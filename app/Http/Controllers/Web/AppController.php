@@ -1509,7 +1509,7 @@ class AppController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|max:150|unique:users,email',
+            'email' => 'nullable|email|max:150|unique:users,email',
             'phone' => 'required|string|max:30',
             'role' => 'required|string|in:gym_manager,receptionist,trainer,accountant,staff',
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',
@@ -1565,7 +1565,7 @@ class AppController extends Controller
         $user = User::create([
             'tenant_id' => $tenant->id,
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'],
             'role' => $validated['role'],
             'status' => $validated['status'],
@@ -1581,11 +1581,11 @@ class AppController extends Controller
         if ($validated['role'] === 'trainer') {
             $nameParts = explode(' ', $validated['name'], 2);
             Trainer::firstOrCreate(
-                ['tenant_id' => $tenant->id, 'email' => $validated['email']],
+                ['tenant_id' => $tenant->id, 'phone' => $validated['phone']],
                 [
                     'first_name' => $nameParts[0],
                     'last_name' => $nameParts[1] ?? 'Trainer',
-                    'phone' => $validated['phone'],
+                    'email' => $validated['email'] ?? null,
                     'specialization' => $validated['designation'] ?? 'Fitness Coach',
                     'status' => 'ACTIVE',
                 ]
@@ -1604,7 +1604,7 @@ class AppController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|max:150|unique:users,email,'.$user->id,
+            'email' => 'nullable|email|max:150|unique:users,email,'.$user->id,
             'phone' => 'required|string|max:30',
             'role' => 'required|string|in:gym_owner,gym_manager,receptionist,trainer,accountant,staff',
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',

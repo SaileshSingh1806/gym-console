@@ -445,11 +445,10 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Email <span class="text-rose-500">*</span></label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Email <span class="text-slate-500 text-[10px] font-normal">(Optional)</span></label>
                                 <input type="email" 
                                        name="email" 
                                        x-model="staffForm.email" 
-                                       required 
                                        placeholder="email@example.com" 
                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
                             </div>
