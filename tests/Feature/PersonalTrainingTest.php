@@ -21,7 +21,13 @@ class PersonalTrainingTest extends TestCase
 
     protected function setupGym()
     {
-        $plan = Plan::where('slug', 'starter')->first();
+        $plan = Plan::where('slug', 'starter')->first() ?? Plan::create([
+            'name' => 'Starter',
+            'slug' => 'starter',
+            'price_monthly' => 49.00,
+            'price_yearly' => 490.00,
+            'status' => 'ACTIVE',
+        ]);
         $tenantService = app(TenantService::class);
         $subscriptionService = app(SubscriptionService::class);
         $rand = Str::random(6);

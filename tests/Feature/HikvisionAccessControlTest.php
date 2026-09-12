@@ -20,7 +20,7 @@ class HikvisionAccessControlTest extends TestCase
 
     public function test_hikvision_event_grants_access_and_records_attendance(): void
     {
-        $plan = Plan::where('slug', 'enterprise')->first();
+        $plan = Plan::where('slug', 'pro')->first();
         $tenantService = app(TenantService::class);
         $membershipService = app(MembershipService::class);
         $accessControlService = app(AccessControlService::class);

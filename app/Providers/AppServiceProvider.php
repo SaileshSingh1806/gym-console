@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +23,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Blade::if('feature', function (string $featureCode) {
+            $user = auth()->user();
+            if (! $user) {
+                return false;
+            }
+
+            return $user->hasFeature($featureCode);
+        });
+
+        Blade::if('hasanyfeature', function (array $featureCodes) {
+            $user = auth()->user();
+            if (! $user) {
+                return false;
+            }
+
+            return $user->hasAnyFeature($featureCodes);
+        });
+
         View::composer('*', function ($view) {
             try {
                 if (Schema::hasTable('settings')) {

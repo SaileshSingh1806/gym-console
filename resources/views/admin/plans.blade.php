@@ -165,11 +165,14 @@
                         <!-- Feature Checkbox Matrix -->
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Feature Gating Permissions</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 max-h-48 overflow-y-auto">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-950 border border-slate-800 max-h-56 overflow-y-auto">
                                 @foreach($features as $f)
-                                    <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                                        <input type="checkbox" name="features[]" value="{{ $f->id }}" :checked="editPlan.feature_ids.includes({{ $f->id }})" class="rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0">
-                                        <span>{{ $f->name }}</span>
+                                    <label class="flex items-start gap-2 text-xs text-slate-300 hover:text-white cursor-pointer p-1.5 rounded-lg hover:bg-slate-900/60 border border-transparent hover:border-slate-800 transition-colors">
+                                        <input type="checkbox" name="features[]" value="{{ $f->id }}" :checked="editPlan.feature_ids.includes({{ $f->id }})" class="mt-0.5 rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0 cursor-pointer">
+                                        <div class="leading-tight">
+                                            <div class="font-bold text-white text-[11px]">{{ $f->name }}</div>
+                                            <div class="text-[10px] text-indigo-400/80 font-mono">{{ $f->code }}</div>
+                                        </div>
                                     </label>
                                 @endforeach
                             </div>
@@ -253,11 +256,14 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Select Plan Features</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-3 rounded-2xl bg-slate-950 border border-slate-800 max-h-48 overflow-y-auto">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-950 border border-slate-800 max-h-56 overflow-y-auto">
                             @foreach($features as $f)
-                                <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                                    <input type="checkbox" name="features[]" value="{{ $f->id }}" checked class="rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0">
-                                    <span>{{ $f->name }}</span>
+                                <label class="flex items-start gap-2 text-xs text-slate-300 hover:text-white cursor-pointer p-1.5 rounded-lg hover:bg-slate-900/60 border border-transparent hover:border-slate-800 transition-colors">
+                                    <input type="checkbox" name="features[]" value="{{ $f->id }}" checked class="mt-0.5 rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0 cursor-pointer">
+                                    <div class="leading-tight">
+                                        <div class="font-bold text-white text-[11px]">{{ $f->name }}</div>
+                                        <div class="text-[10px] text-indigo-400/80 font-mono">{{ $f->code }}</div>
+                                    </div>
                                 </label>
                             @endforeach
                         </div>

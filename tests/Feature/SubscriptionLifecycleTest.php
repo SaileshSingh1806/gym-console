@@ -39,8 +39,8 @@ class SubscriptionLifecycleTest extends TestCase
         $this->assertTrue($tenant->isSubscriptionActive());
 
         // Check feature and quota enforcement
-        $this->assertTrue($featureGateService->hasFeature($tenant, 'members'));
-        $this->assertFalse($featureGateService->hasFeature($tenant, 'hikvision_integration')); // Starter doesn't have Hikvision
+        $this->assertTrue($featureGateService->hasFeature($tenant, 'members_management'));
+        $this->assertFalse($featureGateService->hasFeature($tenant, 'equipment_maintenance')); // Starter doesn't have equipment_maintenance
 
         // Activate via Payment
         $subscription = $subscriptionService->activateSubscription(
@@ -114,7 +114,7 @@ class SubscriptionLifecycleTest extends TestCase
     public function test_super_admin_can_manage_coupons_and_user_gets_discount(): void
     {
         $admin = User::where('role', 'super_admin')->first();
-        $plan = Plan::where('slug', 'professional')->first();
+        $plan = Plan::where('slug', 'pro')->first();
         $rand = strtoupper(Str::random(4));
         $code = "TEST{$rand}";
 

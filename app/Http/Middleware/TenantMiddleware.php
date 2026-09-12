@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Branch;
 use App\Models\Tenant;
+use App\Services\FeatureGateService;
 use App\Services\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
@@ -38,16 +39,20 @@ class TenantMiddleware
         if ($tenant) {
             TenantContext::setTenant($tenant);
 
-            // Determine active branch
+            $gate = app(FeatureGateService::class);
+            $allowedBranches = $gate->getAllowedBranches($tenant);
+            $allowedBranchIds = $allowedBranches->pluck('id')->all();
+
+            // Determine active branch - only allowed branches under the current plan can be active
             $branchId = $request->header('X-Branch-ID') ?? session('active_branch_id');
             $branch = null;
 
-            if ($branchId) {
-                $branch = Branch::where('tenant_id', $tenant->id)->find($branchId);
+            if ($branchId && in_array((int) $branchId, $allowedBranchIds, true)) {
+                $branch = $allowedBranches->firstWhere('id', (int) $branchId);
             }
 
             if (! $branch) {
-                $branch = $tenant->mainBranch ?? $tenant->branches()->first();
+                $branch = $allowedBranches->firstWhere('is_main', true) ?? $allowedBranches->first();
             }
 
             if ($branch) {

@@ -13,7 +13,7 @@ class FeatureGateMiddleware
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, string $featureCode): Response
+    public function handle(Request $request, Closure $next, string ...$featureCodes): Response
     {
         $user = $request->user();
 
@@ -21,24 +21,34 @@ class FeatureGateMiddleware
             return $next($request);
         }
 
-        $tenant = TenantContext::getTenant();
+        $tenant = TenantContext::getTenant() ?? $user?->tenant;
 
         if (! $tenant) {
             return $next($request);
         }
 
-        $hasFeature = app(FeatureGateService::class)->hasFeature($tenant, $featureCode);
+        $featureGateService = app(FeatureGateService::class);
+        $hasAnyFeature = false;
 
-        if (! $hasFeature) {
+        foreach ($featureCodes as $featureCode) {
+            if ($featureGateService->hasFeature($tenant, $featureCode)) {
+                $hasAnyFeature = true;
+                break;
+            }
+        }
+
+        if (! $hasAnyFeature) {
+            $featureDisplay = implode(' or ', $featureCodes);
+
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
                     'success' => false,
-                    'message' => "The feature '{$featureCode}' is not included in your current subscription plan.",
+                    'message' => "The requested feature ({$featureDisplay}) is not included in your current subscription plan.",
                     'code' => 'FEATURE_NOT_AVAILABLE',
                 ], 403);
             }
 
-            return redirect()->route('subscription.index')->with('error', "The feature '{$featureCode}' is not available in your current plan. Please upgrade to unlock it.");
+            return redirect()->route('app.subscription.index')->with('error', "The requested feature ({$featureDisplay}) is not included in your current subscription plan. Please upgrade your plan to unlock it.");
         }
 
         return $next($request);

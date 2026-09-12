@@ -55,20 +55,33 @@ class Plan extends Model
         return $this->hasMany(Subscription::class);
     }
 
+    protected ?array $cachedFeatures = null;
+
     public function hasFeature(string $featureCode): bool
     {
-        $feature = $this->features()->where('code', $featureCode)->first();
-        if (! $feature) {
-            return false;
+        if ($this->cachedFeatures === null) {
+            $this->loadFeaturesCache();
         }
 
-        return $feature->pivot->value === '1' || $feature->pivot->value === 'true';
+        $val = $this->cachedFeatures[$featureCode] ?? null;
+
+        return $val === '1' || $val === 'true' || $val === true || $val === 1;
     }
 
     public function getFeatureValue(string $featureCode, $default = null)
     {
-        $feature = $this->features()->where('code', $featureCode)->first();
+        if ($this->cachedFeatures === null) {
+            $this->loadFeaturesCache();
+        }
 
-        return $feature ? $feature->pivot->value : $default;
+        return $this->cachedFeatures[$featureCode] ?? $default;
+    }
+
+    protected function loadFeaturesCache(): void
+    {
+        $this->cachedFeatures = $this->features()
+            ->get(['features.code', 'plan_features.value'])
+            ->pluck('pivot.value', 'code')
+            ->toArray();
     }
 }

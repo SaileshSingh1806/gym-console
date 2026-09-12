@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -101,12 +102,88 @@ class User extends Authenticatable
 
     public function hasPermission(string $permission): bool
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Feature gate check: if the permission belongs to a feature not in tenant's SaaS plan, deny
+        $featureMap = PermissionSeeder::getPermissionFeatureMap();
+        $featureCode = $featureMap[$permission] ?? null;
+        if ($featureCode !== null && ! $this->hasFeature($featureCode)) {
+            return false;
+        }
+
+        if ($this->isGymOwner()) {
+            return true;
+        }
+
+        if ($this->roles()->whereHas('permissions', function ($query) use ($permission) {
+            $query->where('name', $permission);
+        })->exists()) {
+            return true;
+        }
+
+        if (! empty($this->role) && $this->tenant_id) {
+            $roleObj = Role::where('tenant_id', $this->tenant_id)
+                ->where('name', $this->role)
+                ->first();
+
+            if ($roleObj && $roleObj->permissions()->where('name', $permission)->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<int, string>  $permissions
+     */
+    public function hasAnyPermission(array $permissions): bool
+    {
         if ($this->isSuperAdmin() || $this->isGymOwner()) {
             return true;
         }
 
-        return $this->roles()->whereHas('permissions', function ($query) use ($permission) {
-            $query->where('name', $permission);
-        })->exists();
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasFeature(string $featureCode): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->tenant_id) {
+            return false;
+        }
+
+        $tenant = $this->tenant ?? Tenant::find($this->tenant_id);
+
+        return $tenant ? $tenant->hasFeature($featureCode) : false;
+    }
+
+    /**
+     * @param  array<int, string>  $featureCodes
+     */
+    public function hasAnyFeature(array $featureCodes): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        foreach ($featureCodes as $code) {
+            if ($this->hasFeature($code)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

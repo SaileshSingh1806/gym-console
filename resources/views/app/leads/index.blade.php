@@ -43,3 +43,4 @@
     </div>
 </x-app-layout>
 
+@include('app.crm.leads')

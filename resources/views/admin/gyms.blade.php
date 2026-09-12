@@ -1,5 +1,5 @@
 <x-admin-layout header="Gym Businesses & Tenant Control">
-    <div class="space-y-6" x-data="{ showNewModal: false, editGym: null, getTrialDate(days) { const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; } }">
+    <div class="space-y-6" x-data="{ showNewModal: false, editGym: null, deleteGymModal: null, getTrialDate(days) { const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; } }">
         <!-- Top Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <form action="{{ route('admin.gyms') }}" method="GET" class="flex flex-wrap items-center gap-3 flex-grow max-w-2xl">
@@ -91,14 +91,10 @@
                                             Edit
                                         </button>
 
-                                        <!-- Delete Gym -->
-                                        <form action="{{ route('admin.gyms.delete', $gym->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this gym and its data?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-[10px] font-semibold transition-all">
-                                                Delete
-                                            </button>
-                                        </form>
+                                        <!-- Delete Gym Trigger -->
+                                        <button type="button" @click="deleteGymModal = { id: {{ $gym->id }}, name: {{ Js::from($gym->name) }}, slug: {{ Js::from($gym->slug) }}, typedName: '' }" class="px-2.5 py-1 rounded bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-[10px] font-semibold transition-all">
+                                            Delete
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -316,6 +312,67 @@
                         <button type="submit" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold text-xs">Create Gym Tenant</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- DELETE GYM CONFIRMATION MODAL             -->
+        <!-- Requires typing exact gym name to delete   -->
+        <!-- ========================================== -->
+        <div x-show="deleteGymModal !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
+            <div class="bg-slate-900 border border-red-500/40 rounded-3xl max-w-md w-full p-6 shadow-2xl relative" @click.away="deleteGymModal = null">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-2xl bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-lg shrink-0 border border-red-500/30">
+                        ⚠️
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-white">Permanently Delete Gym</h3>
+                        <p class="text-[11px] text-red-400 font-semibold">Irreversible action & complete data wipe</p>
+                    </div>
+                </div>
+
+                <template x-if="deleteGymModal !== null">
+                    <form :action="'/admin/gyms/' + deleteGymModal.id" method="POST" class="space-y-4">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="confirm_gym_name" :value="deleteGymModal.typedName">
+
+                        <div class="p-3.5 rounded-2xl bg-red-950/40 border border-red-500/20 text-xs text-slate-300 space-y-2">
+                            <p class="leading-relaxed">
+                                You are about to permanently delete <strong class="text-white" x-text="deleteGymModal.name"></strong> and all its associated data from the database.
+                            </p>
+                            <ul class="list-disc list-inside text-[11px] text-red-300/90 space-y-0.5 font-medium">
+                                <li>All enrolled members & payment receipts</li>
+                                <li>Attendance logs, biometric records & access logs</li>
+                                <li>Staff accounts, roles & trainer assignments</li>
+                                <li>Invoices, expenses, inventory & equipment logs</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1.5">
+                                To confirm deletion, type <span class="text-amber-400 font-mono select-all font-black" x-text="deleteGymModal.name"></span> below:
+                            </label>
+                            <input type="text" 
+                                   x-model="deleteGymModal.typedName" 
+                                   :placeholder="deleteGymModal.name" 
+                                   required 
+                                   autofocus 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white font-bold text-xs focus:border-red-500 focus:outline-none placeholder-slate-600">
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                            <button type="button" @click="deleteGymModal = null" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    :disabled="deleteGymModal.typedName.trim().toLowerCase() !== deleteGymModal.name.trim().toLowerCase() && deleteGymModal.typedName.trim().toLowerCase() !== deleteGymModal.slug.trim().toLowerCase()"
+                                    class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-lg shadow-red-600/20 transition-all flex items-center gap-1.5">
+                                <span>🗑️ Permanently Delete Gym</span>
+                            </button>
+                        </div>
+                    </form>
+                </template>
             </div>
         </div>
     </div>

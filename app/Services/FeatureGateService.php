@@ -40,7 +40,7 @@ class FeatureGateService
         $current = match ($resourceType) {
             'members' => $tenant->members()->count(),
             'branches' => $tenant->branches()->count(),
-            'staff' => $tenant->users()->where('role', '!=', 'super_admin')->count(),
+            'staff' => $tenant->users()->whereNotIn('role', ['gym_owner', 'super_admin'])->count(),
             default => 0,
         };
 
@@ -53,6 +53,32 @@ class FeatureGateService
             'limit' => $limit,
             'remaining' => $remaining,
         ];
+    }
+
+    /**
+     * Get the collection of branches allowed under the tenant's current subscription plan.
+     */
+    public function getAllowedBranches(Tenant $tenant)
+    {
+        $subscription = $tenant->activeSubscription;
+        $plan = $subscription?->plan;
+        $limit = $plan ? $plan->branch_limit : 1;
+
+        $branches = $tenant->branches()->orderByDesc('is_main')->orderBy('id')->get();
+
+        if ($limit === -1) {
+            return $branches;
+        }
+
+        return $branches->take(max(1, $limit));
+    }
+
+    /**
+     * Check if a specific branch ID is allowed under the tenant's current plan quota.
+     */
+    public function isBranchAllowed(Tenant $tenant, int $branchId): bool
+    {
+        return $this->getAllowedBranches($tenant)->pluck('id')->contains($branchId);
     }
 
     public function ensureWithinQuota(Tenant $tenant, string $resourceType): void

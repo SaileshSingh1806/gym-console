@@ -59,28 +59,36 @@
             </a>
 
             <!-- 4. Add Lead -->
+            @if(auth()->user()->hasFeature('crm_leads') && auth()->user()->hasPermission('crm.view'))
             <a href="{{ route('app.leads.index') }}" class="px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 <span>Add Lead</span>
             </a>
+            @endif
 
             <!-- 5. Product Sale -->
+            @if(auth()->user()->hasFeature('inventory_stock') && auth()->user()->hasPermission('inventory.view'))
             <a href="{{ route('app.inventory.index') }}" class="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span>Product Sale</span>
             </a>
+            @endif
 
             <!-- 6. Reports -->
+            @if(auth()->user()->hasFeature('reports_finance') && auth()->user()->hasPermission('expenses.manage'))
             <a href="{{ route('app.expenses.index') }}" class="px-3.5 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-400 border border-indigo-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span>Reports</span>
             </a>
+            @endif
 
             <!-- 7. Open Gate IoT -->
+            @if(auth()->user()->hasFeature('hikvision_iot') && auth()->user()->hasPermission('devices.view'))
             <a href="{{ route('app.devices.index') }}" class="px-3.5 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-400 border border-teal-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                 <span>Open Gate</span>
             </a>
+            @endif
 
             <!-- 8. Tutorials -->
             <a href="{{ route('app.settings.index') }}" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
@@ -172,7 +180,8 @@
 
         </div>
 
-        <!-- ROW 2: PERSONAL TRAINING (PT) -->
+        {{-- ROW 2: PERSONAL TRAINING (PT) --}}
+        @if(auth()->user()->hasFeature('personal_training') && auth()->user()->hasPermission('pt.view'))
         <div class="space-y-3">
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
@@ -214,8 +223,10 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- ROW 3: SALES & CRM -->
+        @if(auth()->user()->hasFeature('crm_leads') && auth()->user()->hasPermission('crm.view'))
         <div class="space-y-3">
             <div class="flex items-center gap-3">
                 <div class="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
@@ -280,6 +291,7 @@
                 </a>
             </div>
         </div>
+        @endif
 
         <!-- ROW 4: FINANCIAL OVERVIEW (6 Cards) & DUES OVERVIEW (4 Cards) -->
         <div class="space-y-6">
@@ -727,6 +739,7 @@
             </div>
 
             <!-- Widget 6: Lead Follow-ups -->
+            @if(auth()->user()->hasFeature('crm_leads') && auth()->user()->hasPermission('crm.view'))
             <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-800">
@@ -749,7 +762,7 @@
                                 <div class="flex items-center gap-2">
                                     @if($lead->follow_up_date && \Carbon\Carbon::parse($lead->follow_up_date)->isPast())
                                         <span class="text-[10px] text-red-400 font-bold flex items-center gap-1">
-                                            <span>●</span> {{ \Carbon\Carbon::parse($lead->follow_up_date)->format('d M') }}
+                                             <span>●</span> {{ \Carbon\Carbon::parse($lead->follow_up_date)->format('d M') }}
                                         </span>
                                     @else
                                         <span class="text-[10px] text-slate-400">
@@ -767,6 +780,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
         </div>
 

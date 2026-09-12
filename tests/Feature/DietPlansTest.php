@@ -11,12 +11,33 @@ use Tests\TestCase;
 
 class DietPlansTest extends TestCase
 {
+    protected Tenant $tenant;
+
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->tenant = Tenant::first() ?? Tenant::create([
+            'name' => 'Diet Test Gym',
+            'slug' => 'diet-test-gym',
+            'status' => 'ACTIVE',
+        ]);
+        $this->attachProSubscription($this->tenant);
+
+        $this->user = User::where('tenant_id', $this->tenant->id)->first() ?? User::create([
+            'tenant_id' => $this->tenant->id,
+            'name' => 'Diet Admin',
+            'email' => 'dietadmin@gym.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+    }
+
     public function test_diet_plans_page_renders_successfully(): void
     {
-        $tenant = Tenant::first() ?? Tenant::factory()->create();
-        $user = User::where('tenant_id', $tenant->id)->first() ?? User::factory()->create(['tenant_id' => $tenant->id]);
-
-        $response = $this->actingAs($user)->get('/app/diets');
+        $response = $this->actingAs($this->user)->get('/app/diets');
 
         $response->assertSee('Diet');
         $response->assertSee('Create Diet Plan');
@@ -24,18 +45,15 @@ class DietPlansTest extends TestCase
 
     public function test_can_seed_starter_diet_templates(): void
     {
-        $tenant = Tenant::first() ?? Tenant::factory()->create();
-        $user = User::where('tenant_id', $tenant->id)->first() ?? User::factory()->create(['tenant_id' => $tenant->id]);
-
-        $response = $this->actingAs($user)->post('/app/diets/seed-starter');
+        $response = $this->actingAs($this->user)->post('/app/diets/seed-starter');
 
         $response->assertRedirect();
         $this->assertDatabaseHas('diet_plans', [
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $this->tenant->id,
             'is_template' => 1,
         ]);
 
-        $pageResponse = $this->actingAs($user)->get('/app/diets');
+        $pageResponse = $this->actingAs($this->user)->get('/app/diets');
         $pageResponse->assertSee('Share on WhatsApp');
 
         // Clean up test seeded records
@@ -45,9 +63,7 @@ class DietPlansTest extends TestCase
 
     public function test_can_create_custom_diet_plan_with_meals(): void
     {
-        $tenant = Tenant::first() ?? Tenant::factory()->create();
-        $user = User::where('tenant_id', $tenant->id)->first() ?? User::factory()->create(['tenant_id' => $tenant->id]);
-        $member = Member::where('tenant_id', $tenant->id)->first();
+        $member = Member::where('tenant_id', $this->tenant->id)->first();
 
         $postData = [
             'title' => 'Test High Protein Plan 2000',
@@ -76,11 +92,11 @@ class DietPlansTest extends TestCase
             ],
         ];
 
-        $response = $this->actingAs($user)->post('/app/diets', $postData);
+        $response = $this->actingAs($this->user)->post('/app/diets', $postData);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('diet_plans', [
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $this->tenant->id,
             'title' => 'Test High Protein Plan 2000',
             'daily_calories' => 2000,
         ]);
@@ -96,10 +112,7 @@ class DietPlansTest extends TestCase
 
     public function test_workouts_page_renders_successfully(): void
     {
-        $tenant = Tenant::first() ?? Tenant::factory()->create();
-        $user = User::where('tenant_id', $tenant->id)->first() ?? User::factory()->create(['tenant_id' => $tenant->id]);
-
-        $response = $this->actingAs($user)->get('/app/workouts');
+        $response = $this->actingAs($this->user)->get('/app/workouts');
 
         $response->assertStatus(200);
         $response->assertSee('Workout Routines');

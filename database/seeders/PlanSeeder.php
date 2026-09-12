@@ -8,106 +8,248 @@ use Illuminate\Database\Seeder;
 
 class PlanSeeder extends Seeder
 {
+    public static function getSystemFeatures(): array
+    {
+        return [
+            // 1. Gym Operations
+            [
+                'code' => 'members_management',
+                'name' => 'Member Directory & Profiles',
+                'description' => 'Enroll members, KYC, body measurements & transformation records',
+                'category' => 'Gym Operations',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'memberships_billing',
+                'name' => 'Memberships & Plan Catalog',
+                'description' => 'Configurable plans, recurring packages, admission fees & discounts',
+                'category' => 'Gym Operations',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'attendance_checkin',
+                'name' => 'Daily Attendance & Check-in',
+                'description' => 'Real-time check-in logs, receptionist desk check-in & reports',
+                'category' => 'Gym Operations',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'payments_pos',
+                'name' => 'Payments, POS & PDF Invoices',
+                'description' => 'Record cash, POS, UPI payments, GST billing & print PDF tax receipts',
+                'category' => 'Gym Operations',
+                'type' => 'boolean',
+            ],
+
+            // 2. Fitness & Coaching
+            [
+                'code' => 'group_classes',
+                'name' => 'Training & Group Classes',
+                'description' => 'Yoga, Zumba, CrossFit class calendars, schedules & slot bookings',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'trainers_management',
+                'name' => 'Trainer Directory & Staff',
+                'description' => 'Certified trainers, trainer profiles & member assignments',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'personal_training',
+                'name' => 'Personal Training (PT) Packages',
+                'description' => 'PT packages, 1-on-1 session tracking & appointment booking',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'workout_plans',
+                'name' => 'Workout Plans & Exercise Builder',
+                'description' => 'Custom workout routines, exercise libraries & day-wise workouts',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'diet_nutrition',
+                'name' => 'Diet Plans & Nutrition Charts',
+                'description' => 'Meal planning, caloric macros & customized diet charts',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'gym_services',
+                'name' => 'Gym Services & Locker Rentals',
+                'description' => 'Spa, sauna, steam bath services & monthly locker rentals',
+                'category' => 'Fitness & Coaching',
+                'type' => 'boolean',
+            ],
+
+            // 3. Business & Growth
+            [
+                'code' => 'crm_leads',
+                'name' => 'CRM Leads & Trial Follow-ups',
+                'description' => 'Lead pipeline, walk-in inquiries, trial booking & conversion tracker',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'reports_finance',
+                'name' => 'Reports & Financial Balance Sheet',
+                'description' => 'Member reports, revenue analytics, expense tracking & P&L balance sheet',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'inventory_stock',
+                'name' => 'Inventory & Supplements POS',
+                'description' => 'Supplements stock, merchandise inventory & stock replenishment logs',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'equipment_maintenance',
+                'name' => 'Equipment & AC Maintenance',
+                'description' => 'Gym machines & AC service schedules, repair logs & technician records',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'hikvision_iot',
+                'name' => 'Hikvision IoT Biometrics & Gates',
+                'description' => 'Facial recognition terminals, fingerprint readers & turnstile door control',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
+
+            // 4. Administration
+            [
+                'code' => 'staff_roles',
+                'name' => 'Staff Accounts & Roles Matrix',
+                'description' => 'Staff profiles, custom roles & granular permission access control',
+                'category' => 'Administration',
+                'type' => 'boolean',
+            ],
+            [
+                'code' => 'custom_branding',
+                'name' => 'Custom Gym Logo & Theme Branding',
+                'description' => 'Gym owner custom logo, invoice receipts branding & theme customization',
+                'category' => 'Administration',
+                'type' => 'boolean',
+            ],
+        ];
+    }
+
     public function run(): void
     {
-        // Define SaaS Features
-        $features = [
-            ['code' => 'members', 'name' => 'Member Management', 'description' => 'Create and manage gym member profiles', 'type' => 'boolean'],
-            ['code' => 'memberships', 'name' => 'Membership Billing', 'description' => 'Configurable plans, recurring memberships, receipts', 'type' => 'boolean'],
-            ['code' => 'attendance', 'name' => 'Attendance Tracking', 'description' => 'Manual and QR code attendance tracking', 'type' => 'boolean'],
-            ['code' => 'payments', 'name' => 'Payment & Invoicing', 'description' => 'Record cash, POS, UPI payments and generate invoices', 'type' => 'boolean'],
-            ['code' => 'basic_reports', 'name' => 'Basic Reports', 'description' => 'Daily attendance and revenue summary', 'type' => 'boolean'],
-            ['code' => 'trainers', 'name' => 'Trainer Management', 'description' => 'Trainer profiles and assigned client rosters', 'type' => 'boolean'],
-            ['code' => 'classes', 'name' => 'Classes & Booking', 'description' => 'Group class schedules and member bookings', 'type' => 'boolean'],
-            ['code' => 'workout_plans', 'name' => 'Workout Routines', 'description' => 'Custom workout plan builder and exercise library', 'type' => 'boolean'],
-            ['code' => 'diet_plans', 'name' => 'Diet & Nutrition', 'description' => 'Custom meal plans and calorie target designer', 'type' => 'boolean'],
-            ['code' => 'leads', 'name' => 'Leads CRM', 'description' => 'Prospect inquiry tracking and conversion pipeline', 'type' => 'boolean'],
-            ['code' => 'expenses', 'name' => 'Expense Tracking', 'description' => 'Gym operational expense categorization', 'type' => 'boolean'],
-            ['code' => 'inventory', 'name' => 'Inventory & POS', 'description' => 'Supplement and merchandise stock management', 'type' => 'boolean'],
-            ['code' => 'advanced_reports', 'name' => 'Advanced Financial Analytics', 'description' => 'Revenue forecasting, churn, and retention analysis', 'type' => 'boolean'],
-            ['code' => 'multiple_branches', 'name' => 'Multi-Branch Support', 'description' => 'Manage multiple gym locations under one account', 'type' => 'boolean'],
-            ['code' => 'hikvision_integration', 'name' => 'Hikvision & Biometric Access', 'description' => 'Integration with Hikvision face scanners, turnstiles, and RFID readers', 'type' => 'boolean'],
-            ['code' => 'api_access', 'name' => 'Flutter Mobile API', 'description' => 'REST API access for custom and mobile applications', 'type' => 'boolean'],
-            ['code' => 'custom_branding', 'name' => 'Custom Branding', 'description' => 'Custom gym logo, receipts, and portal styling', 'type' => 'boolean'],
-        ];
-
+        $features = self::getSystemFeatures();
         $createdFeatures = [];
+
         foreach ($features as $f) {
             $createdFeatures[$f['code']] = Feature::updateOrCreate(
                 ['code' => $f['code']],
-                ['name' => $f['name'], 'description' => $f['description'], 'type' => $f['type']]
+                [
+                    'name' => $f['name'],
+                    'description' => $f['description'],
+                    'type' => $f['type'],
+                ]
             );
         }
 
-        // 1. STARTER PLAN
-        $starter = Plan::updateOrCreate(
-            ['slug' => 'starter'],
+        // 1. FREE FOREVER PLAN
+        $freeForever = Plan::updateOrCreate(
+            ['slug' => 'free-forever'],
             [
-                'name' => 'Starter',
-                'description' => 'Essential tools for boutique studios and single-location gyms starting out.',
-                'price_monthly' => 1499.00,
-                'price_yearly' => 14990.00,
-                'trial_days' => 14,
-                'member_limit' => 100,
+                'name' => 'FREE FOREVER',
+                'description' => 'Free forever, not a trial. Perfect for new single-location gym startups.',
+                'price_monthly' => 0.00,
+                'price_yearly' => 0.00,
+                'trial_days' => 0,
+                'member_limit' => 75,
                 'branch_limit' => 1,
-                'staff_limit' => 3,
+                'staff_limit' => 2,
                 'is_active' => true,
                 'is_popular' => false,
                 'sort_order' => 1,
             ]
         );
 
-        $starterFeatures = ['members', 'memberships', 'attendance', 'payments', 'basic_reports'];
-        $starter->features()->sync(
-            collect($starterFeatures)->mapWithKeys(fn ($code) => [$createdFeatures[$code]->id => ['value' => '1']])
+        $freeFeatures = [
+            'members_management',
+            'memberships_billing',
+            'attendance_checkin',
+            'payments_pos',
+            'workout_plans',
+            'diet_nutrition',
+            'gym_services',
+            'staff_roles',
+            'custom_branding',
+        ];
+
+        $freeForever->features()->sync(
+            collect($freeFeatures)->mapWithKeys(fn ($code) => [$createdFeatures[$code]->id => ['value' => '1']])
         );
 
-        // 2. PROFESSIONAL PLAN
-        $professional = Plan::updateOrCreate(
-            ['slug' => 'professional'],
+        // 2. STARTER PLAN (MOST POPULAR)
+        $starter = Plan::updateOrCreate(
+            ['slug' => 'starter'],
             [
-                'name' => 'Professional',
-                'description' => 'Comprehensive management suite for growing fitness centers and clubs.',
-                'price_monthly' => 3499.00,
-                'price_yearly' => 34990.00,
-                'trial_days' => 14,
-                'member_limit' => 500,
-                'branch_limit' => 2,
-                'staff_limit' => 10,
+                'name' => 'STARTER',
+                'description' => 'Launch offer — only ₹500/month (billed annually). Complete operational suite.',
+                'price_monthly' => 500.00,
+                'price_yearly' => 6000.00,
+                'trial_days' => 0,
+                'member_limit' => -1, // Unlimited
+                'branch_limit' => 1,
+                'staff_limit' => 5,
                 'is_active' => true,
                 'is_popular' => true,
                 'sort_order' => 2,
             ]
         );
 
-        $proFeatures = [
-            'members', 'memberships', 'attendance', 'payments', 'basic_reports',
-            'trainers', 'classes', 'workout_plans', 'diet_plans', 'leads', 'expenses', 'inventory', 'advanced_reports', 'api_access',
+        $starterFeatures = [
+            'members_management',
+            'memberships_billing',
+            'attendance_checkin',
+            'payments_pos',
+            'group_classes',
+            'trainers_management',
+            'personal_training',
+            'workout_plans',
+            'diet_nutrition',
+            'gym_services',
+            'crm_leads',
+            'reports_finance',
+            'inventory_stock',
+            'staff_roles',
+            'custom_branding',
         ];
-        $professional->features()->sync(
-            collect($proFeatures)->mapWithKeys(fn ($code) => [$createdFeatures[$code]->id => ['value' => '1']])
+
+        $starter->features()->sync(
+            collect($starterFeatures)->mapWithKeys(fn ($code) => [$createdFeatures[$code]->id => ['value' => '1']])
         );
 
-        // 3. ENTERPRISE PLAN
-        $enterprise = Plan::updateOrCreate(
-            ['slug' => 'enterprise'],
+        // 3. PRO PLAN
+        $pro = Plan::updateOrCreate(
+            ['slug' => 'pro'],
             [
-                'name' => 'Enterprise',
-                'description' => 'Unlimited multi-branch scaling, Hikvision biometric IoT turnstiles, and custom branding.',
-                'price_monthly' => 7999.00,
-                'price_yearly' => 79990.00,
-                'trial_days' => 14,
+                'name' => 'PRO & ENTERPRISE',
+                'description' => 'Unrestricted access to every feature including IoT Biometrics & Equipment Maintenance.',
+                'price_monthly' => 1000.00,
+                'price_yearly' => 12000.00,
+                'trial_days' => 0,
                 'member_limit' => -1, // Unlimited
                 'branch_limit' => 10,
-                'staff_limit' => 50,
+                'staff_limit' => 25,
                 'is_active' => true,
                 'is_popular' => false,
                 'sort_order' => 3,
             ]
         );
 
-        // All features enabled
-        $enterprise->features()->sync(
+        // All features enabled for PRO
+        $pro->features()->sync(
             collect(array_keys($createdFeatures))->mapWithKeys(fn ($code) => [$createdFeatures[$code]->id => ['value' => '1']])
         );
     }

@@ -92,6 +92,58 @@ class Tenant extends Model
         };
     }
 
+    public function getGstNumberAttribute(): ?string
+    {
+        return $this->settings['gst_number'] ?? null;
+    }
+
+    public function getGstRateAttribute(): float
+    {
+        return (float) ($this->settings['gst_rate'] ?? 18.0);
+    }
+
+    public function getIsGstRegisteredAttribute(): bool
+    {
+        return ! empty($this->settings['gst_registered']);
+    }
+
+    public function getAddressAttribute(): ?string
+    {
+        return $this->settings['address'] ?? ($this->mainBranch?->address ?? null);
+    }
+
+    public function getMemberIdFormatAttribute(): string
+    {
+        return $this->settings['member_id_format'] ?? 'coded';
+    }
+
+    public function getMemberIdPrefixAttribute(): string
+    {
+        return $this->settings['member_id_prefix'] ?? 'GYM';
+    }
+
+    public function getMemberIdPaddingAttribute(): int
+    {
+        return (int) ($this->settings['member_id_padding'] ?? 4);
+    }
+
+    public function generateNextMemberCode(): string
+    {
+        $format = $this->member_id_format;
+        $count = $this->members()->count() + 1;
+
+        if ($format === 'numeric') {
+            return (string) (1000 + $count);
+        }
+
+        $prefix = strtoupper(trim($this->member_id_prefix ?: 'GYM'));
+        $year = now()->format('y');
+        $padding = max(3, min(8, $this->member_id_padding ?: 4));
+        $sequence = str_pad((string) $count, $padding, '0', STR_PAD_LEFT);
+
+        return "{$prefix}{$year}{$sequence}";
+    }
+
     public function isSubscriptionActive(): bool
     {
         if ($this->status === 'SUSPENDED' || $this->status === 'CANCELLED') {
@@ -148,5 +200,15 @@ class Tenant extends Model
     public function isSubscriptionExpired(): bool
     {
         return ! $this->isSubscriptionActive();
+    }
+
+    public function hasFeature(string $featureCode): bool
+    {
+        $sub = $this->activeSubscription;
+        if (! $sub || ! $sub->plan) {
+            return false;
+        }
+
+        return $sub->plan->hasFeature($featureCode);
     }
 }

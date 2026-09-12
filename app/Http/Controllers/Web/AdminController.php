@@ -22,7 +22,9 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -177,17 +179,96 @@ class AdminController extends Controller
         return back()->with('success', "Gym '{$tenant->name}' details updated successfully!");
     }
 
-    public function deleteGym(int $id): RedirectResponse
+    public function deleteGym(Request $request, int $id): RedirectResponse
     {
         TenantContext::setBypass(true);
 
         $tenant = Tenant::findOrFail($id);
         $name = $tenant->name;
-        $tenant->delete();
+        $tenantId = $tenant->id;
 
-        ActivityLog::log('gym_deleted_by_admin', "Super admin deleted gym {$name}");
+        // Verify confirmation input matches gym name or slug
+        $confirmation = trim((string) $request->input('confirm_gym_name', ''));
+        if (strtolower($confirmation) !== strtolower($name) && strtolower($confirmation) !== strtolower($tenant->slug)) {
+            return back()->with('error', "Deletion cancelled. The typed confirmation name ('{$confirmation}') did not match the gym name '{$name}'.");
+        }
 
-        return back()->with('success', "Gym '{$name}' has been deleted.");
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        // Detach pivot tables
+        $roleIds = DB::table('roles')->where('tenant_id', $tenantId)->pluck('id');
+        DB::table('permission_role')->whereIn('role_id', $roleIds)->delete();
+        DB::table('role_user')->whereIn('role_id', $roleIds)->delete();
+
+        $userIds = DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->pluck('id');
+        DB::table('branch_user')->whereIn('user_id', $userIds)->delete();
+        DB::table('role_user')->whereIn('user_id', $userIds)->delete();
+
+        $workoutPlanIds = DB::table('workout_plans')->where('tenant_id', $tenantId)->pluck('id');
+        DB::table('workout_exercises')->whereIn('workout_plan_id', $workoutPlanIds)->delete();
+
+        $dietPlanIds = DB::table('diet_plans')->where('tenant_id', $tenantId)->pluck('id');
+        DB::table('diet_meals')->whereIn('diet_plan_id', $dietPlanIds)->delete();
+
+        $equipmentIds = DB::table('gym_equipment')->where('tenant_id', $tenantId)->pluck('id');
+        DB::table('equipment_maintenance_logs')->whereIn('gym_equipment_id', $equipmentIds)->delete();
+
+        $inventoryItemIds = DB::table('inventory_items')->where('tenant_id', $tenantId)->pluck('id');
+        DB::table('inventory_logs')->whereIn('inventory_item_id', $inventoryItemIds)->delete();
+
+        // Direct tenant_id tables
+        $tenantTables = [
+            'access_logs',
+            'attendances',
+            'member_payments',
+            'member_pt_packages',
+            'memberships',
+            'membership_plans',
+            'members',
+            'class_bookings',
+            'class_schedules',
+            'gym_classes',
+            'pt_sessions',
+            'pt_plans',
+            'trainers',
+            'workout_plans',
+            'diet_plans',
+            'gym_service_bookings',
+            'gym_services',
+            'lead_trials',
+            'leads',
+            'expenses',
+            'expense_categories',
+            'inventory_logs',
+            'inventory_items',
+            'equipment_maintenance_logs',
+            'gym_equipment',
+            'devices',
+            'roles',
+            'branches',
+            'subscription_payments',
+            'subscriptions',
+            'platform_invoices',
+            'activity_logs',
+        ];
+
+        foreach ($tenantTables as $table) {
+            if (Schema::hasTable($table)) {
+                DB::table($table)->where('tenant_id', $tenantId)->delete();
+            }
+        }
+
+        // Delete non-super_admin users of this tenant
+        DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->delete();
+
+        // Delete tenant permanently
+        DB::table('tenants')->where('id', $tenantId)->delete();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        ActivityLog::log('gym_deleted_by_admin', "Super admin permanently deleted gym {$name} and all its associated data");
+
+        return back()->with('success', "Gym '{$name}' and all its associated data have been permanently deleted.");
     }
 
     public function impersonateGym(int $id): RedirectResponse

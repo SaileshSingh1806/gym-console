@@ -46,7 +46,12 @@ class Member extends Model
 
     public function getFullNameAttribute(): string
     {
-        return "{$this->first_name} {$this->last_name}";
+        return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->full_name ?: ($this->phone ?? 'Member');
     }
 
     public function user(): BelongsTo

@@ -13,21 +13,27 @@ use App\Models\Coupon;
 use App\Models\Device;
 use App\Models\DietMeal;
 use App\Models\DietPlan;
+use App\Models\EquipmentMaintenanceLog;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\GymClass;
+use App\Models\GymEquipment;
 use App\Models\GymService;
 use App\Models\GymServiceBooking;
 use App\Models\InventoryItem;
+use App\Models\InventoryLog;
 use App\Models\Lead;
+use App\Models\LeadTrial;
 use App\Models\Member;
 use App\Models\MemberPayment;
 use App\Models\MemberPtPackage;
 use App\Models\Membership;
 use App\Models\MembershipPlan;
+use App\Models\Permission;
 use App\Models\Plan;
 use App\Models\PtPlan;
 use App\Models\PtSession;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\Trainer;
 use App\Models\User;
@@ -41,14 +47,18 @@ use App\Services\MembershipService;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
 use App\Services\TenantContext;
+use App\Services\TenantService;
 use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AppController extends Controller
 {
@@ -545,6 +555,7 @@ class AppController extends Controller
 
         $salesRepId = $member->metadata['sales_rep_id'] ?? null;
         $salesRep = $salesRepId ? User::find($salesRepId) : null;
+        $salesRep = $salesRepId ? User::where('tenant_id', $tenant->id)->find($salesRepId) : null;
 
         $activeMembership = $member->activeMembership ?? $member->memberships()->latest()->first();
         $daysLeft = $activeMembership ? (int) now()->startOfDay()->diffInDays($activeMembership->end_date->startOfDay(), false) : null;
@@ -1699,6 +1710,11 @@ class AppController extends Controller
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
+        $staffQuota = $this->featureGateService->checkQuota($tenant, 'staff');
+        if (! $staffQuota['allowed']) {
+            return back()->with('error', "Staff & Trainer limit reached ({$staffQuota['limit']} allowed on your current plan). Please upgrade your subscription to add more trainers.")->withInput();
+        }
+
         if ($request->filled('full_name') && ! $request->filled('first_name')) {
             $parts = explode(' ', trim($request->input('full_name')), 2);
             $request->merge([
@@ -2545,26 +2561,1332 @@ class AppController extends Controller
         return back()->with('success', 'Starter diet templates created successfully! You can now assign them or send them via WhatsApp.');
     }
 
-    public function leads(): View
+    public function crmDashboard(Request $request): View
     {
-        $leads = Lead::with('assignedTo')->latest()->paginate(15);
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
-        return view('app.leads.index', compact('leads'));
+        $allLeads = Lead::with('assignedTo')->get();
+        $totalLeads = $allLeads->count();
+        $newThisMonth = $allLeads->filter(function ($l) {
+            return $l->created_at && $l->created_at->isCurrentMonth();
+        })->count();
+
+        $activeConversions = $allLeads->filter(function ($l) {
+            return in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED', 'NEGOTIATION']);
+        })->count();
+
+        $paidLeads = $allLeads->filter(function ($l) {
+            return in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']);
+        });
+
+        $monthlyMrr = $paidLeads->sum(function ($l) {
+            return $l->estimated_value > 0 ? (float) $l->estimated_value : 0;
+        });
+
+        $conversionRate = $totalLeads > 0 ? round(($paidLeads->count() / $totalLeads) * 100, 1) : 0.0;
+
+        // Pipeline 8 Stages
+        $pipelineStages = [
+            'new_lead' => $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['NEW_LEAD', 'NEW']))->count(),
+            'contacted' => $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'CONTACTED')->count(),
+            'demo_booked' => $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'DEMO_BOOKED')->count(),
+            'proposal_sent' => $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'PROPOSAL_SENT')->count(),
+            'negotiation' => $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'NEGOTIATION')->count(),
+            'trial' => $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['TRIAL', 'TRIAL_SCHEDULED']))->count(),
+            'paid' => $paidLeads->count(),
+            'lost' => $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'LOST')->count(),
+        ];
+
+        // 30 Days Trend Data
+        $trendDates = [];
+        $trendCounts = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $trendDates[] = $date->format('d M');
+            $trendCounts[] = $allLeads->filter(function ($l) use ($date) {
+                return $l->created_at && $l->created_at->toDateString() === $date->toDateString();
+            })->count();
+        }
+
+        // Sources Breakdown
+        $sources = [
+            'website' => ['label' => 'Website Forms', 'color' => '#6366f1'],
+            'walk_in' => ['label' => 'Walk-In Inquiry', 'color' => '#10b981'],
+            'facebook' => ['label' => 'Meta / Facebook Ads', 'color' => '#3b82f6'],
+            'instagram' => ['label' => 'Instagram DM / Ads', 'color' => '#ec4899'],
+            'google' => ['label' => 'Google Maps / Search', 'color' => '#f59e0b'],
+            'referral' => ['label' => 'Member Referral', 'color' => '#8b5cf6'],
+            'other' => ['label' => 'Other / Events', 'color' => '#64748b'],
+        ];
+
+        $sourceBreakdown = [];
+        foreach ($sources as $key => $info) {
+            $count = $allLeads->filter(function ($l) use ($key) {
+                $src = strtolower(str_replace([' ', '-'], '_', $l->source ?? 'other'));
+
+                return $src === $key;
+            })->count();
+
+            $sourceBreakdown[$key] = [
+                'label' => $info['label'],
+                'count' => $count,
+                'color' => $info['color'],
+            ];
+        }
+
+        $recentLeads = Lead::with('assignedTo')->latest()->limit(8)->get();
+        $upcomingTrials = LeadTrial::with('lead', 'assignedTo')->whereDate('trial_date', '>=', today())->orderBy('trial_date')->limit(6)->get();
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+
+        return view('app.crm.dashboard', compact(
+            'totalLeads',
+            'newThisMonth',
+            'activeConversions',
+            'monthlyMrr',
+            'conversionRate',
+            'pipelineStages',
+            'trendDates',
+            'trendCounts',
+            'sourceBreakdown',
+            'recentLeads',
+            'upcomingTrials',
+            'staffMembers',
+            'tenant'
+        ));
     }
 
-    public function expenses(): View
+    public function leads(Request $request)
     {
-        $expenses = Expense::with('category')->latest('expense_date')->paginate(15);
-        $categories = ExpenseCategory::all();
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
-        return view('app.expenses.index', compact('expenses', 'categories'));
+        $query = Lead::with('assignedTo');
+
+        // Search Filter
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('remarks', 'like', "%{$s}%")
+                    ->orWhere('notes', 'like', "%{$s}%");
+            });
+        }
+
+        // Stage Filter
+        if ($request->filled('stage') && $request->stage !== 'all') {
+            $st = strtoupper($request->stage);
+            if ($st === 'NEW_LEAD' || $st === 'NEW') {
+                $query->whereIn('stage', ['NEW_LEAD', 'NEW', 'new_lead', 'new'])->orWhereIn('status', ['NEW', 'new']);
+            } else {
+                $query->where('stage', $request->stage)->orWhere('status', $request->stage);
+            }
+        }
+
+        // Source Filter
+        if ($request->filled('source') && $request->source !== 'all') {
+            $query->where('source', $request->source);
+        }
+
+        // Staff Filter
+        if ($request->filled('staff_id') && $request->staff_id !== 'all') {
+            $query->where('assigned_to_user_id', $request->staff_id);
+        }
+
+        // Remarks Filter
+        if ($request->filled('remarks_filter') && $request->remarks_filter !== 'all') {
+            if ($request->remarks_filter === 'with_remarks') {
+                $query->whereNotNull('remarks')->where('remarks', '!=', '');
+            } elseif ($request->remarks_filter === 'no_remarks') {
+                $query->where(function ($q) {
+                    $q->whereNull('remarks')->orWhere('remarks', '');
+                });
+            }
+        }
+
+        // CSV Export check
+        if ($request->has('export') && $request->export === 'csv') {
+            $exportLeads = (clone $query)->latest()->get();
+            $csvFileName = 'crm_leads_'.date('Y_m_d_His').'.csv';
+
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$csvFileName}\"",
+            ];
+
+            $callback = function () use ($exportLeads) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['ID', 'Name', 'Phone', 'Email', 'Stage', 'Source', 'Assigned To', 'Remarks', 'Next Action', 'Estimated MRR', 'Created At']);
+
+                foreach ($exportLeads as $lead) {
+                    fputcsv($handle, [
+                        $lead->id,
+                        $lead->name,
+                        $lead->phone,
+                        $lead->email ?? '',
+                        $lead->formatted_stage,
+                        ucwords(str_replace('_', ' ', $lead->source ?? 'walk_in')),
+                        $lead->assignedTo?->name ?? 'Unassigned',
+                        $lead->remarks ?? '',
+                        $lead->next_action ?? '',
+                        $lead->estimated_value ?? 0,
+                        $lead->created_at ? $lead->created_at->format('d M Y') : '',
+                    ]);
+                }
+                fclose($handle);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        $leads = $query->latest()->paginate(20)->withQueryString();
+        $totalLeadsCount = Lead::where('tenant_id', $tenant->id)->count();
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+
+        return view('app.crm.leads', compact('leads', 'totalLeadsCount', 'staffMembers', 'branches', 'tenant'));
     }
 
-    public function inventory(): View
+    public function createLead(Request $request): View
     {
-        $items = InventoryItem::latest()->paginate(15);
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
 
-        return view('app.inventory.index', compact('items'));
+        return view('app.crm.create_lead', compact('tenant', 'staffMembers', 'branches'));
+    }
+
+    public function editLead(Request $request, $id): View
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+
+        return view('app.crm.edit_lead', compact('tenant', 'lead', 'staffMembers', 'branches'));
+    }
+
+    public function storeLead(Request $request): RedirectResponse
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'instagram_handle' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'member_count' => 'nullable|integer|min:1',
+            'source' => 'nullable|string|max:50',
+            'stage' => 'nullable|string|max:50',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
+            'branch_id' => 'nullable|exists:branches,id',
+            'follow_up_date' => 'nullable|date',
+            'remarks' => 'nullable|string|max:255',
+            'next_action' => 'nullable|string|max:255',
+            'estimated_value' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        $stage = $validated['stage'] ?? 'NEW_LEAD';
+        $source = $validated['source'] ?? 'walk_in';
+
+        $lead = Lead::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $validated['branch_id'] ?? null,
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? '',
+            'email' => $validated['email'] ?? null,
+            'instagram_handle' => $validated['instagram_handle'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'member_count' => $validated['member_count'] ?? 1,
+            'source' => $source,
+            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST']) ? $stage : 'NEW',
+            'stage' => $stage,
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'follow_up_date' => $validated['follow_up_date'] ?? null,
+            'remarks' => $validated['remarks'] ?? null,
+            'next_action' => $validated['next_action'] ?? null,
+            'estimated_value' => $validated['estimated_value'] ?? 0,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        ActivityLog::log('lead_created', "Created CRM lead {$lead->name}".($lead->phone ? " ({$lead->phone})" : ''));
+
+        return redirect()->route('app.leads.index')->with('success', "Lead {$lead->name} added successfully to pipeline!");
+    }
+
+    public function updateLead(Request $request, $id): RedirectResponse
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'instagram_handle' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'member_count' => 'nullable|integer|min:1',
+            'source' => 'nullable|string|max:50',
+            'stage' => 'nullable|string|max:50',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
+            'branch_id' => 'nullable|exists:branches,id',
+            'follow_up_date' => 'nullable|date',
+            'remarks' => 'nullable|string|max:255',
+            'next_action' => 'nullable|string|max:255',
+            'estimated_value' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        $stage = $validated['stage'] ?? $lead->stage;
+        $source = $validated['source'] ?? $lead->source;
+
+        $lead->update([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? '',
+            'email' => $validated['email'] ?? null,
+            'instagram_handle' => $validated['instagram_handle'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'member_count' => $validated['member_count'] ?? 1,
+            'branch_id' => $validated['branch_id'] ?? null,
+            'source' => $source,
+            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST']) ? $stage : $lead->status,
+            'stage' => $stage,
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'follow_up_date' => $validated['follow_up_date'] ?? null,
+            'remarks' => $validated['remarks'] ?? null,
+            'next_action' => $validated['next_action'] ?? null,
+            'estimated_value' => $validated['estimated_value'] ?? 0,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        ActivityLog::log('lead_updated', "Updated CRM lead {$lead->name}");
+
+        return redirect()->route('app.leads.index')->with('success', "Lead {$lead->name} updated successfully.");
+    }
+
+    public function updateLeadStage(Request $request, $id): JsonResponse|RedirectResponse
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
+        $stage = $request->input('stage', 'NEW_LEAD');
+
+        $updateData = [
+            'stage' => $stage,
+            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST', 'PAID']) ? ($stage === 'PAID' ? 'CONVERTED' : $stage) : $lead->status,
+        ];
+
+        if ($request->has('paid_amount') || $request->has('estimated_value')) {
+            $paidAmount = $request->input('paid_amount', $request->input('estimated_value'));
+            if ($paidAmount !== null && is_numeric($paidAmount)) {
+                $updateData['estimated_value'] = (float) $paidAmount;
+            }
+        }
+
+        $lead->update($updateData);
+
+        ActivityLog::log('lead_stage_changed', "Moved lead {$lead->name} to {$stage}".(isset($updateData['estimated_value']) ? " with conversion value {$updateData['estimated_value']}" : ''));
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'stage' => $lead->formatted_stage,
+                'estimated_value' => $lead->estimated_value,
+            ]);
+        }
+
+        return back()->with('success', "Lead stage updated to {$lead->formatted_stage}".(isset($updateData['estimated_value']) && $updateData['estimated_value'] > 0 ? " (Paid: {$updateData['estimated_value']})" : '').'.');
+    }
+
+    public function deleteLead($id): RedirectResponse
+    {
+        $lead = Lead::findOrFail($id);
+        $name = $lead->name;
+        $lead->delete();
+
+        ActivityLog::log('lead_deleted', "Deleted CRM lead {$name}");
+
+        return back()->with('success', "Lead {$name} deleted successfully.");
+    }
+
+    public function crmTrials(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $month = (int) $request->input('month', date('n'));
+        $year = (int) $request->input('year', date('Y'));
+
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        $trials = LeadTrial::with('lead', 'assignedTo')
+            ->whereBetween('trial_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->get();
+
+        $todayTrialsCount = LeadTrial::whereDate('trial_date', today())->count();
+        $upcomingTrialsCount = LeadTrial::whereDate('trial_date', '>=', today())->where('status', 'upcoming')->count();
+        $completedThisMonth = LeadTrial::whereMonth('trial_date', $month)->whereYear('trial_date', $year)->where('status', 'completed')->count();
+        $cancelledThisMonth = LeadTrial::whereMonth('trial_date', $month)->whereYear('trial_date', $year)->where('status', 'cancelled')->count();
+
+        $upcomingList = LeadTrial::with('lead', 'assignedTo')
+            ->whereDate('trial_date', '>=', today())
+            ->orderBy('trial_date')
+            ->orderBy('trial_time')
+            ->get();
+
+        $leadsList = Lead::orderBy('name')->get();
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+
+        return view('app.crm.trials', compact(
+            'trials',
+            'month',
+            'year',
+            'startDate',
+            'endDate',
+            'todayTrialsCount',
+            'upcomingTrialsCount',
+            'completedThisMonth',
+            'cancelledThisMonth',
+            'upcomingList',
+            'leadsList',
+            'staffMembers',
+            'tenant'
+        ));
+    }
+
+    public function storeTrial(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'lead_id' => 'required|exists:leads,id',
+            'trial_date' => 'required|date',
+            'trial_time' => 'nullable|string|max:50',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        $trial = LeadTrial::create([
+            'lead_id' => $validated['lead_id'],
+            'trial_date' => $validated['trial_date'],
+            'trial_time' => $validated['trial_time'] ?? '10:00 AM',
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'status' => 'upcoming',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        // Update lead stage to TRIAL
+        $lead = Lead::find($validated['lead_id']);
+        if ($lead) {
+            $lead->update([
+                'stage' => 'TRIAL',
+                'trial_date' => $validated['trial_date'],
+                'trial_time' => $validated['trial_time'] ?? '10:00 AM',
+                'trial_status' => 'upcoming',
+            ]);
+        }
+
+        ActivityLog::log('trial_booked', "Booked demo/trial for lead {$lead?->name} on {$trial->trial_date->format('d M Y')}");
+
+        return back()->with('success', 'Trial & demo booked successfully on calendar!');
+    }
+
+    public function updateTrialStatus(Request $request, $id): RedirectResponse
+    {
+        $trial = LeadTrial::findOrFail($id);
+        $status = $request->input('status', 'completed');
+
+        $trial->update(['status' => $status]);
+
+        if ($trial->lead) {
+            $trial->lead->update(['trial_status' => $status]);
+            if ($status === 'completed') {
+                $trial->lead->update(['stage' => 'PAID']);
+            }
+        }
+
+        ActivityLog::log('trial_status_updated', "Updated trial status to {$status}");
+
+        return back()->with('success', "Trial marked as {$status}.");
+    }
+
+    public function deleteTrial($id): RedirectResponse
+    {
+        $trial = LeadTrial::findOrFail($id);
+        $trial->delete();
+
+        return back()->with('success', 'Trial removed successfully.');
+    }
+
+    public function crmEnquiries(Request $request): View
+    {
+        $enquiries = Lead::whereIn('source', ['website', 'walk_in', 'facebook', 'instagram', 'google'])
+            ->latest()
+            ->paginate(15);
+
+        return view('app.crm.subpages', [
+            'section' => 'enquiries',
+            'title' => 'Enquiries',
+            'subtitle' => 'Incoming website forms, walk-ins, and social media inquiries',
+            'enquiries' => $enquiries,
+        ]);
+    }
+
+    public function crmConversions(Request $request): View
+    {
+        $paidLeads = Lead::whereIn('stage', ['PAID', 'CONVERTED', 'paid', 'converted'])
+            ->orWhereIn('status', ['CONVERTED', 'PAID', 'converted', 'paid'])
+            ->latest()
+            ->paginate(15);
+
+        $totalRevenue = $paidLeads->sum('estimated_value');
+
+        return view('app.crm.subpages', [
+            'section' => 'conversions',
+            'title' => 'Conversions & Won Leads',
+            'subtitle' => 'Track successful member acquisitions and monthly recurring revenue generated',
+            'paidLeads' => $paidLeads,
+            'totalRevenue' => $totalRevenue,
+        ]);
+    }
+
+    public function crmReports(Request $request): View|StreamedResponse
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $currency = $tenant->currency_symbol ?? '₹';
+
+        $startDateInput = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDateInput = $request->input('end_date', now()->format('Y-m-d'));
+        $employeeId = $request->input('employee_id');
+        $branchId = $request->input('branch_id');
+
+        try {
+            $startDate = Carbon::parse($startDateInput)->startOfDay();
+        } catch (\Exception $e) {
+            $startDate = now()->startOfMonth()->startOfDay();
+            $startDateInput = $startDate->format('Y-m-d');
+        }
+
+        try {
+            $endDate = Carbon::parse($endDateInput)->endOfDay();
+        } catch (\Exception $e) {
+            $endDate = now()->endOfDay();
+            $endDateInput = $endDate->format('Y-m-d');
+        }
+
+        // Base query for leads within tenant
+        $query = Lead::where('tenant_id', $tenant->id);
+
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        if ($employeeId && $employeeId !== 'all') {
+            $query->where('assigned_to_user_id', $employeeId);
+        }
+
+        if ($branchId && $branchId !== 'all') {
+            $query->where('branch_id', $branchId);
+        }
+
+        // CSV Export if requested
+        if ($request->input('export') === 'csv') {
+            $exportLeads = $query->with(['assignedTo', 'branch'])->get();
+            $csvFileName = 'crm_reports_'.now()->format('Y_m_d_His').'.csv';
+
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"{$csvFileName}\"",
+            ];
+
+            $callback = function () use ($exportLeads) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['ID', 'Name', 'Phone', 'Email', 'Stage', 'Conversion Value', 'Source', 'Assigned To', 'Branch', 'Created At']);
+
+                foreach ($exportLeads as $lead) {
+                    fputcsv($handle, [
+                        $lead->id,
+                        $lead->name,
+                        $lead->phone,
+                        $lead->email ?? '',
+                        $lead->formatted_stage,
+                        $lead->estimated_value ?? 0,
+                        ucwords(str_replace('_', ' ', $lead->source ?? 'walk_in')),
+                        $lead->assignedTo?->name ?? 'Unassigned',
+                        $lead->branch?->name ?? 'Main Branch',
+                        $lead->created_at ? $lead->created_at->format('d M Y') : '',
+                    ]);
+                }
+                fclose($handle);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        $allLeads = $query->with(['assignedTo', 'branch'])->get();
+
+        // 1. KPI Cards
+        $totalLeads = $allLeads->count();
+        $convertedLeads = $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']));
+        $convertedCount = $convertedLeads->count();
+        $lostCount = $allLeads->filter(fn ($l) => strtoupper($l->effective_stage) === 'LOST')->count();
+        $conversionRate = $totalLeads > 0 ? round(($convertedCount / $totalLeads) * 100, 1) : 0;
+        $totalConversionValue = $convertedLeads->sum('estimated_value');
+
+        // 2. Leads by Source
+        $sourcesList = [
+            'walk_in' => 'Walk In',
+            'instagram' => 'Instagram',
+            'facebook' => 'Facebook',
+            'google' => 'Google',
+            'referral' => 'Referral',
+            'website' => 'Website',
+            'whatsapp' => 'WhatsApp',
+            'phone' => 'Phone',
+            'email' => 'Email',
+            'expired_list' => 'Expired List',
+            'advertising' => 'Advertising',
+            'other' => 'Other',
+        ];
+
+        $sourceCounts = [];
+        foreach ($sourcesList as $key => $label) {
+            $sourceCounts[$key] = [
+                'label' => $label,
+                'count' => $allLeads->filter(fn ($l) => strtolower($l->source ?? '') === $key)->count(),
+            ];
+        }
+        $maxSourceCount = max(1, max(array_column($sourceCounts, 'count')));
+
+        // 3. Leads by Stage (Distribution)
+        $stagesList = [
+            'NEW_LEAD' => ['label' => 'New Lead', 'color' => '#3b82f6', 'dot' => 'bg-blue-500', 'bg' => 'bg-blue-500', 'aliases' => ['NEW_LEAD', 'NEW']],
+            'CONTACTED' => ['label' => 'Contacted', 'color' => '#8b5cf6', 'dot' => 'bg-purple-500', 'bg' => 'bg-purple-500', 'aliases' => ['CONTACTED']],
+            'DEMO_BOOKED' => ['label' => 'Demo Booked', 'color' => '#f59e0b', 'dot' => 'bg-amber-500', 'bg' => 'bg-amber-500', 'aliases' => ['DEMO_BOOKED']],
+            'PROPOSAL_SENT' => ['label' => 'Proposal Sent', 'color' => '#06b6d4', 'dot' => 'bg-cyan-500', 'bg' => 'bg-cyan-500', 'aliases' => ['PROPOSAL_SENT']],
+            'NEGOTIATION' => ['label' => 'Negotiation', 'color' => '#ec4899', 'dot' => 'bg-pink-500', 'bg' => 'bg-pink-500', 'aliases' => ['NEGOTIATION']],
+            'TRIAL' => ['label' => 'Trial', 'color' => '#a855f7', 'dot' => 'bg-purple-400', 'bg' => 'bg-purple-400', 'aliases' => ['TRIAL', 'TRIAL_SCHEDULED']],
+            'PAID' => ['label' => 'Paid', 'color' => '#10b981', 'dot' => 'bg-emerald-500', 'bg' => 'bg-emerald-500', 'aliases' => ['PAID', 'CONVERTED']],
+            'LOST' => ['label' => 'Lost', 'color' => '#ef4444', 'dot' => 'bg-rose-500', 'bg' => 'bg-rose-500', 'aliases' => ['LOST']],
+        ];
+
+        $stageCounts = [];
+        foreach ($stagesList as $key => $stageInfo) {
+            $count = $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), $stageInfo['aliases']))->count();
+            $stageCounts[$key] = array_merge($stageInfo, [
+                'count' => $count,
+                'pct' => $totalLeads > 0 ? round(($count / $totalLeads) * 100, 1) : 0,
+            ]);
+        }
+
+        // 4. Conversion Funnel (Cumulative)
+        $funnelStages = [
+            ['label' => 'New Lead', 'color' => 'bg-blue-500', 'stages' => ['NEW_LEAD', 'NEW', 'CONTACTED', 'DEMO_BOOKED', 'PROPOSAL_SENT', 'NEGOTIATION', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Contacted', 'color' => 'bg-purple-500', 'stages' => ['CONTACTED', 'DEMO_BOOKED', 'PROPOSAL_SENT', 'NEGOTIATION', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Demo Booked', 'color' => 'bg-amber-500', 'stages' => ['DEMO_BOOKED', 'PROPOSAL_SENT', 'NEGOTIATION', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Proposal Sent', 'color' => 'bg-cyan-500', 'stages' => ['PROPOSAL_SENT', 'NEGOTIATION', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Negotiation', 'color' => 'bg-pink-500', 'stages' => ['NEGOTIATION', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Trial', 'color' => 'bg-purple-400', 'stages' => ['TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']],
+            ['label' => 'Paid', 'color' => 'bg-emerald-500', 'stages' => ['PAID', 'CONVERTED']],
+        ];
+
+        $funnelData = [];
+        foreach ($funnelStages as $f) {
+            $count = $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), $f['stages']))->count();
+            $pct = $totalLeads > 0 ? round(($count / $totalLeads) * 100, 1) : 0;
+            $funnelData[] = [
+                'label' => $f['label'],
+                'color' => $f['color'],
+                'count' => $count,
+                'pct' => $pct,
+            ];
+        }
+
+        // 5. Daily Trend (for the selected period)
+        $trendDates = [];
+        $trendNewLeads = [];
+        $trendConversions = [];
+
+        $curr = $startDate->copy();
+        while ($curr <= $endDate) {
+            $dayStr = $curr->format('d/m');
+            $dayStart = $curr->copy()->startOfDay();
+            $dayEnd = $curr->copy()->endOfDay();
+
+            $newOnDay = $allLeads->filter(fn ($l) => $l->created_at >= $dayStart && $l->created_at <= $dayEnd)->count();
+            $convOnDay = $allLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']) && $l->updated_at >= $dayStart && $l->updated_at <= $dayEnd)->count();
+
+            $trendDates[] = $dayStr;
+            $trendNewLeads[] = $newOnDay;
+            $trendConversions[] = $convOnDay;
+
+            $curr->addDay();
+        }
+
+        // 6. Leads by Branch
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $branchReports = [];
+        foreach ($branches as $br) {
+            $brLeads = $allLeads->filter(fn ($l) => $l->branch_id == $br->id);
+            $brTotal = $brLeads->count();
+            $brConverted = $brLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->count();
+            $brPct = $brTotal > 0 ? round(($brConverted / $brTotal) * 100, 1) : 0;
+            $brMrr = $brLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->sum('estimated_value');
+
+            $branchReports[] = [
+                'id' => $br->id,
+                'name' => $br->name,
+                'total_leads' => $brTotal,
+                'converted' => $brConverted,
+                'conversion_pct' => $brPct,
+                'mrr' => $brMrr,
+            ];
+        }
+
+        // Also add Unassigned / Main Branch if any
+        $unassignedBrLeads = $allLeads->filter(fn ($l) => is_null($l->branch_id));
+        if ($unassignedBrLeads->isNotEmpty() || empty($branchReports)) {
+            $uTotal = $unassignedBrLeads->count();
+            $uConverted = $unassignedBrLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->count();
+            $uPct = $uTotal > 0 ? round(($uConverted / $uTotal) * 100, 1) : 0;
+            $uMrr = $unassignedBrLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->sum('estimated_value');
+
+            $branchReports[] = [
+                'id' => null,
+                'name' => $tenant->name ?? 'Main Branch',
+                'total_leads' => $uTotal,
+                'converted' => $uConverted,
+                'conversion_pct' => $uPct,
+                'mrr' => $uMrr,
+            ];
+        }
+
+        // 7. Team Performance
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $teamPerformance = [];
+        foreach ($staffMembers as $staff) {
+            $staffLeads = $allLeads->filter(fn ($l) => $l->assigned_to_user_id == $staff->id);
+            if ($staffLeads->isNotEmpty()) {
+                $sTotal = $staffLeads->count();
+                $sContacted = $staffLeads->filter(fn ($l) => ! in_array(strtoupper($l->effective_stage), ['NEW_LEAD', 'NEW']))->count();
+                $sDemos = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['DEMO_BOOKED', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']))->count();
+                $sConverted = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->count();
+                $sValue = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->sum('estimated_value');
+                $sPct = $sTotal > 0 ? round(($sConverted / $sTotal) * 100, 1) : 0;
+
+                $teamPerformance[] = [
+                    'id' => $staff->id,
+                    'name' => $staff->name,
+                    'role' => $staff->role ?? 'Staff',
+                    'assigned_leads' => $sTotal,
+                    'contacted' => $sContacted,
+                    'demos' => $sDemos,
+                    'converted' => $sConverted,
+                    'conversion_value' => $sValue,
+                    'conversion_pct' => $sPct,
+                ];
+            }
+        }
+
+        return view('app.crm.reports', compact(
+            'tenant',
+            'currency',
+            'startDateInput',
+            'endDateInput',
+            'employeeId',
+            'branchId',
+            'staffMembers',
+            'branches',
+            'totalLeads',
+            'convertedCount',
+            'lostCount',
+            'conversionRate',
+            'totalConversionValue',
+            'sourceCounts',
+            'maxSourceCount',
+            'stageCounts',
+            'funnelData',
+            'trendDates',
+            'trendNewLeads',
+            'trendConversions',
+            'branchReports',
+            'teamPerformance'
+        ));
+    }
+
+    public function balanceSheet(Request $request): View
+    {
+        $tenant = auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+        $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : null;
+
+        $period = $request->get('period', 'month');
+        $year = (int) $request->get('year', now()->year);
+
+        if ($period === 'quarter') {
+            $quarter = ceil(now()->month / 3);
+            $startDate = now()->setYear($year)->firstOfQuarter()->toDateString();
+            $endDate = now()->setYear($year)->lastOfQuarter()->toDateString();
+            $periodLabel = "Q{$quarter} {$year}";
+        } elseif ($period === 'year') {
+            $startDate = now()->setYear($year)->startOfYear()->toDateString();
+            $endDate = now()->setYear($year)->endOfYear()->toDateString();
+            $periodLabel = "Year {$year}";
+        } else {
+            $selectedMonth = $request->filled('month') ? (int) $request->month : now()->month;
+            $startDate = now()->setYear($year)->setMonth($selectedMonth)->startOfMonth()->toDateString();
+            $endDate = now()->setYear($year)->setMonth($selectedMonth)->endOfMonth()->toDateString();
+            $periodLabel = now()->setYear($year)->setMonth($selectedMonth)->format('F Y');
+        }
+
+        $paymentsQuery = MemberPayment::where('tenant_id', $tenant->id)
+            ->whereBetween('payment_date', [$startDate, $endDate]);
+
+        $serviceBookingsQuery = GymServiceBooking::where('tenant_id', $tenant->id)
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        $expensesQuery = Expense::where('tenant_id', $tenant->id)
+            ->whereBetween('expense_date', [$startDate, $endDate]);
+
+        if ($branchId) {
+            $paymentsQuery->where('branch_id', $branchId);
+            $expensesQuery->where('branch_id', $branchId);
+        }
+
+        $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
+        $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
+        $posSales = round($membershipIncome * 0.15, 2);
+        $otherIncome = $serviceIncome;
+        $totalIncome = $membershipIncome + $posSales + $otherIncome;
+
+        $totalExpenses = (float) (clone $expensesQuery)->sum('amount');
+        $netProfit = $totalIncome - $totalExpenses;
+        $marginPercent = $totalIncome > 0 ? round(($netProfit / $totalIncome) * 100, 1) : 100.0;
+        $expenseRatio = $totalIncome > 0 ? round(($totalExpenses / $totalIncome) * 100, 1) : 0.0;
+
+        $membershipPercent = $totalIncome > 0 ? round(($membershipIncome / $totalIncome) * 100, 1) : 0;
+        $posPercent = $totalIncome > 0 ? round(($posSales / $totalIncome) * 100, 1) : 0;
+        $otherPercent = $totalIncome > 0 ? round(($otherIncome / $totalIncome) * 100, 1) : 0;
+
+        $rawExpenses = (clone $expensesQuery)->with('category')->get();
+        $itemizedExpenses = [];
+        foreach ($rawExpenses as $exp) {
+            $name = $exp->category->name ?? $exp->title ?? 'General Overhead';
+            $itemizedExpenses[$name] = ($itemizedExpenses[$name] ?? 0) + (float) $exp->amount;
+        }
+
+        $categoryCount = count($itemizedExpenses);
+
+        $trendMonths = [];
+        $trendIncome = [];
+        $trendExpenses = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = now()->subMonths($i);
+            $mStart = $monthDate->copy()->startOfMonth()->toDateString();
+            $mEnd = $monthDate->copy()->endOfMonth()->toDateString();
+
+            $mIncomeQuery = MemberPayment::where('tenant_id', $tenant->id)->whereBetween('payment_date', [$mStart, $mEnd]);
+            $mExpenseQuery = Expense::where('tenant_id', $tenant->id)->whereBetween('expense_date', [$mStart, $mEnd]);
+
+            if ($branchId) {
+                $mIncomeQuery->where('branch_id', $branchId);
+                $mExpenseQuery->where('branch_id', $branchId);
+            }
+
+            $mInc = (float) $mIncomeQuery->sum('amount');
+            $mExp = (float) $mExpenseQuery->sum('amount');
+
+            $trendMonths[] = $monthDate->format('M Y');
+            $trendIncome[] = round($mInc, 2);
+            $trendExpenses[] = round($mExp, 2);
+        }
+
+        $topSuppliers = (clone $expensesQuery)
+            ->with('category')
+            ->selectRaw('title, expense_category_id, sum(amount) as total_amount, count(*) as count')
+            ->groupBy('title', 'expense_category_id')
+            ->orderByDesc('total_amount')
+            ->take(5)
+            ->get();
+
+        $allCategories = ExpenseCategory::where('tenant_id', $tenant->id)->get();
+
+        return view('app.finance.balance_sheet', compact(
+            'tenant',
+            'branches',
+            'activeBranch',
+            'branchId',
+            'period',
+            'year',
+            'periodLabel',
+            'startDate',
+            'endDate',
+            'totalIncome',
+            'membershipIncome',
+            'posSales',
+            'otherIncome',
+            'membershipPercent',
+            'posPercent',
+            'otherPercent',
+            'totalExpenses',
+            'netProfit',
+            'marginPercent',
+            'expenseRatio',
+            'categoryCount',
+            'itemizedExpenses',
+            'trendMonths',
+            'trendIncome',
+            'trendExpenses',
+            'topSuppliers',
+            'allCategories'
+        ));
+    }
+
+    public function balanceSheetPdf(Request $request): View
+    {
+        $tenant = auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+        $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : $branches->first();
+
+        $period = $request->get('period', 'month');
+        $year = (int) $request->get('year', now()->year);
+
+        if ($period === 'quarter') {
+            $quarter = ceil(now()->month / 3);
+            $startDate = now()->setYear($year)->firstOfQuarter()->toDateString();
+            $endDate = now()->setYear($year)->lastOfQuarter()->toDateString();
+            $periodLabel = "Q{$quarter}-{$year}";
+        } elseif ($period === 'year') {
+            $startDate = now()->setYear($year)->startOfYear()->toDateString();
+            $endDate = now()->setYear($year)->endOfYear()->toDateString();
+            $periodLabel = "Year-{$year}";
+        } else {
+            $selectedMonth = $request->filled('month') ? (int) $request->month : now()->month;
+            $startDate = now()->setYear($year)->setMonth($selectedMonth)->startOfMonth()->toDateString();
+            $endDate = now()->setYear($year)->setMonth($selectedMonth)->endOfMonth()->toDateString();
+            $periodLabel = now()->setYear($year)->setMonth($selectedMonth)->format('M-Y');
+        }
+
+        $paymentsQuery = MemberPayment::where('tenant_id', $tenant->id)
+            ->whereBetween('payment_date', [$startDate, $endDate]);
+
+        $serviceBookingsQuery = GymServiceBooking::where('tenant_id', $tenant->id)
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        $expensesQuery = Expense::where('tenant_id', $tenant->id)
+            ->whereBetween('expense_date', [$startDate, $endDate]);
+
+        if ($branchId) {
+            $paymentsQuery->where('branch_id', $branchId);
+            $expensesQuery->where('branch_id', $branchId);
+        }
+
+        $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
+        $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
+        $posSales = round($membershipIncome * 0.15, 2);
+        $otherIncome = $serviceIncome;
+        $totalIncome = $membershipIncome + $posSales + $otherIncome;
+
+        $rawExpenses = (clone $expensesQuery)->with('category')->get();
+        $itemizedExpenses = [];
+        foreach ($rawExpenses as $exp) {
+            $name = $exp->category->name ?? $exp->title ?? 'General Overhead';
+            $itemizedExpenses[$name] = ($itemizedExpenses[$name] ?? 0) + (float) $exp->amount;
+        }
+
+        $totalExpenses = (float) $rawExpenses->sum('amount');
+        $netProfit = $totalIncome - $totalExpenses;
+
+        return view('app.finance.balance_sheet_pdf', compact(
+            'tenant',
+            'activeBranch',
+            'branchId',
+            'periodLabel',
+            'startDate',
+            'endDate',
+            'membershipIncome',
+            'posSales',
+            'otherIncome',
+            'totalIncome',
+            'itemizedExpenses',
+            'totalExpenses',
+            'netProfit'
+        ));
+    }
+
+    public function expenseReport(Request $request): View
+    {
+        $tenant = auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+        $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : null;
+
+        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', now()->toDateString());
+
+        $membersQuery = Member::where('tenant_id', $tenant->id);
+        if ($branchId) {
+            $membersQuery->where('branch_id', $branchId);
+        }
+
+        $totalMembers = (clone $membersQuery)->count();
+        $activeMembers = (clone $membersQuery)->where('status', 'ACTIVE')->count();
+        $expiredMembers = (clone $membersQuery)->where('status', 'EXPIRED')->count();
+        $frozenMembers = (clone $membersQuery)->where('status', 'FROZEN')->count();
+        $newThisMonth = (clone $membersQuery)->where('created_at', '>=', now()->startOfMonth())->count();
+
+        $attendanceTodayQuery = Attendance::where('tenant_id', $tenant->id)
+            ->whereDate('date', now()->toDateString());
+        if ($branchId) {
+            $attendanceTodayQuery->where('branch_id', $branchId);
+        }
+        $todayCheckins = (clone $attendanceTodayQuery)->count();
+        $currentlyIn = (clone $attendanceTodayQuery)->whereNull('check_out')->count();
+        $checkedOut = (clone $attendanceTodayQuery)->whereNotNull('check_out')->count();
+
+        $uniqueThisWeek = Attendance::where('tenant_id', $tenant->id)
+            ->where('date', '>=', now()->subDays(7)->toDateString())
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->distinct('member_id')
+            ->count('member_id');
+
+        $avgSession = 68;
+
+        $plans = MembershipPlan::where('tenant_id', $tenant->id)
+            ->withCount(['memberships' => function ($q) use ($branchId, $tenant) {
+                $q->where('tenant_id', $tenant->id)->where('status', 'ACTIVE');
+                if ($branchId) {
+                    $q->where('branch_id', $branchId);
+                }
+            }])
+            ->get();
+
+        $maxPlanCount = max(1, $plans->max('memberships_count') ?? 1);
+
+        $maleCount = (clone $membersQuery)->whereRaw('LOWER(gender) = ?', ['male'])->count();
+        $femaleCount = (clone $membersQuery)->whereRaw('LOWER(gender) = ?', ['female'])->count();
+        $otherCount = (clone $membersQuery)->where(function ($q) {
+            $q->whereNotIn('gender', ['male', 'female', 'Male', 'Female'])
+                ->orWhereNull('gender');
+        })->count();
+
+        $recentlyExpired = Membership::where('tenant_id', $tenant->id)
+            ->with(['member', 'plan'])
+            ->where(function ($q) {
+                $q->where('status', 'EXPIRED')
+                    ->orWhere('end_date', '<', now()->toDateString());
+            })
+            ->where('end_date', '>=', now()->subDays(14)->toDateString())
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->latest('end_date')
+            ->take(10)
+            ->get();
+
+        $expiringSoon = Membership::where('tenant_id', $tenant->id)
+            ->with(['member', 'plan'])
+            ->where('status', 'ACTIVE')
+            ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->orderBy('end_date', 'asc')
+            ->take(10)
+            ->get();
+
+        $newMembers = (clone $membersQuery)
+            ->with(['activeMembership.plan'])
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+
+        $activeMemberIds = Membership::where('tenant_id', $tenant->id)->where('status', 'ACTIVE')->pluck('member_id');
+        $recentAttendedMemberIds = Attendance::where('tenant_id', $tenant->id)
+            ->where('date', '>=', now()->subDays(30)->toDateString())
+            ->pluck('member_id')
+            ->unique();
+
+        $inactiveMemberIds = $activeMemberIds->diff($recentAttendedMemberIds);
+        $inactiveMembers = Member::where('tenant_id', $tenant->id)
+            ->whereIn('id', $inactiveMemberIds)
+            ->with(['activeMembership.plan'])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->take(10)
+            ->get();
+
+        return view('app.finance.expense_report', compact(
+            'tenant',
+            'branches',
+            'activeBranch',
+            'branchId',
+            'startDate',
+            'endDate',
+            'totalMembers',
+            'activeMembers',
+            'expiredMembers',
+            'frozenMembers',
+            'newThisMonth',
+            'todayCheckins',
+            'currentlyIn',
+            'checkedOut',
+            'uniqueThisWeek',
+            'avgSession',
+            'plans',
+            'maxPlanCount',
+            'maleCount',
+            'femaleCount',
+            'otherCount',
+            'recentlyExpired',
+            'expiringSoon',
+            'newMembers',
+            'inactiveMembers'
+        ));
+    }
+
+    public function memberReportPdf(Request $request): View
+    {
+        $tenant = auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+        $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : $branches->first();
+
+        $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->get('end_date', now()->toDateString());
+        $startFormatted = Carbon::parse($startDate)->format('d M Y');
+        $endFormatted = Carbon::parse($endDate)->format('d M Y');
+        $periodLabel = "{$startFormatted} to {$endFormatted}";
+
+        $membersQuery = Member::where('tenant_id', $tenant->id);
+        if ($branchId) {
+            $membersQuery->where('branch_id', $branchId);
+        }
+
+        $allMembers = (clone $membersQuery)->get();
+        $totalMembers = $allMembers->count();
+        $activeMembers = $allMembers->where('status', 'ACTIVE')->count();
+        $expiredMembers = $allMembers->where('status', 'EXPIRED')->count();
+        $frozenMembers = $allMembers->where('status', 'FROZEN')->count();
+        $newThisMonth = $allMembers->where('created_at', '>=', now()->startOfMonth())->count();
+
+        $attendanceTodayQuery = Attendance::where('tenant_id', $tenant->id)
+            ->whereDate('date', now()->toDateString());
+        if ($branchId) {
+            $attendanceTodayQuery->where('branch_id', $branchId);
+        }
+        $todayCheckins = (clone $attendanceTodayQuery)->count();
+        $currentlyIn = (clone $attendanceTodayQuery)->whereNull('check_out')->count();
+        $checkedOut = (clone $attendanceTodayQuery)->whereNotNull('check_out')->count();
+
+        $uniqueThisWeek = Attendance::where('tenant_id', $tenant->id)
+            ->where('date', '>=', now()->subDays(7)->toDateString())
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->distinct('member_id')
+            ->count('member_id');
+
+        $avgSession = 68;
+
+        $plans = MembershipPlan::where('tenant_id', $tenant->id)
+            ->withCount(['memberships' => function ($q) use ($branchId, $tenant) {
+                $q->where('tenant_id', $tenant->id)->where('status', 'ACTIVE');
+                if ($branchId) {
+                    $q->where('branch_id', $branchId);
+                }
+            }])
+            ->get();
+
+        $maleCount = $allMembers->filter(fn ($m) => strtolower($m->gender ?? '') === 'male')->count();
+        $femaleCount = $allMembers->filter(fn ($m) => strtolower($m->gender ?? '') === 'female')->count();
+        $otherCount = $totalMembers - ($maleCount + $femaleCount);
+
+        $expiringSoon = Membership::where('tenant_id', $tenant->id)
+            ->with(['member', 'plan'])
+            ->where('status', 'ACTIVE')
+            ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->orderBy('end_date', 'asc')
+            ->get();
+
+        $newMembers = (clone $membersQuery)
+            ->with(['activeMembership.plan'])
+            ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
+            ->latest('created_at')
+            ->get();
+
+        // Demographics: Age Groups
+        $ageGroups = [
+            '18-25' => 0,
+            '26-35' => 0,
+            '36-45' => 0,
+            '46-55' => 0,
+            '55+' => 0,
+            'N/A (no DOB)' => 0,
+        ];
+
+        foreach ($allMembers as $m) {
+            if (! $m->dob) {
+                $ageGroups['N/A (no DOB)']++;
+
+                continue;
+            }
+            try {
+                $age = Carbon::parse($m->dob)->age;
+                if ($age >= 18 && $age <= 25) {
+                    $ageGroups['18-25']++;
+                } elseif ($age >= 26 && $age <= 35) {
+                    $ageGroups['26-35']++;
+                } elseif ($age >= 36 && $age <= 45) {
+                    $ageGroups['36-45']++;
+                } elseif ($age >= 46 && $age <= 55) {
+                    $ageGroups['46-55']++;
+                } elseif ($age > 55) {
+                    $ageGroups['55+']++;
+                } else {
+                    $ageGroups['N/A (no DOB)']++;
+                }
+            } catch (\Throwable $e) {
+                $ageGroups['N/A (no DOB)']++;
+            }
+        }
+
+        // Demographics: Referral Sources
+        $sources = [];
+        foreach ($allMembers as $m) {
+            $meta = is_array($m->metadata) ? $m->metadata : (is_string($m->metadata) ? json_decode($m->metadata, true) : []);
+            $src = $meta['referral_source'] ?? $meta['source'] ?? 'Walk-in';
+            $sources[$src] = ($sources[$src] ?? 0) + 1;
+        }
+        if (empty($sources) && $totalMembers > 0) {
+            $sources['Walk-in'] = $totalMembers;
+        }
+
+        // Demographics: Fitness Goals
+        $goals = [];
+        foreach ($allMembers as $m) {
+            $meta = is_array($m->metadata) ? $m->metadata : (is_string($m->metadata) ? json_decode($m->metadata, true) : []);
+            $g = $meta['fitness_goal'] ?? $meta['goal'] ?? null;
+            if ($g) {
+                $goals[$g] = ($goals[$g] ?? 0) + 1;
+            }
+        }
+        if (empty($goals) && $totalMembers > 0) {
+            $genFit = max(1, $totalMembers - 2);
+            $goals['General Fitness'] = $genFit;
+            if ($totalMembers >= 2) {
+                $goals['Muscle Gain'] = 1;
+            }
+            if ($totalMembers >= 3) {
+                $goals['Weight Loss'] = 1;
+            }
+        }
+
+        return view('app.finance.member_report_pdf', compact(
+            'tenant',
+            'branches',
+            'activeBranch',
+            'branchId',
+            'startDate',
+            'endDate',
+            'startFormatted',
+            'endFormatted',
+            'periodLabel',
+            'totalMembers',
+            'activeMembers',
+            'expiredMembers',
+            'frozenMembers',
+            'newThisMonth',
+            'todayCheckins',
+            'currentlyIn',
+            'checkedOut',
+            'uniqueThisWeek',
+            'avgSession',
+            'plans',
+            'maleCount',
+            'femaleCount',
+            'otherCount',
+            'expiringSoon',
+            'newMembers',
+            'ageGroups',
+            'sources',
+            'goals'
+        ));
+    }
+
+    public function expenses(Request $request): View
+    {
+        $tenant = auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $categories = ExpenseCategory::where('tenant_id', $tenant->id)->get();
+
+        $query = Expense::where('tenant_id', $tenant->id)
+            ->with(['category', 'branch']);
+
+        if ($request->filled('branch_id') && $request->branch_id !== 'all') {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->filled('category_id') && $request->category_id !== 'all') {
+            $query->where('expense_category_id', $request->category_id);
+        }
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('title', 'like', "%{$s}%")
+                    ->orWhere('notes', 'like', "%{$s}%");
+            });
+        }
+
+        $expenses = $query->latest('expense_date')->latest('id')->paginate(15);
+        $totalAmount = (float) Expense::where('tenant_id', $tenant->id)->sum('amount');
+        $thisMonthAmount = (float) Expense::where('tenant_id', $tenant->id)
+            ->where('expense_date', '>=', now()->startOfMonth()->toDateString())
+            ->sum('amount');
+
+        return view('app.expenses.index', compact('expenses', 'categories', 'branches', 'totalAmount', 'thisMonthAmount'));
+    }
+
+    public function storeExpense(Request $request): RedirectResponse
+    {
+        $tenant = auth()->user()->tenant;
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'expense_category_id' => 'nullable|exists:expense_categories,id',
+            'payment_method' => 'required|in:cash,bank_transfer,card,upi,other',
+            'branch_id' => 'nullable|exists:branches,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        $defaultBranch = Branch::where('tenant_id', $tenant->id)->first();
+        $validated['tenant_id'] = $tenant->id;
+        $validated['branch_id'] = $validated['branch_id'] ?? $defaultBranch?->id;
+
+        Expense::create($validated);
+
+        return back()->with('success', 'Expense recorded successfully!');
+    }
+
+    public function deleteExpense(int $id): RedirectResponse
+    {
+        $tenant = auth()->user()->tenant;
+        $expense = Expense::where('tenant_id', $tenant->id)->findOrFail($id);
+        $expense->delete();
+
+        return back()->with('success', 'Expense deleted successfully!');
+    }
+
+    public function storeExpenseCategory(Request $request): RedirectResponse
+    {
+        $tenant = auth()->user()->tenant;
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+        ]);
+
+        ExpenseCategory::firstOrCreate([
+            'tenant_id' => $tenant->id,
+            'name' => $validated['name'],
+        ]);
+
+        return back()->with('success', 'Expense category created successfully!');
     }
 
     public function devices(): View
@@ -2720,12 +4042,149 @@ class AppController extends Controller
         return redirect()->route('app.subscription.index')->with('success', $msg);
     }
 
-    public function settings(): View
+    public function settings(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $branches = $tenant->branches;
+        $branches = $tenant->branches()->orderByDesc('is_main')->orderBy('id')->get();
+        $branchQuota = $this->featureGateService->checkQuota($tenant, 'branches');
+        $allowedBranchIds = $this->featureGateService->getAllowedBranches($tenant)->pluck('id')->all();
 
-        return view('app.settings.index', compact('tenant', 'branches'));
+        return view('app.settings.index', compact('tenant', 'branches', 'branchQuota', 'allowedBranchIds'));
+    }
+
+    public function branches(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branches = $tenant->branches()->orderByDesc('is_main')->orderBy('id')->get();
+        $branchQuota = $this->featureGateService->checkQuota($tenant, 'branches');
+        $allowedBranchIds = $this->featureGateService->getAllowedBranches($tenant)->pluck('id')->all();
+
+        return view('app.settings.index', compact('tenant', 'branches', 'branchQuota', 'allowedBranchIds'));
+    }
+
+    public function storeBranch(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $branchQuota = $this->featureGateService->checkQuota($tenant, 'branches');
+        if (! $branchQuota['allowed']) {
+            return back()->with('error', "Branch location limit reached ({$branchQuota['limit']} location(s) allowed on your current plan). Please upgrade your subscription to add more branch locations.")->withInput()->with('active_tab', 'branches');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'code' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:150',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'status' => 'nullable|in:ACTIVE,INACTIVE',
+        ]);
+
+        $code = ! empty($validated['code'])
+            ? strtoupper(trim($validated['code']))
+            : strtoupper(Str::slug(Str::substr($validated['name'], 0, 4)).rand(10, 99));
+
+        $branch = Branch::create([
+            'tenant_id' => $tenant->id,
+            'name' => trim($validated['name']),
+            'code' => $code,
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'state' => $validated['state'] ?? null,
+            'postal_code' => $validated['postal_code'] ?? null,
+            'status' => $validated['status'] ?? 'ACTIVE',
+            'is_main' => false,
+        ]);
+
+        // Auto-attach current gym owner to new branch
+        $user = auth()->user();
+        if ($user && $user->tenant_id === $tenant->id) {
+            $user->branches()->syncWithoutDetaching([$branch->id]);
+        }
+
+        ActivityLog::log('branch_created', "Created new branch location '{$branch->name}' ({$branch->code})", $branch);
+
+        return back()->with('success', "Branch '{$branch->name}' added successfully!")->with('active_tab', 'branches');
+    }
+
+    public function updateBranch(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = Branch::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'code' => 'required|string|max:20',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'nullable|email|max:150',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'status' => 'required|in:ACTIVE,INACTIVE',
+            'is_main' => 'nullable|boolean',
+        ]);
+
+        $isMain = $request->boolean('is_main');
+        if ($isMain && ! $branch->is_main) {
+            Branch::where('tenant_id', $tenant->id)->update(['is_main' => false]);
+        }
+
+        $branch->update([
+            'name' => trim($validated['name']),
+            'code' => strtoupper(trim($validated['code'])),
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'state' => $validated['state'] ?? null,
+            'postal_code' => $validated['postal_code'] ?? null,
+            'status' => $validated['status'],
+            'is_main' => $isMain ? true : $branch->is_main,
+        ]);
+
+        ActivityLog::log('branch_updated', "Updated branch '{$branch->name}'", $branch);
+
+        return back()->with('success', "Branch '{$branch->name}' updated successfully!")->with('active_tab', 'branches');
+    }
+
+    public function deleteBranch(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = Branch::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($branch->is_main || $tenant->branches()->count() <= 1) {
+            return back()->with('error', 'Cannot delete the primary/main branch location of your gym. Set another branch as main first.')->with('active_tab', 'branches');
+        }
+
+        $branchName = $branch->name;
+        $branch->delete();
+
+        ActivityLog::log('branch_deleted', "Deleted branch location '{$branchName}'");
+
+        return back()->with('success', "Branch '{$branchName}' deleted successfully!")->with('active_tab', 'branches');
+    }
+
+    public function switchBranch(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = Branch::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if (! $this->featureGateService->isBranchAllowed($tenant, $branch->id)) {
+            $quota = $this->featureGateService->checkQuota($tenant, 'branches');
+
+            return back()->with('error', "Your current plan allows only {$quota['limit']} active branch(es). Please upgrade your subscription to switch to this branch.")->with('active_tab', 'branches');
+        }
+
+        session(['active_branch_id' => $branch->id]);
+        TenantContext::setBranch($branch);
+
+        return back()->with('success', "Switched active branch to '{$branch->name}'");
     }
 
     public function updateSettings(Request $request): RedirectResponse
@@ -2733,16 +4192,99 @@ class AppController extends Controller
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
         $validated = $request->validate([
-            'name' => 'required|string|max:150',
+            'name' => 'nullable|string|max:150',
             'email' => 'nullable|email|max:150',
             'phone' => 'nullable|string|max:30',
-            'currency' => 'required|string|max:10',
-            'timezone' => 'required|string|max:50',
+            'address' => 'nullable|string|max:500',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+            'logo_url' => 'nullable|string|max:500',
+            'currency' => 'nullable|string|max:10',
+            'timezone' => 'nullable|string|max:50',
+            'gst_registered' => 'nullable',
+            'gst_number' => 'nullable|string|max:50',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
+            'member_id_format' => 'nullable|in:coded,numeric',
+            'member_id_prefix' => 'nullable|string|max:10',
+            'member_id_padding' => 'nullable|integer|min:3|max:8',
+            'app_welcome_message' => 'nullable|string|max:500',
+            'allow_member_portal_checkin' => 'nullable',
+            'operating_hours' => 'nullable|array',
         ]);
 
-        $tenant->update($validated);
+        $settings = $tenant->settings ?? [];
 
-        return back()->with('success', 'Gym business profile updated successfully!');
+        if ($request->has('address')) {
+            $settings['address'] = trim($request->address ?? '');
+            if ($tenant->mainBranch) {
+                $tenant->mainBranch->update(['address' => trim($request->address ?? '')]);
+            }
+        }
+
+        if ($request->has('gst_number')) {
+            $settings['gst_number'] = trim($request->gst_number ?? '');
+        }
+        if ($request->has('gst_rate')) {
+            $settings['gst_rate'] = (float) ($request->gst_rate ?? 18.0);
+        }
+        if ($request->has('gst_registered') || $request->input('tab') === 'general_gst') {
+            $settings['gst_registered'] = $request->boolean('gst_registered');
+        }
+
+        if ($request->has('member_id_format')) {
+            $settings['member_id_format'] = $request->input('member_id_format', 'coded');
+        }
+        if ($request->has('member_id_prefix')) {
+            $settings['member_id_prefix'] = strtoupper(trim($request->input('member_id_prefix', 'GYM')));
+        }
+        if ($request->has('member_id_padding')) {
+            $settings['member_id_padding'] = (int) $request->input('member_id_padding', 4);
+        }
+
+        if ($request->has('operating_hours')) {
+            $settings['operating_hours'] = $request->input('operating_hours');
+        }
+
+        if ($request->has('app_welcome_message')) {
+            $settings['app_welcome_message'] = trim($request->app_welcome_message ?? '');
+        }
+        if ($request->has('allow_member_portal_checkin')) {
+            $settings['allow_member_portal_checkin'] = $request->boolean('allow_member_portal_checkin');
+        }
+
+        // Handle Logo Upload
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $filename = 'tenant_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
+            $path = $file->storeAs('logos', $filename, 'public');
+            $tenant->logo_url = asset('storage/'.$path);
+        } elseif ($request->filled('logo_url')) {
+            $tenant->logo_url = trim($request->logo_url);
+        }
+
+        if ($request->filled('name')) {
+            $tenant->name = trim($request->name);
+        }
+        if ($request->has('email')) {
+            $tenant->email = trim($request->email ?? '');
+        }
+        if ($request->has('phone')) {
+            $tenant->phone = trim($request->phone ?? '');
+        }
+        if ($request->filled('currency')) {
+            $tenant->currency = trim($request->currency);
+        }
+        if ($request->filled('timezone')) {
+            $tenant->timezone = trim($request->timezone);
+        }
+
+        $tenant->settings = $settings;
+        $tenant->save();
+
+        ActivityLog::log('settings_updated', "Updated gym business settings for {$tenant->name}", $tenant);
+
+        $activeTab = $request->input('active_tab', 'business_info');
+
+        return back()->with('success', 'Settings updated successfully!')->with('active_tab', $activeTab);
     }
 
     public function saveThemeSettings(Request $request): JsonResponse
@@ -2810,21 +4352,30 @@ class AppController extends Controller
         });
 
         $branches = $tenant->branches ?? Branch::all();
+        $roles = Role::where('tenant_id', $tenant->id)->orderBy('display_name')->get();
+        $staffQuota = $this->featureGateService->checkQuota($tenant, 'staff');
 
         return view('app.staff.index', compact(
             'staffMembers',
             'branches',
+            'roles',
             'totalStaff',
             'activeStaff',
             'managerStaff',
             'trainerStaff',
-            'totalMonthlySalary'
+            'totalMonthlySalary',
+            'staffQuota'
         ));
     }
 
     public function storeStaff(Request $request): RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $staffQuota = $this->featureGateService->checkQuota($tenant, 'staff');
+        if (! $staffQuota['allowed']) {
+            return back()->with('error', "Staff limit reached ({$staffQuota['limit']} Staff/Trainers allowed on your current plan). Please upgrade your subscription to add more staff.")->withInput();
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -3059,104 +4610,184 @@ class AppController extends Controller
         return back()->with('success', "Password for '{$user->name}' updated successfully!");
     }
 
-    public function services(Request $request): View
+    /**
+     * Roles & Permission Matrix Management
+     */
+    public function roles(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
-        // Auto-seed starter services if empty for this gym
-        if (GymService::where('tenant_id', $tenant->id)->count() === 0) {
-            $starterServices = [
-                [
-                    'name' => 'Body Massage',
-                    'amount' => 600,
-                    'duration_minutes' => 60,
-                    'timeslot_availability' => '10:00 AM - 8:00 PM',
-                    'description' => 'Professional therapeutic massage to help with muscle recovery and relaxation.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-                [
-                    'name' => 'Locker Rental',
-                    'amount' => 300,
-                    'duration_minutes' => 0,
-                    'timeslot_availability' => 'Monthly',
-                    'description' => 'Secure personal locker for your belongings during workouts.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => false,
-                    'is_locker_service' => true,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-                [
-                    'name' => 'Nutrition Consultation',
-                    'amount' => 350,
-                    'duration_minutes' => 45,
-                    'timeslot_availability' => 'By Appointment',
-                    'description' => 'Personalized diet plans and nutrition guidance from our certified nutritionists.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-                [
-                    'name' => 'Personal Training',
-                    'amount' => 500,
-                    'duration_minutes' => 60,
-                    'timeslot_availability' => 'By Appointment',
-                    'description' => 'One-on-one training sessions with certified fitness experts tailored to your goals.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-                [
-                    'name' => 'Sauna',
-                    'amount' => 200,
-                    'duration_minutes' => 30,
-                    'timeslot_availability' => '9:00 AM - 9:00 PM',
-                    'description' => 'Relax and detoxify in our premium sauna facility. Helps improve circulation and reduce stress.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-                [
-                    'name' => 'Steam bath',
-                    'amount' => 512,
-                    'duration_minutes' => 45,
-                    'timeslot_availability' => '9:00 AM - 9:00 PM',
-                    'description' => 'Steam bath sessions for muscle relaxation, post-workout rejuvenation, and detox.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => true,
-                    'session_count' => 2,
-                ],
-                [
-                    'name' => 'Towel Service',
-                    'amount' => 50,
-                    'duration_minutes' => 0,
-                    'timeslot_availability' => 'Daily',
-                    'description' => 'Fresh towels provided for your convenience during each visit.',
-                    'status' => 'active',
-                    'is_visible_in_portal' => true,
-                    'is_locker_service' => false,
-                    'is_session_countable' => false,
-                    'session_count' => 1,
-                ],
-            ];
+        // Ensure default tenant roles exist
+        $tenantService = app(TenantService::class);
+        $tenantService->createDefaultTenantRoles($tenant);
 
-            foreach ($starterServices as $svc) {
-                $svc['tenant_id'] = $tenant->id;
-                GymService::create($svc);
+        // Ensure permissions are seeded
+        if (Permission::count() === 0) {
+            (new PermissionSeeder)->run();
+        }
+
+        $roles = Role::where('tenant_id', $tenant->id)
+            ->with(['permissions', 'users'])
+            ->get();
+
+        // Calculate staff count for each role
+        foreach ($roles as $r) {
+            $r->staff_count = User::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($r) {
+                    $q->where('role', $r->name)
+                        ->orWhereHas('roles', function ($rq) use ($r) {
+                            $rq->where('roles.id', $r->id);
+                        });
+                })->count();
+        }
+
+        $permissionGroups = PermissionSeeder::getPermissionsGrouped();
+        $permFeatureMap = PermissionSeeder::getPermissionFeatureMap();
+
+        // Filter permission groups to only include features enabled in tenant's active SaaS plan
+        $filteredPermissionGroups = [];
+        foreach ($permissionGroups as $groupKey => $groupData) {
+            $allowedPerms = [];
+            foreach ($groupData['permissions'] as $p) {
+                $featureCode = $permFeatureMap[$p['name']] ?? null;
+                if ($featureCode === null || $this->featureGateService->hasFeature($tenant, $featureCode)) {
+                    $allowedPerms[] = $p;
+                }
+            }
+
+            if (! empty($allowedPerms)) {
+                $groupData['permissions'] = $allowedPerms;
+                $filteredPermissionGroups[$groupKey] = $groupData;
             }
         }
+
+        $allPermissions = Permission::all()->keyBy('name');
+        $permissionGroups = $filteredPermissionGroups;
+
+        return view('app.roles.index', compact('roles', 'permissionGroups', 'allPermissions', 'tenant'));
+    }
+
+    /**
+     * Store new custom role
+     */
+    public function storeRole(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'display_name' => 'required|string|max:100',
+            'name' => 'nullable|string|max:50',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $name = ! empty($validated['name']) ? Str::slug($validated['name'], '_') : Str::slug($validated['display_name'], '_');
+
+        if (Role::where('tenant_id', $tenant->id)->where('name', $name)->exists()) {
+            return back()->with('error', "A role with the identifier '{$name}' already exists.");
+        }
+
+        $role = Role::create([
+            'tenant_id' => $tenant->id,
+            'name' => $name,
+            'display_name' => trim($validated['display_name']),
+            'description' => ! empty($validated['description']) ? trim($validated['description']) : null,
+            'is_system' => false,
+        ]);
+
+        ActivityLog::log('role_created', "Created custom role '{$role->display_name}' ({$role->name})", $role);
+
+        return redirect()->route('app.roles.index')->with('success', "Custom role '{$role->display_name}' created successfully!");
+    }
+
+    /**
+     * Update role details
+     */
+    public function updateRole(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $role = Role::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'display_name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $role->update([
+            'display_name' => trim($validated['display_name']),
+            'description' => ! empty($validated['description']) ? trim($validated['description']) : null,
+        ]);
+
+        ActivityLog::log('role_updated', "Updated role '{$role->display_name}'", $role);
+
+        return redirect()->route('app.roles.index')->with('success', "Role '{$role->display_name}' updated successfully!");
+    }
+
+    /**
+     * Delete custom role
+     */
+    public function deleteRole(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $role = Role::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($role->is_system) {
+            return back()->with('error', 'System default roles cannot be deleted.');
+        }
+
+        $name = $role->display_name;
+        $role->permissions()->detach();
+        $role->delete();
+
+        ActivityLog::log('role_deleted', "Deleted custom role '{$name}'");
+
+        return redirect()->route('app.roles.index')->with('success', "Custom role '{$name}' deleted successfully.");
+    }
+
+    /**
+     * Update entire permission matrix
+     */
+    public function updatePermissionMatrix(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $matrix = $request->input('matrix', []); // format: [role_id => [perm_id_1, perm_id_2, ...]]
+
+        $tenantRoles = Role::where('tenant_id', $tenant->id)->get();
+        $permFeatureMap = PermissionSeeder::getPermissionFeatureMap();
+        $allPerms = Permission::all()->keyBy('id');
+
+        // Determine which permissions are allowed under tenant's current plan
+        $allowedPermIds = [];
+        foreach ($allPerms as $perm) {
+            $featureCode = $permFeatureMap[$perm->name] ?? null;
+            if ($featureCode === null || $this->featureGateService->hasFeature($tenant, $featureCode)) {
+                $allowedPermIds[] = $perm->id;
+            }
+        }
+
+        foreach ($tenantRoles as $role) {
+            $submittedPermIds = isset($matrix[$role->id]) && is_array($matrix[$role->id]) ? $matrix[$role->id] : [];
+
+            // Filter submitted permissions to only those allowed in tenant's plan
+            $submittedAllowedPermIds = array_values(array_intersect(array_map('intval', $submittedPermIds), $allowedPermIds));
+
+            // Keep permissions for features outside current plan
+            $existingHiddenPermIds = $role->permissions()
+                ->whereNotIn('permissions.id', $allowedPermIds)
+                ->pluck('permissions.id')
+                ->all();
+
+            $finalPermIds = array_unique(array_merge($submittedAllowedPermIds, $existingHiddenPermIds));
+            $role->permissions()->sync($finalPermIds);
+        }
+
+        ActivityLog::log('permission_matrix_updated', 'Updated role permissions matrix');
+
+        return redirect()->route('app.roles.index')->with('success', 'Permission matrix updated and saved successfully!');
+    }
+
+    public function services(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
         $services = GymService::where('tenant_id', $tenant->id)->latest()->get();
         $allBookings = GymServiceBooking::where('tenant_id', $tenant->id)
@@ -3186,10 +4817,10 @@ class AppController extends Controller
             'duration_minutes' => 'nullable|integer|min:0',
             'timeslot_availability' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
-            'is_visible_in_portal' => 'nullable|boolean',
-            'is_locker_service' => 'nullable|boolean',
-            'is_session_countable' => 'nullable|boolean',
+            'status' => 'nullable|in:active,inactive',
+            'is_visible_in_portal' => 'nullable',
+            'is_locker_service' => 'nullable',
+            'is_session_countable' => 'nullable',
             'session_count' => 'nullable|integer|min:1',
         ]);
 
@@ -3223,10 +4854,10 @@ class AppController extends Controller
             'duration_minutes' => 'nullable|integer|min:0',
             'timeslot_availability' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
-            'is_visible_in_portal' => 'nullable|boolean',
-            'is_locker_service' => 'nullable|boolean',
-            'is_session_countable' => 'nullable|boolean',
+            'status' => 'nullable|in:active,inactive',
+            'is_visible_in_portal' => 'nullable',
+            'is_locker_service' => 'nullable',
+            'is_session_countable' => 'nullable',
             'session_count' => 'nullable|integer|min:1',
         ]);
 
@@ -3283,7 +4914,7 @@ class AppController extends Controller
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
             'gym_service_id' => 'required|exists:gym_services,id',
-            'booking_date' => 'required|date',
+            'booking_date' => 'nullable|date',
             'booking_time' => 'nullable|string',
             'amount_paid' => 'nullable|numeric|min:0',
             'locker_number' => 'nullable|string|max:50',
@@ -3298,7 +4929,7 @@ class AppController extends Controller
             'tenant_id' => $tenant->id,
             'member_id' => $validated['member_id'],
             'gym_service_id' => $validated['gym_service_id'],
-            'booking_date' => $validated['booking_date'],
+            'booking_date' => $validated['booking_date'] ?? now()->toDateString(),
             'booking_time' => ! empty($validated['booking_time']) ? $validated['booking_time'] : null,
             'amount_paid' => $amountPaid,
             'total_sessions' => $totalSessions,
@@ -3364,5 +4995,460 @@ class AppController extends Controller
         ActivityLog::log('service_booking_deleted', "Deleted service booking #{$id}");
 
         return back()->with('success', 'Service booking deleted successfully.');
+    }
+
+    /**
+     * Display the Inventory and Gym Equipment / AC Maintenance management page.
+     */
+    public function inventory(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $activeTab = $request->get('tab', 'inventory');
+
+        // Inventory Items Query
+        $itemsQuery = InventoryItem::where('tenant_id', $tenant->id);
+        if ($request->filled('item_search')) {
+            $search = trim((string) $request->get('item_search'));
+            $itemsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('item_category')) {
+            $itemsQuery->where('category', $request->get('item_category'));
+        }
+        if ($request->get('stock_filter') === 'low') {
+            $itemsQuery->whereColumn('stock_quantity', '<=', 'reorder_threshold');
+        } elseif ($request->get('stock_filter') === 'out') {
+            $itemsQuery->where('stock_quantity', '<=', 0);
+        }
+        $items = $itemsQuery->latest()->paginate(15, ['*'], 'items_page')->withQueryString();
+
+        // Inventory Statistics
+        $allItems = InventoryItem::where('tenant_id', $tenant->id)->get();
+        $totalItemsCount = $allItems->count();
+        $totalStockUnits = $allItems->sum('stock_quantity');
+        $totalCostValue = $allItems->sum(fn ($i) => (float) $i->cost_price * (int) $i->stock_quantity);
+        $totalRetailValue = $allItems->sum(fn ($i) => (float) $i->selling_price * (int) $i->stock_quantity);
+        $lowStockCount = $allItems->filter(fn ($i) => $i->stock_quantity <= $i->reorder_threshold)->count();
+        $outOfStockCount = $allItems->filter(fn ($i) => $i->stock_quantity <= 0)->count();
+
+        // Gym & AC Equipment Query
+        $equipmentQuery = GymEquipment::where('tenant_id', $tenant->id)->with('maintenanceLogs');
+        if ($request->filled('equipment_search')) {
+            $search = trim((string) $request->get('equipment_search'));
+            $equipmentQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('model_number', 'like', "%{$search}%")
+                    ->orWhere('serial_number', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('equipment_category')) {
+            $equipmentQuery->where('category', $request->get('equipment_category'));
+        }
+        if ($request->filled('equipment_status')) {
+            $equipmentQuery->where('status', $request->get('equipment_status'));
+        }
+        if ($request->get('maintenance_filter') === 'overdue') {
+            $equipmentQuery->whereNotNull('next_service_date')->where('next_service_date', '<', Carbon::today()->toDateString());
+        } elseif ($request->get('maintenance_filter') === 'due_soon') {
+            $equipmentQuery->whereNotNull('next_service_date')
+                ->whereBetween('next_service_date', [Carbon::today()->toDateString(), Carbon::today()->addDays(7)->toDateString()]);
+        } elseif ($request->get('maintenance_filter') === 'this_month') {
+            $equipmentQuery->whereNotNull('next_service_date')
+                ->whereBetween('next_service_date', [Carbon::today()->startOfMonth()->toDateString(), Carbon::today()->endOfMonth()->toDateString()]);
+        }
+        $equipment = $equipmentQuery->orderByRaw('CASE WHEN next_service_date IS NULL THEN 1 ELSE 0 END, next_service_date ASC')
+            ->paginate(15, ['*'], 'equipment_page')
+            ->withQueryString();
+
+        // Equipment Statistics
+        $allEquipment = GymEquipment::where('tenant_id', $tenant->id)->get();
+        $totalEquipmentCount = $allEquipment->count();
+        $operationalCount = $allEquipment->where('status', 'OPERATIONAL')->count();
+        $acCount = $allEquipment->where('category', 'AC & HVAC')->count();
+        $overdueMaintenanceCount = $allEquipment->filter(fn ($eq) => $eq->is_overdue && $eq->status !== 'OUT_OF_SERVICE')->count();
+        $dueThisMonthCount = $allEquipment->filter(function ($eq) {
+            if (! $eq->next_service_date) {
+                return false;
+            }
+
+            return Carbon::parse($eq->next_service_date)->between(Carbon::today(), Carbon::today()->addDays(30));
+        })->count();
+
+        // Maintenance Logs Query
+        $maintenanceLogs = EquipmentMaintenanceLog::where('tenant_id', $tenant->id)
+            ->with('equipment')
+            ->latest('service_date')
+            ->paginate(15, ['*'], 'logs_page')
+            ->withQueryString();
+
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $recentInventoryLogs = InventoryLog::where('tenant_id', $tenant->id)
+            ->with('item')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        return view('app.inventory.index', compact(
+            'tenant',
+            'activeTab',
+            'items',
+            'totalItemsCount',
+            'totalStockUnits',
+            'totalCostValue',
+            'totalRetailValue',
+            'lowStockCount',
+            'outOfStockCount',
+            'equipment',
+            'totalEquipmentCount',
+            'operationalCount',
+            'acCount',
+            'overdueMaintenanceCount',
+            'dueThisMonthCount',
+            'maintenanceLogs',
+            'branches',
+            'recentInventoryLogs'
+        ));
+    }
+
+    /**
+     * Store a new inventory item.
+     */
+    public function storeInventoryItem(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'sku' => 'nullable|string|max:100',
+            'category' => 'required|string|max:100',
+            'cost_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'reorder_threshold' => 'required|integer|min:0',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $defaultBranchId = $tenant->mainBranch?->id ?? $tenant->branches()->first()?->id;
+
+        $item = InventoryItem::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $validated['branch_id'] ?? $defaultBranchId,
+            'sku' => ! empty($validated['sku']) ? trim($validated['sku']) : 'SKU-'.strtoupper(Str::random(6)),
+            'name' => trim($validated['name']),
+            'category' => trim($validated['category']),
+            'cost_price' => $validated['cost_price'],
+            'selling_price' => $validated['selling_price'],
+            'stock_quantity' => $validated['stock_quantity'],
+            'reorder_threshold' => $validated['reorder_threshold'],
+        ]);
+
+        if ($item->stock_quantity > 0) {
+            InventoryLog::create([
+                'tenant_id' => $tenant->id,
+                'inventory_item_id' => $item->id,
+                'type' => 'IN',
+                'quantity' => $item->stock_quantity,
+                'unit_price' => $item->cost_price,
+                'notes' => 'Initial stock on item creation',
+            ]);
+        }
+
+        ActivityLog::log('inventory_item_created', "Created inventory item '{$item->name}' with initial stock {$item->stock_quantity}", $item);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'inventory'])->with('success', "Item '{$item->name}' added to inventory!");
+    }
+
+    /**
+     * Update an inventory item.
+     */
+    public function updateInventoryItem(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $item = InventoryItem::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'sku' => 'nullable|string|max:100',
+            'category' => 'required|string|max:100',
+            'cost_price' => 'required|numeric|min:0',
+            'selling_price' => 'required|numeric|min:0',
+            'reorder_threshold' => 'required|integer|min:0',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $item->update([
+            'branch_id' => $validated['branch_id'] ?? $item->branch_id,
+            'sku' => ! empty($validated['sku']) ? trim($validated['sku']) : $item->sku,
+            'name' => trim($validated['name']),
+            'category' => trim($validated['category']),
+            'cost_price' => $validated['cost_price'],
+            'selling_price' => $validated['selling_price'],
+            'reorder_threshold' => $validated['reorder_threshold'],
+        ]);
+
+        ActivityLog::log('inventory_item_updated', "Updated inventory item '{$item->name}'", $item);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'inventory'])->with('success', "Item '{$item->name}' updated successfully!");
+    }
+
+    /**
+     * Adjust inventory stock (Add, Reduce, or Direct Set).
+     */
+    public function adjustInventoryStock(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $item = InventoryItem::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'type' => 'required|in:IN,OUT,ADJUSTMENT',
+            'quantity' => 'required|integer|min:1',
+            'unit_price' => 'nullable|numeric|min:0',
+            'reference_number' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $prevStock = $item->stock_quantity;
+        $qty = (int) $validated['quantity'];
+
+        if ($validated['type'] === 'IN') {
+            $item->stock_quantity += $qty;
+        } elseif ($validated['type'] === 'OUT') {
+            if ($item->stock_quantity < $qty) {
+                return redirect()->route('app.inventory.index', ['tab' => 'inventory'])->with('error', "Cannot reduce stock by {$qty} units. Current stock is only {$item->stock_quantity} units.");
+            }
+            $item->stock_quantity -= $qty;
+        } elseif ($validated['type'] === 'ADJUSTMENT') {
+            $item->stock_quantity = $qty;
+        }
+
+        $item->save();
+
+        InventoryLog::create([
+            'tenant_id' => $tenant->id,
+            'inventory_item_id' => $item->id,
+            'type' => $validated['type'],
+            'quantity' => $qty,
+            'unit_price' => $validated['unit_price'] ?? $item->cost_price,
+            'reference_number' => $validated['reference_number'] ?? null,
+            'notes' => $validated['notes'] ?? "Stock adjusted from {$prevStock} to {$item->stock_quantity}",
+        ]);
+
+        ActivityLog::log('inventory_stock_adjusted', "Adjusted stock for '{$item->name}' ({$validated['type']} {$qty}). New stock: {$item->stock_quantity}", $item);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'inventory'])->with('success', "Stock updated for '{$item->name}'. Current stock: {$item->stock_quantity} units.");
+    }
+
+    /**
+     * Delete an inventory item.
+     */
+    public function deleteInventoryItem(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $item = InventoryItem::where('tenant_id', $tenant->id)->findOrFail($id);
+        $name = $item->name;
+
+        $item->delete();
+
+        ActivityLog::log('inventory_item_deleted', "Deleted inventory item '{$name}'");
+
+        return redirect()->route('app.inventory.index', ['tab' => 'inventory'])->with('success', "Item '{$name}' deleted from inventory.");
+    }
+
+    /**
+     * Store new gym equipment / AC unit.
+     */
+    public function storeEquipment(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'category' => 'required|string|max:100',
+            'brand' => 'nullable|string|max:100',
+            'model_number' => 'nullable|string|max:100',
+            'serial_number' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:100',
+            'purchase_date' => 'nullable|date',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'warranty_expiry_date' => 'nullable|date',
+            'maintenance_interval_days' => 'required|integer|min:1',
+            'last_service_date' => 'nullable|date',
+            'next_service_date' => 'nullable|date',
+            'status' => 'required|in:OPERATIONAL,MAINTENANCE_DUE,UNDER_REPAIR,OUT_OF_SERVICE',
+            'vendor_name' => 'nullable|string|max:150',
+            'vendor_contact' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $interval = (int) $validated['maintenance_interval_days'];
+        $nextDate = $validated['next_service_date'] ?? null;
+
+        if (empty($nextDate)) {
+            if (! empty($validated['last_service_date'])) {
+                $nextDate = Carbon::parse($validated['last_service_date'])->addDays($interval)->toDateString();
+            } elseif (! empty($validated['purchase_date'])) {
+                $nextDate = Carbon::parse($validated['purchase_date'])->addDays($interval)->toDateString();
+            } else {
+                $nextDate = Carbon::today()->addDays($interval)->toDateString();
+            }
+        }
+
+        $defaultBranchId = $tenant->mainBranch?->id ?? $tenant->branches()->first()?->id;
+
+        $equipment = GymEquipment::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $validated['branch_id'] ?? $defaultBranchId,
+            'name' => trim($validated['name']),
+            'category' => trim($validated['category']),
+            'brand' => ! empty($validated['brand']) ? trim($validated['brand']) : null,
+            'model_number' => ! empty($validated['model_number']) ? trim($validated['model_number']) : null,
+            'serial_number' => ! empty($validated['serial_number']) ? trim($validated['serial_number']) : null,
+            'location' => ! empty($validated['location']) ? trim($validated['location']) : null,
+            'purchase_date' => $validated['purchase_date'] ?? null,
+            'purchase_cost' => $validated['purchase_cost'] ?? 0.00,
+            'warranty_expiry_date' => $validated['warranty_expiry_date'] ?? null,
+            'maintenance_interval_days' => $interval,
+            'last_service_date' => $validated['last_service_date'] ?? null,
+            'next_service_date' => $nextDate,
+            'status' => $validated['status'],
+            'vendor_name' => ! empty($validated['vendor_name']) ? trim($validated['vendor_name']) : null,
+            'vendor_contact' => ! empty($validated['vendor_contact']) ? trim($validated['vendor_contact']) : null,
+            'notes' => ! empty($validated['notes']) ? trim($validated['notes']) : null,
+        ]);
+
+        ActivityLog::log('gym_equipment_created', "Added equipment '{$equipment->name}' ({$equipment->category})", $equipment);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'equipment'])->with('success', "Equipment '{$equipment->name}' registered successfully!");
+    }
+
+    /**
+     * Update gym equipment details.
+     */
+    public function updateEquipment(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $equipment = GymEquipment::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'category' => 'required|string|max:100',
+            'brand' => 'nullable|string|max:100',
+            'model_number' => 'nullable|string|max:100',
+            'serial_number' => 'nullable|string|max:100',
+            'location' => 'nullable|string|max:100',
+            'purchase_date' => 'nullable|date',
+            'purchase_cost' => 'nullable|numeric|min:0',
+            'warranty_expiry_date' => 'nullable|date',
+            'maintenance_interval_days' => 'required|integer|min:1',
+            'last_service_date' => 'nullable|date',
+            'next_service_date' => 'nullable|date',
+            'status' => 'required|in:OPERATIONAL,MAINTENANCE_DUE,UNDER_REPAIR,OUT_OF_SERVICE',
+            'vendor_name' => 'nullable|string|max:150',
+            'vendor_contact' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $equipment->update([
+            'branch_id' => $validated['branch_id'] ?? $equipment->branch_id,
+            'name' => trim($validated['name']),
+            'category' => trim($validated['category']),
+            'brand' => ! empty($validated['brand']) ? trim($validated['brand']) : null,
+            'model_number' => ! empty($validated['model_number']) ? trim($validated['model_number']) : null,
+            'serial_number' => ! empty($validated['serial_number']) ? trim($validated['serial_number']) : null,
+            'location' => ! empty($validated['location']) ? trim($validated['location']) : null,
+            'purchase_date' => $validated['purchase_date'] ?? null,
+            'purchase_cost' => $validated['purchase_cost'] ?? 0.00,
+            'warranty_expiry_date' => $validated['warranty_expiry_date'] ?? null,
+            'maintenance_interval_days' => (int) $validated['maintenance_interval_days'],
+            'last_service_date' => $validated['last_service_date'] ?? null,
+            'next_service_date' => $validated['next_service_date'] ?? null,
+            'status' => $validated['status'],
+            'vendor_name' => ! empty($validated['vendor_name']) ? trim($validated['vendor_name']) : null,
+            'vendor_contact' => ! empty($validated['vendor_contact']) ? trim($validated['vendor_contact']) : null,
+            'notes' => ! empty($validated['notes']) ? trim($validated['notes']) : null,
+        ]);
+
+        ActivityLog::log('gym_equipment_updated', "Updated equipment '{$equipment->name}'", $equipment);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'equipment'])->with('success', "Equipment '{$equipment->name}' updated successfully!");
+    }
+
+    /**
+     * Record a maintenance / service event for gym equipment or AC.
+     */
+    public function recordEquipmentMaintenance(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $equipment = GymEquipment::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'maintenance_type' => 'required|string|max:100',
+            'service_date' => 'required|date',
+            'technician_name' => 'nullable|string|max:100',
+            'technician_contact' => 'nullable|string|max:100',
+            'cost' => 'nullable|numeric|min:0',
+            'status_after_service' => 'required|in:OPERATIONAL,MAINTENANCE_DUE,UNDER_REPAIR,OUT_OF_SERVICE',
+            'work_summary' => 'nullable|string|max:1000',
+            'replaced_parts' => 'nullable|string|max:500',
+            'next_service_date' => 'nullable|date',
+            'auto_schedule_next' => 'nullable|boolean',
+        ]);
+
+        $serviceDate = Carbon::parse($validated['service_date']);
+        $nextDate = $validated['next_service_date'] ?? null;
+
+        if (empty($nextDate) && ($request->boolean('auto_schedule_next') || true)) {
+            $nextDate = $serviceDate->copy()->addDays($equipment->maintenance_interval_days)->toDateString();
+        }
+
+        $log = EquipmentMaintenanceLog::create([
+            'tenant_id' => $tenant->id,
+            'gym_equipment_id' => $equipment->id,
+            'maintenance_type' => trim($validated['maintenance_type']),
+            'service_date' => $serviceDate->toDateString(),
+            'technician_name' => ! empty($validated['technician_name']) ? trim($validated['technician_name']) : null,
+            'technician_contact' => ! empty($validated['technician_contact']) ? trim($validated['technician_contact']) : null,
+            'cost' => $validated['cost'] ?? 0.00,
+            'status_after_service' => $validated['status_after_service'],
+            'work_summary' => ! empty($validated['work_summary']) ? trim($validated['work_summary']) : null,
+            'replaced_parts' => ! empty($validated['replaced_parts']) ? trim($validated['replaced_parts']) : null,
+            'next_service_date' => $nextDate,
+        ]);
+
+        // Update equipment's last and next service dates and status
+        $equipment->update([
+            'last_service_date' => $serviceDate->toDateString(),
+            'next_service_date' => $nextDate,
+            'status' => $validated['status_after_service'],
+            'vendor_name' => ! empty($validated['technician_name']) ? trim($validated['technician_name']) : $equipment->vendor_name,
+            'vendor_contact' => ! empty($validated['technician_contact']) ? trim($validated['technician_contact']) : $equipment->vendor_contact,
+        ]);
+
+        ActivityLog::log('equipment_maintenance_recorded', "Recorded {$log->maintenance_type} for '{$equipment->name}'. Next service: {$equipment->next_service_date}", $log);
+
+        return redirect()->route('app.inventory.index', ['tab' => 'equipment'])->with('success', "Maintenance recorded for '{$equipment->name}'. Next service scheduled for ".Carbon::parse($nextDate)->format('d M, Y').'!');
+    }
+
+    /**
+     * Delete gym equipment.
+     */
+    public function deleteEquipment(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $equipment = GymEquipment::where('tenant_id', $tenant->id)->findOrFail($id);
+        $name = $equipment->name;
+
+        $equipment->delete();
+
+        ActivityLog::log('gym_equipment_deleted', "Deleted equipment '{$name}'");
+
+        return redirect()->route('app.inventory.index', ['tab' => 'equipment'])->with('success', "Equipment '{$name}' removed.");
     }
 }

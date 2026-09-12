@@ -127,61 +127,106 @@
             };
             this.showEditStaffModal = true;
         }
-    }" class="space-y-6">
+    }" class="space-y-4">
+
+        <!-- Top Navigation Bar & Tabs (Staff vs Roles) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-1.5">
+                <!-- Staff Tab (Active) -->
+                <a href="{{ route('app.staff.index') }}" 
+                   class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow border border-indigo-500/30">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <span>Staff Members</span>
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950/60 font-black">{{ $totalStaff }}</span>
+                </a>
+
+                <!-- Roles & Permissions Tab -->
+                <a href="{{ route('app.roles.index') }}" 
+                   class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span>Roles & Permissions</span>
+                </a>
+
+                @if(isset($staffQuota))
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold font-mono flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $staffQuota['allowed'] ? 'bg-emerald-400' : 'bg-amber-400' }}"></span>
+                    <span>Staff Quota: {{ $staffQuota['current'] }}/{{ $staffQuota['limit'] == -1 ? 'Unlimited' : $staffQuota['limit'] }}</span>
+                </span>
+                @endif
+            </div>
+
+            <!-- Action Button: Add Staff -->
+            <div class="flex items-center gap-2">
+                @if(isset($staffQuota) && ! $staffQuota['allowed'])
+                    <a href="{{ route('app.subscription.index') }}" 
+                       class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow transition-all whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Upgrade for More Staff</span>
+                    </a>
+                @else
+                    <button type="button" 
+                            @click="openAddStaff()" 
+                            class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer whitespace-nowrap">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>Add Staff Member</span>
+                    </button>
+                @endif
+            </div>
+        </div>
 
         <!-- ========================================== -->
         <!-- TOP KPI STATS BANNER                       -->
         <!-- ========================================== -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <!-- Total Staff -->
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Team</span>
-                    <span class="text-2xl font-black text-white mt-1 block">{{ $totalStaff }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Team</span>
+                    <span class="text-xl font-bold text-white mt-0.5 block">{{ $totalStaff }}</span>
                 </div>
-                <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 </div>
             </div>
 
             <!-- Active Staff -->
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Active Access</span>
-                    <span class="text-2xl font-black text-emerald-400 mt-1 block">{{ $activeStaff }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Active Access</span>
+                    <span class="text-xl font-bold text-emerald-400 mt-0.5 block">{{ $activeStaff }}</span>
                 </div>
-                <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
             </div>
 
             <!-- Managers & Front Desk -->
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Managers & Desk</span>
-                    <span class="text-2xl font-black text-sky-400 mt-1 block">{{ $managerStaff }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Managers & Desk</span>
+                    <span class="text-xl font-bold text-sky-400 mt-0.5 block">{{ $managerStaff }}</span>
                 </div>
-                <div class="w-11 h-11 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 </div>
             </div>
 
             <!-- Trainers & Coaches -->
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Trainers / Coaches</span>
-                    <span class="text-2xl font-black text-amber-400 mt-1 block">{{ $trainerStaff }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Trainers / Coaches</span>
+                    <span class="text-xl font-bold text-amber-400 mt-0.5 block">{{ $trainerStaff }}</span>
                 </div>
-                <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- FILTER & ACTION TOOLBAR                    -->
+        <!-- FILTER TOOLBAR                             -->
         <!-- ========================================== -->
-        <form method="GET" action="{{ route('app.staff.index') }}" class="flex flex-wrap items-center gap-3">
+        <form method="GET" action="{{ route('app.staff.index') }}" class="flex flex-wrap items-center gap-2.5">
             <!-- Search Bar -->
             <div class="flex-1 min-w-[240px] relative">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">

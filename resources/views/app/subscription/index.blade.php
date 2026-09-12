@@ -263,7 +263,7 @@
                         $isCurrentPlan = $subscription?->plan_id == $p->id;
                     @endphp
                     <div class="rounded-3xl bg-slate-900 border {{ $isCurrentPlan ? 'border-amber-500 ring-1 ring-amber-500/50' : 'border-slate-800 hover:border-slate-700' }} p-6 flex flex-col justify-between relative shadow-xl transition-all">
-                        @if($p->slug === 'professional')
+                        @if($p->is_popular)
                             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-extrabold uppercase tracking-wider shadow-md">
                                 Most Popular
                             </div>

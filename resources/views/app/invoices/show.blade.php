@@ -92,6 +92,9 @@
                         @if(!empty($tenant->phone) || !empty($tenant->email))
                             <p class="text-[11px] text-slate-400 mt-0.5">{{ $tenant->phone ?? '' }} @if(!empty($tenant->phone) && !empty($tenant->email)) • @endif {{ $tenant->email ?? '' }}</p>
                         @endif
+                        @if(!empty($tenant->gst_number))
+                            <p class="text-[10px] font-mono text-slate-500 mt-0.5 font-bold">GSTIN: {{ $tenant->gst_number }}</p>
+                        @endif
                     </div>
                 </div>
 
