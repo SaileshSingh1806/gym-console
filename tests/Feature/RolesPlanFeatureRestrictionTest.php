@@ -95,4 +95,3 @@ class RolesPlanFeatureRestrictionTest extends TestCase
         $this->assertTrue($managerRole->permissions->contains('id', $devPerm->id));
     }
 }
-

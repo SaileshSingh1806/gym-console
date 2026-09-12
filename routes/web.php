@@ -116,6 +116,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::middleware('feature:diet_nutrition')->group(function () {
         Route::get('/diets', [AppController::class, 'diets'])->name('app.diets.index');
         Route::post('/diets', [AppController::class, 'storeDiet'])->name('app.diets.store');
+        Route::post('/diets/generate-ai', [AppController::class, 'generateAiDiet'])->name('app.diets.generate-ai');
         Route::post('/diets/seed-starter', [AppController::class, 'seedStarterDiets'])->name('app.diets.seed');
         Route::post('/diets/{id}', [AppController::class, 'updateDiet'])->name('app.diets.update')->whereNumber('id');
         Route::delete('/diets/{id}', [AppController::class, 'deleteDiet'])->name('app.diets.delete')->whereNumber('id');
@@ -196,10 +197,13 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // 15. Hikvision IoT & Devices
+    // 15. Biometric & IoT Devices
     Route::middleware('feature:hikvision_iot')->group(function () {
         Route::get('/devices', [AppController::class, 'devices'])->name('app.devices.index');
         Route::post('/devices', [AppController::class, 'storeDevice'])->name('app.devices.store');
         Route::post('/devices/{id}/test', [AppController::class, 'testDevice'])->name('app.devices.test');
+        Route::post('/devices/{id}/test', [AppController::class, 'testDevice'])->name('app.devices.test')->whereNumber('id');
+        Route::delete('/devices/{id}', [AppController::class, 'deleteDevice'])->name('app.devices.delete')->whereNumber('id');
     });
 
     // 16. Staff & Roles Management
@@ -223,9 +227,17 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::post('/subscription/upgrade', [AppController::class, 'upgradePlan'])->name('app.subscription.upgrade');
     Route::post('/coupon/validate', [AppController::class, 'validateCoupon'])->name('app.coupon.validate');
 
+    // Help & Support Tickets
+    Route::get('/support', [AppController::class, 'supportTickets'])->name('app.support.index');
+    Route::post('/support', [AppController::class, 'storeSupportTicket'])->name('app.support.store');
+    Route::get('/support/{id}', [AppController::class, 'showSupportTicket'])->name('app.support.show')->whereNumber('id');
+    Route::post('/support/{id}/reply', [AppController::class, 'replySupportTicket'])->name('app.support.reply')->whereNumber('id');
+    Route::post('/support/{id}/close', [AppController::class, 'closeSupportTicket'])->name('app.support.close')->whereNumber('id');
+
     // Settings & Branch Management
     Route::get('/settings', [AppController::class, 'settings'])->name('app.settings.index');
     Route::post('/settings', [AppController::class, 'updateSettings'])->name('app.settings.update');
+    Route::post('/settings/email/test', [AppController::class, 'sendGymTestEmail'])->name('app.settings.email.test');
 
     Route::get('/branches', [AppController::class, 'branches'])->name('app.branches.index');
     Route::post('/branches', [AppController::class, 'storeBranch'])->name('app.branches.store');
@@ -237,6 +249,13 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
 // SaaS Super Admin Routes (Fully Editable Platform Administration)
 Route::prefix('admin')->middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Support Tickets (Super Admin Helpdesk)
+    Route::get('/tickets', [AdminController::class, 'supportTickets'])->name('admin.tickets.index');
+    Route::get('/tickets/{id}', [AdminController::class, 'showSupportTicket'])->name('admin.tickets.show')->whereNumber('id');
+    Route::post('/tickets/{id}/reply', [AdminController::class, 'replySupportTicket'])->name('admin.tickets.reply')->whereNumber('id');
+    Route::post('/tickets/{id}/status', [AdminController::class, 'updateTicketStatus'])->name('admin.tickets.status')->whereNumber('id');
+    Route::delete('/tickets/{id}', [AdminController::class, 'deleteSupportTicket'])->name('admin.tickets.delete')->whereNumber('id');
 
     // Gyms
     Route::get('/gyms', [AdminController::class, 'gyms'])->name('admin.gyms');

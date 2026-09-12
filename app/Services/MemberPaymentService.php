@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\PaymentReceiptMail;
 use App\Models\ActivityLog;
 use App\Models\Member;
 use App\Models\MemberPayment;
@@ -42,6 +43,13 @@ class MemberPaymentService
             }
 
             ActivityLog::log('member_payment_received', "Received payment of \${$amount} via {$paymentMethod} from {$member->full_name}", $payment);
+
+            if (! empty($member->email)) {
+                $tenant = $member->tenant;
+                if ($tenant) {
+                    TenantMailService::send($tenant, $member->email, new PaymentReceiptMail($tenant, $payment));
+                }
+            }
 
             return $payment;
         });

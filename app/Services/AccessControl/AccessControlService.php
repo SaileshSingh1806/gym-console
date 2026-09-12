@@ -19,6 +19,8 @@ class AccessControlService
     {
         return match ($device->type) {
             'hikvision_facial', 'hikvision_turnstile' => new HikvisionISAPIDriver,
+            'essl_desktop' => new EsslDesktopDriver,
+            'zkteco_biometric' => new ZktecoDriver,
             default => new GenericDeviceDriver,
         };
     }

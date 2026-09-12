@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\GymOwnerWelcomeMail;
 use App\Models\ActivityLog;
 use App\Models\Branch;
 use App\Models\Plan;
@@ -10,6 +11,8 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class TenantService
@@ -78,6 +81,12 @@ class TenantService
             $subscription = $this->subscriptionService->startTrial($tenant, $plan);
 
             ActivityLog::log('tenant_registered', "New Gym '{$tenant->name}' registered with owner '{$owner->name}'", $tenant);
+
+            try {
+                Mail::to($owner->email)->send(new GymOwnerWelcomeMail($tenant, $owner, $plan, $data['password'] ?? null));
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch welcome email to gym owner {$owner->email}: ".$e->getMessage());
+            }
 
             return [
                 'tenant' => $tenant,

@@ -45,4 +45,9 @@ class MemberPayment extends Model
     {
         return $this->belongsTo(User::class, 'received_by_user_id');
     }
+
+    public function getReceiptNumberAttribute(): string
+    {
+        return $this->invoice_number ?? 'RCP-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
 }

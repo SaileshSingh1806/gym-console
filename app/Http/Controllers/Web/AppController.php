@@ -35,18 +35,22 @@ use App\Models\PtPlan;
 use App\Models\PtSession;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Models\SupportTicket;
 use App\Models\Trainer;
 use App\Models\User;
 use App\Models\WorkoutExercise;
 use App\Models\WorkoutPlan;
 use App\Services\AccessControl\AccessControlService;
+use App\Services\AiDietPlannerService;
 use App\Services\AttendanceService;
 use App\Services\FeatureGateService;
 use App\Services\MemberPaymentService;
 use App\Services\MembershipService;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
+use App\Services\SupportTicketService;
 use App\Services\TenantContext;
+use App\Services\TenantMailService;
 use App\Services\TenantService;
 use Carbon\Carbon;
 use Database\Seeders\PermissionSeeder;
@@ -2561,6 +2565,77 @@ class AppController extends Controller
         return back()->with('success', 'Starter diet templates created successfully! You can now assign them or send them via WhatsApp.');
     }
 
+    public function generateAiDiet(Request $request, AiDietPlannerService $aiDietService): JsonResponse
+    {
+        $validated = $request->validate([
+            'member_id' => 'nullable|exists:members,id',
+            'name' => 'nullable|string|max:100',
+            'age' => 'nullable|integer|min:10|max:100',
+            'gender' => 'nullable|string|in:male,female,other',
+            'height' => 'nullable|numeric|min:50|max:260',
+            'weight' => 'nullable|numeric|min:20|max:300',
+            'goal' => 'nullable|string|in:weight_loss,weight_gain,muscle_gain,fat_loss,maintenance,general_fitness',
+            'activity_level' => 'nullable|string|in:sedentary,lightly_active,moderately_active,very_active,extremely_active',
+            'diet_preference' => 'nullable|string|in:vegetarian,non_vegetarian,vegan,eggetarian',
+            'meals_per_day' => 'nullable|integer|min:3|max:6',
+            'workout_time' => 'nullable|string|in:early_morning,morning,afternoon,evening,night',
+            'food_preferences' => 'nullable|string|max:500',
+            'foods_to_avoid' => 'nullable|string|max:500',
+            'allergies' => 'nullable|string|max:500',
+            'additional_notes' => 'nullable|string|max:1000',
+            'auto_save' => 'nullable|boolean',
+        ]);
+
+        if (! empty($validated['member_id'])) {
+            $member = Member::find($validated['member_id']);
+            if ($member) {
+                $validated['name'] = $validated['name'] ?: $member->full_name;
+                $validated['gender'] = $validated['gender'] ?: ($member->gender ?: 'male');
+                if (empty($validated['age']) && $member->dob) {
+                    $validated['age'] = $member->dob->age;
+                }
+            }
+        }
+
+        $planData = $aiDietService->generate($validated);
+
+        if ($request->boolean('auto_save')) {
+            $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+            $createdPlan = DietPlan::create([
+                'tenant_id' => $tenant->id,
+                'member_id' => $validated['member_id'] ?? null,
+                'title' => $planData['plan_title'],
+                'daily_calories' => $planData['daily_totals']['calories'],
+                'protein_grams' => $planData['daily_totals']['protein_grams'],
+                'carbs_grams' => $planData['daily_totals']['carbs_grams'],
+                'fat_grams' => $planData['daily_totals']['fat_grams'],
+                'is_template' => empty($validated['member_id']),
+                'guidelines' => implode("\n", $planData['guidelines'])."\n\n⚠️ Medical Disclaimer:\n".$planData['medical_disclaimer'],
+            ]);
+
+            foreach ($planData['meals'] as $meal) {
+                DietMeal::create([
+                    'diet_plan_id' => $createdPlan->id,
+                    'meal_type' => in_array($meal['meal_type'], ['breakfast', 'morning_snack', 'lunch', 'evening_snack', 'dinner', 'post_workout']) ? $meal['meal_type'] : 'breakfast',
+                    'recommended_time' => $meal['recommended_time'],
+                    'meal_name' => $meal['meal_name'],
+                    'items_description' => $meal['items_description'].(! empty($meal['alternatives']) ? "\n\n🔄 Alternative Options:\n".$meal['alternatives'] : ''),
+                    'calories' => $meal['target_macros']['calories'] ?? null,
+                    'sort_order' => $meal['sort_order'],
+                ]);
+            }
+
+            ActivityLog::log('diet_ai_generated', "AI generated and saved diet plan '{$createdPlan->title}'", $createdPlan);
+
+            $planData['saved_plan_id'] = $createdPlan->id;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $planData,
+        ]);
+    }
+
     public function crmDashboard(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -3889,43 +3964,6 @@ class AppController extends Controller
         return back()->with('success', 'Expense category created successfully!');
     }
 
-    public function devices(): View
-    {
-        $devices = Device::with('branch')->latest()->paginate(15);
-        $branches = Branch::all();
-        $logs = AccessLog::with(['member', 'device'])->latest('event_time')->take(20)->get();
-
-        return view('app.devices.index', compact('devices', 'branches', 'logs'));
-    }
-
-    public function storeDevice(Request $request): RedirectResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'model' => 'nullable|string|max:100',
-            'type' => 'required|in:hikvision_facial,hikvision_turnstile,rfid_reader,qr_scanner,generic_biometric',
-            'serial_number' => 'nullable|string|max:100',
-            'ip_address' => 'nullable|ip',
-            'port' => 'nullable|integer',
-            'direction' => 'required|in:in,out,both',
-            'branch_id' => 'nullable|exists:branches,id',
-        ]);
-
-        $validated['device_secret'] = 'dev_'.Str::random(24);
-        Device::create($validated);
-
-        return back()->with('success', 'Access control device registered successfully!');
-    }
-
-    public function testDevice(int $id): RedirectResponse
-    {
-        $device = Device::findOrFail($id);
-        $driver = $this->accessControlService->getDriver($device);
-        $driver->checkHealth($device);
-
-        return back()->with('success', "Device ping check completed! Status: {$device->status}");
-    }
-
     public function subscription(): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -4048,18 +4086,95 @@ class AppController extends Controller
         $branches = $tenant->branches()->orderByDesc('is_main')->orderBy('id')->get();
         $branchQuota = $this->featureGateService->checkQuota($tenant, 'branches');
         $allowedBranchIds = $this->featureGateService->getAllowedBranches($tenant)->pluck('id')->all();
+        $devices = Device::where('tenant_id', $tenant->id)->with('branch')->latest()->get();
+        $accessLogs = AccessLog::where('tenant_id', $tenant->id)->with(['member', 'device'])->latest('event_time')->take(20)->get();
 
-        return view('app.settings.index', compact('tenant', 'branches', 'branchQuota', 'allowedBranchIds'));
+        return view('app.settings.index', compact('tenant', 'branches', 'branchQuota', 'allowedBranchIds', 'devices', 'accessLogs'));
     }
 
     public function branches(Request $request): View
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $branches = $tenant->branches()->orderByDesc('is_main')->orderBy('id')->get();
-        $branchQuota = $this->featureGateService->checkQuota($tenant, 'branches');
-        $allowedBranchIds = $this->featureGateService->getAllowedBranches($tenant)->pluck('id')->all();
+        return $this->settings($request);
+    }
 
-        return view('app.settings.index', compact('tenant', 'branches', 'branchQuota', 'allowedBranchIds'));
+    public function devices(Request $request): View
+    {
+        $request->query->set('tab', 'devices');
+
+        return $this->settings($request);
+    }
+
+    public function storeDevice(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'model' => 'nullable|string|max:100',
+            'type' => 'required|string|in:essl_desktop,hikvision_facial,hikvision_turnstile,zkteco_biometric,rfid_reader,qr_scanner,generic',
+            'serial_number' => 'nullable|string|max:100',
+            'ip_address' => 'nullable|string|max:45',
+            'port' => 'nullable|integer|min:1|max:65535',
+            'username' => 'nullable|string|max:100',
+            'password' => 'nullable|string|max:100',
+            'direction' => 'required|in:in,out,both',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $deviceSecret = 'dev_'.Str::random(32);
+        $branchId = ! empty($validated['branch_id'])
+            ? (int) $validated['branch_id']
+            : ($tenant->branches()->where('is_main', true)->value('id') ?? $tenant->branches()->value('id'));
+
+        $device = Device::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $branchId,
+            'name' => trim($validated['name']),
+            'model' => $validated['model'] ?? null,
+            'type' => $validated['type'],
+            'serial_number' => $validated['serial_number'] ?? null,
+            'ip_address' => $validated['ip_address'] ?? null,
+            'port' => ! empty($validated['port']) ? (int) $validated['port'] : 80,
+            'username' => $validated['username'] ?? null,
+            'password' => $validated['password'] ?? null,
+            'device_secret' => $deviceSecret,
+            'direction' => $validated['direction'],
+            'status' => 'ONLINE',
+            'last_seen_at' => now(),
+            'configuration' => [
+                'sync_mode' => in_array($validated['type'], ['essl_desktop', 'zkteco_biometric']) ? 'desktop_agent_push' : 'direct_webhook',
+                'created_by' => auth()->id(),
+            ],
+        ]);
+
+        ActivityLog::log('device_created', "Registered biometric device '{$device->name}' ({$device->type})", $device);
+
+        return redirect()->route('app.settings.index', ['tab' => 'devices'])->with('success', "Biometric Device '{$device->name}' registered successfully!");
+    }
+
+    public function testDevice(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $device = Device::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $driver = $this->accessControlService->getDriver($device);
+        $driver->checkHealth($device);
+
+        ActivityLog::log('device_pinged', "Tested connection to biometric device '{$device->name}'", $device);
+
+        return redirect()->route('app.settings.index', ['tab' => 'devices'])->with('success', "Device '{$device->name}' ping check passed (ONLINE).");
+    }
+
+    public function deleteDevice(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $device = Device::where('tenant_id', $tenant->id)->findOrFail($id);
+        $name = $device->name;
+        $device->delete();
+
+        ActivityLog::log('device_deleted', "Removed biometric device '{$name}'");
+
+        return redirect()->route('app.settings.index', ['tab' => 'devices'])->with('success', "Biometric Device '{$name}' removed successfully.");
     }
 
     public function storeBranch(Request $request): RedirectResponse
@@ -4251,6 +4366,21 @@ class AppController extends Controller
             $settings['allow_member_portal_checkin'] = $request->boolean('allow_member_portal_checkin');
         }
 
+        // Handle Gym Custom SMTP Settings
+        if ($request->has('smtp') || $request->input('active_tab') === 'email_smtp') {
+            $existingSmtp = $settings['smtp'] ?? [];
+            $settings['smtp'] = [
+                'enabled' => $request->boolean('smtp_enabled'),
+                'mail_host' => trim($request->input('mail_host') ?? ''),
+                'mail_port' => (int) ($request->input('mail_port') ?? 587),
+                'mail_encryption' => $request->input('mail_encryption', 'tls'),
+                'mail_username' => trim($request->input('mail_username') ?? ''),
+                'mail_password' => $request->filled('mail_password') ? $request->input('mail_password') : ($existingSmtp['mail_password'] ?? ''),
+                'mail_from_address' => trim($request->input('mail_from_address') ?? ''),
+                'mail_from_name' => trim($request->input('mail_from_name') ?? ''),
+            ];
+        }
+
         // Handle Logo Upload
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
@@ -4285,6 +4415,30 @@ class AppController extends Controller
         $activeTab = $request->input('active_tab', 'business_info');
 
         return back()->with('success', 'Settings updated successfully!')->with('active_tab', $activeTab);
+    }
+
+    public function sendGymTestEmail(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $request->validate([
+            'test_email' => 'required|email',
+        ]);
+
+        $smtpConfig = TenantMailService::getTenantSmtpConfig($tenant);
+
+        if (! $smtpConfig || empty($smtpConfig['host'])) {
+            return back()->with('error', 'Please configure and enable your gym SMTP settings first before sending a test email.')->with('active_tab', 'email_smtp');
+        }
+
+        try {
+            TenantMailService::testTenantSmtp($tenant, $request->test_email, $smtpConfig);
+            ActivityLog::log('gym_test_email_sent', "Gym {$tenant->name} sent test verification email to {$request->test_email}", $tenant);
+
+            return back()->with('success', "Test email successfully sent from {$smtpConfig['host']} to {$request->test_email}! Check your inbox/spam folder.")->with('active_tab', 'email_smtp');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'SMTP Connection Failed: '.$e->getMessage())->with('active_tab', 'email_smtp');
+        }
     }
 
     public function saveThemeSettings(Request $request): JsonResponse
@@ -5450,5 +5604,125 @@ class AppController extends Controller
         ActivityLog::log('gym_equipment_deleted', "Deleted equipment '{$name}'");
 
         return redirect()->route('app.inventory.index', ['tab' => 'equipment'])->with('success', "Equipment '{$name}' removed.");
+    }
+
+    /**
+     * Display support tickets list for tenant.
+     */
+    public function supportTickets(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        $query = SupportTicket::where('tenant_id', $tenant->id)
+            ->with(['user', 'lastReplyBy', 'latestReply']);
+
+        if ($status = $request->get('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+
+        $tickets = $query->latest('last_reply_at')->latest('id')->paginate(15);
+
+        $counts = [
+            'total' => SupportTicket::where('tenant_id', $tenant->id)->count(),
+            'open' => SupportTicket::where('tenant_id', $tenant->id)->whereIn('status', ['open', 'in_progress'])->count(),
+            'answered' => SupportTicket::where('tenant_id', $tenant->id)->where('status', 'answered')->count(),
+            'resolved' => SupportTicket::where('tenant_id', $tenant->id)->whereIn('status', ['resolved', 'closed'])->count(),
+        ];
+
+        return view('app.support.index', compact('tickets', 'counts', 'tenant'));
+    }
+
+    /**
+     * Store a new support ticket.
+     */
+    public function storeSupportTicket(Request $request, SupportTicketService $ticketService): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'subject' => 'required|string|max:200',
+            'category' => 'required|in:technical,billing,feature_request,account,general',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'message' => 'required|string|max:5000',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx,zip|max:5120',
+        ]);
+
+        $ticket = $ticketService->createTicket(
+            $tenant,
+            $user,
+            $validated,
+            $request->file('attachment')
+        );
+
+        return redirect()->route('app.support.show', $ticket->id)
+            ->with('success', "Support ticket #{$ticket->ticket_number} created successfully! Our team has been notified.");
+    }
+
+    /**
+     * Show support ticket details and conversation thread.
+     */
+    public function showSupportTicket(int $id): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $ticket = SupportTicket::where('tenant_id', $tenant->id)
+            ->with(['user', 'replies.user', 'tenant'])
+            ->findOrFail($id);
+
+        return view('app.support.show', compact('ticket', 'tenant'));
+    }
+
+    /**
+     * Reply to a support ticket.
+     */
+    public function replySupportTicket(Request $request, int $id, SupportTicketService $ticketService): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+        $ticket = SupportTicket::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'message' => 'required|string|max:5000',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx,zip|max:5120',
+        ]);
+
+        $ticketService->replyTicket(
+            $ticket,
+            $user,
+            $validated['message'],
+            $request->file('attachment'),
+            false
+        );
+
+        return back()->with('success', 'Your reply has been posted successfully!');
+    }
+
+    /**
+     * Close a support ticket.
+     */
+    public function closeSupportTicket(int $id, SupportTicketService $ticketService): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $ticket = SupportTicket::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $ticket->update([
+            'status' => 'closed',
+            'resolved_at' => now(),
+        ]);
+
+        ActivityLog::log('support_ticket_closed', "Closed ticket #{$ticket->ticket_number}", $ticket);
+
+        return back()->with('success', "Ticket #{$ticket->ticket_number} has been closed.");
     }
 }

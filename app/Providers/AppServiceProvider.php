@@ -41,6 +41,53 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasAnyFeature($featureCodes);
         });
 
+        // Dynamically apply database-stored Mail / SMTP settings if present
+        try {
+            if (Schema::hasTable('settings')) {
+                $mailMailer = Setting::getGlobal('mail_mailer');
+                if (! empty($mailMailer)) {
+                    config(['mail.default' => $mailMailer]);
+                }
+
+                $mailHost = Setting::getGlobal('mail_host');
+                if (! empty($mailHost)) {
+                    config(['mail.mailers.smtp.host' => $mailHost]);
+                }
+
+                $mailPort = Setting::getGlobal('mail_port');
+                if (! empty($mailPort)) {
+                    config(['mail.mailers.smtp.port' => (int) $mailPort]);
+                }
+
+                $mailUsername = Setting::getGlobal('mail_username');
+                if (! empty($mailUsername)) {
+                    config(['mail.mailers.smtp.username' => $mailUsername]);
+                }
+
+                $mailPassword = Setting::getGlobal('mail_password');
+                if (! empty($mailPassword)) {
+                    config(['mail.mailers.smtp.password' => $mailPassword]);
+                }
+
+                $mailEncryption = Setting::getGlobal('mail_encryption');
+                if (! empty($mailEncryption)) {
+                    config(['mail.mailers.smtp.encryption' => $mailEncryption === 'none' ? null : $mailEncryption]);
+                }
+
+                $fromAddress = Setting::getGlobal('mail_from_address');
+                if (! empty($fromAddress)) {
+                    config(['mail.from.address' => $fromAddress]);
+                }
+
+                $fromName = Setting::getGlobal('mail_from_name');
+                if (! empty($fromName)) {
+                    config(['mail.from.name' => $fromName]);
+                }
+            }
+        } catch (\Throwable) {
+            // DB not ready or not migrated yet
+        }
+
         View::composer('*', function ($view) {
             try {
                 if (Schema::hasTable('settings')) {

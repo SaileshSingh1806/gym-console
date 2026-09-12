@@ -27,10 +27,23 @@
         memberSeq: '{{ str_pad($memberCount, (int) ($tenant->member_id_padding ?? 4), '0', STR_PAD_LEFT) }}',
         showAddBranchModal: false,
         showEditBranchModal: false,
+        showAddDeviceModal: false,
+        copiedEndpoint: false,
+        copiedToken: null,
         editBranchData: { id: '', name: '', code: '', phone: '', email: '', address: '', city: '', state: '', postal_code: '', status: 'ACTIVE', is_main: false },
         openEditBranch(b) {
             this.editBranchData = { ...b, is_main: Boolean(b.is_main) };
             this.showEditBranchModal = true;
+        },
+        copyText(text, key) {
+            navigator.clipboard.writeText(text);
+            if (key === 'endpoint') {
+                this.copiedEndpoint = true;
+                setTimeout(() => this.copiedEndpoint = false, 2000);
+            } else {
+                this.copiedToken = key;
+                setTimeout(() => this.copiedToken = null, 2000);
+            }
         },
         get formattedSeq() {
             let num = {{ $memberCount }};
@@ -53,7 +66,7 @@
                 reader.readAsDataURL(file);
             }
         }
-    }" class="space-y-6 max-w-5xl">
+    }" class="space-y-6 w-full">
 
         <!-- ==================== TOP HORIZONTAL NAVIGATION TABS ==================== -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800 text-xs font-bold">
@@ -104,6 +117,26 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span>Branches &amp; Locations</span>
                 <span class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">{{ $branches->count() }}/{{ $branchQuota['limit'] == -1 ? '∞' : $branchQuota['limit'] }}</span>
+            </button>
+
+            <!-- 7. Biometric & IoT Devices -->
+            <button type="button" @click="tab = 'devices'"
+                    :class="tab === 'devices' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'"
+                    class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                <span>Biometric &amp; IoT Devices</span>
+                <span class="px-1.5 py-0.5 rounded-full bg-slate-800 text-[10px] text-slate-300 font-mono">{{ $devices->count() }}</span>
+            </button>
+
+            <!-- 8. Email & SMTP Settings -->
+            <button type="button" @click="tab = 'email_smtp'"
+                    :class="tab === 'email_smtp' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'"
+                    class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span>Email &amp; SMTP</span>
+                @if(!empty($tenantSettings['smtp']['enabled']))
+                    <span class="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">ACTIVE</span>
+                @endif
             </button>
         </div>
 
@@ -663,6 +696,444 @@
         </div>
 
         <!-- ========================================================================= -->
+        <!-- TAB 7: BIOMETRIC & IOT ACCESS CONTROL                                     -->
+        <!-- ========================================================================= -->
+        <div x-show="tab === 'devices'" x-cloak class="space-y-6">
+            <!-- Header Card -->
+            <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-white tracking-wide">Biometric &amp; IoT Access Control</h3>
+                        <p class="text-xs text-slate-400">Connect eSSL Biometric machines (via Desktop Middleware), Hikvision terminals, turnstiles, and ZKTeco push</p>
+                    </div>
+                </div>
+                <button type="button" @click="showAddDeviceModal = true"
+                        class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-600/25 transition-all cursor-pointer whitespace-nowrap self-start md:self-auto">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    <span>Register Biometric Device</span>
+                </button>
+            </div>
+
+            <!-- Desktop Middleware & Push API Integration Box -->
+            <div class="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/20 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                            ⚡
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider">Attendance Sync Middleware &amp; Cloud Webhook</h4>
+                            <p class="text-[11px] text-slate-400">Sync fingerprint / facial punches directly into live attendance and membership access control</p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 self-start sm:self-auto">
+                        ● Cloud Endpoint Active
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Webhook URL Box -->
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Universal Webhook / Push URL</span>
+                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-teal-400">
+                            <span class="truncate">{{ url('/api/v1/devices/events') }}</span>
+                            <button type="button" @click="copyText('{{ url('/api/v1/devices/events') }}', 'endpoint')" 
+                                    class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition-colors shrink-0" title="Copy Push URL">
+                                <span x-show="!copiedEndpoint">Copy</span>
+                                <span x-show="copiedEndpoint" class="text-emerald-400 font-bold" x-cloak>Copied!</span>
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-500">Configure this URL in your eSSL desktop sync agent, Hikvision alert stream, or ZKTeco ADMS settings.</p>
+                    </div>
+
+                    <!-- Middleware Compatibility Badges -->
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Supported Hardware Protocols</span>
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                                🖥️ eSSL Desktop Agent (LAN/USB)
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                                📹 Hikvision ISAPI / MinMoe
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                                ⚡ ZKTeco / Realtime ADMS
+                            </span>
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 font-medium flex items-center gap-1.5">
+                                💳 RFID &amp; Dynamic QR Readers
+                            </span>
+                        </div>
+                        <p class="text-[10px] text-indigo-300/80">Every valid punch automatically checks membership validity, branch enrollment, and marks attendance.</p>
+                    </div>
+                </div>
+
+                <!-- Step-by-step Desktop Middleware Instructions -->
+                <div x-data="{ showSteps: false }" class="border-t border-slate-800/80 pt-3">
+                    <button type="button" @click="showSteps = !showSteps" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 cursor-pointer">
+                        <span x-text="showSteps ? 'Hide eSSL Desktop Middleware Setup Instructions' : 'View eSSL Desktop Middleware Setup Instructions (3 Quick Steps)'"></span>
+                        <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': showSteps }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div x-show="showSteps" x-cloak class="mt-3 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-2.5">
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">1</span>
+                            <div>
+                                <strong class="text-white">Connect Device to Local Network:</strong> Connect your eSSL or Hikvision terminal to your gym's Wi-Fi router / LAN switch. Assign a static IP address to the machine.
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">2</span>
+                            <div>
+                                <strong class="text-white">Register Device in Gym Console:</strong> Click "+ Register Biometric Device" above and obtain the generated <em>Device Secret Token</em>.
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">3</span>
+                            <div>
+                                <strong class="text-white">Configure Auto-Push Agent:</strong> In your eSSL desktop sync software (eTimeTrack / CAMS / Cloud Push utility), set the cloud push URL to <code class="text-teal-400">{{ url('/api/v1/devices/events') }}</code> and paste the Device Secret Token in HTTP Header <code class="text-amber-400">X-Device-Secret</code>. Members punching on the biometric terminal will be authenticated and marked present in real-time!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connected Hardware Devices Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">Registered Biometric Terminals ({{ $devices->count() }})</h4>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @forelse($devices as $device)
+                        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-all">
+                            <div>
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center font-bold text-sm">
+                                            @if($device->type === 'essl_desktop')
+                                                🖥️
+                                            @elseif(str_contains($device->type, 'turnstile'))
+                                                🚧
+                                            @elseif(str_contains($device->type, 'facial'))
+                                                📹
+                                            @elseif(str_contains($device->type, 'zkteco'))
+                                                ⚡
+                                            @elseif($device->type === 'rfid_reader')
+                                                💳
+                                            @else
+                                                📱
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-white text-sm">{{ $device->name }}</h4>
+                                            <span class="text-[11px] text-slate-400">
+                                                @if($device->type === 'essl_desktop')
+                                                    eSSL Biometric (Desktop Middleware)
+                                                @elseif($device->type === 'hikvision_facial')
+                                                    Hikvision Facial Terminal (ISAPI)
+                                                @elseif($device->type === 'hikvision_turnstile')
+                                                    Hikvision Turnstile Barrier Gate
+                                                @elseif($device->type === 'zkteco_biometric')
+                                                    ZKTeco / Realtime Biometric Push
+                                                @elseif($device->type === 'rfid_reader')
+                                                    RFID Card / NFC Scanner
+                                                @elseif($device->type === 'qr_scanner')
+                                                    Dynamic QR Code Scanner
+                                                @else
+                                                    {{ ucwords(str_replace('_', ' ', $device->type)) }}
+                                                @endif
+                                                • {{ $device->branch->name ?? 'Main Branch' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $device->status === 'ONLINE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20' }}">
+                                        ● {{ $device->status }}
+                                    </span>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs space-y-2 text-slate-300">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">Connection Mode:</span>
+                                        <span class="font-mono text-slate-200">
+                                            @if($device->ip_address)
+                                                {{ $device->ip_address }}:{{ $device->port }}
+                                            @else
+                                                Desktop Middleware Push
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">Direction:</span>
+                                        <span class="uppercase font-bold text-[11px] {{ $device->direction === 'in' ? 'text-emerald-400' : ($device->direction === 'out' ? 'text-rose-400' : 'text-amber-400') }}">
+                                            {{ $device->direction === 'both' ? 'Bi-Directional (Entry & Exit)' : ($device->direction === 'in' ? 'Entry Only' : 'Exit Only') }}
+                                        </span>
+                                    </div>
+                                    @if($device->serial_number)
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-500">Serial Number:</span>
+                                        <span class="font-mono text-slate-300 text-[11px]">{{ $device->serial_number }}</span>
+                                    </div>
+                                    @endif
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-800/60">
+                                        <span class="text-slate-500">Device Secret:</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-mono text-[10px] text-slate-400 truncate max-w-[140px]">{{ $device->device_secret }}</span>
+                                            <button type="button" @click="copyText('{{ $device->device_secret }}', 'dev_{{ $device->id }}')"
+                                                    class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition-colors" title="Copy Secret">
+                                                <span x-show="copiedToken !== 'dev_{{ $device->id }}'">Copy</span>
+                                                <span x-show="copiedToken === 'dev_{{ $device->id }}'" class="text-emerald-400 font-bold" x-cloak>✓</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
+                                <form action="{{ route('app.devices.test', $device->id) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all cursor-pointer">
+                                        Ping Test
+                                    </button>
+                                </form>
+                                <form action="{{ route('app.devices.delete', $device->id) }}" method="POST" onsubmit="return confirm('Remove biometric device {{ $device->name }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs transition-all cursor-pointer" title="Delete Device">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-2 p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-500 text-xs space-y-2">
+                            <p class="font-medium text-slate-400">No biometric hardware terminals registered yet.</p>
+                            <p>Click <strong class="text-teal-400 cursor-pointer" @click="showAddDeviceModal = true">+ Register Biometric Device</strong> to connect your eSSL fingerprint machines or Hikvision turnstiles.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Recent Biometric Access & Attendance Logs Table -->
+            <div class="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-sm">
+                <div class="p-5 border-b border-slate-800 bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Real-Time Access Control &amp; Biometric Punch Telemetry</h4>
+                        <p class="text-[11px] text-slate-400">Live feed of device punches, membership access decisions, and turnstile events</p>
+                    </div>
+                    <span class="text-[11px] text-slate-500 font-mono">Showing latest {{ $accessLogs->count() }} records</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="py-3 px-4">Event Time</th>
+                                <th class="py-3 px-4">Member / User</th>
+                                <th class="py-3 px-4">Device Terminal</th>
+                                <th class="py-3 px-4">Direction</th>
+                                <th class="py-3 px-4">Access Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                            @forelse($accessLogs as $log)
+                                <tr class="hover:bg-slate-800/30">
+                                    <td class="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
+                                        {{ $log->event_time ? $log->event_time->format('d M Y, h:i:s A') : '-' }}
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        @if($log->member)
+                                            <div class="font-bold text-white">{{ $log->member->full_name }}</div>
+                                            <div class="text-[10px] text-slate-400 font-mono">{{ $log->member->member_code }}</div>
+                                        @else
+                                            <span class="text-slate-400 font-medium">Guest / Unknown Credential</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3.5 px-4 text-slate-300">
+                                        {{ $log->device->name ?? 'Direct Biometric Sync' }}
+                                    </td>
+                                    <td class="py-3.5 px-4 uppercase font-semibold text-amber-400 text-[11px]">
+                                        {{ $log->event_type ?? 'PUNCH' }}
+                                    </td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $log->access_status === 'GRANTED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20' }}">
+                                            {{ $log->access_status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-500">No hardware access logs recorded yet. Punches will appear here in real time.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 8: EMAIL & SMTP SETTINGS                                              -->
+        <!-- ========================================================================= -->
+        @php
+            $smtpData = $tenantSettings['smtp'] ?? [];
+            $smtpEnabled = !empty($smtpData['enabled']) || !empty($smtpData['smtp_enabled']);
+        @endphp
+        <div x-show="tab === 'email_smtp'" x-cloak class="space-y-6" x-data="{
+            customSmtpEnabled: {{ $smtpEnabled ? 'true' : 'false' }},
+            showPassword: false
+        }">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main SMTP Config Form -->
+                <div class="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-white tracking-wide">Gym Outbound SMTP Configuration</h3>
+                                <p class="text-xs text-slate-400">Send transactional emails (member welcome, payment receipts, renewals) from your own custom domain email</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('app.settings.update') }}" method="POST" class="space-y-5 text-xs">
+                        @csrf
+                        <input type="hidden" name="active_tab" value="email_smtp">
+
+                        <!-- Toggle Custom SMTP -->
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-white mb-0.5">Enable Custom Gym SMTP Server</h4>
+                                <p class="text-[11px] text-slate-400">
+                                    When enabled, member notifications and receipts are sent using your own mail server. If disabled, platform default server is used.
+                                </p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="smtp_enabled" value="1" x-model="customSmtpEnabled" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </label>
+                        </div>
+
+                        <div x-show="customSmtpEnabled" x-transition class="space-y-4 pt-2">
+                            <!-- Host, Port, Encryption -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">SMTP Host *</label>
+                                    <input type="text" name="mail_host" value="{{ old('mail_host', $smtpData['mail_host'] ?? '') }}" placeholder="e.g. smtp.gmail.com"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none font-mono">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">SMTP Port *</label>
+                                    <input type="number" name="mail_port" value="{{ old('mail_port', $smtpData['mail_port'] ?? 587) }}" placeholder="587 / 465"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none font-mono">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Encryption Protocol *</label>
+                                    <select name="mail_encryption" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        <option value="tls" {{ ($smtpData['mail_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS (Port 587 - Recommended)</option>
+                                        <option value="ssl" {{ ($smtpData['mail_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL (Port 465)</option>
+                                        <option value="none" {{ ($smtpData['mail_encryption'] ?? '') === 'none' ? 'selected' : '' }}>None (Unencrypted)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Username & Password -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">SMTP Username / Email *</label>
+                                    <input type="text" name="mail_username" value="{{ old('mail_username', $smtpData['mail_username'] ?? '') }}" placeholder="e.g. notifications@yourgym.com"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-1.5">
+                                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">SMTP Password / App Password</label>
+                                        <button type="button" @click="showPassword = !showPassword" class="text-[10px] text-slate-400 hover:text-white" x-text="showPassword ? 'Hide' : 'Show'"></button>
+                                    </div>
+                                    <input :type="showPassword ? 'text' : 'password'" name="mail_password" value="{{ old('mail_password', $smtpData['mail_password'] ?? '') }}" placeholder="••••••••••••••••"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none font-mono">
+                                </div>
+                            </div>
+
+                            <!-- From Address & From Name -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">From Email Address *</label>
+                                    <input type="email" name="mail_from_address" value="{{ old('mail_from_address', $smtpData['mail_from_address'] ?? ($tenant->email ?? '')) }}" placeholder="e.g. contact@yourgym.com"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">From Sender Name *</label>
+                                    <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $smtpData['mail_from_name'] ?? ($tenant->name ?? '')) }}" placeholder="e.g. PowerFit Gym"
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4 border-t border-slate-800">
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 transition-all cursor-pointer">
+                                Save Gym SMTP Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Test Connection & Setup Guide Side Cards -->
+                <div class="space-y-6">
+                    <!-- Test Connection Card -->
+                    <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+                        <div class="border-b border-slate-800 pb-3">
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <span>🚀</span> Test Gym SMTP Mail
+                            </h4>
+                            <p class="text-[11px] text-slate-400">Send an instant test email to verify your mail server configuration and logo branding.</p>
+                        </div>
+
+                        <form action="{{ route('app.settings.email.test') }}" method="POST" class="space-y-4 text-xs">
+                            @csrf
+                            <div>
+                                <label class="block font-semibold text-slate-300 mb-1.5">Recipient Email Address</label>
+                                <input type="email" name="test_email" value="{{ auth()->user()->email }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                            </div>
+
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer border border-slate-700">
+                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                <span>Send Test Email</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Setup Guide Box -->
+                    <div class="p-5 rounded-3xl bg-slate-900/60 border border-slate-800/80 space-y-3">
+                        <h4 class="text-xs font-bold text-white flex items-center gap-2">
+                            <span>💡</span> Quick SMTP Setup Tips
+                        </h4>
+                        <ul class="text-[11px] text-slate-400 space-y-2 leading-relaxed">
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-indigo-400 font-bold">•</span>
+                                <span><strong>Gmail / Google Workspace:</strong> Host: <code class="text-indigo-300">smtp.gmail.com</code>, Port: <code class="text-indigo-300">587</code> (TLS). Generate a 16-character <em>App Password</em> from your Google Security page.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-indigo-400 font-bold">•</span>
+                                <span><strong>Custom Domain (Hostinger/cPanel):</strong> Host: <code class="text-indigo-300">smtp.hostinger.com</code> or <code class="text-indigo-300">mail.yourdomain.com</code>, Port: <code class="text-indigo-300">465</code> (SSL) or <code class="text-indigo-300">587</code> (TLS).</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-indigo-400 font-bold">•</span>
+                                <span><strong>Gym Logo in Emails:</strong> Upload your logo in the <em>Business Info</em> tab. It will automatically appear on all member welcome emails and invoice receipts.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
         <!-- MODAL 1: ADD NEW BRANCH                                                   -->
         <!-- ========================================================================= -->
         <div x-show="showAddBranchModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -838,6 +1309,106 @@
                         <button type="submit" 
                                 class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all cursor-pointer">
                             Update Branch
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL 3: REGISTER BIOMETRIC DEVICE                                        -->
+        <!-- ========================================================================= -->
+        <div x-show="showAddDeviceModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div @click.away="showAddDeviceModal = false" class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-100">
+                <div class="p-5 bg-teal-600/10 border-b border-teal-500/20 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-white">Register Biometric Device</h3>
+                            <p class="text-xs text-teal-300/80">Configure eSSL desktop agent, Hikvision terminal, or ZKTeco</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showAddDeviceModal = false" class="p-1.5 text-slate-400 hover:text-white rounded-lg cursor-pointer">✕</button>
+                </div>
+
+                <form action="{{ route('app.devices.store') }}" method="POST" class="p-6 space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Device Name *</label>
+                        <input type="text" name="name" required placeholder="e.g. Front Reception eSSL Fingerprint" 
+                               class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs focus:border-teal-500 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Device Type / Protocol *</label>
+                            <select name="type" required 
+                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-teal-500 focus:outline-none cursor-pointer">
+                                <option value="essl_desktop">eSSL Biometric (Desktop Middleware / LAN)</option>
+                                <option value="hikvision_facial">Hikvision Face Terminal (ISAPI)</option>
+                                <option value="hikvision_turnstile">Hikvision Turnstile Barrier Gate</option>
+                                <option value="zkteco_biometric">ZKTeco / Realtime Biometric Push</option>
+                                <option value="rfid_reader">RFID Card / NFC Reader</option>
+                                <option value="qr_scanner">Dynamic QR Scanner</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Hardware Model</label>
+                            <input type="text" name="model" placeholder="e.g. SilkBio-101 / DS-K1T341" 
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs focus:border-teal-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Branch Location *</label>
+                            <select name="branch_id" required 
+                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-teal-500 focus:outline-none cursor-pointer">
+                                @foreach($branches as $b)
+                                    <option value="{{ $b->id }}">{{ $b->name }} ({{ $b->code }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Access Direction *</label>
+                            <select name="direction" required 
+                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-teal-500 focus:outline-none cursor-pointer">
+                                <option value="in">Entry Only (Punch In)</option>
+                                <option value="out">Exit Only (Punch Out)</option>
+                                <option value="both">Both (Bi-Directional Entry/Exit)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">LAN IP Address (Optional)</label>
+                            <input type="text" name="ip_address" placeholder="192.168.1.201" 
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs font-mono focus:border-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Port</label>
+                            <input type="number" name="port" value="80" 
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs font-mono focus:border-teal-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Machine Serial / Identifier</label>
+                        <input type="text" name="serial_number" placeholder="e.g. ESSL-SN-9988123" 
+                               class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs font-mono focus:border-teal-500 focus:outline-none">
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+                        <button type="button" @click="showAddDeviceModal = false" 
+                                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow-lg shadow-teal-600/25 transition-all cursor-pointer">
+                            Register Device
                         </button>
                     </div>
                 </form>

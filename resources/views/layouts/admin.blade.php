@@ -153,6 +153,21 @@
                 Coupons & Discounts
             </a>
 
+            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Helpdesk & Support</div>
+
+            <a href="{{ route('admin.tickets.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.tickets*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <span>Support Tickets</span>
+                </div>
+                @php
+                    $pendingTicketsCount = \App\Models\SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress'])->count();
+                @endphp
+                @if($pendingTicketsCount > 0)
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-red-600 text-white animate-pulse">{{ $pendingTicketsCount }}</span>
+                @endif
+            </a>
+
             <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Administration</div>
 
             <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.users*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} transition-colors">
@@ -225,7 +240,8 @@
         @endif
 
         <main class="flex-1 p-6">
-            {{ $slot }}
+            {{ $slot ?? '' }}
+            @yield('content')
         </main>
     </div>
 

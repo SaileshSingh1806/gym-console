@@ -82,11 +82,11 @@
             </a>
             @endif
 
-            <!-- 7. Open Gate IoT -->
+            <!-- 7. Biometric & IoT Devices -->
             @if(auth()->user()->hasFeature('hikvision_iot') && auth()->user()->hasPermission('devices.view'))
-            <a href="{{ route('app.devices.index') }}" class="px-3.5 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-400 border border-teal-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
+            <a href="{{ route('app.settings.index', ['tab' => 'devices']) }}" class="px-3.5 py-2 rounded-xl bg-teal-500/15 hover:bg-teal-500/25 text-teal-400 border border-teal-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                <span>Open Gate</span>
+                <span>Biometric Devices</span>
             </a>
             @endif
 

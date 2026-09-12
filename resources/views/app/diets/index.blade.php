@@ -46,6 +46,11 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <button type="button" onclick="openAiDietModal()" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-600/25 flex items-center gap-2 transition-all cursor-pointer border border-purple-400/30">
+                    <span class="text-sm">✨</span>
+                    <span>AI Diet Generator</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-white/20 text-[9px] font-extrabold uppercase tracking-wider">AI AGENT</span>
+                </button>
                 <button type="button" onclick="openDietModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>Create Diet Plan</span>
@@ -859,5 +864,563 @@
 
             document.getElementById('dietPlanModal').classList.remove('hidden');
         }
+
+        // ==================== AI DIET GENERATOR MODAL SCRIPT ====================
+        @php
+            $membersDirectoryData = $members->map(function($m) {
+                return [
+                    'id' => $m->id,
+                    'name' => $m->full_name,
+                    'gender' => $m->gender ?? 'male',
+                    'age' => $m->dob ? $m->dob->age : 26,
+                    'phone' => $m->phone ?? '',
+                ];
+            })->values();
+        @endphp
+        const membersDirectory = {!! json_encode($membersDirectoryData) !!};
+
+        let currentAiDietResult = null;
+
+        function openAiDietModal() {
+            document.getElementById('aiDietForm').reset();
+            document.getElementById('aiDietFormView').classList.remove('hidden');
+            document.getElementById('aiDietLoadingView').classList.add('hidden');
+            document.getElementById('aiDietResultView').classList.add('hidden');
+            document.getElementById('aiDietModal').classList.remove('hidden');
+        }
+
+        function closeAiDietModal() {
+            document.getElementById('aiDietModal').classList.add('hidden');
+        }
+
+        function handleAiMemberSelect() {
+            const memberId = document.getElementById('aiMemberSelect').value;
+            if (!memberId) return;
+
+            const member = membersDirectory.find(m => m.id == memberId);
+            if (member) {
+                document.getElementById('aiInputName').value = member.name || '';
+                if (member.gender) {
+                    document.getElementById('aiInputGender').value = member.gender.toLowerCase();
+                }
+                if (member.age) {
+                    document.getElementById('aiInputAge').value = member.age;
+                }
+            }
+        }
+
+        async function submitAiDietGeneration(event) {
+            event.preventDefault();
+            
+            const memberId = document.getElementById('aiMemberSelect').value || null;
+            const name = document.getElementById('aiInputName').value || 'Gym Member';
+            const age = parseInt(document.getElementById('aiInputAge').value) || 25;
+            const gender = document.getElementById('aiInputGender').value || 'male';
+            const height = parseFloat(document.getElementById('aiInputHeight').value) || 172;
+            const weight = parseFloat(document.getElementById('aiInputWeight').value) || 70;
+            const goal = document.getElementById('aiInputGoal').value || 'muscle_gain';
+            const activityLevel = document.getElementById('aiInputActivity').value || 'moderately_active';
+            const dietPreference = document.getElementById('aiInputDietPref').value || 'vegetarian';
+            const mealsPerDay = parseInt(document.getElementById('aiInputMealsCount').value) || 4;
+            const workoutTime = document.getElementById('aiInputWorkoutTime').value || 'morning';
+            const foodPreferences = document.getElementById('aiInputFoodPref').value || '';
+            const foodsToAvoid = document.getElementById('aiInputFoodsAvoid').value || '';
+            const allergies = document.getElementById('aiInputAllergies').value || '';
+            const additionalNotes = document.getElementById('aiInputNotes').value || '';
+
+            // Switch to Loading View
+            document.getElementById('aiDietFormView').classList.add('hidden');
+            document.getElementById('aiDietLoadingView').classList.remove('hidden');
+            document.getElementById('aiDietResultView').classList.add('hidden');
+
+            const payload = {
+                member_id: memberId,
+                name: name,
+                age: age,
+                gender: gender,
+                height: height,
+                weight: weight,
+                goal: goal,
+                activity_level: activityLevel,
+                diet_preference: dietPreference,
+                meals_per_day: mealsPerDay,
+                workout_time: workoutTime,
+                food_preferences: foodPreferences,
+                foods_to_avoid: foodsToAvoid,
+                allergies: allergies,
+                additional_notes: additionalNotes,
+                _token: '{{ csrf_token() }}'
+            };
+
+            try {
+                const response = await fetch('{{ route('app.diets.generate-ai') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const resData = await response.json();
+
+                if (resData.success && resData.data) {
+                    currentAiDietResult = { ...resData.data, payload: payload };
+                    renderAiDietResult(resData.data);
+                    document.getElementById('aiDietLoadingView').classList.add('hidden');
+                    document.getElementById('aiDietResultView').classList.remove('hidden');
+                } else {
+                    alert('Could not generate diet: ' + (resData.message || 'Unknown error occurred.'));
+                    document.getElementById('aiDietLoadingView').classList.add('hidden');
+                    document.getElementById('aiDietFormView').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred during AI plan generation. Please try again.');
+                document.getElementById('aiDietLoadingView').classList.add('hidden');
+                document.getElementById('aiDietFormView').classList.remove('hidden');
+            }
+        }
+
+        function renderAiDietResult(data) {
+            document.getElementById('aiResPlanTitle').innerText = data.plan_title || 'Personalized AI Diet Plan';
+            document.getElementById('aiResCalories').innerText = data.daily_totals.calories + ' kcal';
+            document.getElementById('aiResProtein').innerText = data.daily_totals.protein_grams + 'g';
+            document.getElementById('aiResCarbs').innerText = data.daily_totals.carbs_grams + 'g';
+            document.getElementById('aiResFat').innerText = data.daily_totals.fat_grams + 'g';
+            document.getElementById('aiResFiber').innerText = data.daily_totals.fiber_grams + 'g';
+            document.getElementById('aiResWater').innerText = data.daily_totals.water_liters + ' L';
+            
+            document.getElementById('aiResBmr').innerText = 'BMR: ' + data.bmr_calculated + ' kcal';
+            document.getElementById('aiResTdee').innerText = 'TDEE: ' + data.tdee_calculated + ' kcal';
+
+            // Meals
+            const mealsContainer = document.getElementById('aiResMealsList');
+            mealsContainer.innerHTML = '';
+
+            data.meals.forEach((meal, idx) => {
+                const mealHtml = `
+                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-mono text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+                                <h4 class="text-xs font-black text-white">${meal.meal_name}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">⏰ ${meal.recommended_time}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-[10px] font-bold">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-mono">${meal.target_macros.calories} kcal</span>
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 font-mono">P: ${meal.target_macros.protein_g}g</span>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono">C: ${meal.target_macros.carbs_g}g</span>
+                                <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 font-mono">F: ${meal.target_macros.fat_g}g</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-200 whitespace-pre-line leading-relaxed font-sans pl-2 border-l-2 border-indigo-500/40">
+                            ${meal.items_description}
+                        </div>
+                        ${meal.alternatives ? `
+                            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/60 text-[11px] text-slate-400">
+                                <span class="text-indigo-400 font-bold">🔄 Alternative Option:</span>
+                                <p class="mt-0.5 text-slate-300 whitespace-pre-line">${meal.alternatives}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                mealsContainer.insertAdjacentHTML('beforeend', mealHtml);
+            });
+
+            // Supplements
+            const suppContainer = document.getElementById('aiResSupplementsList');
+            suppContainer.innerHTML = '';
+            data.optional_supplements.forEach(s => {
+                suppContainer.insertAdjacentHTML('beforeend', `
+                    <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-white">${s.name}</span>
+                            <span class="px-2 py-0.2 rounded-full bg-indigo-500/10 text-indigo-400 text-[9px] font-bold">OPTIONAL</span>
+                        </div>
+                        <p class="text-[11px] text-indigo-300 font-mono mt-1">${s.dosage}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${s.purpose}</p>
+                    </div>
+                `);
+            });
+
+            // Guidelines
+            const guidelinesContainer = document.getElementById('aiResGuidelinesList');
+            guidelinesContainer.innerHTML = '';
+            data.guidelines.forEach(g => {
+                guidelinesContainer.insertAdjacentHTML('beforeend', `<li class="flex items-start gap-2"><span class="text-emerald-400">✓</span><span>${g}</span></li>`);
+            });
+
+            document.getElementById('aiResDisclaimer').innerText = data.medical_disclaimer;
+        }
+
+        async function saveCurrentAiDietPlan() {
+            if (!currentAiDietResult || !currentAiDietResult.payload) return;
+
+            const btn = document.getElementById('aiBtnSavePlan');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span>Saving...</span>`;
+
+            try {
+                const payload = { ...currentAiDietResult.payload, auto_save: true };
+                const response = await fetch('{{ route('app.diets.generate-ai') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    btn.innerHTML = `<span>✓ Plan Saved! Reloading...</span>`;
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                } else {
+                    alert('Error saving plan: ' + (resData.message || 'Please try again.'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Could not save plan.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function copyAiDietWhatsAppText() {
+            if (!currentAiDietResult) return;
+
+            const d = currentAiDietResult;
+            let text = `🥗 *${d.plan_title}*\n`;
+            text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+            text += `🔥 *Daily Calorie Target:* ${d.daily_totals.calories} kcal\n`;
+            text += `💪 *Protein:* ${d.daily_totals.protein_grams}g | 🍚 *Carbs:* ${d.daily_totals.carbs_grams}g | 🥑 *Fats:* ${d.daily_totals.fat_grams}g\n`;
+            text += `💧 *Hydration Goal:* ${d.daily_totals.water_liters} Litres / day\n\n`;
+            text += `📋 *DAILY MEAL REGIME:*\n`;
+            
+            d.meals.forEach((m, idx) => {
+                text += `\n*${idx + 1}. ${m.meal_name}* (⏰ ${m.recommended_time}) [${m.target_macros.calories} kcal]\n`;
+                text += `${m.items_description}\n`;
+                if (m.alternatives) {
+                    text += `_🔄 Alternative: ${m.alternatives.replace(/\n/g, ' ')}_\n`;
+                }
+            });
+
+            text += `\n━━━━━━━━━━━━━━━━━━━━━\n`;
+            text += `💊 *OPTIONAL SUPPLEMENTS:*\n`;
+            d.optional_supplements.forEach(s => {
+                text += `• *${s.name}:* ${s.dosage} (${s.purpose})\n`;
+            });
+
+            text += `\n📌 *GUIDELINES:*\n`;
+            d.guidelines.forEach(g => {
+                text += `• ${g}\n`;
+            });
+
+            text += `\n_⚠️ Note: This diet is designed for general gym fitness goals._`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.getElementById('aiBtnCopyText');
+                copyBtn.innerHTML = `<span>✓ Copied to Clipboard!</span>`;
+                setTimeout(() => {
+                    copyBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg><span>Copy WhatsApp Text</span>`;
+                }, 2000);
+            });
+        }
     </script>
+
+    <!-- ==================== AI DIET GENERATOR MODAL ==================== -->
+    <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden max-h-[92vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30">
+                        ✨
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-black text-white tracking-tight">AI Personalized Diet Planner</h3>
+                        </div>
+                        <p class="text-xs text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+
+                <!-- 1. FORM INPUT VIEW -->
+                <div id="aiDietFormView" class="space-y-6">
+                    <form id="aiDietForm" onsubmit="submitAiDietGeneration(event)" class="space-y-5">
+                        
+                        <!-- Member Quick Select -->
+                        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-300">👤 Select Existing Member (Optional):</span>
+                            </div>
+                            <div class="w-full sm:w-72">
+                                <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Manual Entry / Custom Member --</option>
+                                    @foreach($members as $m)
+                                        <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No Phone' }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 1. Personal & Body Metrics -->
+                        <div class="space-y-3">
+                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>1. Member Profile & Body Metrics</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name *</label>
+                                    <input type="text" id="aiInputName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Age *</label>
+                                    <input type="number" id="aiInputAge" required value="26" min="12" max="90" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gender *</label>
+                                    <select id="aiInputGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Height (cm) *</label>
+                                    <input type="number" id="aiInputHeight" required value="172" min="100" max="250" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Weight (kg) *</label>
+                                    <input type="number" id="aiInputWeight" required value="72" min="30" max="250" step="0.5" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Goals & Training Routine -->
+                        <div class="space-y-3 pt-2 border-t border-slate-800/80">
+                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>2. Fitness Goals & Training Schedule</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fitness Goal *</label>
+                                    <select id="aiInputGoal" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="muscle_gain">Muscle Gain & Hypertrophy</option>
+                                        <option value="fat_loss">Fat Loss & Leaning</option>
+                                        <option value="weight_loss">Weight Loss</option>
+                                        <option value="weight_gain">Weight Gain (Bulk)</option>
+                                        <option value="maintenance">Maintenance</option>
+                                        <option value="general_fitness">General Fitness</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Activity Level *</label>
+                                    <select id="aiInputActivity" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="moderately_active">Moderately Active (Gym 3-5 days)</option>
+                                        <option value="very_active">Very Active (Gym 6-7 days)</option>
+                                        <option value="lightly_active">Lightly Active (Gym 1-3 days)</option>
+                                        <option value="sedentary">Sedentary (Desk job / minimal)</option>
+                                        <option value="extremely_active">Extremely Active (2x daily training)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Workout Timing *</label>
+                                    <select id="aiInputWorkoutTime" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="morning">Morning (08:00 AM - 11:00 AM)</option>
+                                        <option value="evening">Evening (05:00 PM - 08:00 PM)</option>
+                                        <option value="early_morning">Early Morning (06:00 AM - 08:00 AM)</option>
+                                        <option value="afternoon">Afternoon (12:00 PM - 03:00 PM)</option>
+                                        <option value="night">Night (08:00 PM - 10:00 PM)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Meals Per Day *</label>
+                                    <select id="aiInputMealsCount" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="4">4 Meals / Day (Standard)</option>
+                                        <option value="5">5 Meals / Day (Optimal)</option>
+                                        <option value="3">3 Meals / Day (Compact)</option>
+                                        <option value="6">6 Meals / Day (Frequent)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Diet Preferences & Dietary Restrictions -->
+                        <div class="space-y-3 pt-2 border-t border-slate-800/80">
+                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>3. Dietary Preferences & Restrictions</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Diet Preference *</label>
+                                    <select id="aiInputDietPref" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                        <option value="vegetarian">Vegetarian (Lacto / High-Protein)</option>
+                                        <option value="non_vegetarian">Non-Vegetarian (Eggs, Chicken, Fish)</option>
+                                        <option value="eggetarian">Eggetarian (Eggs + Veg Dairy)</option>
+                                        <option value="vegan">Vegan (100% Plant-Based)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Food Preferences</label>
+                                    <input type="text" id="aiInputFoodPref" placeholder="e.g. North Indian, Oats, Paneer, Rice" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Foods to Avoid</label>
+                                    <input type="text" id="aiInputFoodsAvoid" placeholder="e.g. Deep fried, Sugary snacks, Soya" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Allergies</label>
+                                    <input type="text" id="aiInputAllergies" placeholder="e.g. Peanuts, Gluten, Dairy (or None)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Additional Notes / Medical Concerns</label>
+                                <input type="text" id="aiInputNotes" placeholder="e.g. Desk job, prefers budget-friendly home cooking, takes morning coffee" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Action Submit -->
+                        <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+                            <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                                <span>✨ Generate AI Diet Plan</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. LOADING STATE VIEW -->
+                <div id="aiDietLoadingView" class="hidden py-16 flex flex-col items-center justify-center text-center space-y-4">
+                    <div class="relative w-16 h-16">
+                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 animate-spin opacity-75 blur-sm"></div>
+                        <div class="relative w-16 h-16 rounded-full bg-slate-900 border border-purple-500/40 flex items-center justify-center text-2xl">
+                            ✨
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-extrabold text-white">Synthesizing Personalized Indian Diet Plan...</h4>
+                        <p class="text-xs text-slate-400">Calculating BMR, optimizing macronutrient ratios & structuring timed Indian meals.</p>
+                    </div>
+                </div>
+
+                <!-- 3. AI RESULTS VIEW -->
+                <div id="aiDietResultView" class="hidden space-y-5">
+                    
+                    <!-- Result Header Banner -->
+                    <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-slate-900 border border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
+                                <h3 id="aiResPlanTitle" class="text-base font-black text-white tracking-tight"></h3>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                                <span id="aiResBmr" class="font-mono"></span>
+                                <span>•</span>
+                                <span id="aiResTdee" class="font-mono"></span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="aiBtnCopyText" onclick="copyAiDietWhatsAppText()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700/80 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                <span>Copy WhatsApp Text</span>
+                            </button>
+                            <button type="button" id="aiBtnSavePlan" onclick="saveCurrentAiDietPlan()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 flex items-center gap-1.5 transition-all cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                <span>Save to Member Plans</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Macro Target Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Calories</span>
+                            <span id="aiResCalories" class="text-sm font-black text-amber-400 font-mono mt-0.5 block"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Protein</span>
+                            <span id="aiResProtein" class="text-sm font-black text-indigo-400 font-mono mt-0.5 block"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Carbohydrates</span>
+                            <span id="aiResCarbs" class="text-sm font-black text-emerald-400 font-mono mt-0.5 block"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Fats</span>
+                            <span id="aiResFat" class="text-sm font-black text-rose-400 font-mono mt-0.5 block"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Fiber</span>
+                            <span id="aiResFiber" class="text-sm font-black text-teal-400 font-mono mt-0.5 block"></span>
+                        </div>
+                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Hydration</span>
+                            <span id="aiResWater" class="text-sm font-black text-cyan-400 font-mono mt-0.5 block"></span>
+                        </div>
+                    </div>
+
+                    <!-- Daily Meal Schedule -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                            <span>🍽️ Scheduled Indian Meals &amp; Portion Breakdown</span>
+                        </h4>
+                        <div id="aiResMealsList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Supplements & Guidelines -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+                            <h4 class="text-xs font-black text-white uppercase tracking-wider">💊 Optional Training Supplements</h4>
+                            <div id="aiResSupplementsList" class="space-y-2"></div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+                            <h4 class="text-xs font-black text-white uppercase tracking-wider">📌 Lifestyle &amp; Cooking Guidelines</h4>
+                            <ul id="aiResGuidelinesList" class="space-y-2 text-xs text-slate-300"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Disclaimer -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 text-[11px] leading-relaxed flex items-start gap-2.5">
+                        <span class="text-amber-400 text-sm shrink-0">⚠️</span>
+                        <p id="aiResDisclaimer"></p>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+                        <button type="button" onclick="document.getElementById('aiDietResultView').classList.add('hidden'); document.getElementById('aiDietFormView').classList.remove('hidden');" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5">
+                            <span>&larr; Adjust Parameters</span>
+                        </button>
+                        <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold transition-colors cursor-pointer">
+                            Close
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </x-app-layout>

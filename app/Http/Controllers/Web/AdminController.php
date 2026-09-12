@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\TestDiagnosticMail;
 use App\Models\ActivityLog;
 use App\Models\Coupon;
 use App\Models\Feature;
@@ -12,10 +13,12 @@ use App\Models\PlatformInvoice;
 use App\Models\Setting;
 use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
+use App\Models\SupportTicket;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
+use App\Services\SupportTicketService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
 use Carbon\Carbon;
@@ -24,6 +27,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -882,9 +887,16 @@ class AdminController extends Controller
             'test_email' => 'required|email',
         ]);
 
-        ActivityLog::log('test_email_sent', "Sent test verification email to {$request->test_email}");
+        try {
+            Mail::to($request->test_email)->send(new TestDiagnosticMail($request->test_email));
+            ActivityLog::log('test_email_sent', "Sent test verification email to {$request->test_email}");
 
-        return back()->with('success', "Test email successfully dispatched to {$request->test_email}!");
+            return back()->with('success', "Test email successfully dispatched to {$request->test_email}! Check your inbox (or storage/logs/laravel.log if using log driver).");
+        } catch (\Throwable $e) {
+            Log::error("Failed to send test email to {$request->test_email}: ".$e->getMessage());
+
+            return back()->with('error', 'Could not send test email: '.$e->getMessage());
+        }
     }
 
     public function updatePaymentSettings(Request $request): RedirectResponse
@@ -941,5 +953,154 @@ class AdminController extends Controller
         ActivityLog::log('seo_settings_updated', 'Updated site SEO meta tags, OpenGraph & Analytics scripts');
 
         return back()->with('success', 'Site SEO & Analytics configuration updated successfully!');
+    }
+
+    /**
+     * Display all support tickets across all gym tenants for Super Admin.
+     */
+    public function supportTickets(Request $request): View
+    {
+        TenantContext::setBypass(true);
+
+        $query = SupportTicket::withoutGlobalScopes()
+            ->with(['tenant', 'user', 'lastReplyBy', 'latestReply']);
+
+        if ($status = $request->get('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($priority = $request->get('priority')) {
+            if ($priority !== 'all') {
+                $query->where('priority', $priority);
+            }
+        }
+
+        if ($tenantId = $request->get('tenant_id')) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhereHas('tenant', function ($tq) use ($search) {
+                        $tq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $tickets = $query->latest('last_reply_at')->latest('id')->paginate(20);
+
+        $counts = [
+            'total' => SupportTicket::withoutGlobalScopes()->count(),
+            'open' => SupportTicket::withoutGlobalScopes()->where('status', 'open')->count(),
+            'in_progress' => SupportTicket::withoutGlobalScopes()->where('status', 'in_progress')->count(),
+            'answered' => SupportTicket::withoutGlobalScopes()->where('status', 'answered')->count(),
+            'resolved' => SupportTicket::withoutGlobalScopes()->whereIn('status', ['resolved', 'closed'])->count(),
+            'urgent' => SupportTicket::withoutGlobalScopes()->where('priority', 'urgent')->whereNotIn('status', ['resolved', 'closed'])->count(),
+        ];
+
+        $gyms = Tenant::orderBy('name')->get();
+
+        return view('admin.tickets.index', compact('tickets', 'counts', 'gyms'));
+    }
+
+    /**
+     * Show ticket details and thread for Super Admin.
+     */
+    public function showSupportTicket(int $id): View
+    {
+        TenantContext::setBypass(true);
+
+        $ticket = SupportTicket::withoutGlobalScopes()
+            ->with(['tenant.activeSubscription.plan', 'user', 'replies.user'])
+            ->findOrFail($id);
+
+        return view('admin.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Super Admin reply to a support ticket.
+     */
+    public function replySupportTicket(Request $request, int $id, SupportTicketService $ticketService): RedirectResponse
+    {
+        TenantContext::setBypass(true);
+
+        $ticket = SupportTicket::withoutGlobalScopes()->findOrFail($id);
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'message' => 'required|string|max:5000',
+            'status' => 'nullable|in:open,in_progress,answered,resolved,closed',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf,doc,docx,zip|max:5120',
+        ]);
+
+        $ticketService->replyTicket(
+            $ticket,
+            $user,
+            $validated['message'],
+            $request->file('attachment'),
+            true,
+            $validated['status'] ?? 'answered'
+        );
+
+        return back()->with('success', 'Reply posted and email update sent to the gym owner!');
+    }
+
+    /**
+     * Update support ticket status/priority.
+     */
+    public function updateTicketStatus(Request $request, int $id): RedirectResponse
+    {
+        TenantContext::setBypass(true);
+
+        $ticket = SupportTicket::withoutGlobalScopes()->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:open,in_progress,answered,resolved,closed',
+            'priority' => 'nullable|in:low,medium,high,urgent',
+        ]);
+
+        $updateData = ['status' => $validated['status']];
+
+        if (! empty($validated['priority'])) {
+            $updateData['priority'] = $validated['priority'];
+        }
+
+        if (in_array($validated['status'], ['resolved', 'closed'])) {
+            $updateData['resolved_at'] = now();
+        } else {
+            $updateData['resolved_at'] = null;
+        }
+
+        $ticket->update($updateData);
+
+        ActivityLog::log('support_ticket_status_updated', "Updated ticket #{$ticket->ticket_number} status to {$validated['status']}", $ticket);
+
+        return back()->with('success', "Ticket status updated to '{$validated['status']}' successfully!");
+    }
+
+    /**
+     * Delete a support ticket (Super Admin only).
+     */
+    public function deleteSupportTicket(int $id): RedirectResponse
+    {
+        TenantContext::setBypass(true);
+
+        $ticket = SupportTicket::withoutGlobalScopes()->findOrFail($id);
+        $number = $ticket->ticket_number;
+
+        $ticket->replies()->delete();
+        $ticket->delete();
+
+        ActivityLog::log('support_ticket_deleted', "Deleted support ticket #{$number}");
+
+        return redirect()->route('admin.tickets.index')->with('success', "Support ticket #{$number} deleted successfully.");
     }
 }

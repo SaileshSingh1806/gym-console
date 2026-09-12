@@ -279,8 +279,7 @@
             @php
                 $canBiz = ($user->hasPermission('crm.view') && $user->hasFeature('crm_leads'))
                     || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.manage']) && $user->hasFeature('reports_finance'))
-                    || ($user->hasPermission('inventory.view') && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']))
-                    || ($user->hasPermission('devices.view') && $user->hasFeature('hikvision_iot'));
+                    || ($user->hasPermission('inventory.view') && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
             @endphp
 
             @if($canBiz)
@@ -392,17 +391,6 @@
                 <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
             @endif
-
-            <!-- Devices IoT -->
-            @if($user->hasPermission('devices.view') && $user->hasFeature('hikvision_iot'))
-            <a href="{{ route('app.devices.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.devices.*') ? 'bg-indigo-600/15 text-indigo-400 font-bold border border-indigo-500/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                    <span>HIKVISION IOT</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
             @endif
 
             @php
@@ -459,6 +447,15 @@
                 <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
             @endif
+
+            <!-- Help & Support -->
+            <a href="{{ route('app.support.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.support.*') ? 'bg-indigo-600/15 text-indigo-400 font-bold border border-indigo-500/20' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <span>HELP & SUPPORT</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
 
             <!-- Gym Settings -->
             @if($user->hasPermission('settings.manage'))

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\TenantSubscriptionInvoiceMail;
 use App\Models\ActivityLog;
 use App\Models\Coupon;
 use App\Models\Plan;
@@ -15,6 +16,8 @@ use App\Services\Payment\SaaSPaymentGatewayInterface;
 use App\Services\Payment\StripePaymentAdapter;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class SubscriptionService
@@ -140,6 +143,21 @@ class SubscriptionService
 
             $currencySymbol = $tenant->currency_symbol ?? '₹';
             ActivityLog::log('subscription_activated', "Activated {$plan->name} ({$billingCycle}) subscription for {$currencySymbol}{$amount}".($coupon ? " (Coupon: {$coupon->code} saved {$currencySymbol}{$discountAmount})" : ''), $subscription);
+
+            try {
+                $ownerEmail = $tenant->email ?? $tenant->users()->whereIn('role', ['gym_owner', 'admin'])->first()?->email;
+                if ($ownerEmail) {
+                    Mail::to($ownerEmail)->send(new TenantSubscriptionInvoiceMail(
+                        $tenant,
+                        $plan,
+                        $billingCycle,
+                        $transactionId,
+                        (float) $amount
+                    ));
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch subscription invoice email for tenant {$tenant->name}: ".$e->getMessage());
+            }
 
             return $subscription;
         });

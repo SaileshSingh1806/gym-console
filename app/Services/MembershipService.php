@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\MemberWelcomeMail;
 use App\Models\ActivityLog;
 use App\Models\Member;
 use App\Models\Membership;
@@ -46,6 +47,10 @@ class MembershipService
             ]);
 
             ActivityLog::log('member_created', "Registered new member {$member->full_name} ({$member->member_code})", $member);
+
+            if (! empty($member->email)) {
+                TenantMailService::send($tenant, $member->email, new MemberWelcomeMail($tenant, $member));
+            }
 
             return $member;
         });
