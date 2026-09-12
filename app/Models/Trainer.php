@@ -23,13 +23,23 @@ class Trainer extends Model
         'email',
         'phone',
         'specialization',
+        'certification',
         'hourly_rate',
+        'salary',
+        'salary_type',
+        'salary_pay_day',
+        'joining_date',
         'status',
+        'is_featured',
         'bio',
+        'photo_path',
     ];
 
     protected $casts = [
         'hourly_rate' => 'decimal:2',
+        'salary' => 'decimal:2',
+        'is_featured' => 'boolean',
+        'joining_date' => 'date',
     ];
 
     public function getFullNameAttribute(): string
@@ -55,5 +65,20 @@ class Trainer extends Model
     public function dietPlans(): HasMany
     {
         return $this->hasMany(DietPlan::class);
+    }
+
+    public function memberPtPackages(): HasMany
+    {
+        return $this->hasMany(MemberPtPackage::class);
+    }
+
+    public function assignedMembers(): HasMany
+    {
+        return $this->hasMany(Member::class);
+    }
+
+    public function ptSessions(): HasMany
+    {
+        return $this->hasMany(PtSession::class);
     }
 }

@@ -7,6 +7,8 @@ use App\Models\AccessLog;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
 use App\Models\Branch;
+use App\Models\ClassBooking;
+use App\Models\ClassSchedule;
 use App\Models\Coupon;
 use App\Models\Device;
 use App\Models\DietPlan;
@@ -17,9 +19,12 @@ use App\Models\InventoryItem;
 use App\Models\Lead;
 use App\Models\Member;
 use App\Models\MemberPayment;
+use App\Models\MemberPtPackage;
 use App\Models\Membership;
 use App\Models\MembershipPlan;
 use App\Models\Plan;
+use App\Models\PtPlan;
+use App\Models\PtSession;
 use App\Models\Setting;
 use App\Models\Trainer;
 use App\Models\User;
@@ -1181,37 +1186,939 @@ class AppController extends Controller
         return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
     }
 
-    public function trainers(): View
+    public function personalTraining(Request $request): View
     {
-        $trainers = Trainer::with('branch')->latest()->paginate(15);
-        $branches = Branch::all();
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = TenantContext::getBranch();
+        $tab = $request->get('tab', 'packages');
 
-        return view('app.trainers.index', compact('trainers', 'branches'));
+        // Top KPI Metrics for Packages
+        $activePackagesCount = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->where('end_date', '>=', now()->toDateString())
+            ->count();
+
+        $expiring7DaysCount = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
+            ->count();
+
+        $revenueMtd = (float) MemberPtPackage::where('tenant_id', $tenant->id)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->sum('paid_amount');
+
+        // Filtered Packages Query
+        $packagesQuery = MemberPtPackage::with(['member.branch', 'trainer', 'ptPlan'])
+            ->where('tenant_id', $tenant->id)
+            ->latest('id');
+
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $packagesQuery->where(function ($q) use ($s) {
+                $q->where('package_name', 'like', "%{$s}%")
+                    ->orWhereHas('member', function ($mq) use ($s) {
+                        $mq->where('first_name', 'like', "%{$s}%")
+                            ->orWhere('last_name', 'like', "%{$s}%")
+                            ->orWhere('phone', 'like', "%{$s}%")
+                            ->orWhere('member_code', 'like', "%{$s}%");
+                    })
+                    ->orWhereHas('trainer', function ($tq) use ($s) {
+                        $tq->where('first_name', 'like', "%{$s}%")
+                            ->orWhere('last_name', 'like', "%{$s}%");
+                    });
+            });
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $status = strtoupper($request->status);
+            if ($status === 'EXPIRING') {
+                $packagesQuery->where('status', 'ACTIVE')
+                    ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()]);
+            } else {
+                $packagesQuery->where('status', $status);
+            }
+        }
+
+        if ($request->filled('trainer_id') && $request->trainer_id !== 'all') {
+            $packagesQuery->where('trainer_id', $request->trainer_id);
+        }
+
+        if ($request->boolean('only_expiring')) {
+            $packagesQuery->where('status', 'ACTIVE')
+                ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()]);
+        }
+
+        $packages = $packagesQuery->paginate(15, ['*'], 'packages_page')->withQueryString();
+
+        // PT Sessions KPI & Data (Matching Image 3)
+        $todayScheduledCount = PtSession::where('tenant_id', $tenant->id)
+            ->whereDate('session_date', now()->toDateString())
+            ->where('status', 'SCHEDULED')
+            ->count();
+
+        $todayCompletedCount = PtSession::where('tenant_id', $tenant->id)
+            ->whereDate('session_date', now()->toDateString())
+            ->where('status', 'COMPLETED')
+            ->count();
+
+        $thisMonthSessionsCount = PtSession::where('tenant_id', $tenant->id)
+            ->whereBetween('session_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->where('status', 'COMPLETED')
+            ->count();
+
+        $noShowsMonthCount = PtSession::where('tenant_id', $tenant->id)
+            ->whereBetween('session_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->where('status', 'NO_SHOW')
+            ->count();
+
+        $upcomingSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'SCHEDULED')
+            ->whereDate('session_date', '>=', now()->toDateString())
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->take(10)
+            ->get();
+
+        $recentCompletedSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'COMPLETED')
+            ->orderByDesc('completed_at')
+            ->orderByDesc('session_date')
+            ->take(10)
+            ->get();
+
+        $allSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+            ->where('tenant_id', $tenant->id)
+            ->latest('session_date')
+            ->latest('start_time')
+            ->paginate(15, ['*'], 'sessions_page')
+            ->withQueryString();
+
+        // Plans Query
+        $plans = PtPlan::where('tenant_id', $tenant->id)
+            ->withCount('memberPtPackages')
+            ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Active Trainers & Members for Dropdowns & Modals
+        $trainers = Trainer::where('tenant_id', $tenant->id)
+            ->with(['assignedMembers'])
+            ->withCount([
+                'assignedMembers',
+                'ptSessions as today_sessions_count' => function ($q) {
+                    $q->whereDate('session_date', now()->toDateString());
+                },
+            ])
+            ->orderBy('first_name')
+            ->get();
+
+        $members = Member::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->with('branch')
+            ->orderBy('first_name')
+            ->get();
+
+        $activeMemberPackages = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->where('end_date', '>=', now()->toDateString())
+            ->with(['member', 'trainer'])
+            ->get();
+
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+
+        return view('app.personal-training.index', compact(
+            'tenant',
+            'tab',
+            'activePackagesCount',
+            'expiring7DaysCount',
+            'revenueMtd',
+            'todayScheduledCount',
+            'todayCompletedCount',
+            'thisMonthSessionsCount',
+            'noShowsMonthCount',
+            'upcomingSessions',
+            'recentCompletedSessions',
+            'allSessions',
+            'packages',
+            'plans',
+            'trainers',
+            'members',
+            'activeMemberPackages',
+            'branches'
+        ));
+    }
+
+    public function storePtPlan(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'sort_order' => 'nullable|integer',
+            'description' => 'nullable|string|max:1000',
+            'total_sessions' => 'required|integer|min:1',
+            'validity_days' => 'required|integer|min:1',
+            'default_price' => 'required|numeric|min:0',
+            'trainer_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'sac_code' => 'nullable|string|max:20',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $validated['tenant_id'] = $tenant->id;
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
+        $validated['sac_code'] = ! empty($validated['sac_code']) ? trim($validated['sac_code']) : null;
+        $validated['gst_rate'] = ! empty($validated['gst_rate']) ? (float) $validated['gst_rate'] : 0.00;
+        $validated['price_includes_gst'] = $request->has('price_includes_gst') && $validated['gst_rate'] > 0;
+        $validated['is_active'] = $request->has('is_active');
+        $validated['includes_gate_pass'] = $request->has('includes_gate_pass');
+        $validated['show_on_mobile_app'] = $request->has('show_on_mobile_app');
+
+        $plan = PtPlan::create($validated);
+
+        ActivityLog::log('pt_plan_created', "Created PT Plan '{$plan->name}' with {$plan->total_sessions} sessions", $plan);
+
+        return redirect()->route('app.pt.index', ['tab' => 'plans'])->with('success', "PT Plan '{$plan->name}' created successfully!");
+    }
+
+    public function updatePtPlan(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $plan = PtPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'sort_order' => 'nullable|integer',
+            'description' => 'nullable|string|max:1000',
+            'total_sessions' => 'required|integer|min:1',
+            'validity_days' => 'required|integer|min:1',
+            'default_price' => 'required|numeric|min:0',
+            'trainer_commission_percent' => 'nullable|numeric|min:0|max:100',
+            'sac_code' => 'nullable|string|max:20',
+            'gst_rate' => 'nullable|numeric|min:0|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'branch_id' => 'nullable|exists:branches,id',
+        ]);
+
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
+        $validated['sac_code'] = ! empty($validated['sac_code']) ? trim($validated['sac_code']) : null;
+        $validated['gst_rate'] = ! empty($validated['gst_rate']) ? (float) $validated['gst_rate'] : 0.00;
+        $validated['price_includes_gst'] = $request->has('price_includes_gst') && $validated['gst_rate'] > 0;
+        $validated['is_active'] = $request->has('is_active');
+        $validated['includes_gate_pass'] = $request->has('includes_gate_pass');
+        $validated['show_on_mobile_app'] = $request->has('show_on_mobile_app');
+
+        $plan->update($validated);
+
+        ActivityLog::log('pt_plan_updated', "Updated PT Plan '{$plan->name}'", $plan);
+
+        return redirect()->route('app.pt.index', ['tab' => 'plans'])->with('success', "PT Plan '{$plan->name}' updated successfully!");
+    }
+
+    public function togglePtPlan(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $plan = PtPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $plan->update(['is_active' => ! $plan->is_active]);
+        $statusText = $plan->is_active ? 'activated' : 'deactivated';
+
+        ActivityLog::log('pt_plan_toggled', "PT Plan '{$plan->name}' was {$statusText}", $plan);
+
+        return redirect()->route('app.pt.index', ['tab' => 'plans'])->with('success', "PT Plan '{$plan->name}' {$statusText}.");
+    }
+
+    public function deletePtPlan(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $plan = PtPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($plan->memberPtPackages()->where('status', 'ACTIVE')->exists()) {
+            return redirect()->route('app.pt.index', ['tab' => 'plans'])->with('error', "Cannot delete PT Plan '{$plan->name}' because it is assigned to active member packages.");
+        }
+
+        $name = $plan->name;
+        $plan->delete();
+
+        ActivityLog::log('pt_plan_deleted', "Deleted PT Plan '{$name}'");
+
+        return redirect()->route('app.pt.index', ['tab' => 'plans'])->with('success', "PT Plan '{$name}' deleted successfully.");
+    }
+
+    public function assignPtPackage(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'pt_plan_id' => 'nullable|exists:pt_plans,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'package_name' => 'required|string|max:150',
+            'total_sessions' => 'required|integer|min:1',
+            'validity_days' => 'required|integer|min:1',
+            'start_date' => 'required|date',
+            'price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
+            'transaction_reference' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($validated['member_id']);
+        $startDate = Carbon::parse($validated['start_date']);
+        $validityDays = (int) $validated['validity_days'];
+        $endDate = $startDate->copy()->addDays($validityDays);
+
+        $price = (float) $validated['price'];
+        $discount = (float) ($validated['discount'] ?? 0);
+        $finalAmount = max(0, $price - $discount);
+        $paidAmount = (float) ($validated['paid_amount'] ?? 0);
+
+        $package = MemberPtPackage::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $member->branch_id,
+            'member_id' => $member->id,
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'pt_plan_id' => $validated['pt_plan_id'] ?? null,
+            'package_name' => $validated['package_name'],
+            'total_sessions' => (int) $validated['total_sessions'],
+            'used_sessions' => 0,
+            'start_date' => $startDate->toDateString(),
+            'end_date' => $endDate->toDateString(),
+            'price' => $price,
+            'discount' => $discount,
+            'final_amount' => $finalAmount,
+            'paid_amount' => $paidAmount,
+            'status' => 'ACTIVE',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        // If payment collected, record MemberPayment receipt
+        if ($paidAmount > 0) {
+            $invoiceNumber = 'RCP-PT-'.date('Ymd').rand(1000, 9999);
+            $paymentMethod = $validated['payment_method'] ?? 'upi';
+
+            $payment = MemberPayment::create([
+                'tenant_id' => $tenant->id,
+                'branch_id' => $member->branch_id,
+                'member_id' => $member->id,
+                'invoice_number' => $invoiceNumber,
+                'amount' => $paidAmount,
+                'payment_method' => $paymentMethod,
+                'transaction_reference' => $validated['transaction_reference'] ?? null,
+                'payment_date' => $startDate->toDateString(),
+                'received_by_user_id' => auth()->id(),
+                'notes' => "PT Package: {$package->package_name}".(! empty($validated['notes']) ? " | {$validated['notes']}" : ''),
+            ]);
+
+            ActivityLog::log('pt_payment_received', 'Recorded PT payment of '.($tenant->currency_symbol ?? '₹').number_format($paidAmount, 2)." for {$member->full_name} ({$invoiceNumber})", $payment);
+        }
+
+        ActivityLog::log('pt_package_assigned', "Assigned PT Package '{$package->package_name}' to {$member->full_name}", $package);
+
+        return redirect()->route('app.pt.index', ['tab' => 'packages'])->with('success', "Personal Training package '{$package->package_name}' assigned to {$member->full_name} successfully!");
+    }
+
+    public function logPtSession(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $package = MemberPtPackage::where('tenant_id', $tenant->id)->with('member')->findOrFail($id);
+
+        $sessionsToLog = (int) $request->input('count', 1);
+        $newUsed = min($package->total_sessions, $package->used_sessions + $sessionsToLog);
+
+        $updateData = ['used_sessions' => $newUsed];
+        if ($newUsed >= $package->total_sessions) {
+            $updateData['status'] = 'COMPLETED';
+        }
+
+        $package->update($updateData);
+
+        // Also record a completed session log in pt_sessions table
+        PtSession::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $package->branch_id,
+            'member_id' => $package->member_id,
+            'trainer_id' => $package->trainer_id,
+            'member_pt_package_id' => $package->id,
+            'session_date' => now()->toDateString(),
+            'start_time' => now()->toTimeString(),
+            'duration_minutes' => 60,
+            'status' => 'COMPLETED',
+            'focus_area' => 'PT Workout Session',
+            'completed_at' => now(),
+        ]);
+
+        ActivityLog::log('pt_session_logged', "Logged {$sessionsToLog} PT session(s) for {$package->member?->full_name} on package '{$package->package_name}' (Used: {$newUsed}/{$package->total_sessions})", $package);
+
+        $statusMsg = $newUsed >= $package->total_sessions ? ' All sessions completed!' : " ({$package->remaining_sessions} remaining)";
+
+        return back()->with('success', "Session logged for {$package->member?->full_name}!{$statusMsg}");
+    }
+
+    public function cancelPtPackage(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $package = MemberPtPackage::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $package->update(['status' => 'CANCELLED']);
+
+        ActivityLog::log('pt_package_cancelled', "Cancelled PT Package '{$package->package_name}' for member ID {$package->member_id}", $package);
+
+        return back()->with('success', "PT Package '{$package->package_name}' cancelled.");
+    }
+
+    public function storePtSession(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'member_pt_package_id' => 'nullable|exists:member_pt_packages,id',
+            'session_date' => 'required|date',
+            'start_time' => 'required|string',
+            'duration_minutes' => 'nullable|integer|min:15|max:180',
+            'focus_area' => 'nullable|string|max:150',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($validated['member_id']);
+
+        $session = PtSession::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $member->branch_id,
+            'member_id' => $member->id,
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'member_pt_package_id' => $validated['member_pt_package_id'] ?? null,
+            'session_date' => $validated['session_date'],
+            'start_time' => $validated['start_time'],
+            'duration_minutes' => (int) ($validated['duration_minutes'] ?? 60),
+            'status' => 'SCHEDULED',
+            'focus_area' => $validated['focus_area'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        ActivityLog::log('pt_session_scheduled', "Scheduled PT session for {$member->full_name} on {$session->session_date->format('d M Y')}", $session);
+
+        return redirect()->route('app.pt.index', ['tab' => 'sessions'])->with('success', "PT Session scheduled for {$member->full_name} on {$session->session_date->format('d M Y')}!");
+    }
+
+    public function completePtSession(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $session = PtSession::where('tenant_id', $tenant->id)->with(['member', 'memberPtPackage'])->findOrFail($id);
+
+        $session->update([
+            'status' => 'COMPLETED',
+            'completed_at' => now(),
+        ]);
+
+        if ($session->memberPtPackage && $session->memberPtPackage->status === 'ACTIVE') {
+            $pkg = $session->memberPtPackage;
+            $newUsed = min($pkg->total_sessions, $pkg->used_sessions + 1);
+            $update = ['used_sessions' => $newUsed];
+            if ($newUsed >= $pkg->total_sessions) {
+                $update['status'] = 'COMPLETED';
+            }
+            $pkg->update($update);
+        }
+
+        ActivityLog::log('pt_session_completed', "Marked PT session completed for {$session->member?->full_name}", $session);
+
+        return back()->with('success', "PT Session for {$session->member?->full_name} marked as completed!");
+    }
+
+    public function updatePtSessionStatus(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $session = PtSession::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:SCHEDULED,COMPLETED,NO_SHOW,CANCELLED',
+        ]);
+
+        $session->update([
+            'status' => $validated['status'],
+            'completed_at' => $validated['status'] === 'COMPLETED' ? now() : null,
+        ]);
+
+        return back()->with('success', "PT Session status updated to {$validated['status']}.");
+    }
+
+    public function trainers(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $query = Trainer::where('tenant_id', $tenant->id)
+            ->with(['assignedMembers'])
+            ->withCount([
+                'assignedMembers',
+                'ptSessions as today_sessions_count' => function ($q) {
+                    $q->whereDate('session_date', now()->toDateString());
+                },
+            ]);
+
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('first_name', 'like', "%{$s}%")
+                    ->orWhere('last_name', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('specialization', 'like', "%{$s}%");
+            });
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $trainers = $query->orderBy('first_name')->get();
+
+        $members = Member::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->with('branch')
+            ->orderBy('first_name')
+            ->get();
+
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+
+        return view('app.trainers.index', compact('trainers', 'members', 'tenant', 'branches'));
     }
 
     public function storeTrainer(Request $request): RedirectResponse
     {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        if ($request->filled('full_name') && ! $request->filled('first_name')) {
+            $parts = explode(' ', trim($request->input('full_name')), 2);
+            $request->merge([
+                'first_name' => $parts[0],
+                'last_name' => $parts[1] ?? '',
+            ]);
+        }
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
-            'last_name' => 'required|string|max:100',
+            'last_name' => 'nullable|string|max:100',
             'phone' => 'required|string|max:30',
             'email' => 'nullable|email|max:150',
             'specialization' => 'nullable|string|max:150',
+            'certification' => 'nullable|string|max:150',
             'hourly_rate' => 'nullable|numeric|min:0',
+            'salary' => 'nullable|numeric|min:0',
+            'salary_type' => 'nullable|string|max:50',
+            'salary_pay_day' => 'nullable|string|max:50',
+            'joining_date' => 'nullable|date',
+            'status' => 'nullable|in:ACTIVE,INACTIVE,SUSPENDED',
             'bio' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:3072',
+            'branch_id' => 'nullable|exists:branches,id',
         ]);
 
-        Trainer::create($validated);
+        $validated['tenant_id'] = $tenant->id;
+        $validated['last_name'] = $validated['last_name'] ?? '';
+        $validated['status'] = $validated['status'] ?? 'ACTIVE';
+        $validated['salary'] = $validated['salary'] ?? 0.00;
+        $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
+        $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
+        $validated['is_featured'] = $request->has('is_featured');
 
-        return back()->with('success', 'Trainer added successfully!');
+        if ($request->hasFile('photo')) {
+            $validated['photo_path'] = $request->file('photo')->store('trainers', 'public');
+        }
+
+        $trainer = Trainer::create($validated);
+
+        ActivityLog::log('trainer_created', "Added trainer '{$trainer->full_name}'", $trainer);
+
+        return back()->with('success', "Trainer '{$trainer->full_name}' added successfully!");
     }
 
-    public function classes(): View
+    public function updateTrainer(Request $request, int $id): RedirectResponse
     {
-        $classes = GymClass::with(['branch', 'schedules.trainer'])->latest()->paginate(15);
-        $trainers = Trainer::where('status', 'ACTIVE')->get();
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $trainer = Trainer::where('tenant_id', $tenant->id)->findOrFail($id);
 
-        return view('app.classes.index', compact('classes', 'trainers'));
+        if ($request->filled('full_name') && ! $request->filled('first_name')) {
+            $parts = explode(' ', trim($request->input('full_name')), 2);
+            $request->merge([
+                'first_name' => $parts[0],
+                'last_name' => $parts[1] ?? '',
+            ]);
+        }
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'nullable|string|max:100',
+            'phone' => 'required|string|max:30',
+            'email' => 'nullable|email|max:150',
+            'specialization' => 'nullable|string|max:150',
+            'certification' => 'nullable|string|max:150',
+            'hourly_rate' => 'nullable|numeric|min:0',
+            'salary' => 'nullable|numeric|min:0',
+            'salary_type' => 'nullable|string|max:50',
+            'salary_pay_day' => 'nullable|string|max:50',
+            'joining_date' => 'nullable|date',
+            'status' => 'nullable|in:ACTIVE,INACTIVE,SUSPENDED',
+            'bio' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:3072',
+            'assigned_member_ids' => 'nullable|array',
+            'assigned_member_ids.*' => 'exists:members,id',
+        ]);
+
+        $validated['last_name'] = $validated['last_name'] ?? '';
+        $validated['status'] = $validated['status'] ?? 'ACTIVE';
+        $validated['salary'] = $validated['salary'] ?? 0.00;
+        $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
+        $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
+        $validated['is_featured'] = $request->has('is_featured');
+
+        if ($request->hasFile('photo')) {
+            if ($trainer->photo_path) {
+                Storage::disk('public')->delete($trainer->photo_path);
+            }
+            $validated['photo_path'] = $request->file('photo')->store('trainers', 'public');
+        }
+
+        $trainer->update($validated);
+
+        // Update assigned members
+        if ($request->has('assigned_member_ids_submitted')) {
+            $assignedIds = $request->input('assigned_member_ids', []);
+
+            // Unassign members previously assigned to this trainer who are not in list
+            Member::where('tenant_id', $tenant->id)
+                ->where('trainer_id', $trainer->id)
+                ->whereNotIn('id', $assignedIds)
+                ->update(['trainer_id' => null]);
+
+            // Assign selected members
+            if (! empty($assignedIds)) {
+                Member::where('tenant_id', $tenant->id)
+                    ->whereIn('id', $assignedIds)
+                    ->update(['trainer_id' => $trainer->id]);
+            }
+        }
+
+        ActivityLog::log('trainer_updated', "Updated trainer details for '{$trainer->full_name}'", $trainer);
+
+        return back()->with('success', "Trainer '{$trainer->full_name}' updated successfully!");
+    }
+
+    public function deleteTrainer(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $trainer = Trainer::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        // Unlink assigned members
+        Member::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->update(['trainer_id' => null]);
+
+        $name = $trainer->full_name;
+        $trainer->delete();
+
+        ActivityLog::log('trainer_deleted', "Deleted trainer '{$name}'");
+
+        return back()->with('success', "Trainer '{$name}' deleted successfully.");
+    }
+
+    public function assignTrainerMembers(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $trainer = Trainer::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $memberIds = $request->input('member_ids', []);
+
+        Member::where('tenant_id', $tenant->id)
+            ->whereIn('id', $memberIds)
+            ->update(['trainer_id' => $trainer->id]);
+
+        return back()->with('success', 'Members assigned to trainer successfully!');
+    }
+
+    public function classes(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = TenantContext::getBranch() ?? auth()->user()->branch;
+
+        $classes = GymClass::where('tenant_id', $tenant->id)
+            ->with(['instructor', 'schedules.trainer', 'schedules.bookings.member'])
+            ->withCount(['schedules'])
+            ->latest()
+            ->get();
+
+        $todayDay = strtolower(now()->format('l'));
+
+        $todaySchedules = ClassSchedule::where('tenant_id', $tenant->id)
+            ->where('day_of_week', $todayDay)
+            ->where('is_active', true)
+            ->with(['gymClass.instructor', 'trainer', 'bookings.member'])
+            ->withCount(['bookings' => function ($q) {
+                $q->whereDate('booking_date', now()->toDateString())
+                    ->whereIn('status', ['BOOKED', 'ATTENDED']);
+            }])
+            ->orderBy('start_time')
+            ->get();
+
+        $allSchedules = ClassSchedule::where('tenant_id', $tenant->id)
+            ->where('is_active', true)
+            ->with(['gymClass.instructor', 'trainer', 'bookings.member'])
+            ->orderBy('start_time')
+            ->get();
+
+        $bookingRequests = ClassBooking::where('tenant_id', $tenant->id)
+            ->with(['classSchedule.gymClass', 'member', 'classSchedule.trainer'])
+            ->latest()
+            ->take(50)
+            ->get();
+
+        $trainers = Trainer::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->orderBy('first_name')
+            ->get();
+
+        $members = Member::where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->orderBy('first_name')
+            ->get();
+
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
+
+        return view('app.classes.index', compact(
+            'classes',
+            'todaySchedules',
+            'allSchedules',
+            'bookingRequests',
+            'trainers',
+            'members',
+            'branches',
+            'tenant'
+        ));
+    }
+
+    public function storeClass(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branch = TenantContext::getBranch() ?? auth()->user()->branch ?? Branch::where('tenant_id', $tenant->id)->first();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'class_type' => 'required|string|max:100',
+            'instructor_id' => 'nullable|exists:trainers,id',
+            'fee' => 'nullable|numeric|min:0',
+            'validity_days' => 'nullable|integer|min:1',
+            'total_sessions' => 'nullable|integer|min:1',
+            'cancellation_hours' => 'nullable|integer|min:0',
+            'sac_code' => 'nullable|string|max:20',
+            'gst_rate' => 'nullable|numeric|min:0',
+            'capacity' => 'nullable|integer|min:1',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'room_location' => 'nullable|string|max:100',
+            'status' => 'nullable|in:ACTIVE,INACTIVE',
+            'description' => 'nullable|string|max:1000',
+            'thumbnail' => 'nullable|image|max:3072',
+            'schedules' => 'nullable|array',
+            'schedules.*.day_of_week' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedules.*.start_time' => 'nullable|string',
+            'schedules.*.end_time' => 'nullable|string',
+        ]);
+
+        $validated['tenant_id'] = $tenant->id;
+        $validated['branch_id'] = $branch?->id ?? 1;
+        $validated['fee'] = $validated['fee'] ?? 0.00;
+        $validated['validity_days'] = $validated['validity_days'] ?? 30;
+        $validated['cancellation_hours'] = $validated['cancellation_hours'] ?? 4;
+        $validated['sac_code'] = ! empty($validated['sac_code']) ? trim($validated['sac_code']) : null;
+        $validated['gst_rate'] = ! empty($validated['gst_rate']) ? (float) $validated['gst_rate'] : 0.00;
+        $validated['capacity'] = $validated['capacity'] ?? 20;
+        $validated['duration_minutes'] = $validated['duration_minutes'] ?? 60;
+        $validated['status'] = $validated['status'] ?? 'ACTIVE';
+        $validated['is_active'] = ($validated['status'] === 'ACTIVE');
+        $validated['is_featured'] = $request->has('is_featured');
+        $validated['price_includes_gst'] = $request->has('price_includes_gst') && $validated['gst_rate'] > 0;
+
+        if ($request->hasFile('thumbnail')) {
+            $validated['thumbnail_path'] = $request->file('thumbnail')->store('classes', 'public');
+        }
+
+        $schedulesInput = $request->input('schedules', []);
+        unset($validated['schedules']);
+
+        $gymClass = GymClass::create($validated);
+
+        if (! empty($schedulesInput) && is_array($schedulesInput)) {
+            foreach ($schedulesInput as $sch) {
+                if (! empty($sch['day_of_week']) && ! empty($sch['start_time'])) {
+                    $startTime = $sch['start_time'];
+                    $endTime = $sch['end_time'] ?? null;
+                    if (! $endTime) {
+                        $endTime = Carbon::createFromTimeString($startTime)->addMinutes($gymClass->duration_minutes)->format('H:i');
+                    }
+
+                    ClassSchedule::create([
+                        'tenant_id' => $tenant->id,
+                        'branch_id' => $gymClass->branch_id,
+                        'gym_class_id' => $gymClass->id,
+                        'trainer_id' => $gymClass->instructor_id,
+                        'day_of_week' => strtolower($sch['day_of_week']),
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
+                        'room_or_studio' => null,
+                        'is_active' => true,
+                    ]);
+                }
+            }
+        }
+
+        ActivityLog::log('class_created', "Created group class '{$gymClass->name}'", $gymClass);
+
+        return back()->with('success', "Class '{$gymClass->name}' created successfully!");
+    }
+
+    public function updateClass(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $gymClass = GymClass::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'class_type' => 'required|string|max:100',
+            'instructor_id' => 'nullable|exists:trainers,id',
+            'fee' => 'nullable|numeric|min:0',
+            'validity_days' => 'nullable|integer|min:1',
+            'total_sessions' => 'nullable|integer|min:1',
+            'cancellation_hours' => 'nullable|integer|min:0',
+            'sac_code' => 'nullable|string|max:20',
+            'gst_rate' => 'nullable|numeric|min:0',
+            'capacity' => 'nullable|integer|min:1',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'room_location' => 'nullable|string|max:100',
+            'status' => 'nullable|in:ACTIVE,INACTIVE',
+            'description' => 'nullable|string|max:1000',
+            'thumbnail' => 'nullable|image|max:3072',
+            'schedules' => 'nullable|array',
+            'schedules.*.day_of_week' => 'nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedules.*.start_time' => 'nullable|string',
+            'schedules.*.end_time' => 'nullable|string',
+        ]);
+
+        $validated['fee'] = $validated['fee'] ?? 0.00;
+        $validated['validity_days'] = $validated['validity_days'] ?? 30;
+        $validated['cancellation_hours'] = $validated['cancellation_hours'] ?? 4;
+        $validated['sac_code'] = ! empty($validated['sac_code']) ? trim($validated['sac_code']) : null;
+        $validated['gst_rate'] = ! empty($validated['gst_rate']) ? (float) $validated['gst_rate'] : 0.00;
+        $validated['capacity'] = $validated['capacity'] ?? 20;
+        $validated['duration_minutes'] = $validated['duration_minutes'] ?? 60;
+        $validated['status'] = $validated['status'] ?? 'ACTIVE';
+        $validated['is_active'] = ($validated['status'] === 'ACTIVE');
+        $validated['is_featured'] = $request->has('is_featured');
+        $validated['price_includes_gst'] = $request->has('price_includes_gst') && $validated['gst_rate'] > 0;
+
+        if ($request->hasFile('thumbnail')) {
+            if ($gymClass->thumbnail_path) {
+                Storage::disk('public')->delete($gymClass->thumbnail_path);
+            }
+            $validated['thumbnail_path'] = $request->file('thumbnail')->store('classes', 'public');
+        }
+
+        $schedulesInput = $request->input('schedules', []);
+        unset($validated['schedules']);
+
+        $gymClass->update($validated);
+
+        // Sync schedules if provided
+        if ($request->has('schedules_submitted')) {
+            ClassSchedule::where('gym_class_id', $gymClass->id)->delete();
+            if (! empty($schedulesInput) && is_array($schedulesInput)) {
+                foreach ($schedulesInput as $sch) {
+                    if (! empty($sch['day_of_week']) && ! empty($sch['start_time'])) {
+                        $startTime = $sch['start_time'];
+                        $endTime = $sch['end_time'] ?? null;
+                        if (! $endTime) {
+                            $endTime = Carbon::createFromTimeString($startTime)->addMinutes($gymClass->duration_minutes)->format('H:i');
+                        }
+
+                        ClassSchedule::create([
+                            'tenant_id' => $tenant->id,
+                            'branch_id' => $gymClass->branch_id,
+                            'gym_class_id' => $gymClass->id,
+                            'trainer_id' => $gymClass->instructor_id,
+                            'day_of_week' => strtolower($sch['day_of_week']),
+                            'start_time' => $startTime,
+                            'end_time' => $endTime,
+                            'room_or_studio' => null,
+                            'is_active' => true,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        ActivityLog::log('class_updated', "Updated group class '{$gymClass->name}'", $gymClass);
+
+        return back()->with('success', "Class '{$gymClass->name}' updated successfully!");
+    }
+
+    public function deleteClass(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $gymClass = GymClass::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $name = $gymClass->name;
+        if ($gymClass->thumbnail_path) {
+            Storage::disk('public')->delete($gymClass->thumbnail_path);
+        }
+        $gymClass->delete();
+
+        ActivityLog::log('class_deleted', "Deleted group class '{$name}'");
+
+        return back()->with('success', "Class '{$name}' deleted successfully.");
+    }
+
+    public function bookClassSchedule(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $schedule = ClassSchedule::where('tenant_id', $tenant->id)->with('gymClass')->findOrFail($id);
+
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'booking_date' => 'nullable|date',
+        ]);
+
+        $bookingDate = $validated['booking_date'] ?? now()->toDateString();
+
+        $booking = ClassBooking::firstOrCreate([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $schedule->branch_id,
+            'class_schedule_id' => $schedule->id,
+            'member_id' => $validated['member_id'],
+            'booking_date' => $bookingDate,
+        ], [
+            'status' => 'BOOKED',
+        ]);
+
+        return back()->with('success', "Booking confirmed for class '{$schedule->gymClass->name}'!");
+    }
+
+    public function updateClassBookingStatus(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $booking = ClassBooking::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:BOOKED,ATTENDED,CANCELLED,NO_SHOW',
+        ]);
+
+        $booking->update(['status' => $validated['status']]);
+
+        return back()->with('success', "Booking status updated to {$validated['status']}.");
     }
 
     public function workouts(): View
@@ -1490,6 +2397,11 @@ class AppController extends Controller
         $activeStaff = $allTenantUsers->where('status', 'ACTIVE')->count();
         $managerStaff = $allTenantUsers->whereIn('role', ['gym_manager', 'receptionist'])->count();
         $trainerStaff = $allTenantUsers->where('role', 'trainer')->count();
+        $totalMonthlySalary = $allTenantUsers->sum(function ($u) {
+            $salary = $u->metadata['monthly_salary'] ?? 0;
+
+            return is_numeric($salary) ? (float) $salary : 0;
+        });
 
         $branches = $tenant->branches ?? Branch::all();
 
@@ -1499,7 +2411,8 @@ class AppController extends Controller
             'totalStaff',
             'activeStaff',
             'managerStaff',
-            'trainerStaff'
+            'trainerStaff',
+            'totalMonthlySalary'
         ));
     }
 
@@ -1720,5 +2633,23 @@ class AppController extends Controller
         ActivityLog::log('staff_status_changed', "Changed status of staff '{$user->name}' to {$newStatus}");
 
         return back()->with('success', "Status for '{$user->name}' changed to {$newStatus}.");
+    }
+
+    public function resetStaffPassword(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        ActivityLog::log('staff_password_reset', "Reset password for staff member '{$user->name}'");
+
+        return back()->with('success', "Password for '{$user->name}' updated successfully!");
     }
 }

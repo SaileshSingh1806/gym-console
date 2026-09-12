@@ -15,7 +15,16 @@
     <div x-data="{
         showAddStaffModal: false,
         showEditStaffModal: false,
+        showPasswordModal: false,
+        passwordStaffId: null,
+        passwordStaffName: '',
         allBranches: {{ Js::from($branchesJson) }},
+        
+        openPasswordModal(id, name) {
+            this.passwordStaffId = id;
+            this.passwordStaffName = name;
+            this.showPasswordModal = true;
+        },
         
         // Form Data
         staffForm: {
@@ -229,13 +238,15 @@
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-950/80 border-b border-slate-800 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                         <tr>
-                            <th class="py-3.5 px-4">Staff Member</th>
-                            <th class="py-3.5 px-4">Employee ID</th>
-                            <th class="py-3.5 px-4">Role & Access</th>
-                            <th class="py-3.5 px-4">Designation</th>
-                            <th class="py-3.5 px-4">Branch</th>
-                            <th class="py-3.5 px-4">Status</th>
-                            <th class="py-3.5 px-4 text-right">Actions</th>
+                            <th class="py-3.5 px-4">NAME</th>
+                            <th class="py-3.5 px-4">EMPLOYEE ID</th>
+                            <th class="py-3.5 px-4">ROLE</th>
+                            <th class="py-3.5 px-4">DESIGNATION</th>
+                            <th class="py-3.5 px-4">PHONE</th>
+                            <th class="py-3.5 px-4">SALARY</th>
+                            <th class="py-3.5 px-4">LOGIN</th>
+                            <th class="py-3.5 px-4">STATUS</th>
+                            <th class="py-3.5 px-4 text-right">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800/60 text-slate-300">
@@ -244,76 +255,93 @@
                                 $meta = $u->metadata ?? [];
                                 $empId = $meta['employee_id'] ?? ('EMP' . str_pad($u->id, 3, '0', STR_PAD_LEFT));
                                 $roleBadgeClass = match($u->role) {
-                                    'gym_owner' => 'bg-amber-500/15 border-amber-500/30 text-amber-400',
-                                    'gym_manager' => 'bg-purple-500/15 border-purple-500/30 text-purple-400',
-                                    'receptionist' => 'bg-sky-500/15 border-sky-500/30 text-sky-400',
-                                    'trainer' => 'bg-orange-500/15 border-orange-500/30 text-orange-400',
-                                    'accountant' => 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+                                    'gym_owner' => 'bg-purple-500/15 border-purple-500/30 text-purple-300',
+                                    'gym_manager' => 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300',
+                                    'receptionist' => 'bg-slate-800 border-slate-700 text-slate-300',
+                                    'trainer' => 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+                                    'accountant' => 'bg-sky-500/15 border-sky-500/30 text-sky-400',
                                     default => 'bg-slate-800 border-slate-700 text-slate-300'
                                 };
                                 $roleLabel = match($u->role) {
-                                    'gym_owner' => 'Gym Owner',
+                                    'gym_owner' => 'Gym owner',
                                     'gym_manager' => 'Gym Manager',
                                     'receptionist' => 'Receptionist',
-                                    'trainer' => 'Trainer / Coach',
+                                    'trainer' => 'Trainer',
                                     'accountant' => 'Accountant',
                                     default => 'Staff'
                                 };
                                 $branchList = $u->branches->pluck('name')->join(', ');
                                 $branchIds = $u->branches->pluck('id')->toArray();
+                                $canLogin = !isset($meta['can_login']) || $meta['can_login'];
+                                $salaryVal = isset($meta['monthly_salary']) && floatval($meta['monthly_salary']) > 0 ? (float)$meta['monthly_salary'] : null;
                             @endphp
                             <tr class="hover:bg-slate-800/40 transition-colors">
-                                <!-- Name & Contact -->
+                                <!-- NAME -->
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-white text-xs shrink-0 shadow-sm">
+                                        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-sm">
                                             {{ strtoupper(substr($u->name, 0, 1)) }}
                                         </div>
-                                        <div>
-                                            <div class="font-bold text-white text-xs flex items-center gap-1.5">
-                                                <span>{{ $u->name }}</span>
-                                                @if($u->id === auth()->id())
-                                                    <span class="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-400 text-[9px] font-bold border border-indigo-500/30">You</span>
-                                                @endif
-                                            </div>
-                                            <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ $u->phone ?: $u->email }}</div>
+                                        <div class="font-bold text-white text-xs flex items-center gap-1.5">
+                                            <span>{{ $u->name }}</span>
+                                            @if($u->id === auth()->id())
+                                                <span class="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-400 text-[9px] font-bold border border-indigo-500/30">You</span>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
 
-                                <!-- Employee ID -->
-                                <td class="py-3.5 px-4 font-mono font-bold text-indigo-400 text-xs">
-                                    {{ $empId }}
+                                <!-- EMPLOYEE ID -->
+                                <td class="py-3.5 px-4">
+                                    @if(!empty($empId))
+                                        <span class="px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 font-mono text-[11px] font-semibold text-slate-300">
+                                            {{ $empId }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-500">—</span>
+                                    @endif
                                 </td>
 
-                                <!-- Role & Login Access -->
+                                <!-- ROLE -->
                                 <td class="py-3.5 px-4">
-                                    <span class="px-2.5 py-0.5 rounded-full border font-bold text-[10px] uppercase tracking-wider {{ $roleBadgeClass }}">
+                                    <span class="px-2.5 py-0.5 rounded-full border text-[10px] font-semibold tracking-wide {{ $roleBadgeClass }}">
                                         {{ $roleLabel }}
                                     </span>
-                                    @if(isset($meta['can_login']) && !$meta['can_login'])
-                                        <div class="text-[10px] text-slate-500 mt-1">No Login Access</div>
-                                    @endif
                                 </td>
 
-                                <!-- Designation / Dept -->
+                                <!-- DESIGNATION -->
                                 <td class="py-3.5 px-4 text-slate-300 text-xs">
-                                    <span class="font-medium text-slate-200">{{ $meta['designation'] ?? '—' }}</span>
-                                    @if(!empty($meta['department']))
-                                        <span class="text-[10px] text-slate-500 block">{{ $meta['department'] }}</span>
-                                    @endif
+                                    {{ $meta['designation'] ?? '—' }}
                                 </td>
 
-                                <!-- Branch -->
-                                <td class="py-3.5 px-4 text-slate-300">
-                                    @if(!empty($branchList))
-                                        <span class="text-xs font-semibold text-slate-200">{{ $branchList }}</span>
+                                <!-- PHONE -->
+                                <td class="py-3.5 px-4 text-slate-300 font-mono text-xs">
+                                    {{ $u->phone ?: '—' }}
+                                </td>
+
+                                <!-- SALARY -->
+                                <td class="py-3.5 px-4 font-mono text-xs text-slate-200">
+                                    @if($salaryVal !== null)
+                                        {{ $currency }}{{ number_format($salaryVal, 2) }}
                                     @else
-                                        <span class="text-xs text-slate-500 italic">All Branches</span>
+                                        <span class="text-slate-500">—</span>
                                     @endif
                                 </td>
 
-                                <!-- Status -->
+                                <!-- LOGIN -->
+                                <td class="py-3.5 px-4">
+                                    @if($canLogin)
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[10px] inline-flex items-center gap-1">
+                                            ✓ On
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-bold text-[10px] inline-flex items-center gap-1">
+                                            ✕ Off
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <!-- STATUS -->
                                 <td class="py-3.5 px-4">
                                     @if($u->status === 'ACTIVE')
                                         <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
@@ -330,7 +358,7 @@
                                     @endif
                                 </td>
 
-                                <!-- Actions -->
+                                <!-- ACTIONS -->
                                 <td class="py-3.5 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <!-- Edit Button -->
@@ -341,6 +369,14 @@
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                         </button>
 
+                                        <!-- Password Reset Key Button -->
+                                        <button type="button" 
+                                                @click="openPasswordModal({{ $u->id }}, '{{ addslashes($u->name) }}')"
+                                                title="Reset Password" 
+                                                class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 transition-colors cursor-pointer">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                        </button>
+
                                         <!-- Toggle Status (Activate / Suspend) -->
                                         @if($u->id !== auth()->id() && $u->role !== 'gym_owner')
                                             <form action="{{ route('app.staff.toggle-status', $u->id) }}" method="POST" class="inline">
@@ -349,9 +385,9 @@
                                                         title="{{ $u->status === 'ACTIVE' ? 'Suspend Staff Account' : 'Activate Staff Account' }}" 
                                                         class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer">
                                                     @if($u->status === 'ACTIVE')
-                                                        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                                     @else
-                                                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                     @endif
                                                 </button>
                                             </form>
@@ -372,7 +408,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-slate-500">
+                                <td colspan="9" class="py-12 text-center text-slate-500">
                                     <div class="text-3xl mb-2">👥</div>
                                     <p class="text-sm font-semibold text-slate-400">No staff members found.</p>
                                     <p class="text-xs text-slate-500 mt-1">Click "+ Add Staff Member" to add front desk, trainers, or managers.</p>
@@ -752,6 +788,56 @@
                                 class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                             <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL: RESET PASSWORD                                                     -->
+        <!-- ========================================================================= -->
+        <div x-show="showPasswordModal" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-sm flex items-center justify-center p-4" 
+             x-cloak>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-slate-200" 
+                 @click.away="showPasswordModal = false">
+                
+                <button type="button" 
+                        @click="showPasswordModal = false" 
+                        class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <div class="border-b border-slate-800 pb-3 mb-4">
+                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        <span>Reset Password</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Set a new login password for <span class="font-bold text-white" x-text="passwordStaffName"></span></p>
+                </div>
+
+                <form :action="'{{ url('app/staff') }}/' + passwordStaffId + '/reset-password'" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">New Password <span class="text-rose-500">*</span></label>
+                        <input type="password" 
+                               name="password" 
+                               required 
+                               minlength="6" 
+                               placeholder="Minimum 6 characters" 
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2.5 pt-2">
+                        <button type="button" 
+                                @click="showPasswordModal = false" 
+                                class="px-4 py-2 rounded-xl bg-transparent hover:bg-slate-800 text-slate-300 font-bold text-xs transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                            <span>Update Password</span>
                         </button>
                     </div>
                 </form>

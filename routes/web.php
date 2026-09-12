@@ -61,10 +61,31 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::get('/attendance', [AppController::class, 'attendance'])->name('app.attendance.index');
     Route::post('/attendance', [AppController::class, 'storeCheckin'])->name('app.attendance.store');
 
+    // Personal Training & PT Plans & Sessions
+    Route::get('/personal-training', [AppController::class, 'personalTraining'])->name('app.pt.index');
+    Route::post('/pt-plans', [AppController::class, 'storePtPlan'])->name('app.pt-plans.store');
+    Route::post('/pt-plans/{id}', [AppController::class, 'updatePtPlan'])->name('app.pt-plans.update');
+    Route::post('/pt-plans/{id}/toggle', [AppController::class, 'togglePtPlan'])->name('app.pt-plans.toggle');
+    Route::delete('/pt-plans/{id}', [AppController::class, 'deletePtPlan'])->name('app.pt-plans.delete');
+    Route::post('/pt-packages', [AppController::class, 'assignPtPackage'])->name('app.pt-packages.store');
+    Route::post('/pt-packages/{id}/log-session', [AppController::class, 'logPtSession'])->name('app.pt-packages.log-session');
+    Route::post('/pt-packages/{id}/cancel', [AppController::class, 'cancelPtPackage'])->name('app.pt-packages.cancel');
+    Route::post('/pt-sessions', [AppController::class, 'storePtSession'])->name('app.pt-sessions.store');
+    Route::post('/pt-sessions/{id}/complete', [AppController::class, 'completePtSession'])->name('app.pt-sessions.complete');
+    Route::post('/pt-sessions/{id}/status', [AppController::class, 'updatePtSessionStatus'])->name('app.pt-sessions.status');
+
     // Trainers & Classes
     Route::get('/trainers', [AppController::class, 'trainers'])->name('app.trainers.index');
     Route::post('/trainers', [AppController::class, 'storeTrainer'])->name('app.trainers.store');
+    Route::post('/trainers/{id}', [AppController::class, 'updateTrainer'])->name('app.trainers.update');
+    Route::delete('/trainers/{id}', [AppController::class, 'deleteTrainer'])->name('app.trainers.delete');
+    Route::post('/trainers/{id}/assign-members', [AppController::class, 'assignTrainerMembers'])->name('app.trainers.assign-members');
     Route::get('/classes', [AppController::class, 'classes'])->name('app.classes.index');
+    Route::post('/classes', [AppController::class, 'storeClass'])->name('app.classes.store');
+    Route::post('/classes/{id}', [AppController::class, 'updateClass'])->name('app.classes.update');
+    Route::delete('/classes/{id}', [AppController::class, 'deleteClass'])->name('app.classes.delete');
+    Route::post('/classes/schedules/{id}/book', [AppController::class, 'bookClassSchedule'])->name('app.classes.book');
+    Route::post('/classes/bookings/{id}/status', [AppController::class, 'updateClassBookingStatus'])->name('app.classes.booking-status');
 
     // Workouts & Diets
     Route::get('/workouts', [AppController::class, 'workouts'])->name('app.workouts.index');
@@ -86,6 +107,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::post('/staff/{id}', [AppController::class, 'updateStaff'])->name('app.staff.update');
     Route::delete('/staff/{id}', [AppController::class, 'deleteStaff'])->name('app.staff.delete');
     Route::post('/staff/{id}/toggle-status', [AppController::class, 'toggleStaffStatus'])->name('app.staff.toggle-status');
+    Route::post('/staff/{id}/reset-password', [AppController::class, 'resetStaffPassword'])->name('app.staff.reset-password');
 
     // SaaS Subscription & Settings
     Route::get('/subscription', [AppController::class, 'subscription'])->name('app.subscription.index');

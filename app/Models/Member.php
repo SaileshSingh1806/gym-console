@@ -18,6 +18,7 @@ class Member extends Model
     protected $fillable = [
         'tenant_id',
         'branch_id',
+        'trainer_id',
         'user_id',
         'member_code',
         'first_name',
@@ -53,9 +54,19 @@ class Member extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function assignedTrainer(): BelongsTo
+    {
+        return $this->belongsTo(Trainer::class, 'trainer_id');
+    }
+
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    public function memberPtPackages(): HasMany
+    {
+        return $this->hasMany(MemberPtPackage::class);
     }
 
     public function activeMembership(): HasOne
