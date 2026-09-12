@@ -54,6 +54,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::delete('/membership-plans/{id}', [AppController::class, 'deleteMembershipPlan'])->name('app.membership-plans.delete');
     Route::get('/payments', [AppController::class, 'payments'])->name('app.payments.index');
     Route::post('/payments', [AppController::class, 'storePayment'])->name('app.payments.store');
+    Route::post('/payments/{id}/reverse', [AppController::class, 'reversePayment'])->name('app.payments.reverse');
     Route::get('/invoices/{id}', [AppController::class, 'showInvoice'])->name('app.invoices.show');
 
     // Attendance
@@ -78,6 +79,13 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::get('/devices', [AppController::class, 'devices'])->name('app.devices.index');
     Route::post('/devices', [AppController::class, 'storeDevice'])->name('app.devices.store');
     Route::post('/devices/{id}/test', [AppController::class, 'testDevice'])->name('app.devices.test');
+
+    // Staff & Team Management
+    Route::get('/staff', [AppController::class, 'staff'])->name('app.staff.index');
+    Route::post('/staff', [AppController::class, 'storeStaff'])->name('app.staff.store');
+    Route::post('/staff/{id}', [AppController::class, 'updateStaff'])->name('app.staff.update');
+    Route::delete('/staff/{id}', [AppController::class, 'deleteStaff'])->name('app.staff.delete');
+    Route::post('/staff/{id}/toggle-status', [AppController::class, 'toggleStaffStatus'])->name('app.staff.toggle-status');
 
     // SaaS Subscription & Settings
     Route::get('/subscription', [AppController::class, 'subscription'])->name('app.subscription.index');

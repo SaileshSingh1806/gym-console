@@ -1850,17 +1850,25 @@
         <div x-show="showAddPtModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md p-3 sm:p-6" 
              style="display: none;">
             
-            <div class="min-h-full flex items-center justify-center py-6">
-                <div @click.away="showAddPtModal = false" class="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6 text-xs relative">
+            <div class="min-h-full flex items-center justify-center py-4 sm:py-6">
+                <div @click.away="showAddPtModal = false" class="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 sm:p-8 space-y-6 text-xs relative">
                     
+                    <!-- Top-Right Close Button -->
+                    <button type="button" 
+                            @click="showAddPtModal = false" 
+                            class="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors z-20 cursor-pointer" 
+                            title="Close modal">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+
                     <form action="{{ route('app.members.add-pt-package', $member->id) }}" method="POST" class="space-y-6">
                         @csrf
                         
                         <!-- Header Section: Gym Info & INVOICE -->
-                        <div class="flex items-start justify-between border-b border-slate-800/80 pb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-800/80 pb-5 pr-10">
                             <div>
                                 <h2 class="text-base font-black text-white tracking-wide uppercase">{{ auth()->user()->tenant->name ?? 'POWERFIT GYM' }}</h2>
                                 <p class="text-[11px] text-slate-400 mt-0.5">{{ $member->branch->address ?? (auth()->user()->tenant->address ?? '123 Fitness Street, Health City') }}</p>
@@ -1868,9 +1876,9 @@
                                 <p class="text-[11px] font-mono text-slate-500">{{ auth()->user()->tenant->metadata['gstin'] ?? 'GSTIN: 27AAACM3025E1ZZ' }}</p>
                             </div>
 
-                            <div class="text-right">
+                            <div class="text-left sm:text-right">
                                 <h1 class="text-2xl font-black text-indigo-400 tracking-wider uppercase">INVOICE</h1>
-                                <div class="flex items-center gap-2 mt-2 justify-end">
+                                <div class="flex items-center gap-2 mt-2 sm:justify-end">
                                     <span class="text-xs text-slate-400 font-semibold">Date</span>
                                     <input type="date" 
                                            name="start_date" 
@@ -1883,11 +1891,13 @@
                         <!-- BILL TO Card -->
                         <div>
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">BILL TO</span>
-                            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-1.5">
-                                <h3 class="font-bold text-white text-sm">{{ $member->full_name }} ({{ $member->member_code }})</h3>
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-black text-[10px]">Active</span>
-                                    <span class="text-slate-400 font-mono text-xs">{{ $member->phone }}</span>
+                            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">{{ $member->full_name }} ({{ $member->member_code }})</h3>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-black text-[10px]">Active</span>
+                                        <span class="text-slate-400 font-mono text-xs">{{ $member->phone }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1895,7 +1905,7 @@
                         <!-- Item Description Table -->
                         <div class="space-y-2">
                             <!-- Table Header -->
-                            <div class="flex items-center gap-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-800 pb-2 px-1">
+                            <div class="hidden sm:flex items-center gap-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-800 pb-2 px-1">
                                 <div class="w-6 shrink-0">#</div>
                                 <div class="w-44 shrink-0">ITEM TYPE</div>
                                 <div class="flex-1 min-w-0">DESCRIPTION</div>
@@ -1903,16 +1913,18 @@
                             </div>
 
                             <!-- Line Item Row 1 -->
-                            <div class="flex items-start gap-3 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
-                                <div class="w-6 shrink-0 font-bold text-slate-400 pt-2.5">1</div>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                                <div class="hidden sm:block w-6 shrink-0 font-bold text-slate-400 pt-2.5">1</div>
                                 
-                                <div class="w-44 shrink-0">
+                                <div class="w-full sm:w-44 shrink-0">
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Item Type</label>
                                     <select class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 font-bold text-white text-xs focus:border-indigo-500 focus:outline-none">
                                         <option value="pt" selected>Personal Training</option>
                                     </select>
                                 </div>
 
                                 <div class="flex-1 min-w-0 space-y-2.5">
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
                                     <div>
                                         <select name="pt_package_name" 
                                                 x-model="ptPackageName" 
@@ -1976,22 +1988,23 @@
                                     </div>
                                 </div>
 
-                                <div class="w-32 shrink-0 text-right">
+                                <div class="w-full sm:w-32 shrink-0 text-left sm:text-right">
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount ({{ $currency }})</label>
                                     <input type="number" 
                                            step="0.01" 
                                            name="amount" 
                                            x-model="ptAmount" 
                                            required 
-                                           @input="ptCollectedAmount = ptTotal"
+                                           @input="ptCollectedAmount = ptTotal" 
                                            placeholder="0.00" 
-                                           class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono font-bold text-xs text-right focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono font-bold text-xs text-left sm:text-right focus:border-indigo-500 focus:outline-none">
                                 </div>
                             </div>
 
                             <!-- Add Line Item Button (Visual match to reference) -->
                             <div class="pt-1">
                                 <button type="button" 
-                                        class="px-3.5 py-1.5 rounded-lg border border-dashed border-indigo-500/40 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 text-xs font-bold flex items-center gap-1.5 transition-colors">
+                                        class="px-3.5 py-1.5 rounded-lg border border-dashed border-indigo-500/40 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                     <span>Add Line Item</span>
                                 </button>
@@ -2000,7 +2013,7 @@
 
                         <!-- Financial Breakdown Summary -->
                         <div class="flex justify-end pt-1">
-                            <div class="w-full max-w-xs space-y-2 border-t border-slate-800 pt-3 text-xs">
+                            <div class="w-full sm:max-w-xs space-y-2 border-t border-slate-800 pt-3 text-xs">
                                 <div class="flex items-center justify-between text-slate-400">
                                     <span>Subtotal</span>
                                     <span class="font-bold text-white">{{ $currency }}<span x-text="Number(ptAmount || 0).toFixed(2)"></span></span>
@@ -2014,7 +2027,7 @@
                                                step="0.01" 
                                                name="discount" 
                                                x-model="ptDiscount" 
-                                               @input="ptCollectedAmount = ptTotal"
+                                               @input="ptCollectedAmount = ptTotal" 
                                                class="w-24 px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
                                     </div>
                                 </div>
@@ -2027,7 +2040,7 @@
                                                step="0.01" 
                                                name="tax" 
                                                x-model="ptTax" 
-                                               @input="ptCollectedAmount = ptTotal"
+                                               @input="ptCollectedAmount = ptTotal" 
                                                class="w-24 px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
                                     </div>
                                 </div>
@@ -2060,36 +2073,44 @@
                             </label>
                         </div>
 
-                        <!-- PAYMENT METHOD -->
+                        <!-- PAYMENT METHOD (Responsive Layout) -->
                         <div class="space-y-2">
                             <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">PAYMENT METHOD</span>
-                            <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-                                <select name="payment_method" 
-                                        x-model="ptPaymentMethod" 
-                                        class="w-36 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold text-xs focus:border-indigo-500 focus:outline-none">
-                                    <option value="cash">Cash</option>
-                                    <option value="upi">UPI / QR Code</option>
-                                    <option value="card">Card / POS Machine</option>
-                                    <option value="netbanking">Net Banking</option>
-                                    <option value="cheque">Cheque</option>
-                                </select>
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                                <div class="sm:col-span-4">
+                                    <select name="payment_method" 
+                                            x-model="ptPaymentMethod" 
+                                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold text-xs focus:border-indigo-500 focus:outline-none">
+                                        <option value="cash">Cash</option>
+                                        <option value="upi">UPI / QR Code</option>
+                                        <option value="card">Card / POS Machine</option>
+                                        <option value="netbanking">Net Banking</option>
+                                        <option value="cheque">Cheque</option>
+                                    </select>
+                                </div>
 
-                                <input type="number" 
-                                       step="0.01" 
-                                       x-model="ptCollectedAmount" 
-                                       placeholder="0" 
-                                       class="w-24 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                <div class="sm:col-span-3">
+                                    <input type="number" 
+                                           step="0.01" 
+                                           x-model="ptCollectedAmount" 
+                                           placeholder="0" 
+                                           class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                </div>
 
-                                <input type="text" 
-                                       name="transaction_reference" 
-                                       x-model="ptRef" 
-                                       placeholder="Ref / Txn ID (Optional)" 
-                                       class="flex-1 min-w-[140px] px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                <div class="sm:col-span-4">
+                                    <input type="text" 
+                                           name="transaction_reference" 
+                                           x-model="ptRef" 
+                                           placeholder="Ref / Txn ID (Optional)" 
+                                           class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                </div>
 
-                                <button type="button" 
-                                        class="px-3.5 py-2 rounded-xl border border-dashed border-indigo-500/40 text-indigo-400 text-xs font-bold whitespace-nowrap hover:bg-slate-800 transition-colors">
-                                    + Split
-                                </button>
+                                <div class="sm:col-span-1">
+                                    <button type="button" 
+                                            class="w-full h-full py-2 px-2 rounded-xl border border-dashed border-indigo-500/40 text-indigo-400 text-xs font-bold whitespace-nowrap hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer">
+                                        + Split
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -2103,17 +2124,17 @@
                                       class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none"></textarea>
                         </div>
 
-                        <!-- Footer Actions -->
-                        <div class="flex items-center justify-between border-t border-slate-800 pt-4">
-                            <p class="text-xs text-slate-400 italic">Thank you for your membership!</p>
-                            <div class="flex items-center gap-3">
+                        <!-- Footer Actions (Responsive) -->
+                        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-slate-800 pt-4 gap-3">
+                            <p class="text-xs text-slate-400 italic text-center sm:text-left">Thank you for your membership!</p>
+                            <div class="flex items-center gap-3 justify-end">
                                 <button type="button" 
                                         @click="showAddPtModal = false" 
-                                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors">
+                                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer text-center">
                                     Cancel
                                 </button>
                                 <button type="submit" 
-                                        class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                     <span>Record Payment</span>
                                 </button>

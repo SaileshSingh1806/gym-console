@@ -36,6 +36,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -884,37 +885,300 @@ class AppController extends Controller
         return back()->with('success', "Check-in recorded for {$member->full_name}.");
     }
 
-    public function payments(): View
+    public function payments(Request $request): View
     {
-        $payments = MemberPayment::with(['member', 'receivedBy'])->latest('payment_date')->paginate(15);
-        $members = Member::all();
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $query = MemberPayment::with(['member.branch', 'membership.plan', 'receivedBy'])->latest('payment_date')->latest('id');
 
-        return view('app.payments.index', compact('payments', 'members'));
+        // Search filter (member name, phone, email, member_code, invoice_number, transaction_reference)
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('invoice_number', 'like', "%{$s}%")
+                    ->orWhere('transaction_reference', 'like', "%{$s}%")
+                    ->orWhereHas('member', function ($mq) use ($s) {
+                        $mq->where('first_name', 'like', "%{$s}%")
+                            ->orWhere('last_name', 'like', "%{$s}%")
+                            ->orWhere('phone', 'like', "%{$s}%")
+                            ->orWhere('email', 'like', "%{$s}%")
+                            ->orWhere('member_code', 'like', "%{$s}%");
+                    });
+            });
+        }
+
+        // Date range filter
+        $dateFilter = $request->get('date_filter', 'month_till_date');
+        if ($dateFilter === 'today') {
+            $query->whereDate('payment_date', now()->toDateString());
+        } elseif ($dateFilter === 'yesterday') {
+            $query->whereDate('payment_date', now()->subDay()->toDateString());
+        } elseif ($dateFilter === 'this_week') {
+            $query->whereBetween('payment_date', [now()->startOfWeek()->toDateString(), now()->endOfWeek()->toDateString()]);
+        } elseif ($dateFilter === 'month_till_date') {
+            $query->whereBetween('payment_date', [now()->startOfMonth()->toDateString(), now()->toDateString()]);
+        } elseif ($dateFilter === 'last_month') {
+            $query->whereBetween('payment_date', [now()->subMonth()->startOfMonth()->toDateString(), now()->subMonth()->endOfMonth()->toDateString()]);
+        } elseif ($dateFilter === 'this_year') {
+            $query->whereBetween('payment_date', [now()->startOfYear()->toDateString(), now()->toDateString()]);
+        }
+
+        // Method filter
+        if ($request->filled('method') && $request->method !== 'all') {
+            $query->where('payment_method', strtolower($request->method));
+        }
+
+        // Status filter (completed, partial, reversed)
+        if ($request->filled('status') && $request->status !== 'all') {
+            $st = strtolower($request->status);
+            if ($st === 'reversed') {
+                $query->where('notes', 'like', '%[REVERSED]%');
+            } elseif ($st === 'partial') {
+                $query->where('notes', 'not like', '%[REVERSED]%')
+                    ->whereHas('membership', function ($mq) {
+                        $mq->whereColumn('paid_amount', '<', 'final_amount');
+                    });
+            } elseif ($st === 'completed') {
+                $query->where('notes', 'not like', '%[REVERSED]%')
+                    ->where(function ($q) {
+                        $q->whereNull('membership_id')
+                            ->orWhereHas('membership', function ($mq) {
+                                $mq->whereColumn('paid_amount', '>=', 'final_amount');
+                            });
+                    });
+            }
+        }
+
+        // Due dates filter (has_due, no_due)
+        if ($request->filled('due_filter') && $request->due_filter !== 'all') {
+            $dueF = strtolower($request->due_filter);
+            if ($dueF === 'has_due') {
+                $query->whereHas('membership', function ($mq) {
+                    $mq->whereColumn('paid_amount', '<', 'final_amount');
+                });
+            } elseif ($dueF === 'no_due') {
+                $query->where(function ($q) {
+                    $q->whereNull('membership_id')
+                        ->orWhereHas('membership', function ($mq) {
+                            $mq->whereColumn('paid_amount', '>=', 'final_amount');
+                        });
+                });
+            }
+        }
+
+        // Clone for aggregates
+        $aggQuery = clone $query;
+        $totalCollected = (float) (clone $aggQuery)->where('notes', 'not like', '%[REVERSED]%')->sum('amount');
+
+        // Total Due calculation across filtered records
+        $allPaymentsForDue = (clone $query)->with('membership')->get();
+        $totalDue = 0.0;
+        $countedMemberships = [];
+        foreach ($allPaymentsForDue as $pay) {
+            if ($pay->membership && ! isset($countedMemberships[$pay->membership_id])) {
+                $countedMemberships[$pay->membership_id] = true;
+                $due = max(0, (float) $pay->membership->final_amount - (float) $pay->membership->paid_amount);
+                $totalDue += $due;
+            }
+        }
+
+        $payments = $query->paginate(20)->withQueryString();
+
+        $membershipPlans = MembershipPlan::where('is_active', true)->get();
+        $trainers = Trainer::where('status', 'ACTIVE')->get();
+        $members = Member::with(['activeMembership.plan', 'branch'])->where('status', '!=', 'DELETED')->get();
+
+        return view('app.payments.index', compact(
+            'payments',
+            'members',
+            'membershipPlans',
+            'trainers',
+            'totalCollected',
+            'totalDue'
+        ));
     }
 
     public function storePayment(Request $request): RedirectResponse
     {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
-            'amount' => 'required|numeric|min:1',
-            'payment_method' => 'required|in:cash,card,pos,upi,bank_transfer,online',
+            'membership_id' => 'nullable|exists:memberships,id',
+            'payment_date' => 'nullable|date',
+            'item_type' => 'nullable|string|in:membership,pt,service,custom,due',
+            'membership_plan_id' => 'nullable|exists:membership_plans,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'pt_package_name' => 'nullable|string|max:150',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'sessions' => 'nullable|integer|min:1',
+            'validity_days' => 'nullable|integer|min:1',
+            'custom_item_name' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'collected_amount' => 'required|numeric|min:0',
+            'payment_method' => 'required|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
+            'activate_now' => 'nullable|boolean',
         ]);
 
-        $member = Member::findOrFail($validated['member_id']);
-        $membership = $member->activeMembership;
+        try {
+            $member = Member::with(['activeMembership', 'memberships'])->findOrFail($validated['member_id']);
+            $itemType = $validated['item_type'] ?? 'membership';
+            $membership = null;
+            $paymentDate = $validated['payment_date'] ?? now()->toDateString();
+            $collectedAmount = (float) $validated['collected_amount'];
+            $notes = $validated['notes'] ?? '';
+            $itemLabel = 'Fee Payment';
 
-        $this->paymentService->recordPayment(
-            $member,
-            (float) $validated['amount'],
-            $validated['payment_method'],
-            $membership,
-            $validated['transaction_reference'],
-            $validated['notes']
-        );
+            if (! empty($validated['membership_id'])) {
+                $membership = Membership::where('member_id', $member->id)->find($validated['membership_id']);
+            }
 
-        return back()->with('success', "Payment of \${$validated['amount']} recorded successfully!");
+            if ($itemType === 'membership' && ! empty($validated['membership_plan_id'])) {
+                $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
+                $startDate = $validated['start_date'] ?? now()->toDateString();
+
+                if (! empty($validated['end_date'])) {
+                    $endDate = $validated['end_date'];
+                } else {
+                    $start = Carbon::parse($startDate);
+                    $val = (int) $plan->duration_value;
+                    $end = match ($plan->duration_type) {
+                        'days' => $start->copy()->addDays($val),
+                        'years' => $start->copy()->addYears($val),
+                        default => $start->copy()->addMonths($val),
+                    };
+                    $endDate = $end->toDateString();
+                }
+
+                $price = (float) $validated['amount'];
+                $discount = (float) ($validated['discount'] ?? 0);
+                $tax = (float) ($validated['tax'] ?? 0);
+                $finalAmount = max(0, $price - $discount + $tax);
+
+                $membership = Membership::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $member->branch_id,
+                    'member_id' => $member->id,
+                    'membership_plan_id' => $plan->id,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'price' => $price,
+                    'discount' => $discount,
+                    'tax' => $tax,
+                    'final_amount' => $finalAmount,
+                    'paid_amount' => 0.00,
+                    'status' => 'ACTIVE',
+                    'notes' => $notes ?: "Plan: {$plan->name}",
+                ]);
+
+                $member->update(['status' => 'ACTIVE']);
+                $itemLabel = "Membership: {$plan->name}";
+            } elseif ($itemType === 'pt' && ! empty($validated['pt_package_name'])) {
+                $trainer = ! empty($validated['trainer_id']) ? Trainer::find($validated['trainer_id']) : null;
+                $startDate = Carbon::parse($validated['start_date'] ?? now()->toDateString());
+                $validity = (int) ($validated['validity_days'] ?? 30);
+                $endDate = $startDate->copy()->addDays($validity);
+
+                $meta = $member->metadata ?? [];
+                $ptPackages = $meta['pt_packages'] ?? [];
+
+                $ptEntry = [
+                    'id' => uniqid('pt_'),
+                    'package_name' => $validated['pt_package_name'],
+                    'trainer_id' => $trainer?->id,
+                    'trainer_name' => $trainer?->full_name ?? 'Assigned Trainer',
+                    'sessions' => (int) ($validated['sessions'] ?? 12),
+                    'remaining_sessions' => (int) ($validated['sessions'] ?? 12),
+                    'validity_days' => $validity,
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $endDate->toDateString(),
+                    'amount' => (float) $validated['amount'],
+                    'discount' => (float) ($validated['discount'] ?? 0),
+                    'tax' => (float) ($validated['tax'] ?? 0),
+                    'total' => max(0, (float) $validated['amount'] - (float) ($validated['discount'] ?? 0) + (float) ($validated['tax'] ?? 0)),
+                    'paid' => $collectedAmount,
+                    'status' => 'ACTIVE',
+                    'created_at' => now()->toDateTimeString(),
+                ];
+
+                if ($trainer) {
+                    $meta['trainer_id'] = $trainer->id;
+                }
+
+                array_unshift($ptPackages, $ptEntry);
+                $meta['pt_packages'] = $ptPackages;
+                $member->update(['metadata' => $meta]);
+
+                $membership = $membership ?? $member->activeMembership;
+                $itemLabel = "PT Package: {$validated['pt_package_name']}".($trainer ? " ({$trainer->full_name})" : '');
+            } elseif ($itemType === 'due') {
+                $membership = $membership ?? $member->activeMembership ?? $member->memberships()->latest()->first();
+                $itemLabel = ! empty($validated['custom_item_name']) ? $validated['custom_item_name'] : 'Due Payment Clearance';
+            } else {
+                $membership = $membership ?? $member->activeMembership ?? $member->memberships()->latest()->first();
+                $itemLabel = ! empty($validated['custom_item_name']) ? $validated['custom_item_name'] : 'Fee Payment / General Item';
+            }
+
+            if ($collectedAmount > 0) {
+                $invoiceNumber = 'RCP'.date('Ymd').rand(1000, 9999);
+                $notesCombined = trim($itemLabel.($notes ? " | {$notes}" : ''));
+
+                $payment = MemberPayment::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $member->branch_id,
+                    'member_id' => $member->id,
+                    'membership_id' => $membership?->id,
+                    'invoice_number' => $invoiceNumber,
+                    'amount' => $collectedAmount,
+                    'payment_method' => $validated['payment_method'],
+                    'transaction_reference' => $validated['transaction_reference'] ?? null,
+                    'payment_date' => $paymentDate,
+                    'received_by_user_id' => auth()->id(),
+                    'notes' => $notesCombined,
+                ]);
+
+                if ($membership) {
+                    $newPaid = (float) $membership->paid_amount + $collectedAmount;
+                    $membership->update(['paid_amount' => $newPaid]);
+                }
+
+                ActivityLog::log('member_payment_received', 'Recorded payment of '.($tenant->currency_symbol ?? '₹').number_format($collectedAmount, 2)." from {$member->full_name} ({$invoiceNumber})", $payment);
+            }
+
+            $currency = $tenant->currency_symbol ?? '₹';
+
+            return back()->with('success', "Payment of {$currency}".number_format($collectedAmount, 2)." recorded and receipt issued for {$member->full_name}!");
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+    }
+
+    public function reversePayment(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $payment = MemberPayment::with('membership')->findOrFail($id);
+
+        if ($payment->notes && str_contains($payment->notes, '[REVERSED]')) {
+            return back()->with('error', 'This payment receipt is already marked as reversed.');
+        }
+
+        if ($payment->membership) {
+            $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
+            $payment->membership->update(['paid_amount' => $newPaid]);
+        }
+
+        $payment->update([
+            'notes' => '[REVERSED] '.($payment->notes ?? ''),
+        ]);
+
+        $currency = $tenant->currency_symbol ?? '₹';
+        ActivityLog::log('payment_reversed', "Reversed payment receipt {$payment->invoice_number} of {$currency}".number_format($payment->amount, 2), $payment);
+
+        return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
     }
 
     public function trainers(): View
@@ -1193,5 +1457,268 @@ class AppController extends Controller
             'message' => 'Theme settings saved successfully!',
             'theme' => $validated,
         ]);
+    }
+
+    // Staff & Team Management (for Gym Owners & Managers)
+    public function staff(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $query = User::where('tenant_id', $tenant->id)->with('branches')->latest('id');
+
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%");
+            });
+        }
+
+        if ($request->filled('role') && $request->role !== 'all') {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $staffMembers = $query->paginate(15)->withQueryString();
+
+        // Aggregates
+        $allTenantUsers = User::where('tenant_id', $tenant->id)->get();
+        $totalStaff = $allTenantUsers->count();
+        $activeStaff = $allTenantUsers->where('status', 'ACTIVE')->count();
+        $managerStaff = $allTenantUsers->whereIn('role', ['gym_manager', 'receptionist'])->count();
+        $trainerStaff = $allTenantUsers->where('role', 'trainer')->count();
+
+        $branches = $tenant->branches ?? Branch::all();
+
+        return view('app.staff.index', compact(
+            'staffMembers',
+            'branches',
+            'totalStaff',
+            'activeStaff',
+            'managerStaff',
+            'trainerStaff'
+        ));
+    }
+
+    public function storeStaff(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150|unique:users,email',
+            'phone' => 'required|string|max:30',
+            'role' => 'required|string|in:gym_manager,receptionist,trainer,accountant,staff',
+            'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',
+            'can_login' => 'nullable|boolean',
+            'password' => 'nullable|string|min:6',
+            'employee_id' => 'nullable|string|max:50',
+            'device_emp_no' => 'nullable|string|max:50',
+            'maid_id' => 'nullable|string|max:50',
+            'designation' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:100',
+            'employee_category' => 'nullable|string|max:50',
+            'joining_date' => 'nullable|date',
+            'monthly_salary' => 'nullable|numeric|min:0',
+            'payout_type' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'anniversary' => 'nullable|date',
+            'pan_card' => 'nullable|string|max:50',
+            'bank_account_no' => 'nullable|string|max:50',
+            'bank_ifsc' => 'nullable|string|max:50',
+            'branches' => 'nullable|array',
+            'branches.*' => 'exists:branches,id',
+            'address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $canLogin = $request->boolean('can_login', true);
+        $empId = ! empty($validated['employee_id']) ? $validated['employee_id'] : ('EMP'.str_pad((User::where('tenant_id', $tenant->id)->count() + 1), 3, '0', STR_PAD_LEFT));
+
+        $metadata = [
+            'employee_id' => $empId,
+            'device_emp_no' => $validated['device_emp_no'] ?? null,
+            'maid_id' => $validated['maid_id'] ?? null,
+            'designation' => $validated['designation'] ?? null,
+            'department' => $validated['department'] ?? null,
+            'employee_category' => $validated['employee_category'] ?? null,
+            'joining_date' => $validated['joining_date'] ?? null,
+            'monthly_salary' => $validated['monthly_salary'] ?? null,
+            'payout_type' => $validated['payout_type'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'dob' => $validated['dob'] ?? null,
+            'anniversary' => $validated['anniversary'] ?? null,
+            'pan_card' => $validated['pan_card'] ?? null,
+            'bank_account_no' => $validated['bank_account_no'] ?? null,
+            'bank_ifsc' => $validated['bank_ifsc'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'can_login' => $canLogin,
+        ];
+
+        $pwd = ! empty($validated['password']) ? Hash::make($validated['password']) : Hash::make(Str::random(12));
+
+        $user = User::create([
+            'tenant_id' => $tenant->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'role' => $validated['role'],
+            'status' => $validated['status'],
+            'password' => $pwd,
+            'metadata' => $metadata,
+        ]);
+
+        if (! empty($validated['branches'])) {
+            $user->branches()->sync($validated['branches']);
+        }
+
+        // If trainer role, auto-create or link Trainer record
+        if ($validated['role'] === 'trainer') {
+            $nameParts = explode(' ', $validated['name'], 2);
+            Trainer::firstOrCreate(
+                ['tenant_id' => $tenant->id, 'email' => $validated['email']],
+                [
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? 'Trainer',
+                    'phone' => $validated['phone'],
+                    'specialization' => $validated['designation'] ?? 'Fitness Coach',
+                    'status' => 'ACTIVE',
+                ]
+            );
+        }
+
+        ActivityLog::log('staff_created', "Added new staff member '{$user->name}' ({$empId}) with role '{$user->role}'");
+
+        return back()->with('success', "Staff member '{$user->name}' ({$empId}) added successfully!");
+    }
+
+    public function updateStaff(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:150|unique:users,email,'.$user->id,
+            'phone' => 'required|string|max:30',
+            'role' => 'required|string|in:gym_owner,gym_manager,receptionist,trainer,accountant,staff',
+            'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',
+            'can_login' => 'nullable|boolean',
+            'password' => 'nullable|string|min:6',
+            'employee_id' => 'nullable|string|max:50',
+            'device_emp_no' => 'nullable|string|max:50',
+            'maid_id' => 'nullable|string|max:50',
+            'designation' => 'nullable|string|max:100',
+            'department' => 'nullable|string|max:100',
+            'employee_category' => 'nullable|string|max:50',
+            'joining_date' => 'nullable|date',
+            'monthly_salary' => 'nullable|numeric|min:0',
+            'payout_type' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'anniversary' => 'nullable|date',
+            'pan_card' => 'nullable|string|max:50',
+            'bank_account_no' => 'nullable|string|max:50',
+            'bank_ifsc' => 'nullable|string|max:50',
+            'branches' => 'nullable|array',
+            'branches.*' => 'exists:branches,id',
+            'address' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $canLogin = $request->boolean('can_login', true);
+        $currentMeta = $user->metadata ?? [];
+        $empId = ! empty($validated['employee_id']) ? $validated['employee_id'] : ($currentMeta['employee_id'] ?? ('EMP'.str_pad($user->id, 3, '0', STR_PAD_LEFT)));
+
+        $metadata = array_merge($currentMeta, [
+            'employee_id' => $empId,
+            'device_emp_no' => $validated['device_emp_no'] ?? null,
+            'maid_id' => $validated['maid_id'] ?? null,
+            'designation' => $validated['designation'] ?? null,
+            'department' => $validated['department'] ?? null,
+            'employee_category' => $validated['employee_category'] ?? null,
+            'joining_date' => $validated['joining_date'] ?? null,
+            'monthly_salary' => $validated['monthly_salary'] ?? null,
+            'payout_type' => $validated['payout_type'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'dob' => $validated['dob'] ?? null,
+            'anniversary' => $validated['anniversary'] ?? null,
+            'pan_card' => $validated['pan_card'] ?? null,
+            'bank_account_no' => $validated['bank_account_no'] ?? null,
+            'bank_ifsc' => $validated['bank_ifsc'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'can_login' => $canLogin,
+        ]);
+
+        $updateData = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'status' => $validated['status'],
+            'metadata' => $metadata,
+        ];
+
+        // Do not change role of primary gym owner
+        if ($user->role !== 'gym_owner') {
+            $updateData['role'] = $validated['role'];
+        }
+
+        if (! empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
+
+        if (isset($validated['branches'])) {
+            $user->branches()->sync($validated['branches']);
+        }
+
+        ActivityLog::log('staff_updated', "Updated staff member details for '{$user->name}'");
+
+        return back()->with('success', "Staff member '{$user->name}' updated successfully!");
+    }
+
+    public function deleteStaff(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot delete your own logged-in account.');
+        }
+
+        if ($user->role === 'gym_owner') {
+            return back()->with('error', 'The primary Gym Owner account cannot be deleted.');
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        ActivityLog::log('staff_deleted', "Deleted staff member '{$name}'");
+
+        return back()->with('success', "Staff member '{$name}' deleted successfully.");
+    }
+
+    public function toggleStaffStatus(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot change the status of your own account.');
+        }
+
+        $newStatus = $user->status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+        $user->update(['status' => $newStatus]);
+
+        ActivityLog::log('staff_status_changed', "Changed status of staff '{$user->name}' to {$newStatus}");
+
+        return back()->with('success', "Status for '{$user->name}' changed to {$newStatus}.");
     }
 }
