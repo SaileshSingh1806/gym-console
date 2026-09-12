@@ -13,54 +13,72 @@
 
         <!-- Membership Plans Available -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             @forelse($plans as $plan)
                 <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors shadow-sm">
                     <div>
                         <div class="flex justify-between items-start mb-2">
+                        <div class="flex justify-between items-start gap-2 mb-1.5">
                             <div>
                                 <h4 class="font-bold text-white text-base">{{ $plan->name }}</h4>
+                                <h4 class="font-bold text-white text-sm leading-tight">{{ $plan->name }}</h4>
                                 <div class="mt-1">
                                     @if($plan->plan_type === 'duo')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                                             <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                                            <svg class="w-3 h-3 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                                             <span>Duo Plan (2 Persons)</span>
                                         </span>
                                     @elseif($plan->plan_type === 'family')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-500/15 text-purple-300 border border-purple-500/30">
                                             <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                                            <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             <span>Family Plan (4 Persons)</span>
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                             <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                                            <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                             <span>Single Plan (1 Person)</span>
                                         </span>
                                     @endif
                                 </div>
                             </div>
                             <span class="px-2 py-0.5 rounded text-[10px] {{ $plan->is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-500' }} font-bold">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] {{ $plan->is_active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-500' }} font-bold">
                                 {{ $plan->is_active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
                         <p class="text-xs text-slate-400 mb-4 min-h-[32px]">{{ $plan->description ?? 'Standard gym access membership' }}</p>
+                        <p class="text-[11px] text-slate-400 mb-2.5 line-clamp-2 min-h-[28px]">{{ $plan->description ?? 'Standard gym access membership' }}</p>
 
                         <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 mb-4 space-y-1.5 text-xs text-slate-300">
+                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 mb-3 space-y-1.5 text-xs text-slate-300">
                             <div class="flex justify-between items-baseline">
                                 <span class="text-slate-400">Plan Fee:</span>
                                 <span class="text-2xl font-extrabold text-amber-400">
+                                <span class="text-[11px] text-slate-400">Plan Fee:</span>
+                                <span class="text-lg font-black text-amber-400">
                                     {{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($plan->price, 2) }}
                                 </span>
                             </div>
                             <div class="flex justify-between border-t border-slate-800/60 pt-1.5">
+                            <div class="flex justify-between border-t border-slate-800/60 pt-1 text-[11px]">
                                 <span class="text-slate-400">Duration:</span>
                                 <span class="font-bold text-white capitalize">{{ $plan->duration_value }} {{ $plan->duration_type }}</span>
                             </div>
                             <div class="flex justify-between">
+                            <div class="flex justify-between text-[11px]">
                                 <span class="text-slate-400">Members Allowed:</span>
                                 <span class="font-semibold text-white">{{ $plan->max_members ?? ($plan->plan_type === 'duo' ? 2 : ($plan->plan_type === 'family' ? 4 : 1)) }} {{ ($plan->max_members ?? 1) > 1 ? 'Persons' : 'Person' }}</span>
                             </div>
                             @if($plan->tax_rate > 0)
                                 <div class="flex justify-between">
+                                <div class="flex justify-between text-[11px]">
                                     <span class="text-slate-400">Tax Rate:</span>
                                     <span class="font-semibold text-slate-300">{{ $plan->tax_rate }}%</span>
                                 </div>
@@ -69,6 +87,7 @@
                     </div>
 
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-800">
+                    <div class="flex items-center gap-2 pt-2.5 border-t border-slate-800">
                         <button @click="editPlan = {{ json_encode([
                             'id' => $plan->id,
                             'name' => $plan->name,
@@ -81,6 +100,7 @@
                             'tax_rate' => $plan->tax_rate,
                             'is_active' => (bool)$plan->is_active,
                         ]) }}" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+                        ]) }}" class="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
                             Edit Plan
                         </button>
                         <form action="{{ route('app.membership-plans.delete', $plan->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this membership plan?');">
@@ -88,6 +108,8 @@
                             @method('DELETE')
                             <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-xs font-bold transition-all" title="Delete Plan">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <button type="submit" class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-xs font-bold transition-all" title="Delete Plan">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </form>
                     </div>
@@ -96,12 +118,17 @@
                 <div class="col-span-3 p-10 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-3">
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center font-bold">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                <div class="col-span-full p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 mx-auto flex items-center justify-center font-bold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
                     <h4 class="text-base font-bold text-white">No Membership Plans Configured</h4>
+                    <h4 class="text-sm font-bold text-white">No Membership Plans Configured</h4>
                     <p class="text-xs text-slate-400 max-w-md mx-auto">
                         Create your first membership package (Single, Duo, or Family) so you can enroll new members.
                     </p>
                     <button @click="showNewModal = true; newPlanType = 'single'" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/10">
+                    <button @click="showNewModal = true; newPlanType = 'single'" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/10">
                         + Create Your First Plan
                     </button>
                 </div>

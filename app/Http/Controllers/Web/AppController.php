@@ -11,10 +11,13 @@ use App\Models\ClassBooking;
 use App\Models\ClassSchedule;
 use App\Models\Coupon;
 use App\Models\Device;
+use App\Models\DietMeal;
 use App\Models\DietPlan;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\GymClass;
+use App\Models\GymService;
+use App\Models\GymServiceBooking;
 use App\Models\InventoryItem;
 use App\Models\Lead;
 use App\Models\Member;
@@ -28,6 +31,7 @@ use App\Models\PtSession;
 use App\Models\Setting;
 use App\Models\Trainer;
 use App\Models\User;
+use App\Models\WorkoutExercise;
 use App\Models\WorkoutPlan;
 use App\Services\AccessControl\AccessControlService;
 use App\Services\AttendanceService;
@@ -2124,19 +2128,421 @@ class AppController extends Controller
     public function workouts(): View
     {
         $plans = WorkoutPlan::with(['member', 'trainer', 'exercises'])->latest()->paginate(15);
-        $members = Member::where('status', 'ACTIVE')->get();
-        $trainers = Trainer::where('status', 'ACTIVE')->get();
+        $members = Member::where('status', 'ACTIVE')->orderBy('first_name')->get();
+        $trainers = Trainer::where('status', 'ACTIVE')->orderBy('first_name')->get();
 
         return view('app.workouts.index', compact('plans', 'members', 'trainers'));
     }
 
+    public function storeWorkout(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'member_id' => 'nullable|exists:members,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'goal' => 'nullable|string|max:255',
+            'level' => 'nullable|string|max:255',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'is_template' => 'nullable|boolean',
+            'notes' => 'nullable|string',
+            'exercises' => 'nullable|array',
+            'exercises.*.exercise_name' => 'required_with:exercises|string|max:255',
+            'exercises.*.day' => 'nullable|string',
+            'exercises.*.sets' => 'nullable|integer|min:1',
+            'exercises.*.reps' => 'nullable|string',
+            'exercises.*.weight' => 'nullable|string',
+            'exercises.*.rest_seconds' => 'nullable|integer',
+            'exercises.*.notes' => 'nullable|string',
+        ]);
+
+        $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
+
+        $workout = WorkoutPlan::create([
+            'tenant_id' => $tenant->id,
+            'member_id' => $isTemplate ? null : ($validated['member_id'] ?? null),
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'title' => $validated['title'],
+            'goal' => $validated['goal'] ?? 'General Fitness',
+            'level' => $validated['level'] ?? 'Beginner',
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'is_template' => $isTemplate,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        if (! empty($validated['exercises']) && is_array($validated['exercises'])) {
+            $order = 1;
+            foreach ($validated['exercises'] as $ex) {
+                if (! empty($ex['exercise_name'])) {
+                    WorkoutExercise::create([
+                        'workout_plan_id' => $workout->id,
+                        'day' => $ex['day'] ?? 'Day 1',
+                        'exercise_name' => $ex['exercise_name'],
+                        'sets' => $ex['sets'] ?? 3,
+                        'reps' => $ex['reps'] ?? '10-12',
+                        'weight' => $ex['weight'] ?? null,
+                        'rest_seconds' => $ex['rest_seconds'] ?? 60,
+                        'notes' => $ex['notes'] ?? null,
+                        'sort_order' => $order++,
+                    ]);
+                }
+            }
+        }
+
+        ActivityLog::log('workout_created', "Created workout routine '{$workout->title}'", $workout);
+
+        return back()->with('success', "Workout routine '{$workout->title}' created successfully!");
+    }
+
+    public function deleteWorkout(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $workout = WorkoutPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $title = $workout->title;
+        WorkoutExercise::where('workout_plan_id', $workout->id)->delete();
+        $workout->delete();
+
+        ActivityLog::log('workout_deleted', "Deleted workout routine '{$title}'");
+
+        return back()->with('success', "Workout routine '{$title}' deleted successfully!");
+    }
+
     public function diets(): View
     {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $plans = DietPlan::with(['member', 'trainer', 'meals'])->latest()->paginate(15);
-        $members = Member::where('status', 'ACTIVE')->get();
-        $trainers = Trainer::where('status', 'ACTIVE')->get();
+        $members = Member::where('status', 'ACTIVE')->orderBy('first_name')->get();
+        $trainers = Trainer::where('status', 'ACTIVE')->orderBy('first_name')->get();
 
-        return view('app.diets.index', compact('plans', 'members', 'trainers'));
+        $totalPlans = DietPlan::count();
+        $memberPlansCount = DietPlan::whereNotNull('member_id')->where('is_template', false)->count();
+        $templatePlansCount = DietPlan::where('is_template', true)->count();
+
+        return view('app.diets.index', compact('plans', 'members', 'trainers', 'tenant', 'totalPlans', 'memberPlansCount', 'templatePlansCount'));
+    }
+
+    public function storeDiet(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'member_id' => 'nullable|exists:members,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'is_template' => 'nullable|boolean',
+            'daily_calories' => 'nullable|integer|min:0|max:15000',
+            'protein_grams' => 'nullable|integer|min:0|max:1000',
+            'carbs_grams' => 'nullable|integer|min:0|max:1500',
+            'fat_grams' => 'nullable|integer|min:0|max:1000',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'guidelines' => 'nullable|string',
+            'meals' => 'nullable|array',
+            'meals.*.meal_type' => 'nullable|string|in:breakfast,morning_snack,lunch,evening_snack,dinner,post_workout',
+            'meals.*.recommended_time' => 'nullable|string',
+            'meals.*.meal_name' => 'nullable|string|max:255',
+            'meals.*.items_description' => 'nullable|string',
+            'meals.*.calories' => 'nullable|integer|min:0',
+        ]);
+
+        $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
+
+        $plan = DietPlan::create([
+            'tenant_id' => $tenant->id,
+            'member_id' => $isTemplate ? null : ($validated['member_id'] ?? null),
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'title' => $validated['title'],
+            'daily_calories' => $validated['daily_calories'] ?? null,
+            'protein_grams' => $validated['protein_grams'] ?? null,
+            'carbs_grams' => $validated['carbs_grams'] ?? null,
+            'fat_grams' => $validated['fat_grams'] ?? null,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'is_template' => $isTemplate,
+            'guidelines' => $validated['guidelines'] ?? null,
+        ]);
+
+        if (! empty($validated['meals']) && is_array($validated['meals'])) {
+            $order = 1;
+            foreach ($validated['meals'] as $mealData) {
+                if (! empty($mealData['meal_name']) || ! empty($mealData['items_description'])) {
+                    DietMeal::create([
+                        'diet_plan_id' => $plan->id,
+                        'meal_type' => $mealData['meal_type'] ?? 'breakfast',
+                        'recommended_time' => $mealData['recommended_time'] ?? null,
+                        'meal_name' => $mealData['meal_name'] ?? 'Meal',
+                        'items_description' => $mealData['items_description'] ?? null,
+                        'calories' => $mealData['calories'] ?? null,
+                        'sort_order' => $order++,
+                    ]);
+                }
+            }
+        }
+
+        ActivityLog::log('diet_created', "Created diet plan '{$plan->title}'", $plan);
+
+        return back()->with('success', "Diet plan '{$plan->title}' created successfully!");
+    }
+
+    public function updateDiet(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $plan = DietPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'member_id' => 'nullable|exists:members,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'is_template' => 'nullable|boolean',
+            'daily_calories' => 'nullable|integer|min:0|max:15000',
+            'protein_grams' => 'nullable|integer|min:0|max:1000',
+            'carbs_grams' => 'nullable|integer|min:0|max:1500',
+            'fat_grams' => 'nullable|integer|min:0|max:1000',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'guidelines' => 'nullable|string',
+            'meals' => 'nullable|array',
+            'meals.*.meal_type' => 'nullable|string|in:breakfast,morning_snack,lunch,evening_snack,dinner,post_workout',
+            'meals.*.recommended_time' => 'nullable|string',
+            'meals.*.meal_name' => 'nullable|string|max:255',
+            'meals.*.items_description' => 'nullable|string',
+            'meals.*.calories' => 'nullable|integer|min:0',
+        ]);
+
+        $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
+
+        $plan->update([
+            'member_id' => $isTemplate ? null : ($validated['member_id'] ?? null),
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'title' => $validated['title'],
+            'daily_calories' => $validated['daily_calories'] ?? null,
+            'protein_grams' => $validated['protein_grams'] ?? null,
+            'carbs_grams' => $validated['carbs_grams'] ?? null,
+            'fat_grams' => $validated['fat_grams'] ?? null,
+            'start_date' => $validated['start_date'] ?? null,
+            'end_date' => $validated['end_date'] ?? null,
+            'is_template' => $isTemplate,
+            'guidelines' => $validated['guidelines'] ?? null,
+        ]);
+
+        // Re-sync meals
+        DietMeal::where('diet_plan_id', $plan->id)->delete();
+        if (! empty($validated['meals']) && is_array($validated['meals'])) {
+            $order = 1;
+            foreach ($validated['meals'] as $mealData) {
+                if (! empty($mealData['meal_name']) || ! empty($mealData['items_description'])) {
+                    DietMeal::create([
+                        'diet_plan_id' => $plan->id,
+                        'meal_type' => $mealData['meal_type'] ?? 'breakfast',
+                        'recommended_time' => $mealData['recommended_time'] ?? null,
+                        'meal_name' => $mealData['meal_name'] ?? 'Meal',
+                        'items_description' => $mealData['items_description'] ?? null,
+                        'calories' => $mealData['calories'] ?? null,
+                        'sort_order' => $order++,
+                    ]);
+                }
+            }
+        }
+
+        ActivityLog::log('diet_updated', "Updated diet plan '{$plan->title}'", $plan);
+
+        return back()->with('success', "Diet plan '{$plan->title}' updated successfully!");
+    }
+
+    public function deleteDiet(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $plan = DietPlan::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $title = $plan->title;
+        DietMeal::where('diet_plan_id', $plan->id)->delete();
+        $plan->delete();
+
+        ActivityLog::log('diet_deleted', "Deleted diet plan '{$title}'");
+
+        return back()->with('success', "Diet plan '{$title}' deleted successfully!");
+    }
+
+    public function seedStarterDiets(): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $presets = [
+            [
+                'title' => 'Fat Loss & Shred (1,600 kcal) - High Protein',
+                'daily_calories' => 1600,
+                'protein_grams' => 140,
+                'carbs_grams' => 150,
+                'fat_grams' => 45,
+                'is_template' => true,
+                'guidelines' => 'Drink at least 3.5 to 4 liters of water daily. Avoid added sugars, sugary beverages, and refined flour. Maintain consistent sleep 7-8 hours.',
+                'meals' => [
+                    [
+                        'meal_type' => 'breakfast',
+                        'recommended_time' => '08:00',
+                        'meal_name' => 'Oats Bowl & Egg Whites',
+                        'items_description' => '40g rolled oats cooked in water/almond milk, 4 boiled egg whites, 1 pinch cinnamon, 5 almonds',
+                        'calories' => 350,
+                    ],
+                    [
+                        'meal_type' => 'morning_snack',
+                        'recommended_time' => '11:00',
+                        'meal_name' => 'Fruit & Green Tea',
+                        'items_description' => '1 medium green apple or seasonal papaya (150g) + 1 cup warm green tea',
+                        'calories' => 110,
+                    ],
+                    [
+                        'meal_type' => 'lunch',
+                        'recommended_time' => '13:30',
+                        'meal_name' => 'Grilled Chicken / Soya Bowl',
+                        'items_description' => '100g cooked brown rice, 150g grilled chicken breast or air-fried tofu/soya chunks, 1 bowl cucumber tomato salad',
+                        'calories' => 520,
+                    ],
+                    [
+                        'meal_type' => 'evening_snack',
+                        'recommended_time' => '17:00',
+                        'meal_name' => 'Pre-Workout Energizer',
+                        'items_description' => '1 scoop whey protein in water or 1 cup black coffee + 1 slice whole wheat toast with 1 tsp peanut butter',
+                        'calories' => 200,
+                    ],
+                    [
+                        'meal_type' => 'dinner',
+                        'recommended_time' => '20:30',
+                        'meal_name' => 'Light Clean Dinner',
+                        'items_description' => '1-2 whole wheat phulkas, 1 bowl yellow dal, 100g sautéed broccoli/zucchini or grilled paneer',
+                        'calories' => 420,
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Lean Muscle Mass (2,500 kcal) - Hypertrophy',
+                'daily_calories' => 2500,
+                'protein_grams' => 180,
+                'carbs_grams' => 280,
+                'fat_grams' => 70,
+                'is_template' => true,
+                'guidelines' => 'Eat every 3-3.5 hours. Ensure 5g creatine monohydrate with post-workout meal. Hydrate with minimum 4 liters daily.',
+                'meals' => [
+                    [
+                        'meal_type' => 'breakfast',
+                        'recommended_time' => '08:30',
+                        'meal_name' => 'Power Breakfast & Shake',
+                        'items_description' => '3 whole eggs + 2 egg whites omelette, 2 multigrain bread slices, 1 banana with 1 glass milk',
+                        'calories' => 600,
+                    ],
+                    [
+                        'meal_type' => 'morning_snack',
+                        'recommended_time' => '11:30',
+                        'meal_name' => 'Nuts & Greek Yogurt',
+                        'items_description' => '150g Greek yogurt / curd, 20g mixed walnuts and almonds, 1 tsp chia seeds',
+                        'calories' => 280,
+                    ],
+                    [
+                        'meal_type' => 'lunch',
+                        'recommended_time' => '13:45',
+                        'meal_name' => 'High Carb & Protein Lunch Bowl',
+                        'items_description' => '200g basmati or brown rice, 180g roasted chicken or paneer, 1 bowl dal tadka, fresh salad',
+                        'calories' => 750,
+                    ],
+                    [
+                        'meal_type' => 'post_workout',
+                        'recommended_time' => '18:00',
+                        'meal_name' => 'Anabolic Window Recovery',
+                        'items_description' => '1.5 scoops whey isolate with chilled water, 1 large banana, 2 dates',
+                        'calories' => 320,
+                    ],
+                    [
+                        'meal_type' => 'dinner',
+                        'recommended_time' => '21:00',
+                        'meal_name' => 'Night Recovery Fuel',
+                        'items_description' => '3 whole wheat rotis, 150g fish fillet / paneer bhurji, 1 big bowl mixed vegetable sabzi',
+                        'calories' => 550,
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Pure Vegetarian Fitness (2,000 kcal)',
+                'daily_calories' => 2000,
+                'protein_grams' => 130,
+                'carbs_grams' => 230,
+                'fat_grams' => 60,
+                'is_template' => true,
+                'guidelines' => 'Focus on combining legumes with cereals for complete amino acid profiles. Add lemon to meals to boost non-heme iron absorption.',
+                'meals' => [
+                    [
+                        'meal_type' => 'breakfast',
+                        'recommended_time' => '08:30',
+                        'meal_name' => 'Besan Chilla & Sprouts',
+                        'items_description' => '2 paneer-stuffed besan chillas, 1 bowl steamed moong sprouts with lemon & chaat masala, green chutney',
+                        'calories' => 450,
+                    ],
+                    [
+                        'meal_type' => 'morning_snack',
+                        'recommended_time' => '11:30',
+                        'meal_name' => 'Nutty Fruit Mix',
+                        'items_description' => '1 apple, 15g soaked almonds, 5 walnuts',
+                        'calories' => 220,
+                    ],
+                    [
+                        'meal_type' => 'lunch',
+                        'recommended_time' => '13:30',
+                        'meal_name' => 'Dal, Paneer & Brown Rice Bowl',
+                        'items_description' => '150g brown rice or 2 multigrain rotis, 150g low-fat paneer curry, 1 bowl rajma or chana, crunchy salad',
+                        'calories' => 620,
+                    ],
+                    [
+                        'meal_type' => 'evening_snack',
+                        'recommended_time' => '17:30',
+                        'meal_name' => 'Roasted Chana & Whey Shake',
+                        'items_description' => '1 scoop plant/whey protein, 30g roasted roasted chana (Bengal gram)',
+                        'calories' => 260,
+                    ],
+                    [
+                        'meal_type' => 'dinner',
+                        'recommended_time' => '20:30',
+                        'meal_name' => 'Soya / Tofu Curry & Rotis',
+                        'items_description' => '2 whole wheat phulkas, 100g nutri soya chunks or tofu in light tomato gravy, cucumber salad',
+                        'calories' => 450,
+                    ],
+                ],
+            ],
+        ];
+
+        foreach ($presets as $preset) {
+            $plan = DietPlan::create([
+                'tenant_id' => $tenant->id,
+                'member_id' => null,
+                'trainer_id' => null,
+                'title' => $preset['title'],
+                'daily_calories' => $preset['daily_calories'],
+                'protein_grams' => $preset['protein_grams'],
+                'carbs_grams' => $preset['carbs_grams'],
+                'fat_grams' => $preset['fat_grams'],
+                'is_template' => true,
+                'guidelines' => $preset['guidelines'],
+            ]);
+
+            $order = 1;
+            foreach ($preset['meals'] as $meal) {
+                DietMeal::create([
+                    'diet_plan_id' => $plan->id,
+                    'meal_type' => $meal['meal_type'],
+                    'recommended_time' => $meal['recommended_time'],
+                    'meal_name' => $meal['meal_name'],
+                    'items_description' => $meal['items_description'],
+                    'calories' => $meal['calories'],
+                    'sort_order' => $order++,
+                ]);
+            }
+        }
+
+        ActivityLog::log('diet_seeded', 'Seeded starter diet templates');
+
+        return back()->with('success', 'Starter diet templates created successfully! You can now assign them or send them via WhatsApp.');
     }
 
     public function leads(): View
@@ -2651,5 +3057,312 @@ class AppController extends Controller
         ActivityLog::log('staff_password_reset', "Reset password for staff member '{$user->name}'");
 
         return back()->with('success', "Password for '{$user->name}' updated successfully!");
+    }
+
+    public function services(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        // Auto-seed starter services if empty for this gym
+        if (GymService::where('tenant_id', $tenant->id)->count() === 0) {
+            $starterServices = [
+                [
+                    'name' => 'Body Massage',
+                    'amount' => 600,
+                    'duration_minutes' => 60,
+                    'timeslot_availability' => '10:00 AM - 8:00 PM',
+                    'description' => 'Professional therapeutic massage to help with muscle recovery and relaxation.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+                [
+                    'name' => 'Locker Rental',
+                    'amount' => 300,
+                    'duration_minutes' => 0,
+                    'timeslot_availability' => 'Monthly',
+                    'description' => 'Secure personal locker for your belongings during workouts.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => false,
+                    'is_locker_service' => true,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+                [
+                    'name' => 'Nutrition Consultation',
+                    'amount' => 350,
+                    'duration_minutes' => 45,
+                    'timeslot_availability' => 'By Appointment',
+                    'description' => 'Personalized diet plans and nutrition guidance from our certified nutritionists.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+                [
+                    'name' => 'Personal Training',
+                    'amount' => 500,
+                    'duration_minutes' => 60,
+                    'timeslot_availability' => 'By Appointment',
+                    'description' => 'One-on-one training sessions with certified fitness experts tailored to your goals.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+                [
+                    'name' => 'Sauna',
+                    'amount' => 200,
+                    'duration_minutes' => 30,
+                    'timeslot_availability' => '9:00 AM - 9:00 PM',
+                    'description' => 'Relax and detoxify in our premium sauna facility. Helps improve circulation and reduce stress.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+                [
+                    'name' => 'Steam bath',
+                    'amount' => 512,
+                    'duration_minutes' => 45,
+                    'timeslot_availability' => '9:00 AM - 9:00 PM',
+                    'description' => 'Steam bath sessions for muscle relaxation, post-workout rejuvenation, and detox.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => true,
+                    'session_count' => 2,
+                ],
+                [
+                    'name' => 'Towel Service',
+                    'amount' => 50,
+                    'duration_minutes' => 0,
+                    'timeslot_availability' => 'Daily',
+                    'description' => 'Fresh towels provided for your convenience during each visit.',
+                    'status' => 'active',
+                    'is_visible_in_portal' => true,
+                    'is_locker_service' => false,
+                    'is_session_countable' => false,
+                    'session_count' => 1,
+                ],
+            ];
+
+            foreach ($starterServices as $svc) {
+                $svc['tenant_id'] = $tenant->id;
+                GymService::create($svc);
+            }
+        }
+
+        $services = GymService::where('tenant_id', $tenant->id)->latest()->get();
+        $allBookings = GymServiceBooking::where('tenant_id', $tenant->id)
+            ->with(['member', 'service'])
+            ->latest('booking_date')
+            ->latest('id')
+            ->paginate(20);
+
+        $bookingRequests = GymServiceBooking::where('tenant_id', $tenant->id)
+            ->where('status', 'pending')
+            ->with(['member', 'service'])
+            ->latest()
+            ->get();
+
+        $members = Member::where('status', 'ACTIVE')->orderBy('first_name')->get();
+
+        return view('app.services.index', compact('services', 'allBookings', 'bookingRequests', 'members'));
+    }
+
+    public function storeService(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:0',
+            'timeslot_availability' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'is_visible_in_portal' => 'nullable|boolean',
+            'is_locker_service' => 'nullable|boolean',
+            'is_session_countable' => 'nullable|boolean',
+            'session_count' => 'nullable|integer|min:1',
+        ]);
+
+        $service = GymService::create([
+            'tenant_id' => $tenant->id,
+            'name' => $validated['name'],
+            'amount' => $validated['amount'],
+            'duration_minutes' => $validated['duration_minutes'] ?? 60,
+            'timeslot_availability' => $validated['timeslot_availability'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? 'active',
+            'is_visible_in_portal' => $request->boolean('is_visible_in_portal', true),
+            'is_locker_service' => $request->boolean('is_locker_service', false),
+            'is_session_countable' => $request->boolean('is_session_countable', false),
+            'session_count' => $request->boolean('is_session_countable') ? (int) ($validated['session_count'] ?? 1) : 1,
+        ]);
+
+        ActivityLog::log('service_created', "Created gym service '{$service->name}'", $service);
+
+        return back()->with('success', "Service '{$service->name}' added successfully!");
+    }
+
+    public function updateService(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $service = GymService::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:0',
+            'timeslot_availability' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'is_visible_in_portal' => 'nullable|boolean',
+            'is_locker_service' => 'nullable|boolean',
+            'is_session_countable' => 'nullable|boolean',
+            'session_count' => 'nullable|integer|min:1',
+        ]);
+
+        $service->update([
+            'name' => $validated['name'],
+            'amount' => $validated['amount'],
+            'duration_minutes' => $validated['duration_minutes'] ?? 60,
+            'timeslot_availability' => $validated['timeslot_availability'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'status' => $validated['status'] ?? 'active',
+            'is_visible_in_portal' => $request->boolean('is_visible_in_portal', false),
+            'is_locker_service' => $request->boolean('is_locker_service', false),
+            'is_session_countable' => $request->boolean('is_session_countable', false),
+            'session_count' => $request->boolean('is_session_countable') ? (int) ($validated['session_count'] ?? 1) : 1,
+        ]);
+
+        ActivityLog::log('service_updated', "Updated gym service '{$service->name}'", $service);
+
+        return back()->with('success', "Service '{$service->name}' updated successfully!");
+    }
+
+    public function toggleServiceVisibility(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $service = GymService::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $service->update([
+            'is_visible_in_portal' => ! $service->is_visible_in_portal,
+        ]);
+
+        $state = $service->is_visible_in_portal ? 'Visible in portal' : 'Hidden from portal';
+        ActivityLog::log('service_visibility_changed', "Changed visibility of service '{$service->name}' to {$state}");
+
+        return back()->with('success', "Service '{$service->name}' is now {$state}.");
+    }
+
+    public function deleteService(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $service = GymService::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $name = $service->name;
+        $service->delete();
+
+        ActivityLog::log('service_deleted', "Deleted gym service '{$name}'");
+
+        return back()->with('success', "Service '{$name}' deleted successfully.");
+    }
+
+    public function storeServiceBooking(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'gym_service_id' => 'required|exists:gym_services,id',
+            'booking_date' => 'required|date',
+            'booking_time' => 'nullable|string',
+            'amount_paid' => 'nullable|numeric|min:0',
+            'locker_number' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
+        ]);
+
+        $service = GymService::findOrFail($validated['gym_service_id']);
+        $totalSessions = $service->is_session_countable ? max(1, $service->session_count) : 1;
+        $amountPaid = isset($validated['amount_paid']) ? (float) $validated['amount_paid'] : (float) $service->amount;
+
+        $booking = GymServiceBooking::create([
+            'tenant_id' => $tenant->id,
+            'member_id' => $validated['member_id'],
+            'gym_service_id' => $validated['gym_service_id'],
+            'booking_date' => $validated['booking_date'],
+            'booking_time' => ! empty($validated['booking_time']) ? $validated['booking_time'] : null,
+            'amount_paid' => $amountPaid,
+            'total_sessions' => $totalSessions,
+            'sessions_left' => $totalSessions,
+            'locker_number' => $validated['locker_number'] ?? null,
+            'status' => 'active',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        ActivityLog::log('service_booking_created', "Created booking for '{$service->name}'", $booking);
+
+        return back()->with('success', "Service '{$service->name}' booked successfully for member!");
+    }
+
+    public function deductServiceSession(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $booking = GymServiceBooking::where('tenant_id', $tenant->id)->with(['member', 'service'])->findOrFail($id);
+
+        if ($booking->sessions_left <= 0) {
+            return back()->with('error', 'No sessions remaining on this booking.');
+        }
+
+        $booking->sessions_left -= 1;
+        if ($booking->sessions_left === 0) {
+            $booking->status = 'completed';
+        }
+        $booking->save();
+
+        ActivityLog::log('service_session_deducted', "Deducted 1 session of '{$booking->service->name}' for {$booking->member->full_name}. Remaining: {$booking->sessions_left}", $booking);
+
+        return back()->with('success', "1 session deducted. Remaining sessions: {$booking->sessions_left}/{$booking->total_sessions}");
+    }
+
+    public function updateBookingStatus(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $booking = GymServiceBooking::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:active,pending,completed,cancelled',
+            'locker_number' => 'nullable|string|max:50',
+        ]);
+
+        $booking->status = $validated['status'];
+        if ($request->filled('locker_number')) {
+            $booking->locker_number = $validated['locker_number'];
+        }
+        $booking->save();
+
+        ActivityLog::log('service_booking_status_updated', "Updated booking #{$booking->id} status to {$booking->status}", $booking);
+
+        return back()->with('success', "Booking status updated to '{$booking->status}'.");
+    }
+
+    public function deleteServiceBooking(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $booking = GymServiceBooking::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $booking->delete();
+
+        ActivityLog::log('service_booking_deleted', "Deleted service booking #{$id}");
+
+        return back()->with('success', 'Service booking deleted successfully.');
     }
 }

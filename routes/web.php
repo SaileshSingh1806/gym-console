@@ -89,7 +89,25 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
 
     // Workouts & Diets
     Route::get('/workouts', [AppController::class, 'workouts'])->name('app.workouts.index');
+    Route::post('/workouts', [AppController::class, 'storeWorkout'])->name('app.workouts.store');
+    Route::delete('/workouts/{id}', [AppController::class, 'deleteWorkout'])->name('app.workouts.delete');
+
     Route::get('/diets', [AppController::class, 'diets'])->name('app.diets.index');
+    Route::post('/diets', [AppController::class, 'storeDiet'])->name('app.diets.store');
+    Route::post('/diets/seed-starter', [AppController::class, 'seedStarterDiets'])->name('app.diets.seed');
+    Route::post('/diets/{id}', [AppController::class, 'updateDiet'])->name('app.diets.update')->whereNumber('id');
+    Route::delete('/diets/{id}', [AppController::class, 'deleteDiet'])->name('app.diets.delete')->whereNumber('id');
+
+    // Services & Bookings
+    Route::get('/services', [AppController::class, 'services'])->name('app.services.index');
+    Route::post('/services', [AppController::class, 'storeService'])->name('app.services.store');
+    Route::post('/services/{id}', [AppController::class, 'updateService'])->name('app.services.update')->whereNumber('id');
+    Route::post('/services/{id}/toggle-visibility', [AppController::class, 'toggleServiceVisibility'])->name('app.services.toggle-visibility')->whereNumber('id');
+    Route::delete('/services/{id}', [AppController::class, 'deleteService'])->name('app.services.delete')->whereNumber('id');
+    Route::post('/services/bookings', [AppController::class, 'storeServiceBooking'])->name('app.services.bookings.store');
+    Route::post('/services/bookings/{id}/deduct', [AppController::class, 'deductServiceSession'])->name('app.services.bookings.deduct')->whereNumber('id');
+    Route::post('/services/bookings/{id}/status', [AppController::class, 'updateBookingStatus'])->name('app.services.bookings.status')->whereNumber('id');
+    Route::delete('/services/bookings/{id}', [AppController::class, 'deleteServiceBooking'])->name('app.services.bookings.delete')->whereNumber('id');
 
     // Leads, Expenses, Inventory
     Route::get('/leads', [AppController::class, 'leads'])->name('app.leads.index');

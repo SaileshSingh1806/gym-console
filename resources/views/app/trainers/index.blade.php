@@ -1,4 +1,4 @@
-<x-app-layout header="Fitness Trainers & Coaches">
+<x-app-layout header="">
     @php
         $currency = $tenant->currency_symbol ?? '₹';
         $activeTrainersCount = $trainers->where('status', 'ACTIVE')->count();
@@ -159,137 +159,137 @@
     }">
 
         <!-- ==================== TOP ACTION BAR ==================== -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-xl font-black text-white tracking-tight">Fitness Trainers &amp; Coaches</h2>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <div class="flex items-center gap-2.5">
+                    <h2 class="text-lg font-black text-white tracking-tight">Fitness Trainers &amp; Coaches</h2>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                         {{ $trainers->count() }} Total
                     </span>
                 </div>
-                <p class="text-xs text-slate-400 mt-1">Manage certified coaches, personal trainers, and assigned gym members</p>
+                <p class="text-xs text-slate-400 mt-0.5">Manage certified coaches, personal trainers, and assigned gym members</p>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button type="button" @click="showTrainerModal = true" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/25 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <div class="flex items-center gap-2.5">
+                <button type="button" @click="showTrainerModal = true" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-indigo-600/25 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Add Trainer</span>
                 </button>
 
-                <a href="{{ route('app.staff.index', ['role' => 'trainer']) }}" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 hover:border-slate-700 flex items-center gap-2 transition-all shadow-sm">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                <a href="{{ route('app.staff.index', ['role' => 'trainer']) }}" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs border border-slate-800 hover:border-slate-700 flex items-center gap-1.5 transition-all shadow-sm">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
                     <span>Staff Roster</span>
                 </a>
             </div>
         </div>
 
         <!-- ==================== METRICS KPI STATS BAR ==================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <!-- Total Trainers -->
-            <div class="p-4 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-sm relative overflow-hidden group hover:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Coaches</span>
-                    <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Coaches</span>
+                    <div class="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-white tracking-tight">{{ $trainers->count() }}</div>
-                <div class="text-[10px] text-slate-500 font-medium mt-0.5">Registered trainers</div>
+                <div class="text-xl font-black text-white tracking-tight">{{ $trainers->count() }}</div>
+                <div class="text-[9px] text-slate-500 font-medium mt-0.5">Registered trainers</div>
             </div>
 
             <!-- Active Trainers -->
-            <div class="p-4 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-sm relative overflow-hidden group hover:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Staff</span>
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Staff</span>
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-emerald-400 tracking-tight">{{ $activeTrainersCount }}</div>
-                <div class="text-[10px] text-slate-500 font-medium mt-0.5">Ready for sessions</div>
+                <div class="text-xl font-black text-emerald-400 tracking-tight">{{ $activeTrainersCount }}</div>
+                <div class="text-[9px] text-slate-500 font-medium mt-0.5">Ready for sessions</div>
             </div>
 
             <!-- Total Assigned Clients -->
-            <div class="p-4 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-sm relative overflow-hidden group hover:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Assigned Clients</span>
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assigned Clients</span>
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-white tracking-tight">{{ $totalAssignedMembers }}</div>
-                <div class="text-[10px] text-slate-500 font-medium mt-0.5">Members under PT</div>
+                <div class="text-xl font-black text-white tracking-tight">{{ $totalAssignedMembers }}</div>
+                <div class="text-[9px] text-slate-500 font-medium mt-0.5">Members under PT</div>
             </div>
 
             <!-- Today's Sessions -->
-            <div class="p-4 rounded-3xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-sm relative overflow-hidden group hover:border-slate-700/80 transition-all">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Today's Sessions</span>
-                    <div class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Today's Sessions</span>
+                    <div class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </div>
                 </div>
-                <div class="text-2xl font-black text-purple-400 tracking-tight">{{ $totalTodaySessions }}</div>
-                <div class="text-[10px] text-slate-500 font-medium mt-0.5">Scheduled for today</div>
+                <div class="text-xl font-black text-purple-400 tracking-tight">{{ $totalTodaySessions }}</div>
+                <div class="text-[9px] text-slate-500 font-medium mt-0.5">Scheduled for today</div>
             </div>
         </div>
 
         <!-- ==================== TOOLBAR: SEARCH & STATUS FILTER ==================== -->
-        <div class="p-4 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-1.5 text-xs font-bold">
-                <button type="button" @click="statusFilter = 'all'" :class="statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'all'" :class="statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3 py-1.2 rounded-lg text-[11px] transition-all cursor-pointer">
                     All ({{ $trainers->count() }})
                 </button>
-                <button type="button" @click="statusFilter = 'active'" :class="statusFilter === 'active' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'active'" :class="statusFilter === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3 py-1.2 rounded-lg text-[11px] transition-all cursor-pointer">
                     Active ({{ $activeTrainersCount }})
                 </button>
-                <button type="button" @click="statusFilter = 'featured'" :class="statusFilter === 'featured' ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'featured'" :class="statusFilter === 'featured' ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3 py-1.2 rounded-lg text-[11px] transition-all cursor-pointer">
                     ★ Featured ({{ $trainers->where('is_featured', true)->count() }})
                 </button>
-                <button type="button" @click="statusFilter = 'inactive'" :class="statusFilter === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'inactive'" :class="statusFilter === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'" class="px-3 py-1.2 rounded-lg text-[11px] transition-all cursor-pointer">
                     Inactive ({{ $trainers->where('status', '!=', 'ACTIVE')->count() }})
                 </button>
             </div>
 
-            <div class="relative w-full sm:w-72">
-                <input type="text" x-model="searchQuery" placeholder="Search by name, phone, spec..." class="w-full pl-9 pr-3.5 py-2 rounded-2xl bg-slate-950 border border-slate-800 text-white text-xs placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all">
-                <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <div class="relative w-full sm:w-64">
+                <input type="text" x-model="searchQuery" placeholder="Search by name, phone, spec..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
 
         <!-- ==================== TRAINER CARDS GRID ==================== -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @forelse($trainers as $trainer)
-                <div x-show="matchesFilter({{ Js::from($trainer) }})" class="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-xl group relative overflow-hidden">
+                <div x-show="matchesFilter({{ Js::from($trainer) }})" class="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-3 shadow-md group relative overflow-hidden">
                     @if($trainer->is_featured)
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-400"></div>
+                        <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500 to-amber-400"></div>
                     @endif
 
                     <div>
                         <!-- Header: Avatar + Name + Specialization -->
-                        <div class="flex items-start gap-3.5 mb-4">
+                        <div class="flex items-start gap-3 mb-2.5">
                             <div class="relative shrink-0">
                                 @if($trainer->photo_path)
-                                    <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" class="w-12 h-12 rounded-2xl object-cover border border-slate-700 shadow-md">
+                                    <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shadow-sm">
                                 @else
-                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 font-black text-sm flex items-center justify-center border border-indigo-500/30">
+                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 font-black text-xs flex items-center justify-center border border-indigo-500/30">
                                         {{ substr($trainer->first_name, 0, 1) }}{{ substr($trainer->last_name, 0, 1) }}
                                     </div>
                                 @endif
-                                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full {{ $trainer->status === 'ACTIVE' ? 'bg-emerald-500 ring-2 ring-slate-900' : 'bg-slate-600 ring-2 ring-slate-900' }}" title="{{ $trainer->status }}"></span>
+                                <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full {{ $trainer->status === 'ACTIVE' ? 'bg-emerald-500 ring-2 ring-slate-900' : 'bg-slate-600 ring-2 ring-slate-900' }}" title="{{ $trainer->status }}"></span>
                             </div>
 
                             <div class="min-w-0 flex-1">
-                                <h4 class="font-extrabold text-white text-sm truncate tracking-tight">{{ $trainer->full_name }}</h4>
-                                <p class="text-xs text-indigo-400 font-semibold truncate mt-0.5">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
+                                <h4 class="font-extrabold text-white text-xs truncate tracking-tight">{{ $trainer->full_name }}</h4>
+                                <p class="text-[11px] text-indigo-400 font-semibold truncate mt-0.5">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
                                 
-                                <div class="flex items-center gap-1.5 mt-1.5">
-                                    <a href="{{ route('app.staff.index', ['search' => $trainer->phone]) }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <a href="{{ route('app.staff.index', ['search' => $trainer->phone]) }}" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                        Staff Record
+                                        Staff
                                     </a>
                                     @if($trainer->is_featured)
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-500/15 text-amber-300 border border-amber-500/30">
                                             ★ Featured
                                         </span>
                                     @endif
@@ -298,49 +298,49 @@
                         </div>
 
                         <!-- 2 Stats Counters -->
-                        <div class="grid grid-cols-2 gap-2 p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 mb-3 text-center">
+                        <div class="grid grid-cols-2 gap-1.5 p-2 rounded-xl bg-slate-950/70 border border-slate-800/80 mb-2.5 text-center">
                             <div class="border-r border-slate-800 pr-1">
-                                <div class="text-base font-black text-white">{{ $trainer->assigned_members_count ?? ($trainer->assignedMembers ? $trainer->assignedMembers->count() : 0) }}</div>
-                                <div class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-0.5">Assigned Clients</div>
+                                <div class="text-sm font-black text-white">{{ $trainer->assigned_members_count ?? ($trainer->assignedMembers ? $trainer->assignedMembers->count() : 0) }}</div>
+                                <div class="text-[8.5px] font-extrabold text-slate-400 uppercase tracking-wider mt-0.5">Assigned</div>
                             </div>
                             <div class="pl-1">
-                                <div class="text-base font-black text-white">{{ $trainer->today_sessions_count ?? 0 }}</div>
-                                <div class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-0.5">Today's Sessions</div>
+                                <div class="text-sm font-black text-white">{{ $trainer->today_sessions_count ?? 0 }}</div>
+                                <div class="text-[8.5px] font-extrabold text-slate-400 uppercase tracking-wider mt-0.5">Today</div>
                             </div>
                         </div>
 
                         <!-- Contact Details -->
-                        <div class="space-y-1.5 text-xs text-slate-400 px-1">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        <div class="space-y-1 text-[11px] text-slate-400 px-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3 h-3 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                 <a href="tel:{{ $trainer->phone }}" class="text-slate-200 hover:text-indigo-400 font-medium truncate transition-colors">{{ $trainer->phone }}</a>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <span class="text-slate-400 truncate">{{ $trainer->email ?: 'No email registered' }}</span>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-3 h-3 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span class="text-slate-400 truncate text-[10.5px]">{{ $trainer->email ?: 'No email registered' }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex items-center gap-2 pt-3 border-t border-slate-800">
-                        <button type="button" @click="openEditTrainer({{ Js::from($trainer) }})" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <div class="flex items-center gap-1.5 pt-2.5 border-t border-slate-800">
+                        <button type="button" @click="openEditTrainer({{ Js::from($trainer) }})" class="flex-1 py-1.5 px-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm transition-all cursor-pointer">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             <span>Edit &amp; Assign</span>
                         </button>
-                        <button type="button" @click="confirmDelete({{ $trainer->id }}, '{{ addslashes($trainer->full_name) }}')" title="Delete Trainer" class="p-2 rounded-xl bg-slate-950 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <button type="button" @click="confirmDelete({{ $trainer->id }}, '{{ addslashes($trainer->full_name) }}')" title="Delete Trainer" class="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full p-12 text-center bg-slate-900 border border-slate-800 rounded-3xl text-slate-500 text-xs">
-                    <div class="w-14 h-14 rounded-3xl bg-slate-950 flex items-center justify-center mx-auto mb-3.5 border border-slate-800 text-slate-500 shadow-inner">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <div class="col-span-full p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl text-slate-500 text-xs">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center mx-auto mb-3 border border-slate-800 text-slate-500 shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    <h4 class="font-extrabold text-white text-base">No trainers registered yet</h4>
+                    <h4 class="font-extrabold text-white text-sm">No trainers registered yet</h4>
                     <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Register your certified fitness coaches to start scheduling workouts and assigning gym members.</p>
-                    <button type="button" @click="showTrainerModal = true" class="mt-4 px-5 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/25 cursor-pointer">
+                    <button type="button" @click="showTrainerModal = true" class="mt-3.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-md shadow-indigo-600/25 cursor-pointer">
                         + Add Fitness Trainer
                     </button>
                 </div>
