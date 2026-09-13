@@ -35,6 +35,7 @@ use App\Models\Plan;
 use App\Models\PtPlan;
 use App\Models\PtSession;
 use App\Models\Role;
+use App\Models\Scopes\BranchScope;
 use App\Models\Setting;
 use App\Models\SupportTicket;
 use App\Models\Trainer;
@@ -643,6 +644,11 @@ class AppController extends Controller
         return back()->with('success', "Member '{$name}' deleted successfully.");
     }
 
+    public function editMember(int $id): RedirectResponse
+    {
+        return redirect()->route('app.members.show', ['id' => $id, 'edit' => 1]);
+    }
+
     public function showMember(int $id): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -991,24 +997,54 @@ class AppController extends Controller
 
     public function attendance(Request $request): View
     {
-        $attendance = Attendance::with(['member', 'device'])->latest('check_in')->paginate(20);
-        $members = Member::where('status', 'ACTIVE')->get();
-        $summary = $this->attendanceService->getTodaySummary();
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branchId = TenantContext::getBranchId();
+        $branchId = TenantContext::branchId();
 
-        return view('app.attendance.index', compact('attendance', 'members', 'summary'));
+        $query = Attendance::with(['member', 'device']);
+        if ($tenant) {
+            $query->where('tenant_id', $tenant->id);
+        }
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
+        }
+
+        $attendance = $query->latest('check_in')->latest('id')->paginate(20);
+
+        $membersQuery = Member::where('status', 'ACTIVE');
+        if ($tenant) {
+            $membersQuery->where('tenant_id', $tenant->id);
+        }
+        if ($branchId) {
+            $membersQuery->where('branch_id', $branchId);
+        }
+        $members = $membersQuery->orderBy('first_name')->get();
+
+        $currentlyInsideMemberIds = Attendance::where('date', now()->toDateString())
+            ->whereNull('check_out')
+            ->pluck('member_id');
+
+        $summary = $this->attendanceService->getTodaySummary($branchId);
+
+        return view('app.attendance.index', compact('attendance', 'members', 'currentlyInsideMemberIds', 'summary'));
     }
 
     public function storeCheckin(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
-            'action' => 'required|in:check_in,check_out',
+            'action' => 'nullable|in:check_in,check_out',
         ]);
 
         $member = Member::findOrFail($validated['member_id']);
+        $action = $validated['action'] ?? 'check_in';
 
-        if ($validated['action'] === 'check_out') {
-            $this->attendanceService->checkOut($member);
+        if ($action === 'check_out') {
+            $record = $this->attendanceService->checkOut($member);
+
+            if (! $record) {
+                return back()->with('error', "No active check-in record found for {$member->full_name} to check out.");
+            }
 
             return back()->with('success', "Check-out recorded for {$member->full_name}.");
         }
@@ -1016,6 +1052,16 @@ class AppController extends Controller
         $this->attendanceService->checkIn($member, 'manual');
 
         return back()->with('success', "Check-in recorded for {$member->full_name}.");
+    }
+
+    public function checkoutAttendance(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $attendance = Attendance::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $this->attendanceService->checkOutById($attendance);
+
+        return back()->with('success', "Check-out recorded for {$attendance->member?->full_name}.");
     }
 
     public function payments(Request $request): View
@@ -2958,6 +3004,13 @@ class AppController extends Controller
         }
 
         $recentLeads = Lead::with('assignedTo')->latest()->limit(8)->get();
+        $demoBookedLeads = Lead::where('tenant_id', $tenant->id)
+            ->where(function ($q) {
+                $q->whereIn('stage', ['DEMO_BOOKED', 'demo_booked', 'TRIAL', 'trial'])
+                    ->orWhereIn('status', ['DEMO_BOOKED', 'demo_booked', 'TRIAL_SCHEDULED', 'trial_scheduled']);
+            })
+            ->orderBy('name')
+            ->get();
         $upcomingTrials = LeadTrial::with('lead', 'assignedTo')->whereDate('trial_date', '>=', today())->orderBy('trial_date')->limit(6)->get();
         $staffMembers = User::where('tenant_id', $tenant->id)->get();
 
@@ -2972,6 +3025,7 @@ class AppController extends Controller
             'trendCounts',
             'sourceBreakdown',
             'recentLeads',
+            'demoBookedLeads',
             'upcomingTrials',
             'staffMembers',
             'tenant'
@@ -3114,6 +3168,17 @@ class AppController extends Controller
         $stage = $validated['stage'] ?? 'NEW_LEAD';
         $source = $validated['source'] ?? 'walk_in';
 
+        $status = match (strtoupper(str_replace(' ', '_', $stage))) {
+            'PAID', 'CONVERTED' => 'CONVERTED',
+            'LOST' => 'LOST',
+            'CONTACTED' => 'CONTACTED',
+            'TRIAL', 'TRIAL_SCHEDULED' => 'TRIAL_SCHEDULED',
+            'DEMO_BOOKED' => 'DEMO_BOOKED',
+            'PROPOSAL_SENT' => 'PROPOSAL_SENT',
+            'NEGOTIATION' => 'NEGOTIATION',
+            default => 'NEW',
+        };
+
         $lead = Lead::create([
             'tenant_id' => $tenant->id,
             'branch_id' => $validated['branch_id'] ?? null,
@@ -3124,7 +3189,7 @@ class AppController extends Controller
             'city' => $validated['city'] ?? null,
             'member_count' => $validated['member_count'] ?? 1,
             'source' => $source,
-            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST']) ? $stage : 'NEW',
+            'status' => $status,
             'stage' => $stage,
             'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
             'follow_up_date' => $validated['follow_up_date'] ?? null,
@@ -3165,6 +3230,17 @@ class AppController extends Controller
         $stage = $validated['stage'] ?? $lead->stage;
         $source = $validated['source'] ?? $lead->source;
 
+        $status = match (strtoupper(str_replace(' ', '_', $stage))) {
+            'PAID', 'CONVERTED' => 'CONVERTED',
+            'LOST' => 'LOST',
+            'CONTACTED' => 'CONTACTED',
+            'TRIAL', 'TRIAL_SCHEDULED' => 'TRIAL_SCHEDULED',
+            'DEMO_BOOKED' => 'DEMO_BOOKED',
+            'PROPOSAL_SENT' => 'PROPOSAL_SENT',
+            'NEGOTIATION' => 'NEGOTIATION',
+            default => 'NEW',
+        };
+
         $lead->update([
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? '',
@@ -3174,7 +3250,7 @@ class AppController extends Controller
             'member_count' => $validated['member_count'] ?? 1,
             'branch_id' => $validated['branch_id'] ?? null,
             'source' => $source,
-            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST']) ? $stage : $lead->status,
+            'status' => $status,
             'stage' => $stage,
             'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
             'follow_up_date' => $validated['follow_up_date'] ?? null,
@@ -3183,6 +3259,10 @@ class AppController extends Controller
             'estimated_value' => $validated['estimated_value'] ?? 0,
             'notes' => $validated['notes'] ?? null,
         ]);
+
+        if (in_array(strtoupper(str_replace(' ', '_', $stage)), ['PAID', 'CONVERTED'])) {
+            $this->convertLeadToMember($lead, (float) ($validated['estimated_value'] ?? $lead->estimated_value ?? 0));
+        }
 
         ActivityLog::log('lead_updated', "Updated CRM lead {$lead->name}");
 
@@ -3195,10 +3275,25 @@ class AppController extends Controller
         $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
         $stage = $request->input('stage', 'NEW_LEAD');
 
+        $status = match (strtoupper(str_replace(' ', '_', $stage))) {
+            'PAID', 'CONVERTED' => 'CONVERTED',
+            'LOST' => 'LOST',
+            'CONTACTED' => 'CONTACTED',
+            'TRIAL', 'TRIAL_SCHEDULED' => 'TRIAL_SCHEDULED',
+            'DEMO_BOOKED' => 'DEMO_BOOKED',
+            'PROPOSAL_SENT' => 'PROPOSAL_SENT',
+            'NEGOTIATION' => 'NEGOTIATION',
+            default => 'NEW',
+        };
+
         $updateData = [
             'stage' => $stage,
-            'status' => in_array($stage, ['NEW', 'CONTACTED', 'TRIAL_SCHEDULED', 'CONVERTED', 'LOST', 'PAID']) ? ($stage === 'PAID' ? 'CONVERTED' : $stage) : $lead->status,
+            'status' => $status,
         ];
+
+        if (in_array(strtoupper(str_replace(' ', '_', $stage)), ['PAID', 'CONVERTED']) && $lead->trial_status === 'upcoming') {
+            $updateData['trial_status'] = 'completed';
+        }
 
         if ($request->has('paid_amount') || $request->has('estimated_value')) {
             $paidAmount = $request->input('paid_amount', $request->input('estimated_value'));
@@ -3209,17 +3304,126 @@ class AppController extends Controller
 
         $lead->update($updateData);
 
+        if (in_array(strtoupper(str_replace(' ', '_', $stage)), ['PAID', 'CONVERTED'])) {
+            $conversionAmount = isset($updateData['estimated_value']) ? (float) $updateData['estimated_value'] : (float) ($lead->estimated_value ?? 0);
+            $this->convertLeadToMember($lead, $conversionAmount);
+        }
+
         ActivityLog::log('lead_stage_changed', "Moved lead {$lead->name} to {$stage}".(isset($updateData['estimated_value']) ? " with conversion value {$updateData['estimated_value']}" : ''));
 
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'stage' => $lead->formatted_stage,
+                'status' => $lead->status,
                 'estimated_value' => $lead->estimated_value,
             ]);
         }
 
         return back()->with('success', "Lead stage updated to {$lead->formatted_stage}".(isset($updateData['estimated_value']) && $updateData['estimated_value'] > 0 ? " (Paid: {$updateData['estimated_value']})" : '').'.');
+    }
+
+    protected function convertLeadToMember(Lead $lead, ?float $paidAmount = null): ?Member
+    {
+        $tenant = $lead->tenant ?? TenantContext::getTenant() ?? auth()->user()?->tenant;
+        if (! $tenant) {
+            return null;
+        }
+
+        $branchId = $lead->branch_id ?? session('active_branch_id') ?? TenantContext::getBranchId() ?? $tenant->branches()->first()?->id;
+
+        $member = Member::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($lead) {
+                if (! empty($lead->phone)) {
+                    $q->where('phone', $lead->phone);
+                }
+                if (! empty($lead->email)) {
+                    $q->orWhere('email', $lead->email);
+                }
+            })
+            ->first();
+
+        $nameParts = explode(' ', trim($lead->name), 2);
+        $firstName = ! empty($nameParts[0]) ? $nameParts[0] : 'Lead';
+        $lastName = ! empty($nameParts[1]) ? $nameParts[1] : $firstName;
+
+        if (! $member) {
+            $member = Member::create([
+                'tenant_id' => $tenant->id,
+                'branch_id' => $branchId,
+                'member_code' => $tenant->generateNextMemberCode(),
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $lead->phone ?: '0000000000',
+                'email' => $lead->email,
+                'join_date' => now()->toDateString(),
+                'status' => 'ACTIVE',
+                'notes' => "Converted from CRM Lead #{$lead->id} ({$lead->name})",
+                'qr_code_token' => Str::random(32),
+            ]);
+        } else {
+            $member->update(['status' => 'ACTIVE']);
+        }
+
+        $amount = $paidAmount ?? (float) ($lead->estimated_value ?? 0);
+        if ($amount > 0) {
+            $activeMembership = $member->activeMembership;
+            $defaultPlan = MembershipPlan::where('tenant_id', $tenant->id)->first();
+            $durationDays = match ($defaultPlan?->duration_type) {
+                'days' => (int) ($defaultPlan->duration_value ?: 30),
+                'months' => (int) ($defaultPlan->duration_value ?: 1) * 30,
+                'years' => (int) ($defaultPlan->duration_value ?: 1) * 365,
+                default => 30,
+            };
+
+            if (! $activeMembership) {
+                $activeMembership = Membership::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $branchId,
+                    'member_id' => $member->id,
+                    'membership_plan_id' => $defaultPlan?->id,
+                    'start_date' => now()->toDateString(),
+                    'end_date' => now()->addDays($durationDays)->toDateString(),
+                    'price' => $amount,
+                    'discount' => 0,
+                    'tax' => 0,
+                    'final_amount' => $amount,
+                    'paid_amount' => $amount,
+                    'status' => 'ACTIVE',
+                    'notes' => "Auto-created from CRM Lead #{$lead->id} conversion",
+                ]);
+            } else {
+                $activeMembership->increment('paid_amount', $amount);
+                if ($activeMembership->paid_amount > $activeMembership->final_amount) {
+                    $activeMembership->update(['final_amount' => $activeMembership->paid_amount]);
+                }
+            }
+
+            $recentPayment = MemberPayment::withoutGlobalScope(BranchScope::class)
+                ->where('tenant_id', $tenant->id)
+                ->where('member_id', $member->id)
+                ->where('amount', $amount)
+                ->where('created_at', '>=', now()->subMinutes(5))
+                ->first();
+
+            if (! $recentPayment) {
+                MemberPayment::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $branchId,
+                    'member_id' => $member->id,
+                    'membership_id' => $activeMembership?->id,
+                    'invoice_number' => 'INV-CRM-'.strtoupper(Str::random(6)).'-'.date('Ymd'),
+                    'amount' => $amount,
+                    'payment_method' => 'cash',
+                    'payment_date' => now()->toDateString(),
+                    'received_by_user_id' => auth()->id(),
+                    'notes' => "Conversion payment from CRM Lead: {$lead->name}",
+                ]);
+            }
+        }
+
+        return $member;
     }
 
     public function deleteLead($id): RedirectResponse
@@ -3257,7 +3461,13 @@ class AppController extends Controller
             ->orderBy('trial_time')
             ->get();
 
-        $leadsList = Lead::orderBy('name')->get();
+        $leadsList = Lead::where('tenant_id', $tenant->id)
+            ->where(function ($q) {
+                $q->whereIn('stage', ['DEMO_BOOKED', 'demo_booked', 'TRIAL', 'trial'])
+                    ->orWhereIn('status', ['DEMO_BOOKED', 'demo_booked', 'TRIAL_SCHEDULED', 'trial_scheduled']);
+            })
+            ->orderBy('name')
+            ->get();
         $staffMembers = User::where('tenant_id', $tenant->id)->get();
 
         return view('app.crm.trials', compact(
@@ -3320,10 +3530,15 @@ class AppController extends Controller
         $trial->update(['status' => $status]);
 
         if ($trial->lead) {
-            $trial->lead->update(['trial_status' => $status]);
+            $leadUpdates = ['trial_status' => $status];
             if ($status === 'completed') {
-                $trial->lead->update(['stage' => 'PAID']);
+                $leadUpdates['stage'] = 'PAID';
+                $leadUpdates['status'] = 'CONVERTED';
+            } elseif ($status === 'cancelled') {
+                $leadUpdates['stage'] = 'LOST';
+                $leadUpdates['status'] = 'LOST';
             }
+            $trial->lead->update($leadUpdates);
         }
 
         ActivityLog::log('trial_status_updated', "Updated trial status to {$status}");
@@ -3341,16 +3556,91 @@ class AppController extends Controller
 
     public function crmEnquiries(Request $request): View
     {
-        $enquiries = Lead::whereIn('source', ['website', 'walk_in', 'facebook', 'instagram', 'google'])
-            ->latest()
-            ->paginate(15);
+        $tenant = TenantContext::getTenant() ?? Auth::user()->tenant;
+        $query = Lead::where('tenant_id', $tenant->id)
+            ->whereIn('source', ['website', 'walk_in', 'facebook', 'instagram', 'google', 'whatsapp', 'phone', 'referral', 'other']);
+
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('remarks', 'like', "%{$s}%")
+                    ->orWhere('notes', 'like', "%{$s}%");
+            });
+        }
+
+        if ($request->filled('source') && $request->source !== 'all') {
+            $query->where('source', $request->source);
+        }
+
+        $enquiries = $query->latest()->paginate(15)->withQueryString();
+        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $branches = Branch::where('tenant_id', $tenant->id)->get();
 
         return view('app.crm.subpages', [
             'section' => 'enquiries',
-            'title' => 'Enquiries',
-            'subtitle' => 'Incoming website forms, walk-ins, and social media inquiries',
+            'title' => 'Enquiries & Direct Walk-Ins',
+            'subtitle' => 'Incoming website forms, walk-ins, phone calls, and social media inquiries',
             'enquiries' => $enquiries,
+            'staffMembers' => $staffMembers,
+            'branches' => $branches,
+            'tenant' => $tenant,
         ]);
+    }
+
+    public function storeEnquiry(Request $request): RedirectResponse
+    {
+        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'source' => 'nullable|string|max:50',
+            'stage' => 'nullable|string|max:50',
+            'branch_id' => 'nullable|exists:branches,id',
+            'assigned_to_user_id' => 'nullable|exists:users,id',
+            'follow_up_date' => 'nullable|date',
+            'estimated_value' => 'nullable|numeric|min:0',
+            'remarks' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $stage = $validated['stage'] ?? 'NEW_LEAD';
+        $source = $validated['source'] ?? 'walk_in';
+
+        $status = match (strtoupper(str_replace(' ', '_', $stage))) {
+            'PAID', 'CONVERTED' => 'CONVERTED',
+            'LOST' => 'LOST',
+            'CONTACTED' => 'CONTACTED',
+            'TRIAL', 'TRIAL_SCHEDULED' => 'TRIAL_SCHEDULED',
+            'DEMO_BOOKED' => 'DEMO_BOOKED',
+            'PROPOSAL_SENT' => 'PROPOSAL_SENT',
+            'NEGOTIATION' => 'NEGOTIATION',
+            default => 'NEW',
+        };
+
+        $lead = Lead::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $validated['branch_id'] ?? null,
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? '',
+            'email' => $validated['email'] ?? null,
+            'source' => $source,
+            'status' => $status,
+            'stage' => $stage,
+            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'follow_up_date' => $validated['follow_up_date'] ?? null,
+            'remarks' => $validated['remarks'] ?? ($validated['notes'] ?? null),
+            'notes' => $validated['notes'] ?? ($validated['remarks'] ?? null),
+            'estimated_value' => $validated['estimated_value'] ?? 0,
+        ]);
+
+        ActivityLog::log('enquiry_created', "Recorded direct enquiry/walk-in for {$lead->name}");
+
+        return back()->with('success', "Enquiry for {$lead->name} recorded successfully!");
     }
 
     public function crmConversions(Request $request): View
@@ -3637,9 +3927,15 @@ class AppController extends Controller
 
     public function balanceSheet(Request $request): View
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $branches = Branch::where('tenant_id', $tenant->id)->get();
-        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+
+        if ($request->has('branch_id')) {
+            $branchId = ($request->branch_id !== 'all' && ! empty($request->branch_id)) ? (int) $request->branch_id : null;
+        } else {
+            $branchId = session('active_branch_id') ?? TenantContext::getBranchId();
+        }
+
         $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : null;
 
         $period = $request->get('period', 'month');
@@ -3661,32 +3957,53 @@ class AppController extends Controller
             $periodLabel = now()->setYear($year)->setMonth($selectedMonth)->format('F Y');
         }
 
-        $paymentsQuery = MemberPayment::where('tenant_id', $tenant->id)
+        // 1. Membership Income
+        $paymentsQuery = MemberPayment::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('payment_date', [$startDate, $endDate]);
 
-        $serviceBookingsQuery = GymServiceBooking::where('tenant_id', $tenant->id)
+        // 2. Service Bookings Income (Lockers, Spa, Steam, etc.)
+        $serviceBookingsQuery = GymServiceBooking::where('gym_service_bookings.tenant_id', $tenant->id)
+            ->whereBetween('gym_service_bookings.created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        // 3. Personal Training Packages Income
+        $ptPackagesQuery = MemberPtPackage::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
 
-        $expensesQuery = Expense::where('tenant_id', $tenant->id)
+        // 4. POS / Inventory Sales Income (Real sold products)
+        $posSalesQuery = InventoryLog::where('inventory_logs.tenant_id', $tenant->id)
+            ->where('inventory_logs.type', 'OUT')
+            ->whereBetween('inventory_logs.created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        // 5. Expenses
+        $expensesQuery = Expense::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('expense_date', [$startDate, $endDate]);
 
         if ($branchId) {
             $paymentsQuery->where('branch_id', $branchId);
+            $serviceBookingsQuery->whereHas('member', fn ($q) => $q->withoutGlobalScope(BranchScope::class)->where('branch_id', $branchId));
+            $ptPackagesQuery->where('branch_id', $branchId);
+            $posSalesQuery->whereHas('item', fn ($q) => $q->where('branch_id', $branchId));
             $expensesQuery->where('branch_id', $branchId);
         }
 
         $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
         $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
-        $posSales = round($membershipIncome * 0.15, 2);
-        $otherIncome = $serviceIncome;
+        $ptIncome = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+        $posSales = (float) ($posSalesQuery->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
+        $otherIncome = $serviceIncome + $ptIncome;
         $totalIncome = $membershipIncome + $posSales + $otherIncome;
 
         $totalExpenses = (float) (clone $expensesQuery)->sum('amount');
         $netProfit = $totalIncome - $totalExpenses;
-        $marginPercent = $totalIncome > 0 ? round(($netProfit / $totalIncome) * 100, 1) : 100.0;
+        $marginPercent = $totalIncome > 0 ? round(($netProfit / $totalIncome) * 100, 1) : ($totalExpenses > 0 ? 0.0 : 100.0);
         $expenseRatio = $totalIncome > 0 ? round(($totalExpenses / $totalIncome) * 100, 1) : 0.0;
 
         $membershipPercent = $totalIncome > 0 ? round(($membershipIncome / $totalIncome) * 100, 1) : 0;
+        $servicePercent = $totalIncome > 0 ? round(($serviceIncome / $totalIncome) * 100, 1) : 0;
+        $ptPercent = $totalIncome > 0 ? round(($ptIncome / $totalIncome) * 100, 1) : 0;
         $posPercent = $totalIncome > 0 ? round(($posSales / $totalIncome) * 100, 1) : 0;
         $otherPercent = $totalIncome > 0 ? round(($otherIncome / $totalIncome) * 100, 1) : 0;
 
@@ -3707,15 +4024,33 @@ class AppController extends Controller
             $mStart = $monthDate->copy()->startOfMonth()->toDateString();
             $mEnd = $monthDate->copy()->endOfMonth()->toDateString();
 
-            $mIncomeQuery = MemberPayment::where('tenant_id', $tenant->id)->whereBetween('payment_date', [$mStart, $mEnd]);
-            $mExpenseQuery = Expense::where('tenant_id', $tenant->id)->whereBetween('expense_date', [$mStart, $mEnd]);
+            $mIncomeQuery = MemberPayment::withoutGlobalScope(BranchScope::class)
+                ->where('tenant_id', $tenant->id)
+                ->whereBetween('payment_date', [$mStart, $mEnd]);
+            $mServices = GymServiceBooking::where('gym_service_bookings.tenant_id', $tenant->id)
+                ->whereBetween('gym_service_bookings.created_at', [$mStart.' 00:00:00', $mEnd.' 23:59:59']);
+            $mPt = MemberPtPackage::withoutGlobalScope(BranchScope::class)
+                ->where('tenant_id', $tenant->id)
+                ->whereBetween('created_at', [$mStart.' 00:00:00', $mEnd.' 23:59:59']);
+            $mPos = InventoryLog::where('inventory_logs.tenant_id', $tenant->id)
+                ->where('inventory_logs.type', 'OUT')
+                ->whereBetween('inventory_logs.created_at', [$mStart.' 00:00:00', $mEnd.' 23:59:59']);
+            $mExpenseQuery = Expense::withoutGlobalScope(BranchScope::class)
+                ->where('tenant_id', $tenant->id)
+                ->whereBetween('expense_date', [$mStart, $mEnd]);
 
             if ($branchId) {
                 $mIncomeQuery->where('branch_id', $branchId);
+                $mServices->whereHas('member', fn ($q) => $q->withoutGlobalScope(BranchScope::class)->where('branch_id', $branchId));
+                $mPt->where('branch_id', $branchId);
+                $mPos->whereHas('item', fn ($q) => $q->where('branch_id', $branchId));
                 $mExpenseQuery->where('branch_id', $branchId);
             }
 
-            $mInc = (float) $mIncomeQuery->sum('amount');
+            $mInc = (float) $mIncomeQuery->sum('amount')
+                + (float) $mServices->sum('amount_paid')
+                + (float) $mPt->sum('paid_amount')
+                + (float) ($mPos->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
             $mExp = (float) $mExpenseQuery->sum('amount');
 
             $trendMonths[] = $monthDate->format('M Y');
@@ -3745,9 +4080,13 @@ class AppController extends Controller
             'endDate',
             'totalIncome',
             'membershipIncome',
+            'serviceIncome',
+            'ptIncome',
             'posSales',
             'otherIncome',
             'membershipPercent',
+            'servicePercent',
+            'ptPercent',
             'posPercent',
             'otherPercent',
             'totalExpenses',
@@ -3766,9 +4105,15 @@ class AppController extends Controller
 
     public function balanceSheetPdf(Request $request): View
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $branches = Branch::where('tenant_id', $tenant->id)->get();
-        $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
+
+        if ($request->has('branch_id')) {
+            $branchId = ($request->branch_id !== 'all' && ! empty($request->branch_id)) ? (int) $request->branch_id : null;
+        } else {
+            $branchId = session('active_branch_id') ?? TenantContext::getBranchId();
+        }
+
         $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : $branches->first();
 
         $period = $request->get('period', 'month');
@@ -3790,24 +4135,38 @@ class AppController extends Controller
             $periodLabel = now()->setYear($year)->setMonth($selectedMonth)->format('M-Y');
         }
 
-        $paymentsQuery = MemberPayment::where('tenant_id', $tenant->id)
+        $paymentsQuery = MemberPayment::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('payment_date', [$startDate, $endDate]);
 
-        $serviceBookingsQuery = GymServiceBooking::where('tenant_id', $tenant->id)
+        $serviceBookingsQuery = GymServiceBooking::where('gym_service_bookings.tenant_id', $tenant->id)
+            ->whereBetween('gym_service_bookings.created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        $ptPackagesQuery = MemberPtPackage::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
 
-        $expensesQuery = Expense::where('tenant_id', $tenant->id)
+        $posSalesQuery = InventoryLog::where('inventory_logs.tenant_id', $tenant->id)
+            ->where('inventory_logs.type', 'OUT')
+            ->whereBetween('inventory_logs.created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+
+        $expensesQuery = Expense::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
             ->whereBetween('expense_date', [$startDate, $endDate]);
 
         if ($branchId) {
             $paymentsQuery->where('branch_id', $branchId);
+            $serviceBookingsQuery->whereHas('member', fn ($q) => $q->withoutGlobalScope(BranchScope::class)->where('branch_id', $branchId));
+            $ptPackagesQuery->where('branch_id', $branchId);
+            $posSalesQuery->whereHas('item', fn ($q) => $q->where('branch_id', $branchId));
             $expensesQuery->where('branch_id', $branchId);
         }
 
         $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
         $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
-        $posSales = round($membershipIncome * 0.15, 2);
-        $otherIncome = $serviceIncome;
+        $ptIncome = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+        $posSales = (float) ($posSalesQuery->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
+        $otherIncome = $serviceIncome + $ptIncome;
         $totalIncome = $membershipIncome + $posSales + $otherIncome;
 
         $rawExpenses = (clone $expensesQuery)->with('category')->get();
@@ -3828,6 +4187,8 @@ class AppController extends Controller
             'startDate',
             'endDate',
             'membershipIncome',
+            'serviceIncome',
+            'ptIncome',
             'posSales',
             'otherIncome',
             'totalIncome',
@@ -4883,7 +5244,7 @@ class AppController extends Controller
                     'salary' => $validated['monthly_salary'] ?? $trainer->salary,
                     'salary_type' => $validated['payout_type'] ?? $trainer->salary_type,
                     'joining_date' => $validated['joining_date'] ?? $trainer->joining_date,
-                    'specialization' => $validated['designation'] ?: ($trainer->specialization ?: 'Fitness Coach'),
+                    'specialization' => ($validated['designation'] ?? null) ?: ($trainer->specialization ?: 'Fitness Coach'),
                     'status' => $validated['status'],
                 ]);
             } else {
@@ -4897,7 +5258,7 @@ class AppController extends Controller
                     'salary' => $validated['monthly_salary'] ?? 0.00,
                     'salary_type' => $validated['payout_type'] ?? 'Fixed Monthly',
                     'joining_date' => $validated['joining_date'] ?? now()->toDateString(),
-                    'specialization' => $validated['designation'] ?: 'Fitness Coach',
+                    'specialization' => ($validated['designation'] ?? null) ?: 'Fitness Coach',
                     'status' => $validated['status'],
                     'branch_id' => ! empty($validated['branches']) ? $validated['branches'][0] : null,
                 ]);
@@ -5014,7 +5375,7 @@ class AppController extends Controller
                     'salary' => $validated['monthly_salary'] ?? $trainer->salary,
                     'salary_type' => $validated['payout_type'] ?? $trainer->salary_type,
                     'joining_date' => $validated['joining_date'] ?? $trainer->joining_date,
-                    'specialization' => $validated['designation'] ?: ($trainer->specialization ?: 'Fitness Coach'),
+                    'specialization' => ($validated['designation'] ?? null) ?: ($trainer->specialization ?: 'Fitness Coach'),
                     'status' => $user->status,
                 ]);
             }

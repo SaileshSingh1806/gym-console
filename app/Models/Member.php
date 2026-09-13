@@ -93,6 +93,11 @@ class Member extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->attendance();
+    }
+
     public function workoutPlans(): HasMany
     {
         return $this->hasMany(WorkoutPlan::class);

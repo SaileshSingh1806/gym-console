@@ -7,10 +7,13 @@ use App\Models\Lead;
 use App\Models\LeadTrial;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class CrmTest extends TestCase
 {
+    use DatabaseTransactions;
+
     protected User $user;
 
     protected Tenant $tenant;

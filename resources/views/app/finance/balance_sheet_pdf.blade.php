@@ -105,11 +105,22 @@
                 }
             }
 
-            $incList = [
-                ['name' => 'Membership Subscription', 'amount' => $membershipIncome],
-                ['name' => 'Sale of Goods', 'amount' => $posSales],
-                ['name' => 'Other Income', 'amount' => $otherIncome],
-            ];
+            $incList = [];
+            if ($membershipIncome > 0) {
+                $incList[] = ['name' => 'Membership Subscriptions', 'amount' => $membershipIncome];
+            }
+            if (($serviceIncome ?? 0) > 0) {
+                $incList[] = ['name' => 'Gym Services & Amenities (Lockers, Spa)', 'amount' => $serviceIncome];
+            }
+            if (($ptIncome ?? 0) > 0) {
+                $incList[] = ['name' => 'Personal Training (PT) Packages', 'amount' => $ptIncome];
+            }
+            if ($posSales > 0) {
+                $incList[] = ['name' => 'Sale of Goods (POS)', 'amount' => $posSales];
+            }
+            if (empty($incList)) {
+                $incList[] = ['name' => 'Total Receipts', 'amount' => $totalIncome];
+            }
 
             $rowCount = max(count($expList), count($incList), 3);
         @endphp

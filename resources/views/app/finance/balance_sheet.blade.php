@@ -32,13 +32,13 @@
             <div class="flex flex-wrap items-center gap-2.5">
                 <!-- Period Toggles (This Month, This Quarter, This Year) -->
                 <div class="inline-flex rounded-xl bg-slate-900 border border-slate-800 p-1">
-                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'month', 'year' => $year, 'branch_id' => request('branch_id')]) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'month' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
+                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'month', 'year' => $year, 'branch_id' => $branchId ?: 'all']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'month' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
                         This Month
                     </a>
-                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'quarter', 'year' => $year, 'branch_id' => request('branch_id')]) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'quarter' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
+                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'quarter', 'year' => $year, 'branch_id' => $branchId ?: 'all']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'quarter' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
                         This Quarter
                     </a>
-                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'year', 'year' => $year, 'branch_id' => request('branch_id')]) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'year' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
+                    <a href="{{ route('app.finance.balance-sheet', ['period' => 'year', 'year' => $year, 'branch_id' => $branchId ?: 'all']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'year' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white' }}">
                         This Year
                     </a>
                 </div>
@@ -46,7 +46,7 @@
                 <!-- Year Select -->
                 <form action="{{ route('app.finance.balance-sheet') }}" method="GET" class="inline-flex">
                     <input type="hidden" name="period" value="{{ $period }}">
-                    <input type="hidden" name="branch_id" value="{{ request('branch_id') }}">
+                    <input type="hidden" name="branch_id" value="{{ $branchId ?: 'all' }}">
                     <select name="year" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold focus:border-indigo-500 focus:outline-none cursor-pointer">
                         @for($y = now()->year; $y >= now()->year - 4; $y--)
                             <option value="{{ $y }}" {{ $year === $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -73,7 +73,7 @@
                 </form>
 
                 <!-- Download PDF / Print -->
-                <a href="{{ route('app.finance.balance-sheet.pdf', request()->all()) }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer">
+                <a href="{{ route('app.finance.balance-sheet.pdf', ['period' => $period, 'year' => $year, 'branch_id' => $branchId ?: 'all', 'month' => request('month')]) }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Download PDF</span>
                 </a>
@@ -155,7 +155,7 @@
                         <div class="flex items-center justify-between">
                             <span class="flex items-center gap-2 text-slate-300 font-medium">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                Membership Fees
+                                Membership Subscriptions
                             </span>
                             <span class="font-bold text-white">{{ $currency }}{{ number_format($membershipIncome, 2) }}</span>
                         </div>
@@ -164,31 +164,45 @@
                         </div>
                     </div>
 
+                    <!-- Gym Services & Amenities (Lockers, Spa, Steam) -->
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-slate-300 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                                Gym Services & Amenities (Lockers, Spa)
+                            </span>
+                            <span class="font-bold text-white">{{ $currency }}{{ number_format($serviceIncome ?? 0, 2) }}</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                            <div class="h-full bg-sky-400 rounded-full" style="width: {{ $servicePercent ?? 0 }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Training Packages -->
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-slate-300 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                Personal Training (PT) Packages
+                            </span>
+                            <span class="font-bold text-white">{{ $currency }}{{ number_format($ptIncome ?? 0, 2) }}</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                            <div class="h-full bg-amber-400 rounded-full" style="width: {{ $ptPercent ?? 0 }}%"></div>
+                        </div>
+                    </div>
+
                     <!-- POS Sales -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
                             <span class="flex items-center gap-2 text-slate-300 font-medium">
                                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                                POS Sales
+                                POS / Store Sales
                             </span>
                             <span class="font-bold text-white">{{ $currency }}{{ number_format($posSales, 2) }}</span>
                         </div>
                         <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
                             <div class="h-full bg-purple-400 rounded-full" style="width: {{ $posPercent }}%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Other -->
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-slate-300 font-medium">
-                                <span class="w-2 h-2 rounded-full bg-slate-500"></span>
-                                Other
-                            </span>
-                            <span class="font-bold text-white">{{ $currency }}{{ number_format($otherIncome, 2) }}</span>
-                        </div>
-                        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                            <div class="h-full bg-slate-500 rounded-full" style="width: {{ $otherPercent }}%"></div>
                         </div>
                     </div>
                 </div>

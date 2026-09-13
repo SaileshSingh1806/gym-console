@@ -39,6 +39,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/members/create', [AppController::class, 'createMember'])->name('app.members.create');
         Route::get('/members/lookup-phone', [AppController::class, 'lookupMemberPhone'])->name('app.members.lookup-phone');
         Route::get('/members/{id}', [AppController::class, 'showMember'])->name('app.members.show');
+        Route::get('/members/{id}/edit', [AppController::class, 'editMember'])->name('app.members.edit');
         Route::post('/members', [AppController::class, 'storeMember'])->name('app.members.store');
         Route::post('/members/{id}', [AppController::class, 'updateMember'])->name('app.members.update');
         Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete');
@@ -70,6 +71,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::middleware('feature:attendance_checkin')->group(function () {
         Route::get('/attendance', [AppController::class, 'attendance'])->name('app.attendance.index');
         Route::post('/attendance', [AppController::class, 'storeCheckin'])->name('app.attendance.store');
+        Route::post('/attendance/{id}/checkout', [AppController::class, 'checkoutAttendance'])->name('app.attendance.checkout')->whereNumber('id');
     });
 
     // 5. Personal Training & PT Plans & Sessions
@@ -158,6 +160,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::delete('/crm/trials/{id}', [AppController::class, 'deleteTrial'])->name('app.crm.trials.delete')->whereNumber('id');
 
         Route::get('/crm/enquiries', [AppController::class, 'crmEnquiries'])->name('app.crm.enquiries');
+        Route::post('/crm/enquiries', [AppController::class, 'storeEnquiry'])->name('app.crm.enquiries.store');
         Route::get('/crm/conversions', [AppController::class, 'crmConversions'])->name('app.crm.conversions');
         Route::get('/crm/reports', [AppController::class, 'crmReports'])->name('app.crm.reports');
     });

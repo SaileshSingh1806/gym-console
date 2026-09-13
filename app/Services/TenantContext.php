@@ -31,6 +31,11 @@ class TenantContext
         return static::$tenant?->id;
     }
 
+    public static function getTenantId(): ?int
+    {
+        return static::tenantId();
+    }
+
     public static function setBranch(?Branch $branch): void
     {
         static::$branch = $branch;
@@ -44,6 +49,11 @@ class TenantContext
     public static function branchId(): ?int
     {
         return static::$branch?->id;
+    }
+
+    public static function getBranchId(): ?int
+    {
+        return static::branchId();
     }
 
     public static function setBypass(bool $bypass = true): void

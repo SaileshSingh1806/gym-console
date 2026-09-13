@@ -17,13 +17,15 @@ class AttendanceService
         $today = $time->toDateString();
 
         return DB::transaction(function () use ($member, $method, $device, $time, $today) {
-            $existing = Attendance::where('tenant_id', $member->tenant_id)
+            $existing = Attendance::withoutGlobalScopes()
+                ->where('tenant_id', $member->tenant_id)
                 ->where('member_id', $member->id)
                 ->where('date', $today)
+                ->latest('id')
                 ->first();
 
-            if ($existing) {
-                // Already checked in today, update if no check in time
+            if ($existing && ! $existing->check_out) {
+                // Already inside today, update if no check in time
                 if (! $existing->check_in) {
                     $existing->update(['check_in' => $time]);
                 }
@@ -54,10 +56,21 @@ class AttendanceService
         $today = $time->toDateString();
 
         return DB::transaction(function () use ($member, $time, $today) {
-            $attendance = Attendance::where('tenant_id', $member->tenant_id)
+            $attendance = Attendance::withoutGlobalScopes()
+                ->where('tenant_id', $member->tenant_id)
                 ->where('member_id', $member->id)
-                ->where('date', $today)
+                ->whereNull('check_out')
+                ->latest('id')
                 ->first();
+
+            if (! $attendance) {
+                $attendance = Attendance::withoutGlobalScopes()
+                    ->where('tenant_id', $member->tenant_id)
+                    ->where('member_id', $member->id)
+                    ->where('date', $today)
+                    ->latest('id')
+                    ->first();
+            }
 
             if ($attendance) {
                 $attendance->update(['check_out' => $time]);
@@ -65,6 +78,23 @@ class AttendanceService
             }
 
             return $attendance;
+        });
+    }
+
+    public function checkOutById(int|Attendance $attendance, ?Carbon $time = null): ?Attendance
+    {
+        $time = $time ?? now();
+
+        return DB::transaction(function () use ($attendance, $time) {
+            $att = $attendance instanceof Attendance
+                ? $attendance
+                : Attendance::withoutGlobalScopes()->findOrFail($attendance);
+
+            $att->update(['check_out' => $time]);
+
+            ActivityLog::log('member_checkout', "Member {$att->member?->full_name} checked out", $att);
+
+            return $att;
         });
     }
 

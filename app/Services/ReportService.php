@@ -7,11 +7,11 @@ use App\Models\Expense;
 use App\Models\Lead;
 use App\Models\Member;
 use App\Models\MemberPayment;
+use App\Models\MemberPtPackage;
 use App\Models\Membership;
 use App\Models\PlatformInvoice;
 use App\Models\Subscription;
 use App\Models\Tenant;
-use App\Models\Trainer;
 
 class ReportService
 {
@@ -73,6 +73,9 @@ class ReportService
                 'birthday_members_list' => [],
                 'churn_risk_members' => [],
                 'leads_followup_list' => [],
+                'active_pt' => 0,
+                'expired_pt' => 0,
+                'exhausted_pt' => 0,
             ];
         }
 
@@ -139,32 +142,86 @@ class ReportService
             ->count();
 
         $dormantMembers = (clone $membersQuery)
-            ->whereIn('status', ['INACTIVE', 'FROZEN'])
+            ->where('status', 'ACTIVE')
+            ->whereDoesntHave('attendances', function ($q) {
+                $q->where('date', '>=', now()->subDays(14)->toDateString());
+            })
             ->count();
 
         // Leads & CRM metrics
         $leadsQuery = Lead::query();
+        if ($tenant && $tenant->id) {
+            $leadsQuery->where('tenant_id', $tenant->id);
+        }
         if ($branchId) {
             $leadsQuery->where('branch_id', $branchId);
         }
-        $activeLeads = (clone $leadsQuery)->whereNotIn('status', ['CONVERTED', 'LOST', 'converted', 'lost'])->count();
+        $activeLeads = (clone $leadsQuery)
+            ->whereNotIn('status', ['CONVERTED', 'LOST', 'converted', 'lost', 'PAID', 'paid'])
+            ->whereNotIn('stage', ['CONVERTED', 'LOST', 'converted', 'lost', 'PAID', 'paid'])
+            ->count();
         $todayEnquiries = (clone $leadsQuery)->whereDate('created_at', now()->toDateString())->count();
         $todayFollowups = (clone $leadsQuery)->whereDate('follow_up_date', now()->toDateString())->count();
         $overdueFollowups = (clone $leadsQuery)
             ->whereNotNull('follow_up_date')
             ->whereDate('follow_up_date', '<', now()->toDateString())
-            ->whereNotIn('status', ['CONVERTED', 'LOST', 'converted', 'lost'])
+            ->whereNotIn('status', ['CONVERTED', 'LOST', 'converted', 'lost', 'PAID', 'paid'])
+            ->whereNotIn('stage', ['CONVERTED', 'LOST', 'converted', 'lost', 'PAID', 'paid'])
             ->count();
-        $upcomingTrials = (clone $leadsQuery)->whereIn('status', ['TRIAL', 'trial', 'TRIAL_SCHEDULED'])->count();
+        $upcomingTrials = (clone $leadsQuery)
+            ->where(function ($q) {
+                $q->whereIn('stage', ['TRIAL', 'trial', 'TRIAL_SCHEDULED', 'trial_scheduled'])
+                    ->orWhereIn('status', ['TRIAL', 'trial', 'TRIAL_SCHEDULED', 'trial_scheduled'])
+                    ->orWhere(function ($tq) {
+                        $tq->whereNotNull('trial_date')
+                            ->where('trial_date', '>=', now()->toDateString())
+                            ->where('trial_status', '!=', 'completed')
+                            ->where('trial_status', '!=', 'cancelled');
+                    });
+            })
+            ->count();
 
         // PT (Personal Training) metrics
-        $trainersQuery = Trainer::query();
-        if ($branchId) {
-            $trainersQuery->where('branch_id', $branchId);
+        $ptPackagesQuery = MemberPtPackage::query();
+        if ($tenant && $tenant->id) {
+            $ptPackagesQuery->where('tenant_id', $tenant->id);
         }
-        $activePt = (clone $trainersQuery)->where('status', 'ACTIVE')->count();
-        $expiredPt = (clone $trainersQuery)->where('status', 'INACTIVE')->count();
-        $exhaustedPt = 0;
+        if ($branchId) {
+            $ptPackagesQuery->where('branch_id', $branchId);
+        }
+
+        $activePt = (clone $ptPackagesQuery)
+            ->where('status', 'ACTIVE')
+            ->where(function ($q) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->toDateString());
+            })
+            ->where(function ($q) {
+                $q->whereNull('total_sessions')
+                    ->orWhereRaw('used_sessions < total_sessions');
+            })
+            ->count();
+
+        $expiredPt = (clone $ptPackagesQuery)
+            ->where(function ($q) {
+                $q->where('status', 'EXPIRED')
+                    ->orWhere(function ($sub) {
+                        $sub->where('status', 'ACTIVE')
+                            ->whereNotNull('end_date')
+                            ->where('end_date', '<', now()->toDateString());
+                    });
+            })
+            ->count();
+
+        $exhaustedPt = (clone $ptPackagesQuery)
+            ->where(function ($q) {
+                $q->whereIn('status', ['COMPLETED', 'EXHAUSTED'])
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('total_sessions')
+                            ->whereRaw('used_sessions >= total_sessions');
+                    });
+            })
+            ->count();
 
         // Detail lists for interactive widgets and modals
         $expiringMembersList = (clone $membershipsQuery)

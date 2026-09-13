@@ -22,10 +22,49 @@
         $expiringSoonCount = \App\Models\Membership::where('status', 'ACTIVE')
             ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
             ->count();
+
+        $membersMap = $members->getCollection()->mapWithKeys(function ($m) {
+            $meta = is_array($m->metadata) ? $m->metadata : [];
+            $membership = $m->activeMembership ?? $m->memberships()->latest()->first();
+            return [(string) $m->id => [
+                'id' => $m->id,
+                'member_code' => (string) ($m->member_code ?? ''),
+                'first_name' => (string) ($m->first_name ?? ''),
+                'last_name' => (string) ($m->last_name ?? ''),
+                'phone' => (string) ($m->phone ?? ''),
+                'alternate_phone' => (string) ($meta['alternate_phone'] ?? ''),
+                'email' => (string) ($m->email ?? ''),
+                'gender' => (string) ($m->gender ?? 'male'),
+                'dob' => $m->dob ? $m->dob->format('Y-m-d') : '',
+                'blood_group' => (string) ($meta['blood_group'] ?? ''),
+                'city' => (string) ($meta['city'] ?? ''),
+                'address' => (string) ($m->address ?? ''),
+                'height' => (string) ($meta['height'] ?? ''),
+                'height_unit' => (string) ($meta['height_unit'] ?? 'cm'),
+                'weight' => (string) ($meta['weight'] ?? ''),
+                'target_weight' => (string) ($meta['target_weight'] ?? ''),
+                'fitness_goal' => (string) ($meta['fitness_goal'] ?? ''),
+                'medical_history' => (string) ($meta['medical_history'] ?? ''),
+                'emergency_contact_name' => (string) ($m->emergency_contact_name ?? ''),
+                'emergency_contact_phone' => (string) ($m->emergency_contact_phone ?? ''),
+                'emergency_relation' => (string) ($meta['emergency_relation'] ?? ''),
+                'branch_id' => $m->branch_id ?? '',
+                'status' => (string) ($m->status ?? 'ACTIVE'),
+                'membership_plan_id' => $membership?->membership_plan_id ?? '',
+                'notes' => (string) ($m->notes ?? ''),
+                'photo_path' => (string) ($m->photo_path ?? ''),
+                'membership' => $membership ? [
+                    'final_amount' => (float) ($membership->final_amount ?? 0),
+                    'paid_amount' => (float) ($membership->paid_amount ?? 0),
+                    'plan_name' => $membership->plan?->name ?? 'Active Membership',
+                ] : null,
+            ]];
+        });
     @endphp
 
     <script>
         window.__MEMBERSHIP_PLANS__ = {{ Js::from($plansJson) }};
+        window.__MEMBERS_DATA__ = {{ Js::from($membersMap) }};
     </script>
 
     <div x-data="{ 
@@ -33,6 +72,7 @@
         showEditModal: false, 
         showCollectFeeModal: false,
         plans: window.__MEMBERSHIP_PLANS__ || {},
+        membersData: window.__MEMBERS_DATA__ || {},
         
         // Add Member Form State
         selectedPlanId: '',
@@ -89,33 +129,43 @@
         editCameraActive: false,
         editCameraError: null,
 
-        openEditModal(member) {
-            const meta = member.metadata || {};
+        openEditModal(memberId) {
+            let member = null;
+            if (this.membersData) {
+                if (Array.isArray(this.membersData)) {
+                    member = this.membersData.find(m => m && m.id == memberId);
+                } else if (typeof this.membersData === 'object') {
+                    member = this.membersData[String(memberId)] || this.membersData[memberId];
+                }
+            }
+            if (!member) {
+                member = { id: memberId };
+            }
             this.editMember = {
-                id: member.id,
+                id: member.id || memberId,
                 member_code: member.member_code || '',
                 first_name: member.first_name || '',
                 last_name: member.last_name || '',
                 phone: member.phone || '',
-                alternate_phone: meta.alternate_phone || '',
+                alternate_phone: member.alternate_phone || '',
                 email: member.email || '',
                 gender: member.gender || 'male',
-                dob: member.dob ? member.dob.substring(0, 10) : '',
-                blood_group: meta.blood_group || '',
-                city: meta.city || '',
+                dob: member.dob || '',
+                blood_group: member.blood_group || '',
+                city: member.city || '',
                 address: member.address || '',
-                height: meta.height || '',
-                height_unit: meta.height_unit || 'cm',
-                weight: meta.weight || '',
-                target_weight: meta.target_weight || '',
-                fitness_goal: meta.fitness_goal || '',
-                medical_history: meta.medical_history || '',
+                height: member.height || '',
+                height_unit: member.height_unit || 'cm',
+                weight: member.weight || '',
+                target_weight: member.target_weight || '',
+                fitness_goal: member.fitness_goal || '',
+                medical_history: member.medical_history || '',
                 emergency_contact_name: member.emergency_contact_name || '',
                 emergency_contact_phone: member.emergency_contact_phone || '',
-                emergency_relation: meta.emergency_relation || '',
+                emergency_relation: member.emergency_relation || '',
                 branch_id: member.branch_id || '',
                 status: member.status || 'ACTIVE',
-                membership_plan_id: member.active_membership ? member.active_membership.membership_plan_id : '',
+                membership_plan_id: member.membership_plan_id || '',
                 notes: member.notes || '',
                 photo_path: member.photo_path || ''
             };
@@ -199,16 +249,21 @@
         collectMethod: 'cash',
         collectRef: '',
         collectNotes: '',
-        openCollectFeeModal(member, membership) {
+        openCollectFeeModal(memberId) {
+            const member = this.membersData[String(memberId)] || {};
+            const membership = member.membership || {};
+            const finalAmt = Number(membership.final_amount || 0);
+            const paidAmt = Number(membership.paid_amount || 0);
+            const remBalance = Math.max(0, finalAmt - paidAmt);
             this.feeMember = {
                 id: member.id,
-                name: member.first_name + ' ' + member.last_name,
-                plan_name: membership?.plan?.name || 'Active Membership',
-                final_amount: Number(membership?.final_amount || 0),
-                paid_amount: Number(membership?.paid_amount || 0),
-                remaining_balance: Math.max(0, Number(membership?.final_amount || 0) - Number(membership?.paid_amount || 0)),
+                name: (member.first_name || '') + ' ' + (member.last_name || ''),
+                plan_name: membership.plan_name || 'Active Membership',
+                final_amount: finalAmt,
+                paid_amount: paidAmt,
+                remaining_balance: remBalance,
             };
-            this.collectAmount = this.feeMember.remaining_balance > 0 ? this.feeMember.remaining_balance : '';
+            this.collectAmount = remBalance > 0 ? remBalance : '';
             this.collectMethod = 'upi';
             this.collectRef = '';
             this.collectNotes = '';
@@ -458,7 +513,7 @@
                             <td class="py-3 px-3.5 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     @if($membership && $remainingAmt > 0)
-                                        <button type="button" @click='openCollectFeeModal({{ Js::from($member) }}, {{ Js::from($membership) }})' title="Collect Remaining Fees" class="py-1 px-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all flex items-center gap-1 text-[11px] font-bold shadow-sm shrink-0">
+                                        <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1 px-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-all flex items-center gap-1 text-[11px] font-bold shadow-sm shrink-0">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
                                         </button>
@@ -468,9 +523,9 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     </a>
 
-                                    <button type="button" @click='openEditModal({{ Js::from($member) }})' title="Edit Member Details" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700/50">
+                                    <a href="{{ route('app.members.edit', $member->id) }}" @click.prevent="openEditModal({{ $member->id }})" title="Edit Member Details" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700/50 cursor-pointer inline-flex items-center justify-center">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </button>
+                                    </a>
 
                                     <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
                                           data-confirm="Are you sure you want to remove member '{{ addslashes($member->full_name) }}'? This will permanently delete their profile and membership history." 

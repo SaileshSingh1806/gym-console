@@ -513,12 +513,14 @@
                 <form action="{{ route('app.crm.trials.store') }}" method="POST" class="space-y-3.5">
                     @csrf
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 mb-1">Select Lead *</label>
+                        <label class="block text-xs font-bold text-slate-300 mb-1">Select Lead (Demo Booked) *</label>
                         <select name="lead_id" required class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-indigo-500 focus:outline-none">
                             <option value="">-- Choose Lead --</option>
-                            @foreach($recentLeads as $ld)
+                            @forelse($demoBookedLeads ?? $recentLeads as $ld)
                                 <option value="{{ $ld->id }}">{{ $ld->name }} ({{ $ld->phone }}) - {{ $ld->formatted_stage }}</option>
-                            @endforeach
+                            @empty
+                                <option value="" disabled>No leads currently in 'Demo Booked' stage</option>
+                            @endforelse
                         </select>
                     </div>
 
