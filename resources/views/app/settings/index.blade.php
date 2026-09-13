@@ -676,7 +676,11 @@
                             </button>
 
                             @if(! $b->is_main && $branches->count() > 1)
-                            <form action="{{ route('app.branches.delete', $b->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove branch {{ $b->name }}?');">
+                            <form action="{{ route('app.branches.delete', $b->id) }}" method="POST" 
+                                  data-confirm="Are you sure you want to remove branch '{{ addslashes($b->name) }}'? Devices and staff associated with this location will need to be reassigned." 
+                                  data-confirm-title="Remove Branch Location" 
+                                  data-confirm-btn="Yes, Remove Branch" 
+                                  data-confirm-type="danger">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs transition-all cursor-pointer" title="Delete Branch">
@@ -897,7 +901,11 @@
                                         Ping Test
                                     </button>
                                 </form>
-                                <form action="{{ route('app.devices.delete', $device->id) }}" method="POST" onsubmit="return confirm('Remove biometric device {{ $device->name }}?');">
+                                <form action="{{ route('app.devices.delete', $device->id) }}" method="POST" 
+                                      data-confirm="Are you sure you want to remove biometric device '{{ addslashes($device->name) }}'? Automated check-in sync from this hardware terminal will be stopped." 
+                                      data-confirm-title="Remove Biometric Device" 
+                                      data-confirm-btn="Yes, Remove Device" 
+                                      data-confirm-type="danger">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs transition-all cursor-pointer" title="Delete Device">

@@ -30,9 +30,21 @@
                     
                     <!-- Top Gradient Header Brand Bar -->
                     @php
-                        $resolvedBrandLogo = $brandLogo ?? ($tenant->logo_url ?? null);
-                        $resolvedBrandName = $brandName ?? ($tenant->name ?? config('app.name', 'Gym Console'));
-                        $resolvedSupportEmail = $supportEmail ?? ($tenant->email ?? null);
+                        $rawLogo = $brandLogo ?? ($tenant->logo_url ?? ($ticket->tenant->logo_url ?? \App\Models\Setting::getGlobal('logo_url')));
+                        $resolvedBrandName = $brandName ?? ($tenant->name ?? ($ticket->tenant->name ?? \App\Models\Setting::getGlobal('app_name', config('app.name', 'Gym Console'))));
+                        $resolvedSupportEmail = $supportEmail ?? ($tenant->email ?? ($ticket->tenant->email ?? \App\Models\Setting::getGlobal('support_email')));
+
+                        $resolvedBrandLogo = null;
+                        if (!empty($rawLogo)) {
+                            $rawLogo = trim($rawLogo);
+                            if (str_starts_with($rawLogo, 'http://') || str_starts_with($rawLogo, 'https://')) {
+                                $resolvedBrandLogo = $rawLogo;
+                            } elseif (str_starts_with($rawLogo, '/')) {
+                                $resolvedBrandLogo = url($rawLogo);
+                            } else {
+                                $resolvedBrandLogo = asset($rawLogo);
+                            }
+                        }
                     @endphp
                     <tr>
                         <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%); padding: 26px 32px; text-align: center;">
@@ -40,17 +52,22 @@
                                 <tr>
                                     <td align="center">
                                         @if(!empty($resolvedBrandLogo))
-                                            <div style="margin-bottom: 12px;">
-                                                <img src="{{ $resolvedBrandLogo }}" alt="{{ $resolvedBrandName }}" style="max-height: 55px; max-width: 190px; object-fit: contain; border-radius: 10px; background-color: rgba(255, 255, 255, 0.95); padding: 5px 10px; display: inline-block; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);" />
+                                            <!-- Gym / Platform Brand Logo (Displayed in place of text name) -->
+                                            <div style="display: inline-block;">
+                                                <img src="{{ $resolvedBrandLogo }}" 
+                                                     alt="{{ $resolvedBrandName }}" 
+                                                     style="max-height: 55px; max-width: 220px; object-fit: contain; border-radius: 10px; background-color: rgba(255, 255, 255, 0.95); padding: 6px 12px; display: inline-block; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);" />
+                                            </div>
+                                        @else
+                                            <!-- Fallback Text Brand Name when logo is not uploaded -->
+                                            <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.15); padding: 7px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.25);">
+                                                <span style="font-size: 17px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase;">
+                                                    ⚡ {{ $resolvedBrandName }}
+                                                </span>
                                             </div>
                                         @endif
-                                        <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.15); padding: 7px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.25);">
-                                            <span style="font-size: 17px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; text-transform: uppercase;">
-                                                ⚡ {{ $resolvedBrandName }}
-                                            </span>
-                                        </div>
                                         @if(isset($headerSubtitle))
-                                            <p style="margin: 8px 0 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">
+                                            <p style="margin: 10px 0 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.9); font-weight: 500;">
                                                 {{ $headerSubtitle }}
                                             </p>
                                         @endif

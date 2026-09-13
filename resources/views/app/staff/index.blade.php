@@ -438,7 +438,12 @@
                                             </form>
 
                                             <!-- Delete Button -->
-                                            <form action="{{ route('app.staff.delete', $u->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove {{ addslashes($u->name) }} from gym staff?');" class="inline">
+                                            <form action="{{ route('app.staff.delete', $u->id) }}" method="POST" 
+                                                  data-confirm="Are you sure you want to remove '{{ addslashes($u->name) }}' from gym staff?" 
+                                                  data-confirm-title="Remove Staff Member" 
+                                                  data-confirm-btn="Yes, Remove Staff" 
+                                                  data-confirm-type="danger" 
+                                                  class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" 
@@ -496,6 +501,8 @@
 
                 <form :action="showEditStaffModal ? ('{{ url('app/staff') }}/' + staffForm.id) : '{{ route('app.staff.store') }}'" 
                       method="POST" 
+                      x-data="{ isSubmitting: false }"
+                      @submit="if(isSubmitting) { $event.preventDefault(); return false; } isSubmitting = true;"
                       class="space-y-6">
                     @csrf
 
@@ -830,9 +837,12 @@
                         </button>
                         
                         <button type="submit" 
+                                :disabled="isSubmitting"
+                                :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': isSubmitting }"
                                 class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                            <span>Save</span>
+                            <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            <svg x-show="isSubmitting" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span x-text="isSubmitting ? 'Saving...' : 'Save'">Save</span>
                         </button>
                     </div>
                 </form>

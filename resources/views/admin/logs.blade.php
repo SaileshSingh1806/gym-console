@@ -15,7 +15,11 @@
                 </button>
             </form>
 
-            <form action="{{ route('admin.logs.clear') }}" method="POST" onsubmit="return confirm('Are you sure you want to purge all activity logs?');">
+            <form action="{{ route('admin.logs.clear') }}" method="POST"
+                  data-confirm="Are you sure you want to permanently purge all system activity logs? This cannot be undone."
+                  data-confirm-title="Purge Activity Logs"
+                  data-confirm-btn="Purge Logs"
+                  data-confirm-type="danger">
                 @csrf
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 font-bold text-xs border border-red-500/20 transition-all">
                     Purge All Logs

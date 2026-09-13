@@ -251,10 +251,15 @@
                                 @endif
                             </form>
 
-                            <form action="{{ route('app.services.delete', $svc->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this service?');" class="inline">
+                            <form action="{{ route('app.services.delete', $svc->id) }}" method="POST" 
+                                  data-confirm="Are you sure you want to delete the gym service '{{ addslashes($svc->name) }}'?" 
+                                  data-confirm-title="Delete Gym Service" 
+                                  data-confirm-btn="Yes, Delete Service" 
+                                  data-confirm-type="danger" 
+                                  class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-xs font-bold transition-colors" title="Delete Service">
+                                <button type="submit" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 text-xs font-bold transition-colors cursor-pointer" title="Delete Service">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
@@ -466,19 +471,29 @@
                                     <td class="py-3.5 px-4 text-right">
                                         <div class="flex items-center justify-end gap-2">
                                             @if($bk->status === 'active' && $bk->sessions_left > 0)
-                                                <form action="{{ route('app.services.bookings.deduct', $bk->id) }}" method="POST" onsubmit="return confirm('Deduct 1 session for {{ $bk->member->full_name }}?');" class="inline">
+                                                <form action="{{ route('app.services.bookings.deduct', $bk->id) }}" method="POST" 
+                                                      data-confirm="Deduct 1 used session for {{ addslashes($bk->member->full_name ?? 'this member') }}?" 
+                                                      data-confirm-title="Deduct Service Session" 
+                                                      data-confirm-btn="Yes, Deduct Session" 
+                                                      data-confirm-type="primary" 
+                                                      class="inline">
                                                     @csrf
-                                                    <button type="submit" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all" title="Deduct 1 session">
+                                                    <button type="submit" class="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-sm transition-all cursor-pointer" title="Deduct 1 session">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                                         <span>Deduct</span>
                                                     </button>
                                                 </form>
                                             @endif
 
-                                            <form action="{{ route('app.services.bookings.delete', $bk->id) }}" method="POST" onsubmit="return confirm('Delete this booking record?');" class="inline">
+                                            <form action="{{ route('app.services.bookings.delete', $bk->id) }}" method="POST" 
+                                                  data-confirm="Are you sure you want to delete this booking record?" 
+                                                  data-confirm-title="Delete Booking Record" 
+                                                  data-confirm-btn="Yes, Delete Booking" 
+                                                  data-confirm-type="danger" 
+                                                  class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-950/40 transition-colors" title="Delete Booking">
+                                                <button type="submit" class="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-950/40 transition-colors cursor-pointer" title="Delete Booking">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>
                                             </form>

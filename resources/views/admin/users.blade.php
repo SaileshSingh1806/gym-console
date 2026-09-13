@@ -81,7 +81,11 @@
                                         </button>
 
                                         @if($u->id !== auth()->id())
-                                            <form action="{{ route('admin.users.delete', $u->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                            <form action="{{ route('admin.users.delete', $u->id) }}" method="POST"
+                                                  data-confirm="Are you sure you want to delete user '{{ $u->name }}'? This action cannot be undone."
+                                                  data-confirm-title="Delete User"
+                                                  data-confirm-btn="Delete User"
+                                                  data-confirm-type="danger">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="px-2 py-1 rounded bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-[10px] font-semibold transition-all">

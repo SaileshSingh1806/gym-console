@@ -2,15 +2,469 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
+use Exception;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 class AiDietPlannerService
 {
     /**
-     * Generate a personalized, practical, Indian-friendly diet plan JSON based on member input.
+     * Generate a personalized, practical, Indian-friendly diet plan based on member input.
+     * Uses Google Gemini AI if configured, with automatic fallback to built-in algorithmic engine.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed>
      */
-    public function generate(array $input): array
+    public function generate(array $input, ?string $apiKey = null, ?string $model = null): array
+    {
+        // 1. Resolve Gemini API Key & Model
+        $resolvedKey = $apiKey;
+        $resolvedModel = $model;
+
+        if (empty($resolvedKey)) {
+            $resolvedKey = Setting::getGlobal('gemini_api_key') ?: config('services.gemini.api_key');
+            $resolvedModel = $resolvedModel ?: (Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-2.5-flash'));
+
+            // Optional tenant custom override if configured
+            $tenant = TenantContext::getTenant() ?? (auth()->check() ? auth()->user()->tenant : null);
+            if (! empty($tenant?->settings['gemini_api_key'])) {
+                $resolvedKey = $tenant->settings['gemini_api_key'];
+                $resolvedModel = $tenant->settings['gemini_model'] ?? $resolvedModel;
+            }
+        }
+
+        $resolvedModel = $resolvedModel ?: 'gemini-2.5-flash';
+
+        // 2. If API Key is present, attempt Gemini generation
+        if (! empty($resolvedKey)) {
+            try {
+                $geminiPlan = $this->generateWithGemini($input, $resolvedKey, $resolvedModel);
+                if (! empty($geminiPlan) && ! empty($geminiPlan['meals'])) {
+                    $geminiPlan['is_gemini'] = true;
+                    $geminiPlan['gemini_model'] = $geminiPlan['gemini_model'] ?? $resolvedModel;
+
+                    return $geminiPlan;
+                }
+            } catch (Exception $e) {
+                Log::warning('Gemini AI Diet Generation failed, falling back to algorithmic engine: '.$e->getMessage(), [
+                    'exception' => $e,
+                    'input' => $input,
+                ]);
+            }
+        }
+
+        // 3. Fallback to robust procedural/algorithmic diet engine
+        $plan = $this->generateAlgorithmic($input);
+        $plan['is_gemini'] = false;
+        $plan['gemini_model'] = null;
+
+        return $plan;
+    }
+
+    /**
+     * Query Google's ListModels endpoint to fetch actual supported text generateContent models for the API key.
+     * Strictly filters out TTS, audio, speech, embedding, and other non-text generation models.
+     *
+     * @return array<int, string>
+     */
+    public function fetchAvailableModels(string $apiKey): array
+    {
+        $apiKey = trim($apiKey);
+        if (empty($apiKey)) {
+            return [];
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(8)
+                ->get("https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $models = [];
+                foreach ($data['models'] ?? [] as $m) {
+                    $methods = $m['supportedGenerationMethods'] ?? [];
+                    if (in_array('generateContent', $methods)) {
+                        $name = str_replace('models/', '', $m['name'] ?? '');
+                        // Strictly filter OUT TTS, audio, speech, embedding, imagen, and non-text generation models
+                        if (
+                            ! empty($name) &&
+                            ! preg_match('/(?:tts|audio|speech|embed|aqa|imagen|whisper|transcription|realtime)/i', $name)
+                        ) {
+                            $models[] = $name;
+                        }
+                    }
+                }
+
+                return $models;
+            }
+        } catch (\Throwable $e) {
+            Log::debug('Failed to fetch Gemini available models list: '.$e->getMessage());
+        }
+
+        return [];
+    }
+
+    /**
+     * Get list of candidate text-generation model identifiers to try in order of preference.
+     * Ensures NO TTS or audio models are ever queried for text/diet generation.
+     *
+     * @return array<int, string>
+     */
+    protected function getModelCandidates(string $model, ?string $apiKey = null): array
+    {
+        $normalized = strtolower(trim($model));
+
+        // Strip any accidental TTS or non-text model reference
+        if (preg_match('/(?:tts|audio|speech|embed|aqa|imagen|whisper|transcription|realtime)/i', $normalized)) {
+            $normalized = 'gemini-2.5-flash';
+        }
+
+        $candidates = [$normalized];
+
+        // Specific family fallbacks
+        if (str_contains($normalized, '3.8')) {
+            $candidates[] = 'gemini-3.8-flash';
+            $candidates[] = 'gemini-3.5-flash';
+            $candidates[] = 'gemini-2.5-flash';
+            $candidates[] = 'gemini-2.0-flash';
+        } elseif (str_contains($normalized, '3.5')) {
+            $candidates[] = 'gemini-3.5-flash';
+            $candidates[] = 'gemini-3.8-flash';
+            $candidates[] = 'gemini-2.5-flash';
+            $candidates[] = 'gemini-2.0-flash';
+        } elseif (str_contains($normalized, '3.1')) {
+            $candidates[] = 'gemini-3.1-flash-lite';
+            $candidates[] = 'gemini-2.0-flash-lite';
+            $candidates[] = 'gemini-2.5-flash';
+            $candidates[] = 'gemini-2.0-flash';
+        } elseif (str_contains($normalized, '2.5')) {
+            $candidates[] = 'gemini-2.5-flash';
+            $candidates[] = 'gemini-2.5-pro';
+            $candidates[] = 'gemini-2.0-flash';
+        } elseif (str_contains($normalized, '2.0')) {
+            $candidates[] = 'gemini-2.0-flash';
+            $candidates[] = 'gemini-2.0-flash-lite';
+            $candidates[] = 'gemini-2.5-flash';
+        } elseif (str_contains($normalized, 'pro')) {
+            $candidates[] = 'gemini-2.5-pro';
+            $candidates[] = 'gemini-2.5-flash';
+            $candidates[] = 'gemini-2.0-flash';
+            $candidates[] = 'gemini-1.5-pro-latest';
+        }
+
+        // Standard modern text generation fallback stack
+        $standardModernStack = [
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-2.5-pro',
+            'gemini-2.0-flash-lite',
+            'gemini-3.5-flash',
+            'gemini-3.8-flash',
+            'gemini-3.1-flash-lite',
+            'gemini-1.5-flash',
+            'gemini-1.5-flash-latest',
+            'gemini-1.5-pro-latest',
+            'gemini-1.5-pro',
+        ];
+
+        $candidates = array_merge($candidates, $standardModernStack);
+
+        // If apiKey is provided, discover Google API's live models list
+        if (! empty($apiKey)) {
+            $liveModels = $this->fetchAvailableModels($apiKey);
+            if (! empty($liveModels)) {
+                $candidates = array_merge([$normalized], $liveModels, $candidates);
+            }
+        }
+
+        // Final strict filter: exclude any non-text/TTS/audio model
+        $filtered = array_filter($candidates, function ($item) {
+            return ! empty($item) && ! preg_match('/(?:tts|audio|speech|embed|aqa|imagen|whisper|transcription|realtime)/i', $item);
+        });
+
+        return array_values(array_unique($filtered));
+    }
+
+    /**
+     * Test Google Gemini API connection with a given API key and model.
+     *
+     * @return array{success: bool, message: string, model?: string}
+     */
+    public function testConnection(string $apiKey, ?string $model = null): array
+    {
+        $requestedModel = $model ?: 'gemini-2.5-flash';
+        $apiKey = trim($apiKey);
+
+        if (empty($apiKey)) {
+            return [
+                'success' => false,
+                'message' => 'Gemini API Key cannot be empty.',
+            ];
+        }
+
+        $candidates = $this->getModelCandidates($requestedModel, $apiKey);
+        $lastError = 'Unknown error';
+
+        foreach ($candidates as $candModel) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$candModel}:generateContent?key={$apiKey}";
+
+            try {
+                $response = Http::withoutVerifying()
+                    ->timeout(15)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post($url, [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    ['text' => 'Respond strictly in JSON: {"status": "ok", "message": "Connection verified"}'],
+                                ],
+                            ],
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.1,
+                            'responseMimeType' => 'application/json',
+                        ],
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                    $cleanText = trim(preg_replace('/^```(?:json)?\s*/i', '', preg_replace('/\s*```$/', '', trim($text))));
+                    $parsed = json_decode($cleanText, true);
+
+                    $activeModelMsg = ($candModel === $requestedModel) ? "Google Gemini AI ({$candModel})" : "Google Gemini AI ({$candModel} [resolved for {$requestedModel}])";
+
+                    return [
+                        'success' => true,
+                        'model' => $candModel,
+                        'message' => "{$activeModelMsg} connected and verified successfully!",
+                    ];
+                }
+
+                $errorData = $response->json();
+                $lastError = $errorData['error']['message'] ?? ('HTTP '.$response->status().': '.$response->body());
+
+                // If not a 404 / model not found, don't keep trying alternative models (e.g. invalid API key or quota issue)
+                if ($response->status() !== 404 && ! str_contains(strtolower($lastError), 'not found') && ! str_contains(strtolower($lastError), 'not supported')) {
+                    return [
+                        'success' => false,
+                        'message' => 'Google Gemini API Error: '.$lastError,
+                    ];
+                }
+            } catch (Exception $e) {
+                $lastError = $e->getMessage();
+            }
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Google Gemini API Error: '.$lastError,
+        ];
+    }
+
+    /**
+     * Generate diet plan using Google Gemini AI models.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    protected function generateWithGemini(array $input, string $apiKey, string $model): array
+    {
+        $name = trim((string) ($input['name'] ?? 'Gym Member'));
+        $age = max(12, min(90, (int) ($input['age'] ?? 26)));
+        $gender = strtolower((string) ($input['gender'] ?? 'male'));
+        $height = max(100, min(240, (float) ($input['height'] ?? 172)));
+        $weight = max(30, min(250, (float) ($input['weight'] ?? 72)));
+        $goal = strtolower(str_replace([' ', '-'], '_', (string) ($input['goal'] ?? 'muscle_gain')));
+        $activityLevel = strtolower(str_replace([' ', '-'], '_', (string) ($input['activity_level'] ?? 'moderately_active')));
+        $dietPreference = strtolower(str_replace([' ', '-'], '_', (string) ($input['diet_preference'] ?? 'vegetarian')));
+        $mealsPerDay = max(3, min(6, (int) ($input['meals_per_day'] ?? 4)));
+        $workoutTime = strtolower(str_replace([' ', '-'], '_', (string) ($input['workout_time'] ?? 'morning')));
+        $foodPreferences = trim((string) ($input['food_preferences'] ?? ''));
+        $foodsToAvoid = trim((string) ($input['foods_to_avoid'] ?? ''));
+        $allergies = trim((string) ($input['allergies'] ?? ''));
+        $additionalNotes = trim((string) ($input['additional_notes'] ?? ''));
+
+        $prompt = <<<PROMPT
+You are a World-Class Certified Clinical Nutritionist & Sports Dietitian specializing in personalized Indian and international gym nutrition plans.
+
+Create a highly detailed, authentic, scientifically accurate, and personalized Indian-friendly daily diet plan for the following gym member:
+
+MEMBER BIOMETRIC & LIFESTYLE PROFILE:
+- Name: {$name}
+- Age: {$age} years old (CRITICAL: Adjust metabolism, hormonal balance, protein bioavailability, recovery capacity, micronutrients like calcium/iron/vitamin D, and joint support based specifically on this age group)
+- Gender: {$gender}
+- Height: {$height} cm
+- Weight: {$weight} kg
+- Primary Fitness Goal: {$goal} (e.g. muscle_gain, fat_loss, weight_loss, weight_gain, maintenance, general_fitness)
+- Activity & Training Level: {$activityLevel}
+- Workout Timing: {$workoutTime} (CRITICAL: Place Pre-Workout energy and Post-Workout protein/glycogen recovery meals precisely relative to this workout timing)
+- Meals Per Day: {$mealsPerDay} meals
+- Dietary Preference: {$dietPreference} (vegetarian / non_vegetarian / eggetarian / vegan)
+- Preferred Foods: {$foodPreferences}
+- Foods to Avoid: {$foodsToAvoid}
+- Food Allergies / Intolerances: {$allergies}
+- Special Notes / Medical Conditions / Lifestyle: {$additionalNotes}
+
+NUTRITIONAL RULES & CALCULATIONS:
+1. Accurately calculate BMR (using Mifflin-St Jeor formula) and TDEE based on activity multiplier.
+2. Calculate target daily Calories and precise macronutrients (Protein in grams [1.6g - 2.2g per kg depending on goal], Carbohydrates in grams, Fats in grams, Dietary Fiber in grams, and Daily Hydration in Litres).
+3. Structure exactly {$mealsPerDay} meals throughout the day with precise meal names, recommended clock times, individual meal calories and macros (P, C, F).
+4. Each meal MUST have:
+   - "items_description": Clear bullet points with specific gram/portion measurements (e.g. "• 100g Grilled Paneer", "• 2 medium Whole Wheat Phulkas", "• 1 katori (150g) Yellow Moong Dal", "• 1 bowl Cucumber & Beetroot salad").
+   - "alternatives": A practical alternative Indian food combination matching similar macros.
+5. Provide 4-5 actionable lifestyle & cooking guidelines tailored to the member's age, goal, and medical notes.
+6. Provide 2-4 safe, evidence-based optional fitness supplements (e.g. Whey Protein, Creatine, Omega-3, Multivitamin) with exact dosage and timing.
+7. Output strict JSON matching the exact schema below. Do NOT output any markdown code fences, comments, or explanations outside the JSON.
+
+REQUIRED JSON SCHEMA:
+{
+  "member_name": "{$name}",
+  "plan_title": "String summarizing Member Name, Goal & Diet Type",
+  "goal": "{$goal}",
+  "diet_preference": "{$dietPreference}",
+  "daily_totals": {
+    "calories": 2400,
+    "protein_grams": 140,
+    "carbs_grams": 280,
+    "fat_grams": 60,
+    "fiber_grams": 35,
+    "water_liters": 3.5
+  },
+  "bmr_calculated": 1650,
+  "tdee_calculated": 2550,
+  "meals": [
+    {
+      "sort_order": 1,
+      "meal_type": "breakfast",
+      "meal_name": "Post-Workout High Protein Breakfast",
+      "recommended_time": "08:30 AM",
+      "target_macros": {
+        "calories": 600,
+        "protein_g": 35,
+        "carbs_g": 70,
+        "fat_g": 15
+      },
+      "items_description": "• Bullet point list of food items with gram portions",
+      "alternatives": "• Bullet point list of alternative options"
+    }
+  ],
+  "guidelines": [
+    "Actionable tip 1",
+    "Actionable tip 2",
+    "Actionable tip 3",
+    "Actionable tip 4"
+  ],
+  "optional_supplements": [
+    {
+      "name": "Supplement Name",
+      "dosage": "Recommended dosage and timing",
+      "purpose": "Why this supplement helps with their goal [OPTIONAL]"
+    }
+  ],
+  "medical_disclaimer": "This diet plan is an AI-generated fitness guideline created for general gym nutrition purposes. It is not a medical prescription. Members with health conditions should consult a licensed doctor or clinical dietitian."
+}
+PROMPT;
+
+        $candidates = $this->getModelCandidates($model, $apiKey);
+        $lastException = null;
+
+        foreach ($candidates as $candModel) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$candModel}:generateContent?key={$apiKey}";
+
+            try {
+                $response = Http::withoutVerifying()
+                    ->timeout(45)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post($url, [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    ['text' => $prompt],
+                                ],
+                            ],
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.65,
+                            'topK' => 40,
+                            'topP' => 0.95,
+                            'responseMimeType' => 'application/json',
+                        ],
+                    ]);
+
+                if (! $response->successful()) {
+                    $errBody = $response->body();
+                    $errStatus = $response->status();
+
+                    if ($errStatus === 404 || str_contains(strtolower($errBody), 'not found') || str_contains(strtolower($errBody), 'not supported')) {
+                        $lastException = new Exception("Gemini API request failed ({$candModel}) with status {$errStatus}: {$errBody}");
+
+                        continue;
+                    }
+
+                    throw new Exception("Gemini API request failed ({$candModel}) with status {$errStatus}: {$errBody}");
+                }
+
+                $body = $response->json();
+                $rawText = $body['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+                if (empty($rawText)) {
+                    throw new Exception('Gemini API returned empty response candidates.');
+                }
+
+                // Clean any potential markdown wrapping
+                $cleanJson = trim(preg_replace('/^```(?:json)?\s*/i', '', preg_replace('/\s*```$/', '', trim($rawText))));
+                $parsed = json_decode($cleanJson, true);
+
+                if (! is_array($parsed) || empty($parsed['meals'])) {
+                    throw new Exception('Failed to decode structured JSON diet plan from Gemini response: '.$rawText);
+                }
+
+                // Normalize and safeguard values
+                $parsed['member_name'] = $parsed['member_name'] ?? $name;
+                $parsed['plan_title'] = $parsed['plan_title'] ?? "{$name} - Personalized Diet Plan";
+                $parsed['goal'] = $parsed['goal'] ?? $goal;
+                $parsed['diet_preference'] = $parsed['diet_preference'] ?? $dietPreference;
+                $parsed['bmr_calculated'] = (int) ($parsed['bmr_calculated'] ?? 1600);
+                $parsed['tdee_calculated'] = (int) ($parsed['tdee_calculated'] ?? 2400);
+
+                if (! isset($parsed['daily_totals']) || ! is_array($parsed['daily_totals'])) {
+                    $parsed['daily_totals'] = [
+                        'calories' => (int) ($parsed['daily_calories'] ?? 2200),
+                        'protein_grams' => (int) ($parsed['protein_grams'] ?? 120),
+                        'carbs_grams' => (int) ($parsed['carbs_grams'] ?? 250),
+                        'fat_grams' => (int) ($parsed['fat_grams'] ?? 60),
+                        'fiber_grams' => (int) ($parsed['fiber_grams'] ?? 30),
+                        'water_liters' => (float) ($parsed['water_liters'] ?? 3.5),
+                    ];
+                }
+
+                if (empty($parsed['medical_disclaimer'])) {
+                    $parsed['medical_disclaimer'] = 'This diet plan is an AI-generated fitness guideline created for general gym nutrition purposes. It is not a medical prescription. Members with health conditions should consult a licensed doctor or clinical dietitian.';
+                }
+
+                $parsed['is_gemini'] = true;
+                $parsed['gemini_model'] = $candModel;
+                $parsed['generated_at'] = now()->toIso8601String();
+
+                return $parsed;
+            } catch (Exception $e) {
+                $lastException = $e;
+            }
+        }
+
+        throw $lastException ?: new Exception("Failed to generate diet with Gemini AI model {$model}");
+    }
+
+    /**
+     * Generate a personalized, practical, Indian-friendly diet plan using the built-in algorithmic engine.
+     *
+     * @param  array<string, mixed>  $input
+     * @return array<string, mixed>
+     */
+    public function generateAlgorithmic(array $input): array
     {
         $name = trim((string) ($input['name'] ?? 'Gym Member'));
         $age = max(12, min(90, (int) ($input['age'] ?? 26)));

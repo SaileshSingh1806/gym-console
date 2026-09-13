@@ -1,9 +1,15 @@
 <x-admin-layout header="SaaS Global Platform Settings">
     <div class="space-y-6" x-data="{ 
-        activeTab: 'general',
+        activeTab: '{{ session('activeTab', request('tab', 'general')) }}',
         showSmtpPassword: false,
         showRazorpaySecret: false,
         showStripeSecret: false,
+        showGeminiKey: false,
+        geminiApiKey: '{{ $settings['gemini_api_key'] ?? config('services.gemini.api_key', '') }}',
+        geminiModel: '{{ $settings['gemini_model'] ?? config('services.gemini.model', 'gemini-1.5-flash') }}',
+        testingGemini: false,
+        geminiTestStatus: null,
+        geminiTestMsg: '',
         logoPreview: '{{ $settings['logo_url'] ?? '' }}',
         faviconPreview: '{{ $settings['favicon_url'] ?? '' }}',
         ogPreview: '{{ $settings['og_image_url'] ?? '' }}',
@@ -12,29 +18,64 @@
             if (file) {
                 this[target] = URL.createObjectURL(file);
             }
+        },
+        async testGemini() {
+            this.testingGemini = true;
+            this.geminiTestStatus = null;
+            this.geminiTestMsg = '';
+            try {
+                const res = await fetch('{{ route('admin.settings.gemini.test') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        gemini_api_key: this.geminiApiKey,
+                        gemini_model: this.geminiModel
+                    })
+                });
+                const data = await res.json();
+                this.geminiTestStatus = data.success ? 'success' : 'error';
+                this.geminiTestMsg = data.message || (data.success ? 'Google Gemini AI connected successfully!' : 'Connection failed');
+            } catch (e) {
+                this.geminiTestStatus = 'error';
+                this.geminiTestMsg = 'Network error or unable to reach server.';
+            } finally {
+                this.testingGemini = false;
+            }
         }
     }">
 
         <!-- Navigation Tabs Bar -->
         <div class="p-2 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap gap-2">
-            <button type="button" @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+            <button type="button" @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <span>🏢 General & Branding</span>
+                <span>🏢 General &amp; Branding</span>
             </button>
 
-            <button type="button" @click="activeTab = 'email'" :class="activeTab === 'email' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+            <button type="button" @click="activeTab = 'email'" :class="activeTab === 'email' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 <span>✉️ Email / SMTP</span>
             </button>
 
-            <button type="button" @click="activeTab = 'payment'" :class="activeTab === 'payment' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+            <button type="button" @click="activeTab = 'payment'" :class="activeTab === 'payment' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span>💳 Payment Gateways (Razorpay)</span>
             </button>
 
-            <button type="button" @click="activeTab = 'seo'" :class="activeTab === 'seo' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all">
+            <button type="button" @click="activeTab = 'seo'" :class="activeTab === 'seo' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <span>🔍 Site SEO & Analytics</span>
+                <span>🔍 Site SEO &amp; Analytics</span>
+            </button>
+
+            <button type="button" @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-600/25' : 'text-slate-400 hover:text-white hover:bg-slate-800'" class="px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span>✨ AI &amp; Google Gemini</span>
+                @if(!empty($settings['gemini_api_key']) || !empty(config('services.gemini.api_key')))
+                    <span class="px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-bold">ACTIVE</span>
+                @endif
             </button>
         </div>
 
@@ -456,12 +497,180 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs hover:brightness-110 shadow-xl shadow-red-600/20 flex items-center gap-2">
+                    <button type="submit" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs hover:brightness-110 shadow-xl shadow-red-600/20 flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span>Save SEO & Analytics Settings</span>
+                        <span>Save SEO &amp; Analytics Settings</span>
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- TAB 5: AI & Google Gemini Global Platform Settings -->
+        <div x-show="activeTab === 'ai'" class="space-y-6" x-cloak>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Form (2 Cols) -->
+                <div class="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30">
+                                ✨
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <span>Google Gemini AI Platform Integration</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-mono font-bold">API v1beta</span>
+                                </h3>
+                                <p class="text-xs text-slate-400">Configure global Gemini API key here. All gym tenants with diet feature will automatically use this key.</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            @if(!empty($settings['gemini_api_key']) || !empty(config('services.gemini.api_key')))
+                                <span class="px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>GEMINI ACTIVE</span>
+                                </span>
+                            @else
+                                <span class="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span>KEY NOT CONFIGURED</span>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <form action="{{ route('admin.settings.ai') }}" method="POST" class="space-y-5 text-xs">
+                        @csrf
+
+                        <!-- Enable Toggle -->
+                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h4 class="text-xs font-bold text-white mb-0.5">Enable Google Gemini AI Platform-Wide</h4>
+                                <p class="text-[11px] text-slate-400">
+                                    When enabled, all gym tenants with Diet &amp; Nutrition permissions will have full access to personalized AI diet generation.
+                                </p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="gemini_enabled" value="1" {{ !empty($settings['gemini_enabled']) ? 'checked' : '' }} class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+
+                        <!-- Gemini API Key Input -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                                    Google Gemini API Key *
+                                </label>
+                                <button type="button" @click="showGeminiKey = !showGeminiKey" class="text-[11px] text-purple-400 hover:text-purple-300 font-medium cursor-pointer" x-text="showGeminiKey ? 'Hide Key' : 'Show Key'"></button>
+                            </div>
+                            <div class="relative">
+                                <input :type="showGeminiKey ? 'text' : 'password'" 
+                                       name="gemini_api_key" 
+                                       x-model="geminiApiKey"
+                                       value="{{ old('gemini_api_key', $settings['gemini_api_key'] ?? '') }}"
+                                       placeholder="AIzaSy..." 
+                                       class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs font-mono focus:border-purple-500 focus:outline-none pr-10">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-500">
+                                    🔑
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Get your free key from <a href="https://aistudio.google.com/" target="_blank" class="text-purple-400 hover:underline">Google AI Studio (aistudio.google.com)</a>.
+                            </p>
+                        </div>
+
+                        <!-- Gemini Model Selector -->
+                        <div class="space-y-1.5">
+                            <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+                                Preferred Gemini AI Model *
+                            </label>
+                            <select name="gemini_model" x-model="geminiModel" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-purple-500 focus:outline-none cursor-pointer">
+                                <option value="gemini-2.5-flash" {{ ($settings['gemini_model'] ?? 'gemini-2.5-flash') === 'gemini-2.5-flash' ? 'selected' : '' }}>gemini-2.5-flash (Recommended: High-Speed &amp; Advanced Multimodal Reasoning)</option>
+                                <option value="gemini-2.0-flash" {{ ($settings['gemini_model'] ?? '') === 'gemini-2.0-flash' ? 'selected' : '' }}>gemini-2.0-flash (Ultra Fast &amp; High Accuracy)</option>
+                                <option value="gemini-2.5-pro" {{ ($settings['gemini_model'] ?? '') === 'gemini-2.5-pro' ? 'selected' : '' }}>gemini-2.5-pro (Deep Reasoning &amp; Clinical Metabolic Customization)</option>
+                                <option value="gemini-3.5-flash" {{ ($settings['gemini_model'] ?? '') === 'gemini-3.5-flash' ? 'selected' : '' }}>gemini-3.5-flash (Next-Gen Intelligence &amp; Speed)</option>
+                                <option value="gemini-3.8-flash" {{ ($settings['gemini_model'] ?? '') === 'gemini-3.8-flash' ? 'selected' : '' }}>gemini-3.8-flash (Advanced Next-Gen Performance)</option>
+                                <option value="gemini-3.1-flash-lite" {{ ($settings['gemini_model'] ?? '') === 'gemini-3.1-flash-lite' ? 'selected' : '' }}>gemini-3.1-flash-lite (Ultra Lightweight &amp; Lowest Latency)</option>
+                                <option value="gemini-2.0-flash-lite" {{ ($settings['gemini_model'] ?? '') === 'gemini-2.0-flash-lite' ? 'selected' : '' }}>gemini-2.0-flash-lite (Cost-Effective &amp; High RPM)</option>
+                                <option value="gemini-1.5-flash" {{ ($settings['gemini_model'] ?? '') === 'gemini-1.5-flash' ? 'selected' : '' }}>gemini-1.5-flash (Standard Series)</option>
+                                <option value="gemini-1.5-pro-latest" {{ ($settings['gemini_model'] ?? '') === 'gemini-1.5-pro-latest' ? 'selected' : '' }}>gemini-1.5-pro-latest (Legacy Pro Series)</option>
+                            </select>
+                        </div>
+
+                        <!-- Test Status Banner -->
+                        <div x-show="geminiTestStatus" x-cloak class="p-3.5 rounded-2xl border text-xs flex items-start gap-2.5"
+                             :class="geminiTestStatus === 'success' ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'">
+                            <span class="text-base" x-text="geminiTestStatus === 'success' ? '✅' : '❌'"></span>
+                            <div class="flex-1">
+                                <p class="font-bold" x-text="geminiTestStatus === 'success' ? 'Connection Succeeded!' : 'Connection Failed'"></p>
+                                <p class="mt-0.5 text-[11px] opacity-90" x-text="geminiTestMsg"></p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
+                            <button type="button" 
+                                    @click="testGemini()" 
+                                    :disabled="testingGemini || !geminiApiKey"
+                                    class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer border border-slate-700">
+                                <span x-show="testingGemini" class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                <span x-show="!testingGemini">⚡</span>
+                                <span x-text="testingGemini ? 'Testing Connection...' : 'Test Gemini Connection'"></span>
+                            </button>
+
+                            <button type="submit" 
+                                    class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all cursor-pointer flex items-center gap-2">
+                                <span>Save AI Settings</span>
+                                <span>&rarr;</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Side Box Guide (1 Col) -->
+                <div class="space-y-6">
+                    <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3.5">
+                        <h4 class="text-xs font-extrabold text-white flex items-center gap-2">
+                            <span>🔑</span> Free API Key in 4 Simple Steps
+                        </h4>
+                        <ol class="text-[11px] text-slate-300 space-y-2.5 pl-1 leading-relaxed">
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 font-bold text-[10px] flex items-center justify-center shrink-0">1</span>
+                                <span>Open <a href="https://aistudio.google.com/" target="_blank" class="text-purple-400 font-bold hover:underline">aistudio.google.com</a></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 font-bold text-[10px] flex items-center justify-center shrink-0">2</span>
+                                <span>Sign in with your Google Account</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 font-bold text-[10px] flex items-center justify-center shrink-0">3</span>
+                                <span>Click <strong>"Get API Key"</strong> &rarr; <strong>"Create API Key"</strong></span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 font-bold text-[10px] flex items-center justify-center shrink-0">4</span>
+                                <span>Paste the key here and click <strong>Save AI Settings</strong></span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 space-y-3">
+                        <h4 class="text-xs font-extrabold text-white flex items-center gap-2">
+                            <span>🏢</span> Multi-Tenant Advantage
+                        </h4>
+                        <div class="text-[11px] text-slate-400 space-y-2 leading-relaxed">
+                            <p class="flex items-start gap-2">
+                                <span class="text-purple-400 font-bold">✓ Centralized:</span>
+                                <span>Super Admin configures the Gemini API key once, and all gym owners across the platform get AI Diet features automatically.</span>
+                            </p>
+                            <p class="flex items-start gap-2">
+                                <span class="text-indigo-400 font-bold">✓ Age &amp; Multi-Factor:</span>
+                                <span>Gemini adapts macro ratios, BMR/TDEE, pre/post workout timing, and Indian diets based on age, weight, and health conditions.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </x-admin-layout>

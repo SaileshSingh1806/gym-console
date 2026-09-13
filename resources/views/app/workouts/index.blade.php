@@ -133,10 +133,14 @@
                     </div>
 
                     <div class="border-t border-slate-800 pt-3 mt-4 flex items-center justify-end">
-                        <form action="{{ route('app.workouts.delete', $plan->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this workout routine?');">
+                        <form action="{{ route('app.workouts.delete', $plan->id) }}" method="POST" 
+                              data-confirm="Are you sure you want to delete the workout routine '{{ addslashes($plan->title) }}'?" 
+                              data-confirm-title="Delete Workout Routine" 
+                              data-confirm-btn="Yes, Delete Routine" 
+                              data-confirm-type="danger">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 text-xs font-semibold border border-slate-700 hover:border-rose-900/50 transition-colors">
+                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 text-xs font-semibold border border-slate-700 hover:border-rose-900/50 transition-colors cursor-pointer">
                                 Delete Routine
                             </button>
                         </form>

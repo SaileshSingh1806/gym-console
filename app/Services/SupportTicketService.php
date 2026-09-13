@@ -12,7 +12,6 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class SupportTicketService
 {
@@ -131,7 +130,7 @@ class SupportTicketService
 
             foreach ($adminEmails as $email) {
                 if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    Mail::to($email)->send(new NewSupportTicketAdminNotification($ticket, $message));
+                    AsyncMailService::dispatch($ticket->tenant_id, $email, new NewSupportTicketAdminNotification($ticket, $message));
                 }
             }
         } catch (\Throwable $e) {
@@ -149,14 +148,14 @@ class SupportTicketService
                 // Notify ticket creator (gym owner)
                 $creatorEmail = $ticket->user->email ?? null;
                 if ($creatorEmail && filter_var($creatorEmail, FILTER_VALIDATE_EMAIL)) {
-                    Mail::to($creatorEmail)->send(new SupportTicketReplyNotification($ticket, $reply, true));
+                    AsyncMailService::dispatch($ticket->tenant_id, $creatorEmail, new SupportTicketReplyNotification($ticket, $reply, true));
                 }
             } else {
                 // Notify super admins
                 $adminEmails = User::where('role', 'super_admin')->pluck('email')->filter()->all();
                 foreach ($adminEmails as $email) {
                     if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        Mail::to($email)->send(new SupportTicketReplyNotification($ticket, $reply, false));
+                        AsyncMailService::dispatch($ticket->tenant_id, $email, new SupportTicketReplyNotification($ticket, $reply, false));
                     }
                 }
             }

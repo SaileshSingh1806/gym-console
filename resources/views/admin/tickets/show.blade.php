@@ -24,7 +24,11 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <form action="{{ route('admin.tickets.delete', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
+            <form action="{{ route('admin.tickets.delete', $ticket->id) }}" method="POST"
+                  data-confirm="Are you sure you want to delete ticket #{{ $ticket->ticket_number }} ({{ $ticket->subject }})? All conversation history will be permanently removed."
+                  data-confirm-title="Delete Support Ticket"
+                  data-confirm-btn="Delete Ticket"
+                  data-confirm-type="danger">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition-colors cursor-pointer flex items-center gap-1.5">

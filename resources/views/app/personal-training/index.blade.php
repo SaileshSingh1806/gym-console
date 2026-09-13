@@ -553,9 +553,14 @@
                                             @endif
 
                                             @if($pkg->status === 'ACTIVE')
-                                                <form action="{{ route('app.pt-packages.cancel', $pkg->id) }}" method="POST" onsubmit="return confirm('Cancel this PT package?')" class="inline">
+                                                <form action="{{ route('app.pt-packages.cancel', $pkg->id) }}" method="POST" 
+                                                      data-confirm="Are you sure you want to cancel this PT package for {{ addslashes($pkg->member->full_name ?? 'this member') }}?" 
+                                                      data-confirm-title="Cancel Personal Training Package" 
+                                                      data-confirm-btn="Yes, Cancel Package" 
+                                                      data-confirm-type="warning" 
+                                                      class="inline">
                                                     @csrf
-                                                    <button type="submit" title="Cancel package" class="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                                                    <button type="submit" title="Cancel package" class="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     </button>
                                                 </form>
@@ -1090,10 +1095,15 @@
                                             </form>
 
                                             <!-- Delete Button -->
-                                            <form action="{{ route('app.pt-plans.delete', $plan->id) }}" method="POST" onsubmit="return confirm('Delete this PT plan?')" class="inline">
+                                            <form action="{{ route('app.pt-plans.delete', $plan->id) }}" method="POST" 
+                                                  data-confirm="Are you sure you want to delete the personal training plan '{{ addslashes($plan->name) }}'?" 
+                                                  data-confirm-title="Delete PT Plan" 
+                                                  data-confirm-btn="Yes, Delete Plan" 
+                                                  data-confirm-type="danger" 
+                                                  class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" title="Delete PT plan" class="p-1 rounded bg-slate-800 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors">
+                                                <button type="submit" title="Delete PT plan" class="p-1 rounded bg-slate-800 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>
                                             </form>
@@ -1214,10 +1224,15 @@
                                 <span>Edit</span>
                             </button>
 
-                            <form action="{{ route('app.trainers.delete', $trainer->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete trainer {{ $trainer->full_name }}?')" class="inline">
+                            <form action="{{ route('app.trainers.delete', $trainer->id) }}" method="POST" 
+                                  data-confirm="Are you sure you want to delete coach / trainer '{{ addslashes($trainer->full_name) }}'? Assigned members will be unassigned." 
+                                  data-confirm-title="Delete Trainer Profile" 
+                                  data-confirm-btn="Yes, Delete Trainer" 
+                                  data-confirm-type="danger" 
+                                  class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" title="Delete Trainer" class="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 border border-slate-800 transition-colors">
+                                <button type="submit" title="Delete Trainer" class="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 border border-slate-800 transition-colors cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>

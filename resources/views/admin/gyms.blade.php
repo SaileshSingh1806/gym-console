@@ -48,7 +48,11 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="font-semibold text-amber-400 block">{{ $gym->activeSubscription->plan->name ?? 'Free Trial' }}</span>
-                                    <span class="text-[10px] text-slate-500 capitalize">{{ $gym->activeSubscription->billing_cycle ?? 'monthly' }} cycle</span>
+                                    @if($gym->activeSubscription && $gym->status === 'ACTIVE')
+                                        <span class="text-[10px] text-emerald-400 font-semibold capitalize">{{ $gym->activeSubscription->billing_cycle ?? 'yearly' }} package</span>
+                                    @else
+                                        <span class="text-[10px] text-slate-500 capitalize">{{ $gym->activeSubscription->billing_cycle ?? 'monthly' }} cycle</span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-4 font-bold text-white">
                                     {{ $gym->members_count }}
@@ -87,6 +91,7 @@
                                             'status' => $gym->status,
                                             'trial_ends_at' => $gym->trial_ends_at?->toDateString(),
                                             'plan_id' => $gym->activeSubscription?->plan_id,
+                                            'billing_cycle' => $gym->activeSubscription?->billing_cycle ?? 'yearly',
                                         ]) }}" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-semibold">
                                             Edit
                                         </button>
@@ -149,7 +154,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">Status / Mode</label>
                                 <select name="status" x-model="editGym.status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
@@ -161,11 +166,18 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Assigned Plan Tier</label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Assigned Plan</label>
                                 <select name="plan_id" x-model="editGym.plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
                                     @foreach($plans as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Billing Cycle</label>
+                                <select name="billing_cycle" x-model="editGym.billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
+                                    <option value="yearly">📅 Yearly (Annual)</option>
+                                    <option value="monthly">🗓️ Monthly</option>
                                 </select>
                             </div>
                             <div>
@@ -188,44 +200,22 @@
                         <!-- Free Trial Duration Controls -->
                         <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
                             <div class="flex items-center justify-between">
-                                <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider">Free Trial Settings</label>
-                                <span class="text-[11px] text-slate-400">1-Click Trial Presets:</span>
+                                <span class="text-xs font-semibold text-slate-300">Set Custom Trial Expiry (If in Trial mode)</span>
+                                <span class="text-[10px] text-slate-500">Overrides plan default</span>
                             </div>
-
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" @click="editGym.status = 'TRIAL'; editGym.trial_ends_at = getTrialDate(7)" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 text-xs font-medium transition-colors">
-                                    + 7 Days Trial
-                                </button>
-                                <button type="button" @click="editGym.status = 'TRIAL'; editGym.trial_ends_at = getTrialDate(14)" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 text-xs font-medium transition-colors">
-                                    + 14 Days Trial
-                                </button>
-                                <button type="button" @click="editGym.status = 'TRIAL'; editGym.trial_ends_at = getTrialDate(30)" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 text-xs font-medium transition-colors">
-                                    + 30 Days Trial
-                                </button>
-                                <button type="button" @click="editGym.status = 'TRIAL'; editGym.trial_ends_at = getTrialDate(60)" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 text-xs font-medium transition-colors">
-                                    + 60 Days Trial
-                                </button>
-                                <button type="button" @click="editGym.status = 'ACTIVE'; editGym.trial_ends_at = ''" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-colors">
-                                    ✓ Make Active (Paid)
-                                </button>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Trial Expiration Date (Trial Ends At)</label>
-                                <input type="date" name="trial_ends_at" x-model="editGym.trial_ends_at" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
-                            </div>
+                            <input type="date" name="trial_ends_at" x-model="editGym.trial_ends_at" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
                         </div>
 
                         <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
                             <button type="button" @click="editGym = null" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Cancel</button>
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-red-500 text-white font-bold text-xs">Save Changes</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-bold text-xs">Save Changes</button>
                         </div>
                     </form>
                 </template>
             </div>
         </div>
 
-        <!-- Add Gym Modal -->
+        <!-- Add New Gym Modal -->
         <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 flex items-center justify-center p-4" x-cloak>
             <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl" @click.away="showNewModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
@@ -268,9 +258,9 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-4 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">SaaS Plan Tier *</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">SaaS Plan *</label>
                             <select name="plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
@@ -278,10 +268,17 @@
                             </select>
                         </div>
                         <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Billing Cycle *</label>
+                            <select name="billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
+                                <option value="yearly" selected>📅 Yearly (Annual)</option>
+                                <option value="monthly">🗓️ Monthly</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Status / Mode</label>
                             <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
-                                <option value="TRIAL" selected>🟡 TRIAL (Free Trial)</option>
-                                <option value="ACTIVE">🟢 ACTIVE (Paid Activation)</option>
+                                <option value="TRIAL">🟡 TRIAL (Free Trial)</option>
+                                <option value="ACTIVE" selected>🟢 ACTIVE (Paid Activation)</option>
                                 <option value="SUSPENDED">🔴 SUSPENDED</option>
                             </select>
                         </div>

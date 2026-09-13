@@ -50,8 +50,32 @@ class ReportService
         ];
     }
 
-    public function getTenantDashboardMetrics(Tenant $tenant, ?int $branchId = null): array
+    public function getTenantDashboardMetrics(?Tenant $tenant = null, ?int $branchId = null): array
     {
+        if (! $tenant) {
+            $tenant = TenantContext::getTenant() ?? Tenant::first();
+        }
+
+        if (! $tenant) {
+            return [
+                'total_members' => 0,
+                'active_members' => 0,
+                'inactive_members' => 0,
+                'expired_members' => 0,
+                'today_revenue' => 0.0,
+                'month_revenue' => 0.0,
+                'today_expense' => 0.0,
+                'month_expense' => 0.0,
+                'net_profit' => 0.0,
+                'trends' => ['labels' => [], 'revenue' => [], 'prev_revenue' => [], 'joins' => [], 'attendance' => []],
+                'chart' => ['labels' => [], 'income' => [], 'expenses' => [], 'profit' => []],
+                'expiring_members_list' => [],
+                'birthday_members_list' => [],
+                'churn_risk_members' => [],
+                'leads_followup_list' => [],
+            ];
+        }
+
         $membersQuery = Member::query();
         $paymentsQuery = MemberPayment::query();
         $expensesQuery = Expense::query();

@@ -317,7 +317,12 @@
                                         </a>
 
                                         <!-- Delete -->
-                                        <form action="{{ route('app.leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete lead {{ addslashes($lead->name) }}?')" class="inline-block">
+                                        <form action="{{ route('app.leads.delete', $lead->id) }}" method="POST" 
+                                              data-confirm="Are you sure you want to delete lead '{{ addslashes($lead->name) }}'?" 
+                                              data-confirm-title="Delete Lead" 
+                                              data-confirm-btn="Yes, Delete Lead" 
+                                              data-confirm-type="danger" 
+                                              class="inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" title="Delete Lead" class="p-1.5 rounded-lg bg-slate-950 hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 border border-slate-800 transition-all cursor-pointer">

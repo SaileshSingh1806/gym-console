@@ -62,6 +62,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/payments', [AppController::class, 'payments'])->name('app.payments.index');
         Route::post('/payments', [AppController::class, 'storePayment'])->name('app.payments.store');
         Route::post('/payments/{id}/reverse', [AppController::class, 'reversePayment'])->name('app.payments.reverse');
+        Route::post('/payments/{id}/send-email', [AppController::class, 'sendPaymentReceipt'])->name('app.payments.send-email');
         Route::get('/invoices/{id}', [AppController::class, 'showInvoice'])->name('app.invoices.show');
     });
 
@@ -293,11 +294,13 @@ Route::prefix('admin')->middleware(['auth', 'role:super_admin'])->group(function
     Route::get('/logs', [AdminController::class, 'logs'])->name('admin.logs');
     Route::post('/logs/clear', [AdminController::class, 'clearLogs'])->name('admin.logs.clear');
 
-    // Global Platform Settings (General, Logo/Favicon, Email/SMTP, Razorpay Payment, Site SEO)
+    // Global Platform Settings (General, Logo/Favicon, Email/SMTP, Razorpay Payment, Site SEO, AI Gemini)
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::post('/settings/general', [AdminController::class, 'updateGeneralSettings'])->name('admin.settings.general');
     Route::post('/settings/email', [AdminController::class, 'updateEmailSettings'])->name('admin.settings.email');
     Route::post('/settings/email/test', [AdminController::class, 'sendTestEmail'])->name('admin.settings.email.test');
     Route::post('/settings/payment', [AdminController::class, 'updatePaymentSettings'])->name('admin.settings.payment');
     Route::post('/settings/seo', [AdminController::class, 'updateSeoSettings'])->name('admin.settings.seo');
+    Route::post('/settings/ai', [AdminController::class, 'updateAiSettings'])->name('admin.settings.ai');
+    Route::post('/settings/gemini/test', [AdminController::class, 'testAdminGeminiConnection'])->name('admin.settings.gemini.test');
 });

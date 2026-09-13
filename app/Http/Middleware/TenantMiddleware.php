@@ -34,10 +34,21 @@ class TenantMiddleware
             $tenant = $user->tenant;
         } elseif ($request->header('X-Tenant-ID')) {
             $tenant = Tenant::find($request->header('X-Tenant-ID'));
+        } elseif ($user && $user->isSuperAdmin()) {
+            $tenantId = session('active_tenant_id') ?? session('switch_tenant_id') ?? $request->query('tenant_id');
+            if ($tenantId) {
+                $tenant = Tenant::find($tenantId);
+            }
+            if (! $tenant) {
+                $tenant = Tenant::first();
+            }
         }
 
         if ($tenant) {
             TenantContext::setTenant($tenant);
+            if ($request->hasSession()) {
+                session(['active_tenant_id' => $tenant->id]);
+            }
 
             $gate = app(FeatureGateService::class);
             $allowedBranches = $gate->getAllowedBranches($tenant);

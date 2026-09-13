@@ -55,38 +55,135 @@
         // Edit Member Form State
         editMember: {
             id: null,
+            member_code: '',
             first_name: '',
             last_name: '',
             phone: '',
+            alternate_phone: '',
             email: '',
             gender: 'male',
             dob: '',
+            blood_group: '',
+            city: '',
             address: '',
+            height: '',
+            height_unit: 'cm',
+            weight: '',
+            target_weight: '',
+            fitness_goal: '',
+            medical_history: '',
             emergency_contact_name: '',
             emergency_contact_phone: '',
+            emergency_relation: '',
             branch_id: '',
             status: 'ACTIVE',
             membership_plan_id: '',
-            notes: ''
+            notes: '',
+            photo_path: ''
         },
+        editPhotoPreview: '',
+        editCapturedPhotoData: '',
+        editRemovePhoto: false,
+        editShowCameraModal: false,
+        editCameraStream: null,
+        editCameraActive: false,
+        editCameraError: null,
+
         openEditModal(member) {
+            const meta = member.metadata || {};
             this.editMember = {
                 id: member.id,
+                member_code: member.member_code || '',
                 first_name: member.first_name || '',
                 last_name: member.last_name || '',
                 phone: member.phone || '',
+                alternate_phone: meta.alternate_phone || '',
                 email: member.email || '',
                 gender: member.gender || 'male',
                 dob: member.dob ? member.dob.substring(0, 10) : '',
+                blood_group: meta.blood_group || '',
+                city: meta.city || '',
                 address: member.address || '',
+                height: meta.height || '',
+                height_unit: meta.height_unit || 'cm',
+                weight: meta.weight || '',
+                target_weight: meta.target_weight || '',
+                fitness_goal: meta.fitness_goal || '',
+                medical_history: meta.medical_history || '',
                 emergency_contact_name: member.emergency_contact_name || '',
                 emergency_contact_phone: member.emergency_contact_phone || '',
+                emergency_relation: meta.emergency_relation || '',
                 branch_id: member.branch_id || '',
                 status: member.status || 'ACTIVE',
                 membership_plan_id: member.active_membership ? member.active_membership.membership_plan_id : '',
-                notes: member.notes || ''
+                notes: member.notes || '',
+                photo_path: member.photo_path || ''
             };
+            this.editPhotoPreview = member.photo_path ? ('/storage/' + member.photo_path) : '';
+            this.editCapturedPhotoData = '';
+            this.editRemovePhoto = false;
             this.showEditModal = true;
+        },
+        triggerEditFileInput() {
+            this.$refs.editPhotoInput.click();
+        },
+        onEditPhotoSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.editPhotoPreview = URL.createObjectURL(file);
+                this.editCapturedPhotoData = '';
+                this.editRemovePhoto = false;
+            }
+        },
+        async openEditWebcam() {
+            this.editShowCameraModal = true;
+            this.editCameraError = null;
+            this.editCameraActive = false;
+            try {
+                this.editCameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+                });
+                this.$nextTick(() => {
+                    if (this.$refs.editCameraVideo) {
+                        this.$refs.editCameraVideo.srcObject = this.editCameraStream;
+                        this.$refs.editCameraVideo.play();
+                        this.editCameraActive = true;
+                    }
+                });
+            } catch (err) {
+                this.editCameraError = 'Camera access denied or unavailable on this device.';
+            }
+        },
+        closeEditWebcam() {
+            if (this.editCameraStream) {
+                this.editCameraStream.getTracks().forEach(track => track.stop());
+                this.editCameraStream = null;
+            }
+            this.editCameraActive = false;
+            this.editShowCameraModal = false;
+        },
+        takeEditSnapshot() {
+            const video = this.$refs.editCameraVideo;
+            const canvas = this.$refs.editCameraCanvas;
+            if (video && canvas) {
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                this.editPhotoPreview = dataUrl;
+                this.editCapturedPhotoData = dataUrl;
+                this.editRemovePhoto = false;
+                this.closeEditWebcam();
+            }
+        },
+        removeEditPhoto() {
+            this.editPhotoPreview = '';
+            this.editCapturedPhotoData = '';
+            this.editRemovePhoto = true;
+            if (this.$refs.editPhotoInput) {
+                this.$refs.editPhotoInput.value = '';
+            }
         },
 
         // Collect Fee Modal State
@@ -375,10 +472,15 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </button>
 
-                                    <form action="{{ route('app.members.delete', $member->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove member {{ addslashes($member->full_name) }}?');" class="inline">
+                                    <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
+                                          data-confirm="Are you sure you want to remove member '{{ addslashes($member->full_name) }}'? This will permanently delete their profile and membership history." 
+                                          data-confirm-title="Remove Gym Member" 
+                                          data-confirm-btn="Yes, Delete Member" 
+                                          data-confirm-type="danger" 
+                                          class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Delete Member" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors border border-slate-700/50">
+                                        <button type="submit" title="Delete Member" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors border border-slate-700/50 cursor-pointer">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </form>
@@ -569,108 +671,354 @@
             </div>
         </div>
 
-        <!-- 2. EDIT MEMBER MODAL (Gym Owner & Receptionist Editable) -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-5" @click.away="showEditModal = false">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <div>
-                        <h3 class="text-base font-bold text-white">Edit Gym Member Details</h3>
-                        <p class="text-xs text-slate-400">Update personal details, membership status, and branch</p>
+        <!-- 2. EDIT MEMBER MODAL (Matching Add Member UI & Photo Management) -->
+        <div x-show="showEditModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4" 
+             x-cloak>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto" @click.away="showEditModal = false">
+                
+                <!-- Modal Top Bar -->
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold border border-indigo-500/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-black text-white">Edit Member Details</h3>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-800 text-amber-400 text-xs font-mono font-bold border border-slate-700" x-text="editMember.member_code"></span>
+                            </div>
+                            <p class="text-xs text-slate-400">Update personal details, profile picture, body metrics, and membership status</p>
+                        </div>
                     </div>
-                    <button @click="showEditModal = false" class="text-slate-400 hover:text-white text-lg">✕</button>
+                    <button type="button" @click="showEditModal = false" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">✕</button>
                 </div>
 
-                <form :action="'/app/members/' + editMember.id" method="POST" class="space-y-4">
+                <form :action="'/app/members/' + editMember.id" method="POST" enctype="multipart/form-data" class="space-y-6 text-xs">
                     @csrf
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">First Name *</label>
-                            <input type="text" name="first_name" x-model="editMember.first_name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+                    <input type="hidden" name="photo_data" :value="editCapturedPhotoData">
+                    <input type="hidden" name="remove_photo" :value="editRemovePhoto ? '1' : '0'">
+
+                    <!-- 1. PROFILE PHOTO MANAGEMENT CARD -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Profile Photo</span>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Last Name *</label>
-                            <input type="text" name="last_name" x-model="editMember.last_name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                            <div class="relative group shrink-0">
+                                <div class="w-24 h-24 rounded-2xl bg-slate-800 border-2 border-indigo-500/30 overflow-hidden flex items-center justify-center shadow-xl relative">
+                                    <template x-if="editPhotoPreview">
+                                        <img :src="editPhotoPreview" alt="Profile preview" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!editPhotoPreview">
+                                        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-slate-500">
+                                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                            <span class="text-[9px] font-bold mt-1 text-slate-500">No Photo</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col justify-center space-y-2 text-center sm:text-left grow">
+                                <span class="text-xs font-bold text-slate-300">Upload or capture a new member photo</span>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                                    <!-- Hidden File Input -->
+                                    <input type="file" 
+                                           name="photo" 
+                                           x-ref="editPhotoInput" 
+                                           accept="image/png,image/jpeg,image/webp,image/gif" 
+                                           class="hidden" 
+                                           @change="onEditPhotoSelected($event)">
+
+                                    <button type="button" 
+                                            @click="triggerEditFileInput()"
+                                            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-slate-700 transition-all cursor-pointer shadow-sm">
+                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>Upload Photo</span>
+                                    </button>
+
+                                    <button type="button" 
+                                            @click="openEditWebcam()"
+                                            class="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-sm">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span>Capture Camera</span>
+                                    </button>
+
+                                    <template x-if="editPhotoPreview">
+                                        <button type="button" 
+                                                @click="removeEditPhoto()"
+                                                class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer">
+                                            Remove Photo
+                                        </button>
+                                    </template>
+                                </div>
+                                <p class="text-[11px] text-slate-500">Supported formats: JPG, PNG, WEBP, GIF. Max file size: 5MB.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Phone Number (WhatsApp) *</label>
-                            <input type="text" name="phone" x-model="editMember.phone" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+                    <!-- 2. PERSONAL INFORMATION SECTION -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>Personal Information</span>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
-                            <input type="email" name="email" x-model="editMember.email" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">First Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="first_name" x-model="editMember.first_name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Last Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="last_name" x-model="editMember.last_name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Phone Number <span class="text-rose-500">*</span></label>
+                                <div class="relative flex items-center">
+                                    <span class="absolute left-3 text-xs font-bold text-slate-500">+91</span>
+                                    <input type="tel" name="phone" x-model="editMember.phone" required class="w-full pl-11 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Alternate Phone</label>
+                                <input type="tel" name="alternate_phone" x-model="editMember.alternate_phone" placeholder="Optional secondary contact" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Email Address</label>
+                                <input type="email" name="email" x-model="editMember.email" placeholder="member@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Gender</label>
+                                <select name="gender" x-model="editMember.gender" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Date of Birth</label>
+                                <input type="date" name="dob" x-model="editMember.dob" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Blood Group</label>
+                                <select name="blood_group" x-model="editMember.blood_group" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Select Blood Group</option>
+                                    @foreach(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as $bg)
+                                        <option value="{{ $bg }}">{{ $bg }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">City</label>
+                                <input type="text" name="city" x-model="editMember.city" placeholder="e.g. Ahmedabad" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-bold text-slate-300 mb-1.5">Full Address</label>
+                                <input type="text" name="address" x-model="editMember.address" placeholder="Street address, apartment, locality" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Gender</label>
-                            <select name="gender" x-model="editMember.gender" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
+                    <!-- 3. PHYSICAL & FITNESS METRICS SECTION -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span>Physical & Fitness Metrics</span>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Date of Birth</label>
-                            <input type="date" name="dob" x-model="editMember.dob" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Height with Unit Selector -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="font-bold text-slate-300">Height</label>
+                                    <div class="flex rounded-lg overflow-hidden border border-slate-700 p-0.5 bg-slate-900">
+                                        <button type="button" 
+                                                @click="editMember.height_unit = 'cm'" 
+                                                :class="editMember.height_unit === 'cm' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+                                                class="px-2 py-0.5 text-[10px] font-bold rounded transition-colors">cm</button>
+                                        <button type="button" 
+                                                @click="editMember.height_unit = 'ft'" 
+                                                :class="editMember.height_unit === 'ft' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+                                                class="px-2 py-0.5 text-[10px] font-bold rounded transition-colors">ft</button>
+                                    </div>
+                                    <input type="hidden" name="height_unit" :value="editMember.height_unit">
+                                </div>
+                                <input type="text" 
+                                       name="height" 
+                                       x-model="editMember.height" 
+                                       :placeholder="editMember.height_unit === 'cm' ? 'e.g. 175' : 'e.g. 5.9'" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Current Weight (kg)</label>
+                                <input type="number" step="0.1" name="weight" x-model="editMember.weight" placeholder="e.g. 72.5" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Target Weight (kg)</label>
+                                <input type="number" step="0.1" name="target_weight" x-model="editMember.target_weight" placeholder="e.g. 68.0" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Membership Status</label>
-                            <select name="status" x-model="editMember.status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="INACTIVE">INACTIVE</option>
-                                <option value="SUSPENDED">SUSPENDED</option>
-                                <option value="EXPIRED">EXPIRED</option>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Primary Fitness Goal</label>
+                                <select name="fitness_goal" x-model="editMember.fitness_goal" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Select Primary Goal</option>
+                                    <option value="Weight Loss">🔥 Weight Loss & Fat Burn</option>
+                                    <option value="Muscle Building">💪 Muscle Building & Hypertrophy</option>
+                                    <option value="General Fitness">⚡ General Fitness & Stamina</option>
+                                    <option value="Endurance Training">🏃 Endurance & Cardiovascular</option>
+                                    <option value="Rehabilitation">🩹 Injury Rehab / Physical Therapy</option>
+                                    <option value="Athletic Performance">🏆 Athletic Performance & Sports</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Medical History / Health Notes</label>
+                                <input type="text" name="medical_history" x-model="editMember.medical_history" placeholder="e.g. Asthma, Knee surgery, High BP" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Branch</label>
-                            <select name="branch_id" x-model="editMember.branch_id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                                @foreach($branches as $b)
-                                    <option value="{{ $b->id }}">{{ $b->name }}</option>
-                                @endforeach
-                            </select>
+                    <!-- 4. EMERGENCY CONTACT DETAILS -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Emergency Contact Information</span>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Assign / Change Package Plan</label>
-                            <select name="membership_plan_id" x-model="editMember.membership_plan_id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                                <option value="">-- Keep Current Plan --</option>
-                                @foreach($membershipPlans as $mp)
-                                    <option value="{{ $mp->id }}">{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 2) }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Address / Home Details</label>
-                        <input type="text" name="address" x-model="editMember.address" placeholder="Address..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Emergency Contact Name</label>
-                            <input type="text" name="emergency_contact_name" x-model="editMember.emergency_contact_name" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Emergency Contact Phone</label>
-                            <input type="text" name="emergency_contact_phone" x-model="editMember.emergency_contact_phone" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Contact Person Name</label>
+                                <input type="text" name="emergency_contact_name" x-model="editMember.emergency_contact_name" placeholder="e.g. Robert Doe" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Emergency Phone Number</label>
+                                <input type="tel" name="emergency_contact_phone" x-model="editMember.emergency_contact_phone" placeholder="e.g. 9876543210" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Relationship</label>
+                                <input type="text" name="emergency_relation" x-model="editMember.emergency_relation" placeholder="e.g. Spouse / Parent / Sibling" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                        <button type="button" @click="showEditModal = false" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20">Update Member</button>
+                    <!-- 5. ACCOUNT STATUS & SYSTEM SETTINGS -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Membership & Account Status</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Member Status <span class="text-rose-500">*</span></label>
+                                <select name="status" x-model="editMember.status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none font-bold">
+                                    <option value="ACTIVE" class="text-emerald-400">🟢 Active</option>
+                                    <option value="INACTIVE" class="text-slate-400">⚪ Inactive</option>
+                                    <option value="SUSPENDED" class="text-rose-400">🔴 Suspended / Frozen</option>
+                                    <option value="EXPIRED" class="text-orange-400">🟠 Expired</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Branch</label>
+                                <select name="branch_id" x-model="editMember.branch_id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    @foreach($branches as $b)
+                                        <option value="{{ $b->id }}">{{ $b->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Package Plan</label>
+                                <select name="membership_plan_id" x-model="editMember.membership_plan_id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">-- Keep Current Plan --</option>
+                                    @foreach($membershipPlans as $mp)
+                                        <option value="{{ $mp->id }}">{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 2) }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1.5">Internal Notes</label>
+                            <textarea name="notes" x-model="editMember.notes" rows="2" placeholder="Optional notes regarding medical history or special arrangements" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions Footer -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <button type="button" @click="showEditModal = false" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition-all cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-7 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save Changes</span>
+                        </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- EMBEDDED CAMERA SNAPSHOT MODAL FOR EDIT (IN MEMBERS LIST) -->
+        <div x-show="editShowCameraModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" 
+             style="display: none;">
+            <div @click.away="closeEditWebcam()" class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-black text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Take Live Member Photo</span>
+                    </h3>
+                    <button type="button" @click="closeEditWebcam()" class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <template x-if="editCameraError">
+                    <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                        <span x-text="editCameraError"></span>
+                    </div>
+                </template>
+
+                <div class="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-slate-800">
+                    <video x-ref="editCameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <canvas x-ref="editCameraCanvas" class="hidden"></canvas>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="closeEditWebcam()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all">
+                        Cancel
+                    </button>
+                    <button type="button" @click="takeEditSnapshot()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Capture Photo</span>
+                    </button>
+                </div>
             </div>
         </div>
 

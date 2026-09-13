@@ -93,7 +93,11 @@
                         ]) }}" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
                             Edit Plan
                         </button>
-                        <form action="{{ route('admin.plans.delete', $plan->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this plan?');">
+                        <form action="{{ route('admin.plans.delete', $plan->id) }}" method="POST"
+                              data-confirm="Are you sure you want to delete the plan '{{ $plan->name }}'?"
+                              data-confirm-title="Delete Subscription Plan"
+                              data-confirm-btn="Delete Plan"
+                              data-confirm-type="danger">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 rounded-xl bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 text-xs font-bold transition-all">

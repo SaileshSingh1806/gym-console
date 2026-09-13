@@ -459,16 +459,37 @@
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
                                         </a>
 
-                                        <!-- Email Receipt -->
-                                        <a href="mailto:{{ $member->email }}?subject=Payment%20Receipt%20{{ $receiptNo }}&body=Dear%20{{ urlencode($member->full_name) }},%0A%0APayment%20of%20{{ $currency }}{{ number_format($p->amount, 2) }}%20was%20received%20successfully.%0AReceipt%20No:%20{{ $receiptNo }}." 
-                                           title="Send Email Receipt" 
-                                           class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                        </a>
+                                        <!-- Email Receipt (Direct Send) -->
+                                        @if(!empty($member->email))
+                                            <form action="{{ route('app.payments.send-email', $p->id) }}" method="POST" class="inline"
+                                                  data-confirm="Are you sure you want to directly send the official payment receipt for '{{ $receiptNo }}' to {{ $member->email }}?"
+                                                  data-confirm-title="Send Email Receipt"
+                                                  data-confirm-btn="Yes, Send Email"
+                                                  data-confirm-type="info">
+                                                @csrf
+                                                <button type="submit" 
+                                                        title="Direct Send Email Receipt ({{ $member->email }})" 
+                                                        class="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600/30 text-slate-300 hover:text-blue-400 transition-colors cursor-pointer">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <button type="button" 
+                                                    onclick="alert('No email address registered for this member.')" 
+                                                    title="No email address registered" 
+                                                    class="p-1.5 rounded-lg bg-slate-800/40 text-slate-600 cursor-not-allowed">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                            </button>
+                                        @endif
 
                                         <!-- Reverse / Void Button -->
                                         @if(!$isReversed)
-                                            <form action="{{ route('app.payments.reverse', $p->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to reverse / void receipt {{ $receiptNo }}?');" class="inline">
+                                            <form action="{{ route('app.payments.reverse', $p->id) }}" method="POST" 
+                                                  data-confirm="Are you sure you want to reverse / void payment receipt '{{ $receiptNo }}' ({{ $currency }}{{ number_format($p->amount, 2) }})? This will deduct the paid amount from the member's account." 
+                                                  data-confirm-title="Reverse / Void Payment" 
+                                                  data-confirm-btn="Yes, Reverse Payment" 
+                                                  data-confirm-type="warning" 
+                                                  class="inline">
                                                 @csrf
                                                 <button type="submit" 
                                                         title="Reverse / Cancel Payment" 
@@ -980,7 +1001,7 @@
                         </div>
                     </div>
 
-                    <!-- Action Bar Toolbar (Close, Print, Download PDF) -->
+                    <!-- Action Bar Toolbar (Close, Print, Send Email, Download PDF) -->
                     <div class="flex items-center justify-center gap-3">
                         <button type="button" 
                                 @click="showInvoiceModal = false" 
@@ -990,14 +1011,27 @@
 
                         <button type="button" 
                                 onclick="window.print()" 
-                                class="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                                class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                             <span>Print</span>
                         </button>
 
+                        <form :action="'/app/payments/' + selectedInvoice.id + '/send-email'" method="POST" class="inline"
+                              data-confirm="Send official payment receipt email directly to this member?"
+                              data-confirm-title="Send Email Receipt"
+                              data-confirm-btn="Yes, Send Email"
+                              data-confirm-type="info">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-blue-600/30 transition-all cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>Send Email</span>
+                            </button>
+                        </form>
+
                         <a :href="'/app/invoices/' + selectedInvoice.id" 
                            target="_blank" 
-                           class="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all">
+                           class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             <span>Download PDF</span>
                         </a>

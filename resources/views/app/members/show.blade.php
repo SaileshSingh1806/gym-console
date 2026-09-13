@@ -55,6 +55,78 @@
             this.showInvoiceModal = true;
         },
 
+        // Edit Member Photo & Webcam State
+        editPhotoPreview: '{{ $member->photo_path ? asset("storage/" . $member->photo_path) : "" }}',
+        editCapturedPhotoData: '',
+        editRemovePhoto: false,
+        editShowCameraModal: false,
+        editCameraStream: null,
+        editCameraActive: false,
+        editCameraError: null,
+        editHeightUnit: '{{ $member->metadata["height_unit"] ?? "cm" }}',
+
+        triggerEditFileInput() {
+            this.$refs.editPhotoInput.click();
+        },
+        onEditPhotoSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.editPhotoPreview = URL.createObjectURL(file);
+                this.editCapturedPhotoData = '';
+                this.editRemovePhoto = false;
+            }
+        },
+        async openEditWebcam() {
+            this.editShowCameraModal = true;
+            this.editCameraError = null;
+            this.editCameraActive = false;
+            try {
+                this.editCameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+                });
+                this.$nextTick(() => {
+                    if (this.$refs.editCameraVideo) {
+                        this.$refs.editCameraVideo.srcObject = this.editCameraStream;
+                        this.$refs.editCameraVideo.play();
+                        this.editCameraActive = true;
+                    }
+                });
+            } catch (err) {
+                this.editCameraError = 'Camera access denied or unavailable on this device.';
+            }
+        },
+        closeEditWebcam() {
+            if (this.editCameraStream) {
+                this.editCameraStream.getTracks().forEach(track => track.stop());
+                this.editCameraStream = null;
+            }
+            this.editCameraActive = false;
+            this.editShowCameraModal = false;
+        },
+        takeEditSnapshot() {
+            const video = this.$refs.editCameraVideo;
+            const canvas = this.$refs.editCameraCanvas;
+            if (video && canvas) {
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                this.editPhotoPreview = dataUrl;
+                this.editCapturedPhotoData = dataUrl;
+                this.editRemovePhoto = false;
+                this.closeEditWebcam();
+            }
+        },
+        removeEditPhoto() {
+            this.editPhotoPreview = '';
+            this.editCapturedPhotoData = '';
+            this.editRemovePhoto = true;
+            if (this.$refs.editPhotoInput) {
+                this.$refs.editPhotoInput.value = '';
+            }
+        },
+
         // Add Subscription State
         plans: window.__MEMBERSHIP_PLANS__ || {},
         newSubPlanId: '',
@@ -216,7 +288,12 @@
                 </button>
 
                 <!-- Actions: Delete -->
-                <form action="{{ route('app.members.delete', $member->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete member {{ addslashes($member->full_name) }}?');" class="inline">
+                <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
+                      data-confirm="Are you sure you want to permanently delete member '{{ addslashes($member->full_name) }}'? All membership records, workout history, and payments will be removed." 
+                      data-confirm-title="Delete Gym Member" 
+                      data-confirm-btn="Yes, Delete Member" 
+                      data-confirm-type="danger" 
+                      class="inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="px-3.5 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer">
@@ -1495,76 +1572,351 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- MODAL 3: EDIT MEMBER BASIC DETAILS -->
+        <!-- MODAL 3: EDIT MEMBER FULL DETAILS (Matching Add Member UI) -->
         <!-- ========================================================================= -->
         <div x-show="showEditModal" 
-             x-transition 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4" 
              style="display: none;">
-            <div @click.away="showEditModal = false" class="w-full max-w-xl rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <h3 class="text-base font-black text-white">Edit Member Details</h3>
-                    <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-white">✕</button>
+            <div @click.away="showEditModal = false" class="bg-slate-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto">
+                
+                <!-- Modal Top Bar -->
+                <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold border border-indigo-500/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-black text-white">Edit Member Details</h3>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-800 text-amber-400 text-xs font-mono font-bold border border-slate-700">
+                                    {{ $member->member_code }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">Update personal details, profile picture, body metrics, and membership status</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showEditModal = false" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">✕</button>
                 </div>
 
-                <form action="{{ route('app.members.update', $member->id) }}" method="POST" class="space-y-4 text-xs">
+                <form action="{{ route('app.members.update', $member->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6 text-xs">
                     @csrf
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">First Name *</label>
-                            <input type="text" name="first_name" value="{{ $member->first_name }}" required class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                    <input type="hidden" name="photo_data" :value="editCapturedPhotoData">
+                    <input type="hidden" name="remove_photo" :value="editRemovePhoto ? '1' : '0'">
+
+                    <!-- 1. PROFILE PHOTO MANAGEMENT CARD (Like Add Member UI) -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Profile Photo</span>
                         </div>
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Last Name *</label>
-                            <input type="text" name="last_name" value="{{ $member->last_name }}" required class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                            <div class="relative group shrink-0">
+                                <div class="w-24 h-24 rounded-2xl bg-slate-800 border-2 border-indigo-500/30 overflow-hidden flex items-center justify-center shadow-xl relative">
+                                    <template x-if="editPhotoPreview">
+                                        <img :src="editPhotoPreview" alt="Profile preview" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!editPhotoPreview">
+                                        <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 text-slate-500">
+                                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                            <span class="text-[9px] font-bold mt-1 text-slate-500">No Photo</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col justify-center space-y-2 text-center sm:text-left grow">
+                                <span class="text-xs font-bold text-slate-300">Upload or capture a new member photo</span>
+                                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                                    <!-- Hidden File Input -->
+                                    <input type="file" 
+                                           name="photo" 
+                                           x-ref="editPhotoInput" 
+                                           accept="image/png,image/jpeg,image/webp,image/gif" 
+                                           class="hidden" 
+                                           @change="onEditPhotoSelected($event)">
+
+                                    <button type="button" 
+                                            @click="triggerEditFileInput()"
+                                            class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-slate-700 transition-all cursor-pointer shadow-sm">
+                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        <span>Upload Photo</span>
+                                    </button>
+
+                                    <button type="button" 
+                                            @click="openEditWebcam()"
+                                            class="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-sm">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span>Capture Camera</span>
+                                    </button>
+
+                                    <template x-if="editPhotoPreview">
+                                        <button type="button" 
+                                                @click="removeEditPhoto()"
+                                                class="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-bold transition-all cursor-pointer">
+                                            Remove Photo
+                                        </button>
+                                    </template>
+                                </div>
+                                <p class="text-[11px] text-slate-500">Supported formats: JPG, PNG, WEBP, GIF. Max file size: 5MB.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Phone Number *</label>
-                            <input type="tel" name="phone" value="{{ $member->phone }}" required class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                    <!-- 2. PERSONAL INFORMATION SECTION -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span>Personal Information</span>
                         </div>
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Email</label>
-                            <input type="email" name="email" value="{{ $member->email }}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">First Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="first_name" value="{{ $member->first_name }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Last Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="last_name" value="{{ $member->last_name }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Phone Number <span class="text-rose-500">*</span></label>
+                                <div class="relative flex items-center">
+                                    <span class="absolute left-3 text-xs font-bold text-slate-500">+91</span>
+                                    <input type="tel" name="phone" value="{{ $member->phone }}" required class="w-full pl-11 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Alternate Phone</label>
+                                <input type="tel" name="alternate_phone" value="{{ $member->metadata['alternate_phone'] ?? '' }}" placeholder="Optional secondary contact" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Email Address</label>
+                                <input type="email" name="email" value="{{ $member->email }}" placeholder="member@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Gender</label>
+                                <select name="gender" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {{ strtolower($member->gender ?? '') === 'male' ? 'selected' : '' }}>Male</option>
+                                    <option value="female" {{ strtolower($member->gender ?? '') === 'female' ? 'selected' : '' }}>Female</option>
+                                    <option value="other" {{ strtolower($member->gender ?? '') === 'other' ? 'selected' : '' }}>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Date of Birth</label>
+                                <input type="date" name="dob" value="{{ $member->dob ? $member->dob->format('Y-m-d') : '' }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Blood Group</label>
+                                <select name="blood_group" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Select Blood Group</option>
+                                    @foreach(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] as $bg)
+                                        <option value="{{ $bg }}" {{ ($member->metadata['blood_group'] ?? '') === $bg ? 'selected' : '' }}>{{ $bg }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">City</label>
+                                <input type="text" name="city" value="{{ $member->metadata['city'] ?? '' }}" placeholder="e.g. Ahmedabad" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-bold text-slate-300 mb-1.5">Full Address</label>
+                                <input type="text" name="address" value="{{ $member->address }}" placeholder="Street address, apartment, locality" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Gender</label>
-                            <select name="gender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
-                                <option value="male" {{ strtolower($member->gender) === 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ strtolower($member->gender) === 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ strtolower($member->gender) === 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
+                    <!-- 3. PHYSICAL & FITNESS METRICS SECTION -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span>Physical & Fitness Metrics</span>
                         </div>
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Date of Birth</label>
-                            <input type="date" name="dob" value="{{ $member->dob ? $member->dob->format('Y-m-d') : '' }}" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Height with Unit Selector -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="font-bold text-slate-300">Height</label>
+                                    <div class="flex rounded-lg overflow-hidden border border-slate-700 p-0.5 bg-slate-900">
+                                        <button type="button" 
+                                                @click="editHeightUnit = 'cm'" 
+                                                :class="editHeightUnit === 'cm' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+                                                class="px-2 py-0.5 text-[10px] font-bold rounded transition-colors">cm</button>
+                                        <button type="button" 
+                                                @click="editHeightUnit = 'ft'" 
+                                                :class="editHeightUnit === 'ft' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'"
+                                                class="px-2 py-0.5 text-[10px] font-bold rounded transition-colors">ft</button>
+                                    </div>
+                                    <input type="hidden" name="height_unit" :value="editHeightUnit">
+                                </div>
+                                <input type="text" 
+                                       name="height" 
+                                       value="{{ $member->metadata['height'] ?? '' }}" 
+                                       :placeholder="editHeightUnit === 'cm' ? 'e.g. 175' : 'e.g. 5.9'" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Current Weight (kg)</label>
+                                <input type="number" step="0.1" name="weight" value="{{ $member->metadata['weight'] ?? ($latestMeasurement['weight'] ?? '') }}" placeholder="e.g. 72.5" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Target Weight (kg)</label>
+                                <input type="number" step="0.1" name="target_weight" value="{{ $member->metadata['target_weight'] ?? '' }}" placeholder="e.g. 68.0" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block font-bold text-slate-300 mb-1">Status *</label>
-                            <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
-                                <option value="ACTIVE" {{ $member->status === 'ACTIVE' ? 'selected' : '' }}>Active</option>
-                                <option value="INACTIVE" {{ $member->status === 'INACTIVE' ? 'selected' : '' }}>Inactive</option>
-                                <option value="SUSPENDED" {{ $member->status === 'SUSPENDED' ? 'selected' : '' }}>Suspended</option>
-                                <option value="EXPIRED" {{ $member->status === 'EXPIRED' ? 'selected' : '' }}>Expired</option>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Primary Fitness Goal</label>
+                                <select name="fitness_goal" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    <option value="">Select Primary Goal</option>
+                                    @php $currentGoal = $member->metadata['fitness_goal'] ?? ''; @endphp
+                                    <option value="Weight Loss" {{ $currentGoal === 'Weight Loss' ? 'selected' : '' }}>🔥 Weight Loss & Fat Burn</option>
+                                    <option value="Muscle Building" {{ $currentGoal === 'Muscle Building' ? 'selected' : '' }}>💪 Muscle Building & Hypertrophy</option>
+                                    <option value="General Fitness" {{ $currentGoal === 'General Fitness' ? 'selected' : '' }}>⚡ General Fitness & Stamina</option>
+                                    <option value="Endurance Training" {{ $currentGoal === 'Endurance Training' ? 'selected' : '' }}>🏃 Endurance & Cardiovascular</option>
+                                    <option value="Rehabilitation" {{ $currentGoal === 'Rehabilitation' ? 'selected' : '' }}>🩹 Injury Rehab / Physical Therapy</option>
+                                    <option value="Athletic Performance" {{ $currentGoal === 'Athletic Performance' ? 'selected' : '' }}>🏆 Athletic Performance & Sports</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Medical History / Health Notes</label>
+                                <input type="text" name="medical_history" value="{{ $member->metadata['medical_history'] ?? '' }}" placeholder="e.g. Asthma, Knee surgery, High BP" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block font-bold text-slate-300 mb-1">Address</label>
-                        <input type="text" name="address" value="{{ $member->address }}" class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-indigo-500 focus:outline-none">
+                    <!-- 4. EMERGENCY CONTACT DETAILS -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Emergency Contact Information</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Contact Person Name</label>
+                                <input type="text" name="emergency_contact_name" value="{{ $member->emergency_contact_name }}" placeholder="e.g. Robert Doe" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Emergency Phone Number</label>
+                                <input type="tel" name="emergency_contact_phone" value="{{ $member->emergency_contact_phone }}" placeholder="e.g. 9876543210" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Relationship</label>
+                                <input type="text" name="emergency_relation" value="{{ $member->metadata['emergency_relation'] ?? '' }}" placeholder="e.g. Spouse / Parent / Sibling" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-2">
-                        <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black">Save Changes</button>
+                    <!-- 5. ACCOUNT STATUS & SYSTEM SETTINGS -->
+                    <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2.5 text-slate-200 font-extrabold text-xs">
+                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Membership & Account Status</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Member Status <span class="text-rose-500">*</span></label>
+                                <select name="status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none font-bold">
+                                    <option value="ACTIVE" {{ $member->status === 'ACTIVE' ? 'selected' : '' }} class="text-emerald-400">🟢 Active</option>
+                                    <option value="INACTIVE" {{ $member->status === 'INACTIVE' ? 'selected' : '' }} class="text-slate-400">⚪ Inactive</option>
+                                    <option value="SUSPENDED" {{ $member->status === 'SUSPENDED' ? 'selected' : '' }} class="text-rose-400">🔴 Suspended / Frozen</option>
+                                    <option value="EXPIRED" {{ $member->status === 'EXPIRED' ? 'selected' : '' }} class="text-orange-400">🟠 Expired</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-300 mb-1.5">Assigned Gym Branch</label>
+                                <select name="branch_id" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none">
+                                    @foreach($branches as $b)
+                                        <option value="{{ $b->id }}" {{ $member->branch_id == $b->id ? 'selected' : '' }}>
+                                            🏢 {{ $b->name }} {{ $b->is_main ? '(Main Branch)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-300 mb-1.5">Internal Staff Notes</label>
+                            <textarea name="notes" rows="2" placeholder="Optional notes regarding medical history, locker usage, or special arrangements" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none">{{ $member->notes }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions Footer -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <button type="button" @click="showEditModal = false" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold transition-all cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-7 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-black shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all flex items-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save Changes</span>
+                        </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- EMBEDDED CAMERA SNAPSHOT MODAL FOR EDIT -->
+        <div x-show="editShowCameraModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" 
+             style="display: none;">
+            <div @click.away="closeEditWebcam()" class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-black text-white flex items-center gap-2">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Take Live Member Photo</span>
+                    </h3>
+                    <button type="button" @click="closeEditWebcam()" class="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <template x-if="editCameraError">
+                    <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                        <span x-text="editCameraError"></span>
+                    </div>
+                </template>
+
+                <div class="relative rounded-2xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-slate-800">
+                    <video x-ref="editCameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <canvas x-ref="editCameraCanvas" class="hidden"></canvas>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="closeEditWebcam()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all">
+                        Cancel
+                    </button>
+                    <button type="button" @click="takeEditSnapshot()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>Capture Photo</span>
+                    </button>
+                </div>
             </div>
         </div>
 

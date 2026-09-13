@@ -121,7 +121,8 @@
                     $fatPct = max(0, 100 - $protPct - $carbsPct);
                 @endphp
 
-                <div class="diet-plan-card flex flex-col justify-between p-4.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all shadow-md group"
+                <div x-data="{ expanded: false }" 
+                     class="diet-plan-card flex flex-col justify-between p-4.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all shadow-md group"
                      data-plan-type="{{ $plan->is_template ? 'template' : 'member' }}"
                      data-title="{{ strtolower($plan->title) }}"
                      data-member="{{ strtolower($memberName) }}">
@@ -147,11 +148,11 @@
                                     @endif
                                 </div>
 
-                                <h3 class="text-lg font-black text-white tracking-tight leading-snug">{{ $plan->title }}</h3>
+                                <h3 class="text-base font-black text-white tracking-tight leading-snug">{{ $plan->title }}</h3>
 
                                 @if(!$plan->is_template && $plan->member)
                                     <div class="flex items-center gap-2 pt-0.5">
-                                        <div class="w-6 h-6 rounded-full bg-slate-800 text-indigo-400 border border-slate-700 flex items-center justify-center font-bold text-[10px]">
+                                        <div class="w-5 h-5 rounded-full bg-slate-800 text-indigo-400 border border-slate-700 flex items-center justify-center font-bold text-[9px]">
                                             {{ substr($plan->member->first_name, 0, 1) }}
                                         </div>
                                         <span class="text-xs font-semibold text-slate-300">{{ $plan->member->full_name }}</span>
@@ -163,10 +164,10 @@
                             </div>
 
                             <div class="text-right shrink-0">
-                                <div class="px-3 py-1.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-tight inline-flex items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-tight inline-flex items-center gap-1">
                                     <span>🔥</span>
                                     <span>{{ $plan->daily_calories ? number_format($plan->daily_calories) : '2,000' }}</span>
-                                    <span class="text-[10px] font-normal text-emerald-400/80">kcal/day</span>
+                                    <span class="text-[10px] font-normal text-emerald-400/80">kcal</span>
                                 </div>
                                 @if($plan->start_date)
                                     <div class="text-[10px] text-slate-500 mt-1 font-mono">
@@ -177,34 +178,52 @@
                         </div>
 
                         <!-- Macro Target Distribution -->
-                        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 mb-4 space-y-2.5">
+                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 mb-2.5 space-y-2">
                             <div class="flex items-center justify-between text-[11px] font-bold">
-                                <span class="text-slate-400 uppercase tracking-wider text-[10px]">Daily Macro Targets</span>
-                                <div class="flex items-center gap-3 text-xs">
-                                    <span class="text-rose-400"><strong class="font-black">{{ $protein }}g</strong> <span class="text-[10px] text-slate-500 font-normal">Protein</span></span>
-                                    <span class="text-amber-400"><strong class="font-black">{{ $carbs }}g</strong> <span class="text-[10px] text-slate-500 font-normal">Carbs</span></span>
-                                    <span class="text-cyan-400"><strong class="font-black">{{ $fat }}g</strong> <span class="text-[10px] text-slate-500 font-normal">Fats</span></span>
+                                <span class="text-slate-400 uppercase tracking-wider text-[10px]">Daily Macro Split</span>
+                                <div class="flex items-center gap-2.5 text-xs font-mono">
+                                    <span class="text-rose-400"><strong class="font-bold">{{ $protein }}g</strong> <span class="text-[10px] text-slate-500">P</span></span>
+                                    <span class="text-amber-400"><strong class="font-bold">{{ $carbs }}g</strong> <span class="text-[10px] text-slate-500">C</span></span>
+                                    <span class="text-cyan-400"><strong class="font-bold">{{ $fat }}g</strong> <span class="text-[10px] text-slate-500">F</span></span>
                                 </div>
                             </div>
 
                             <!-- Macro Percentage Multi-Color Bar -->
-                            <div class="h-2 w-full rounded-full bg-slate-800 flex overflow-hidden">
+                            <div class="h-1.5 w-full rounded-full bg-slate-800 flex overflow-hidden">
                                 <div class="bg-rose-500 h-full transition-all" style="width: {{ $protPct }}%" title="Protein: {{ $protPct }}%"></div>
                                 <div class="bg-amber-400 h-full transition-all" style="width: {{ $carbsPct }}%" title="Carbohydrates: {{ $carbsPct }}%"></div>
                                 <div class="bg-cyan-400 h-full transition-all" style="width: {{ $fatPct }}%" title="Fats: {{ $fatPct }}%"></div>
                             </div>
                         </div>
 
-                        <!-- Scheduled Meals Timeline List -->
-                        <div class="space-y-2 mb-4">
-                            <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                <span>Meal Schedule ({{ $plan->meals->count() }} Meals)</span>
-                            </div>
+                        <!-- Clickable Expand / Collapse Toggle Bar -->
+                        <button type="button" 
+                                @click="expanded = !expanded" 
+                                class="w-full my-1.5 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-950/90 border border-slate-800/80 hover:border-indigo-500/40 text-xs font-semibold text-slate-300 hover:text-white flex items-center justify-between transition-all cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <span>🍽️</span>
+                                <span>{{ $plan->meals->count() }} Scheduled Meals</span>
+                                @if($plan->guidelines)
+                                    <span class="text-[10px] text-indigo-400 font-normal">&bull; Advice</span>
+                                @endif
+                            </span>
+                            <span class="flex items-center gap-1 text-[11px] text-indigo-400 font-bold">
+                                <span x-text="expanded ? 'Hide Meals' : 'View Meals'"></span>
+                                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </span>
+                        </button>
 
-                            <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Collapsible Meal Schedule & Guidelines -->
+                        <div x-show="expanded" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-cloak 
+                             class="space-y-3 pt-2 mb-3">
+                            <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
                                 @forelse($plan->meals as $meal)
-                                    <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-start gap-3 hover:border-slate-700 transition-colors">
-                                        <div class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-sm shrink-0">
+                                    <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex items-start gap-3 hover:border-slate-700 transition-colors">
+                                        <div class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shrink-0">
                                             {{ match($meal->meal_type) {
                                                 'breakfast' => '🍳',
                                                 'morning_snack' => '🍎',
@@ -238,28 +257,28 @@
                                             </div>
 
                                             @if($meal->items_description)
-                                                <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">{{ $meal->items_description }}</p>
+                                                <p class="text-[11px] text-slate-400 mt-1 leading-relaxed whitespace-pre-line">{{ $meal->items_description }}</p>
                                             @endif
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="p-4 text-center rounded-2xl bg-slate-950 border border-dashed border-slate-800 text-slate-500 text-xs">
+                                    <div class="p-4 text-center rounded-xl bg-slate-950 border border-dashed border-slate-800 text-slate-500 text-xs">
                                         No meals added to this schedule yet.
                                     </div>
                                 @endforelse
                             </div>
-                        </div>
 
-                        <!-- Nutritionist & Hydration Advice -->
-                        @if($plan->guidelines)
-                            <div class="p-3 rounded-2xl bg-indigo-950/20 border border-indigo-900/30 text-[11px] text-indigo-300 mb-4 leading-relaxed flex items-start gap-2">
-                                <span class="text-sm">💧</span>
-                                <div>
-                                    <strong class="font-bold text-indigo-200 block mb-0.5">Hydration & Dietary Advice:</strong>
-                                    {{ $plan->guidelines }}
+                            <!-- Nutritionist & Hydration Advice -->
+                            @if($plan->guidelines)
+                                <div class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-900/30 text-[11px] text-indigo-300 leading-relaxed flex items-start gap-2">
+                                    <span class="text-sm">💧</span>
+                                    <div class="whitespace-pre-line">
+                                        <strong class="font-bold text-indigo-200 block mb-0.5">Hydration &amp; Dietary Advice:</strong>
+                                        {{ $plan->guidelines }}
+                                    </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Card Actions -->
@@ -291,10 +310,15 @@
                             </button>
 
                             <!-- Delete Plan -->
-                            <form action="{{ route('app.diets.delete', $plan->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this diet plan?');" class="inline">
+                            <form action="{{ route('app.diets.delete', $plan->id) }}" method="POST" 
+                                  data-confirm="Are you sure you want to delete diet plan '{{ addslashes($plan->title) }}'?" 
+                                  data-confirm-title="Delete Diet Plan" 
+                                  data-confirm-btn="Yes, Delete Plan" 
+                                  data-confirm-type="danger" 
+                                  class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-900/50 transition-colors" title="Delete Plan">
+                                <button type="submit" class="p-2.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-900/50 transition-colors cursor-pointer" title="Delete Plan">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
@@ -992,6 +1016,17 @@
             document.getElementById('aiResFiber').innerText = data.daily_totals.fiber_grams + 'g';
             document.getElementById('aiResWater').innerText = data.daily_totals.water_liters + ' L';
             
+            const badgeEl = document.getElementById('aiResBadge');
+            if (badgeEl) {
+                if (data.is_gemini) {
+                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
+                    badgeEl.innerHTML = `✨ <span>Google Gemini AI (${data.gemini_model || 'gemini-1.5-flash'})</span>`;
+                } else {
+                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
+                    badgeEl.innerHTML = `⚡ <span>Smart Diet Engine</span>`;
+                }
+            }
+
             document.getElementById('aiResBmr').innerText = 'BMR: ' + data.bmr_calculated + ' kcal';
             document.getElementById('aiResTdee').innerText = 'TDEE: ' + data.tdee_calculated + ' kcal';
 
@@ -1142,16 +1177,31 @@
         <div class="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden max-h-[92vh] flex flex-col">
             
             <!-- Modal Header -->
+            @php
+                $globalGeminiKey = \App\Models\Setting::getGlobal('gemini_api_key') ?: config('services.gemini.api_key');
+                $globalGeminiModel = \App\Models\Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-1.5-flash');
+                $hasGeminiConfigured = !empty($globalGeminiKey);
+            @endphp
             <div class="px-6 py-4 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30">
                         ✨
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="text-base font-black text-white tracking-tight">AI Personalized Diet Planner</h3>
+                            @if($hasGeminiConfigured)
+                                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                                    <span>Powered by Google Gemini AI ({{ $globalGeminiModel }})</span>
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono font-bold flex items-center gap-1">
+                                    <span>⚡ Smart Multi-Factor Diet Engine</span>
+                                </span>
+                            @endif
                         </div>
-                        <p class="text-xs text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals.</p>
+                        <p class="text-xs text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
@@ -1332,7 +1382,7 @@
                     <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-slate-900 border border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
+                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
                                 <h3 id="aiResPlanTitle" class="text-base font-black text-white tracking-tight"></h3>
                             </div>
                             <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">

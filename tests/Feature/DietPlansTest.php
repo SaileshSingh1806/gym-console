@@ -7,6 +7,7 @@ use App\Models\DietPlan;
 use App\Models\Member;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\AiDietPlannerService;
 use Tests\TestCase;
 
 class DietPlansTest extends TestCase
@@ -116,5 +117,30 @@ class DietPlansTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Workout Routines');
+    }
+
+    public function test_ai_diet_planner_filters_out_tts_and_non_text_models(): void
+    {
+        $service = app(AiDietPlannerService::class);
+
+        // Reflection to test protected getModelCandidates
+        $reflection = new \ReflectionClass($service);
+        $method = $reflection->getMethod('getModelCandidates');
+        $method->setAccessible(true);
+
+        // Case 1: If an accidental TTS model is requested, it must be normalized to a text model
+        $candidates = $method->invoke($service, 'gemini-2.5-pro-tts');
+        $this->assertNotEmpty($candidates);
+        $this->assertNotContains('gemini-2.5-pro-tts', $candidates);
+        $this->assertContains('gemini-2.5-flash', $candidates);
+
+        // Case 2: Candidate list must NEVER contain any audio/tts/embed models
+        foreach ($candidates as $cand) {
+            $this->assertDoesNotMatchRegularExpression('/(?:tts|audio|speech|embed|aqa|imagen)/i', $cand);
+        }
+
+        // Case 3: gemini-2.5-flash requested
+        $flashCandidates = $method->invoke($service, 'gemini-2.5-flash');
+        $this->assertEquals('gemini-2.5-flash', $flashCandidates[0]);
     }
 }

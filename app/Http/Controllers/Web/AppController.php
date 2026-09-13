@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentReceiptMail;
 use App\Models\AccessLog;
 use App\Models\ActivityLog;
 use App\Models\Attendance;
@@ -76,10 +77,26 @@ class AppController extends Controller
         protected FeatureGateService $featureGateService
     ) {}
 
-    public function dashboard(): View
+    public function dashboard(): View|RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $branch = TenantContext::getBranch();
+        $user = auth()->user();
+        $tenant = TenantContext::getTenant() ?? $user?->tenant;
+
+        if (! $tenant) {
+            if ($user && $user->isSuperAdmin()) {
+                $firstTenant = Tenant::first();
+                if ($firstTenant) {
+                    $tenant = $firstTenant;
+                    TenantContext::setTenant($tenant);
+                } else {
+                    return redirect()->route('admin.dashboard')->with('info', 'No gyms created yet. Create a gym tenant first.');
+                }
+            } else {
+                return redirect()->route('login');
+            }
+        }
+
+        $branch = TenantContext::getBranch() ?? $tenant->branches()->first();
         $metrics = $this->reportService->getTenantDashboardMetrics($tenant, $branch?->id);
 
         $subscription = $tenant->activeSubscription;
@@ -284,6 +301,18 @@ class AppController extends Controller
         ]);
 
         try {
+            // Prevent concurrent double submission
+            $existingRecentMember = Member::where('tenant_id', $tenant->id)
+                ->where('phone', $validated['phone'])
+                ->where('first_name', $validated['first_name'])
+                ->where('last_name', $validated['last_name'])
+                ->where('created_at', '>=', now()->subSeconds(6))
+                ->first();
+
+            if ($existingRecentMember) {
+                return redirect()->route('app.members.index')->with('success', "Member '{$validated['first_name']} {$validated['last_name']}' created successfully!");
+            }
+
             // Handle Photo Upload / Base64 Snapshot
             $photoPath = null;
             if ($request->hasFile('photo')) {
@@ -455,45 +484,125 @@ class AppController extends Controller
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'phone' => 'required|string|max:30',
+            'alternate_phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:150',
-            'gender' => 'nullable|in:male,female,other',
+            'gender' => 'nullable|in:male,female,other,Male,Female,Other',
             'dob' => 'nullable|date',
+            'blood_group' => 'nullable|string|max:10',
+            'city' => 'nullable|string|max:100',
             'address' => 'nullable|string|max:500',
             'emergency_contact_name' => 'nullable|string|max:100',
             'emergency_contact_phone' => 'nullable|string|max:30',
+            'emergency_relation' => 'nullable|string|max:50',
             'branch_id' => 'nullable|exists:branches,id',
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED,EXPIRED',
-            'notes' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:1000',
             'membership_plan_id' => 'nullable|exists:membership_plans,id',
+            'photo' => 'nullable|image|max:5120',
+            'photo_data' => 'nullable|string',
+            'remove_photo' => 'nullable|boolean',
+            'weight' => 'nullable|numeric|min:0',
+            'target_weight' => 'nullable|numeric|min:0',
+            'height' => 'nullable|string|max:30',
+            'height_unit' => 'nullable|string|in:cm,ft',
+            'fitness_goal' => 'nullable|string|max:100',
+            'medical_history' => 'nullable|string|max:1000',
         ]);
 
-        $member->update([
-            'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'phone' => $validated['phone'],
-            'email' => $validated['email'] ?? null,
-            'gender' => $validated['gender'] ?? null,
-            'dob' => $validated['dob'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
-            'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
-            'branch_id' => $validated['branch_id'] ?? $member->branch_id,
-            'status' => $validated['status'],
-            'notes' => $validated['notes'] ?? null,
-        ]);
+        try {
+            // Handle Photo Upload / Webcam Snapshot / Remove
+            $photoPath = $member->photo_path;
 
-        if (! empty($validated['membership_plan_id'])) {
-            $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
-            if (! $member->activeMembership || $member->activeMembership->membership_plan_id != $plan->id) {
-                $this->membershipService->assignMembership($member, $plan, [
-                    'start_date' => now()->toDateString(),
-                ]);
+            if ($request->hasFile('photo')) {
+                // Delete previous file if exists
+                if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
+                    Storage::disk('public')->delete($member->photo_path);
+                }
+                $photoPath = $request->file('photo')->store('members/photos', 'public');
+            } elseif (! empty($validated['photo_data']) && str_starts_with($validated['photo_data'], 'data:image')) {
+                @[$type, $data] = explode(';', $validated['photo_data']);
+                @[, $data] = explode(',', $data);
+                if ($data) {
+                    if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
+                        Storage::disk('public')->delete($member->photo_path);
+                    }
+                    $decodedImage = base64_decode($data);
+                    $fileName = 'members/photos/cam_'.Str::random(20).'.jpg';
+                    Storage::disk('public')->put($fileName, $decodedImage);
+                    $photoPath = $fileName;
+                }
+            } elseif ($request->boolean('remove_photo')) {
+                if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
+                    Storage::disk('public')->delete($member->photo_path);
+                }
+                $photoPath = null;
             }
+
+            // Merge metadata
+            $metadata = $member->metadata ?? [];
+            if (isset($validated['alternate_phone'])) {
+                $metadata['alternate_phone'] = $validated['alternate_phone'];
+            }
+            if (isset($validated['blood_group'])) {
+                $metadata['blood_group'] = $validated['blood_group'];
+            }
+            if (isset($validated['city'])) {
+                $metadata['city'] = $validated['city'];
+            }
+            if (isset($validated['emergency_relation'])) {
+                $metadata['emergency_relation'] = $validated['emergency_relation'];
+            }
+            if (isset($validated['weight'])) {
+                $metadata['weight'] = $validated['weight'];
+            }
+            if (isset($validated['target_weight'])) {
+                $metadata['target_weight'] = $validated['target_weight'];
+            }
+            if (isset($validated['height'])) {
+                $metadata['height'] = $validated['height'];
+            }
+            if (isset($validated['height_unit'])) {
+                $metadata['height_unit'] = $validated['height_unit'];
+            }
+            if (isset($validated['fitness_goal'])) {
+                $metadata['fitness_goal'] = $validated['fitness_goal'];
+            }
+            if (isset($validated['medical_history'])) {
+                $metadata['medical_history'] = $validated['medical_history'];
+            }
+
+            $member->update([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'phone' => $validated['phone'],
+                'email' => $validated['email'] ?? null,
+                'gender' => ! empty($validated['gender']) ? strtolower($validated['gender']) : null,
+                'dob' => $validated['dob'] ?? null,
+                'photo_path' => $photoPath,
+                'address' => $validated['address'] ?? null,
+                'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
+                'branch_id' => $validated['branch_id'] ?? $member->branch_id,
+                'status' => $validated['status'],
+                'notes' => $validated['notes'] ?? null,
+                'metadata' => $metadata,
+            ]);
+
+            if (! empty($validated['membership_plan_id'])) {
+                $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
+                if (! $member->activeMembership || $member->activeMembership->membership_plan_id != $plan->id) {
+                    $this->membershipService->assignMembership($member, $plan, [
+                        'start_date' => now()->toDateString(),
+                    ]);
+                }
+            }
+
+            ActivityLog::log('member_updated', "Updated details for member {$member->full_name} ({$member->member_code})", $member);
+
+            return back()->with('success', "Member '{$member->full_name}' details updated successfully!");
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
         }
-
-        ActivityLog::log('member_updated', "Updated details for member {$member->full_name} ({$member->member_code})", $member);
-
-        return back()->with('success', "Member '{$member->full_name}' details updated successfully!");
     }
 
     public function collectMemberFee(Request $request, int $id): RedirectResponse
@@ -1148,6 +1257,18 @@ class AppController extends Controller
             }
 
             if ($collectedAmount > 0) {
+                // Prevent concurrent double submission
+                $existingRecentPayment = MemberPayment::where('tenant_id', $tenant->id)
+                    ->where('member_id', $member->id)
+                    ->where('amount', $collectedAmount)
+                    ->where('payment_date', $paymentDate)
+                    ->where('created_at', '>=', now()->subSeconds(6))
+                    ->first();
+
+                if ($existingRecentPayment) {
+                    return back()->with('success', 'Payment was already recorded successfully!');
+                }
+
                 $invoiceNumber = 'RCP'.date('Ymd').rand(1000, 9999);
                 $notesCombined = trim($itemLabel.($notes ? " | {$notes}" : ''));
 
@@ -1203,6 +1324,20 @@ class AppController extends Controller
         ActivityLog::log('payment_reversed', "Reversed payment receipt {$payment->invoice_number} of {$currency}".number_format($payment->amount, 2), $payment);
 
         return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
+    }
+
+    public function sendPaymentReceipt(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $payment = MemberPayment::with(['member', 'membership.plan'])->where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if (empty($payment->member?->email)) {
+            return back()->with('error', 'This member does not have a registered email address.');
+        }
+
+        TenantMailService::send($tenant, $payment->member->email, new PaymentReceiptMail($tenant, $payment));
+
+        return back()->with('success', "Payment receipt #{$payment->invoice_number} sent directly to {$payment->member->email}!");
     }
 
     public function personalTraining(Request $request): View
@@ -1759,9 +1894,62 @@ class AppController extends Controller
 
         $trainer = Trainer::create($validated);
 
+        // Auto-create or sync User staff member for this Trainer
+        $name = trim($trainer->full_name);
+        $trainerPhone = $trainer->phone;
+        $trainerEmail = $trainer->email;
+        $trainerStatus = in_array($trainer->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED']) ? $trainer->status : 'ACTIVE';
+
+        $existingUser = User::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($trainerPhone, $trainerEmail) {
+                $q->where('phone', $trainerPhone);
+                if ($trainerEmail) {
+                    $q->orWhere('email', $trainerEmail);
+                }
+            })
+            ->first();
+
+        if ($existingUser) {
+            $existingUser->update([
+                'name' => $name,
+                'role' => 'trainer',
+                'status' => $trainerStatus,
+            ]);
+            $trainer->update(['user_id' => $existingUser->id]);
+        } else {
+            $nextEmpNo = User::where('tenant_id', $tenant->id)->count() + 1;
+            $empId = 'EMP'.str_pad($nextEmpNo, 3, '0', STR_PAD_LEFT);
+            $meta = [
+                'employee_id' => $empId,
+                'designation' => $trainer->specialization ?: 'Fitness Trainer',
+                'department' => 'Fitness / Training',
+                'joining_date' => $trainer->joining_date ? $trainer->joining_date->toDateString() : now()->toDateString(),
+                'monthly_salary' => $trainer->salary ?? 0.00,
+                'payout_type' => $trainer->salary_type ?? 'Fixed Monthly',
+                'can_login' => false,
+            ];
+
+            $newUser = User::create([
+                'tenant_id' => $tenant->id,
+                'name' => $name,
+                'email' => $trainerEmail ?: null,
+                'phone' => $trainerPhone,
+                'role' => 'trainer',
+                'status' => $trainerStatus,
+                'password' => Hash::make(Str::random(16)),
+                'metadata' => $meta,
+            ]);
+
+            if ($trainer->branch_id) {
+                $newUser->branches()->sync([$trainer->branch_id]);
+            }
+
+            $trainer->update(['user_id' => $newUser->id]);
+        }
+
         ActivityLog::log('trainer_created', "Added trainer '{$trainer->full_name}'", $trainer);
 
-        return back()->with('success', "Trainer '{$trainer->full_name}' added successfully!");
+        return back()->with('success', "Trainer '{$trainer->full_name}' added successfully and registered in Staff roster!");
     }
 
     public function updateTrainer(Request $request, int $id): RedirectResponse
@@ -1812,6 +2000,33 @@ class AppController extends Controller
 
         $trainer->update($validated);
 
+        // Sync linked User staff member if exists
+        $user = $trainer->user_id ? User::find($trainer->user_id) : User::where('tenant_id', $tenant->id)->where('phone', $trainer->phone)->first();
+        if ($user) {
+            $userMeta = $user->metadata ?? [];
+            $userMeta['designation'] = $trainer->specialization ?: ($userMeta['designation'] ?? 'Fitness Trainer');
+            $userMeta['monthly_salary'] = $trainer->salary ?? ($userMeta['monthly_salary'] ?? 0.00);
+            $userMeta['payout_type'] = $trainer->salary_type ?? ($userMeta['payout_type'] ?? 'Fixed Monthly');
+            if ($trainer->joining_date) {
+                $userMeta['joining_date'] = $trainer->joining_date->toDateString();
+            }
+
+            $userUpdate = [
+                'name' => trim($trainer->full_name),
+                'phone' => $trainer->phone,
+                'status' => in_array($trainer->status, ['ACTIVE', 'INACTIVE', 'SUSPENDED']) ? $trainer->status : 'ACTIVE',
+                'metadata' => $userMeta,
+            ];
+            if ($trainer->email) {
+                $userUpdate['email'] = $trainer->email;
+            }
+            $user->update($userUpdate);
+
+            if (! $trainer->user_id) {
+                $trainer->update(['user_id' => $user->id]);
+            }
+        }
+
         // Update assigned members
         if ($request->has('assigned_member_ids_submitted')) {
             $assignedIds = $request->input('assigned_member_ids', []);
@@ -1846,6 +2061,20 @@ class AppController extends Controller
             ->update(['trainer_id' => null]);
 
         $name = $trainer->full_name;
+
+        // Also delete / soft delete linked User if role is trainer
+        if ($trainer->user_id) {
+            $user = User::find($trainer->user_id);
+            if ($user && $user->role === 'trainer' && $user->id !== auth()->id()) {
+                $user->delete();
+            }
+        } else {
+            $user = User::where('tenant_id', $tenant->id)->where('phone', $trainer->phone)->where('role', 'trainer')->first();
+            if ($user && $user->id !== auth()->id()) {
+                $user->delete();
+            }
+        }
+
         $trainer->delete();
 
         ActivityLog::log('trainer_deleted', "Deleted trainer '{$name}'");
@@ -2600,34 +2829,53 @@ class AppController extends Controller
         $planData = $aiDietService->generate($validated);
 
         if ($request->boolean('auto_save')) {
-            $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-            $createdPlan = DietPlan::create([
-                'tenant_id' => $tenant->id,
-                'member_id' => $validated['member_id'] ?? null,
-                'title' => $planData['plan_title'],
-                'daily_calories' => $planData['daily_totals']['calories'],
-                'protein_grams' => $planData['daily_totals']['protein_grams'],
-                'carbs_grams' => $planData['daily_totals']['carbs_grams'],
-                'fat_grams' => $planData['daily_totals']['fat_grams'],
-                'is_template' => empty($validated['member_id']),
-                'guidelines' => implode("\n", $planData['guidelines'])."\n\n⚠️ Medical Disclaimer:\n".$planData['medical_disclaimer'],
-            ]);
-
-            foreach ($planData['meals'] as $meal) {
-                DietMeal::create([
-                    'diet_plan_id' => $createdPlan->id,
-                    'meal_type' => in_array($meal['meal_type'], ['breakfast', 'morning_snack', 'lunch', 'evening_snack', 'dinner', 'post_workout']) ? $meal['meal_type'] : 'breakfast',
-                    'recommended_time' => $meal['recommended_time'],
-                    'meal_name' => $meal['meal_name'],
-                    'items_description' => $meal['items_description'].(! empty($meal['alternatives']) ? "\n\n🔄 Alternative Options:\n".$meal['alternatives'] : ''),
-                    'calories' => $meal['target_macros']['calories'] ?? null,
-                    'sort_order' => $meal['sort_order'],
+            try {
+                $tenant = TenantContext::getTenant() ?? (auth()->check() ? auth()->user()->tenant : null);
+                $createdPlan = DietPlan::create([
+                    'tenant_id' => $tenant->id,
+                    'member_id' => $validated['member_id'] ?? null,
+                    'title' => $planData['plan_title'],
+                    'daily_calories' => $planData['daily_totals']['calories'] ?? 2000,
+                    'protein_grams' => $planData['daily_totals']['protein_grams'] ?? 100,
+                    'carbs_grams' => $planData['daily_totals']['carbs_grams'] ?? 200,
+                    'fat_grams' => $planData['daily_totals']['fat_grams'] ?? 50,
+                    'is_template' => empty($validated['member_id']),
+                    'guidelines' => implode("\n", $planData['guidelines'] ?? [])."\n\n⚠️ Medical Disclaimer:\n".($planData['medical_disclaimer'] ?? ''),
                 ]);
+
+                foreach ($planData['meals'] as $meal) {
+                    $rawTime = $meal['recommended_time'] ?? null;
+                    $formattedTime = null;
+                    if (! empty($rawTime)) {
+                        try {
+                            $formattedTime = Carbon::parse(trim($rawTime))->format('H:i:s');
+                        } catch (\Throwable $e) {
+                            $formattedTime = '08:00:00';
+                        }
+                    }
+
+                    DietMeal::create([
+                        'diet_plan_id' => $createdPlan->id,
+                        'meal_type' => in_array($meal['meal_type'], ['breakfast', 'morning_snack', 'lunch', 'evening_snack', 'dinner', 'post_workout']) ? $meal['meal_type'] : 'breakfast',
+                        'recommended_time' => $formattedTime,
+                        'meal_name' => $meal['meal_name'],
+                        'items_description' => $meal['items_description'].(! empty($meal['alternatives']) ? "\n\n🔄 Alternative Options:\n".$meal['alternatives'] : ''),
+                        'calories' => $meal['target_macros']['calories'] ?? null,
+                        'sort_order' => $meal['sort_order'] ?? 1,
+                    ]);
+                }
+
+                ActivityLog::log('diet_ai_generated', "AI generated and saved diet plan '{$createdPlan->title}'", $createdPlan);
+
+                $planData['saved_plan_id'] = $createdPlan->id;
+            } catch (\Throwable $e) {
+                Log::error('Failed to auto-save AI diet plan: '.$e->getMessage(), ['exception' => $e]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error saving plan: '.$e->getMessage(),
+                ], 500);
             }
-
-            ActivityLog::log('diet_ai_generated', "AI generated and saved diet plan '{$createdPlan->title}'", $createdPlan);
-
-            $planData['saved_plan_id'] = $createdPlan->id;
         }
 
         return response()->json([
@@ -4561,6 +4809,18 @@ class AppController extends Controller
         ]);
 
         $canLogin = $request->boolean('can_login', true);
+
+        // Prevent concurrent double submission
+        $existingRecentUser = User::where('tenant_id', $tenant->id)
+            ->where('phone', $validated['phone'])
+            ->where('name', $validated['name'])
+            ->where('created_at', '>=', now()->subSeconds(6))
+            ->first();
+
+        if ($existingRecentUser) {
+            return redirect()->route('app.staff.index')->with('success', "Staff member '{$validated['name']}' added successfully!");
+        }
+
         $empId = ! empty($validated['employee_id']) ? $validated['employee_id'] : ('EMP'.str_pad((User::where('tenant_id', $tenant->id)->count() + 1), 3, '0', STR_PAD_LEFT));
 
         $metadata = [
@@ -4604,16 +4864,44 @@ class AppController extends Controller
         // If trainer role, auto-create or link Trainer record
         if ($validated['role'] === 'trainer') {
             $nameParts = explode(' ', $validated['name'], 2);
-            Trainer::firstOrCreate(
-                ['tenant_id' => $tenant->id, 'phone' => $validated['phone']],
-                [
+            $trainer = Trainer::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($validated) {
+                    $q->where('phone', $validated['phone']);
+                    if (! empty($validated['email'])) {
+                        $q->orWhere('email', $validated['email']);
+                    }
+                })
+                ->first();
+
+            if ($trainer) {
+                $trainer->update([
+                    'user_id' => $user->id,
                     'first_name' => $nameParts[0],
-                    'last_name' => $nameParts[1] ?? 'Trainer',
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $validated['email'] ?? $trainer->email,
+                    'phone' => $validated['phone'],
+                    'salary' => $validated['monthly_salary'] ?? $trainer->salary,
+                    'salary_type' => $validated['payout_type'] ?? $trainer->salary_type,
+                    'joining_date' => $validated['joining_date'] ?? $trainer->joining_date,
+                    'specialization' => $validated['designation'] ?: ($trainer->specialization ?: 'Fitness Coach'),
+                    'status' => $validated['status'],
+                ]);
+            } else {
+                Trainer::create([
+                    'tenant_id' => $tenant->id,
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
                     'email' => $validated['email'] ?? null,
-                    'specialization' => $validated['designation'] ?? 'Fitness Coach',
-                    'status' => 'ACTIVE',
-                ]
-            );
+                    'phone' => $validated['phone'],
+                    'salary' => $validated['monthly_salary'] ?? 0.00,
+                    'salary_type' => $validated['payout_type'] ?? 'Fixed Monthly',
+                    'joining_date' => $validated['joining_date'] ?? now()->toDateString(),
+                    'specialization' => $validated['designation'] ?: 'Fitness Coach',
+                    'status' => $validated['status'],
+                    'branch_id' => ! empty($validated['branches']) ? $validated['branches'][0] : null,
+                ]);
+            }
         }
 
         ActivityLog::log('staff_created', "Added new staff member '{$user->name}' ({$empId}) with role '{$user->role}'");
@@ -4703,6 +4991,35 @@ class AppController extends Controller
             $user->branches()->sync($validated['branches']);
         }
 
+        // Sync linked Trainer if user is a trainer
+        if ($user->role === 'trainer') {
+            $nameParts = explode(' ', $user->name, 2);
+            $trainer = Trainer::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->orWhere('phone', $user->phone);
+                    if ($user->email) {
+                        $q->orWhere('email', $user->email);
+                    }
+                })
+                ->first();
+
+            if ($trainer) {
+                $trainer->update([
+                    'user_id' => $user->id,
+                    'first_name' => $nameParts[0],
+                    'last_name' => $nameParts[1] ?? '',
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'salary' => $validated['monthly_salary'] ?? $trainer->salary,
+                    'salary_type' => $validated['payout_type'] ?? $trainer->salary_type,
+                    'joining_date' => $validated['joining_date'] ?? $trainer->joining_date,
+                    'specialization' => $validated['designation'] ?: ($trainer->specialization ?: 'Fitness Coach'),
+                    'status' => $user->status,
+                ]);
+            }
+        }
+
         ActivityLog::log('staff_updated', "Updated staff member details for '{$user->name}'");
 
         return back()->with('success', "Staff member '{$user->name}' updated successfully!");
@@ -4722,6 +5039,17 @@ class AppController extends Controller
         }
 
         $name = $user->name;
+
+        // If user is a trainer, also delete linked Trainer record
+        if ($user->role === 'trainer') {
+            Trainer::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->orWhere('phone', $user->phone);
+                })
+                ->delete();
+        }
+
         $user->delete();
 
         ActivityLog::log('staff_deleted', "Deleted staff member '{$name}'");
@@ -4740,6 +5068,15 @@ class AppController extends Controller
 
         $newStatus = $user->status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
         $user->update(['status' => $newStatus]);
+
+        if ($user->role === 'trainer') {
+            Trainer::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->orWhere('phone', $user->phone);
+                })
+                ->update(['status' => $newStatus]);
+        }
 
         ActivityLog::log('staff_status_changed', "Changed status of staff '{$user->name}' to {$newStatus}");
 

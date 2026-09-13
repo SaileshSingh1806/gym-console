@@ -9,10 +9,9 @@ use App\Models\Plan;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class TenantService
@@ -22,13 +21,16 @@ class TenantService
         protected FeatureGateService $featureGateService
     ) {}
 
-    public function registerGym(array $data, Plan $plan): array
+    public function registerGym(array $data, Plan $plan, string $status = 'TRIAL', ?Carbon $trialEndsAt = null, string $billingCycle = 'yearly'): array
     {
-        return DB::transaction(function () use ($data, $plan) {
+        return DB::transaction(function () use ($data, $plan, $status, $trialEndsAt, $billingCycle) {
             $slug = Str::slug($data['gym_name']);
             if (Tenant::where('slug', $slug)->exists()) {
                 $slug .= '-'.Str::lower(Str::random(4));
             }
+
+            $resolvedStatus = in_array($status, ['ACTIVE', 'TRIAL', 'SUSPENDED']) ? $status : 'TRIAL';
+            $resolvedCycle = in_array(strtolower($billingCycle), ['monthly', 'yearly']) ? strtolower($billingCycle) : (isset($data['billing_cycle']) && in_array(strtolower($data['billing_cycle']), ['monthly', 'yearly']) ? strtolower($data['billing_cycle']) : 'yearly');
 
             $tenant = Tenant::create([
                 'name' => $data['gym_name'],
@@ -37,7 +39,8 @@ class TenantService
                 'phone' => $data['phone'] ?? null,
                 'currency' => $data['currency'] ?? 'INR',
                 'timezone' => $data['timezone'] ?? 'Asia/Kolkata',
-                'status' => 'TRIAL',
+                'status' => $resolvedStatus,
+                'trial_ends_at' => $resolvedStatus === 'TRIAL' ? ($trialEndsAt ?? now()->addDays($plan->trial_days > 0 ? $plan->trial_days : 14)) : null,
             ]);
 
             // Set context for child records
@@ -77,16 +80,30 @@ class TenantService
             // Seed default roles for this tenant
             $this->createDefaultTenantRoles($tenant);
 
-            // Start trial or activate subscription
-            $subscription = $this->subscriptionService->startTrial($tenant, $plan);
-
-            ActivityLog::log('tenant_registered', "New Gym '{$tenant->name}' registered with owner '{$owner->name}'", $tenant);
-
-            try {
-                Mail::to($owner->email)->send(new GymOwnerWelcomeMail($tenant, $owner, $plan, $data['password'] ?? null));
-            } catch (\Throwable $e) {
-                Log::warning("Could not dispatch welcome email to gym owner {$owner->email}: ".$e->getMessage());
+            // Start trial or activate subscription based on chosen status
+            if ($resolvedStatus === 'ACTIVE') {
+                $planPrice = $resolvedCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
+                $subscription = $this->subscriptionService->activateSubscription(
+                    $tenant,
+                    $plan,
+                    $resolvedCycle,
+                    'manual',
+                    'ADMIN-INIT-'.strtoupper(Str::random(8)),
+                    $planPrice,
+                    ['created_by_super_admin' => auth()->id() ?? null],
+                    sendEmail: false
+                );
+            } elseif ($resolvedStatus === 'TRIAL') {
+                $subscription = $this->subscriptionService->setTenantTrial($tenant, $plan, $trialEndsAt);
+            } else {
+                $subscription = $this->subscriptionService->setTenantTrial($tenant, $plan, $trialEndsAt);
+                $subscription->update(['status' => $resolvedStatus]);
             }
+
+            ActivityLog::log('tenant_registered', "New Gym '{$tenant->name}' registered with owner '{$owner->name}' (Status: {$resolvedStatus}, Plan: {$plan->name}, Cycle: {$resolvedCycle})", $tenant);
+
+            // Send SINGLE welcome email in background (instant non-blocking queue execution)
+            AsyncMailService::dispatch($tenant, $owner->email, new GymOwnerWelcomeMail($tenant, $owner, $plan, $data['password'] ?? null));
 
             return [
                 'tenant' => $tenant,

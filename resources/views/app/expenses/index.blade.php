@@ -138,10 +138,15 @@
                                 <td class="py-3 px-4 font-mono text-slate-400">{{ $exp->expense_date ? $exp->expense_date->format('d M Y') : '' }}</td>
                                 <td class="py-3 px-4 uppercase text-[10px] text-slate-400 font-semibold">{{ $exp->payment_method }}</td>
                                 <td class="py-3 px-4 text-right">
-                                    <form action="{{ route('app.expenses.delete', $exp->id) }}" method="POST" onsubmit="return confirm('Delete this expense record?')" class="inline-block">
+                                    <form action="{{ route('app.expenses.delete', $exp->id) }}" method="POST" 
+                                          data-confirm="Are you sure you want to delete this expense record ({{ $currency }}{{ number_format($exp->amount, 2) }} - {{ addslashes($exp->title) }})?" 
+                                          data-confirm-title="Delete Expense Record" 
+                                          data-confirm-btn="Yes, Delete Expense" 
+                                          data-confirm-type="danger" 
+                                          class="inline-block">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all" title="Delete">
+                                        <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer" title="Delete">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         </button>
                                     </form>

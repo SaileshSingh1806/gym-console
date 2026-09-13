@@ -46,11 +46,13 @@
                 <td style="padding: 6px 0; color: #ffffff; font-weight: 600;">{{ $tenant->name }}</td>
             </tr>
             <tr>
-                <td style="padding: 6px 0; color: #94a3b8;">Active Plan:</td>
+                <td style="padding: 6px 0; color: #94a3b8;">Subscription Plan:</td>
                 <td style="padding: 6px 0; color: #34d399; font-weight: 700;">
-                    {{ $plan->name ?? 'Pro Plan' }} 
+                    {{ $plan->name ?? 'Plan' }} 
                     @if($tenant->status === 'TRIAL')
                         <span style="font-size: 10px; background-color: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">Trial Active</span>
+                    @elseif($tenant->status === 'ACTIVE')
+                        <span style="font-size: 10px; background-color: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 6px; text-transform: uppercase;">Active ({{ ucfirst($tenant->activeSubscription->billing_cycle ?? 'Yearly') }})</span>
                     @endif
                 </td>
             </tr>

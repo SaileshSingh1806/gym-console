@@ -791,6 +791,7 @@
         <!-- 1. Churn Risk Alert Modal (Screenshot 1) -->
         <div x-show="showChurnModal" 
              x-cloak 
+             style="display: none;"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div @click.away="showChurnModal = false" 
                  class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-100">
@@ -844,6 +845,7 @@
         <!-- 2. Expiring Soon Modal (Screenshot 2) -->
         <div x-show="showExpiringModal" 
              x-cloak 
+             style="display: none;"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div @click.away="showExpiringModal = false" 
                  class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-100">
@@ -918,6 +920,7 @@
         <!-- 3. Birthdays Today Modal -->
         <div x-show="showBirthdayModal" 
              x-cloak 
+             style="display: none;"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div @click.away="showBirthdayModal = false" 
                  class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-100">
@@ -987,6 +990,10 @@
     <!-- Charts Core Javascript Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Chart === 'undefined') {
+                return;
+            }
+
             const chartConfig = {
                 responsive: true,
                 maintainAspectRatio: false,

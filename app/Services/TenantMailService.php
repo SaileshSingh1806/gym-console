@@ -44,10 +44,24 @@ class TenantMailService
     }
 
     /**
-     * Configure a dynamic mailer transport for the tenant and dispatch the mailable.
+     * Configure a dynamic mailer transport for the tenant and dispatch the mailable asynchronously.
      * Falls back to the system default mailer if tenant custom SMTP fails or is unconfigured.
      */
-    public static function send(Tenant $tenant, string|array $to, Mailable $mailable): bool
+    public static function send(Tenant $tenant, string|array $to, Mailable $mailable, bool $sync = false): bool
+    {
+        if ($sync) {
+            return self::sendNow($tenant, $to, $mailable);
+        }
+
+        AsyncMailService::dispatch($tenant, $to, $mailable);
+
+        return true;
+    }
+
+    /**
+     * Execute immediate synchronous email dispatch for a tenant.
+     */
+    public static function sendNow(Tenant $tenant, string|array $to, Mailable $mailable): bool
     {
         $smtpConfig = self::getTenantSmtpConfig($tenant);
 
@@ -119,4 +133,3 @@ class TenantMailService
         Mail::mailer($mailerKey)->to($testEmail)->send($mailable);
     }
 }
-

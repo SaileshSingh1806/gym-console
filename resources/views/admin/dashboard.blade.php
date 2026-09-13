@@ -143,21 +143,28 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-4 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">SaaS Plan *</label>
                             <select name="plan_id" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
                                 @foreach($plans as $p)
-                                    <option value="{{ $p->id }}">{{ $p->name }} (${{ number_format($p->price_monthly, 0) }}/mo)</option>
+                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Initial Status</label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Billing Cycle *</label>
+                            <select name="billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
+                                <option value="yearly" selected>📅 Yearly (Annual)</option>
+                                <option value="monthly">🗓️ Monthly</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Status / Mode</label>
                             <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
-                                <option value="ACTIVE">ACTIVE</option>
-                                <option value="TRIAL">TRIAL</option>
-                                <option value="SUSPENDED">SUSPENDED</option>
+                                <option value="ACTIVE" selected>🟢 ACTIVE (Paid)</option>
+                                <option value="TRIAL">🟡 TRIAL (Free)</option>
+                                <option value="SUSPENDED">🔴 SUSPENDED</option>
                             </select>
                         </div>
                         <div>

@@ -698,6 +698,8 @@
         </main>
     </div>
 
+    <x-confirm-modal />
+
     @if(!empty($platformSettings['custom_footer_scripts']))
         {!! $platformSettings['custom_footer_scripts'] !!}
     @endif

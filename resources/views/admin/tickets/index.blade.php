@@ -192,7 +192,12 @@
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>
 
-                                <form action="{{ route('admin.tickets.delete', $t->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete ticket #{{ $t->ticket_number }}?');" class="inline">
+                                <form action="{{ route('admin.tickets.delete', $t->id) }}" method="POST"
+                                      data-confirm="Are you sure you want to permanently delete ticket #{{ $t->ticket_number }} ({{ $t->subject }})?"
+                                      data-confirm-title="Delete Ticket"
+                                      data-confirm-btn="Delete Ticket"
+                                      data-confirm-type="danger"
+                                      class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" title="Delete Ticket" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors">

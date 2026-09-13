@@ -16,12 +16,14 @@ use App\Models\SubscriptionPayment;
 use App\Models\SupportTicket;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\AiDietPlannerService;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
 use App\Services\SupportTicketService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,30 +102,20 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:30',
             'password' => 'required|string|min:6',
             'plan_id' => 'required|exists:plans,id',
+            'billing_cycle' => 'nullable|in:monthly,yearly',
             'currency' => 'required|string|max:10',
             'timezone' => 'required|string|max:50',
             'status' => 'required|in:ACTIVE,TRIAL,SUSPENDED',
             'branch_name' => 'nullable|string|max:150',
+            'trial_ends_at' => 'nullable|date',
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
-        $registration = $this->tenantService->registerGym($validated, $plan);
-        $tenant = $registration['tenant'];
+        $trialEnds = ! empty($request->trial_ends_at) ? Carbon::parse($request->trial_ends_at) : null;
+        $billingCycle = $validated['billing_cycle'] ?? 'yearly';
 
-        if ($validated['status'] === 'ACTIVE') {
-            $this->subscriptionService->activateSubscription(
-                $tenant,
-                $plan,
-                'monthly',
-                'manual',
-                'ADMIN-INIT-'.strtoupper(Str::random(8)),
-                (float) $plan->price_monthly,
-                ['created_by_super_admin' => auth()->id()]
-            );
-        } elseif ($validated['status'] === 'TRIAL') {
-            $trialEnds = ! empty($request->trial_ends_at) ? Carbon::parse($request->trial_ends_at) : now()->addDays($plan->trial_days > 0 ? $plan->trial_days : 14);
-            $this->subscriptionService->setTenantTrial($tenant, $plan, $trialEnds);
-        }
+        $registration = $this->tenantService->registerGym($validated, $plan, $validated['status'], $trialEnds, $billingCycle);
+        $tenant = $registration['tenant'];
 
         return back()->with('success', "Gym '{$tenant->name}' created successfully with owner account!");
     }
@@ -144,10 +136,12 @@ class AdminController extends Controller
             'status' => 'required|in:TRIAL,ACTIVE,PAST_DUE,GRACE_PERIOD,SUSPENDED,CANCELLED,EXPIRED',
             'trial_ends_at' => 'nullable|date',
             'plan_id' => 'required|exists:plans,id',
+            'billing_cycle' => 'nullable|in:monthly,yearly',
         ]);
 
         $trialEndsAt = $validated['trial_ends_at'] ? Carbon::parse($validated['trial_ends_at']) : null;
         $plan = Plan::findOrFail($validated['plan_id']);
+        $billingCycle = $validated['billing_cycle'] ?? ($tenant->activeSubscription?->billing_cycle ?? 'yearly');
 
         $tenant->update([
             'name' => $validated['name'],
@@ -164,22 +158,24 @@ class AdminController extends Controller
             $this->subscriptionService->setTenantTrial($tenant, $plan, $tenant->trial_ends_at);
         } elseif ($validated['status'] === 'ACTIVE') {
             $currentSub = $tenant->activeSubscription;
-            if (! $currentSub || $currentSub->status !== 'ACTIVE' || $currentSub->plan_id != $plan->id) {
+            $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
+            if (! $currentSub || $currentSub->status !== 'ACTIVE' || $currentSub->plan_id != $plan->id || $currentSub->billing_cycle !== $billingCycle) {
                 $this->subscriptionService->activateSubscription(
                     $tenant,
                     $plan,
-                    $currentSub?->billing_cycle ?? 'monthly',
+                    $billingCycle,
                     'manual',
                     'ADMIN-MOD-'.strtoupper(Str::random(8)),
-                    (float) $plan->price_monthly,
-                    ['assigned_by_super_admin' => auth()->id()]
+                    $price,
+                    ['assigned_by_super_admin' => auth()->id()],
+                    sendEmail: false
                 );
             }
         } elseif (in_array($validated['status'], ['SUSPENDED', 'CANCELLED', 'EXPIRED'])) {
             Subscription::where('tenant_id', $tenant->id)->update(['status' => $validated['status']]);
         }
 
-        ActivityLog::log('gym_updated_by_admin', "Super admin updated gym {$tenant->name} (Status: {$validated['status']}, Plan: {$plan->name})", $tenant);
+        ActivityLog::log('gym_updated_by_admin', "Super admin updated gym {$tenant->name} (Status: {$validated['status']}, Plan: {$plan->name}, Cycle: {$billingCycle})", $tenant);
 
         return back()->with('success', "Gym '{$tenant->name}' details updated successfully!");
     }
@@ -813,6 +809,10 @@ class AdminController extends Controller
             'facebook_pixel_id' => '',
             'custom_header_scripts' => '',
             'custom_footer_scripts' => '',
+            // AI & Google Gemini
+            'gemini_api_key' => '',
+            'gemini_model' => 'gemini-1.5-flash',
+            'gemini_enabled' => true,
         ];
 
         $settings = array_merge($defaults, $settings);
@@ -953,6 +953,37 @@ class AdminController extends Controller
         ActivityLog::log('seo_settings_updated', 'Updated site SEO meta tags, OpenGraph & Analytics scripts');
 
         return back()->with('success', 'Site SEO & Analytics configuration updated successfully!');
+    }
+
+    public function updateAiSettings(Request $request): RedirectResponse
+    {
+        TenantContext::setBypass(true);
+
+        $validated = $request->validate([
+            'gemini_api_key' => 'nullable|string|max:200',
+            'gemini_model' => 'required|string|max:100',
+            'gemini_enabled' => 'nullable',
+        ]);
+
+        $validated['gemini_enabled'] = $request->boolean('gemini_enabled');
+
+        Setting::setManyGlobal($validated);
+
+        ActivityLog::log('ai_settings_updated', "Updated Google Gemini AI platform settings (Model: {$validated['gemini_model']})");
+
+        return back()->with('success', 'Google Gemini AI settings saved successfully!')->with('activeTab', 'ai');
+    }
+
+    public function testAdminGeminiConnection(Request $request, AiDietPlannerService $aiDietService): JsonResponse
+    {
+        TenantContext::setBypass(true);
+
+        $apiKey = trim((string) ($request->input('gemini_api_key') ?: (Setting::getGlobal('gemini_api_key') ?: config('services.gemini.api_key'))));
+        $model = trim((string) ($request->input('gemini_model') ?: (Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-2.5-flash'))));
+
+        $result = $aiDietService->testConnection($apiKey, $model);
+
+        return response()->json($result);
     }
 
     /**
