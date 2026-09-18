@@ -103,10 +103,13 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex h-screen overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+<body class="flex h-screen overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100" x-data="{ sidebarOpen: false }">
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black/80 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
 
     <!-- Super Admin Sidebar -->
-    <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col flex-shrink-0 h-screen">
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Logo -->
         <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
@@ -126,6 +129,9 @@
                     </div>
                 @endif
             </a>
+            <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
 
         <!-- Navigation Menu -->
@@ -210,33 +216,38 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-200">
-            <h1 class="text-sm font-bold text-slate-900 dark:text-white">{{ $header ?? 'SaaS Platform Control' }}</h1>
-            <div class="flex items-center gap-3">
+        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-200">
+            <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1.5 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <h1 class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{{ $header ?? 'SaaS Platform Control' }}</h1>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <x-theme-customizer />
-                <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-bold">
-                    Super Admin Mode
+                <span class="px-2.5 sm:px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px] sm:text-xs font-bold whitespace-nowrap">
+                    Super Admin
                 </span>
             </div>
         </header>
 
         <!-- Flash Messages -->
         @if (session('success'))
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center justify-between">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center justify-between">
                 <span>{{ session('success') }}</span>
                 <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-300">✕</button>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-between">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-between">
                 <span>{{ session('error') }}</span>
                 <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300">✕</button>
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
                 <ul class="list-disc list-inside">
                     @foreach ($errors->all() as $err)
                         <li>{{ $err }}</li>
@@ -245,7 +256,7 @@
             </div>
         @endif
 
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-3 sm:p-4 md:p-6">
             {{ $slot ?? '' }}
             @yield('content')
         </main>

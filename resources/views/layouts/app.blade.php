@@ -605,18 +605,18 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200">
-            <div class="flex items-center gap-4">
-                <button @click="sidebarOpen = true" class="lg:hidden text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200">
+            <div class="flex items-center gap-2 sm:gap-4 min-w-0">
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1.5 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $header ?? 'Dashboard' }}</span>
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{{ $header ?? 'Dashboard' }}</span>
                 </div>
             </div>
 
             <!-- Right Telemetry & Widget Badges -->
-            <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 
                 <!-- Live Gym Footfall Widget -->
                 @php
@@ -674,7 +674,7 @@
                 </button>
 
                 <!-- User Profile Pill / Avatar -->
-                <div class="flex items-center gap-2 pl-1">
+                <div class="flex items-center gap-2 pl-0.5 sm:pl-1">
                     <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-800 border border-slate-700 text-white font-black text-xs flex items-center justify-center shadow-sm">
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
@@ -685,28 +685,28 @@
 
         <!-- Flash Messages -->
         @if (session('success'))
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center justify-between">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center justify-between">
                 <span>{{ session('success') }}</span>
                 <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-300">✕</button>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-between">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center justify-between">
                 <span>{{ session('error') }}</span>
                 <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300">✕</button>
             </div>
         @endif
 
         @if (session('warning'))
-            <div class="mx-6 mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center justify-between">
+            <div class="mx-3 sm:mx-4 md:mx-6 mt-3 sm:mt-4 p-3.5 sm:p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center justify-between">
                 <span>{{ session('warning') }}</span>
                 <button onclick="this.parentElement.remove()" class="text-amber-400 hover:text-amber-300">✕</button>
             </div>
         @endif
 
         <!-- Page View Body -->
-        <main class="flex-1 p-6 overflow-y-auto">
+        <main class="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
             {{ $slot }}
         </main>
     </div>

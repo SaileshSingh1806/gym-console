@@ -125,13 +125,67 @@
             @endforelse
         </div>
 
-        <!-- Active Member Contracts Table -->
-        <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-            <div class="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60">
+        <!-- Active Member Contracts: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div class="p-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 flex items-center justify-between">
                 <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Member Subscribed Contracts</h3>
+                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{{ $memberships->total() }} total</span>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+
+            <!-- Mobile Cards View (block md:hidden) -->
+            <div class="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60">
+                @forelse($memberships as $ms)
+                    @php
+                        $isPaidFull = (float)$ms->paid_amount >= (float)$ms->final_amount;
+                        $remainingDue = max(0, (float)$ms->final_amount - (float)$ms->paid_amount);
+                    @endphp
+                    <div class="p-4 space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <a href="{{ route('app.members.show', $ms->member_id) }}" class="font-bold text-slate-900 dark:text-white text-xs hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                                    {{ $ms->member->full_name }}
+                                </a>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-amber-600 dark:text-amber-400 font-semibold text-[11px]">{{ $ms->plan->name }}</span>
+                                    @if(($ms->plan->plan_type ?? 'single') !== 'single')
+                                        <span class="text-[10px] text-slate-500 capitalize">({{ $ms->plan->plan_type }})</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $ms->status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700' }}">
+                                {{ $ms->status }}
+                            </span>
+                        </div>
+
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-xs space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-500 dark:text-slate-400">Validity:</span>
+                                <span class="font-medium text-slate-800 dark:text-slate-200">{{ $ms->start_date->format('M d, Y') }} → {{ $ms->end_date->format('M d, Y') }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-800/60">
+                                <span class="text-slate-500 dark:text-slate-400">Total Contract:</span>
+                                <span class="font-bold text-slate-900 dark:text-white">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($ms->final_amount, 2) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-500 dark:text-slate-400">Paid:</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($ms->paid_amount, 2) }}</span>
+                            </div>
+                            @if($remainingDue > 0)
+                                <div class="flex items-center justify-between text-[11px] text-amber-600 dark:text-amber-400 font-bold pt-1 border-t border-slate-200 dark:border-slate-800/60">
+                                    <span>Remaining Due:</span>
+                                    <span>{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($remainingDue, 2) }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-6 text-center text-slate-500 text-xs">No member contracts found.</div>
+                @endforelse
+            </div>
+
+            <!-- Desktop Table View (hidden md:block) -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[650px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="py-2.5 px-3.5 font-semibold">Member</th>
@@ -146,7 +200,9 @@
                         @forelse($memberships as $ms)
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
                                 <td class="py-2.5 px-3.5 font-bold text-slate-900 dark:text-white text-xs">
-                                    {{ $ms->member->full_name }}
+                                    <a href="{{ route('app.members.show', $ms->member_id) }}" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                                        {{ $ms->member->full_name }}
+                                    </a>
                                 </td>
                                 <td class="py-2.5 px-3.5">
                                     <span class="text-amber-600 dark:text-amber-400 font-medium text-xs">{{ $ms->plan->name }}</span>

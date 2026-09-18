@@ -210,18 +210,18 @@
         @endif
 
         <!-- Top Header Profile Banner -->
-        <div class="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+        <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6">
             <!-- Left Info Block -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">
                 <div>
-                    <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
                         <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $member->full_name }}</h1>
                         <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold">
                             {{ $member->member_code }}
                         </span>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 mt-2.5">
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5">
                         <!-- Status Badge -->
                         @if($member->status === 'ACTIVE')
                             <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm">
@@ -247,14 +247,14 @@
 
                         <!-- Plan Badge -->
                         @if($activeMembership && $activeMembership->plan)
-                            <span class="px-3 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center gap-1.5 shadow-sm">
+                            <span class="px-2.5 sm:px-3 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center gap-1.5 shadow-sm">
                                 <span>👑</span>
                                 <span>{{ $activeMembership->plan->name }}</span>
                             </span>
                         @endif
 
                         <!-- Phone -->
-                        <a href="tel:{{ $member->phone }}" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700/60 dark:text-slate-300 dark:hover:text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm">
+                        <a href="tel:{{ $member->phone }}" class="px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700/60 dark:text-slate-300 dark:hover:text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm">
                             <span>📞</span>
                             <span>{{ $member->phone }}</span>
                         </a>
@@ -263,86 +263,92 @@
             </div>
 
             <!-- Right Metrics & Actions Block -->
-            <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
-                <!-- Metric 1: Days Left -->
-                <div class="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center min-w-[90px] shadow-sm">
-                    <p class="text-xl font-black {{ ($daysLeft !== null && $daysLeft < 7) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
-                        {{ $daysLeft !== null ? max(0, $daysLeft) : '0' }}
-                    </p>
-                    <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">DAYS LEFT</span>
-                </div>
-
-                <!-- Metric 2: Months Active -->
-                <div class="px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center min-w-[100px] shadow-sm">
-                    <p class="text-xl font-black text-slate-900 dark:text-white">{{ $monthsActive }}</p>
-                    <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">MONTHS ACTIVE</span>
-                </div>
-
-                <!-- Actions: Add Payment -->
-                <button type="button" 
-                        @click="showAddPaymentModal = true" 
-                        class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>Add Payment</span>
-                </button>
-
-                <!-- Actions: Edit -->
-                <button type="button" 
-                        @click="showEditModal = true" 
-                        class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    <span>Edit</span>
-                </button>
-
-                <!-- Actions: Delete -->
-                <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
-                      data-confirm="Are you sure you want to permanently delete member '{{ addslashes($member->full_name) }}'? All membership records, workout history, and payments will be removed." 
-                      data-confirm-title="Delete Gym Member" 
-                      data-confirm-btn="Yes, Delete Member" 
-                      data-confirm-type="danger" 
-                      class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-400 dark:border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        <span>Delete</span>
-                    </button>
-                </form>
-
-                <!-- Actions: WhatsApp Menu -->
-                <div class="relative" @click.away="showWhatsappMenu = false">
-                    <button type="button" 
-                            @click="showWhatsappMenu = !showWhatsappMenu" 
-                            class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                        <span>WhatsApp</span>
-                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-
-                    <div x-show="showWhatsappMenu" 
-                         x-transition 
-                         class="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl py-2 z-50 text-xs">
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Hello ' . $member->first_name . ', greeting from ' . (auth()->user()->tenant->name ?? 'Gym') . '!') }}" 
-                           target="_blank" 
-                           class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
-                            <span>💬</span>
-                            <span>Direct Chat</span>
-                        </a>
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Dear ' . $member->first_name . ', your membership expires on ' . ($activeMembership ? $activeMembership->end_date->format('d M Y') : 'soon') . '. Please renew to continue your workout routine without interruption.') }}" 
-                           target="_blank" 
-                           class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
-                            <span>⏳</span>
-                            <span>Send Renewal Reminder</span>
-                        </a>
-                        @if($remainingAmt > 0)
-                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Dear ' . $member->first_name . ', you have a pending fee balance of ' . $currency . number_format($remainingAmt, 0) . ' towards your membership at ' . (auth()->user()->tenant->name ?? 'Gym') . '. Kindly clear at the reception desk.') }}" 
-                               target="_blank" 
-                               class="px-4 py-2.5 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 flex items-center gap-2 transition-colors">
-                                <span>💳</span>
-                                <span>Send Fee Due Notice</span>
-                            </a>
-                        @endif
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
+                <!-- Metrics Grid on Mobile -->
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
+                    <!-- Metric 1: Days Left -->
+                    <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                        <p class="text-lg sm:text-xl font-black {{ ($daysLeft !== null && $daysLeft < 7) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
+                            {{ $daysLeft !== null ? max(0, $daysLeft) : '0' }}
+                        </p>
+                        <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">DAYS LEFT</span>
                     </div>
+
+                    <!-- Metric 2: Months Active -->
+                    <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{{ $monthsActive }}</p>
+                        <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">MONTHS ACTIVE</span>
+                    </div>
+                </div>
+
+                <!-- Actions Buttons Grid on Mobile -->
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+                    <!-- Actions: Add Payment -->
+                    <button type="button" 
+                            @click="showAddPaymentModal = true" 
+                            class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>Add Payment</span>
+                    </button>
+
+                    <!-- Actions: Edit -->
+                    <button type="button" 
+                            @click="showEditModal = true" 
+                            class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <span>Edit</span>
+                    </button>
+
+                    <!-- Actions: WhatsApp Menu -->
+                    <div class="relative" @click.away="showWhatsappMenu = false">
+                        <button type="button" 
+                                @click="showWhatsappMenu = !showWhatsappMenu" 
+                                class="w-full px-3 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                            <span>WhatsApp</span>
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div x-show="showWhatsappMenu" 
+                             x-transition 
+                             class="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl py-2 z-50 text-xs">
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Hello ' . $member->first_name . ', greeting from ' . (auth()->user()->tenant->name ?? 'Gym') . '!') }}" 
+                               target="_blank" 
+                               class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                <span>💬</span>
+                                <span>Direct Chat</span>
+                            </a>
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Dear ' . $member->first_name . ', your membership expires on ' . ($activeMembership ? $activeMembership->end_date->format('d M Y') : 'soon') . '. Please renew to continue your workout routine without interruption.') }}" 
+                               target="_blank" 
+                               class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                <span>⏳</span>
+                                <span>Send Renewal Reminder</span>
+                            </a>
+                            @if($remainingAmt > 0)
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Dear ' . $member->first_name . ', you have a pending fee balance of ' . $currency . number_format($remainingAmt, 0) . ' towards your membership at ' . (auth()->user()->tenant->name ?? 'Gym') . '. Kindly clear at the reception desk.') }}" 
+                                   target="_blank" 
+                                   class="px-4 py-2.5 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 flex items-center gap-2 transition-colors">
+                                    <span>💳</span>
+                                    <span>Send Fee Due Notice</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Actions: Delete -->
+                    <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
+                          data-confirm="Are you sure you want to permanently delete member '{{ addslashes($member->full_name) }}'? All membership records, workout history, and payments will be removed." 
+                          data-confirm-title="Delete Gym Member" 
+                          data-confirm-btn="Yes, Delete Member" 
+                          data-confirm-type="danger" 
+                          class="w-full sm:w-auto">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full px-3 py-2 sm:py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-400 dark:border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Delete</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -627,10 +633,10 @@
             <div class="lg:col-span-8 space-y-6">
 
                 <!-- Scrollable Tab Header Bar -->
-                <div class="flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold no-scrollbar shadow-sm">
+                <div class="flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold no-scrollbar shadow-sm -mx-3 px-3 sm:mx-0 sm:px-1.5">
                     <button type="button" 
                             @click="activeTab = 'subscriptions'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'subscriptions' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Subscriptions
                     </button>
@@ -1615,9 +1621,9 @@
         <!-- ========================================================================= -->
         <div x-show="showAddPaymentModal" 
              x-transition 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
              style="display: none;">
-            <div @click.away="showAddPaymentModal = false" class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-6 space-y-4 text-slate-900 dark:text-slate-200">
+            <div @click.away="showAddPaymentModal = false" class="w-full max-w-md rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4 text-slate-900 dark:text-slate-200 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white">Record Member Payment</h3>
                     <button type="button" @click="showAddPaymentModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
@@ -1673,9 +1679,9 @@
         <!-- ========================================================================= -->
         <div x-show="showAddSubscriptionModal" 
              x-transition 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
              style="display: none;">
-            <div @click.away="showAddSubscriptionModal = false" class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-6 space-y-4 text-slate-900 dark:text-slate-200">
+            <div @click.away="showAddSubscriptionModal = false" class="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4 text-slate-900 dark:text-slate-200 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white">Add Membership Subscription</h3>
                     <button type="button" @click="showAddSubscriptionModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
@@ -1743,9 +1749,9 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-4" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4" 
              x-cloak>
-            <div @click.away="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto text-slate-900 dark:text-slate-200">
+            <div @click.away="showEditModal = false" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-4xl w-full p-4 sm:p-8 shadow-2xl space-y-6 my-4 sm:my-8 max-h-[92vh] overflow-y-auto text-slate-900 dark:text-slate-200">
                 
                 <!-- Modal Top Bar -->
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
@@ -2062,9 +2068,9 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 dark:bg-black/85 backdrop-blur-md" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 dark:bg-black/85 backdrop-blur-md" 
              style="display: none;">
-            <div @click.away="closeEditWebcam()" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+            <div @click.away="closeEditWebcam()" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl space-y-4 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -2101,9 +2107,9 @@
         <!-- ========================================================================= -->
         <div x-show="showAddMeasurementModal" 
              x-transition 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm" 
              style="display: none;">
-            <div @click.away="showAddMeasurementModal = false" class="w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-slate-900 dark:text-slate-200">
+            <div @click.away="showAddMeasurementModal = false" class="w-full max-w-xl rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto text-slate-900 dark:text-slate-200">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                         <span>📏</span>
@@ -2376,13 +2382,13 @@
         <!-- MODAL 6: ADD PERSONAL TRAINING (PT) PACKAGE -->
         <!-- ========================================================================= -->
         <div x-show="showAddPtModal" 
-             x-transition:enter="ease-out duration-200"
-             x-transition:leave="ease-in duration-150"
+             x-transition:enter="ease-out duration-200" 
+             x-transition:leave="ease-in duration-150" 
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 dark:bg-black/85 backdrop-blur-md p-3 sm:p-6" 
              style="display: none;">
             
             <div class="min-h-full flex items-center justify-center py-4 sm:py-6">
-                <div @click.away="showAddPtModal = false" class="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-5 sm:p-8 space-y-6 text-xs text-slate-900 dark:text-slate-200 relative">
+                <div @click.away="showAddPtModal = false" class="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-8 space-y-6 text-xs text-slate-900 dark:text-slate-200 relative max-h-[92vh] overflow-y-auto">
                     
                     <!-- Top-Right Close Button -->
                     <button type="button" 
@@ -2677,9 +2683,9 @@
         <!-- ENROLL IN CLASS MODAL -->
         <div x-show="showEnrollClassModal" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
             <div @click.away="showEnrollClassModal = false" 
-                 class="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xl relative">
+                 class="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                 
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div class="flex items-center gap-2.5">

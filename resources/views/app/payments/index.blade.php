@@ -201,9 +201,9 @@
         <!-- TOP FILTER BAR                             -->
         <!-- ========================================== -->
         <form method="GET" action="{{ route('app.payments.index') }}" class="space-y-3">
-            <div class="flex flex-wrap items-center gap-3">
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
                 <!-- Search Input -->
-                <div class="flex-1 min-w-[260px] relative">
+                <div class="col-span-2 sm:flex-1 sm:min-w-[240px] relative">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
@@ -218,7 +218,7 @@
                 <div>
                     <select name="date_filter" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
+                            class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="month_till_date" {{ request('date_filter', 'month_till_date') === 'month_till_date' ? 'selected' : '' }}>Month Till Date</option>
                         <option value="today" {{ request('date_filter') === 'today' ? 'selected' : '' }}>Today</option>
                         <option value="yesterday" {{ request('date_filter') === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
@@ -233,7 +233,7 @@
                 <div>
                     <select name="method" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
+                            class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('method') === 'all' || !request('method') ? 'selected' : '' }}>All Methods</option>
                         <option value="cash" {{ request('method') === 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="card" {{ request('method') === 'card' ? 'selected' : '' }}>Card</option>
@@ -248,7 +248,7 @@
                 <div>
                     <select name="status" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
+                            class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Status</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="partial" {{ request('status') === 'partial' ? 'selected' : '' }}>Partial</option>
@@ -260,7 +260,7 @@
                 <div>
                     <select name="due_filter" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
+                            class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('due_filter') === 'all' || !request('due_filter') ? 'selected' : '' }}>All Due Dates</option>
                         <option value="has_due" {{ request('due_filter') === 'has_due' ? 'selected' : '' }}>Has Due</option>
                         <option value="no_due" {{ request('due_filter') === 'no_due' ? 'selected' : '' }}>No Due</option>
@@ -270,7 +270,7 @@
                 <!-- Action Button: Record Payment -->
                 <button type="button" 
                         @click="openRecordModal()" 
-                        class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer whitespace-nowrap ml-auto">
+                        class="col-span-2 sm:col-span-1 w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer whitespace-nowrap sm:ml-auto">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Record Payment</span>
                 </button>
@@ -280,9 +280,9 @@
         <!-- ========================================== -->
         <!-- SUMMARY BANNER BAR                         -->
         <!-- ========================================== -->
-        <div class="px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shadow-sm">
+        <div class="px-4 sm:px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs shadow-sm">
             <span class="font-bold text-slate-700 dark:text-slate-300">
-                {{ $payments->total() }} payments
+                {{ $payments->total() }} payments recorded
             </span>
             <div class="flex items-center gap-3">
                 <span class="font-black text-slate-900 dark:text-white">
@@ -296,11 +296,169 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- PAYMENTS TABLE                             -->
+        <!-- PAYMENTS: MOBILE CARDS & DESKTOP TABLE     -->
         <!-- ========================================== -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+            
+            <!-- Mobile Cards View (block md:hidden) -->
+            <div class="block md:hidden divide-y divide-slate-100 dark:divide-slate-800/60">
+                @forelse($payments as $p)
+                    @php
+                        $member = $p->member;
+                        $membership = $p->membership;
+                        $isReversed = $p->notes && str_contains($p->notes, '[REVERSED]');
+                        
+                        $dueAmount = 0;
+                        $discountAmount = 0;
+                        if ($membership) {
+                            $dueAmount = max(0, (float) $membership->final_amount - (float) $membership->paid_amount);
+                            $discountAmount = (float) $membership->discount;
+                        }
+
+                        $status = 'Completed';
+                        if ($isReversed) {
+                            $status = 'Reversed';
+                        } elseif ($dueAmount > 0) {
+                            $status = 'Partial';
+                        }
+
+                        $planName = $membership?->plan?->name ?? ($p->notes ? Str::limit($p->notes, 30) : 'Standard Membership');
+                        $receiptNo = $p->invoice_number;
+                    @endphp
+                    <div class="p-4 space-y-3">
+                        <!-- Top Row: Member Info + Status Badge -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <a href="{{ route('app.members.show', $member->id) }}" class="font-bold text-slate-900 dark:text-white text-xs hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block truncate">
+                                    {{ $member->full_name }}
+                                </a>
+                                <div class="flex items-center gap-1.5 mt-0.5 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                                    <span>{{ $member->member_code }}</span>
+                                    <span>•</span>
+                                    <button type="button" 
+                                            @click="openInvoice({
+                                                id: {{ $p->id }},
+                                                receipt_no: '{{ $receiptNo }}',
+                                                date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
+                                                amount: '{{ number_format($p->amount, 2) }}',
+                                                method: '{{ strtoupper($p->payment_method) }}',
+                                                ref: '{{ $p->transaction_reference ?? '' }}',
+                                                plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
+                                                plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
+                                                member_name: '{{ addslashes($member->full_name) }}',
+                                                member_code: '{{ $member->member_code }}',
+                                                member_phone: '{{ $member->phone }}',
+                                                member_email: '{{ $member->email ?? '' }}',
+                                                total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
+                                                paid: '{{ number_format($p->amount, 2) }}'
+                                            })"
+                                            class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                                        {{ $receiptNo }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Status Badge -->
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 {{ $status === 'Completed' ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : ($status === 'Partial' ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' : 'bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30') }}">
+                                {{ $status }}
+                            </span>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-xs space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-500 dark:text-slate-400">Package / Item:</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[180px]">{{ $planName }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-500 dark:text-slate-400">Payment Date:</span>
+                                <span class="font-mono text-slate-700 dark:text-slate-300">{{ $p->payment_date ? $p->payment_date->format('d/m/Y') : $p->created_at->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-500 dark:text-slate-400">Method:</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300">{{ $p->payment_method }}</span>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-200 dark:border-slate-800/60">
+                                <span class="text-slate-500 dark:text-slate-400 font-medium">Amount Paid:</span>
+                                <span class="text-sm font-black {{ $isReversed ? 'text-rose-600 line-through' : 'text-emerald-600 dark:text-emerald-400' }}">
+                                    {{ $isReversed ? '-' : '' }}{{ $currency }}{{ number_format($p->amount, 2) }}
+                                </span>
+                            </div>
+                            @if($dueAmount > 0)
+                                <div class="flex items-center justify-between text-[11px] text-rose-600 dark:text-rose-400 font-bold">
+                                    <span>Remaining Due:</span>
+                                    <span>{{ $currency }}{{ number_format($dueAmount, 2) }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Action Bar -->
+                        <div class="flex items-center gap-1.5 pt-1">
+                            <button type="button" 
+                                    @click="openInvoice({
+                                        id: {{ $p->id }},
+                                        receipt_no: '{{ $receiptNo }}',
+                                        date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
+                                        amount: '{{ number_format($p->amount, 2) }}',
+                                        method: '{{ strtoupper($p->payment_method) }}',
+                                        ref: '{{ $p->transaction_reference ?? '' }}',
+                                        plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
+                                        plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
+                                        member_name: '{{ addslashes($member->full_name) }}',
+                                        member_code: '{{ $member->member_code }}',
+                                        member_phone: '{{ $member->phone }}',
+                                        member_email: '{{ $member->email ?? '' }}',
+                                        total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
+                                        paid: '{{ number_format($p->amount, 2) }}'
+                                    })"
+                                    class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>Receipt</span>
+                            </button>
+
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Payment Receipt from ' . ($tenant->name ?? 'Gym') . ': ' . $currency . number_format($p->amount, 2) . ' received on ' . ($p->payment_date ? $p->payment_date->format('d/m/Y') : '') . ' (Receipt No: ' . $receiptNo . ')') }}" 
+                               target="_blank" 
+                               title="Send Receipt via WhatsApp" 
+                               class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                            </a>
+
+                            @if($dueAmount > 0 && !$isReversed)
+                                <button type="button" 
+                                        @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
+                                        title="Collect Remaining Due" 
+                                        class="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-sm">
+                                    <span>+ Collect Due</span>
+                                </button>
+                            @endif
+
+                            @if(!$isReversed)
+                                <form action="{{ route('app.payments.reverse', $p->id) }}" method="POST" 
+                                      data-confirm="Are you sure you want to reverse / void payment receipt '{{ $receiptNo }}'?" 
+                                      data-confirm-title="Reverse Payment" 
+                                      data-confirm-btn="Yes, Reverse" 
+                                      data-confirm-type="warning" 
+                                      class="inline">
+                                    @csrf
+                                    <button type="submit" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20 transition-colors" title="Reverse Payment">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-slate-500 dark:text-slate-400 space-y-2">
+                        <div class="text-3xl">💳</div>
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">No payment receipts found.</p>
+                        <p class="text-xs text-slate-500">Tap "+ Record Payment" to collect a fee or record membership.</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Desktop Table View (hidden md:block) -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[700px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider">
                         <tr>
                             <th class="py-3.5 px-4">MEMBER</th>
@@ -456,7 +614,7 @@
                                            target="_blank" 
                                            title="Send Receipt via WhatsApp" 
                                            class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-emerald-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 transition-colors">
-                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                         </a>
 
                                         <!-- Email Receipt (Direct Send) -->
@@ -525,7 +683,7 @@
             </div>
 
             @if($payments->hasPages())
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+                <div class="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
                     {{ $payments->links() }}
                 </div>
             @endif

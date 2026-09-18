@@ -18,49 +18,49 @@
         <!-- Top Header & Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm">
             <div class="flex items-center gap-2.5">
-                <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
                 </span>
                 <div>
-                    <h1 class="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
+                    <h1 class="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
                         Inventory & Equipment Maintenance
                     </h1>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Supplements stock, gym machines, AC servicing, and upcoming maintenance schedules.</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Supplements stock, gym machines, AC servicing, and maintenance schedules.</p>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 flex-wrap">
-                <button @click="showAddProductModal = true" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button @click="showAddProductModal = true" type="button" class="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Add Product
+                    <span>Add Product</span>
                 </button>
-                <button @click="showAddEquipmentModal = true" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-sm transition">
+                <button @click="showAddEquipmentModal = true" type="button" class="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-sm transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Add Machine / AC
+                    <span>Add Machine / AC</span>
                 </button>
             </div>
         </div>
 
-        <!-- KPI Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- KPI Cards Grid (Mobile 2-cols, Desktop 4-cols) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
             <!-- Total Inventory Products -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col justify-between shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Total Products</span>
-                    <span class="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Total Products</span>
+                    <span class="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     </span>
                 </div>
-                <div class="mt-2">
-                    <div class="text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ number_format($totalItemsCount) }}</div>
-                    <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <div class="mt-1.5">
+                    <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ number_format($totalItemsCount) }}</div>
+                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
                         <span>{{ number_format($totalStockUnits) }} units</span>
                         <span>•</span>
                         <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($totalRetailValue, 0) }}</span>
@@ -71,17 +71,17 @@
             <!-- Low Stock Alerts -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col justify-between shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Low & Out of Stock</span>
-                    <span class="p-1 rounded-lg {{ $lowStockCount > 0 ? 'bg-red-500/10 text-red-500 dark:text-red-400 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }}">
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Low & Out Stock</span>
+                    <span class="p-1 rounded-lg {{ $lowStockCount > 0 ? 'bg-red-500/10 text-red-500 dark:text-red-400 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                     </span>
                 </div>
-                <div class="mt-2">
-                    <div class="text-xl font-bold {{ $lowStockCount > 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-800 dark:text-slate-200' }} leading-tight">{{ $lowStockCount }}</div>
-                    <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        <span class="text-red-500 dark:text-red-400 font-medium">{{ $outOfStockCount }} out of stock</span>
+                <div class="mt-1.5">
+                    <div class="text-lg sm:text-xl font-bold {{ $lowStockCount > 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-800 dark:text-slate-200' }} leading-tight">{{ $lowStockCount }}</div>
+                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        <span class="text-red-500 dark:text-red-400 font-medium">{{ $outOfStockCount }} out</span>
                         <span>•</span>
-                        <span>Reorder needed</span>
+                        <span>Reorder</span>
                     </div>
                 </div>
             </div>
@@ -89,15 +89,15 @@
             <!-- Gym Machines & ACs -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col justify-between shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Machines & AC Units</span>
-                    <span class="p-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Machines & ACs</span>
+                    <span class="p-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
                     </span>
                 </div>
-                <div class="mt-2">
-                    <div class="text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ number_format($totalEquipmentCount) }}</div>
-                    <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                        <span class="text-cyan-600 dark:text-cyan-400 font-medium">{{ $acCount }} AC Units</span>
+                <div class="mt-1.5">
+                    <div class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-tight">{{ number_format($totalEquipmentCount) }}</div>
+                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        <span class="text-cyan-600 dark:text-cyan-400 font-medium">{{ $acCount }} ACs</span>
                         <span>•</span>
                         <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $operationalCount }} OK</span>
                     </div>
@@ -107,16 +107,16 @@
             <!-- Maintenance Schedule Alerts -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col justify-between shadow-sm">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Maintenance Status</span>
-                    <span class="p-1 rounded-lg {{ $overdueMaintenanceCount > 0 ? 'bg-rose-500/10 text-rose-500 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }}">
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Service Status</span>
+                    <span class="p-1 rounded-lg {{ $overdueMaintenanceCount > 0 ? 'bg-rose-500/10 text-rose-500 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }} shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     </span>
                 </div>
-                <div class="mt-2">
-                    <div class="text-xl font-bold {{ $overdueMaintenanceCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }} leading-tight">
-                        {{ $overdueMaintenanceCount > 0 ? $overdueMaintenanceCount . ' Overdue' : 'All On Track' }}
+                <div class="mt-1.5">
+                    <div class="text-lg sm:text-xl font-bold {{ $overdueMaintenanceCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }} leading-tight truncate">
+                        {{ $overdueMaintenanceCount > 0 ? $overdueMaintenanceCount . ' Overdue' : 'All OK' }}
                     </div>
-                    <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
                         <span class="text-amber-600 dark:text-amber-400 font-medium">{{ $dueThisMonthCount }} due 30d</span>
                         <span>•</span>
                         <span>Auto-tracked</span>
@@ -125,10 +125,10 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div class="border-b border-slate-200 dark:border-slate-800 flex items-center gap-1">
+        <!-- Navigation Tabs (Touch Scrollable on Mobile) -->
+        <div class="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar border-b border-slate-200 dark:border-slate-800 flex items-center gap-1 whitespace-nowrap">
             <button @click="activeTab = 'inventory'" type="button" 
-                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5"
+                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5 shrink-0"
                 :class="activeTab === 'inventory' ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 Store Inventory & Stock
@@ -136,10 +136,10 @@
             </button>
 
             <button @click="activeTab = 'equipment'" type="button" 
-                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5"
+                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5 shrink-0"
                 :class="activeTab === 'equipment' ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-                Gym Machines & AC Maintenance
+                Gym Machines & AC
                 @if($overdueMaintenanceCount > 0)
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold animate-pulse">{{ $overdueMaintenanceCount }} Due</span>
                 @else
@@ -148,7 +148,7 @@
             </button>
 
             <button @click="activeTab = 'maintenance_logs'" type="button" 
-                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5"
+                class="px-3.5 py-2 text-xs font-bold transition border-b-2 flex items-center gap-1.5 shrink-0"
                 :class="activeTab === 'maintenance_logs' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                 Service History
@@ -158,32 +158,36 @@
         <!-- TAB 1: INVENTORY & STOCK -->
         <div x-show="activeTab === 'inventory'" class="space-y-3">
             <!-- Filter & Search Bar -->
-            <form method="GET" action="{{ route('app.inventory.index') }}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col md:flex-row items-center gap-2.5 shadow-sm">
+            <form method="GET" action="{{ route('app.inventory.index') }}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 shadow-sm">
                 <input type="hidden" name="tab" value="inventory">
-                <div class="relative flex-1 w-full">
+                <div class="relative col-span-2 sm:flex-1 w-full">
                     <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" name="item_search" value="{{ request('item_search') }}" placeholder="Search product name, SKU, or brand..." 
                         class="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500">
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <select name="item_category" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500 w-full md:w-auto">
+                <div class="col-span-1 sm:w-auto">
+                    <select name="item_category" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500">
                         <option value="">All Categories</option>
                         <option value="Supplements" {{ request('item_category') === 'Supplements' ? 'selected' : '' }}>Supplements</option>
                         <option value="Apparel & Wear" {{ request('item_category') === 'Apparel & Wear' ? 'selected' : '' }}>Apparel & Wear</option>
-                        <option value="Beverages & Energy" {{ request('item_category') === 'Beverages & Energy' ? 'selected' : '' }}>Beverages & Energy</option>
-                        <option value="Accessories & Gear" {{ request('item_category') === 'Accessories & Gear' ? 'selected' : '' }}>Accessories & Gear</option>
+                        <option value="Beverages & Energy" {{ request('item_category') === 'Beverages & Energy' ? 'selected' : '' }}>Beverages</option>
+                        <option value="Accessories & Gear" {{ request('item_category') === 'Accessories & Gear' ? 'selected' : '' }}>Accessories</option>
                         <option value="Merchandise" {{ request('item_category') === 'Merchandise' ? 'selected' : '' }}>Merchandise</option>
                         <option value="Other" {{ request('item_category') === 'Other' ? 'selected' : '' }}>Other</option>
                     </select>
+                </div>
 
-                    <select name="stock_filter" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500 w-full md:w-auto">
-                        <option value="">All Stock Levels</option>
+                <div class="col-span-1 sm:w-auto">
+                    <select name="stock_filter" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-amber-500">
+                        <option value="">All Stock</option>
                         <option value="low" {{ request('stock_filter') === 'low' ? 'selected' : '' }}>Low Stock</option>
-                        <option value="out" {{ request('stock_filter') === 'out' ? 'selected' : '' }}>Out of Stock (0)</option>
+                        <option value="out" {{ request('stock_filter') === 'out' ? 'selected' : '' }}>Out of Stock</option>
                     </select>
+                </div>
 
-                    <button type="submit" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg transition border border-slate-200 dark:border-slate-700">
+                <div class="col-span-2 sm:col-span-auto flex items-center gap-2">
+                    <button type="submit" class="flex-1 sm:flex-initial px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg transition border border-slate-200 dark:border-slate-700">
                         Filter
                     </button>
                     @if(request()->hasAny(['item_search', 'item_category', 'stock_filter']))
@@ -192,8 +196,113 @@
                 </div>
             </form>
 
-            <!-- Inventory Items Table -->
-            <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <!-- MOBILE VIEW: Dedicated Cards (block md:hidden) -->
+            <div class="block md:hidden space-y-2.5">
+                @forelse($items as $item)
+                    @php
+                        $cost = (float) $item->cost_price;
+                        $sell = (float) $item->selling_price;
+                        $margin = $sell > 0 ? round((($sell - $cost) / $sell) * 100, 1) : 0;
+                        $isLow = $item->stock_quantity <= $item->reorder_threshold;
+                        $isOut = $item->stock_quantity <= 0;
+                    @endphp
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm space-y-2.5">
+                        <!-- Top Row: Product Name, SKU & Status -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-900 dark:text-white text-xs leading-snug">{{ $item->name }}</h3>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-semibold">{{ $item->sku ?? 'NO-SKU' }}</span>
+                                    <span class="text-slate-400">•</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        {{ $item->category ?? 'General' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                @if($isOut)
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        Out of Stock
+                                    </span>
+                                @elseif($isLow)
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
+                                        Low Stock
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                        In Stock
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Mid Metrics: Price, Margin, Stock -->
+                        <div class="grid grid-cols-3 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 text-center">
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Price</span>
+                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($item->selling_price, 2) }}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Margin</span>
+                                <span class="text-xs font-semibold {{ $margin >= 30 ? 'text-emerald-600 dark:text-emerald-400' : ($margin > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400') }}">
+                                    {{ $margin }}%
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">In Stock</span>
+                                <span class="text-xs font-bold {{ $isOut ? 'text-rose-600 dark:text-rose-400' : ($isLow ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white') }}">
+                                    {{ $item->stock_quantity }} <span class="text-[9px] text-slate-400 font-normal">units</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Actions Row -->
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <button @click="selectedProduct = {{ json_encode($item) }}; showAdjustStockModal = true;" type="button" 
+                                class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs border border-amber-500/20 transition flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                Adjust Stock
+                            </button>
+
+                            <div class="flex items-center gap-1.5">
+                                <button @click="selectedProduct = {{ json_encode($item) }}; showEditProductModal = true;" type="button" 
+                                    class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" title="Edit Item">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+
+                                <form action="{{ route('app.inventory.items.delete', $item->id) }}" method="POST" 
+                                      data-confirm="Are you sure you want to remove item '{{ addslashes($item->name) }}' from inventory?" 
+                                      data-confirm-title="Delete Inventory Item" 
+                                      data-confirm-btn="Yes, Delete Item" 
+                                      data-confirm-type="danger" 
+                                      class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer" title="Delete Item">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-400 dark:text-slate-500">
+                        <svg class="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        <p class="font-medium text-slate-700 dark:text-slate-400 text-xs">No inventory products found.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Add supplements, apparel, and merchandise to track stock.</p>
+                    </div>
+                @endforelse
+
+                @if($items->hasPages())
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                        {{ $items->links() }}
+                    </div>
+                @endif
+            </div>
+
+            <!-- DESKTOP VIEW: High-Density Table (hidden md:block) -->
+            <div class="hidden md:block rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
@@ -320,42 +429,38 @@
         <!-- TAB 2: GYM MACHINES & AC MAINTENANCE -->
         <div x-show="activeTab === 'equipment'" class="space-y-3">
             <!-- Filter & Search Bar for Equipment -->
-            <form method="GET" action="{{ route('app.inventory.index') }}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex flex-col md:flex-row items-center gap-2.5 shadow-sm">
+            <form method="GET" action="{{ route('app.inventory.index') }}" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 shadow-sm">
                 <input type="hidden" name="tab" value="equipment">
-                <div class="relative flex-1 w-full">
+                <div class="relative col-span-2 sm:flex-1 w-full">
                     <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" name="equipment_search" value="{{ request('equipment_search') }}" placeholder="Search machine, AC unit, serial no, brand, location..." 
+                    <input type="text" name="equipment_search" value="{{ request('equipment_search') }}" placeholder="Search machine, AC, serial no, brand..." 
                         class="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-500">
                 </div>
 
-                <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
-                    <select name="equipment_category" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
+                <div class="col-span-1 sm:w-auto">
+                    <select name="equipment_category" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
                         <option value="">All Categories</option>
-                        <option value="AC & HVAC" {{ request('equipment_category') === 'AC & HVAC' ? 'selected' : '' }}>AC & HVAC Units</option>
+                        <option value="AC & HVAC" {{ request('equipment_category') === 'AC & HVAC' ? 'selected' : '' }}>AC & HVAC</option>
                         <option value="Cardio Machines" {{ request('equipment_category') === 'Cardio Machines' ? 'selected' : '' }}>Cardio</option>
-                        <option value="Strength & Resistance" {{ request('equipment_category') === 'Strength & Resistance' ? 'selected' : '' }}>Strength & Plate Loaded</option>
+                        <option value="Strength & Resistance" {{ request('equipment_category') === 'Strength & Resistance' ? 'selected' : '' }}>Strength</option>
                         <option value="Cables & Racks" {{ request('equipment_category') === 'Cables & Racks' ? 'selected' : '' }}>Cables & Racks</option>
-                        <option value="Electrical & Facility" {{ request('equipment_category') === 'Electrical & Facility' ? 'selected' : '' }}>Electrical & Facility</option>
-                        <option value="Audio & Video" {{ request('equipment_category') === 'Audio & Video' ? 'selected' : '' }}>Audio & Video</option>
+                        <option value="Electrical & Facility" {{ request('equipment_category') === 'Electrical & Facility' ? 'selected' : '' }}>Electrical</option>
+                        <option value="Audio & Video" {{ request('equipment_category') === 'Audio & Video' ? 'selected' : '' }}>Audio/Video</option>
                         <option value="Other" {{ request('equipment_category') === 'Other' ? 'selected' : '' }}>Other</option>
                     </select>
+                </div>
 
-                    <select name="maintenance_filter" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
-                        <option value="">Maintenance Status</option>
+                <div class="col-span-1 sm:w-auto">
+                    <select name="maintenance_filter" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
+                        <option value="">Status</option>
                         <option value="overdue" {{ request('maintenance_filter') === 'overdue' ? 'selected' : '' }}>🔴 Overdue</option>
-                        <option value="due_soon" {{ request('maintenance_filter') === 'due_soon' ? 'selected' : '' }}>⚠️ Due in 7 Days</option>
-                        <option value="this_month" {{ request('maintenance_filter') === 'this_month' ? 'selected' : '' }}>📅 Due This Month</option>
+                        <option value="due_soon" {{ request('maintenance_filter') === 'due_soon' ? 'selected' : '' }}>⚠️ Due 7d</option>
+                        <option value="this_month" {{ request('maintenance_filter') === 'this_month' ? 'selected' : '' }}>📅 Due 30d</option>
                     </select>
+                </div>
 
-                    <select name="equipment_status" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:border-cyan-500">
-                        <option value="">All Status</option>
-                        <option value="OPERATIONAL" {{ request('equipment_status') === 'OPERATIONAL' ? 'selected' : '' }}>Operational</option>
-                        <option value="MAINTENANCE_DUE" {{ request('equipment_status') === 'MAINTENANCE_DUE' ? 'selected' : '' }}>Maintenance Due</option>
-                        <option value="UNDER_REPAIR" {{ request('equipment_status') === 'UNDER_REPAIR' ? 'selected' : '' }}>Under Repair</option>
-                        <option value="OUT_OF_SERVICE" {{ request('equipment_status') === 'OUT_OF_SERVICE' ? 'selected' : '' }}>Out of Service</option>
-                    </select>
-
-                    <button type="submit" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg transition border border-slate-200 dark:border-slate-700">
+                <div class="col-span-2 sm:col-span-auto flex items-center gap-2">
+                    <button type="submit" class="flex-1 sm:flex-initial px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg transition border border-slate-200 dark:border-slate-700">
                         Filter
                     </button>
                     @if(request()->hasAny(['equipment_search', 'equipment_category', 'maintenance_filter', 'equipment_status']))
@@ -364,8 +469,141 @@
                 </div>
             </form>
 
-            <!-- Equipment List Table -->
-            <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <!-- MOBILE VIEW: Equipment Cards (block md:hidden) -->
+            <div class="block md:hidden space-y-2.5">
+                @forelse($equipment as $eq)
+                    @php
+                        $isOverdue = $eq->is_overdue && $eq->status !== 'OUT_OF_SERVICE';
+                        $isDueSoon = $eq->is_due_soon && ! $isOverdue;
+                        $daysLeft = $eq->days_until_maintenance;
+                    @endphp
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm space-y-2.5 {{ $isOverdue ? 'ring-1 ring-rose-500/30' : '' }}">
+                        <!-- Machine Header & Status -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-start gap-2">
+                                @if($eq->category === 'AC & HVAC')
+                                    <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0 mt-0.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </span>
+                                @else
+                                    <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 mt-0.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                                    </span>
+                                @endif
+                                <div>
+                                    <h3 class="font-bold text-slate-900 dark:text-white text-xs leading-snug">{{ $eq->name }}</h3>
+                                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                                        @if($eq->brand)
+                                            <span class="text-slate-700 dark:text-slate-300 font-medium">{{ $eq->brand }}</span>
+                                        @endif
+                                        @if($eq->location)
+                                            <span>• {{ $eq->location }}</span>
+                                        @endif
+                                        @if($eq->serial_number)
+                                            <span class="font-mono text-[9px] text-slate-400">S/N: {{ $eq->serial_number }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                @if($eq->status === 'OPERATIONAL')
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                        Operational
+                                    </span>
+                                @elseif($eq->status === 'MAINTENANCE_DUE')
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        Service Due
+                                    </span>
+                                @elseif($eq->status === 'UNDER_REPAIR')
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                                        Under Repair
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                        Out of Service
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Maintenance Meta Box -->
+                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 text-xs">
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Next Service</span>
+                                @if($eq->next_service_date)
+                                    <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                        {{ \Carbon\Carbon::parse($eq->next_service_date)->format('d M, Y') }}
+                                    </div>
+                                    @if($isOverdue)
+                                        <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 animate-pulse">Overdue ({{ abs($daysLeft) }}d)</span>
+                                    @elseif($isDueSoon)
+                                        <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400">Due in {{ $daysLeft }}d</span>
+                                    @else
+                                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400">In {{ $daysLeft }}d</span>
+                                    @endif
+                                @else
+                                    <span class="text-slate-400 text-xs italic">—</span>
+                                @endif
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Technician</span>
+                                <div class="font-medium text-slate-800 dark:text-slate-200 text-xs truncate">{{ $eq->vendor_name ?? 'Technician' }}</div>
+                                @if($eq->vendor_contact)
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $eq->vendor_contact) }}" class="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono underline block mt-0.5">
+                                        {{ $eq->vendor_contact }}
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Actions Row -->
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <button @click="selectedEquipment = {{ json_encode($eq) }}; showRecordMaintenanceModal = true;" type="button" 
+                                class="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-bold text-xs border border-cyan-500/20 transition flex items-center gap-1 shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                Log Service
+                            </button>
+
+                            <div class="flex items-center gap-1.5">
+                                <button @click="selectedEquipment = {{ json_encode($eq) }}; showEditEquipmentModal = true;" type="button" 
+                                    class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" title="Edit Machine">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </button>
+
+                                <form action="{{ route('app.inventory.equipment.delete', $eq->id) }}" method="POST" 
+                                      data-confirm="Are you sure you want to delete the equipment record for '{{ addslashes($eq->name) }}'?" 
+                                      data-confirm-title="Delete Equipment Record" 
+                                      data-confirm-btn="Yes, Delete Record" 
+                                      data-confirm-type="danger" 
+                                      class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 transition cursor-pointer" title="Delete Equipment">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-400 dark:text-slate-500">
+                        <svg class="w-8 h-8 text-slate-400 dark:text-slate-600 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                        <p class="font-medium text-slate-700 dark:text-slate-400 text-xs">No gym equipment or AC units registered.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Click "Add Machine / AC" to track service schedules and repairs.</p>
+                    </div>
+                @endforelse
+
+                @if($equipment->hasPages())
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                        {{ $equipment->links() }}
+                    </div>
+                @endif
+            </div>
+
+            <!-- DESKTOP VIEW: High-Density Table (hidden md:block) -->
+            <div class="hidden md:block rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
@@ -547,7 +785,81 @@
 
         <!-- TAB 3: SERVICE HISTORY & LOGS -->
         <div x-show="activeTab === 'maintenance_logs'" class="space-y-3">
-            <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <!-- MOBILE VIEW: Dedicated Service Log Cards (block md:hidden) -->
+            <div class="block md:hidden space-y-2.5">
+                <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                    <h2 class="text-xs font-bold text-slate-900 dark:text-white">Equipment Maintenance History</h2>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Complete log of routine maintenance, repairs, and service costs.</p>
+                </div>
+
+                @forelse($maintenanceLogs as $log)
+                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-400 uppercase">
+                                    {{ \Carbon\Carbon::parse($log->service_date)->format('d M, Y') }}
+                                </span>
+                                <h3 class="font-bold text-slate-900 dark:text-white text-xs mt-0.5">
+                                    {{ $log->equipment?->name ?? 'Equipment Deleted' }}
+                                </h3>
+                                <div class="text-[10px] text-slate-500 mt-0.5">{{ $log->equipment?->category }}</div>
+                            </div>
+
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                                {{ $log->maintenance_type }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 text-xs">
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Technician</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $log->technician_name ?? '—' }}</span>
+                                @if($log->technician_contact)
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $log->technician_contact) }}" class="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono underline block mt-0.5">
+                                        {{ $log->technician_contact }}
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">Cost & Status</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($log->cost, 2) }}</span>
+                                <div class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ $log->status_after_service }}</div>
+                            </div>
+                        </div>
+
+                        @if($log->work_summary || $log->replaced_parts)
+                            <div class="text-[11px] text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
+                                @if($log->work_summary)
+                                    <p>{{ $log->work_summary }}</p>
+                                @endif
+                                @if($log->replaced_parts)
+                                    <p class="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium">Parts: {{ $log->replaced_parts }}</p>
+                                @endif
+                            </div>
+                        @endif
+
+                        @if($log->next_service_date)
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400">
+                                Next Due: <span class="font-bold text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($log->next_service_date)->format('d M, Y') }}</span>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+                        No maintenance logs recorded yet.
+                    </div>
+                @endforelse
+
+                @if($maintenanceLogs->hasPages())
+                    <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
+                        {{ $maintenanceLogs->links() }}
+                    </div>
+                @endif
+            </div>
+
+            <!-- DESKTOP VIEW: High-Density Table (hidden md:block) -->
+            <div class="hidden md:block rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <div class="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div>
                         <h2 class="text-xs font-bold text-slate-900 dark:text-white">Equipment Maintenance & Service History</h2>
@@ -656,7 +968,7 @@
                             class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-amber-500">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">SKU / Barcode</label>
                             <input type="text" name="sku" placeholder="Auto-generated"
@@ -675,7 +987,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Cost Price ({{ $tenant?->currency_symbol ?? '₹' }}) <span class="text-rose-500">*</span></label>
                             <input type="number" step="0.01" min="0" name="cost_price" required placeholder="0.00"
@@ -688,7 +1000,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Stock Units <span class="text-rose-500">*</span></label>
                             <input type="number" min="0" name="stock_quantity" value="10" required
@@ -748,7 +1060,7 @@
                             class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-amber-500">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">SKU</label>
                             <input type="text" name="sku" x-model="selectedProduct.sku"
@@ -767,7 +1079,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Cost Price ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="cost_price" required x-model="selectedProduct.cost_price"
@@ -890,8 +1202,8 @@
 
                 <form action="{{ route('app.inventory.equipment.store') }}" method="POST" class="p-4 space-y-3">
                     @csrf
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="col-span-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="col-span-1 sm:col-span-2">
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Machine / Equipment Name <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" required placeholder="e.g. Main Hall AC Unit 1 - Daikin 2-Ton or Treadmill #1"
                                 class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-500">
@@ -935,7 +1247,7 @@
                             Maintenance Schedule
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Service Frequency <span class="text-rose-500">*</span></label>
                                 <select name="maintenance_interval_days" required class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
@@ -960,7 +1272,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Technician / Vendor</label>
                             <input type="text" name="vendor_name" placeholder="e.g. Daikin Service"
@@ -973,7 +1285,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Status <span class="text-rose-500">*</span></label>
                             <select name="status" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
@@ -1019,8 +1331,8 @@
 
                 <form :action="'/app/inventory/equipment/' + selectedEquipment.id" method="POST" class="p-4 space-y-3">
                     @csrf
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="col-span-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="col-span-1 sm:col-span-2">
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Machine Name <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" required x-model="selectedEquipment.name"
                                 class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
@@ -1058,7 +1370,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Interval (Days)</label>
                             <input type="number" min="1" name="maintenance_interval_days" required x-model="selectedEquipment.maintenance_interval_days"
@@ -1071,7 +1383,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Status <span class="text-rose-500">*</span></label>
                             <select name="status" required x-model="selectedEquipment.status" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
@@ -1120,7 +1432,7 @@
 
                 <form :action="'/app/inventory/equipment/' + selectedEquipment.id + '/maintenance'" method="POST" class="p-4 space-y-3">
                     @csrf
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Service Date <span class="text-rose-500">*</span></label>
                             <input type="date" name="service_date" required value="{{ date('Y-m-d') }}"
@@ -1140,7 +1452,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Technician Name</label>
                             <input type="text" name="technician_name" :value="selectedEquipment.vendor_name" placeholder="e.g. Ramesh"
@@ -1153,7 +1465,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Service Cost ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="cost" value="0.00"

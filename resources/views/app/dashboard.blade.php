@@ -1088,11 +1088,7 @@
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $exp->member?->phone }}</div>
                                     </td>
                                     <td class="py-2.5 px-3 text-slate-700 dark:text-slate-300 font-semibold">{{ $exp->plan?->name ?? 'Standard Plan' }}</td>
-                                    <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400">{{ \Carbon\Carbon::parse($exp->end_date)->format('d M Y') }}</td>
-                                    <td class="py-2.5 px-3">
-                                        @php $dl = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now())); @endphp
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400">
-                                            {{ $dl }}d
+                                    <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">{{ \Carbon\Carbon::parse($exp->end_date)->format('d M Y') }}</td>
                                     <td class="py-2.5 px-3 whitespace-nowrap">
                                         @php $dl = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay()))); @endphp
                                         <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 whitespace-nowrap inline-block">
