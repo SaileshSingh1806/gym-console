@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\TenantContext;
 use Database\Factories\UserFactory;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -65,6 +66,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Branch::class, 'branch_user');
     }
 
+    public function currentBranch(): ?Branch
+    {
+        return TenantContext::getBranch()
+            ?? $this->tenant?->mainBranch
+            ?? $this->tenant?->branches()->first();
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'role_user');
@@ -97,7 +105,8 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return in_array($this->role, ['gym_owner', 'gym_manager', 'receptionist', 'trainer', 'accountant', 'staff']);
+        return in_array($this->role, ['gym_owner', 'gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'])
+            || ($this->tenant_id && Role::where('tenant_id', $this->tenant_id)->where('name', $this->role)->exists());
     }
 
     public function hasPermission(string $permission): bool

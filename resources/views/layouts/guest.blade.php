@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-950 text-slate-100">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,7 +35,12 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        /* Immediate Critical Dark Mode Background */
+        html, body {
+            background-color: #020617 !important;
+            color: #f8fafc !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
         /* Sleek Transparent Scrollbar */
         * {
@@ -133,12 +138,18 @@
                 @auth
                     @if(auth()->user()->isSuperAdmin())
                         <a href="{{ route('admin.dashboard') }}" class="text-sm font-semibold px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Super Admin</a>
-                    @else
+                    @elseif(auth()->user()->tenant && auth()->user()->tenant->isSubscriptionActive())
                         <a href="{{ route('app.dashboard') }}" class="text-sm font-semibold px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Dashboard</a>
+                    @else
+                        <a href="{{ route('auth.checkout') }}" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">💳 Pay to Activate</a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">Sign Out</button>
+                        </form>
                     @endif
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Sign In</a>
-                    <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-orange-500/20">Start Free Trial</a>
+                    <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-orange-500/20">Get Started</a>
                 @endauth
             </div>
         </div>

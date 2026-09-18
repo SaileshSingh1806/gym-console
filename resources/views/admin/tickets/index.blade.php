@@ -2,75 +2,75 @@
 <div class="space-y-6">
 
     <!-- Top Header & Breadcrumbs -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
-            <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
                 <span>Support Helpdesk & Tickets</span>
                 @if($counts['open'] > 0)
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
                         {{ $counts['open'] }} Action Required
                     </span>
                 @endif
             </h1>
-            <p class="text-xs text-slate-400 mt-1">Manage and respond to support tickets submitted by gym owners and tenants across the platform.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Manage and respond to support tickets submitted by gym owners and tenants across the platform.</p>
         </div>
     </div>
 
     <!-- KPI Summary Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-6 gap-3">
-        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tickets</span>
-            <span class="text-2xl font-black text-white mt-1">{{ $counts['total'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between transition-colors">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tickets</span>
+            <span class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ $counts['total'] }}</span>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-900 border border-red-500/20 bg-gradient-to-b from-slate-900 to-red-950/20 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Open (Unresolved)</span>
-            <span class="text-2xl font-black text-red-400 mt-1">{{ $counts['open'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-red-500/30 flex flex-col justify-between shadow-xs transition-colors">
+            <span class="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">Open (Unresolved)</span>
+            <span class="text-2xl font-black text-red-600 dark:text-red-400 mt-1">{{ $counts['open'] }}</span>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-900 border border-amber-500/20 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">In Progress</span>
-            <span class="text-2xl font-black text-amber-400 mt-1">{{ $counts['in_progress'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-500/30 flex flex-col justify-between shadow-xs transition-colors">
+            <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">In Progress</span>
+            <span class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{{ $counts['in_progress'] }}</span>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-900 border border-indigo-500/20 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Answered</span>
-            <span class="text-2xl font-black text-indigo-400 mt-1">{{ $counts['answered'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-500/30 flex flex-col justify-between shadow-xs transition-colors">
+            <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Answered</span>
+            <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ $counts['answered'] }}</span>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-900 border border-teal-500/20 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider">Resolved / Closed</span>
-            <span class="text-2xl font-black text-teal-400 mt-1">{{ $counts['resolved'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-teal-500/30 flex flex-col justify-between shadow-xs transition-colors">
+            <span class="text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">Resolved / Closed</span>
+            <span class="text-2xl font-black text-teal-600 dark:text-teal-400 mt-1">{{ $counts['resolved'] }}</span>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-900 border border-rose-500/30 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Urgent Priority</span>
-            <span class="text-2xl font-black text-rose-400 mt-1">{{ $counts['urgent'] }}</span>
+        <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-rose-500/30 flex flex-col justify-between shadow-xs transition-colors">
+            <span class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Urgent Priority</span>
+            <span class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">{{ $counts['urgent'] }}</span>
         </div>
     </div>
 
     <!-- Filter Bar & Search Toolbar -->
-    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3 transition-colors">
         <!-- Status Tabs -->
         <div class="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold">
             <a href="{{ route('admin.tickets.index') }}" 
-               class="px-3 py-1.5 rounded-xl transition-colors {{ !request('status') || request('status') === 'all' ? 'bg-red-500 text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+               class="px-3 py-1.5 rounded-xl transition-colors {{ !request('status') || request('status') === 'all' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 All ({{ $counts['total'] }})
             </a>
             <a href="{{ route('admin.tickets.index', ['status' => 'open']) }}" 
-               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'open' ? 'bg-red-500 text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'open' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 Open ({{ $counts['open'] }})
             </a>
             <a href="{{ route('admin.tickets.index', ['status' => 'in_progress']) }}" 
-               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'in_progress' ? 'bg-red-500 text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'in_progress' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 In Progress ({{ $counts['in_progress'] }})
             </a>
             <a href="{{ route('admin.tickets.index', ['status' => 'answered']) }}" 
-               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'answered' ? 'bg-red-500 text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'answered' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 Answered ({{ $counts['answered'] }})
             </a>
             <a href="{{ route('admin.tickets.index', ['status' => 'resolved']) }}" 
-               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'resolved' ? 'bg-red-500 text-white font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+               class="px-3 py-1.5 rounded-xl transition-colors {{ request('status') === 'resolved' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 Resolved ({{ $counts['resolved'] }})
             </a>
         </div>
@@ -82,7 +82,7 @@
             @endif
 
             <!-- Gym Tenant Dropdown -->
-            <select name="tenant_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-semibold focus:border-red-500 focus:outline-none cursor-pointer">
+            <select name="tenant_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-300 text-xs font-semibold focus:border-red-500 focus:outline-none cursor-pointer">
                 <option value="">All Gyms / Tenants</option>
                 @foreach($gyms as $g)
                     <option value="{{ $g->id }}" {{ request('tenant_id') == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
@@ -90,7 +90,7 @@
             </select>
 
             <!-- Priority Dropdown -->
-            <select name="priority" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 text-xs font-semibold focus:border-red-500 focus:outline-none cursor-pointer">
+            <select name="priority" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-300 text-xs font-semibold focus:border-red-500 focus:outline-none cursor-pointer">
                 <option value="all">All Priorities</option>
                 <option value="urgent" {{ request('priority') === 'urgent' ? 'selected' : '' }}>Urgent</option>
                 <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>High</option>
@@ -101,62 +101,62 @@
             <!-- Search -->
             <div class="relative">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search ticket #, subject, gym..." 
-                       class="w-48 sm:w-60 pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-red-500 focus:outline-none">
-                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                       class="w-48 sm:w-60 pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none">
+                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
-            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors">
+            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer">
                 Search
             </button>
         </form>
     </div>
 
     <!-- Tickets Table -->
-    <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl">
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
-                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                        <th class="py-3.5 px-4">Ticket</th>
-                        <th class="py-3.5 px-4">Gym / Tenant</th>
-                        <th class="py-3.5 px-4">Subject & Details</th>
-                        <th class="py-3.5 px-4">Category</th>
-                        <th class="py-3.5 px-4">Priority</th>
-                        <th class="py-3.5 px-4">Status</th>
-                        <th class="py-3.5 px-4">Last Activity</th>
-                        <th class="py-3.5 px-4 text-right">Actions</th>
+                        <th class="py-3.5 px-4 font-semibold">Ticket</th>
+                        <th class="py-3.5 px-4 font-semibold">Gym / Tenant</th>
+                        <th class="py-3.5 px-4 font-semibold">Subject & Details</th>
+                        <th class="py-3.5 px-4 font-semibold">Category</th>
+                        <th class="py-3.5 px-4 font-semibold">Priority</th>
+                        <th class="py-3.5 px-4 font-semibold">Status</th>
+                        <th class="py-3.5 px-4 font-semibold">Last Activity</th>
+                        <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 font-medium">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium text-slate-700 dark:text-slate-300">
                     @forelse($tickets as $t)
-                    <tr class="hover:bg-slate-800/40 transition-colors {{ $t->priority === 'urgent' && in_array($t->status, ['open', 'in_progress']) ? 'bg-red-950/10' : '' }}">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors {{ $t->priority === 'urgent' && in_array($t->status, ['open', 'in_progress']) ? 'bg-red-50/50 dark:bg-red-950/10' : '' }}">
                         <!-- Ticket Number -->
                         <td class="py-3.5 px-4">
-                            <a href="{{ route('admin.tickets.show', $t->id) }}" class="font-mono text-xs font-bold text-red-400 hover:text-red-300">
+                            <a href="{{ route('admin.tickets.show', $t->id) }}" class="font-mono text-xs font-bold text-red-600 dark:text-red-400 hover:underline">
                                 {{ $t->ticket_number }}
                             </a>
-                            <span class="text-[10px] text-slate-500 block mt-0.5">{{ $t->created_at->format('d M, Y') }}</span>
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5">{{ $t->created_at->format('d M, Y') }}</span>
                         </td>
 
                         <!-- Gym / Tenant Info -->
                         <td class="py-3.5 px-4">
-                            <span class="font-bold text-white block">{{ $t->tenant->name ?? 'Deleted Gym' }}</span>
-                            <span class="text-[11px] text-slate-400 block">{{ $t->user->name ?? 'User' }} ({{ $t->user->email ?? '' }})</span>
+                            <span class="font-bold text-slate-900 dark:text-white block">{{ $t->tenant->name ?? 'Deleted Gym' }}</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">{{ $t->user->name ?? 'User' }} ({{ $t->user->email ?? '' }})</span>
                         </td>
 
                         <!-- Subject -->
                         <td class="py-3.5 px-4 max-w-xs">
-                            <a href="{{ route('admin.tickets.show', $t->id) }}" class="font-bold text-white hover:text-red-300 truncate block">
+                            <a href="{{ route('admin.tickets.show', $t->id) }}" class="font-bold text-slate-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 truncate block">
                                 {{ $t->subject }}
                             </a>
-                            <p class="text-[11px] text-slate-400 truncate mt-0.5">
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
                                 {{ $t->latestReply->message ?? 'No messages' }}
                             </p>
                         </td>
 
                         <!-- Category -->
                         <td class="py-3.5 px-4">
-                            <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono text-[10px] uppercase font-semibold">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px] uppercase font-semibold border border-slate-200 dark:border-slate-700">
                                 {{ str_replace('_', ' ', $t->category) }}
                             </span>
                         </td>
@@ -176,10 +176,10 @@
                         </td>
 
                         <!-- Last Activity -->
-                        <td class="py-3.5 px-4 text-[11px] text-slate-400">
+                        <td class="py-3.5 px-4 text-[11px] text-slate-500 dark:text-slate-400">
                             <span>{{ $t->last_reply_at ? $t->last_reply_at->diffForHumans() : $t->created_at->diffForHumans() }}</span>
                             @if($t->lastReplyBy)
-                                <span class="text-[9px] text-slate-500 block">by {{ $t->lastReplyBy->name }}</span>
+                                <span class="text-[9px] text-slate-400 dark:text-slate-500 block">by {{ $t->lastReplyBy->name }}</span>
                             @endif
                         </td>
 
@@ -187,7 +187,7 @@
                         <td class="py-3.5 px-4 text-right">
                             <div class="flex items-center justify-end gap-1.5">
                                 <a href="{{ route('admin.tickets.show', $t->id) }}" 
-                                   class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold transition-colors inline-flex items-center gap-1">
+                                   class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold transition-colors inline-flex items-center gap-1">
                                     <span>Manage</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>
@@ -200,7 +200,7 @@
                                       class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" title="Delete Ticket" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors">
+                                    <button type="submit" title="Delete Ticket" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-rose-500/20 transition-colors cursor-pointer">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </form>
@@ -209,7 +209,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="py-12 px-4 text-center text-slate-500">
+                        <td colspan="8" class="py-12 px-4 text-center text-slate-400 dark:text-slate-500">
                             No support tickets matching the filter criteria.
                         </td>
                     </tr>
@@ -219,7 +219,7 @@
         </div>
 
         @if($tickets->hasPages())
-            <div class="p-3.5 border-t border-slate-800 bg-slate-950/40">
+            <div class="p-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
                 {{ $tickets->links() }}
             </div>
         @endif

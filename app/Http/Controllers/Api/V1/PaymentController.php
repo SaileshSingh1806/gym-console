@@ -14,7 +14,11 @@ class PaymentController extends Controller
     {
         $query = MemberPayment::with(['member', 'receivedBy']);
 
-        if ($request->member_id) {
+        if ($request->user()->role === 'member') {
+            $query->whereHas('member', function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id);
+            });
+        } elseif ($request->member_id) {
             $query->where('member_id', $request->member_id);
         }
 

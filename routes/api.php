@@ -24,19 +24,19 @@ Route::prefix('v1')->group(function () {
         Route::get('/profile', [AuthController::class, 'me']);
 
         // Member Management
-        Route::get('/members', [MemberController::class, 'index']);
+        Route::middleware('role:super_admin,gym_owner,gym_manager,receptionist,accountant,staff,trainer')->get('/members', [MemberController::class, 'index']);
         Route::get('/members/{id}', [MemberController::class, 'show']);
-        Route::post('/members', [MemberController::class, 'store']);
+        Route::middleware('role:super_admin,gym_owner,gym_manager,receptionist,staff')->post('/members', [MemberController::class, 'store']);
 
         // Memberships & Billing
         Route::get('/memberships', [MembershipController::class, 'index']);
         Route::get('/memberships/{id}', [MembershipController::class, 'show']);
-        Route::get('/payments', [PaymentController::class, 'index']);
+        Route::middleware('role:super_admin,gym_owner,gym_manager,receptionist,accountant,member')->get('/payments', [PaymentController::class, 'index']);
 
         // Attendance
         Route::get('/attendance', [AttendanceController::class, 'index']);
         Route::post('/attendance/qr-scan', [AttendanceController::class, 'qrScan']);
-        Route::get('/attendance/summary', [AttendanceController::class, 'todaySummary']);
+        Route::middleware('role:super_admin,gym_owner,gym_manager,receptionist,accountant,trainer,staff')->get('/attendance/summary', [AttendanceController::class, 'todaySummary']);
 
         // Workouts & Diets
         Route::get('/workouts', [WorkoutController::class, 'index']);

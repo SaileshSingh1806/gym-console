@@ -63,6 +63,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -266,6 +267,7 @@ class AppController extends Controller
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'phone' => 'required|string|max:30',
+            'phone' => ['required', 'string', 'max:30', Rule::unique('members', 'phone')->where('tenant_id', $tenant?->id)],
             'alternate_phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:150',
             'gender' => 'nullable|in:male,female,other,Male,Female,Other',
@@ -479,12 +481,14 @@ class AppController extends Controller
 
     public function updateMember(Request $request, int $id): RedirectResponse
     {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $member = Member::with('activeMembership')->findOrFail($id);
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'phone' => 'required|string|max:30',
+            'phone' => ['required', 'string', 'max:30', Rule::unique('members', 'phone')->where('tenant_id', $tenant?->id ?? $member->tenant_id)->ignore($member->id)],
             'alternate_phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:150',
             'gender' => 'nullable|in:male,female,other,Male,Female,Other',
@@ -711,6 +715,17 @@ class AppController extends Controller
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $payment = MemberPayment::with(['member.branch', 'membership.plan', 'receivedBy'])->findOrFail($id);
+        $user = auth()->user();
+
+        if ($user->role === 'member' && $payment->member?->user_id !== $user->id) {
+            abort(403, 'Unauthorized to view this invoice.');
+        }
+
+        if (in_array($user->role, ['trainer', 'staff'])) {
+            // Unless staff user is admin/receptionist/accountant/manager/owner, deny invoice access
+            abort(403, 'Unauthorized to view invoices.');
+        }
+
         $member = $payment->member;
         $membership = $payment->membership ?? $member->activeMembership ?? $member->memberships()->latest()->first();
         $plan = $membership?->plan;
@@ -2455,6 +2470,14 @@ class AppController extends Controller
 
         $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
 
+        $goalInput = strtolower(str_replace(' ', '_', (string) ($validated['goal'] ?? 'general_fitness')));
+        $validGoals = ['weight_loss', 'muscle_gain', 'endurance', 'general_fitness', 'flexibility'];
+        $goal = in_array($goalInput, $validGoals) ? $goalInput : 'general_fitness';
+
+        $levelInput = strtolower(str_replace(' ', '_', (string) ($validated['level'] ?? 'beginner')));
+        $validLevels = ['beginner', 'intermediate', 'advanced'];
+        $level = in_array($levelInput, $validLevels) ? $levelInput : 'beginner';
+
         $workout = WorkoutPlan::create([
             'tenant_id' => $tenant->id,
             'member_id' => $isTemplate ? null : ($validated['member_id'] ?? null),
@@ -2462,6 +2485,8 @@ class AppController extends Controller
             'title' => $validated['title'],
             'goal' => $validated['goal'] ?? 'General Fitness',
             'level' => $validated['level'] ?? 'Beginner',
+            'goal' => $goal,
+            'level' => $level,
             'start_date' => $validated['start_date'] ?? null,
             'end_date' => $validated['end_date'] ?? null,
             'is_template' => $isTemplate,
@@ -2470,11 +2495,16 @@ class AppController extends Controller
 
         if (! empty($validated['exercises']) && is_array($validated['exercises'])) {
             $order = 1;
+            $validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7'];
             foreach ($validated['exercises'] as $ex) {
                 if (! empty($ex['exercise_name'])) {
+                    $dayInput = strtolower(str_replace(' ', '_', (string) ($ex['day'] ?? 'day_1')));
+                    $day = in_array($dayInput, $validDays) ? $dayInput : 'day_1';
+
                     WorkoutExercise::create([
                         'workout_plan_id' => $workout->id,
                         'day' => $ex['day'] ?? 'Day 1',
+                        'day' => $day,
                         'exercise_name' => $ex['exercise_name'],
                         'sets' => $ex['sets'] ?? 3,
                         'reps' => $ex['reps'] ?? '10-12',
@@ -3370,6 +3400,15 @@ class AppController extends Controller
         if ($amount > 0) {
             $activeMembership = $member->activeMembership;
             $defaultPlan = MembershipPlan::where('tenant_id', $tenant->id)->first();
+            $defaultPlan = MembershipPlan::where('tenant_id', $tenant->id)->first() ?? MembershipPlan::create([
+                'tenant_id' => $tenant->id,
+                'branch_id' => $branchId,
+                'name' => 'General Membership',
+                'price' => $amount > 0 ? $amount : 1000,
+                'duration_type' => 'months',
+                'duration_value' => 1,
+                'is_active' => true,
+            ]);
             $durationDays = match ($defaultPlan?->duration_type) {
                 'days' => (int) ($defaultPlan->duration_value ?: 30),
                 'months' => (int) ($defaultPlan->duration_value ?: 1) * 30,
@@ -4587,7 +4626,23 @@ class AppController extends Controller
             'staff' => $this->featureGateService->checkQuota($tenant, 'staff'),
         ];
 
-        return view('app.subscription.index', compact('tenant', 'subscription', 'plans', 'invoices', 'payments', 'quotas'));
+        $user = auth()->user();
+        $razorpayKeyId = Setting::getGlobal('razorpay_key_id', config('services.razorpay.key', env('RAZORPAY_KEY', 'rzp_test_samplekey123')));
+        $razorpayConfig = [
+            'key' => $razorpayKeyId,
+            'currency' => $tenant->currency ?? 'INR',
+            'name' => Setting::getGlobal('app_name', 'Gym Console'),
+            'prefill' => [
+                'name' => $user?->name ?? 'Gym Owner',
+                'email' => $user?->email ?? '',
+                'contact' => $user?->phone ?? ($tenant->phone ?? ''),
+            ],
+            'theme' => [
+                'color' => '#f59e0b',
+            ],
+        ];
+
+        return view('app.subscription.index', compact('tenant', 'subscription', 'plans', 'invoices', 'payments', 'quotas', 'razorpayConfig'));
     }
 
     public function validateCoupon(Request $request)
@@ -4644,6 +4699,9 @@ class AppController extends Controller
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'required|in:monthly,yearly',
             'coupon_code' => 'nullable|string|max:30',
+            'razorpay_payment_id' => 'nullable|string|max:100',
+            'razorpay_order_id' => 'nullable|string|max:100',
+            'razorpay_signature' => 'nullable|string|max:255',
         ]);
 
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -4668,20 +4726,35 @@ class AppController extends Controller
             }
         }
 
+        // Require Razorpay payment if plan is not free ($finalPrice > 0)
+        if ($finalPrice > 0 && empty($request->razorpay_payment_id)) {
+            return back()->with('error', 'Razorpay payment verification failed. No plan upgrade was made without payment confirmation.');
+        }
+
+        $transactionId = $request->razorpay_payment_id ?: ('FREE-'.strtoupper(Str::random(10)));
+        $gatewayName = $finalPrice > 0 ? 'razorpay' : 'free';
+
         $this->subscriptionService->activateSubscription(
             $tenant,
             $plan,
             $request->billing_cycle,
-            'manual_online',
-            'TXN-UPG-'.strtoupper(Str::random(10)),
+            $gatewayName,
+            $transactionId,
             (float) $finalPrice,
-            ['upgraded_from_web' => true, 'coupon_code' => $coupon?->code],
+            [
+                'upgraded_from_portal' => true,
+                'coupon_code' => $coupon?->code,
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_order_id' => $request->razorpay_order_id,
+                'razorpay_signature' => $request->razorpay_signature,
+                'verified_at' => now()->toIso8601String(),
+            ],
             $coupon,
             $discountAmount
         );
 
         $currency = $tenant->currency_symbol ?? '₹';
-        $msg = "Plan activated for {$plan->name} successfully!";
+        $msg = "Congratulations! Your {$plan->name} SaaS subscription has been activated successfully via ".($finalPrice > 0 ? 'Razorpay' : 'Free tier').'!';
         if ($coupon && $discountAmount > 0) {
             $msg .= " (Coupon '{$coupon->code}' applied: saved {$currency}".number_format($discountAmount, 2).')';
         }
@@ -5140,11 +5213,16 @@ class AppController extends Controller
             return back()->with('error', "Staff limit reached ({$staffQuota['limit']} Staff/Trainers allowed on your current plan). Please upgrade your subscription to add more staff.")->withInput();
         }
 
+        $allowedRoles = array_unique(array_merge(
+            ['gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'],
+            Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
+        ));
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|email|max:150|unique:users,email',
             'phone' => 'required|string|max:30',
-            'role' => 'required|string|in:gym_manager,receptionist,trainer,accountant,staff',
+            'role' => ['required', 'string', Rule::in($allowedRoles)],
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',
             'can_login' => 'nullable|boolean',
             'password' => 'nullable|string|min:6',
@@ -5222,6 +5300,12 @@ class AppController extends Controller
             $user->branches()->sync($validated['branches']);
         }
 
+        // Sync role_user pivot
+        $roleModel = Role::where('tenant_id', $tenant->id)->where('name', $validated['role'])->first();
+        if ($roleModel) {
+            $user->roles()->sync([$roleModel->id]);
+        }
+
         // If trainer role, auto-create or link Trainer record
         if ($validated['role'] === 'trainer') {
             $nameParts = explode(' ', $validated['name'], 2);
@@ -5275,11 +5359,16 @@ class AppController extends Controller
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
 
+        $allowedRoles = array_unique(array_merge(
+            ['gym_owner', 'gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'],
+            Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
+        ));
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|email|max:150|unique:users,email,'.$user->id,
             'phone' => 'required|string|max:30',
-            'role' => 'required|string|in:gym_owner,gym_manager,receptionist,trainer,accountant,staff',
+            'role' => ['required', 'string', Rule::in($allowedRoles)],
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED',
             'can_login' => 'nullable|boolean',
             'password' => 'nullable|string|min:6',
@@ -5350,6 +5439,12 @@ class AppController extends Controller
 
         if (isset($validated['branches'])) {
             $user->branches()->sync($validated['branches']);
+        }
+
+        // Sync role_user pivot
+        $roleModel = Role::where('tenant_id', $tenant->id)->where('name', $validated['role'])->first();
+        if ($roleModel) {
+            $user->roles()->sync([$roleModel->id]);
         }
 
         // Sync linked Trainer if user is a trainer

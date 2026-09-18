@@ -23,11 +23,15 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || $user->isGymOwner()) {
             return $next($request);
         }
 
         if (in_array($user->role, $roles)) {
+            return $next($request);
+        }
+
+        if ((in_array('staff', $roles) || in_array('receptionist', $roles)) && $user->isStaff()) {
             return $next($request);
         }
 

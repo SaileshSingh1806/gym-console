@@ -7,11 +7,13 @@ use App\Models\ActivityLog;
 use App\Models\Branch;
 use App\Models\Plan;
 use App\Models\Role;
+use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class TenantService
@@ -29,7 +31,7 @@ class TenantService
                 $slug .= '-'.Str::lower(Str::random(4));
             }
 
-            $resolvedStatus = in_array($status, ['ACTIVE', 'TRIAL', 'SUSPENDED']) ? $status : 'TRIAL';
+            $resolvedStatus = in_array($status, ['ACTIVE', 'TRIAL', 'SUSPENDED', 'PENDING_PAYMENT']) ? $status : 'PENDING_PAYMENT';
             $resolvedCycle = in_array(strtolower($billingCycle), ['monthly', 'yearly']) ? strtolower($billingCycle) : (isset($data['billing_cycle']) && in_array(strtolower($data['billing_cycle']), ['monthly', 'yearly']) ? strtolower($data['billing_cycle']) : 'yearly');
 
             $tenant = Tenant::create([
@@ -95,6 +97,16 @@ class TenantService
                 );
             } elseif ($resolvedStatus === 'TRIAL') {
                 $subscription = $this->subscriptionService->setTenantTrial($tenant, $plan, $trialEndsAt);
+            } elseif ($resolvedStatus === 'PENDING_PAYMENT') {
+                $subscription = Subscription::create([
+                    'tenant_id' => $tenant->id,
+                    'plan_id' => $plan->id,
+                    'billing_cycle' => $resolvedCycle,
+                    'status' => 'PENDING',
+                    'starts_at' => now(),
+                    'ends_at' => null,
+                    'gateway_name' => 'razorpay',
+                ]);
             } else {
                 $subscription = $this->subscriptionService->setTenantTrial($tenant, $plan, $trialEndsAt);
                 $subscription->update(['status' => $resolvedStatus]);
@@ -155,5 +167,110 @@ class TenantService
                 ['display_name' => $r['display_name'], 'description' => $r['description'], 'is_system' => true]
             );
         }
+    }
+
+    public function purgeTenantPermanently(int $tenantId): bool
+    {
+        return DB::transaction(function () use ($tenantId) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            $userIds = DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->pluck('id')->toArray();
+            $userEmails = DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->pluck('email')->toArray();
+            $roleIds = DB::table('roles')->where('tenant_id', $tenantId)->pluck('id')->toArray();
+            $branchIds = DB::table('branches')->where('tenant_id', $tenantId)->pluck('id')->toArray();
+            $workoutPlanIds = DB::table('workout_plans')->where('tenant_id', $tenantId)->pluck('id')->toArray();
+            $dietPlanIds = DB::table('diet_plans')->where('tenant_id', $tenantId)->pluck('id')->toArray();
+            $supportTicketIds = Schema::hasTable('support_tickets')
+                ? DB::table('support_tickets')->where('tenant_id', $tenantId)->pluck('id')->toArray()
+                : [];
+            $equipmentIds = Schema::hasTable('gym_equipment')
+                ? DB::table('gym_equipment')->where('tenant_id', $tenantId)->pluck('id')->toArray()
+                : [];
+            $inventoryItemIds = Schema::hasTable('inventory_items')
+                ? DB::table('inventory_items')->where('tenant_id', $tenantId)->pluck('id')->toArray()
+                : [];
+
+            // 1. Pivot and child relationships
+            if (! empty($roleIds)) {
+                if (Schema::hasTable('permission_role')) {
+                    DB::table('permission_role')->whereIn('role_id', $roleIds)->delete();
+                }
+                if (Schema::hasTable('role_user')) {
+                    DB::table('role_user')->whereIn('role_id', $roleIds)->delete();
+                }
+            }
+
+            if (! empty($userIds)) {
+                if (Schema::hasTable('branch_user')) {
+                    DB::table('branch_user')->whereIn('user_id', $userIds)->delete();
+                }
+                if (Schema::hasTable('role_user')) {
+                    DB::table('role_user')->whereIn('user_id', $userIds)->delete();
+                }
+                if (Schema::hasTable('personal_access_tokens')) {
+                    DB::table('personal_access_tokens')->where('tokenable_type', 'App\\Models\\User')->whereIn('tokenable_id', $userIds)->delete();
+                }
+                if (Schema::hasTable('sessions')) {
+                    DB::table('sessions')->whereIn('user_id', $userIds)->delete();
+                }
+            }
+
+            if (! empty($userEmails) && Schema::hasTable('password_reset_tokens')) {
+                DB::table('password_reset_tokens')->whereIn('email', $userEmails)->delete();
+            }
+
+            if (! empty($branchIds) && Schema::hasTable('branch_user')) {
+                DB::table('branch_user')->whereIn('branch_id', $branchIds)->delete();
+            }
+
+            if (! empty($workoutPlanIds) && Schema::hasTable('workout_exercises')) {
+                DB::table('workout_exercises')->whereIn('workout_plan_id', $workoutPlanIds)->delete();
+            }
+
+            if (! empty($dietPlanIds) && Schema::hasTable('diet_meals')) {
+                DB::table('diet_meals')->whereIn('diet_plan_id', $dietPlanIds)->delete();
+            }
+
+            if (! empty($supportTicketIds) && Schema::hasTable('support_ticket_replies')) {
+                DB::table('support_ticket_replies')->whereIn('support_ticket_id', $supportTicketIds)->delete();
+            }
+
+            if (! empty($equipmentIds) && Schema::hasTable('equipment_maintenance_logs')) {
+                DB::table('equipment_maintenance_logs')->whereIn('gym_equipment_id', $equipmentIds)->delete();
+            }
+
+            if (! empty($inventoryItemIds) && Schema::hasTable('inventory_logs')) {
+                DB::table('inventory_logs')->whereIn('inventory_item_id', $inventoryItemIds)->delete();
+            }
+
+            // 2. Purge across all database tables having a 'tenant_id' column
+            $dbName = DB::getDatabaseName();
+            $tablesWithTenantId = DB::select(
+                "SELECT TABLE_NAME FROM information_schema.columns WHERE TABLE_SCHEMA = ? AND COLUMN_NAME = 'tenant_id' AND TABLE_NAME != 'tenants'",
+                [$dbName]
+            );
+
+            foreach ($tablesWithTenantId as $row) {
+                $tableName = $row->TABLE_NAME;
+                if (Schema::hasTable($tableName)) {
+                    DB::table($tableName)->where('tenant_id', $tenantId)->delete();
+                }
+            }
+
+            // 3. Delete non-super_admin users of this tenant
+            DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->delete();
+
+            // 4. Clean activity logs where tenant was the subject
+            if (Schema::hasTable('activity_logs')) {
+                DB::table('activity_logs')->where('subject_type', 'App\\Models\\Tenant')->where('subject_id', $tenantId)->delete();
+            }
+
+            // 5. Delete tenant record permanently
+            DB::table('tenants')->where('id', $tenantId)->delete();
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return true;
+        });
     }
 }

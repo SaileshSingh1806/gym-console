@@ -34,7 +34,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::get('/dashboard', [AppController::class, 'dashboard'])->name('app.dashboard');
 
     // 1. Members Management
-    Route::middleware('feature:members_management')->group(function () {
+    Route::middleware(['feature:members_management', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant,staff,trainer'])->group(function () {
         Route::get('/members', [AppController::class, 'members'])->name('app.members.index');
         Route::get('/members/create', [AppController::class, 'createMember'])->name('app.members.create');
         Route::get('/members/lookup-phone', [AppController::class, 'lookupMemberPhone'])->name('app.members.lookup-phone');
@@ -42,16 +42,18 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/members/{id}/edit', [AppController::class, 'editMember'])->name('app.members.edit');
         Route::post('/members', [AppController::class, 'storeMember'])->name('app.members.store');
         Route::post('/members/{id}', [AppController::class, 'updateMember'])->name('app.members.update');
-        Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete');
+        Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete')->middleware('role:super_admin,gym_owner');
         Route::post('/members/{id}/collect-fee', [AppController::class, 'collectMemberFee'])->name('app.members.collect-fee');
         Route::post('/members/{id}/freeze', [AppController::class, 'toggleFreezeMember'])->name('app.members.freeze');
         Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription');
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package');
-        Route::post('/members/{id}/measurements', [AppController::class, 'storeMemberMeasurement'])->name('app.members.store-measurement');
     });
 
+    // Member Measurements (Available to Trainers, Staff, and Members)
+    Route::middleware('feature:members_management')->post('/members/{id}/measurements', [AppController::class, 'storeMemberMeasurement'])->name('app.members.store-measurement');
+
     // 2. Memberships & Billing
-    Route::middleware('feature:memberships_billing')->group(function () {
+    Route::middleware(['feature:memberships_billing', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant'])->group(function () {
         Route::get('/memberships', [AppController::class, 'memberships'])->name('app.memberships.index');
         Route::post('/membership-plans', [AppController::class, 'storeMembershipPlan'])->name('app.membership-plans.store');
         Route::post('/membership-plans/{id}', [AppController::class, 'updateMembershipPlan'])->name('app.membership-plans.update');
@@ -59,13 +61,13 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // 3. Payments & POS
-    Route::middleware('feature:payments_pos')->group(function () {
+    Route::middleware(['feature:payments_pos', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant'])->group(function () {
         Route::get('/payments', [AppController::class, 'payments'])->name('app.payments.index');
         Route::post('/payments', [AppController::class, 'storePayment'])->name('app.payments.store');
-        Route::post('/payments/{id}/reverse', [AppController::class, 'reversePayment'])->name('app.payments.reverse');
+        Route::post('/payments/{id}/reverse', [AppController::class, 'reversePayment'])->name('app.payments.reverse')->middleware('role:super_admin,gym_owner,gym_manager');
         Route::post('/payments/{id}/send-email', [AppController::class, 'sendPaymentReceipt'])->name('app.payments.send-email');
-        Route::get('/invoices/{id}', [AppController::class, 'showInvoice'])->name('app.invoices.show');
     });
+    Route::middleware('feature:payments_pos')->get('/invoices/{id}', [AppController::class, 'showInvoice'])->name('app.invoices.show');
 
     // 4. Attendance
     Route::middleware('feature:attendance_checkin')->group(function () {
@@ -90,7 +92,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // 6. Trainers
-    Route::middleware('feature:trainers_management')->group(function () {
+    Route::middleware(['feature:trainers_management', 'role:super_admin,gym_owner,gym_manager'])->group(function () {
         Route::get('/trainers', [AppController::class, 'trainers'])->name('app.trainers.index');
         Route::post('/trainers', [AppController::class, 'storeTrainer'])->name('app.trainers.store');
         Route::post('/trainers/{id}', [AppController::class, 'updateTrainer'])->name('app.trainers.update');
@@ -139,7 +141,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // 11. CRM & Leads Suite
-    Route::middleware('feature:crm_leads')->group(function () {
+    Route::middleware(['feature:crm_leads', 'role:super_admin,gym_owner,gym_manager,receptionist,staff'])->group(function () {
         Route::get('/crm', [AppController::class, 'crmDashboard'])->name('app.crm.index');
         Route::get('/crm/dashboard', [AppController::class, 'crmDashboard'])->name('app.crm.dashboard');
         Route::get('/crm/leads', [AppController::class, 'leads'])->name('app.crm.leads');
@@ -166,59 +168,63 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // 12. Report & Finance
-    Route::middleware('feature:reports_finance')->group(function () {
+    Route::middleware(['feature:reports_finance', 'role:super_admin,gym_owner,gym_manager,accountant'])->group(function () {
         Route::get('/finance/member-report', [AppController::class, 'expenseReport'])->name('app.finance.member-report');
         Route::get('/finance/member-report/pdf', [AppController::class, 'memberReportPdf'])->name('app.finance.member-report.pdf');
         Route::get('/finance/expense-report', [AppController::class, 'expenseReport'])->name('app.finance.expense-report');
         Route::get('/finance/expense-report/pdf', [AppController::class, 'memberReportPdf'])->name('app.finance.expense-report.pdf');
         Route::get('/reports', [AppController::class, 'expenseReport'])->name('app.reports.index');
-        Route::get('/finance/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.finance.balance-sheet');
-        Route::get('/finance/balance-sheet/pdf', [AppController::class, 'balanceSheetPdf'])->name('app.finance.balance-sheet.pdf');
-        Route::get('/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.balance-sheet.index');
         Route::get('/expenses', [AppController::class, 'expenses'])->name('app.expenses.index');
         Route::post('/expenses', [AppController::class, 'storeExpense'])->name('app.expenses.store');
         Route::delete('/expenses/{id}', [AppController::class, 'deleteExpense'])->name('app.expenses.delete')->whereNumber('id');
         Route::post('/expenses/categories', [AppController::class, 'storeExpenseCategory'])->name('app.expenses.categories.store');
     });
 
+    Route::middleware(['feature:reports_finance', 'role:super_admin,gym_owner,accountant'])->group(function () {
+        Route::get('/finance/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.finance.balance-sheet');
+        Route::get('/finance/balance-sheet/pdf', [AppController::class, 'balanceSheetPdf'])->name('app.finance.balance-sheet.pdf');
+        Route::get('/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.balance-sheet.index');
+    });
+
     // 13 & 14. Inventory & Equipment Maintenance
-    Route::middleware('feature:inventory_stock,equipment_maintenance')->group(function () {
+    Route::middleware(['feature:inventory_stock,equipment_maintenance', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant,staff'])->group(function () {
         Route::get('/inventory', [AppController::class, 'inventory'])->name('app.inventory.index');
     });
 
-    Route::middleware('feature:inventory_stock')->group(function () {
+    Route::middleware(['feature:inventory_stock', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant,staff'])->group(function () {
         Route::post('/inventory/items', [AppController::class, 'storeInventoryItem'])->name('app.inventory.items.store');
         Route::post('/inventory/items/{id}', [AppController::class, 'updateInventoryItem'])->name('app.inventory.items.update')->whereNumber('id');
         Route::post('/inventory/items/{id}/adjust', [AppController::class, 'adjustInventoryStock'])->name('app.inventory.items.adjust')->whereNumber('id');
         Route::delete('/inventory/items/{id}', [AppController::class, 'deleteInventoryItem'])->name('app.inventory.items.delete')->whereNumber('id');
     });
 
-    Route::middleware('feature:equipment_maintenance')->group(function () {
+    Route::middleware(['feature:equipment_maintenance', 'role:super_admin,gym_owner,gym_manager,receptionist,accountant,staff'])->group(function () {
         Route::post('/inventory/equipment', [AppController::class, 'storeEquipment'])->name('app.inventory.equipment.store');
         Route::post('/inventory/equipment/{id}', [AppController::class, 'updateEquipment'])->name('app.inventory.equipment.update')->whereNumber('id');
         Route::post('/inventory/equipment/{id}/maintenance', [AppController::class, 'recordEquipmentMaintenance'])->name('app.inventory.equipment.maintenance.store')->whereNumber('id');
         Route::delete('/inventory/equipment/{id}', [AppController::class, 'deleteEquipment'])->name('app.inventory.equipment.delete')->whereNumber('id');
     });
 
-    // 15. Hikvision IoT & Devices
     // 15. Biometric & IoT Devices
-    Route::middleware('feature:hikvision_iot')->group(function () {
+    Route::middleware(['feature:hikvision_iot', 'role:super_admin,gym_owner,gym_manager'])->group(function () {
         Route::get('/devices', [AppController::class, 'devices'])->name('app.devices.index');
         Route::post('/devices', [AppController::class, 'storeDevice'])->name('app.devices.store');
-        Route::post('/devices/{id}/test', [AppController::class, 'testDevice'])->name('app.devices.test');
         Route::post('/devices/{id}/test', [AppController::class, 'testDevice'])->name('app.devices.test')->whereNumber('id');
         Route::delete('/devices/{id}', [AppController::class, 'deleteDevice'])->name('app.devices.delete')->whereNumber('id');
     });
 
-    // 16. Staff & Roles Management
-    Route::middleware('feature:staff_roles')->group(function () {
+    // 16. Staff Management (Owner Only)
+    Route::middleware(['feature:staff_roles', 'role:super_admin,gym_owner'])->group(function () {
         Route::get('/staff', [AppController::class, 'staff'])->name('app.staff.index');
         Route::post('/staff', [AppController::class, 'storeStaff'])->name('app.staff.store');
         Route::post('/staff/{id}', [AppController::class, 'updateStaff'])->name('app.staff.update');
         Route::delete('/staff/{id}', [AppController::class, 'deleteStaff'])->name('app.staff.delete');
         Route::post('/staff/{id}/toggle-status', [AppController::class, 'toggleStaffStatus'])->name('app.staff.toggle-status');
         Route::post('/staff/{id}/reset-password', [AppController::class, 'resetStaffPassword'])->name('app.staff.reset-password');
+    });
 
+    // 17. Roles & Permissions Management (Owner Only)
+    Route::middleware(['feature:staff_roles', 'role:super_admin,gym_owner'])->group(function () {
         Route::get('/roles', [AppController::class, 'roles'])->name('app.roles.index');
         Route::post('/roles', [AppController::class, 'storeRole'])->name('app.roles.store');
         Route::post('/roles/matrix', [AppController::class, 'updatePermissionMatrix'])->name('app.roles.matrix.update');
@@ -238,15 +244,20 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::post('/support/{id}/reply', [AppController::class, 'replySupportTicket'])->name('app.support.reply')->whereNumber('id');
     Route::post('/support/{id}/close', [AppController::class, 'closeSupportTicket'])->name('app.support.close')->whereNumber('id');
 
-    // Settings & Branch Management
-    Route::get('/settings', [AppController::class, 'settings'])->name('app.settings.index');
-    Route::post('/settings', [AppController::class, 'updateSettings'])->name('app.settings.update');
-    Route::post('/settings/email/test', [AppController::class, 'sendGymTestEmail'])->name('app.settings.email.test');
+    // Settings (Owner Only)
+    Route::middleware('role:super_admin,gym_owner')->group(function () {
+        Route::get('/settings', [AppController::class, 'settings'])->name('app.settings.index');
+        Route::post('/settings', [AppController::class, 'updateSettings'])->name('app.settings.update');
+        Route::post('/settings/email/test', [AppController::class, 'sendGymTestEmail'])->name('app.settings.email.test');
+    });
 
-    Route::get('/branches', [AppController::class, 'branches'])->name('app.branches.index');
-    Route::post('/branches', [AppController::class, 'storeBranch'])->name('app.branches.store');
-    Route::post('/branches/{id}', [AppController::class, 'updateBranch'])->name('app.branches.update')->whereNumber('id');
-    Route::delete('/branches/{id}', [AppController::class, 'deleteBranch'])->name('app.branches.delete')->whereNumber('id');
+    // Branches (Owner Only)
+    Route::middleware('role:super_admin,gym_owner')->group(function () {
+        Route::get('/branches', [AppController::class, 'branches'])->name('app.branches.index');
+        Route::post('/branches', [AppController::class, 'storeBranch'])->name('app.branches.store');
+        Route::post('/branches/{id}', [AppController::class, 'updateBranch'])->name('app.branches.update')->whereNumber('id');
+        Route::delete('/branches/{id}', [AppController::class, 'deleteBranch'])->name('app.branches.delete')->whereNumber('id');
+    });
     Route::post('/branches/{id}/switch', [AppController::class, 'switchBranch'])->name('app.branches.switch')->whereNumber('id');
 });
 
@@ -284,8 +295,8 @@ Route::prefix('admin')->middleware(['auth', 'role:super_admin'])->group(function
 
     // Subscriptions & Manual Payments
     Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('admin.subscriptions');
-    Route::post('/subscriptions/{id}', [AdminController::class, 'updateSubscription'])->name('admin.subscriptions.update');
     Route::post('/subscriptions/manual-payment', [AdminController::class, 'recordManualPayment'])->name('admin.subscriptions.manual-payment');
+    Route::post('/subscriptions/{id}', [AdminController::class, 'updateSubscription'])->name('admin.subscriptions.update')->whereNumber('id');
 
     // Users
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
@@ -306,4 +317,5 @@ Route::prefix('admin')->middleware(['auth', 'role:super_admin'])->group(function
     Route::post('/settings/seo', [AdminController::class, 'updateSeoSettings'])->name('admin.settings.seo');
     Route::post('/settings/ai', [AdminController::class, 'updateAiSettings'])->name('admin.settings.ai');
     Route::post('/settings/gemini/test', [AdminController::class, 'testAdminGeminiConnection'])->name('admin.settings.gemini.test');
+    Route::post('/settings/password', [AdminController::class, 'updatePassword'])->name('admin.settings.password');
 });

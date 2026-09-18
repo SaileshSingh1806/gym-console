@@ -13,20 +13,10 @@ class SuperAdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'singhshailesh79@gmail.com'],
             [
-                'name' => 'Shailesh Singh',
+                'name' => 'GymConsole',
                 'role' => 'super_admin',
                 'status' => 'ACTIVE',
-                'password' => Hash::make('password'),
-            ]
-        );
-
-        User::updateOrCreate(
-            ['email' => 'admin@gymconsole.com'],
-            [
-                'name' => 'SaaS Super Admin',
-                'role' => 'super_admin',
-                'status' => 'ACTIVE',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Admin@123'),
             ]
         );
     }

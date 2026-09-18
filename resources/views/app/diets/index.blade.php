@@ -2,31 +2,31 @@
     <div class="space-y-6">
         <!-- Success / Error Notifications -->
         @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1">✕</button>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-between shadow-sm">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('error') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1">✕</button>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm">
                 <div class="font-bold text-xs mb-1">Please fix the following issues:</div>
                 <ul class="list-disc pl-5 text-xs space-y-0.5">
                     @foreach($errors->all() as $error)
@@ -39,10 +39,10 @@
         <!-- Top Header & Main Actions -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl font-black text-white tracking-tight flex items-center gap-2.5">
+                <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
                     <span>🥗 Diet & Nutrition</span>
                 </h2>
-                <p class="text-xs text-slate-400 mt-1">Design customized member diet regimes, track macro splits, and dispatch clean nutrition.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Design customized member diet regimes, track macro splits, and dispatch clean nutrition.</p>
             </div>
 
             <div class="flex items-center gap-3">
@@ -58,24 +58,23 @@
             </div>
         </div>
 
-
         <!-- Filter Tabs & Search Bar -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center gap-1.5 overflow-x-auto">
                 <button type="button" onclick="filterPlans('all')" id="btnFilterAll" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm">
                     All Plans ({{ $totalPlans }})
                 </button>
-                <button type="button" onclick="filterPlans('member')" id="btnFilterMember" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <button type="button" onclick="filterPlans('member')" id="btnFilterMember" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
                     Member Assigned ({{ $memberPlansCount }})
                 </button>
-                <button type="button" onclick="filterPlans('template')" id="btnFilterTemplate" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800">
+                <button type="button" onclick="filterPlans('template')" id="btnFilterTemplate" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800">
                     Templates ({{ $templatePlansCount }})
                 </button>
             </div>
 
             <div class="relative min-w-[260px]">
-                <input type="text" id="dietSearchInput" oninput="searchDietPlans()" placeholder="Search plan or member name..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
-                <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="dietSearchInput" oninput="searchDietPlans()" placeholder="Search plan or member name..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
 
@@ -122,7 +121,7 @@
                 @endphp
 
                 <div x-data="{ expanded: false }" 
-                     class="diet-plan-card flex flex-col justify-between p-4.5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all shadow-md group"
+                     class="diet-plan-card flex flex-col justify-between p-4.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm group"
                      data-plan-type="{{ $plan->is_template ? 'template' : 'member' }}"
                      data-title="{{ strtolower($plan->title) }}"
                      data-member="{{ strtolower($memberName) }}">
@@ -132,45 +131,45 @@
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
                                     @if($plan->is_template)
-                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 uppercase tracking-wider">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                                             Master Template
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                             Member Assigned
                                         </span>
                                     @endif
 
                                     @if($plan->trainer)
-                                        <span class="text-[11px] text-slate-400">Coach: <strong class="text-slate-200">{{ $plan->trainer->full_name }}</strong></span>
+                                        <span class="text-[11px] text-slate-500 dark:text-slate-400">Coach: <strong class="text-slate-800 dark:text-slate-200">{{ $plan->trainer->full_name }}</strong></span>
                                     @endif
                                 </div>
 
-                                <h3 class="text-base font-black text-white tracking-tight leading-snug">{{ $plan->title }}</h3>
+                                <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight leading-snug">{{ $plan->title }}</h3>
 
                                 @if(!$plan->is_template && $plan->member)
                                     <div class="flex items-center gap-2 pt-0.5">
-                                        <div class="w-5 h-5 rounded-full bg-slate-800 text-indigo-400 border border-slate-700 flex items-center justify-center font-bold text-[9px]">
+                                        <div class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-[9px]">
                                             {{ substr($plan->member->first_name, 0, 1) }}
                                         </div>
-                                        <span class="text-xs font-semibold text-slate-300">{{ $plan->member->full_name }}</span>
+                                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">{{ $plan->member->full_name }}</span>
                                         @if($plan->member->phone)
-                                            <span class="text-[10px] text-slate-500 font-mono">({{ $plan->member->phone }})</span>
+                                            <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">({{ $plan->member->phone }})</span>
                                         @endif
                                     </div>
                                 @endif
                             </div>
 
                             <div class="text-right shrink-0">
-                                <div class="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black tracking-tight inline-flex items-center gap-1">
+                                <div class="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black tracking-tight inline-flex items-center gap-1">
                                     <span>🔥</span>
                                     <span>{{ $plan->daily_calories ? number_format($plan->daily_calories) : '2,000' }}</span>
-                                    <span class="text-[10px] font-normal text-emerald-400/80">kcal</span>
+                                    <span class="text-[10px] font-normal text-emerald-600/80 dark:text-emerald-400/80">kcal</span>
                                 </div>
                                 @if($plan->start_date)
-                                    <div class="text-[10px] text-slate-500 mt-1 font-mono">
+                                    <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">
                                         {{ $plan->start_date->format('d M') }} {{ $plan->end_date ? '→ ' . $plan->end_date->format('d M Y') : '' }}
                                     </div>
                                 @endif
@@ -178,18 +177,18 @@
                         </div>
 
                         <!-- Macro Target Distribution -->
-                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 mb-2.5 space-y-2">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 mb-2.5 space-y-2">
                             <div class="flex items-center justify-between text-[11px] font-bold">
-                                <span class="text-slate-400 uppercase tracking-wider text-[10px]">Daily Macro Split</span>
+                                <span class="text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Daily Macro Split</span>
                                 <div class="flex items-center gap-2.5 text-xs font-mono">
-                                    <span class="text-rose-400"><strong class="font-bold">{{ $protein }}g</strong> <span class="text-[10px] text-slate-500">P</span></span>
-                                    <span class="text-amber-400"><strong class="font-bold">{{ $carbs }}g</strong> <span class="text-[10px] text-slate-500">C</span></span>
-                                    <span class="text-cyan-400"><strong class="font-bold">{{ $fat }}g</strong> <span class="text-[10px] text-slate-500">F</span></span>
+                                    <span class="text-rose-600 dark:text-rose-400"><strong class="font-bold">{{ $protein }}g</strong> <span class="text-[10px] text-slate-400 dark:text-slate-500">P</span></span>
+                                    <span class="text-amber-600 dark:text-amber-400"><strong class="font-bold">{{ $carbs }}g</strong> <span class="text-[10px] text-slate-400 dark:text-slate-500">C</span></span>
+                                    <span class="text-cyan-600 dark:text-cyan-400"><strong class="font-bold">{{ $fat }}g</strong> <span class="text-[10px] text-slate-400 dark:text-slate-500">F</span></span>
                                 </div>
                             </div>
 
                             <!-- Macro Percentage Multi-Color Bar -->
-                            <div class="h-1.5 w-full rounded-full bg-slate-800 flex overflow-hidden">
+                            <div class="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 flex overflow-hidden">
                                 <div class="bg-rose-500 h-full transition-all" style="width: {{ $protPct }}%" title="Protein: {{ $protPct }}%"></div>
                                 <div class="bg-amber-400 h-full transition-all" style="width: {{ $carbsPct }}%" title="Carbohydrates: {{ $carbsPct }}%"></div>
                                 <div class="bg-cyan-400 h-full transition-all" style="width: {{ $fatPct }}%" title="Fats: {{ $fatPct }}%"></div>
@@ -199,15 +198,15 @@
                         <!-- Clickable Expand / Collapse Toggle Bar -->
                         <button type="button" 
                                 @click="expanded = !expanded" 
-                                class="w-full my-1.5 py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-950/90 border border-slate-800/80 hover:border-indigo-500/40 text-xs font-semibold text-slate-300 hover:text-white flex items-center justify-between transition-all cursor-pointer">
+                                class="w-full my-1.5 py-2 px-3 rounded-xl bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-950/90 border border-slate-200 dark:border-slate-800/80 hover:border-indigo-500/40 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-between transition-all cursor-pointer">
                             <span class="flex items-center gap-2">
                                 <span>🍽️</span>
                                 <span>{{ $plan->meals->count() }} Scheduled Meals</span>
                                 @if($plan->guidelines)
-                                    <span class="text-[10px] text-indigo-400 font-normal">&bull; Advice</span>
+                                    <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">&bull; Advice</span>
                                 @endif
                             </span>
-                            <span class="flex items-center gap-1 text-[11px] text-indigo-400 font-bold">
+                            <span class="flex items-center gap-1 text-[11px] text-indigo-600 dark:text-indigo-400 font-bold">
                                 <span x-text="expanded ? 'Hide Meals' : 'View Meals'"></span>
                                 <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </span>
@@ -222,8 +221,8 @@
                              class="space-y-3 pt-2 mb-3">
                             <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
                                 @forelse($plan->meals as $meal)
-                                    <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex items-start gap-3 hover:border-slate-700 transition-colors">
-                                        <div class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shrink-0">
+                                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex items-start gap-3 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                                        <div class="w-7 h-7 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-xs shrink-0">
                                             {{ match($meal->meal_type) {
                                                 'breakfast' => '🍳',
                                                 'morning_snack' => '🍎',
@@ -238,31 +237,31 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center justify-between gap-2">
                                                 <div class="flex items-center gap-2 truncate">
-                                                    <span class="text-xs font-bold text-white truncate">{{ $meal->meal_name }}</span>
-                                                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 uppercase font-semibold border border-slate-800 shrink-0">
+                                                    <span class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ $meal->meal_name }}</span>
+                                                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 uppercase font-semibold border border-slate-200 dark:border-slate-800 shrink-0">
                                                         {{ str_replace('_', ' ', $meal->meal_type) }}
                                                     </span>
                                                 </div>
 
                                                 <div class="flex items-center gap-2 shrink-0">
                                                     @if($meal->recommended_time)
-                                                        <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded-md border border-slate-800">
+                                                        <span class="text-[10px] font-mono text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-800">
                                                             {{ date('h:i A', strtotime($meal->recommended_time)) }}
                                                         </span>
                                                     @endif
                                                     @if($meal->calories)
-                                                        <span class="text-[10px] font-black text-amber-400">{{ $meal->calories }} kcal</span>
+                                                        <span class="text-[10px] font-black text-amber-600 dark:text-amber-400">{{ $meal->calories }} kcal</span>
                                                     @endif
                                                 </div>
                                             </div>
 
                                             @if($meal->items_description)
-                                                <p class="text-[11px] text-slate-400 mt-1 leading-relaxed whitespace-pre-line">{{ $meal->items_description }}</p>
+                                                <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed whitespace-pre-line">{{ $meal->items_description }}</p>
                                             @endif
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="p-4 text-center rounded-xl bg-slate-950 border border-dashed border-slate-800 text-slate-500 text-xs">
+                                    <div class="p-4 text-center rounded-xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 text-xs">
                                         No meals added to this schedule yet.
                                     </div>
                                 @endforelse
@@ -270,10 +269,10 @@
 
                             <!-- Nutritionist & Hydration Advice -->
                             @if($plan->guidelines)
-                                <div class="p-3 rounded-xl bg-indigo-950/20 border border-indigo-900/30 text-[11px] text-indigo-300 leading-relaxed flex items-start gap-2">
+                                <div class="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/30 text-[11px] text-indigo-700 dark:text-indigo-300 leading-relaxed flex items-start gap-2">
                                     <span class="text-sm">💧</span>
                                     <div class="whitespace-pre-line">
-                                        <strong class="font-bold text-indigo-200 block mb-0.5">Hydration &amp; Dietary Advice:</strong>
+                                        <strong class="font-bold text-indigo-900 dark:text-indigo-200 block mb-0.5">Hydration &amp; Dietary Advice:</strong>
                                         {{ $plan->guidelines }}
                                     </div>
                                 </div>
@@ -282,7 +281,7 @@
                     </div>
 
                     <!-- Card Actions -->
-                    <div class="border-t border-slate-800/80 pt-4 mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                    <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                         <!-- WhatsApp Action Button -->
                         <button type="button"
                                 onclick="openWhatsAppModal({{ json_encode($planJson) }}, {{ json_encode($memberName) }}, {{ json_encode($recipientPhone) }}, {{ json_encode($gymName) }})"
@@ -295,16 +294,16 @@
                             <!-- Quick Copy Message -->
                             <button type="button"
                                     onclick="quickCopyPlan({{ json_encode($planJson) }}, {{ json_encode($memberName) }}, {{ json_encode($gymName) }})"
-                                    class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                                    class="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                                     title="Copy formatted WhatsApp text">
-                                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                 <span>Copy Text</span>
                             </button>
 
                             <!-- Edit Plan -->
                             <button type="button"
                                     onclick="editDietPlan({{ json_encode($planJson) }})"
-                                    class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                                    class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 transition-colors"
                                     title="Edit Diet Plan">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                             </button>
@@ -318,7 +317,7 @@
                                   class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-900/50 transition-colors cursor-pointer" title="Delete Plan">
+                                <button type="submit" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-900/50 transition-colors cursor-pointer" title="Delete Plan">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
@@ -326,12 +325,12 @@
                     </div>
                 </div>
             @empty
-                <div class="col-span-full p-16 text-center bg-slate-900 border border-dashed border-slate-800 rounded-3xl">
-                    <div class="w-16 h-16 rounded-3xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <div class="col-span-full p-16 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
+                    <div class="w-16 h-16 rounded-3xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
-                    <h3 class="text-lg font-black text-white mb-1">No Diet Plans Created Yet</h3>
-                    <p class="text-xs text-slate-400 max-w-md mx-auto mb-6">Create personalized nutrition programs for your members or build reusable diet templates that you can send over WhatsApp with 1 click.</p>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white mb-1">No Diet Plans Created Yet</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">Create personalized nutrition programs for your members or build reusable diet templates that you can send over WhatsApp with 1 click.</p>
                     <div>
                         <button type="button" onclick="openDietModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all">
                             + Create First Diet Plan
@@ -349,20 +348,20 @@
     </div>
 
     <!-- ==================== WHATSAPP DISPATCH MODAL ==================== -->
-    <div id="whatsappModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-8">
+    <div id="whatsappModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200">
             <!-- Modal Header -->
-            <div class="p-5 bg-gradient-to-r from-emerald-950/60 via-slate-900 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <div class="p-5 bg-gradient-to-r from-emerald-50 via-slate-50 to-white dark:from-emerald-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-inner">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center shadow-inner">
                         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-black text-white">Send Diet Plan via WhatsApp</h3>
-                        <p class="text-xs text-slate-400">Review recipient phone number and live preview before sending.</p>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white">Send Diet Plan via WhatsApp</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Review recipient phone number and live preview before sending.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">✕</button>
+                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
             </div>
 
             <!-- Modal Body -->
@@ -370,31 +369,31 @@
                 <!-- Recipient Phone & Plan Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Recipient Mobile Number *</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Recipient Mobile Number *</label>
                         <div class="relative">
                             <input type="text" id="waRecipientPhone" placeholder="e.g. 9876543210 or 919876543210"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-sm focus:outline-none focus:border-emerald-500 transition-colors">
-                            <span class="absolute right-3 top-2.5 text-[10px] text-slate-500 font-bold">WHATSAPP</span>
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:outline-none focus:border-emerald-500 transition-colors">
+                            <span class="absolute right-3 top-2.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold">WHATSAPP</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-1">Indian 10-digit numbers automatically get country code added.</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Indian 10-digit numbers automatically get country code added.</p>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Recipient / Member</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Recipient / Member</label>
                         <input type="text" id="waRecipientName" readonly
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-300 text-sm focus:outline-none cursor-default font-medium">
-                        <p class="text-[10px] text-slate-500 mt-1">Assigned recipient in gym console records.</p>
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm focus:outline-none cursor-default font-medium">
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Assigned recipient in gym console records.</p>
                     </div>
                 </div>
 
                 <!-- Live Message Preview Box -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
                             <span>💬 Live WhatsApp Message Preview</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-semibold">Formatted Preview</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">Formatted Preview</span>
                         </label>
-                        <button type="button" onclick="copyModalWaText()" class="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1">
+                        <button type="button" onclick="copyModalWaText()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-bold flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                             <span id="copyModalBtnText">Copy Message</span>
                         </button>
@@ -407,13 +406,13 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-5 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3">
-                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition-colors">
+            <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
                     Cancel
                 </button>
 
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 transition-colors flex items-center gap-1.5">
+                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         <span>Copy Text</span>
                     </button>
@@ -428,24 +427,24 @@
     </div>
 
     <!-- ==================== CREATE / EDIT DIET PLAN MODAL ==================== -->
-    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-8">
+    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200">
             <form id="dietPlanForm" method="POST" action="{{ route('app.diets.store') }}">
                 @csrf
                 <input type="hidden" name="_method" id="dietFormMethod" value="POST">
 
                 <!-- Modal Header -->
-                <div class="p-5 bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border-b border-slate-800 flex items-center justify-between">
+                <div class="p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-white" id="dietModalTitle">Create New Diet Plan</h3>
-                            <p class="text-xs text-slate-400">Configure calories, macro targets, and scheduled meals.</p>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white" id="dietModalTitle">Create New Diet Plan</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Configure calories, macro targets, and scheduled meals.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">✕</button>
+                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
                 </div>
 
                 <!-- Modal Form Body -->
@@ -453,15 +452,15 @@
                     <!-- Title & Plan Type -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Plan Title *</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Plan Title *</label>
                             <input type="text" name="title" id="dietInputTitle" required placeholder="e.g. 4-Week High Protein Hypertrophy Split"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Plan Type</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Plan Type</label>
                             <select name="is_template" id="dietInputIsTemplate" onchange="togglePlanTypeFields()"
-                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
                                 <option value="0">Member Specific</option>
                                 <option value="1">Master Template</option>
                             </select>
@@ -471,9 +470,9 @@
                     <!-- Member & Trainer Select (Hidden when Template) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="memberTrainerGroup">
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Assign to Member</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Assign to Member</label>
                             <select name="member_id" id="dietInputMemberId"
-                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Select Active Member --</option>
                                 @foreach($members as $m)
                                     <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No phone' }})</option>
@@ -482,9 +481,9 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Assigned Coach / Trainer</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Assigned Coach / Trainer</label>
                             <select name="trainer_id" id="dietInputTrainerId"
-                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
                                 <option value="">-- Select Trainer (Optional) --</option>
                                 @foreach($trainers as $t)
                                     <option value="{{ $t->id }}">{{ $t->full_name }}</option>
@@ -495,30 +494,30 @@
 
                     <!-- Calorie & Macros Targets -->
                     <div>
-                        <span class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Daily Nutrition Target & Macro Split</span>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
+                        <span class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Daily Nutrition Target & Macro Split</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
                             <div>
-                                <label class="block text-[11px] font-bold text-emerald-400 mb-1">Total Calories (kcal)</label>
+                                <label class="block text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mb-1">Total Calories (kcal)</label>
                                 <input type="number" name="daily_calories" id="dietInputCalories" placeholder="2000" min="0" max="15000"
-                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold focus:outline-none focus:border-emerald-500">
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-emerald-500">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-rose-400 mb-1">Protein (g)</label>
+                                <label class="block text-[11px] font-bold text-rose-600 dark:text-rose-400 mb-1">Protein (g)</label>
                                 <input type="number" name="protein_grams" id="dietInputProtein" placeholder="150" min="0" max="1000"
-                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold focus:outline-none focus:border-rose-500">
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-rose-500">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-amber-400 mb-1">Carbohydrates (g)</label>
+                                <label class="block text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-1">Carbohydrates (g)</label>
                                 <input type="number" name="carbs_grams" id="dietInputCarbs" placeholder="200" min="0" max="1500"
-                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold focus:outline-none focus:border-amber-500">
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-amber-500">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-cyan-400 mb-1">Fats (g)</label>
+                                <label class="block text-[11px] font-bold text-cyan-600 dark:text-cyan-400 mb-1">Fats (g)</label>
                                 <input type="number" name="fat_grams" id="dietInputFats" placeholder="60" min="0" max="1000"
-                                       class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold focus:outline-none focus:border-cyan-500">
+                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-cyan-500">
                             </div>
                         </div>
                     </div>
@@ -526,15 +525,15 @@
                     <!-- Dates (Optional) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="datesGroup">
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Start Date</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Start Date</label>
                             <input type="date" name="start_date" id="dietInputStartDate"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">End Date</label>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">End Date</label>
                             <input type="date" name="end_date" id="dietInputEndDate"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
                         </div>
                     </div>
 
@@ -542,12 +541,12 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Scheduled Meals Builder</h4>
-                                <p class="text-[11px] text-slate-400">Add meal timings, item descriptions, and calorie breakdowns.</p>
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Scheduled Meals Builder</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Add meal timings, item descriptions, and calorie breakdowns.</p>
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="loadStandardMealsPreset()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-[11px] font-semibold border border-slate-700 transition-colors">
+                                <button type="button" onclick="loadStandardMealsPreset()" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-[11px] font-semibold border border-slate-200 dark:border-slate-700 transition-colors">
                                     + Insert 5-Meal Day
                                 </button>
                                 <button type="button" onclick="addMealRow()" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow transition-colors">
@@ -563,15 +562,15 @@
 
                     <!-- General Guidelines / Advice -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Dietary Guidelines & Hydration Advice</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Dietary Guidelines & Hydration Advice</label>
                         <textarea name="guidelines" id="dietInputGuidelines" rows="3" placeholder="e.g. Drink 3.5 - 4 liters of water daily. Avoid refined sugars, fried food, and sodas. Sleep 7-8 hours daily."
-                                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+                                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-5 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3">
-                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-bold border border-slate-800 transition-colors">
+                <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
                         Cancel
                     </button>
 
@@ -723,9 +722,12 @@
 
         // Client-side Filtering
         function filterPlans(type) {
-            document.getElementById('btnFilterAll').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ' + (type === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800');
-            document.getElementById('btnFilterMember').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ' + (type === 'member' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800');
-            document.getElementById('btnFilterTemplate').className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ' + (type === 'template' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800');
+            const activeClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm';
+            const inactiveClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800';
+
+            document.getElementById('btnFilterAll').className = type === 'all' ? activeClass : inactiveClass;
+            document.getElementById('btnFilterMember').className = type === 'member' ? activeClass : inactiveClass;
+            document.getElementById('btnFilterTemplate').className = type === 'template' ? activeClass : inactiveClass;
 
             const cards = document.querySelectorAll('.diet-plan-card');
             cards.forEach(card => {
@@ -792,19 +794,19 @@
             const items = meal ? (meal.items_description || '') : '';
 
             const html = `
-                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 relative group" id="${rowId}">
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 relative group" id="${rowId}">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                            <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-mono">${container.children.length + 1}</span>
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] flex items-center justify-center font-mono">${container.children.length + 1}</span>
                             <span>Meal Details</span>
                         </span>
-                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">✕ Remove</button>
+                        <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-xs text-rose-500 dark:text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 font-semibold">✕ Remove</button>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 mb-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Meal Type</label>
-                            <select name="meals[${mealCounter}][meal_type]" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Meal Type</label>
+                            <select name="meals[${mealCounter}][meal_type]" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                                 <option value="breakfast" ${mealType === 'breakfast' ? 'selected' : ''}>🍳 Breakfast</option>
                                 <option value="morning_snack" ${mealType === 'morning_snack' ? 'selected' : ''}>🍎 Morning Snack</option>
                                 <option value="lunch" ${mealType === 'lunch' ? 'selected' : ''}>🥗 Lunch</option>
@@ -815,24 +817,24 @@
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Meal Title *</label>
-                            <input type="text" name="meals[${mealCounter}][meal_name]" value="${mealName}" required placeholder="e.g. Oats with Milk" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Meal Title *</label>
+                            <input type="text" name="meals[${mealCounter}][meal_name]" value="${mealName}" required placeholder="e.g. Oats with Milk" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Time</label>
-                            <input type="time" name="meals[${mealCounter}][recommended_time]" value="${recommendedTime}" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Time</label>
+                            <input type="time" name="meals[${mealCounter}][recommended_time]" value="${recommendedTime}" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Calories (kcal)</label>
-                            <input type="number" name="meals[${mealCounter}][calories]" value="${calories}" placeholder="400" min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Calories (kcal)</label>
+                            <input type="number" name="meals[${mealCounter}][calories]" value="${calories}" placeholder="400" min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Food Items & Portions (Formatted in WhatsApp)</label>
-                        <input type="text" name="meals[${mealCounter}][items_description]" value="${items}" placeholder="e.g. 50g rolled oats, 250ml milk, 1 scoop whey, 5 almonds" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Food Items & Portions (Formatted in WhatsApp)</label>
+                        <input type="text" name="meals[${mealCounter}][items_description]" value="${items}" placeholder="e.g. 50g rolled oats, 250ml milk, 1 scoop whey, 5 almonds" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-300 focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
             `;
@@ -1019,10 +1021,10 @@
             const badgeEl = document.getElementById('aiResBadge');
             if (badgeEl) {
                 if (data.is_gemini) {
-                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
+                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
                     badgeEl.innerHTML = `✨ <span>Google Gemini AI (${data.gemini_model || 'gemini-1.5-flash'})</span>`;
                 } else {
-                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
+                    badgeEl.className = 'px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 text-[10px] font-black uppercase tracking-wider flex items-center gap-1';
                     badgeEl.innerHTML = `⚡ <span>Smart Diet Engine</span>`;
                 }
             }
@@ -1036,27 +1038,27 @@
 
             data.meals.forEach((meal, idx) => {
                 const mealHtml = `
-                    <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
                             <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-mono text-xs font-bold flex items-center justify-center">${idx + 1}</span>
-                                <h4 class="text-xs font-black text-white">${meal.meal_name}</h4>
-                                <span class="text-[10px] text-slate-400 font-mono">⏰ ${meal.recommended_time}</span>
+                                <span class="w-6 h-6 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+                                <h4 class="text-xs font-black text-slate-900 dark:text-white">${meal.meal_name}</h4>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">⏰ ${meal.recommended_time}</span>
                             </div>
                             <div class="flex items-center gap-1.5 text-[10px] font-bold">
-                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 font-mono">${meal.target_macros.calories} kcal</span>
-                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 font-mono">P: ${meal.target_macros.protein_g}g</span>
-                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono">C: ${meal.target_macros.carbs_g}g</span>
-                                <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 font-mono">F: ${meal.target_macros.fat_g}g</span>
+                                <span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-mono">${meal.target_macros.calories} kcal</span>
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-mono">P: ${meal.target_macros.protein_g}g</span>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono">C: ${meal.target_macros.carbs_g}g</span>
+                                <span class="px-2 py-0.5 rounded-full bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">F: ${meal.target_macros.fat_g}g</span>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-200 whitespace-pre-line leading-relaxed font-sans pl-2 border-l-2 border-indigo-500/40">
+                        <div class="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans pl-2 border-l-2 border-indigo-500/40">
                             ${meal.items_description}
                         </div>
                         ${meal.alternatives ? `
-                            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/60 text-[11px] text-slate-400">
-                                <span class="text-indigo-400 font-bold">🔄 Alternative Option:</span>
-                                <p class="mt-0.5 text-slate-300 whitespace-pre-line">${meal.alternatives}</p>
+                            <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/60 text-[11px] text-slate-600 dark:text-slate-400">
+                                <span class="text-indigo-600 dark:text-indigo-400 font-bold">🔄 Alternative Option:</span>
+                                <p class="mt-0.5 text-slate-700 dark:text-slate-300 whitespace-pre-line">${meal.alternatives}</p>
                             </div>
                         ` : ''}
                     </div>
@@ -1069,13 +1071,13 @@
             suppContainer.innerHTML = '';
             data.optional_supplements.forEach(s => {
                 suppContainer.insertAdjacentHTML('beforeend', `
-                    <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs">
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-xs">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-white">${s.name}</span>
-                            <span class="px-2 py-0.2 rounded-full bg-indigo-500/10 text-indigo-400 text-[9px] font-bold">OPTIONAL</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${s.name}</span>
+                            <span class="px-2 py-0.2 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold">OPTIONAL</span>
                         </div>
-                        <p class="text-[11px] text-indigo-300 font-mono mt-1">${s.dosage}</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">${s.purpose}</p>
+                        <p class="text-[11px] text-indigo-600 dark:text-indigo-300 font-mono mt-1">${s.dosage}</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">${s.purpose}</p>
                     </div>
                 `);
             });
@@ -1084,7 +1086,7 @@
             const guidelinesContainer = document.getElementById('aiResGuidelinesList');
             guidelinesContainer.innerHTML = '';
             data.guidelines.forEach(g => {
-                guidelinesContainer.insertAdjacentHTML('beforeend', `<li class="flex items-start gap-2"><span class="text-emerald-400">✓</span><span>${g}</span></li>`);
+                guidelinesContainer.insertAdjacentHTML('beforeend', `<li class="flex items-start gap-2"><span class="text-emerald-500 dark:text-emerald-400">✓</span><span class="text-slate-700 dark:text-slate-300">${g}</span></li>`);
             });
 
             document.getElementById('aiResDisclaimer').innerText = data.medical_disclaimer;
@@ -1173,8 +1175,8 @@
     </script>
 
     <!-- ==================== AI DIET GENERATOR MODAL ==================== -->
-    <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
-        <div class="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden max-h-[92vh] flex flex-col">
+    <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
             
             <!-- Modal Header -->
             @php
@@ -1182,29 +1184,29 @@
                 $globalGeminiModel = \App\Models\Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-1.5-flash');
                 $hasGeminiConfigured = !empty($globalGeminiKey);
             @endphp
-            <div class="px-6 py-4 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between shrink-0">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30">
                         ✨
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-black text-white tracking-tight">AI Personalized Diet Planner</h3>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">AI Personalized Diet Planner</h3>
                             @if($hasGeminiConfigured)
-                                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 dark:border-purple-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 animate-pulse"></span>
                                     <span>Powered by Google Gemini AI ({{ $globalGeminiModel }})</span>
                                 </span>
                             @else
-                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-mono font-bold flex items-center gap-1">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-bold flex items-center gap-1">
                                     <span>⚡ Smart Multi-Factor Diet Engine</span>
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
+                <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
                     ✕
                 </button>
             </div>
@@ -1217,12 +1219,12 @@
                     <form id="aiDietForm" onsubmit="submitAiDietGeneration(event)" class="space-y-5">
                         
                         <!-- Member Quick Select -->
-                        <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs font-bold text-slate-300">👤 Select Existing Member (Optional):</span>
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">👤 Select Existing Member (Optional):</span>
                             </div>
                             <div class="w-full sm:w-72">
-                                <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Manual Entry / Custom Member --</option>
                                     @foreach($members as $m)
                                         <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No Phone' }})</option>
@@ -1233,46 +1235,46 @@
 
                         <!-- 1. Personal & Body Metrics -->
                         <div class="space-y-3">
-                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <h4 class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <span>1. Member Profile & Body Metrics</span>
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name *</label>
-                                    <input type="text" id="aiInputName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Name *</label>
+                                    <input type="text" id="aiInputName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Age *</label>
-                                    <input type="number" id="aiInputAge" required value="26" min="12" max="90" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Age *</label>
+                                    <input type="number" id="aiInputAge" required value="26" min="12" max="90" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gender *</label>
-                                    <select id="aiInputGender" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Gender *</label>
+                                    <select id="aiInputGender" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Height (cm) *</label>
-                                    <input type="number" id="aiInputHeight" required value="172" min="100" max="250" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Height (cm) *</label>
+                                    <input type="number" id="aiInputHeight" required value="172" min="100" max="250" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Weight (kg) *</label>
-                                    <input type="number" id="aiInputWeight" required value="72" min="30" max="250" step="0.5" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Weight (kg) *</label>
+                                    <input type="number" id="aiInputWeight" required value="72" min="30" max="250" step="0.5" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                 </div>
                             </div>
                         </div>
 
                         <!-- 2. Goals & Training Routine -->
-                        <div class="space-y-3 pt-2 border-t border-slate-800/80">
-                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+                            <h4 class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <span>2. Fitness Goals & Training Schedule</span>
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fitness Goal *</label>
-                                    <select id="aiInputGoal" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Fitness Goal *</label>
+                                    <select id="aiInputGoal" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="muscle_gain">Muscle Gain & Hypertrophy</option>
                                         <option value="fat_loss">Fat Loss & Leaning</option>
                                         <option value="weight_loss">Weight Loss</option>
@@ -1282,8 +1284,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Activity Level *</label>
-                                    <select id="aiInputActivity" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Activity Level *</label>
+                                    <select id="aiInputActivity" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="moderately_active">Moderately Active (Gym 3-5 days)</option>
                                         <option value="very_active">Very Active (Gym 6-7 days)</option>
                                         <option value="lightly_active">Lightly Active (Gym 1-3 days)</option>
@@ -1292,8 +1294,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Workout Timing *</label>
-                                    <select id="aiInputWorkoutTime" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Workout Timing *</label>
+                                    <select id="aiInputWorkoutTime" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="morning">Morning (08:00 AM - 11:00 AM)</option>
                                         <option value="evening">Evening (05:00 PM - 08:00 PM)</option>
                                         <option value="early_morning">Early Morning (06:00 AM - 08:00 AM)</option>
@@ -1302,8 +1304,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Meals Per Day *</label>
-                                    <select id="aiInputMealsCount" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Meals Per Day *</label>
+                                    <select id="aiInputMealsCount" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="4">4 Meals / Day (Standard)</option>
                                         <option value="5">5 Meals / Day (Optimal)</option>
                                         <option value="3">3 Meals / Day (Compact)</option>
@@ -1314,14 +1316,14 @@
                         </div>
 
                         <!-- 3. Diet Preferences & Dietary Restrictions -->
-                        <div class="space-y-3 pt-2 border-t border-slate-800/80">
-                            <h4 class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+                            <h4 class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
                                 <span>3. Dietary Preferences & Restrictions</span>
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Diet Preference *</label>
-                                    <select id="aiInputDietPref" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Diet Preference *</label>
+                                    <select id="aiInputDietPref" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                         <option value="vegetarian">Vegetarian (Lacto / High-Protein)</option>
                                         <option value="non_vegetarian">Non-Vegetarian (Eggs, Chicken, Fish)</option>
                                         <option value="eggetarian">Eggetarian (Eggs + Veg Dairy)</option>
@@ -1329,28 +1331,28 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Food Preferences</label>
-                                    <input type="text" id="aiInputFoodPref" placeholder="e.g. North Indian, Oats, Paneer, Rice" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Food Preferences</label>
+                                    <input type="text" id="aiInputFoodPref" placeholder="e.g. North Indian, Oats, Paneer, Rice" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Foods to Avoid</label>
-                                    <input type="text" id="aiInputFoodsAvoid" placeholder="e.g. Deep fried, Sugary snacks, Soya" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Foods to Avoid</label>
+                                    <input type="text" id="aiInputFoodsAvoid" placeholder="e.g. Deep fried, Sugary snacks, Soya" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Allergies</label>
-                                    <input type="text" id="aiInputAllergies" placeholder="e.g. Peanuts, Gluten, Dairy (or None)" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Allergies</label>
+                                    <input type="text" id="aiInputAllergies" placeholder="e.g. Peanuts, Gluten, Dairy (or None)" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Additional Notes / Medical Concerns</label>
-                                <input type="text" id="aiInputNotes" placeholder="e.g. Desk job, prefers budget-friendly home cooking, takes morning coffee" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:border-indigo-500 focus:outline-none">
+                                <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Additional Notes / Medical Concerns</label>
+                                <input type="text" id="aiInputNotes" placeholder="e.g. Desk job, prefers budget-friendly home cooking, takes morning coffee" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                             </div>
                         </div>
 
                         <!-- Action Submit -->
-                        <div class="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
-                            <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer">
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+                            <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer">
                                 Cancel
                             </button>
                             <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 flex items-center gap-2 transition-all cursor-pointer">
@@ -1365,13 +1367,13 @@
                 <div id="aiDietLoadingView" class="hidden py-16 flex flex-col items-center justify-center text-center space-y-4">
                     <div class="relative w-16 h-16">
                         <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 animate-spin opacity-75 blur-sm"></div>
-                        <div class="relative w-16 h-16 rounded-full bg-slate-900 border border-purple-500/40 flex items-center justify-center text-2xl">
+                        <div class="relative w-16 h-16 rounded-full bg-white dark:bg-slate-900 border border-purple-500/40 flex items-center justify-center text-2xl">
                             ✨
                         </div>
                     </div>
                     <div class="space-y-1">
-                        <h4 class="text-sm font-extrabold text-white">Synthesizing Personalized Indian Diet Plan...</h4>
-                        <p class="text-xs text-slate-400">Calculating BMR, optimizing macronutrient ratios & structuring timed Indian meals.</p>
+                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">Synthesizing Personalized Indian Diet Plan...</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Calculating BMR, optimizing macronutrient ratios & structuring timed Indian meals.</p>
                     </div>
                 </div>
 
@@ -1379,13 +1381,13 @@
                 <div id="aiDietResultView" class="hidden space-y-5">
                     
                     <!-- Result Header Banner -->
-                    <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-slate-900 border border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-indigo-50 to-white dark:from-purple-950/40 dark:via-indigo-950/40 dark:to-slate-900 border border-purple-200 dark:border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
-                                <h3 id="aiResPlanTitle" class="text-base font-black text-white tracking-tight"></h3>
+                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
+                                <h3 id="aiResPlanTitle" class="text-base font-black text-slate-900 dark:text-white tracking-tight"></h3>
                             </div>
-                            <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                            <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                 <span id="aiResBmr" class="font-mono"></span>
                                 <span>•</span>
                                 <span id="aiResTdee" class="font-mono"></span>
@@ -1393,7 +1395,7 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button type="button" id="aiBtnCopyText" onclick="copyAiDietWhatsAppText()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700/80 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <button type="button" id="aiBtnCopyText" onclick="copyAiDietWhatsAppText()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700/80 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                 <span>Copy WhatsApp Text</span>
                             </button>
@@ -1406,35 +1408,35 @@
 
                     <!-- Macro Target Cards -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Calories</span>
-                            <span id="aiResCalories" class="text-sm font-black text-amber-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Calories</span>
+                            <span id="aiResCalories" class="text-sm font-black text-amber-600 dark:text-amber-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Protein</span>
-                            <span id="aiResProtein" class="text-sm font-black text-indigo-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Protein</span>
+                            <span id="aiResProtein" class="text-sm font-black text-indigo-600 dark:text-indigo-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Carbohydrates</span>
-                            <span id="aiResCarbs" class="text-sm font-black text-emerald-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Carbohydrates</span>
+                            <span id="aiResCarbs" class="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Fats</span>
-                            <span id="aiResFat" class="text-sm font-black text-rose-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Fats</span>
+                            <span id="aiResFat" class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Fiber</span>
-                            <span id="aiResFiber" class="text-sm font-black text-teal-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Fiber</span>
+                            <span id="aiResFiber" class="text-sm font-black text-teal-600 dark:text-teal-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase block">Hydration</span>
-                            <span id="aiResWater" class="text-sm font-black text-cyan-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Hydration</span>
+                            <span id="aiResWater" class="text-sm font-black text-cyan-600 dark:text-cyan-400 font-mono mt-0.5 block"></span>
                         </div>
                     </div>
 
                     <!-- Daily Meal Schedule -->
                     <div class="space-y-3">
-                        <h4 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                             <span>🍽️ Scheduled Indian Meals &amp; Portion Breakdown</span>
                         </h4>
                         <div id="aiResMealsList" class="space-y-3"></div>
@@ -1442,29 +1444,29 @@
 
                     <!-- Supplements & Guidelines -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
-                            <h4 class="text-xs font-black text-white uppercase tracking-wider">💊 Optional Training Supplements</h4>
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">💊 Optional Training Supplements</h4>
                             <div id="aiResSupplementsList" class="space-y-2"></div>
                         </div>
 
-                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
-                            <h4 class="text-xs font-black text-white uppercase tracking-wider">📌 Lifestyle &amp; Cooking Guidelines</h4>
-                            <ul id="aiResGuidelinesList" class="space-y-2 text-xs text-slate-300"></ul>
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">📌 Lifestyle &amp; Cooking Guidelines</h4>
+                            <ul id="aiResGuidelinesList" class="space-y-2 text-xs text-slate-700 dark:text-slate-300"></ul>
                         </div>
                     </div>
 
                     <!-- Disclaimer -->
-                    <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 text-[11px] leading-relaxed flex items-start gap-2.5">
-                        <span class="text-amber-400 text-sm shrink-0">⚠️</span>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed flex items-start gap-2.5">
+                        <span class="text-amber-500 dark:text-amber-400 text-sm shrink-0">⚠️</span>
                         <p id="aiResDisclaimer"></p>
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
-                        <button type="button" onclick="document.getElementById('aiDietResultView').classList.add('hidden'); document.getElementById('aiDietFormView').classList.remove('hidden');" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5">
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <button type="button" onclick="document.getElementById('aiDietResultView').classList.add('hidden'); document.getElementById('aiDietFormView').classList.remove('hidden');" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5">
                             <span>&larr; Adjust Parameters</span>
                         </button>
-                        <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs font-bold transition-colors cursor-pointer">
+                        <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors cursor-pointer">
                             Close
                         </button>
                     </div>

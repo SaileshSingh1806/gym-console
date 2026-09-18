@@ -198,7 +198,7 @@
     }" class="space-y-4">
 
         <!-- ========================================== -->
-        <!-- TOP FILTER BAR (Matches Reference Image 1) -->
+        <!-- TOP FILTER BAR                             -->
         <!-- ========================================== -->
         <form method="GET" action="{{ route('app.payments.index') }}" class="space-y-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -211,14 +211,14 @@
                            name="search" 
                            value="{{ request('search') }}" 
                            placeholder="Search name, phone, email, ID, receipt..." 
-                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none transition-colors shadow-sm">
                 </div>
 
                 <!-- Date Range Dropdown -->
                 <div>
                     <select name="date_filter" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="month_till_date" {{ request('date_filter', 'month_till_date') === 'month_till_date' ? 'selected' : '' }}>Month Till Date</option>
                         <option value="today" {{ request('date_filter') === 'today' ? 'selected' : '' }}>Today</option>
                         <option value="yesterday" {{ request('date_filter') === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
@@ -233,7 +233,7 @@
                 <div>
                     <select name="method" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('method') === 'all' || !request('method') ? 'selected' : '' }}>All Methods</option>
                         <option value="cash" {{ request('method') === 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="card" {{ request('method') === 'card' ? 'selected' : '' }}>Card</option>
@@ -248,7 +248,7 @@
                 <div>
                     <select name="status" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Status</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="partial" {{ request('status') === 'partial' ? 'selected' : '' }}>Partial</option>
@@ -260,7 +260,7 @@
                 <div>
                     <select name="due_filter" 
                             onchange="this.form.submit()" 
-                            class="px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
                         <option value="all" {{ request('due_filter') === 'all' || !request('due_filter') ? 'selected' : '' }}>All Due Dates</option>
                         <option value="has_due" {{ request('due_filter') === 'has_due' ? 'selected' : '' }}>Has Due</option>
                         <option value="no_due" {{ request('due_filter') === 'no_due' ? 'selected' : '' }}>No Due</option>
@@ -278,30 +278,30 @@
         </form>
 
         <!-- ========================================== -->
-        <!-- SUMMARY BANNER BAR (Image 1 reference)     -->
+        <!-- SUMMARY BANNER BAR                         -->
         <!-- ========================================== -->
-        <div class="px-5 py-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs shadow-sm">
-            <span class="font-bold text-slate-300">
+        <div class="px-5 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shadow-sm">
+            <span class="font-bold text-slate-700 dark:text-slate-300">
                 {{ $payments->total() }} payments
             </span>
             <div class="flex items-center gap-3">
-                <span class="font-black text-white">
-                    Total: <strong class="text-emerald-400">{{ $currency }}{{ number_format($totalCollected, 2) }}</strong>
+                <span class="font-black text-slate-900 dark:text-white">
+                    Total: <strong class="text-emerald-600 dark:text-emerald-400">{{ $currency }}{{ number_format($totalCollected, 2) }}</strong>
                 </span>
-                <span class="text-slate-600">•</span>
-                <span class="font-black {{ $totalDue > 0 ? 'text-rose-400' : 'text-slate-400' }}">
+                <span class="text-slate-300 dark:text-slate-600">•</span>
+                <span class="font-black {{ $totalDue > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400' }}">
                     Due: <strong>{{ $currency }}{{ number_format($totalDue, 2) }}</strong>
                 </span>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- PAYMENTS TABLE (Image 1 reference)         -->
+        <!-- PAYMENTS TABLE                             -->
         <!-- ========================================== -->
-        <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl">
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-950/70 border-b border-slate-800 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
+                    <thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 font-extrabold uppercase tracking-wider">
                         <tr>
                             <th class="py-3.5 px-4">MEMBER</th>
                             <th class="py-3.5 px-4">TYPE</th>
@@ -312,7 +312,7 @@
                             <th class="py-3.5 px-4 text-right">ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                         @forelse($payments as $p)
                             @php
                                 $member = $p->member;
@@ -336,15 +336,15 @@
                                 $planName = $membership?->plan?->name ?? ($p->notes ? Str::limit($p->notes, 30) : 'Standard Membership');
                                 $receiptNo = $p->invoice_number;
                             @endphp
-                            <tr class="hover:bg-slate-800/40 transition-colors">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                 <!-- MEMBER Column -->
                                 <td class="py-3.5 px-4">
-                                    <div class="font-bold text-white text-xs">
-                                        <a href="{{ route('app.members.show', $member->id) }}" class="hover:text-indigo-400 transition-colors">
+                                    <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                        <a href="{{ route('app.members.show', $member->id) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                                             {{ $member->full_name }}
                                         </a>
                                     </div>
-                                    <div class="text-[11px] font-mono text-slate-400 mt-0.5 flex items-center gap-1.5">
+                                    <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
                                         <span>{{ $member->member_code }}</span>
                                         <span>•</span>
                                         <button type="button" 
@@ -364,7 +364,7 @@
                                                     total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
                                                     paid: '{{ number_format($p->amount, 2) }}'
                                                 })"
-                                                class="text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer underline">
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold cursor-pointer underline">
                                             {{ $receiptNo }}
                                         </button>
                                     </div>
@@ -372,23 +372,23 @@
 
                                 <!-- TYPE Column -->
                                 <td class="py-3.5 px-4">
-                                    <span class="font-medium text-slate-200 block text-xs">
+                                    <span class="font-medium text-slate-800 dark:text-slate-200 block text-xs">
                                         {{ $planName }}
                                     </span>
                                 </td>
 
                                 <!-- AMOUNT Column -->
                                 <td class="py-3.5 px-4">
-                                    <div class="font-extrabold text-xs {{ $isReversed ? 'text-rose-400 line-through' : 'text-emerald-400' }}">
+                                    <div class="font-extrabold text-xs {{ $isReversed ? 'text-rose-600 dark:text-rose-400 line-through' : 'text-emerald-600 dark:text-emerald-400' }}">
                                         {{ $isReversed ? '-' : '' }}{{ $currency }}{{ number_format($p->amount, 2) }}
                                     </div>
                                     @if($discountAmount > 0)
-                                        <div class="text-[10px] text-slate-400 mt-0.5">
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                             Discount: {{ $currency }}{{ number_format($discountAmount, 2) }}
                                         </div>
                                     @endif
                                     @if($dueAmount > 0)
-                                        <div class="text-[10px] text-rose-400 font-bold mt-0.5">
+                                        <div class="text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-0.5">
                                             Due: {{ $currency }}{{ number_format($dueAmount, 2) }}
                                         </div>
                                     @endif
@@ -396,13 +396,13 @@
 
                                 <!-- METHOD Column -->
                                 <td class="py-3.5 px-4">
-                                    <span class="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-semibold uppercase">
+                                    <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold uppercase">
                                         {{ $p->payment_method }}
                                     </span>
                                 </td>
 
                                 <!-- DATE Column -->
-                                <td class="py-3.5 px-4 font-mono text-slate-300 text-xs">
+                                <td class="py-3.5 px-4 font-mono text-slate-600 dark:text-slate-300 text-xs">
                                     {{ $p->payment_date ? $p->payment_date->format('d/m/Y') : $p->created_at->format('d/m/Y') }}
                                 </td>
 
@@ -410,22 +410,22 @@
                                 <td class="py-3.5 px-4">
                                     <div>
                                         @if($status === 'Completed')
-                                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
+                                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">
                                                 Completed
                                             </span>
                                         @elseif($status === 'Partial')
-                                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-bold text-[10px]">
+                                            <span class="px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold text-[10px]">
                                                 Partial
                                             </span>
                                         @else
-                                            <span class="px-2.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 font-bold text-[10px]">
+                                            <span class="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-bold text-[10px]">
                                                 Reversed
                                             </span>
                                         @endif
                                     </div>
                                 </td>
 
-                                <!-- ACTIONS Column (Image 1 reference icons) -->
+                                <!-- ACTIONS Column -->
                                 <td class="py-3.5 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <!-- View / Print Receipt -->
@@ -447,7 +447,7 @@
                                                     paid: '{{ number_format($p->amount, 2) }}'
                                                 })"
                                                 title="View / Print Tax Invoice Receipt" 
-                                                class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer">
+                                                class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </button>
 
@@ -455,7 +455,7 @@
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Payment Receipt from ' . ($tenant->name ?? 'Gym') . ': ' . $currency . number_format($p->amount, 2) . ' received on ' . ($p->payment_date ? $p->payment_date->format('d/m/Y') : '') . ' (Receipt No: ' . $receiptNo . ')') }}" 
                                            target="_blank" 
                                            title="Send Receipt via WhatsApp" 
-                                           class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 transition-colors">
+                                           class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-emerald-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
                                         </a>
 
@@ -469,7 +469,7 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         title="Direct Send Email Receipt ({{ $member->email }})" 
-                                                        class="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600/30 text-slate-300 hover:text-blue-400 transition-colors cursor-pointer">
+                                                        class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-600 dark:bg-slate-800 dark:hover:bg-blue-600/30 dark:text-slate-300 dark:hover:text-blue-400 transition-colors cursor-pointer">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                                 </button>
                                             </form>
@@ -477,7 +477,7 @@
                                             <button type="button" 
                                                     onclick="alert('No email address registered for this member.')" 
                                                     title="No email address registered" 
-                                                    class="p-1.5 rounded-lg bg-slate-800/40 text-slate-600 cursor-not-allowed">
+                                                    class="p-1.5 rounded-lg bg-slate-100/60 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 cursor-not-allowed">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                             </button>
                                         @endif
@@ -493,7 +493,7 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         title="Reverse / Cancel Payment" 
-                                                        class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer">
+                                                        class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-900/50 dark:text-slate-400 dark:hover:text-rose-400 transition-colors cursor-pointer">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                                 </button>
                                             </form>
@@ -504,7 +504,7 @@
                                             <button type="button" 
                                                     @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
                                                     title="Collect Due Payment (Due: {{ $currency }}{{ number_format($dueAmount, 2) }})" 
-                                                    class="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 border border-emerald-500/40 transition-all cursor-pointer shadow-sm shadow-emerald-500/20">
+                                                    class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white border border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500 dark:text-emerald-400 dark:hover:text-slate-950 dark:border-emerald-500/40 transition-all cursor-pointer shadow-sm">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             </button>
                                         @endif
@@ -513,10 +513,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-12 text-center text-slate-500">
+                                <td colspan="7" class="py-12 text-center text-slate-500 dark:text-slate-400">
                                     <div class="text-3xl mb-2">💳</div>
-                                    <p class="text-sm font-semibold text-slate-400">No payment receipts found.</p>
-                                    <p class="text-xs text-slate-500 mt-1">Click "+ Record Payment" to collect a fee or record membership.</p>
+                                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">No payment receipts found.</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Click "+ Record Payment" to collect a fee or record membership.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -525,14 +525,14 @@
             </div>
 
             @if($payments->hasPages())
-                <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
                     {{ $payments->links() }}
                 </div>
             @endif
         </div>
 
         <!-- ========================================================================= -->
-        <!-- MODAL: RECORD PAYMENT / INVOICE (Image 3 exact reference design)          -->
+        <!-- MODAL: RECORD PAYMENT / INVOICE                                           -->
         <!-- ========================================================================= -->
         <div x-show="showRecordPaymentModal" 
              x-transition:enter="ease-out duration-200"
@@ -541,12 +541,12 @@
              style="display: none;">
             
             <div class="min-h-full flex items-center justify-center py-4 sm:py-6">
-                <div @click.away="showRecordPaymentModal = false" class="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 sm:p-8 space-y-6 text-xs relative">
+                <div @click.away="showRecordPaymentModal = false" class="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl shadow-2xl p-5 sm:p-8 space-y-6 text-xs relative">
                     
                     <!-- Top-Right Close Button -->
                     <button type="button" 
                             @click="showRecordPaymentModal = false" 
-                            class="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors z-20 cursor-pointer" 
+                            class="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-20 cursor-pointer" 
                             title="Close modal">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -555,29 +555,29 @@
                         @csrf
                         
                         <!-- Header Section: Gym Info & INVOICE -->
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-800/80 pb-5 pr-10">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-200 dark:border-slate-800/80 pb-5 pr-10">
                             <div>
-                                <h2 class="text-base font-black text-white tracking-wide uppercase">{{ $tenant->name ?? 'POWERFIT GYM' }}</h2>
-                                <p class="text-[11px] text-slate-400 mt-0.5">{{ $tenant->address ?? '123 Fitness Street, Health City' }}</p>
-                                <p class="text-[11px] text-slate-400">Ph: {{ $tenant->phone ?? '080 6940 9814' }}</p>
-                                <p class="text-[11px] font-mono text-slate-500">{{ $tenant->metadata['gstin'] ?? 'GSTIN: 27AAACM3025E1ZZ' }}</p>
+                                <h2 class="text-base font-black text-slate-900 dark:text-white tracking-wide uppercase">{{ $tenant->name ?? 'POWERFIT GYM' }}</h2>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $tenant->address ?? '123 Fitness Street, Health City' }}</p>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Ph: {{ $tenant->phone ?? '080 6940 9814' }}</p>
+                                <p class="text-[11px] font-mono text-slate-400 dark:text-slate-500">{{ $tenant->metadata['gstin'] ?? 'GSTIN: 27AAACM3025E1ZZ' }}</p>
                             </div>
 
                             <div class="text-left sm:text-right">
-                                <h1 class="text-2xl font-black text-indigo-400 tracking-wider uppercase">INVOICE</h1>
+                                <h1 class="text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-wider uppercase">INVOICE</h1>
                                 <div class="flex items-center gap-2 mt-2 sm:justify-end">
-                                    <span class="text-xs text-slate-400 font-semibold">Date</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Date</span>
                                     <input type="date" 
                                            name="payment_date" 
                                            x-model="paymentDate" 
-                                           class="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                           class="px-3 py-1 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
                                 </div>
                             </div>
                         </div>
 
                         <!-- BILL TO Section: Interactive Member Search Dropdown -->
                         <div>
-                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1.5">BILL TO</span>
+                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">BILL TO</span>
                             
                             <!-- Search Member Input with Auto-Suggest -->
                             <div class="relative">
@@ -590,12 +590,12 @@
                                            @focus="showMemberDropdown = true" 
                                            @input="showMemberDropdown = true" 
                                            placeholder="Search member by name, phone, ID..." 
-                                           class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
                                     
                                     <button type="button" 
                                             x-show="selectedMember" 
                                             @click="clearMember()" 
-                                            class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
+                                            class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs">
                                         ✕
                                     </button>
                                 </div>
@@ -603,19 +603,19 @@
                                 <!-- Dropdown List -->
                                 <div x-show="showMemberDropdown && filteredMembers.length > 0" 
                                      @click.away="showMemberDropdown = false" 
-                                     class="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-slate-950 border border-slate-800 rounded-xl shadow-2xl divide-y divide-slate-800/60">
+                                     class="absolute z-30 left-0 right-0 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl divide-y divide-slate-100 dark:divide-slate-800/60">
                                     <template x-for="m in filteredMembers" :key="m.id">
-                                        <div @click="selectMember(m)" class="p-3 hover:bg-slate-900 cursor-pointer flex items-center justify-between transition-colors">
+                                        <div @click="selectMember(m)" class="p-3 hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer flex items-center justify-between transition-colors">
                                             <div>
-                                                <span class="font-bold text-white text-xs" x-text="m.name"></span>
-                                                <span class="text-slate-400 text-[11px] ml-1" x-text="'(' + m.code + ')'"></span>
-                                                <div class="text-[10px] text-slate-500 font-mono" x-text="m.phone"></div>
+                                                <span class="font-bold text-slate-900 dark:text-white text-xs" x-text="m.name"></span>
+                                                <span class="text-slate-500 dark:text-slate-400 text-[11px] ml-1" x-text="'(' + m.code + ')'"></span>
+                                                <div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono" x-text="m.phone"></div>
                                             </div>
                                             <div class="text-right">
                                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" 
-                                                      :class="m.status === 'ACTIVE' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-800 text-slate-400'" 
+                                                      :class="m.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'" 
                                                       x-text="m.status"></span>
-                                                <div class="text-[10px] text-slate-400 mt-0.5" x-text="m.active_plan_name"></div>
+                                                <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5" x-text="m.active_plan_name"></div>
                                             </div>
                                         </div>
                                     </template>
@@ -624,36 +624,36 @@
 
                             <!-- Selected Member Summary Pill -->
                             <template x-if="selectedMember">
-                                <div class="mt-2 p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                                <div class="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-black text-[10px]">Active</span>
-                                        <span class="font-bold text-white text-xs" x-text="selectedMember.name + ' (' + selectedMember.code + ')'"></span>
-                                        <span class="text-slate-400 font-mono text-xs" x-text="selectedMember.phone"></span>
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-black text-[10px]">Active</span>
+                                        <span class="font-bold text-slate-900 dark:text-white text-xs" x-text="selectedMember.name + ' (' + selectedMember.code + ')'"></span>
+                                        <span class="text-slate-500 dark:text-slate-400 font-mono text-xs" x-text="selectedMember.phone"></span>
                                     </div>
-                                    <div x-show="selectedMember.active_due > 0" class="text-rose-400 font-bold text-xs">
+                                    <div x-show="selectedMember.active_due > 0" class="text-rose-600 dark:text-rose-400 font-bold text-xs">
                                         Pending Due: {{ $currency }}<span x-text="Number(selectedMember.active_due).toFixed(2)"></span>
                                     </div>
                                 </div>
                             </template>
                         </div>
 
-                        <!-- Item Description Table Grid (Responsive Design) -->
+                        <!-- Item Description Table Grid -->
                         <div class="space-y-2">
-                            <!-- Table Headers (Visible on tablet/desktop) -->
-                            <div class="hidden sm:flex items-center gap-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-800 pb-2 px-1">
+                            <!-- Table Headers -->
+                            <div class="hidden sm:flex items-center gap-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 pb-2 px-1">
                                 <div class="w-6 shrink-0">#</div>
                                 <div class="w-44 shrink-0">ITEM TYPE</div>
                                 <div class="flex-1 min-w-0">DESCRIPTION</div>
                                 <div class="w-32 shrink-0 text-right">AMOUNT ({{ $currency }})</div>
                             </div>
 
-                            <!-- Line Item Row (Stacks gracefully on mobile) -->
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80">
+                            <!-- Line Item Row -->
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-start gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80">
                                 <div class="hidden sm:block w-6 shrink-0 font-bold text-slate-400 pt-2.5">1</div>
                                 
                                 <!-- ITEM TYPE SELECT -->
                                 <div class="w-full sm:w-44 shrink-0">
-                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Item Type</label>
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Item Type</label>
                                     <select name="item_type" 
                                             x-model="itemType" 
                                             @change="
@@ -662,7 +662,7 @@
                                                 else if (itemType === 'due') { collectedAmount = computedTotal; }
                                                 else { itemAmount = 0; collectedAmount = 0; }
                                             "
-                                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 font-bold text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                            class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 font-bold text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                         <option value="membership">Membership</option>
                                         <option value="pt">Personal Training</option>
                                         <option value="due">Collect Due Balance</option>
@@ -670,9 +670,9 @@
                                     </select>
                                 </div>
 
-                                <!-- DESCRIPTION COLUMN (Dynamic based on Item Type) -->
+                                <!-- DESCRIPTION COLUMN -->
                                 <div class="flex-1 min-w-0 space-y-2.5">
-                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Description</label>
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Description</label>
                                     
                                     <!-- When Membership selected -->
                                     <template x-if="itemType === 'membership'">
@@ -681,7 +681,7 @@
                                                 <select name="membership_plan_id" 
                                                         x-model="selectedPlanId" 
                                                         @change="onPlanChange()" 
-                                                        class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-medium text-xs focus:border-indigo-500 focus:outline-none">
+                                                        class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-medium text-xs focus:border-indigo-500 focus:outline-none">
                                                     <option value="">— Select Membership —</option>
                                                     @foreach($membershipPlans as $p)
                                                         <option value="{{ $p->id }}">{{ $p->name }} ({{ $currency }}{{ number_format($p->price, 2) }} / {{ $p->duration_value }} {{ $p->duration_type }})</option>
@@ -691,20 +691,20 @@
 
                                             <div class="flex items-center gap-3 flex-wrap">
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-slate-400 font-semibold text-xs shrink-0">Start</span>
+                                                    <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0">Start</span>
                                                     <input type="date" 
                                                            name="start_date" 
                                                            x-model="startDate" 
                                                            @change="calculateEndDate()" 
-                                                           class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                                           class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
                                                 </div>
 
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-slate-400 font-semibold text-xs shrink-0">End</span>
+                                                    <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0">End</span>
                                                     <input type="date" 
                                                            name="end_date" 
                                                            x-model="endDate" 
-                                                           class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                                           class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
                                                 </div>
                                             </div>
                                         </div>
@@ -723,7 +723,7 @@
                                                             calculateEndDate();
                                                             collectedAmount = computedTotal;
                                                         "
-                                                        class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-medium text-xs focus:border-indigo-500 focus:outline-none">
+                                                        class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-medium text-xs focus:border-indigo-500 focus:outline-none">
                                                     <option value="">— Select Personal Training —</option>
                                                     <option value="1 Month PT (12 Sessions)">1 Month PT (12 Sessions)</option>
                                                     <option value="3 Month PT (36 Sessions)">3 Month PT (36 Sessions)</option>
@@ -733,10 +733,10 @@
                                             </div>
 
                                             <div class="flex items-center gap-2">
-                                                <span class="text-slate-400 font-semibold text-xs shrink-0 w-16">Trainer</span>
+                                                <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0 w-16">Trainer</span>
                                                 <select name="trainer_id" 
                                                         x-model="ptTrainerId" 
-                                                        class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                                        class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                                     <option value="">Select Trainer</option>
                                                     @foreach($trainers as $t)
                                                         <option value="{{ $t->id }}">{{ $t->full_name }} ({{ $t->specialization ?? 'Trainer' }})</option>
@@ -746,35 +746,35 @@
 
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-slate-400 font-semibold text-xs shrink-0 w-16">Sessions</span>
+                                                    <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0 w-16">Sessions</span>
                                                     <input type="number" 
                                                            name="sessions" 
                                                            x-model="ptSessions" 
                                                            min="1" 
-                                                           class="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs">
+                                                           class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs">
                                                 </div>
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-slate-400 font-semibold text-xs shrink-0">Validity</span>
+                                                    <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0">Validity</span>
                                                     <input type="number" 
                                                            name="validity_days" 
                                                            x-model="ptValidityDays" 
                                                            @input="calculateEndDate()" 
                                                            min="1" 
-                                                           class="w-20 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs">
-                                                    <span class="text-slate-400 text-xs">days</span>
+                                                           class="w-20 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs">
+                                                    <span class="text-slate-500 dark:text-slate-400 text-xs">days</span>
                                                 </div>
                                             </div>
 
                                             <div class="flex items-center gap-3 pt-0.5 flex-wrap">
                                                 <div class="flex items-center gap-2">
-                                                    <span class="text-slate-400 font-semibold text-xs shrink-0 w-16">Start</span>
+                                                    <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0 w-16">Start</span>
                                                     <input type="date" 
                                                            name="pt_start_date" 
                                                            x-model="startDate" 
                                                            @change="calculateEndDate()" 
-                                                           class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs">
+                                                           class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs">
                                                 </div>
-                                                <span class="text-slate-400 font-mono text-xs">→ Ends: <strong class="text-white" x-text="endDate"></strong></span>
+                                                <span class="text-slate-500 dark:text-slate-400 font-mono text-xs">→ Ends: <strong class="text-slate-900 dark:text-white" x-text="endDate"></strong></span>
                                             </div>
                                         </div>
                                     </template>
@@ -782,12 +782,12 @@
                                     <!-- When Due Clearance selected -->
                                     <template x-if="itemType === 'due'">
                                         <div class="space-y-1.5">
-                                            <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                                            <div class="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30">
                                                 <div class="flex items-center justify-between">
-                                                    <span class="text-xs font-bold text-emerald-400">Due Clearance</span>
-                                                    <span class="text-[11px] font-mono font-bold text-emerald-300">Pending Due: {{ $currency }}<span x-text="Number(itemAmount).toFixed(2)"></span></span>
+                                                    <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">Due Clearance</span>
+                                                    <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-300">Pending Due: {{ $currency }}<span x-text="Number(itemAmount).toFixed(2)"></span></span>
                                                 </div>
-                                                <p class="text-[11px] text-slate-300 mt-1" x-text="customItemName"></p>
+                                                <p class="text-[11px] text-slate-700 dark:text-slate-300 mt-1" x-text="customItemName"></p>
                                             </div>
                                             <input type="hidden" name="custom_item_name" :value="customItemName">
                                         </div>
@@ -800,14 +800,14 @@
                                                    name="custom_item_name" 
                                                    x-model="customItemName" 
                                                    placeholder="e.g. Locker Rent, Steam Bath, Supplement Protein..." 
-                                                   class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                                   class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
                                         </div>
                                     </template>
                                 </div>
 
                                 <!-- AMOUNT INPUT -->
                                 <div class="w-full sm:w-32 shrink-0 text-left sm:text-right">
-                                    <label class="block sm:hidden text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Amount ({{ $currency }})</label>
+                                    <label class="block sm:hidden text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Amount ({{ $currency }})</label>
                                     <input type="number" 
                                            step="0.01" 
                                            name="amount" 
@@ -815,14 +815,14 @@
                                            @input="collectedAmount = computedTotal" 
                                            placeholder="0.00" 
                                            required 
-                                           class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono font-bold text-xs text-left sm:text-right focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs text-left sm:text-right focus:border-indigo-500 focus:outline-none">
                                 </div>
                             </div>
 
-                            <!-- Add Line Item Button (Visual match to reference) -->
+                            <!-- Add Line Item Button -->
                             <div class="pt-1">
                                 <button type="button" 
-                                        class="px-3.5 py-1.5 rounded-lg border border-dashed border-indigo-500/40 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
+                                        class="px-3.5 py-1.5 rounded-lg border border-dashed border-indigo-400 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                     <span>Add Line Item</span>
                                 </button>
@@ -831,13 +831,13 @@
 
                         <!-- Financial Breakdown Summary (Right Aligned) -->
                         <div class="flex justify-end pt-1">
-                            <div class="w-full sm:max-w-xs space-y-2 border-t border-slate-800 pt-3 text-xs">
-                                <div class="flex items-center justify-between text-slate-400">
+                            <div class="w-full sm:max-w-xs space-y-2 border-t border-slate-200 dark:border-slate-800 pt-3 text-xs">
+                                <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                     <span>Subtotal</span>
-                                    <span class="font-bold text-white">{{ $currency }}<span x-text="Number(itemAmount || 0).toFixed(2)"></span></span>
+                                    <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}<span x-text="Number(itemAmount || 0).toFixed(2)"></span></span>
                                 </div>
 
-                                <div class="flex items-center justify-between text-slate-400">
+                                <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                     <span>Discount</span>
                                     <div class="flex items-center gap-1">
                                         <span>{{ $currency }}</span>
@@ -846,11 +846,11 @@
                                                name="discount" 
                                                x-model="discount" 
                                                @input="collectedAmount = computedTotal" 
-                                               class="w-24 px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
+                                               class="w-24 px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
                                     </div>
                                 </div>
 
-                                <div class="flex items-center justify-between text-slate-400">
+                                <div class="flex items-center justify-between text-slate-600 dark:text-slate-400">
                                     <span>Tax</span>
                                     <div class="flex items-center gap-1">
                                         <span>{{ $currency }}</span>
@@ -859,47 +859,47 @@
                                                name="tax" 
                                                x-model="tax" 
                                                @input="collectedAmount = computedTotal" 
-                                               class="w-24 px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
+                                               class="w-24 px-2 py-0.5 rounded bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-right text-xs focus:border-indigo-500 focus:outline-none">
                                     </div>
                                 </div>
 
-                                <div class="flex items-center justify-between font-black text-sm text-white pt-2 border-t border-slate-800">
+                                <div class="flex items-center justify-between font-black text-sm text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
                                     <span>TOTAL</span>
-                                    <span class="text-base text-indigo-400 font-bold">{{ $currency }}<span x-text="computedTotal.toFixed(2)"></span></span>
+                                    <span class="text-base text-indigo-600 dark:text-indigo-400 font-bold">{{ $currency }}<span x-text="computedTotal.toFixed(2)"></span></span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- AMOUNT TO COLLECT Box (Matches Image 3) -->
-                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">AMOUNT TO COLLECT</span>
+                        <!-- AMOUNT TO COLLECT Box -->
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">AMOUNT TO COLLECT</span>
                             <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-400 font-black text-base">
+                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-black text-base shadow-sm">
                                     <span>{{ $currency }}</span>
                                     <input type="number" 
                                            step="0.01" 
                                            name="collected_amount" 
                                            x-model="collectedAmount" 
                                            required 
-                                           class="w-28 bg-transparent text-emerald-400 font-mono font-black focus:outline-none">
+                                           class="w-28 bg-transparent text-emerald-600 dark:text-emerald-400 font-mono font-black focus:outline-none">
                                 </div>
-                                <span class="text-xs text-slate-400 font-semibold">of {{ $currency }}<span x-text="computedTotal.toFixed(2)"></span></span>
+                                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">of {{ $currency }}<span x-text="computedTotal.toFixed(2)"></span></span>
                             </div>
 
-                            <label class="flex items-center gap-2 text-xs text-slate-300 font-semibold cursor-pointer pt-1">
-                                <input type="checkbox" name="activate_now" value="1" checked class="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-0">
+                            <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 font-semibold cursor-pointer pt-1">
+                                <input type="checkbox" name="activate_now" value="1" checked class="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-indigo-600 focus:ring-0">
                                 <span><strong>👤+ Activate membership now:</strong> Member can start using the gym immediately despite pending dues</span>
                             </label>
                         </div>
 
-                        <!-- PAYMENT METHOD (Responsive Layout) -->
+                        <!-- PAYMENT METHOD -->
                         <div class="space-y-2">
-                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">PAYMENT METHOD</span>
+                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">PAYMENT METHOD</span>
                             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                                 <div class="sm:col-span-4">
                                     <select name="payment_method" 
                                             x-model="paymentMethod" 
-                                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white font-bold text-xs focus:border-indigo-500 focus:outline-none">
+                                            class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:border-indigo-500 focus:outline-none">
                                         <option value="cash">Cash</option>
                                         <option value="upi">UPI / QR Code</option>
                                         <option value="card">Card / POS Machine</option>
@@ -914,7 +914,7 @@
                                            step="0.01" 
                                            x-model="collectedAmount" 
                                            placeholder="0" 
-                                           class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
                                 </div>
 
                                 <div class="sm:col-span-4">
@@ -922,12 +922,12 @@
                                            name="transaction_reference" 
                                            x-model="txnReference" 
                                            placeholder="Ref / Txn ID (Optional)" 
-                                           class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs font-mono focus:border-indigo-500 focus:outline-none">
                                 </div>
 
                                 <div class="sm:col-span-1">
                                     <button type="button" 
-                                            class="w-full h-full py-2 px-2 rounded-xl border border-dashed border-indigo-500/40 text-indigo-400 text-xs font-bold whitespace-nowrap hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer">
+                                            class="w-full h-full py-2 px-2 rounded-xl border border-dashed border-indigo-400 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer">
                                         + Split
                                     </button>
                                 </div>
@@ -936,21 +936,21 @@
 
                         <!-- Notes Textarea -->
                         <div>
-                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">Notes</span>
+                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Notes</span>
                             <textarea name="notes" 
                                       x-model="notes" 
                                       rows="2" 
                                       placeholder="Additional notes..." 
-                                      class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none"></textarea>
+                                      class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none"></textarea>
                         </div>
 
-                        <!-- Footer Actions (Responsive) -->
-                        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-slate-800 pt-4 gap-3">
-                            <p class="text-xs text-slate-400 italic text-center sm:text-left">Thank you for your membership!</p>
+                        <!-- Footer Actions -->
+                        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-4 gap-3">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 italic text-center sm:text-left">Thank you for your membership!</p>
                             <div class="flex items-center gap-3 justify-end">
                                 <button type="button" 
                                         @click="showRecordPaymentModal = false" 
-                                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer text-center">
+                                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
                                     Cancel
                                 </button>
                                 <button type="submit" 
@@ -967,7 +967,7 @@
         </div>
 
         <!-- ========================================================================= -->
-        <!-- MODAL: TAX INVOICE & FEE RECEIPT PREVIEW (A4 Layout with Watermark)       -->
+        <!-- MODAL: TAX INVOICE & FEE RECEIPT PREVIEW                                   -->
         <!-- ========================================================================= -->
         <div x-show="showInvoiceModal" 
              x-transition:enter="ease-out duration-200"
@@ -979,9 +979,9 @@
                 <div @click.away="showInvoiceModal = false" class="w-full max-w-2xl space-y-3">
                     
                     <!-- Modal Header Toolbar -->
-                    <div class="flex items-center justify-between px-5 py-3 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
-                        <div class="flex items-center gap-2 text-white font-black text-xs">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <div class="flex items-center justify-between px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
+                        <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-xs">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             <span>Invoice Preview</span>
                         </div>
 
@@ -989,23 +989,23 @@
                             <a :href="'/app/invoices/' + selectedInvoice.id" 
                                target="_blank" 
                                title="Open in new tab"
-                               class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                               class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
                             <button type="button" 
                                     @click="showInvoiceModal = false" 
                                     title="Close"
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Action Bar Toolbar (Close, Print, Send Email, Download PDF) -->
+                    <!-- Action Bar Toolbar -->
                     <div class="flex items-center justify-center gap-3">
                         <button type="button" 
                                 @click="showInvoiceModal = false" 
-                                class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs shadow-md transition-all cursor-pointer">
+                                class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
                             Close
                         </button>
 

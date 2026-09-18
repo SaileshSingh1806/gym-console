@@ -1,28 +1,28 @@
 <x-app-layout header="Gym Attendance & Live Access">
     <!-- Today Attendance Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-            <span class="text-xs text-slate-400 font-semibold uppercase">Total Present Today</span>
-            <span class="text-3xl font-bold text-white block mt-1">{{ $summary['total_present'] }}</span>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Total Present Today</span>
+            <span class="text-3xl font-bold text-slate-900 dark:text-white block mt-1">{{ $summary['total_present'] }}</span>
         </div>
-        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-            <span class="text-xs text-emerald-400 font-semibold uppercase">Currently Inside Gym</span>
-            <span class="text-3xl font-bold text-emerald-400 block mt-1">{{ $summary['currently_inside'] }}</span>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Currently Inside Gym</span>
+            <span class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 block mt-1">{{ $summary['currently_inside'] }}</span>
         </div>
-        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-            <span class="text-xs text-slate-400 font-semibold uppercase">Completed & Left</span>
-            <span class="text-3xl font-bold text-slate-300 block mt-1">{{ $summary['checked_out'] }}</span>
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Completed & Left</span>
+            <span class="text-3xl font-bold text-slate-700 dark:text-slate-300 block mt-1">{{ $summary['checked_out'] }}</span>
         </div>
     </div>
 
     <!-- Manual Check-in / Checkout Box -->
-    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 mb-8">
-        <h3 class="text-sm font-bold text-white mb-3">Manual Front Desk Check-in / Check-out</h3>
+    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mb-8 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">Manual Front Desk Check-in / Check-out</h3>
         <form action="{{ route('app.attendance.store') }}" method="POST" id="attendanceForm" class="flex flex-col sm:flex-row items-center gap-4">
             @csrf
             <input type="hidden" name="action" id="attendanceAction" value="check_in">
             <div class="flex-grow w-full">
-                <select name="member_id" id="attendanceMemberSelect" required class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-amber-500 focus:outline-none">
+                <select name="member_id" id="attendanceMemberSelect" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
                     <option value="">-- Select Active Member --</option>
                     @foreach($members as $m)
                         @php $isInside = isset($currentlyInsideMemberIds) && $currentlyInsideMemberIds->contains($m->id); @endphp
@@ -44,15 +44,15 @@
     </div>
 
     <!-- Live Attendance Log Table -->
-    <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
-        <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
-            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Attendance Log History</h3>
-            <span class="text-xs text-slate-400">{{ now()->format('l, F d, Y') }}</span>
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950/40">
+            <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Attendance Log History</h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ now()->format('l, F d, Y') }}</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                     <tr>
                         <th class="py-3.5 px-4 font-semibold">Member</th>
                         <th class="py-3.5 px-4 font-semibold">Date</th>
@@ -63,34 +63,34 @@
                         <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                     @forelse($attendance as $att)
-                        <tr class="hover:bg-slate-800/30 transition-colors">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                             <td class="py-3 px-4 flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center font-bold text-amber-400 text-[10px]">
+                                <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-[10px]">
                                     {{ substr($att->member->first_name ?? 'M', 0, 1) }}
                                 </div>
                                 <div>
-                                    <span class="font-bold text-white block">{{ $att->member->full_name ?? 'Member' }}</span>
-                                    <span class="text-[10px] text-slate-400">{{ $att->member->member_code ?? '' }}</span>
+                                    <span class="font-bold text-slate-900 dark:text-white block">{{ $att->member->full_name ?? 'Member' }}</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ $att->member->member_code ?? '' }}</span>
                                 </div>
                             </td>
-                            <td class="py-3 px-4 text-slate-400">
+                            <td class="py-3 px-4 text-slate-500 dark:text-slate-400">
                                 {{ $att->date ? $att->date->format('M d, Y') : '—' }}
                             </td>
-                            <td class="py-3 px-4 font-semibold text-emerald-400">
+                            <td class="py-3 px-4 font-semibold text-emerald-600 dark:text-emerald-400">
                                 {{ $att->check_in ? $att->check_in->format('h:i:s A') : '—' }}
                             </td>
-                            <td class="py-3 px-4 text-slate-400">
+                            <td class="py-3 px-4 text-slate-500 dark:text-slate-400">
                                 {{ $att->check_out ? $att->check_out->format('h:i:s A') : '—' }}
                             </td>
                             <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                                     {{ $att->device->name ?? ucfirst($att->method) }}
                                 </span>
                             </td>
                             <td class="py-3 px-4">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $att->check_out ? 'bg-slate-500/10 text-slate-400' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }}">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $att->check_out ? 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' }}">
                                     {{ $att->check_out ? 'Completed' : 'Inside' }}
                                 </span>
                             </td>
@@ -98,13 +98,13 @@
                                 @if(! $att->check_out)
                                     <form action="{{ route('app.attendance.checkout', $att->id) }}" method="POST" class="inline-block">
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-[11px] font-bold transition-all shadow-sm">
+                                        <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-400 dark:border-red-500/30 text-[11px] font-bold transition-all shadow-sm">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                             Check Out
                                         </button>
                                     </form>
                                 @else
-                                    <span class="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium">
+                                    <span class="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                                         <svg class="w-3.5 h-3.5 text-emerald-500/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                         Checked Out
                                     </span>
@@ -113,7 +113,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-8 text-center text-slate-500">No attendance logs available.</td>
+                            <td colspan="7" class="py-8 text-center text-slate-500 dark:text-slate-400">No attendance logs available.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -121,10 +121,9 @@
         </div>
 
         @if($attendance->hasPages())
-            <div class="p-4 border-t border-slate-800 bg-slate-950/40">
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
                 {{ $attendance->links() }}
             </div>
         @endif
     </div>
 </x-app-layout>
-

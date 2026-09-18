@@ -12,6 +12,7 @@ use App\Models\Membership;
 use App\Models\PlatformInvoice;
 use App\Models\Subscription;
 use App\Models\Tenant;
+use Illuminate\Support\Facades\DB;
 
 class ReportService
 {
@@ -23,18 +24,23 @@ class ReportService
         $suspendedGyms = Tenant::where('status', 'SUSPENDED')->count();
         $cancelledGyms = Tenant::where('status', 'CANCELLED')->count();
 
-        // Calculate SaaS MRR from active subscriptions
-        $activeSubs = Subscription::with('plan')->where('status', 'ACTIVE')->get();
-        $mrr = 0.0;
+        // Calculate SaaS ARR & Invoiced Platform Revenue from active subscriptions of active tenants (deduplicated per tenant)
+        $activeSubs = Subscription::with('plan')
+            ->where('status', 'ACTIVE')
+            ->whereIn('tenant_id', Tenant::where('status', 'ACTIVE')->pluck('id'))
+            ->get()
+            ->unique('tenant_id');
+
+        $arr = 0.0;
         foreach ($activeSubs as $sub) {
             if ($sub->plan) {
-                $mrr += $sub->billing_cycle === 'yearly'
-                    ? ((float) $sub->plan->price_yearly / 12)
-                    : (float) $sub->plan->price_monthly;
+                $arr += (float) ($sub->plan->price_yearly ?: ($sub->plan->price_monthly * 12));
             }
         }
 
-        $totalRevenue = (float) PlatformInvoice::where('status', 'PAID')->sum('total');
+        // Calculate Total Invoiced Platform Revenue from Platform Invoices
+        $invoicedRevenue = (float) PlatformInvoice::where('status', 'PAID')->sum('total');
+        $totalRevenue = $invoicedRevenue > 0 ? $invoicedRevenue : $arr;
 
         $newCustomersThisMonth = Tenant::where('created_at', '>=', now()->startOfMonth())->count();
 
@@ -44,8 +50,10 @@ class ReportService
             'trial_gyms' => $trialGyms,
             'suspended_gyms' => $suspendedGyms,
             'cancelled_gyms' => $cancelledGyms,
-            'mrr' => round($mrr, 2),
+            'arr' => round($arr, 2),
+            'mrr' => round($arr / 12, 2),
             'total_revenue' => round($totalRevenue, 2),
+            'active_subscriptions_count' => $activeSubs->count(),
             'new_customers_this_month' => $newCustomersThisMonth,
         ];
     }
@@ -73,6 +81,9 @@ class ReportService
                 'birthday_members_list' => [],
                 'churn_risk_members' => [],
                 'leads_followup_list' => [],
+                'due_members_list' => [],
+                'recent_renewals_list' => [],
+                'dormant_members_list' => [],
                 'active_pt' => 0,
                 'expired_pt' => 0,
                 'exhausted_pt' => 0,
@@ -261,14 +272,90 @@ class ReportService
             ->take(6)
             ->get();
 
+        // Due Members List with calculated remaining due balance
+        $dueMembersList = (clone $membershipsQuery)
+            ->with(['member', 'plan', 'payments'])
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)')
+            ->latest('created_at')
+            ->take(8)
+            ->get()
+            ->map(function ($m) {
+                $pkgPrice = (float) ($m->final_amount ?: $m->price);
+                $paid = (float) ($m->paid_amount ?: $m->payments->sum('amount'));
+                $m->due_amount = max(0, $pkgPrice - $paid);
+
+                return $m;
+            })
+            ->filter(fn ($m) => $m->due_amount > 0)
+            ->values();
+
+        // Recent Renewals: memberships renewed this month for existing members
+        $recentRenewalsList = (clone $membershipsQuery)
+            ->with(['member', 'plan'])
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->whereHas('member', function ($q) {
+                $q->where('created_at', '<', now()->startOfMonth());
+            })
+            ->latest('created_at')
+            ->take(8)
+            ->get();
+
+        // Dormant Members List (14+ days absent)
+        $dormantMembersList = (clone $membersQuery)
+            ->where('status', 'ACTIVE')
+            ->whereDoesntHave('attendances', function ($q) {
+                $q->where('date', '>=', now()->subDays(14)->toDateString());
+            })
+            ->with(['activeMembership.plan'])
+            ->take(8)
+            ->get();
+
         // Financial & Dues Calculations
         $allDuesTotal = (float) (clone $membershipsQuery)->where('status', 'ACTIVE')->sum('price');
         $allPaymentsSum = (float) (clone $paymentsQuery)->sum('amount');
         $allDuesRemaining = max(0, $allDuesTotal - $allPaymentsSum);
         $dueMembersCount = (clone $membershipsQuery)->where('status', 'ACTIVE')->count();
+        $monthBilledTotal = (float) (clone $membershipsQuery)
+            ->where(function ($q) {
+                $q->where('created_at', '>=', now()->startOfMonth())
+                    ->orWhere('start_date', '>=', now()->startOfMonth()->toDateString());
+            })
+            ->sum(DB::raw('COALESCE(final_amount, price)'));
 
+        $activeMemberships = (clone $membershipsQuery)->with('payments')->where('status', 'ACTIVE')->get();
+        $totalActivePackageValue = 0.0;
+        $allDuesRemaining = 0.0;
+        $dueMembersCount = 0;
+
+        foreach ($activeMemberships as $m) {
+            $pkgPrice = (float) ($m->final_amount ?: $m->price);
+            $paid = (float) ($m->paid_amount ?: $m->payments->sum('amount'));
+            $due = max(0, $pkgPrice - $paid);
+
+            $totalActivePackageValue += $pkgPrice;
+            $allDuesRemaining += $due;
+            if ($due > 0) {
+                $dueMembersCount++;
+            }
+        }
+
+        if ($monthBilledTotal <= 0) {
+            $monthBilledTotal = $totalActivePackageValue;
+        }
+        $monthBilledTotal = max($monthBilledTotal, $monthRevenue + $allDuesRemaining);
+
+        // New Clients: registered this month
         $newClientsCount = (clone $membersQuery)->where('created_at', '>=', now()->startOfMonth())->count();
         $renewalsCount = (clone $membershipsQuery)->where('created_at', '>=', now()->startOfMonth())->where('created_at', '>', now()->subMonths(1))->count();
+
+        // Renewals: Memberships created/renewed this month for members who joined before this month (or have prior memberships)
+        $renewalsCount = (clone $membershipsQuery)
+            ->where('created_at', '>=', now()->startOfMonth())
+            ->whereHas('member', function ($q) {
+                $q->where('created_at', '<', now()->startOfMonth());
+            })
+            ->count();
 
         $todayAttendanceCount = (clone $attendanceQuery)->count();
         $currentlyInside = (clone $attendanceQuery)->whereNull('check_out')->count();
@@ -327,6 +414,7 @@ class ReportService
             'upcoming_trials' => $upcomingTrials,
             'today_revenue' => $todayRevenue,
             'month_revenue' => $monthRevenue,
+            'month_billed_total' => $monthBilledTotal,
             'today_expense' => $todayExpense,
             'month_expense' => $monthExpense,
             'net_profit' => $netProfit,
@@ -340,6 +428,9 @@ class ReportService
             'birthday_members_list' => $birthdayMembersList,
             'recent_members_list' => $recentMembersList,
             'lead_followups_list' => $leadFollowupsList,
+            'due_members_list' => $dueMembersList,
+            'recent_renewals_list' => $recentRenewalsList,
+            'dormant_members_list' => $dormantMembersList,
             'all_dues_remaining' => $allDuesRemaining,
             'due_members_count' => $dueMembersCount,
             'new_clients_count' => $newClientsCount,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Mail\TestDiagnosticMail;
 use App\Models\ActivityLog;
+use App\Models\Branch;
 use App\Models\Coupon;
 use App\Models\Feature;
 use App\Models\Member;
@@ -29,11 +30,9 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -57,14 +56,81 @@ class AdminController extends Controller implements HasMiddleware
     {
         TenantContext::setBypass(true);
 
+        // Deduplicate: Ensure each active tenant has only 1 latest ACTIVE subscription
+        $activeTenants = Tenant::where('status', 'ACTIVE')->get();
+        foreach ($activeTenants as $t) {
+            $tActiveSubs = Subscription::where('tenant_id', $t->id)->where('status', 'ACTIVE')->latest('id')->get();
+            if ($tActiveSubs->count() > 1) {
+                $keepId = $tActiveSubs->first()->id;
+                Subscription::where('tenant_id', $t->id)
+                    ->where('status', 'ACTIVE')
+                    ->where('id', '!=', $keepId)
+                    ->update(['status' => 'CANCELLED']);
+            }
+        }
+
+        // Auto-sync active subscriptions with their platform invoices to keep metrics consistent
+        $activeSubs = Subscription::with(['plan', 'invoices'])
+            ->where('status', 'ACTIVE')
+            ->whereIn('tenant_id', Tenant::where('status', 'ACTIVE')->pluck('id'))
+            ->get()
+            ->unique('tenant_id');
+
+        foreach ($activeSubs as $activeSub) {
+            if ($activeSub->plan) {
+                $planPrice = (float) ($activeSub->plan->price_yearly ?: ($activeSub->plan->price_monthly * 12));
+                $latestInv = $activeSub->invoices()->latest('invoice_date')->first()
+                    ?? PlatformInvoice::where('tenant_id', $activeSub->tenant_id)->latest('invoice_date')->first();
+                if ($latestInv && $latestInv->total != $planPrice && $planPrice > 0) {
+                    $latestInv->update([
+                        'subscription_id' => $activeSub->id,
+                        'subtotal' => $planPrice,
+                        'total' => $planPrice,
+                        'status' => 'PAID',
+                    ]);
+                }
+            }
+        }
+
         $metrics = $this->reportService->getSuperAdminMetrics();
         $totalMembers = Member::count();
         $totalUsers = User::count();
-        $recentGyms = Tenant::with(['activeSubscription.plan', 'users'])->latest()->take(6)->get();
+        $totalStaffCount = User::whereNotNull('tenant_id')->where('role', '!=', 'super_admin')->count();
+        $superAdminCount = User::where('role', 'super_admin')->count();
+        $totalTicketsCount = SupportTicket::withoutGlobalScopes()->count();
+        $urgentTicketsCount = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->where('priority', 'urgent')->count();
+        $totalBranchesCount = Branch::count();
+        $activeSubscriptionsCount = $metrics['active_subscriptions_count'] ?? $activeSubs->count();
+        $expiringSubscriptionsCount = Subscription::where('status', 'ACTIVE')
+            ->whereBetween('ends_at', [now(), now()->addDays(7)])
+            ->count();
+        $openTicketsCount = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->count();
+        $recentGyms = Tenant::with(['activeSubscription.plan', 'users', 'branches'])->latest()->take(6)->get();
+        $recentInvoices = PlatformInvoice::with(['tenant', 'subscription.plan'])->latest('invoice_date')->take(6)->get();
+        $expiringSubscriptions = Subscription::with(['tenant', 'plan'])->where('status', 'ACTIVE')->whereBetween('ends_at', [now(), now()->addDays(30)])->orderBy('ends_at')->take(5)->get();
+        $openSupportTickets = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->with('tenant')->latest()->take(5)->get();
         $recentPayments = SubscriptionPayment::with(['tenant', 'subscription.plan'])->latest('paid_at')->take(6)->get();
-        $plans = Plan::where('is_active', true)->orderBy('sort_order')->get();
+        $plans = Plan::where('is_active', true)->withCount(['subscriptions' => fn ($q) => $q->where('status', 'ACTIVE')])->orderBy('sort_order')->get();
 
-        return view('admin.dashboard', compact('metrics', 'totalMembers', 'totalUsers', 'recentGyms', 'recentPayments', 'plans'));
+        return view('admin.dashboard', compact(
+            'metrics',
+            'totalMembers',
+            'totalUsers',
+            'totalStaffCount',
+            'superAdminCount',
+            'totalTicketsCount',
+            'urgentTicketsCount',
+            'totalBranchesCount',
+            'activeSubscriptionsCount',
+            'expiringSubscriptionsCount',
+            'openTicketsCount',
+            'recentGyms',
+            'recentInvoices',
+            'expiringSubscriptions',
+            'openSupportTickets',
+            'recentPayments',
+            'plans'
+        ));
     }
 
     // 2. Gyms / Tenants Management
@@ -97,7 +163,17 @@ class AdminController extends Controller implements HasMiddleware
         $gyms = $query->latest()->paginate(15)->withQueryString();
         $plans = Plan::where('is_active', true)->get();
 
-        return view('admin.gyms', compact('gyms', 'plans'));
+        $gymStats = [
+            'totalGymsCount' => Tenant::count(),
+            'totalBranchesCount' => Branch::count(),
+            'totalStaffCount' => User::whereNotNull('tenant_id')->where('role', '!=', 'super_admin')->count(),
+            'activeGymsCount' => Tenant::where('status', 'ACTIVE')->count(),
+            'trialGymsCount' => Tenant::where('status', 'TRIAL')->count(),
+            'totalPlatformMembersCount' => Member::count(),
+            'totalPlatformRevenue' => (float) Subscription::where('status', 'ACTIVE')->with('plan')->get()->sum(fn ($s) => $s->billing_cycle === 'yearly' ? ($s->plan?->price_yearly ?? 0) : ($s->plan?->price_monthly ?? 0)),
+        ];
+
+        return view('admin.gyms', compact('gyms', 'plans', 'gymStats'));
     }
 
     public function storeGym(Request $request): RedirectResponse
@@ -149,6 +225,7 @@ class AdminController extends Controller implements HasMiddleware
         ]);
 
         $trialEndsAt = $validated['trial_ends_at'] ? Carbon::parse($validated['trial_ends_at']) : null;
+        $trialEndsAt = ! empty($validated['trial_ends_at']) ? Carbon::parse($validated['trial_ends_at']) : null;
         $plan = Plan::findOrFail($validated['plan_id']);
         $billingCycle = $validated['billing_cycle'] ?? ($tenant->activeSubscription?->billing_cycle ?? 'yearly');
 
@@ -203,82 +280,11 @@ class AdminController extends Controller implements HasMiddleware
             return back()->with('error', "Deletion cancelled. The typed confirmation name ('{$confirmation}') did not match the gym name '{$name}'.");
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $this->tenantService->purgeTenantPermanently($tenantId);
 
-        // Detach pivot tables
-        $roleIds = DB::table('roles')->where('tenant_id', $tenantId)->pluck('id');
-        DB::table('permission_role')->whereIn('role_id', $roleIds)->delete();
-        DB::table('role_user')->whereIn('role_id', $roleIds)->delete();
+        ActivityLog::log('gym_deleted_by_admin', "Super admin permanently deleted gym {$name} (ID: {$tenantId}) and all associated records across all tables.");
 
-        $userIds = DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->pluck('id');
-        DB::table('branch_user')->whereIn('user_id', $userIds)->delete();
-        DB::table('role_user')->whereIn('user_id', $userIds)->delete();
-
-        $workoutPlanIds = DB::table('workout_plans')->where('tenant_id', $tenantId)->pluck('id');
-        DB::table('workout_exercises')->whereIn('workout_plan_id', $workoutPlanIds)->delete();
-
-        $dietPlanIds = DB::table('diet_plans')->where('tenant_id', $tenantId)->pluck('id');
-        DB::table('diet_meals')->whereIn('diet_plan_id', $dietPlanIds)->delete();
-
-        $equipmentIds = DB::table('gym_equipment')->where('tenant_id', $tenantId)->pluck('id');
-        DB::table('equipment_maintenance_logs')->whereIn('gym_equipment_id', $equipmentIds)->delete();
-
-        $inventoryItemIds = DB::table('inventory_items')->where('tenant_id', $tenantId)->pluck('id');
-        DB::table('inventory_logs')->whereIn('inventory_item_id', $inventoryItemIds)->delete();
-
-        // Direct tenant_id tables
-        $tenantTables = [
-            'access_logs',
-            'attendances',
-            'member_payments',
-            'member_pt_packages',
-            'memberships',
-            'membership_plans',
-            'members',
-            'class_bookings',
-            'class_schedules',
-            'gym_classes',
-            'pt_sessions',
-            'pt_plans',
-            'trainers',
-            'workout_plans',
-            'diet_plans',
-            'gym_service_bookings',
-            'gym_services',
-            'lead_trials',
-            'leads',
-            'expenses',
-            'expense_categories',
-            'inventory_logs',
-            'inventory_items',
-            'equipment_maintenance_logs',
-            'gym_equipment',
-            'devices',
-            'roles',
-            'branches',
-            'subscription_payments',
-            'subscriptions',
-            'platform_invoices',
-            'activity_logs',
-        ];
-
-        foreach ($tenantTables as $table) {
-            if (Schema::hasTable($table)) {
-                DB::table($table)->where('tenant_id', $tenantId)->delete();
-            }
-        }
-
-        // Delete non-super_admin users of this tenant
-        DB::table('users')->where('tenant_id', $tenantId)->where('role', '!=', 'super_admin')->delete();
-
-        // Delete tenant permanently
-        DB::table('tenants')->where('id', $tenantId)->delete();
-
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        ActivityLog::log('gym_deleted_by_admin', "Super admin permanently deleted gym {$name} and all its associated data");
-
-        return back()->with('success', "Gym '{$name}' and all its associated data have been permanently deleted.");
+        return back()->with('success', "Gym '{$name}' and all associated tenant data across all tables have been permanently deleted.");
     }
 
     public function impersonateGym(int $id): RedirectResponse
@@ -332,7 +338,7 @@ class AdminController extends Controller implements HasMiddleware
             'name' => 'required|string|max:100',
             'slug' => 'required|string|max:100|unique:plans,slug',
             'description' => 'nullable|string|max:500',
-            'price_monthly' => 'required|numeric|min:0',
+            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'member_limit' => 'required|integer',
@@ -344,11 +350,15 @@ class AdminController extends Controller implements HasMiddleware
             'features' => 'nullable|array',
         ]);
 
+        $monthlyPrice = isset($validated['price_monthly']) && $validated['price_monthly'] !== ''
+            ? (float) $validated['price_monthly']
+            : round((float) $validated['price_yearly'] / 12, 2);
+
         $plan = Plan::create([
             'name' => $validated['name'],
             'slug' => Str::slug($validated['slug']),
             'description' => $validated['description'] ?? null,
-            'price_monthly' => $validated['price_monthly'],
+            'price_monthly' => $monthlyPrice,
             'price_yearly' => $validated['price_yearly'],
             'trial_days' => $validated['trial_days'],
             'member_limit' => $validated['member_limit'],
@@ -378,7 +388,7 @@ class AdminController extends Controller implements HasMiddleware
             'name' => 'required|string|max:100',
             'slug' => 'required|string|max:100|unique:plans,slug,'.$plan->id,
             'description' => 'nullable|string|max:500',
-            'price_monthly' => 'required|numeric|min:0',
+            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'member_limit' => 'required|integer',
@@ -390,11 +400,15 @@ class AdminController extends Controller implements HasMiddleware
             'features' => 'nullable|array',
         ]);
 
+        $monthlyPrice = isset($validated['price_monthly']) && $validated['price_monthly'] !== ''
+            ? (float) $validated['price_monthly']
+            : round((float) $validated['price_yearly'] / 12, 2);
+
         $plan->update([
             'name' => $validated['name'],
             'slug' => Str::slug($validated['slug']),
             'description' => $validated['description'] ?? null,
-            'price_monthly' => $validated['price_monthly'],
+            'price_monthly' => $monthlyPrice,
             'price_yearly' => $validated['price_yearly'],
             'trial_days' => $validated['trial_days'],
             'member_limit' => $validated['member_limit'],
@@ -449,16 +463,31 @@ class AdminController extends Controller implements HasMiddleware
     {
         TenantContext::setBypass(true);
 
-        $query = Subscription::with(['tenant', 'plan', 'payments', 'invoices']);
+        // Deduplicate: Ensure each tenant only has 1 ACTIVE subscription (cancel older duplicates if any)
+        $tenants = Tenant::all();
+        foreach ($tenants as $t) {
+            $activeSubs = Subscription::where('tenant_id', $t->id)->where('status', 'ACTIVE')->latest('id')->get();
+            if ($activeSubs->count() > 1) {
+                $keepId = $activeSubs->first()->id;
+                Subscription::where('tenant_id', $t->id)
+                    ->where('status', 'ACTIVE')
+                    ->where('id', '!=', $keepId)
+                    ->update(['status' => 'CANCELLED']);
+            }
+        }
 
-        if ($request->status) {
+        $query = Subscription::with(['tenant.users', 'plan.features', 'payments', 'invoices']);
+
+        if ($request->status && $request->status !== 'all') {
             $query->where('status', $request->status);
+        } elseif (! $request->has('status')) {
+            $query->whereIn('status', ['ACTIVE', 'TRIAL', 'PAST_DUE', 'GRACE_PERIOD']);
         }
 
         $subscriptions = $query->latest()->paginate(15);
-        $invoices = PlatformInvoice::with(['tenant', 'subscription'])->latest('invoice_date')->paginate(15);
+        $invoices = PlatformInvoice::with(['tenant', 'subscription.plan'])->latest('invoice_date')->paginate(15);
         $gyms = Tenant::all();
-        $plans = Plan::all();
+        $plans = Plan::with('features')->get();
 
         return view('admin.subscriptions', compact('subscriptions', 'invoices', 'gyms', 'plans'));
     }
@@ -467,7 +496,7 @@ class AdminController extends Controller implements HasMiddleware
     {
         TenantContext::setBypass(true);
 
-        $sub = Subscription::findOrFail($id);
+        $sub = Subscription::with(['tenant', 'plan', 'invoices', 'payments'])->findOrFail($id);
 
         $validated = $request->validate([
             'status' => 'required|in:TRIAL,ACTIVE,PAST_DUE,GRACE_PERIOD,SUSPENDED,CANCELLED,EXPIRED',
@@ -477,18 +506,61 @@ class AdminController extends Controller implements HasMiddleware
             'trial_ends_at' => 'nullable|date',
         ]);
 
+        $newPlan = Plan::findOrFail($validated['plan_id']);
+        $newPrice = (float) ($validated['billing_cycle'] === 'yearly' ? $newPlan->price_yearly : $newPlan->price_monthly);
+
+        $endsAt = ! empty($validated['ends_at']) ? Carbon::parse($validated['ends_at']) : $sub->ends_at;
+        $trialEndsAt = ! empty($validated['trial_ends_at']) ? Carbon::parse($validated['trial_ends_at']) : $sub->trial_ends_at;
+
         $sub->update([
             'status' => $validated['status'],
             'plan_id' => $validated['plan_id'],
             'billing_cycle' => $validated['billing_cycle'],
-            'ends_at' => $validated['ends_at'] ? Carbon::parse($validated['ends_at']) : $sub->ends_at,
-            'trial_ends_at' => $validated['trial_ends_at'] ? Carbon::parse($validated['trial_ends_at']) : $sub->trial_ends_at,
+            'ends_at' => $endsAt,
+            'trial_ends_at' => $trialEndsAt,
         ]);
+
+        // Sync invoices & payments to match the updated subscription plan & amount
+        if ($validated['status'] === 'ACTIVE' && $newPrice > 0) {
+            $latestInvoice = $sub->invoices()->latest('invoice_date')->first()
+                ?? PlatformInvoice::where('tenant_id', $sub->tenant_id)->latest('invoice_date')->first();
+
+            if ($latestInvoice) {
+                $latestInvoice->update([
+                    'subscription_id' => $sub->id,
+                    'subtotal' => $newPrice,
+                    'total' => $newPrice,
+                    'status' => 'PAID',
+                ]);
+            } else {
+                PlatformInvoice::create([
+                    'tenant_id' => $sub->tenant_id,
+                    'subscription_id' => $sub->id,
+                    'invoice_number' => 'INV-SAAS-'.strtoupper(Str::random(6)).'-'.date('Y'),
+                    'subtotal' => $newPrice,
+                    'discount' => 0.00,
+                    'tax' => 0.00,
+                    'total' => $newPrice,
+                    'currency' => $sub->tenant?->currency ?? 'INR',
+                    'status' => 'PAID',
+                    'invoice_date' => now()->toDateString(),
+                    'paid_at' => now(),
+                ]);
+            }
+
+            $latestPayment = $sub->payments()->latest('paid_at')->first();
+            if ($latestPayment) {
+                $latestPayment->update([
+                    'amount' => $newPrice,
+                    'status' => 'SUCCESS',
+                ]);
+            }
+        }
 
         // Sync tenant status
         $sub->tenant->update(['status' => in_array($validated['status'], ['ACTIVE', 'TRIAL']) ? $validated['status'] : $validated['status']]);
 
-        return back()->with('success', "Subscription for {$sub->tenant->name} updated successfully!");
+        return back()->with('success', "Subscription for {$sub->tenant->name} updated successfully to {$newPlan->name} ({$validated['billing_cycle']})!");
     }
 
     public function recordManualPayment(Request $request): RedirectResponse
@@ -529,7 +601,7 @@ class AdminController extends Controller implements HasMiddleware
 
         $query = User::with('tenant');
 
-        if ($request->search) {
+        if ($request->filled('search')) {
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
@@ -538,18 +610,20 @@ class AdminController extends Controller implements HasMiddleware
             });
         }
 
-        if ($request->role) {
-            $query->where('role', $request->role);
+        // Default to 'gym_owner' on initial load; if user explicitly submits empty string ('') or 'all', show all roles
+        $selectedRole = $request->has('role') ? $request->role : 'gym_owner';
+        if (! empty($selectedRole) && $selectedRole !== 'all') {
+            $query->where('role', $selectedRole);
         }
 
-        if ($request->tenant_id) {
+        if ($request->filled('tenant_id')) {
             $query->where('tenant_id', $request->tenant_id);
         }
 
         $users = $query->latest()->paginate(20)->withQueryString();
         $gyms = Tenant::all();
 
-        return view('admin.users', compact('users', 'gyms'));
+        return view('admin.users', compact('users', 'gyms', 'selectedRole'));
     }
 
     public function storeUser(Request $request): RedirectResponse
@@ -993,6 +1067,29 @@ class AdminController extends Controller implements HasMiddleware
         $result = $aiDietService->testConnection($apiKey, $model);
 
         return response()->json($result);
+    }
+
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        TenantContext::setBypass(true);
+        /** @var User $user */
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ], [
+            'current_password.current_password' => 'The provided current password does not match your account password.',
+            'password.different' => 'The new password must be different from your current password.',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        ActivityLog::log('super_admin_password_updated', "Super Admin {$user->name} ({$user->email}) updated their master login password");
+
+        return back()->with('success', 'Super Admin master password changed successfully!')->with('activeTab', 'security');
     }
 
     /**

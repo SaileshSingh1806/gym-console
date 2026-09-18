@@ -14,12 +14,16 @@ class MembershipController extends Controller
     {
         $query = Membership::with(['member', 'plan']);
 
-        if ($request->status) {
-            $query->where('status', $request->status);
+        if ($request->user()->role === 'member') {
+            $query->whereHas('member', function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id);
+            });
+        } elseif ($request->member_id) {
+            $query->where('member_id', $request->member_id);
         }
 
-        if ($request->member_id) {
-            $query->where('member_id', $request->member_id);
+        if ($request->status) {
+            $query->where('status', $request->status);
         }
 
         $memberships = $query->latest()->paginate($request->per_page ?? 15);
@@ -36,9 +40,16 @@ class MembershipController extends Controller
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         $membership = Membership::with(['member', 'plan', 'payments'])->findOrFail($id);
+
+        if ($request->user()->role === 'member' && $membership->member?->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to view another member\'s membership.',
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,

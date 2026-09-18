@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             PermissionSeeder::class,
             SuperAdminSeeder::class,
-            CouponSeeder::class,
         ]);
     }
 }

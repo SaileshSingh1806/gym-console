@@ -14,7 +14,12 @@ class DietController extends Controller
     {
         $query = DietPlan::with(['trainer', 'meals']);
 
-        if ($request->member_id) {
+        if ($request->user()->role === 'member') {
+            $query->where(function ($q) use ($request) {
+                $q->where('is_template', true)
+                    ->orWhereHas('member', fn ($m) => $m->where('user_id', $request->user()->id));
+            });
+        } elseif ($request->member_id) {
             $query->where('member_id', $request->member_id);
         }
 
@@ -26,9 +31,16 @@ class DietController extends Controller
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         $plan = DietPlan::with(['trainer', 'meals'])->findOrFail($id);
+
+        if ($request->user()->role === 'member' && ! $plan->is_template && $plan->member?->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to view another member\'s diet plan.',
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,

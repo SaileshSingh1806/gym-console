@@ -23,13 +23,20 @@ class Setting extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public static function get(string $key, $default = null, ?int $tenantId = null)
+    public static function get(string $key, $default = null, $tenantId = false)
     {
-        $resolvedTenantId = $tenantId ?? (! TenantContext::isBypassed() ? TenantContext::tenantId() : null);
+        $resolvedTenantId = $tenantId !== false
+            ? $tenantId
+            : (! TenantContext::isBypassed() ? TenantContext::tenantId() : null);
 
-        $setting = static::where('key', $key)
-            ->where('tenant_id', $resolvedTenantId)
-            ->first();
+        $query = static::where('key', $key);
+        if ($resolvedTenantId === null) {
+            $query->whereNull('tenant_id');
+        } else {
+            $query->where('tenant_id', $resolvedTenantId);
+        }
+
+        $setting = $query->first();
 
         if (! $setting) {
             return $default;
@@ -43,9 +50,11 @@ class Setting extends Model
         };
     }
 
-    public static function set(string $key, $value, string $type = 'string', ?int $tenantId = null): self
+    public static function set(string $key, $value, string $type = 'string', $tenantId = false): self
     {
-        $resolvedTenantId = $tenantId ?? (! TenantContext::isBypassed() ? TenantContext::tenantId() : null);
+        $resolvedTenantId = $tenantId !== false
+            ? $tenantId
+            : (! TenantContext::isBypassed() ? TenantContext::tenantId() : null);
 
         $val = match ($type) {
             'json' => is_string($value) ? $value : json_encode($value),
@@ -61,12 +70,32 @@ class Setting extends Model
 
     public static function getGlobal(string $key, $default = null)
     {
-        return static::get($key, $default, null);
+        $setting = static::where('key', $key)->whereNull('tenant_id')->first();
+
+        if (! $setting) {
+            return $default;
+        }
+
+        return match ($setting->type) {
+            'json' => json_decode($setting->value, true),
+            'boolean' => filter_var($setting->value, FILTER_VALIDATE_BOOLEAN),
+            'integer' => (int) $setting->value,
+            default => $setting->value,
+        };
     }
 
     public static function setGlobal(string $key, $value, string $type = 'string'): self
     {
-        return static::set($key, $value, $type, null);
+        $val = match ($type) {
+            'json' => is_string($value) ? $value : json_encode($value),
+            'boolean' => $value ? '1' : '0',
+            default => (string) $value,
+        };
+
+        return static::updateOrCreate(
+            ['key' => $key, 'tenant_id' => null],
+            ['value' => $val, 'type' => $type]
+        );
     }
 
     public static function getAllGlobal(): array

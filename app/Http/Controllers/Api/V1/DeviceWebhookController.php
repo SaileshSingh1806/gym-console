@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Device;
 use App\Services\AccessControl\AccessControlService;
+use App\Services\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -23,17 +24,9 @@ class DeviceWebhookController extends Controller
         $device = null;
 
         if ($secret) {
-            $device = Device::where('device_secret', $secret)->first();
+            $device = Device::withoutGlobalScopes()->where('device_secret', $secret)->first();
         } elseif ($serial) {
-            $device = Device::where('serial_number', $serial)->first();
-        }
-
-        if (! $device) {
-            // Fallback: look for device specified in route or payload for demo/local simulator
-            $deviceId = $request->input('device_id');
-            if ($deviceId) {
-                $device = Device::find($deviceId);
-            }
+            $device = Device::withoutGlobalScopes()->where('serial_number', $serial)->first();
         }
 
         if (! $device) {
@@ -41,6 +34,13 @@ class DeviceWebhookController extends Controller
                 'success' => false,
                 'message' => 'Unauthorized device or unknown device identifier.',
             ], 401);
+        }
+
+        if ($device->tenant) {
+            TenantContext::setTenant($device->tenant);
+        }
+        if ($device->branch) {
+            TenantContext::setBranch($device->branch);
         }
 
         $result = $this->accessControlService->processDeviceEvent($device, $request->all());

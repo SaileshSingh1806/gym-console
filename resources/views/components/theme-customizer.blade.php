@@ -525,10 +525,10 @@ document.addEventListener('alpine:init', () => {
         <button @click="langDropdownOpen = !langDropdownOpen"
                 type="button"
                 title="Change Language"
-                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all text-xs font-semibold shadow-sm cursor-pointer theme-btn">
+                class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 dark:text-slate-300 dark:hover:text-white dark:border-slate-700/60 transition-all text-xs font-semibold shadow-sm cursor-pointer theme-btn">
             <span class="text-sm leading-none" x-text="currentLangObj.flag">🌐</span>
             <span class="font-bold uppercase tracking-wider text-[11px]" x-text="currentLangObj.code">EN</span>
-            <svg class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="langDropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 text-slate-500 dark:text-slate-400 transition-transform duration-200" :class="langDropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
@@ -542,11 +542,11 @@ document.addEventListener('alpine:init', () => {
              x-transition:leave="transition ease-in duration-100"
              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
-             class="absolute right-0 mt-2 w-56 bg-slate-900 rounded-xl border border-slate-800 shadow-2xl z-[9999] overflow-hidden py-1 divide-y divide-slate-800/60">
+             class="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-[9999] overflow-hidden py-1 divide-y divide-slate-100 dark:divide-slate-800/60">
             
-            <div class="px-3.5 py-2 bg-slate-950/70 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Select Language</span>
-                <span class="text-[10px] text-amber-400 font-semibold">Translate</span>
+            <div class="px-3.5 py-2 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Select Language</span>
+                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Translate</span>
             </div>
 
             <div class="max-h-64 overflow-y-auto p-1 space-y-0.5">
@@ -554,15 +554,15 @@ document.addEventListener('alpine:init', () => {
                     <button type="button"
                             @click="selectLanguage(lang.code)"
                             class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-colors text-left cursor-pointer"
-                            :class="selectedLang === lang.code ? 'bg-amber-500/15 text-amber-400 font-bold' : 'text-slate-300 hover:bg-slate-800 hover:text-white'">
+                            :class="selectedLang === lang.code ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'">
                         <div class="flex items-center gap-2.5">
                             <span class="text-base leading-none" x-text="lang.flag"></span>
                             <div>
-                                <div class="font-medium" x-text="lang.name"></div>
-                                <div class="text-[10px] text-slate-400 font-normal" x-text="lang.native"></div>
+                                <div class="font-medium text-slate-900 dark:text-white" x-text="lang.name"></div>
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-normal" x-text="lang.native"></div>
                             </div>
                         </div>
-                        <svg x-show="selectedLang === lang.code" class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="selectedLang === lang.code" class="w-4 h-4 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                         </svg>
                     </button>
@@ -575,8 +575,8 @@ document.addEventListener('alpine:init', () => {
     <button @click="drawerOpen = true"
             type="button"
             title="Theme Settings"
-            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition-all text-xs font-semibold shadow-sm group cursor-pointer theme-btn">
-        <svg class="w-4 h-4 text-emerald-400 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-300 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 dark:text-slate-300 dark:hover:text-white dark:border-slate-700/60 transition-all text-xs font-semibold shadow-sm group cursor-pointer theme-btn">
+        <svg class="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
@@ -594,9 +594,9 @@ document.addEventListener('alpine:init', () => {
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
                  @click="drawerOpen = false"
-                 class="fixed inset-0 bg-black/70 backdrop-blur-sm"></div>
+                 class="fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-xs"></div>
 
-            <!-- Slide-Over Theme Drawer Panel (FitPlex Match) -->
+            <!-- Slide-Over Theme Drawer Panel -->
             <div x-show="drawerOpen"
                  x-transition:enter="transition transform ease-out duration-300"
                  x-transition:enter-start="translate-x-full"
@@ -604,41 +604,41 @@ document.addEventListener('alpine:init', () => {
                  x-transition:leave="transition transform ease-in duration-200"
                  x-transition:leave-start="translate-x-0"
                  x-transition:leave-end="translate-x-full"
-                 class="fixed inset-y-0 right-0 max-w-[380px] sm:max-w-[400px] w-full bg-[#0b1329] border-l border-slate-800/80 shadow-2xl flex flex-col justify-between text-slate-100 overflow-hidden h-screen drawer-panel">
+                 class="fixed inset-y-0 right-0 max-w-[380px] sm:max-w-[400px] w-full bg-white dark:bg-[#0b1329] border-l border-slate-200 dark:border-slate-800/80 shadow-2xl flex flex-col justify-between text-slate-900 dark:text-slate-100 overflow-hidden h-screen z-50">
 
                 <!-- Drawer Header -->
-                <div class="px-5 py-4 border-b border-slate-800/80 bg-[#080e1e] flex items-center justify-between shrink-0">
-                    <h3 class="font-extrabold text-white text-sm tracking-wider uppercase">THEME SETTINGS</h3>
-                    <button @click="drawerOpen = false" type="button" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#080e1e] flex items-center justify-between shrink-0">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-sm tracking-wider uppercase">THEME SETTINGS</h3>
+                    <button @click="drawerOpen = false" type="button" class="p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
                 <!-- Navigation Tabs (Palette Icon & Font 'A' Icon) -->
-                <div class="px-5 pt-3 pb-2 border-b border-slate-800/60 bg-[#0a1024] flex items-center justify-center gap-8 shrink-0">
+                <div class="px-5 pt-3 pb-2 border-b border-slate-200 dark:border-slate-800/60 bg-slate-50/70 dark:bg-[#0a1024] flex items-center justify-center gap-8 shrink-0">
                     <!-- Tab 1: Theme & Palette -->
                     <button type="button"
                             @click="activeTab = 'layout'"
                             class="pb-2 px-3 relative font-bold text-xs transition-all flex items-center gap-2 cursor-pointer"
-                            :class="activeTab === 'layout' ? 'text-white' : 'text-slate-400 hover:text-slate-200'">
+                            :class="activeTab === 'layout' ? 'text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                         </svg>
-                        <div x-show="activeTab === 'layout'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400 rounded-full"></div>
+                        <div x-show="activeTab === 'layout'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 dark:bg-emerald-400 rounded-full"></div>
                     </button>
 
                     <!-- Tab 2: Typography 'A' -->
                     <button type="button"
                             @click="activeTab = 'typography'"
                             class="pb-2 px-3 relative font-bold text-sm transition-all flex items-center gap-2 cursor-pointer"
-                            :class="activeTab === 'typography' ? 'text-white' : 'text-slate-400 hover:text-slate-200'">
+                            :class="activeTab === 'typography' ? 'text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'">
                         <span class="font-extrabold text-base tracking-tight leading-none font-serif">A</span>
-                        <div x-show="activeTab === 'typography'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400 rounded-full"></div>
+                        <div x-show="activeTab === 'typography'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 dark:bg-emerald-400 rounded-full"></div>
                     </button>
                 </div>
 
                 <!-- Drawer Content Body -->
-                <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+                <div class="flex-1 overflow-y-auto px-5 py-5 space-y-6 bg-white dark:bg-[#0b1329]">
 
                     <!-- TAB 1: LAYOUT & COLOR SETTINGS -->
                     <div x-show="activeTab === 'layout'" class="space-y-6">
@@ -647,8 +647,8 @@ document.addEventListener('alpine:init', () => {
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">THEME MODE</h4>
-                                    <p class="text-[11px] text-slate-400">Light / Dark / System</p>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">THEME MODE</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Light / Dark / System</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 gap-3">
@@ -656,8 +656,8 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setMode('light')"
                                         class="h-14 rounded-xl border transition-all flex items-center justify-center p-2 cursor-pointer relative"
-                                        :class="theme.mode === 'light' ? 'border-emerald-400 ring-2 ring-emerald-400/40' : 'border-slate-700/80 hover:border-slate-600'">
-                                    <div class="w-full h-full bg-white rounded-lg shadow-inner flex items-center justify-center text-slate-900 text-xs font-bold">
+                                        :class="theme.mode === 'light' ? 'border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-[#111c38] hover:border-slate-300 dark:hover:border-slate-600'">
+                                    <div class="w-full h-full bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-900 dark:text-white text-xs font-bold">
                                         Light
                                     </div>
                                 </button>
@@ -666,8 +666,8 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setMode('dark')"
                                         class="h-14 rounded-xl border transition-all flex items-center justify-center p-2 cursor-pointer relative"
-                                        :class="theme.mode === 'dark' ? 'border-emerald-400 ring-2 ring-emerald-400/40' : 'border-slate-700/80 hover:border-slate-600'">
-                                    <div class="w-full h-full bg-[#111c38] rounded-lg border border-slate-700/60 flex items-center justify-center text-slate-200 text-xs font-bold">
+                                        :class="theme.mode === 'dark' ? 'border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-[#111c38] hover:border-slate-300 dark:hover:border-slate-600'">
+                                    <div class="w-full h-full bg-slate-900 rounded-lg border border-slate-700/60 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                                         Dark
                                     </div>
                                 </button>
@@ -676,20 +676,20 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setMode('system')"
                                         class="h-14 rounded-xl border transition-all flex items-center justify-center p-2 cursor-pointer relative"
-                                        :class="theme.mode === 'system' ? 'border-emerald-400 ring-2 ring-emerald-400/40' : 'border-slate-700/80 hover:border-slate-600'">
-                                    <div class="w-full h-full bg-[#111c38] rounded-lg border border-slate-700/60 flex items-center justify-center text-cyan-400">
+                                        :class="theme.mode === 'system' ? 'border-emerald-500 ring-2 ring-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-[#111c38] hover:border-slate-300 dark:hover:border-slate-600'">
+                                    <div class="w-full h-full bg-slate-100 dark:bg-[#111c38] rounded-lg border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-700 dark:text-cyan-400">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
                                     </div>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- 2. Accent Color Palette (Exact FitPlex Matching media_1788971845608.png) -->
+                        <!-- 2. Accent Color Palette -->
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">ACCENT COLOR</h4>
-                                    <p class="text-[11px] text-slate-400">Choose your primary theme color</p>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">ACCENT COLOR</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Choose your primary theme color</p>
                                 </div>
                             </div>
                             
@@ -777,33 +777,33 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="toggleCustomPicker()"
                                         title="Pick Custom Color"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105 border-2 bg-slate-950"
-                                        :class="theme.isCustom ? 'border-white ring-2 ring-emerald-400/50' : 'border-slate-700'"
+                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105 border-2 bg-slate-100 dark:bg-slate-950"
+                                        :class="theme.isCustom ? 'border-emerald-500 ring-2 ring-emerald-500/50' : 'border-slate-300 dark:border-slate-700'"
                                         :style="theme.isCustom ? `background-color: ${theme.customHex};` : ''">
                                     <div x-show="theme.isCustom" class="w-6 h-6 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center">
                                         <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </div>
-                                    <div x-show="!theme.isCustom" class="text-white font-bold text-sm">
+                                    <div x-show="!theme.isCustom" class="text-slate-800 dark:text-white font-bold text-sm">
                                         ✓
                                     </div>
                                 </button>
                             </div>
 
-                            <!-- Integrated Inline Color Picker Panel (Exact Reference Box) -->
+                            <!-- Integrated Inline Color Picker Panel -->
                             <div x-show="showCustomPicker"
                                  x-cloak
                                  x-transition
-                                 class="mt-4 p-4 rounded-2xl bg-white text-slate-900 shadow-2xl border border-slate-200 space-y-3.5 w-full">
+                                 class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-800 space-y-3.5 w-full">
                                 
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-extrabold uppercase tracking-wide text-slate-800">Custom Color</span>
-                                    <button @click="showCustomPicker = false" class="text-slate-400 hover:text-slate-800 text-sm font-bold">✕</button>
+                                    <span class="text-xs font-extrabold uppercase tracking-wide text-slate-800 dark:text-slate-200">Custom Color</span>
+                                    <button @click="showCustomPicker = false" class="text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm font-bold cursor-pointer">✕</button>
                                 </div>
 
                                 <!-- Spectrum / Gradient Canvas Area -->
-                                <div class="h-28 w-full rounded-xl relative overflow-hidden shadow-inner cursor-crosshair border border-slate-200"
+                                <div class="h-28 w-full rounded-xl relative overflow-hidden shadow-inner cursor-crosshair border border-slate-200 dark:border-slate-700"
                                      :style="`background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${pickerBaseColor});`"
                                      @click="pickCanvasColor($event)">
                                     <div class="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2"
@@ -816,14 +816,14 @@ document.addEventListener('alpine:init', () => {
                                     <button type="button"
                                             @click="triggerEyeDropper()"
                                             title="Eyedropper"
-                                            class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0">
+                                            class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer shrink-0">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                         </svg>
                                     </button>
 
                                     <!-- Swatch Circle -->
-                                    <div class="w-7 h-7 rounded-full shadow-inner border border-slate-300 shrink-0"
+                                    <div class="w-7 h-7 rounded-full shadow-inner border border-slate-300 dark:border-slate-600 shrink-0"
                                          :style="`background-color: ${theme.customHex};`"></div>
 
                                     <!-- Rainbow Hue Slider -->
@@ -838,7 +838,7 @@ document.addEventListener('alpine:init', () => {
                                     </div>
 
                                     <!-- Native picker icon -->
-                                    <label class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 cursor-pointer shrink-0" title="Native Color Picker">
+                                    <label class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shrink-0" title="Native Color Picker">
                                         <input type="color" :value="theme.customHex" @input="setCustomHex($event.target.value)" class="sr-only">
                                         🎨
                                     </label>
@@ -847,31 +847,31 @@ document.addEventListener('alpine:init', () => {
                                 <!-- R, G, B Inputs Row -->
                                 <div class="grid grid-cols-4 gap-2 text-center text-xs font-semibold">
                                     <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.r" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase mt-1 block">R</span>
+                                        <input type="number" min="0" max="255" x-model.number="rgb.r" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">R</span>
                                     </div>
                                     <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.g" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase mt-1 block">G</span>
+                                        <input type="number" min="0" max="255" x-model.number="rgb.g" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">G</span>
                                     </div>
                                     <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.b" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900 text-xs focus:ring-1 focus:ring-slate-900 focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase mt-1 block">B</span>
+                                        <input type="number" min="0" max="255" x-model.number="rgb.b" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">B</span>
                                     </div>
                                     <div>
-                                        <input type="text" x-model="theme.customHex" @input="setCustomHex(theme.customHex)" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 bg-slate-50 text-slate-900 text-xs uppercase focus:ring-1 focus:ring-slate-900 focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 font-bold uppercase mt-1 block">HEX</span>
+                                        <input type="text" x-model="theme.customHex" @input="setCustomHex(theme.customHex)" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs uppercase focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
+                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">HEX</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 3. Sidebar Option (Caption Hide / Show) -->
-                        <div class="pt-3 border-t border-slate-800/80">
+                        <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">SIDEBAR OPTION</h4>
-                                    <p class="text-[11px] text-slate-400">Caption Hide / Show</p>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">SIDEBAR OPTION</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Caption Hide / Show</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
@@ -879,39 +879,39 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setSidebarCaption(true)"
                                         class="h-16 rounded-xl border p-2.5 transition-all flex flex-col justify-between cursor-pointer"
-                                        :class="theme.sidebarCaption ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
+                                        :class="theme.sidebarCaption ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
                                     <div class="flex items-center gap-1.5">
-                                        <div class="w-2.5 h-1 bg-emerald-400 rounded-full"></div>
-                                        <div class="w-8 h-1 bg-slate-500 rounded-full"></div>
+                                        <div class="w-2.5 h-1 bg-emerald-500 rounded-full"></div>
+                                        <div class="w-8 h-1 bg-slate-400 dark:bg-slate-500 rounded-full"></div>
                                     </div>
                                     <div class="space-y-1">
-                                        <div class="w-12 h-1 bg-slate-400 rounded-full"></div>
-                                        <div class="w-10 h-1 bg-slate-600 rounded-full"></div>
+                                        <div class="w-12 h-1 bg-slate-300 dark:bg-slate-400 rounded-full"></div>
+                                        <div class="w-10 h-1 bg-slate-400 dark:bg-slate-600 rounded-full"></div>
                                     </div>
-                                    <span class="text-[10px] font-bold text-slate-300">Show Captions</span>
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Show Captions</span>
                                 </button>
 
                                 <!-- Caption Hide Card -->
                                 <button type="button"
                                         @click="setSidebarCaption(false)"
                                         class="h-16 rounded-xl border p-2.5 transition-all flex flex-col justify-between cursor-pointer"
-                                        :class="!theme.sidebarCaption ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
+                                        :class="!theme.sidebarCaption ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
                                     <div class="space-y-1.5 pt-1">
-                                        <div class="w-12 h-1 bg-slate-400 rounded-full"></div>
-                                        <div class="w-10 h-1 bg-slate-600 rounded-full"></div>
-                                        <div class="w-8 h-1 bg-slate-600 rounded-full"></div>
+                                        <div class="w-12 h-1 bg-slate-300 dark:bg-slate-400 rounded-full"></div>
+                                        <div class="w-10 h-1 bg-slate-400 dark:bg-slate-600 rounded-full"></div>
+                                        <div class="w-8 h-1 bg-slate-400 dark:bg-slate-600 rounded-full"></div>
                                     </div>
-                                    <span class="text-[10px] font-bold text-slate-300">Hide Captions</span>
+                                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300">Hide Captions</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- 4. Theme Layout (LTR / RTL) -->
-                        <div class="pt-3 border-t border-slate-800/80">
+                        <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">THEME LAYOUT</h4>
-                                    <p class="text-[11px] text-slate-400">LTR / RTL</p>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">THEME LAYOUT</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">LTR / RTL</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
@@ -919,36 +919,36 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setDirection('ltr')"
                                         class="h-14 rounded-xl border p-2.5 transition-all flex items-center justify-between cursor-pointer"
-                                        :class="theme.direction === 'ltr' ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
-                                    <div class="w-3 h-8 bg-slate-700 rounded-sm"></div>
+                                        :class="theme.direction === 'ltr' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
+                                    <div class="w-3 h-8 bg-slate-300 dark:bg-slate-700 rounded-xs"></div>
                                     <div class="flex-1 ml-2 space-y-1">
-                                        <div class="w-full h-2 bg-slate-600 rounded-xs"></div>
-                                        <div class="w-3/4 h-2 bg-slate-700 rounded-xs"></div>
+                                        <div class="w-full h-2 bg-slate-400 dark:bg-slate-600 rounded-xs"></div>
+                                        <div class="w-3/4 h-2 bg-slate-300 dark:bg-slate-700 rounded-xs"></div>
                                     </div>
-                                    <span class="text-[11px] font-bold text-slate-300 ml-2">LTR</span>
+                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 ml-2">LTR</span>
                                 </button>
 
                                 <!-- RTL Card -->
                                 <button type="button"
                                         @click="setDirection('rtl')"
                                         class="h-14 rounded-xl border p-2.5 transition-all flex items-center justify-between cursor-pointer"
-                                        :class="theme.direction === 'rtl' ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
-                                    <span class="text-[11px] font-bold text-slate-300 mr-2">RTL</span>
+                                        :class="theme.direction === 'rtl' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
+                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mr-2">RTL</span>
                                     <div class="flex-1 mr-2 space-y-1 text-right">
-                                        <div class="w-full h-2 bg-slate-600 rounded-xs ml-auto"></div>
-                                        <div class="w-3/4 h-2 bg-slate-700 rounded-xs ml-auto"></div>
+                                        <div class="w-full h-2 bg-slate-400 dark:bg-slate-600 rounded-xs ml-auto"></div>
+                                        <div class="w-3/4 h-2 bg-slate-300 dark:bg-slate-700 rounded-xs ml-auto"></div>
                                     </div>
-                                    <div class="w-3 h-8 bg-slate-700 rounded-sm"></div>
+                                    <div class="w-3 h-8 bg-slate-300 dark:bg-slate-700 rounded-xs"></div>
                                 </button>
                             </div>
                         </div>
 
                         <!-- 5. Layout Width (Full / Fixed width) -->
-                        <div class="pt-3 border-t border-slate-800/80">
+                        <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
                             <div class="flex items-center justify-between mb-2">
                                 <div>
-                                    <h4 class="text-xs font-bold text-white uppercase tracking-wider">LAYOUT WIDTH</h4>
-                                    <p class="text-[11px] text-slate-400">Full / Fixed width</p>
+                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">LAYOUT WIDTH</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Full / Fixed width</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
@@ -956,8 +956,8 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setLayoutWidth('fluid')"
                                         class="h-14 rounded-xl border p-2.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                        :class="theme.layoutWidth === 'fluid' ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
-                                    <div class="w-full h-6 border border-dashed border-slate-500 rounded flex items-center justify-center text-[10px] font-bold text-slate-300">
+                                        :class="theme.layoutWidth === 'fluid' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
+                                    <div class="w-full h-6 border border-dashed border-slate-400 dark:border-slate-500 rounded flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
                                         Full Width
                                     </div>
                                 </button>
@@ -966,8 +966,8 @@ document.addEventListener('alpine:init', () => {
                                 <button type="button"
                                         @click="setLayoutWidth('boxed')"
                                         class="h-14 rounded-xl border p-2.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                                        :class="theme.layoutWidth === 'boxed' ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-[#0e162c] hover:border-slate-700'">
-                                    <div class="w-3/4 h-6 border border-dashed border-slate-500 rounded flex items-center justify-center text-[10px] font-bold text-slate-300">
+                                        :class="theme.layoutWidth === 'boxed' ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] hover:border-slate-300 dark:hover:border-slate-700'">
+                                    <div class="w-3/4 h-6 border border-dashed border-slate-400 dark:border-slate-500 rounded flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-300">
                                         Fixed Boxed
                                     </div>
                                 </button>
@@ -981,42 +981,42 @@ document.addEventListener('alpine:init', () => {
 
                         <!-- Font Family -->
                         <div>
-                            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">FONT FAMILY</h4>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">FONT FAMILY</h4>
                             <div class="grid grid-cols-2 gap-2.5">
                                 <template x-for="font in fontFamilies" :key="font.name">
                                     <button type="button"
                                             @click="setFontFamily(font.name)"
                                             class="p-3 rounded-xl border text-left transition-all cursor-pointer"
-                                            :class="theme.fontFamily === font.name ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400' : 'border-slate-800 bg-[#0e162c] text-slate-300 hover:border-slate-700'">
+                                            :class="theme.fontFamily === font.name ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] text-slate-800 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
                                         <div class="font-bold text-xs" :style="`font-family: '${font.name}', sans-serif;`" x-text="font.name"></div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5" x-text="font.preview"></div>
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5" x-text="font.preview"></div>
                                     </button>
                                 </template>
                             </div>
                         </div>
 
                         <!-- Font Size Scaling -->
-                        <div class="pt-3 border-t border-slate-800/80">
-                            <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-2">FONT SIZE</h4>
+                        <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">FONT SIZE</h4>
                             <div class="grid grid-cols-3 gap-2.5">
                                 <button type="button"
                                         @click="setFontSize('sm')"
                                         class="py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all cursor-pointer"
-                                        :class="theme.fontSize === 'sm' ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400 font-bold' : 'border-slate-800 bg-[#0e162c] text-slate-400 hover:border-slate-700'">
+                                        :class="theme.fontSize === 'sm' ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
                                     <span class="text-xs">A</span>
                                     <span class="text-[10px]">Small</span>
                                 </button>
                                 <button type="button"
                                         @click="setFontSize('md')"
                                         class="py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all cursor-pointer"
-                                        :class="theme.fontSize === 'md' ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400 font-bold' : 'border-slate-800 bg-[#0e162c] text-slate-400 hover:border-slate-700'">
+                                        :class="theme.fontSize === 'md' ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
                                     <span class="text-sm font-bold">A</span>
                                     <span class="text-[10px]">Regular</span>
                                 </button>
                                 <button type="button"
                                         @click="setFontSize('lg')"
                                         class="py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition-all cursor-pointer"
-                                        :class="theme.fontSize === 'lg' ? 'border-emerald-400 bg-emerald-500/15 text-emerald-400 font-bold' : 'border-slate-800 bg-[#0e162c] text-slate-400 hover:border-slate-700'">
+                                        :class="theme.fontSize === 'lg' ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
                                     <span class="text-base font-extrabold">A</span>
                                     <span class="text-[10px]">Large</span>
                                 </button>
@@ -1028,13 +1028,13 @@ document.addEventListener('alpine:init', () => {
                 </div>
 
                 <!-- Drawer Footer (Sticky Full Width Button) -->
-                <div class="p-4 border-t border-slate-800/80 bg-[#080e1e] flex items-center justify-between gap-3 shrink-0">
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#080e1e] flex items-center justify-between gap-3 shrink-0">
                     <button @click="saveSettingsToServer()"
                             type="button"
                             :disabled="saving"
-                            class="w-full py-3 px-4 rounded-xl text-slate-950 font-extrabold text-sm transition-all shadow-xl hover:opacity-95 active:scale-[0.99] text-center cursor-pointer flex items-center justify-center gap-2 theme-save-btn"
+                            class="w-full py-3 px-4 rounded-xl text-white font-extrabold text-sm transition-all shadow-xl hover:opacity-95 active:scale-[0.99] text-center cursor-pointer flex items-center justify-center gap-2 theme-save-btn"
                             :style="`background-color: ${currentAccentHex};`">
-                        <svg x-show="saving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-slate-950" fill="none" viewBox="0 0 24 24">
+                        <svg x-show="saving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                         </svg>
@@ -1056,181 +1056,13 @@ document.addEventListener('alpine:init', () => {
     .goog-te-banner-frame, .skiptranslate, iframe.skiptranslate { display: none !important; }
     body { top: 0px !important; }
 
-    /* ============================================================
-       LIGHT THEME SPECIFIC OVERRIDES (Pure Modern Crisp Style)
-       ============================================================ */
+    /* Clean light theme rules without destructive text-white resets */
     html.light {
         color-scheme: light;
     }
 
     html.light body {
-        background-color: #f4f6f9 !important;
-        color: #1e293b !important;
-    }
-
-    /* Sidebar Light */
-    html.light aside {
-        background-color: #ffffff !important;
-        border-right: 1px solid #eef2f6 !important;
-        box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.02) !important;
-    }
-
-    html.light aside div,
-    html.light aside nav {
-        background-color: #ffffff !important;
-        border-color: #f1f5f9 !important;
-    }
-
-    html.light aside nav div[class*="uppercase"] {
-        color: #94a3b8 !important;
-        font-weight: 700 !important;
-    }
-
-    html.light aside nav a {
-        color: #475569 !important;
-    }
-
-    html.light aside nav a:hover {
-        background-color: #f8fafc !important;
-        color: #0f172a !important;
-    }
-
-    html.light aside .text-white {
-        color: #0f172a !important;
-    }
-
-    html.light aside .text-slate-400,
-    html.light aside .text-slate-300 {
-        color: #64748b !important;
-    }
-
-    html.light aside div[class*="border-t"] {
-        background-color: #fafbfc !important;
-        border-color: #eef2f6 !important;
-    }
-
-    /* Top Navbar Light */
-    html.light header {
-        background-color: #ffffff !important;
-        border-color: #eef2f6 !important;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02) !important;
-    }
-
-    html.light header h1,
-    html.light header span.font-bold,
-    html.light header span.text-white {
-        color: #0f172a !important;
-    }
-
-    html.light header .text-slate-400 {
-        color: #64748b !important;
-    }
-
-    html.light .theme-btn {
-        background-color: #f1f5f9 !important;
-        color: #334155 !important;
-        border-color: #e2e8f0 !important;
-    }
-    html.light .theme-btn:hover {
-        background-color: #e2e8f0 !important;
-        color: #0f172a !important;
-    }
-
-    /* Main Area & Cards in Light Mode */
-    html.light main {
-        background-color: #f4f6f9 !important;
-    }
-
-    html.light .bg-slate-900 {
-        background-color: #ffffff !important;
-        border-color: #eef2f6 !important;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03) !important;
-    }
-
-    html.light .bg-slate-950,
-    html.light .bg-slate-950\/40,
-    html.light .bg-slate-950\/50,
-    html.light .bg-slate-950\/60,
-    html.light .bg-slate-950\/70,
-    html.light .bg-slate-950\/80 {
-        background-color: #f8fafc !important;
-        border-color: #eef2f6 !important;
-    }
-
-    html.light .bg-slate-800,
-    html.light .bg-slate-800\/30,
-    html.light .bg-slate-800\/40,
-    html.light .bg-slate-800\/50,
-    html.light .bg-slate-800\/60,
-    html.light .bg-slate-800\/80 {
-        background-color: #f1f5f9 !important;
-        color: #1e293b !important;
-        border-color: #e2e8f0 !important;
-    }
-
-    /* Typography & Text */
-    html.light .text-white {
-        color: #0f172a !important;
-    }
-
-    html.light .text-slate-100,
-    html.light .text-slate-200,
-    html.light .text-slate-300 {
-        color: #334155 !important;
-    }
-
-    html.light .text-slate-400 {
-        color: #64748b !important;
-    }
-
-    html.light .text-slate-500 {
-        color: #94a3b8 !important;
-    }
-
-    html.light .border-slate-800,
-    html.light .border-slate-700,
-    html.light .border-slate-800\/60,
-    html.light .border-slate-800\/80 {
-        border-color: #eef2f6 !important;
-    }
-
-    /* Tables in Light Mode */
-    html.light table thead {
-        background-color: #f8fafc !important;
-        color: #64748b !important;
-        border-color: #eef2f6 !important;
-    }
-
-    html.light table tbody {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-    }
-
-    html.light table tbody tr:hover {
-        background-color: #f8fafc !important;
-    }
-
-    html.light table tbody tr {
-        border-color: #f1f5f9 !important;
-    }
-
-    /* Forms & Inputs */
-    html.light input,
-    html.light select,
-    html.light textarea {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border-color: #cbd5e1 !important;
-    }
-
-    html.light input::placeholder,
-    html.light textarea::placeholder {
-        color: #94a3b8 !important;
-    }
-
-    /* Drawer Panel Keep Clean */
-    .drawer-panel {
-        background-color: #0b1329 !important;
-        color: #f8fafc !important;
+        background-color: #f4f6f9;
+        color: #1e293b;
     }
 </style>

@@ -48,9 +48,16 @@ class MemberController extends Controller
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         $member = Member::with(['branch', 'memberships.plan', 'payments', 'attendance', 'workoutPlans', 'dietPlans'])->findOrFail($id);
+
+        if ($request->user()->role === 'member' && $member->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to view another member\'s profile.',
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,

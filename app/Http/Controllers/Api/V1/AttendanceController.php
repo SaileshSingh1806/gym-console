@@ -20,12 +20,16 @@ class AttendanceController extends Controller
     {
         $query = Attendance::with(['member', 'device']);
 
-        if ($request->date) {
-            $query->where('date', $request->date);
+        if ($request->user()->role === 'member') {
+            $query->whereHas('member', function ($q) use ($request) {
+                $q->where('user_id', $request->user()->id);
+            });
+        } elseif ($request->member_id) {
+            $query->where('member_id', $request->member_id);
         }
 
-        if ($request->member_id) {
-            $query->where('member_id', $request->member_id);
+        if ($request->date) {
+            $query->where('date', $request->date);
         }
 
         $attendance = $query->latest('check_in')->paginate($request->per_page ?? 20);

@@ -26,7 +26,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen py-8 px-4 font-sans antialiased flex flex-col items-center">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen py-8 px-4 font-sans antialiased flex flex-col items-center">
 
     @php
         $currency = $tenant->currency_symbol ?? '₹';
@@ -38,7 +38,7 @@
     <!-- Top Action Toolbar -->
     <div class="no-print w-full max-w-2xl flex items-center justify-between mb-6">
         <a href="{{ route('app.members.show', $member->id) }}" 
-           class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-bold transition-all shadow-sm">
+           class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 text-xs font-bold transition-all shadow-sm">
             Close
         </a>
 

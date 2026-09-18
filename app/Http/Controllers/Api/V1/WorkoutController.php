@@ -14,7 +14,12 @@ class WorkoutController extends Controller
     {
         $query = WorkoutPlan::with(['trainer', 'exercises']);
 
-        if ($request->member_id) {
+        if ($request->user()->role === 'member') {
+            $query->where(function ($q) use ($request) {
+                $q->where('is_template', true)
+                    ->orWhereHas('member', fn ($m) => $m->where('user_id', $request->user()->id));
+            });
+        } elseif ($request->member_id) {
             $query->where('member_id', $request->member_id);
         }
 
@@ -26,9 +31,16 @@ class WorkoutController extends Controller
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function show(Request $request, int $id): JsonResponse
     {
         $plan = WorkoutPlan::with(['trainer', 'exercises'])->findOrFail($id);
+
+        if ($request->user()->role === 'member' && ! $plan->is_template && $plan->member?->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to view another member\'s workout plan.',
+            ], 403);
+        }
 
         return response()->json([
             'success' => true,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\FeatureGateService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,6 +41,11 @@ class Tenant extends Model
         return $this->hasOne(Branch::class)->where('is_main', true);
     }
 
+    public function allowedBranches()
+    {
+        return app(FeatureGateService::class)->getAllowedBranches($this);
+    }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
@@ -48,6 +54,11 @@ class Tenant extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function platformInvoices(): HasMany
+    {
+        return $this->hasMany(PlatformInvoice::class);
     }
 
     public function activeSubscription(): HasOne
@@ -146,7 +157,7 @@ class Tenant extends Model
 
     public function isSubscriptionActive(): bool
     {
-        if ($this->status === 'SUSPENDED' || $this->status === 'CANCELLED') {
+        if (in_array($this->status, ['PENDING_PAYMENT', 'SUSPENDED', 'CANCELLED', 'INACTIVE'])) {
             return false;
         }
 

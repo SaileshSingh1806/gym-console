@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Plan;
+use App\Models\Setting;
 use App\Services\SubscriptionService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
+use Database\Seeders\PlanSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,12 +35,34 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = Auth::user();
+
+            if ($user->status !== 'ACTIVE') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Your account is inactive or suspended.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
             $user = Auth::user();
 
             if ($user->isSuperAdmin()) {
                 return redirect()->intended(route('admin.dashboard'));
+            }
+
+            $tenant = $user->tenant;
+            if ($tenant && ! $tenant->isSubscriptionActive()) {
+                session([
+                    'checkout_plan_id' => $tenant->latestSubscription?->plan_id ?? Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id,
+                    'checkout_billing_cycle' => $tenant->latestSubscription?->billing_cycle ?? 'monthly',
+                ]);
+
+                return redirect()->route('auth.checkout')->with('warning', 'Please complete your subscription payment to activate your gym dashboard.');
             }
 
             return redirect()->intended(route('app.dashboard'));
@@ -53,6 +77,10 @@ class AuthController extends Controller
     {
         $selectedPlanSlug = $request->query('plan', 'starter');
         $plans = Plan::with('features')->where('is_active', true)->orderBy('sort_order')->get();
+        if ($plans->isEmpty()) {
+            (new PlanSeeder)->run();
+            $plans = Plan::with('features')->where('is_active', true)->orderBy('sort_order')->get();
+        }
         $selectedPlan = Plan::where('slug', $selectedPlanSlug)->first() ?? $plans->first();
 
         return view('auth.register', compact('plans', 'selectedPlan'));
@@ -71,12 +99,18 @@ class AuthController extends Controller
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
+        $isFreePlan = ($plan->price_monthly <= 0 && $plan->price_yearly <= 0) || $plan->slug === 'free-forever';
+        $initialStatus = $isFreePlan ? 'ACTIVE' : 'PENDING_PAYMENT';
 
-        $registration = $this->tenantService->registerGym($validated, $plan);
+        $registration = $this->tenantService->registerGym($validated, $plan, $initialStatus, null, $validated['billing_cycle']);
         $owner = $registration['owner'];
         $tenant = $registration['tenant'];
 
         Auth::login($owner);
+
+        if ($isFreePlan) {
+            return redirect()->route('app.dashboard')->with('success', "Welcome to Gym Console! Your {$plan->name} plan is now active.");
+        }
 
         // Store pending checkout details in session
         session([
@@ -89,13 +123,44 @@ class AuthController extends Controller
 
     public function showCheckout(): View
     {
-        $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id'));
+        $user = Auth::user();
+        $tenant = $user?->tenant;
+
+        if (Plan::count() === 0) {
+            (new PlanSeeder)->run();
+        }
+
+        $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id);
         $billingCycle = session('checkout_billing_cycle', 'monthly');
         $plan = Plan::findOrFail($planId);
 
-        $price = $billingCycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+        $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
 
-        return view('auth.checkout', compact('plan', 'billingCycle', 'price'));
+        $razorpayKeyId = Setting::getGlobal('razorpay_key_id', config('services.razorpay.key', env('RAZORPAY_KEY', 'rzp_test_samplekey123')));
+        $razorpayEnabled = (bool) Setting::getGlobal('razorpay_enabled', true);
+        $stripeEnabled = (bool) Setting::getGlobal('stripe_enabled', true);
+
+        $amountInPaise = (int) round($price * 100);
+        $orderId = 'order_'.Str::random(14);
+
+        $razorpayConfig = [
+            'key' => $razorpayKeyId,
+            'amount' => $amountInPaise,
+            'currency' => $tenant?->currency ?? 'INR',
+            'name' => Setting::getGlobal('app_name', 'Gym Console'),
+            'description' => "Subscription to {$plan->name} ({$billingCycle})",
+            'order_id' => $orderId,
+            'prefill' => [
+                'name' => $user?->name ?? 'Gym Owner',
+                'email' => $user?->email ?? '',
+                'contact' => $user?->phone ?? ($tenant?->phone ?? ''),
+            ],
+            'theme' => [
+                'color' => '#f59e0b',
+            ],
+        ];
+
+        return view('auth.checkout', compact('plan', 'billingCycle', 'price', 'razorpayConfig', 'razorpayEnabled', 'stripeEnabled', 'tenant', 'user'));
     }
 
     public function processCheckout(Request $request): RedirectResponse
@@ -103,14 +168,18 @@ class AuthController extends Controller
         $user = Auth::user();
         $tenant = $user->tenant;
 
-        $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id'));
+        $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id);
         $billingCycle = session('checkout_billing_cycle', 'monthly');
         $plan = Plan::findOrFail($planId);
 
-        $gateway = $request->input('gateway', 'stripe');
-        $price = $billingCycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+        $gateway = $request->input('gateway', 'razorpay');
+        $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
 
-        $transactionId = 'TXN-'.strtoupper(Str::random(12));
+        $transactionId = match ($gateway) {
+            'razorpay' => $request->input('razorpay_payment_id') ?: ('pay_'.Str::random(14)),
+            'stripe' => $request->input('stripe_payment_id') ?: ('ch_'.Str::random(14)),
+            default => 'TXN-'.strtoupper(Str::random(12)),
+        };
 
         $this->subscriptionService->activateSubscription(
             $tenant,
@@ -118,13 +187,19 @@ class AuthController extends Controller
             $billingCycle,
             $gateway,
             $transactionId,
-            (float) $price,
-            ['checkout_source' => 'web_registration', 'verified_at' => now()->toIso8601String()]
+            $price,
+            [
+                'checkout_source' => 'web_registration',
+                'razorpay_payment_id' => $request->input('razorpay_payment_id'),
+                'razorpay_order_id' => $request->input('razorpay_order_id'),
+                'razorpay_signature' => $request->input('razorpay_signature'),
+                'verified_at' => now()->toIso8601String(),
+            ]
         );
 
         session()->forget(['checkout_plan_id', 'checkout_billing_cycle']);
 
-        return redirect()->route('app.dashboard')->with('success', 'Congratulations! Your subscription has been activated successfully.');
+        return redirect()->route('app.dashboard')->with('success', "Congratulations! Your {$plan->name} subscription has been activated successfully via ".ucfirst($gateway).'.');
     }
 
     public function logout(Request $request): RedirectResponse
