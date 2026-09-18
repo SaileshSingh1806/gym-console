@@ -153,9 +153,9 @@
                 </div>
             </button>
 
-            <!-- 5. Dormant Members (Links to /app/members?status=INACTIVE) -->
-            <a href="{{ route('app.members.index', ['status' => 'INACTIVE']) }}" 
-               class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/90 shadow-xs flex items-center gap-3.5 hover:border-amber-500/50 hover:shadow-md transition-all group">
+            <!-- 5. Dormant Members (Links to /app/members?filter=dormant) -->
+            <a href="{{ route('app.members.index', ['filter' => 'dormant']) }}" 
+                class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/90 shadow-xs flex items-center gap-3.5 hover:border-amber-500/50 hover:shadow-md transition-all group">
                 <div class="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-500/20 group-hover:scale-105 transition-transform">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
@@ -357,7 +357,7 @@
                             <div class="text-xl font-black text-amber-700 dark:text-amber-400 leading-none">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 2) }}</div>
                             <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">Payments Pending</div>
                         </div>
-                        <a href="{{ route('app.members.index') }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-3">View More →</a>
+                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-3">View More →</a>
                     </div>
 
                     <!-- 5. New Clients -->
@@ -369,7 +369,7 @@
                             <div class="text-xl font-black text-slate-900 dark:text-white leading-none">{{ $metrics['new_clients_count'] }}</div>
                             <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">New Client(s)</div>
                         </div>
-                        <a href="{{ route('app.members.index') }}" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-3">View More →</a>
+                        <a href="{{ route('app.members.index', ['filter' => 'new']) }}" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-3">View More →</a>
                     </div>
 
                     <!-- 6. Renewals -->
@@ -395,7 +395,7 @@
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- 1. All Dues -->
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-indigo-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all cursor-pointer group shadow-xs">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
@@ -405,11 +405,11 @@
                                 <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">All Dues</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-extrabold text-xs">{{ $metrics['due_members_count'] }}</span>
-                    </div>
+                        <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-extrabold text-xs group-hover:scale-105 transition-transform">{{ $metrics['due_members_count'] }}</span>
+                    </a>
 
                     <!-- 2. This Month -->
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-blue-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all cursor-pointer group shadow-xs">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -419,11 +419,11 @@
                                 <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">This Month</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-extrabold text-xs">{{ $metrics['due_members_count'] }}</span>
-                    </div>
+                        <span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-extrabold text-xs group-hover:scale-105 transition-transform">{{ $metrics['due_members_count'] }}</span>
+                    </a>
 
                     <!-- 3. Due Today -->
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-amber-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all cursor-pointer group shadow-xs">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -434,10 +434,10 @@
                             </div>
                         </div>
                         <span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-extrabold text-xs">0</span>
-                    </div>
+                    </a>
 
                     <!-- 4. Defaulters -->
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between hover:border-red-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/60 transition-all cursor-pointer group shadow-xs">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -447,8 +447,8 @@
                                 <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Defaulters</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 font-extrabold text-xs">{{ $metrics['due_members_count'] }}</span>
-                    </div>
+                        <span class="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 font-extrabold text-xs group-hover:scale-105 transition-transform">{{ $metrics['due_members_count'] }}</span>
+                    </a>
                 </div>
             </div>
 
@@ -580,8 +580,10 @@
                                 <div class="flex items-center gap-2">
                                     @php
                                         $daysLeft = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now()));
+                                        $daysLeft = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
                                     @endphp
                                     <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
+                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 whitespace-nowrap">
                                         {{ $daysLeft }}d
                                     </span>
                                     @if($exp->member?->phone)
@@ -935,50 +937,109 @@
              style="display: none;"
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm">
             <div @click.away="showChurnModal = false" 
-                 class="w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
+                 class="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
                 <!-- Modal Header -->
-                <div class="p-5 bg-rose-50 dark:bg-rose-500/10 border-b border-rose-200 dark:border-rose-500/20 flex items-start justify-between">
+                <div class="p-5 bg-rose-50 dark:bg-rose-500/10 border-b border-rose-200 dark:border-rose-500/20 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-rose-700 dark:text-rose-400">Churn Risk Alert</h3>
-                            <p class="text-xs text-rose-600 dark:text-rose-300/80 font-medium">No visit in 7+ days and membership expiring within 7 days</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-base font-black text-rose-700 dark:text-rose-400">Churn Risk Alert</h3>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                                    {{ count($metrics['churn_risk_members'] ?? $metrics['churn_risk_list'] ?? []) }} Members
+                                </span>
+                            </div>
+                            <p class="text-xs text-rose-600/90 dark:text-rose-300/80 font-medium">Members inactive for 7+ days with membership expiring within 7 days</p>
                         </div>
                     </div>
                     <button @click="showChurnModal = false" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
                 </div>
 
                 <!-- Modal Body -->
-                <div class="p-6 space-y-5">
-                    <!-- Why is this a high risk info box -->
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
-                        <div class="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold">
+                <div class="p-5 space-y-4">
+                    <!-- High Churn Info Box -->
+                    <div class="p-3.5 rounded-2xl bg-rose-50/60 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/50 text-xs flex items-start gap-3">
+                        <div class="p-1 rounded-lg bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 mt-0.5 shrink-0">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-                            <span>Why is this a high risk?</span>
                         </div>
-                        <p class="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                            These members have not checked into the gym for over a week, and their plans expire in less than 7 days. A lack of attendance right before renewal is the strongest indicator that a member is going to drop out (churn).
-                        </p>
-                        <div class="pt-2 border-t border-slate-200 dark:border-slate-800/80 space-y-1">
-                            <span class="font-bold text-slate-900 dark:text-slate-200 block">📋 Recommended Actions:</span>
-                            <ul class="space-y-1 text-slate-600 dark:text-slate-400 pl-1 font-medium">
-                                <li>📞 <strong class="text-slate-800 dark:text-slate-300">Call immediately:</strong> Check in on their fitness journey and ask if they need help.</li>
-                                <li>💬 <strong class="text-slate-800 dark:text-slate-300">WhatsApp Outreach:</strong> Send a renewal reminder or special re-engagement offer.</li>
-                                <li>🎁 <strong class="text-slate-800 dark:text-slate-300">Special Offer:</strong> Offer a personal training session or renewal perk to win them back.</li>
-                            </ul>
+                        <div class="space-y-1 text-slate-700 dark:text-slate-300 font-medium">
+                            <p><strong class="text-rose-700 dark:text-rose-400 font-bold">Why is this urgent?</strong> Inactivity right before renewal is the #1 indicator of dropouts. Reach out immediately to retain these members.</p>
                         </div>
                     </div>
 
-                    <!-- Member Status / List -->
-                    <div class="py-6 flex flex-col items-center justify-center text-center">
-                        <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <p class="text-sm font-extrabold text-slate-900 dark:text-slate-300">No churn risk members detected.</p>
-                        <p class="text-xs text-slate-500 mt-0.5">Your gym member engagement is performing well.</p>
+                    <!-- Member Table List -->
+                    <div class="overflow-x-auto max-h-80 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase sticky top-0">
+                                <tr>
+                                    <th class="py-2.5 px-3.5">Member Details</th>
+                                    <th class="py-2.5 px-3.5">Current Plan</th>
+                                    <th class="py-2.5 px-3.5">Expires</th>
+                                    <th class="py-2.5 px-3.5 text-right">Quick Outreach</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-800 dark:text-slate-300 font-medium">
+                                @forelse($metrics['churn_risk_members'] ?? $metrics['churn_risk_list'] ?? [] as $crm)
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                        <td class="py-3 px-3.5">
+                                            <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                                <a href="{{ route('app.members.show', $crm->member_id) }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                                                    {{ $crm->member?->full_name }}
+                                                </a>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <span class="text-[10px] font-mono font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.2 rounded border border-rose-200/50 dark:border-rose-900/40">{{ $crm->member?->member_code }}</span>
+                                                <span class="text-[11px] text-slate-500 dark:text-slate-400">{{ $crm->member?->phone }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-3.5 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+                                            {{ $crm->plan?->name ?? 'Standard Plan' }}
+                                        </td>
+                                        <td class="py-3 px-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap text-xs">
+                                            {{ \Carbon\Carbon::parse($crm->end_date)->format('d M Y') }}
+                                        </td>
+                                        <td class="py-3 px-3.5 text-right whitespace-nowrap">
+                                            <div class="flex items-center justify-end gap-2">
+                                                @if($crm->member?->phone)
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $crm->member->phone) }}?text={{ urlencode('Hi ' . ($crm->member?->full_name ?? 'there') . ', we missed you at ' . ($tenantName ?? 'the gym') . '! Your membership expires on ' . \Carbon\Carbon::parse($crm->end_date)->format('d M') . '. Renew today for an exclusive loyalty discount!') }}" 
+                                                       target="_blank" 
+                                                       title="WhatsApp Outreach"
+                                                       class="px-2.5 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white font-bold text-[11px] transition-all inline-flex items-center gap-1.5 shadow-xs">
+                                                        <span>💬 WhatsApp</span>
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route('app.members.show', $crm->member_id) }}" 
+                                                   title="View Profile"
+                                                   class="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 transition-all inline-flex items-center shadow-xs">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="py-10 text-center text-slate-500">
+                                            <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                            </div>
+                                            <p class="text-sm font-bold text-slate-900 dark:text-slate-200">No churn risk members detected</p>
+                                            <p class="text-xs text-slate-500 mt-0.5">All expiring members are attending regularly.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <span class="text-slate-600 dark:text-slate-400 font-medium">{{ count($metrics['churn_risk_members'] ?? $metrics['churn_risk_list'] ?? []) }} churn risk members detected</span>
+                    <a href="{{ route('app.members.index', ['filter' => 'churn']) }}" class="text-rose-700 dark:text-rose-400 font-bold hover:underline flex items-center gap-1">
+                        <span>↗ View All in Directory</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1029,6 +1090,10 @@
                                         @php $dl = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now())); @endphp
                                         <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400">
                                             {{ $dl }}d
+                                    <td class="py-2.5 px-3 whitespace-nowrap">
+                                        @php $dl = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay()))); @endphp
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 whitespace-nowrap inline-block">
+                                            {{ $dl }}d left
                                         </span>
                                     </td>
                                     <td class="py-2.5 px-3">

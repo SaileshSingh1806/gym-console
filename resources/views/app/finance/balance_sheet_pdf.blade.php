@@ -211,17 +211,20 @@
             </table>
         </div>
 
-        <!-- Summary Box -->
-        <div class="border border-black p-3.5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="space-y-1 text-xs">
-                <div class="font-bold text-black">Summary:</div>
+        <!-- Summary & Receivables Box -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="border border-black p-3.5 space-y-1 text-xs">
+                <div class="font-bold text-black uppercase tracking-wider text-[11px]">Financial Summary:</div>
                 <div class="text-slate-800">Total Income (B): ₹ {{ number_format($totalIncome, 2) }}</div>
                 <div class="text-slate-800">Total Expenditure (A): ₹ {{ $totalExpenses > 0 ? number_format($totalExpenses, 2) : '-' }}</div>
                 <div class="font-bold text-black">Surplus (B-A): ₹ {{ number_format($netProfit, 2) }}</div>
             </div>
-            <div class="text-left sm:text-right text-[11px] text-slate-700 italic flex flex-col justify-end space-y-0.5">
-                <div>Amount in Indian Rupees (₹)</div>
-                <div>Figures rounded to nearest rupee</div>
+
+            <div class="border border-black p-3.5 space-y-1 text-xs bg-slate-50">
+                <div class="font-bold text-black uppercase tracking-wider text-[11px]">Outstanding Receivables &amp; Dues:</div>
+                <div class="text-slate-800 flex justify-between"><span>General Membership Dues:</span> <span class="font-mono font-bold">₹ {{ number_format($membershipDues ?? 0, 2) }}</span></div>
+                <div class="text-slate-800 flex justify-between"><span>Personal Training (PT) Dues:</span> <span class="font-mono font-bold">₹ {{ number_format($ptDues ?? 0, 2) }}</span></div>
+                <div class="font-bold text-black border-t border-black/40 pt-0.5 flex justify-between"><span>Total Outstanding:</span> <span class="font-mono font-bold">₹ {{ number_format($totalDues ?? 0, 2) }}</span></div>
             </div>
         </div>
 

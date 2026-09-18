@@ -139,7 +139,7 @@ class AppController extends Controller
         } elseif ($request->filter === 'churn') {
             $query->whereHas('activeMembership', function ($q) {
                 $q->where('status', 'ACTIVE')
-                    ->whereBetween('end_date', [now()->toDateString(), now()->addDays(3)->toDateString()]);
+                    ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()]);
             });
         } elseif ($request->filter === 'due' || $request->filter === 'pending_fee') {
             $query->where(function ($subQ) {
@@ -153,6 +153,13 @@ class AppController extends Controller
             $query->whereNotNull('dob')
                 ->whereMonth('dob', now()->month)
                 ->whereDay('dob', now()->day);
+        } elseif ($request->filter === 'dormant') {
+            $query->where('status', 'ACTIVE')
+                ->whereDoesntHave('attendances', function ($q) {
+                    $q->where('date', '>=', now()->subDays(14)->toDateString());
+                });
+        } elseif ($request->filter === 'new') {
+            $query->where('created_at', '>=', now()->startOfMonth());
         }
 
         $members = $query->latest()->paginate(15)->withQueryString();
@@ -666,6 +673,8 @@ class AppController extends Controller
             'attendance' => fn ($q) => $q->latest()->take(30),
             'workoutPlans',
             'dietPlans',
+            'classBookings.schedule.gymClass.instructor',
+            'classBookings.schedule.trainer',
         ])->findOrFail($id);
 
         $membershipPlans = MembershipPlan::where('is_active', true)->get();
@@ -677,7 +686,6 @@ class AppController extends Controller
         $assignedTrainer = $trainerId ? Trainer::find($trainerId) : null;
 
         $salesRepId = $member->metadata['sales_rep_id'] ?? null;
-        $salesRep = $salesRepId ? User::find($salesRepId) : null;
         $salesRep = $salesRepId ? User::where('tenant_id', $tenant->id)->find($salesRepId) : null;
 
         $activeMembership = $member->activeMembership ?? $member->memberships()->latest()->first();
@@ -695,6 +703,16 @@ class AppController extends Controller
             ->take(20)
             ->get();
 
+        $availableClassSchedules = ClassSchedule::where('tenant_id', $tenant->id)
+            ->where('is_active', true)
+            ->with(['gymClass.instructor', 'trainer'])
+            ->get();
+
+        $allGymClasses = GymClass::where('tenant_id', $tenant->id)
+            ->where('is_active', true)
+            ->with(['schedules.trainer', 'instructor'])
+            ->get();
+
         return view('app.members.show', compact(
             'member',
             'activeMembership',
@@ -707,7 +725,9 @@ class AppController extends Controller
             'staff',
             'assignedTrainer',
             'salesRep',
-            'auditLogs'
+            'auditLogs',
+            'availableClassSchedules',
+            'allGymClasses'
         ));
     }
 
@@ -844,13 +864,34 @@ class AppController extends Controller
             $meta['pt_packages'] = $ptPackages;
             $member->update(['metadata' => $meta]);
 
+            // Create persistent MemberPtPackage record
+            $totalAmount = max(0, (float) $validated['amount'] - (float) ($validated['discount'] ?? 0) + (float) ($validated['tax'] ?? 0));
             $collected = (float) ($validated['collected_amount'] ?? 0);
+
+            $ptRecord = MemberPtPackage::create([
+                'tenant_id' => $tenant->id,
+                'branch_id' => $member->branch_id,
+                'member_id' => $member->id,
+                'trainer_id' => $trainer?->id,
+                'package_name' => $validated['pt_package_name'],
+                'total_sessions' => (int) ($validated['sessions'] ?? 12),
+                'used_sessions' => 0,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+                'price' => (float) $validated['amount'],
+                'discount' => (float) ($validated['discount'] ?? 0),
+                'final_amount' => $totalAmount,
+                'paid_amount' => $collected,
+                'status' => 'ACTIVE',
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
             if ($collected > 0) {
                 MemberPayment::create([
                     'tenant_id' => $tenant->id,
                     'branch_id' => $member->branch_id,
                     'member_id' => $member->id,
-                    'membership_id' => $member->activeMembership?->id,
+                    'membership_id' => null,
                     'amount' => $collected,
                     'payment_date' => now()->toDateString(),
                     'payment_method' => $validated['payment_method'] ?? 'cash',
@@ -2433,6 +2474,79 @@ class AppController extends Controller
         $booking->update(['status' => $validated['status']]);
 
         return back()->with('success', "Booking status updated to {$validated['status']}.");
+    }
+
+    public function enrollMemberInClass(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $rawScheduleId = $request->input('class_schedule_id');
+        $gymClassId = $request->input('gym_class_id');
+        $classScheduleId = null;
+
+        if ($rawScheduleId && str_starts_with((string) $rawScheduleId, 'class_')) {
+            $gymClassId = (int) str_replace('class_', '', (string) $rawScheduleId);
+        } elseif ($rawScheduleId && is_numeric($rawScheduleId)) {
+            $classScheduleId = (int) $rawScheduleId;
+        }
+
+        $validated = $request->validate([
+            'booking_date' => 'nullable|date',
+            'status' => 'nullable|in:BOOKED,ATTENDED,CANCELLED',
+        ]);
+
+        $schedule = null;
+        if (! empty($classScheduleId)) {
+            $schedule = ClassSchedule::where('tenant_id', $tenant->id)->with('gymClass')->find($classScheduleId);
+        } elseif (! empty($gymClassId)) {
+            $gymClass = GymClass::where('tenant_id', $tenant->id)->with('schedules')->find($gymClassId);
+            $schedule = $gymClass?->schedules()->where('is_active', true)->first() ?? $gymClass?->schedules()->first();
+            if (! $schedule && $gymClass) {
+                // Auto create a schedule for this class if none exists
+                $schedule = ClassSchedule::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $gymClass->branch_id ?? ($member->branch_id ?? 1),
+                    'gym_class_id' => $gymClass->id,
+                    'trainer_id' => $gymClass->instructor_id,
+                    'day_of_week' => strtolower(now()->format('l')),
+                    'start_time' => '07:00:00',
+                    'end_time' => '08:00:00',
+                    'is_active' => true,
+                ]);
+            }
+        }
+
+        if (! $schedule) {
+            return back()->with('error', 'Please select a valid class or schedule to enroll.');
+        }
+
+        $bookingDate = $validated['booking_date'] ?? now()->toDateString();
+        $status = $validated['status'] ?? 'BOOKED';
+
+        $booking = ClassBooking::updateOrCreate([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $schedule->branch_id,
+            'class_schedule_id' => $schedule->id,
+            'member_id' => $member->id,
+            'booking_date' => $bookingDate,
+        ], [
+            'status' => $status,
+        ]);
+
+        ActivityLog::log('class_enrolled', "Enrolled member '{$member->full_name}' in class '{$schedule->gymClass->name}'", $booking);
+
+        return back()->with('success', "Member successfully enrolled in '{$schedule->gymClass->name}'!");
+    }
+
+    public function deleteClassBooking(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $booking = ClassBooking::where('tenant_id', $tenant->id)->with(['schedule.gymClass', 'member'])->findOrFail($id);
+        $className = $booking->schedule?->gymClass?->name ?? 'Class';
+        $booking->delete();
+
+        return back()->with('success', "Enrollment in '{$className}' removed successfully.");
     }
 
     public function workouts(): View
@@ -4028,12 +4142,45 @@ class AppController extends Controller
             $expensesQuery->where('branch_id', $branchId);
         }
 
-        $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
+        // 1. Membership Income (General Gym Memberships)
+        $membershipPaymentsQuery = (clone $paymentsQuery)->where(function ($q) {
+            $q->where('notes', 'not like', '%PT Package%')
+                ->orWhereNull('notes');
+        });
+        $membershipIncome = (float) $membershipPaymentsQuery->sum('amount');
+
+        // 2. Service Bookings Income (Lockers, Spa, Steam, etc.)
         $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
-        $ptIncome = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+
+        // 3. Personal Training Packages Income
+        $ptPaymentsSum = (float) (clone $paymentsQuery)->where('notes', 'like', '%PT Package%')->sum('amount');
+        $ptPackagesSum = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+        $ptIncome = max($ptPackagesSum, $ptPaymentsSum);
+
+        // 4. POS / Inventory Sales Income (Real sold products)
         $posSales = (float) ($posSalesQuery->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
         $otherIncome = $serviceIncome + $ptIncome;
         $totalIncome = $membershipIncome + $posSales + $otherIncome;
+
+        // 5. Outstanding Receivables & Dues Breakdown
+        $membershipDuesQuery = Membership::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)');
+
+        $ptDuesQuery = MemberPtPackage::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)');
+
+        if ($branchId) {
+            $membershipDuesQuery->where('branch_id', $branchId);
+            $ptDuesQuery->where('branch_id', $branchId);
+        }
+
+        $membershipDues = (float) ($membershipDuesQuery->selectRaw('SUM(COALESCE(final_amount, price) - COALESCE(paid_amount, 0)) as due')->value('due') ?? 0.0);
+        $ptDues = (float) ($ptDuesQuery->selectRaw('SUM(COALESCE(final_amount, price) - COALESCE(paid_amount, 0)) as due')->value('due') ?? 0.0);
+        $totalDues = $membershipDues + $ptDues;
 
         $totalExpenses = (float) (clone $expensesQuery)->sum('amount');
         $netProfit = $totalIncome - $totalExpenses;
@@ -4086,9 +4233,14 @@ class AppController extends Controller
                 $mExpenseQuery->where('branch_id', $branchId);
             }
 
-            $mInc = (float) $mIncomeQuery->sum('amount')
+            $mMemInc = (float) (clone $mIncomeQuery)->where(function ($q) {
+                $q->where('notes', 'not like', '%PT Package%')->orWhereNull('notes');
+            })->sum('amount');
+            $mPtInc = max((float) (clone $mPt)->sum('paid_amount'), (float) (clone $mIncomeQuery)->where('notes', 'like', '%PT Package%')->sum('amount'));
+
+            $mInc = $mMemInc
                 + (float) $mServices->sum('amount_paid')
-                + (float) $mPt->sum('paid_amount')
+                + $mPtInc
                 + (float) ($mPos->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
             $mExp = (float) $mExpenseQuery->sum('amount');
 
@@ -4128,6 +4280,9 @@ class AppController extends Controller
             'ptPercent',
             'posPercent',
             'otherPercent',
+            'membershipDues',
+            'ptDues',
+            'totalDues',
             'totalExpenses',
             'netProfit',
             'marginPercent',
@@ -4201,9 +4356,14 @@ class AppController extends Controller
             $expensesQuery->where('branch_id', $branchId);
         }
 
-        $membershipIncome = (float) (clone $paymentsQuery)->sum('amount');
+        $membershipPaymentsQuery = (clone $paymentsQuery)->where(function ($q) {
+            $q->where('notes', 'not like', '%PT Package%')->orWhereNull('notes');
+        });
+        $membershipIncome = (float) $membershipPaymentsQuery->sum('amount');
         $serviceIncome = (float) (clone $serviceBookingsQuery)->sum('amount_paid');
-        $ptIncome = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+        $ptPaymentsSum = (float) (clone $paymentsQuery)->where('notes', 'like', '%PT Package%')->sum('amount');
+        $ptPackagesSum = (float) (clone $ptPackagesQuery)->sum('paid_amount');
+        $ptIncome = max($ptPackagesSum, $ptPaymentsSum);
         $posSales = (float) ($posSalesQuery->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
         $otherIncome = $serviceIncome + $ptIncome;
         $totalIncome = $membershipIncome + $posSales + $otherIncome;
@@ -4218,6 +4378,25 @@ class AppController extends Controller
         $totalExpenses = (float) $rawExpenses->sum('amount');
         $netProfit = $totalIncome - $totalExpenses;
 
+        $membershipDuesQuery = Membership::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)');
+
+        $ptDuesQuery = MemberPtPackage::withoutGlobalScope(BranchScope::class)
+            ->where('tenant_id', $tenant->id)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)');
+
+        if ($branchId) {
+            $membershipDuesQuery->where('branch_id', $branchId);
+            $ptDuesQuery->where('branch_id', $branchId);
+        }
+
+        $membershipDues = (float) ($membershipDuesQuery->selectRaw('SUM(COALESCE(final_amount, price) - COALESCE(paid_amount, 0)) as due')->value('due') ?? 0.0);
+        $ptDues = (float) ($ptDuesQuery->selectRaw('SUM(COALESCE(final_amount, price) - COALESCE(paid_amount, 0)) as due')->value('due') ?? 0.0);
+        $totalDues = $membershipDues + $ptDues;
+
         return view('app.finance.balance_sheet_pdf', compact(
             'tenant',
             'activeBranch',
@@ -4225,15 +4404,18 @@ class AppController extends Controller
             'periodLabel',
             'startDate',
             'endDate',
+            'totalIncome',
             'membershipIncome',
             'serviceIncome',
             'ptIncome',
             'posSales',
             'otherIncome',
-            'totalIncome',
-            'itemizedExpenses',
             'totalExpenses',
-            'netProfit'
+            'netProfit',
+            'itemizedExpenses',
+            'membershipDues',
+            'ptDues',
+            'totalDues'
         ));
     }
 

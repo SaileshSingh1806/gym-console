@@ -226,6 +226,7 @@
                     @forelse($expiringSoon as $exp)
                         @php
                             $dl = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now()));
+                            $dl = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
                         @endphp
                         <tr>
                             <td class="py-1 px-3 border border-black font-bold text-black">{{ $exp->member?->full_name }}</td>

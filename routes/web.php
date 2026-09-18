@@ -47,6 +47,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/members/{id}/freeze', [AppController::class, 'toggleFreezeMember'])->name('app.members.freeze');
         Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription');
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package');
+        Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class');
     });
 
     // Member Measurements (Available to Trainers, Staff, and Members)
@@ -108,6 +109,8 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::delete('/classes/{id}', [AppController::class, 'deleteClass'])->name('app.classes.delete');
         Route::post('/classes/schedules/{id}/book', [AppController::class, 'bookClassSchedule'])->name('app.classes.book');
         Route::post('/classes/bookings/{id}/status', [AppController::class, 'updateClassBookingStatus'])->name('app.classes.booking-status');
+        Route::delete('/classes/bookings/{id}', [AppController::class, 'deleteClassBooking'])->name('app.classes.booking.delete');
+        Route::post('/classes/bookings/{id}/delete', [AppController::class, 'deleteClassBooking'])->name('app.classes.booking.delete.post');
     });
 
     // 8. Workouts

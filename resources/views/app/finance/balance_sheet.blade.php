@@ -91,8 +91,8 @@
                 <div class="text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
                     {{ $currency }}{{ number_format($totalIncome, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1">
-                    Memberships: {{ $currency }}{{ number_format($membershipIncome, 2) }} | POS: {{ $currency }}{{ number_format($posSales, 2) }}
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+                    Memberships: {{ $currency }}{{ number_format($membershipIncome, 2) }} | PT: {{ $currency }}{{ number_format($ptIncome ?? 0, 2) }}
                 </div>
             </div>
 
@@ -133,6 +133,62 @@
                 </div>
                 <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1">
                     of total income
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RECEIVABLES & OUTSTANDING DUES ==================== -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Outstanding Receivables & Dues</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Separated tracking for General Memberships and Personal Training (PT) packages</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    Total Due: {{ $currency }}{{ number_format($totalDues, 2) }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 1. General Membership Dues -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">General Membership Dues</div>
+                        <div class="text-lg font-black text-slate-900 dark:text-white mt-0.5">{{ $currency }}{{ number_format($membershipDues, 2) }}</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Pending standard subscriptions</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                </div>
+
+                <!-- 2. Personal Training Dues -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Personal Training (PT) Dues</div>
+                        <div class="text-lg font-black text-slate-900 dark:text-white mt-0.5">{{ $currency }}{{ number_format($ptDues, 2) }}</div>
+                        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Pending PT package payments</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                </div>
+
+                <!-- 3. Total Outstanding Gym Receivables -->
+                <div class="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">Total Gym Receivables</div>
+                        <div class="text-lg font-black text-indigo-700 dark:text-indigo-300 mt-0.5">{{ $currency }}{{ number_format($totalDues, 2) }}</div>
+                        <div class="text-[10px] text-indigo-500 dark:text-indigo-400 mt-0.5">Combined uncollected revenue</div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/30">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
                 </div>
             </div>
         </div>

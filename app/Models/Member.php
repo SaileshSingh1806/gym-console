@@ -123,6 +123,11 @@ class Member extends Model
         return $this->hasMany(AccessLog::class);
     }
 
+    public function classBookings(): HasMany
+    {
+        return $this->hasMany(ClassBooking::class);
+    }
+
     public function isMembershipActive(): bool
     {
         return $this->status === 'ACTIVE' && $this->activeMembership()->exists();

@@ -316,6 +316,7 @@
                                 @foreach($expiringSoon as $exp)
                                     @php
                                         $daysLeft = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now()));
+                                        $daysLeft = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                         <td class="py-3.5 px-5 font-bold text-slate-900 dark:text-white">{{ $exp->member->full_name ?? ($exp->member->name ?? 'N/A') }}</td>

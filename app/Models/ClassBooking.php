@@ -30,6 +30,11 @@ class ClassBooking extends Model
         return $this->belongsTo(ClassSchedule::class, 'class_schedule_id');
     }
 
+    public function classSchedule(): BelongsTo
+    {
+        return $this->belongsTo(ClassSchedule::class, 'class_schedule_id');
+    }
+
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);

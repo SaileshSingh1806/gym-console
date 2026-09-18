@@ -36,6 +36,13 @@
         showWhatsappMenu: false,
         showInvoiceModal: false,
         showAddMeasurementModal: false,
+        showEnrollClassModal: false,
+        selectedScheduleId: '',
+        enrollBookingDate: '{{ now()->format('Y-m-d') }}',
+        openEnrollClass(scheduleId = '') {
+            this.selectedScheduleId = scheduleId;
+            this.showEnrollClassModal = true;
+        },
         selectedInvoice: {
             id: null,
             receipt_no: '',
@@ -1184,39 +1191,175 @@
                 </div>
 
                 <!-- TAB 7: CLASSES -->
-                <div x-show="activeTab === 'classes'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Enrolled Fitness & Studio Classes</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-base">
-                                    🧘
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white">Morning Yoga & Mobility</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Mon, Wed, Fri • 07:00 AM</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] border border-emerald-200 dark:border-emerald-500/20">
-                                Enrolled
-                            </span>
+                <div x-show="activeTab === 'classes'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white">Enrolled Fitness & Studio Classes</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Classes and group session schedules enrolled by this member</p>
                         </div>
-
-                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-600/20 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-base">
-                                    🔥
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white">HIIT & Strength Bootcamp</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Tue, Thu • 06:30 PM</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] border border-emerald-200 dark:border-emerald-500/20">
-                                Enrolled
-                            </span>
-                        </div>
+                        <button type="button" 
+                                @click="openEnrollClass('')" 
+                                class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            <span>+ Enroll in Class</span>
+                        </button>
                     </div>
+
+                    <!-- Enrolled Classes List -->
+                    @if($member->classBookings->isNotEmpty())
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($member->classBookings as $booking)
+                                @php
+                                    $sch = $booking->schedule;
+                                    $gc = $sch?->gymClass;
+                                    $classType = strtolower($gc?->class_type ?? '');
+                                    $icon = match(true) {
+                                        str_contains($classType, 'yoga') => '🧘',
+                                        str_contains($classType, 'hiit') || str_contains($classType, 'bootcamp') => '🔥',
+                                        str_contains($classType, 'zumba') || str_contains($classType, 'dance') => '💃',
+                                        str_contains($classType, 'spin') || str_contains($classType, 'cycl') => '🚴',
+                                        str_contains($classType, 'pilates') => '🤸',
+                                        str_contains($classType, 'crossfit') || str_contains($classType, 'strength') => '🏋️',
+                                        str_contains($classType, 'box') || str_contains($classType, 'fight') => '🥊',
+                                        default => '⚡',
+                                    };
+                                @endphp
+                                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-4 shadow-sm hover:border-indigo-500/40 transition-all">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg shrink-0 border border-indigo-200 dark:border-indigo-500/20">
+                                                {{ $icon }}
+                                            </div>
+                                            <div>
+                                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">{{ $gc?->name ?? 'Group Class' }}</h4>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                                                    <span class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold">{{ $gc?->class_type ?? 'Fitness' }}</span>
+                                                    @if($gc?->duration_minutes)
+                                                        <span>• {{ $gc->duration_minutes }} mins</span>
+                                                    @endif
+                                                </div>
+                                                <div class="mt-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                    @if($sch)
+                                                        <p class="flex items-center gap-1.5">
+                                                            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                            <span>{{ ucfirst($sch->day_of_week) }} • {{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($sch->end_time)->format('g:i A') }}</span>
+                                                        </p>
+                                                    @endif
+                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                        Trainer: <span class="text-slate-700 dark:text-slate-300 font-bold">{{ $sch?->trainer?->full_name ?? ($gc?->instructor?->full_name ?? 'Gym Instructor') }}</span>
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
+                                                        Booked on: {{ $booking->booking_date ? $booking->booking_date->format('d M Y') : $booking->created_at->format('d M Y') }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Badge -->
+                                        @if($booking->status === 'BOOKED')
+                                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-black text-[10px] border border-emerald-200 dark:border-emerald-500/20 shrink-0">
+                                                Enrolled / Booked
+                                            </span>
+                                        @elseif($booking->status === 'ATTENDED')
+                                            <span class="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 font-black text-[10px] border border-blue-200 dark:border-blue-500/20 shrink-0">
+                                                Attended
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 font-black text-[10px] border border-rose-200 dark:border-rose-500/20 shrink-0">
+                                                {{ $booking->status }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <!-- Actions Footer -->
+                                    <div class="flex items-center justify-between pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
+                                        <form action="{{ route('app.classes.booking-status', $booking->id) }}" method="POST" class="flex items-center gap-1.5">
+                                            @csrf
+                                            <select name="status" onchange="this.form.submit()" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500">
+                                                <option value="BOOKED" {{ $booking->status === 'BOOKED' ? 'selected' : '' }}>Enrolled</option>
+                                                <option value="ATTENDED" {{ $booking->status === 'ATTENDED' ? 'selected' : '' }}>Attended</option>
+                                                <option value="CANCELLED" {{ $booking->status === 'CANCELLED' ? 'selected' : '' }}>Cancelled</option>
+                                                <option value="NO_SHOW" {{ $booking->status === 'NO_SHOW' ? 'selected' : '' }}>No Show</option>
+                                            </select>
+                                        </form>
+
+                                        <form action="{{ route('app.classes.booking.delete', $booking->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this class enrollment?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Remove</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl border border-indigo-200 dark:border-indigo-500/20">
+                                🧘
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">No Class Enrollments Yet</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                                {{ $member->first_name }} has not been enrolled into any group fitness or studio classes yet.
+                            </p>
+                            <button type="button" 
+                                    @click="openEnrollClass('')" 
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Enroll In A Class Now</span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <!-- Available Classes In The Gym -->
+                    @if(isset($allGymClasses) && $allGymClasses->isNotEmpty())
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-black text-slate-900 dark:text-white text-xs uppercase tracking-wider">Available Gym Classes & Schedules</h4>
+                                <a href="{{ route('app.classes.index') }}" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold">Manage All Classes →</a>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @foreach($allGymClasses as $gc)
+                                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 shadow-xs">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h5 class="font-bold text-slate-900 dark:text-white text-xs">{{ $gc->name }}</h5>
+                                                <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] shrink-0">{{ $gc->class_type }}</span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                                                Instructor: <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ $gc->instructor?->full_name ?? 'Gym Trainer' }}</span>
+                                            </p>
+                                            @if($gc->schedules->isNotEmpty())
+                                                <div class="mt-2 space-y-1">
+                                                    @foreach($gc->schedules as $sch)
+                                                        <div class="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800/60">
+                                                            <span class="font-medium">{{ ucfirst($sch->day_of_week) }} ({{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }})</span>
+                                                            <button type="button" 
+                                                                    @click="openEnrollClass('{{ $sch->id }}')" 
+                                                                    class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[10px] cursor-pointer">
+                                                                + Enroll
+                                                            </button>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="mt-2">
+                                                    <button type="button" 
+                                                            @click="openEnrollClass('')" 
+                                                            class="w-full py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white dark:bg-indigo-600/20 dark:hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 dark:hover:text-white text-[11px] font-bold transition-all text-center cursor-pointer">
+                                                        + Enroll in Class
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- TAB 8: ATTENDANCE HISTORY -->
@@ -2528,6 +2671,93 @@
                     </form>
 
                 </div>
+            </div>
+        </div>
+
+        <!-- ENROLL IN CLASS MODAL -->
+        <div x-show="showEnrollClassModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.away="showEnrollClassModal = false" 
+                 class="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-5 shadow-2xl relative">
+                
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                            🧘
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base">Enroll in Group / Studio Class</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Enroll {{ $member->full_name }} into a class schedule</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showEnrollClassModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('app.members.enroll-class', $member->id) }}" method="POST" class="space-y-4">
+                    @csrf
+                    
+                    <!-- Class / Schedule Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Select Class & Schedule *</label>
+                        <select name="class_schedule_id" 
+                                x-model="selectedScheduleId" 
+                                required 
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                            <option value="">-- Choose Class Schedule --</option>
+                            @if(isset($availableClassSchedules) && $availableClassSchedules->isNotEmpty())
+                                @foreach($availableClassSchedules as $sch)
+                                    <option value="{{ $sch->id }}">
+                                        {{ $sch->gymClass->name }} — {{ ucfirst($sch->day_of_week) }} ({{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($sch->end_time)->format('g:i A') }}) [{{ $sch->gymClass->class_type }}]
+                                    </option>
+                                @endforeach
+                            @endif
+                            @if(isset($allGymClasses))
+                                @foreach($allGymClasses as $gc)
+                                    @if($gc->schedules->isEmpty())
+                                        <option value="class_{{ $gc->id }}">
+                                            {{ $gc->name }} (General / All Days) [{{ $gc->class_type }}]
+                                        </option>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <!-- Booking / Enrollment Date -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Enrollment / Start Date</label>
+                        <input type="date" 
+                               name="booking_date" 
+                               x-model="enrollBookingDate" 
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                    </div>
+
+                    <!-- Initial Status -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Enrollment Status</label>
+                        <select name="status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                            <option value="BOOKED">Booked / Enrolled (Active)</option>
+                            <option value="ATTENDED">Attended</option>
+                        </select>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" 
+                                @click="showEnrollClassModal = false" 
+                                class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Confirm Enrollment</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

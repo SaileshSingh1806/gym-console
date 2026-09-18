@@ -141,10 +141,29 @@ class ReportService
             ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
             ->count();
 
-        $churnRisk = (clone $membershipsQuery)
+        // Churn risk: active members whose membership expires in <= 7 days and have not checked in for 7+ days (or expiring within 7 days)
+        $churnRiskQuery = (clone $membershipsQuery)
+            ->with(['member.activeMembership.plan', 'plan'])
             ->where('status', 'ACTIVE')
-            ->whereBetween('end_date', [now()->toDateString(), now()->addDays(3)->toDateString()])
-            ->count();
+            ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
+            ->whereHas('member', function ($q) {
+                $q->whereDoesntHave('attendances', function ($attQ) {
+                    $attQ->where('date', '>=', now()->subDays(7)->toDateString());
+                });
+            });
+
+        $churnRisk = (clone $churnRiskQuery)->count();
+        $churnRiskMembersList = (clone $churnRiskQuery)->orderBy('end_date', 'asc')->get();
+
+        if ($churnRiskMembersList->isEmpty()) {
+            $churnRiskFallback = (clone $membershipsQuery)
+                ->with(['member.activeMembership.plan', 'plan'])
+                ->where('status', 'ACTIVE')
+                ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
+                ->orderBy('end_date', 'asc');
+            $churnRisk = (clone $churnRiskFallback)->count();
+            $churnRiskMembersList = (clone $churnRiskFallback)->get();
+        }
 
         $birthdaysToday = (clone $membersQuery)
             ->whereNotNull('dob')
@@ -402,6 +421,8 @@ class ReportService
             'inactive_members' => $inactiveMembers,
             'expired_members' => $expiredMembers,
             'churn_risk' => $churnRisk,
+            'churn_risk_members' => $churnRiskMembersList,
+            'churn_risk_list' => $churnRiskMembersList,
             'birthdays_today' => $birthdaysToday,
             'dormant_members' => $dormantMembers,
             'active_pt' => $activePt,
