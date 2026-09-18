@@ -128,44 +128,105 @@
 
         <!-- Platform Invoices Table -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Generated SaaS Platform Invoices</h3>
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Generated SaaS Platform Invoices (Gym Owner Subscriptions)</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Official platform billing receipts issued to gym owners for software licenses and subscriptions</p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                    {{ $invoices->total() }} Invoices Logged
+                </span>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
-                            <th class="py-3 px-4 font-semibold">Invoice #</th>
-                            <th class="py-3 px-4 font-semibold">Gym Tenant</th>
-                            <th class="py-3 px-4 font-semibold">Invoice Date</th>
-                            <th class="py-3 px-4 font-semibold">Amount</th>
-                            <th class="py-3 px-4 font-semibold">Status</th>
+                            <th class="py-3.5 px-4 font-semibold">Invoice #</th>
+                            <th class="py-3.5 px-4 font-semibold">Subscriber (Gym Owner & Gym)</th>
+                            <th class="py-3.5 px-4 font-semibold">Subscribed SaaS Plan</th>
+                            <th class="py-3.5 px-4 font-semibold">Payment Method & Ref</th>
+                            <th class="py-3.5 px-4 font-semibold">Invoice Date</th>
+                            <th class="py-3.5 px-4 font-semibold">Amount Paid</th>
+                            <th class="py-3.5 px-4 font-semibold text-right">Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                         @forelse($invoices as $inv)
+                            @php
+                                $owner = $inv->tenant?->users?->firstWhere('role', 'gym_owner') ?? $inv->tenant?->users?->first();
+                            @endphp
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                <td class="py-3 px-4 font-mono font-bold text-red-600 dark:text-red-400">{{ $inv->invoice_number }}</td>
-                                <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">{{ $inv->tenant->name }}</td>
-                                <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ $inv->invoice_date->format('M d, Y') }}</td>
-                                <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">
-                                    {{ $inv->currency === 'INR' ? '₹' : ($inv->currency === 'EUR' ? '€' : ($inv->currency === 'GBP' ? '£' : '$')) }}{{ number_format($inv->total, 2) }}
-                                    <span class="text-[10px] text-slate-400 font-normal">({{ $inv->currency }})</span>
+                                <td class="py-3.5 px-4">
+                                    <span class="font-mono font-bold text-red-600 dark:text-red-400 block">{{ $inv->invoice_number }}</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">Billed System License</span>
                                 </td>
-                                <td class="py-3 px-4">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                        {{ $owner?->name ?? 'Gym Owner' }}
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
+                                        <span>{{ $owner?->email ?? $inv->tenant?->email }}</span>
+                                        @if($owner?->phone || $inv->tenant?->phone)
+                                            <span>&bull;</span>
+                                            <span class="font-mono">{{ $owner?->phone ?? $inv->tenant?->phone }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 text-[10px] font-medium">
+                                            🏢 {{ $inv->tenant?->name ?? 'Gym Facility' }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-[10px] inline-block">
+                                        {{ $inv->subscription?->plan?->name ?? 'Growth Tier' }}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5 uppercase font-medium">
+                                        Billing: {{ $inv->subscription?->billing_cycle ?? 'yearly' }}
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="text-slate-900 dark:text-white font-semibold text-[11px]">
+                                        {{ ucfirst($inv->payment?->gateway ?? ($inv->subscription?->gateway_name ?? 'Razorpay / UPI')) }}
+                                    </div>
+                                    <div class="text-[10px] font-mono text-slate-400 truncate max-w-[140px] mt-0.5" title="{{ $inv->payment?->gateway_payment_id ?? ($inv->subscription?->gateway_subscription_id ?? 'TXN-DIRECT') }}">
+                                        {{ $inv->payment?->gateway_payment_id ?? ($inv->subscription?->gateway_subscription_id ?? 'TXN-DIRECT') }}
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4 text-slate-500 dark:text-slate-400">
+                                    <span class="text-slate-900 dark:text-white font-medium block">{{ $inv->invoice_date->format('M d, Y') }}</span>
+                                    @if($inv->paid_at)
+                                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">Paid {{ $inv->paid_at->format('M d') }}</span>
+                                    @endif
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                        {{ $inv->currency === 'INR' ? '₹' : ($inv->currency === 'EUR' ? '€' : ($inv->currency === 'GBP' ? '£' : '$')) }}{{ number_format($inv->total, 2) }}
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-normal font-mono">({{ $inv->currency }})</span>
+                                </td>
+                                <td class="py-3.5 px-4 text-right">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 inline-block">
                                         {{ $inv->status }}
                                     </span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-6 text-center text-slate-400 dark:text-slate-500">No invoices logged.</td>
+                                <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500">
+                                    No SaaS platform invoices logged.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
+            @if($invoices->hasPages())
+                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
+                    {{ $invoices->links() }}
+                </div>
+            @endif
         </div>
 
         <!-- Edit Subscription Modal -->

@@ -171,7 +171,7 @@
                             <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                                 <tr>
                                     <th class="py-3.5 px-4 font-bold">Invoice #</th>
-                                    <th class="py-3.5 px-4 font-bold">Gym Tenant</th>
+                                    <th class="py-3.5 px-4 font-bold">Subscriber (Gym Owner & Gym)</th>
                                     <th class="py-3.5 px-4 font-bold">Subscribed Plan</th>
                                     <th class="py-3.5 px-4 font-bold">Amount</th>
                                     <th class="py-3.5 px-4 font-bold">Date</th>
@@ -180,17 +180,26 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                                 @forelse($recentInvoices as $inv)
+                                    @php
+                                        $owner = $inv->tenant?->users?->firstWhere('role', 'gym_owner') ?? $inv->tenant?->users?->first();
+                                    @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                                         <td class="py-3.5 px-4 font-mono font-bold text-red-600 dark:text-red-400">
                                             {{ $inv->invoice_number }}
                                         </td>
                                         <td class="py-3.5 px-4">
-                                            <span class="font-bold text-slate-900 dark:text-white block">{{ $inv->tenant?->name ?? 'Gym Tenant' }}</span>
-                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{{ $inv->tenant?->email ?? '' }}</span>
+                                            <span class="font-bold text-slate-900 dark:text-white block text-xs">{{ $owner?->name ?? 'Gym Owner' }}</span>
+                                            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">{{ $owner?->email ?? $inv->tenant?->email }}</span>
+                                            <span class="inline-flex items-center gap-1 text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">
+                                                🏢 {{ $inv->tenant?->name ?? 'Gym Facility' }}
+                                            </span>
                                         </td>
                                         <td class="py-3.5 px-4">
                                             <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-[10px]">
                                                 {{ $inv->subscription?->plan?->name ?? 'SaaS Plan' }}
+                                            </span>
+                                            <span class="text-[10px] text-slate-400 block mt-0.5 font-medium">
+                                                {{ ucfirst($inv->subscription?->billing_cycle ?? 'yearly') }}
                                             </span>
                                         </td>
                                         <td class="py-3.5 px-4 font-black text-slate-900 dark:text-white">

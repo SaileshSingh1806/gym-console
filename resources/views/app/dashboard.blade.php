@@ -476,8 +476,8 @@
                 </div>
             </div>
 
-            <!-- 4 Charts Grid (2x2) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 4 Charts Grid (Responsive layout based on role) -->
+            <div class="grid grid-cols-1 {{ (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) ? 'lg:grid-cols-2' : 'md:grid-cols-3' }} gap-6">
 
                 <!-- Chart 1: Revenue -->
                 <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
@@ -527,7 +527,8 @@
                     </div>
                 </div>
 
-                <!-- Chart 4: Revenue vs Expenses -->
+                @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
+                <!-- Chart 4: Revenue vs Expenses (Gym Owner Only) -->
                 <div class="p-5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
@@ -542,6 +543,7 @@
                         <canvas id="chartRevVsExp"></canvas>
                     </div>
                 </div>
+                @endif
 
             </div>
         </div>
@@ -577,17 +579,18 @@
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $exp->plan?->name ?? 'Standard' }}</div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5 shrink-0">
                                     @php
-                                        $daysLeft = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now()));
                                         $daysLeft = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
                                     @endphp
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30">
-                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 whitespace-nowrap">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 whitespace-nowrap">
                                         {{ $daysLeft }}d
                                     </span>
                                     @if($exp->member?->phone)
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text=Hi%20{{ urlencode($exp->member->first_name) }},%20your%20gym%20membership%20at%20{{ urlencode($tenantName) }}%20is%20expiring%20on%20{{ $exp->end_date }}.%20Please%20renew%20to%20continue%20your%20workouts!" target="_blank" title="Send WhatsApp Reminder" class="p-1 rounded bg-emerald-100 dark:bg-emerald-500/20 hover:bg-emerald-600 hover:text-white text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-500 dark:hover:text-white transition-colors">
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text=Hi%20{{ urlencode($exp->member->first_name) }},%20your%20gym%20membership%20at%20{{ urlencode($tenantName) }}%20is%20expiring%20on%20{{ $exp->end_date }}.%20Please%20renew%20to%20continue%20your%20workouts!" 
+                                           target="_blank" 
+                                           title="Send WhatsApp Reminder" 
+                                           class="w-7 h-7 rounded-lg bg-emerald-100 hover:bg-emerald-600 text-emerald-700 hover:text-white dark:bg-emerald-500/20 dark:hover:bg-emerald-500 dark:text-emerald-400 dark:hover:text-white flex items-center justify-center transition-colors shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.971.53 1.771.815 2.796.815 3.18 0 5.767-2.587 5.768-5.766 0-3.18-2.586-5.768-5.768-5.768zm3.393 8.167c-.145.408-.839.774-1.208.825-.331.045-.764.08-2.222-.524-1.865-.772-3.056-2.677-3.149-2.8-.093-.124-.754-.999-.754-1.905s.475-1.353.644-1.539c.169-.187.369-.234.492-.234.124 0 .247.001.355.006.113.005.263-.043.411.314.153.37.524 1.28.57 1.373.046.093.077.201.015.324-.062.124-.093.201-.185.308-.093.108-.195.241-.278.324-.093.093-.19.195-.082.38.108.186.48 1.012 1.031 1.503.711.633 1.311.83 1.496.922.185.093.293.078.401-.046.108-.124.463-.54.587-.725.124-.185.247-.154.416-.093.169.062 1.076.507 1.261.6.185.093.308.139.354.216.046.077.046.447-.099.855z"/></svg>
                                         </a>
                                     @endif

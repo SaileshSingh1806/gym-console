@@ -11,10 +11,12 @@
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Subscription plans and rates for single, duo (2 persons), and family (4 persons).</p>
                 </div>
             </div>
-            <button @click="showNewModal = true; newPlanType = 'single'" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Create Plan
-            </button>
+            @if(auth()->user()->hasPermission('memberships.manage'))
+                <button @click="showNewModal = true; newPlanType = 'single'" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Create Plan
+                </button>
+            @endif
         </div>
 
         <!-- Membership Plans Available -->
@@ -74,34 +76,36 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
-                        <button @click="editPlan = {{ json_encode([
-                            'id' => $plan->id,
-                            'name' => $plan->name,
-                            'description' => $plan->description,
-                            'plan_type' => $plan->plan_type ?? 'single',
-                            'max_members' => (int) ($plan->max_members ?? 1),
-                            'duration_type' => $plan->duration_type,
-                            'duration_value' => $plan->duration_value,
-                            'price' => $plan->price,
-                            'tax_rate' => $plan->tax_rate,
-                            'is_active' => (bool)$plan->is_active,
-                        ]) }}" class="flex-1 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 text-[11px] font-semibold transition">
-                            Edit Plan
-                        </button>
-                        <form action="{{ route('app.membership-plans.delete', $plan->id) }}" method="POST" 
-                              data-confirm="Are you sure you want to delete membership plan '{{ addslashes($plan->name) }}'? Existing active member subscriptions with this plan will remain valid." 
-                              data-confirm-title="Delete Membership Plan" 
-                              data-confirm-btn="Yes, Delete Plan" 
-                              data-confirm-type="danger" 
-                              class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-1 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500 dark:text-red-400 dark:border-red-500/20 text-xs font-bold transition cursor-pointer" title="Delete Plan">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    @if(auth()->user()->hasPermission('memberships.manage'))
+                        <div class="flex items-center gap-1.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+                            <button @click="editPlan = {{ json_encode([
+                                'id' => $plan->id,
+                                'name' => $plan->name,
+                                'description' => $plan->description,
+                                'plan_type' => $plan->plan_type ?? 'single',
+                                'max_members' => (int) ($plan->max_members ?? 1),
+                                'duration_type' => $plan->duration_type,
+                                'duration_value' => $plan->duration_value,
+                                'price' => $plan->price,
+                                'tax_rate' => $plan->tax_rate,
+                                'is_active' => (bool)$plan->is_active,
+                            ]) }}" class="flex-1 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 text-[11px] font-semibold transition cursor-pointer">
+                                Edit Plan
                             </button>
-                        </form>
-                    </div>
+                            <form action="{{ route('app.membership-plans.delete', $plan->id) }}" method="POST" 
+                                  data-confirm="Are you sure you want to delete membership plan '{{ addslashes($plan->name) }}'? Existing active member subscriptions with this plan will remain valid." 
+                                  data-confirm-title="Delete Membership Plan" 
+                                  data-confirm-btn="Yes, Delete Plan" 
+                                  data-confirm-type="danger" 
+                                  class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-1 rounded-lg bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500 dark:text-red-400 dark:border-red-500/20 text-xs font-bold transition cursor-pointer" title="Delete Plan">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="col-span-full p-6 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
@@ -112,9 +116,11 @@
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 max-w-md mx-auto">
                         Create your first membership package (Single, Duo, or Family) so you can enroll new members.
                     </p>
-                    <button @click="showNewModal = true; newPlanType = 'single'" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition">
-                        + Create Your First Plan
-                    </button>
+                    @if(auth()->user()->hasPermission('memberships.manage'))
+                        <button @click="showNewModal = true; newPlanType = 'single'" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm transition cursor-pointer">
+                            + Create Your First Plan
+                        </button>
+                    @endif
                 </div>
             @endforelse
         </div>
@@ -179,13 +185,14 @@
             @endif
         </div>
 
-        <!-- Create Membership Plan Modal -->
-        <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-xl max-w-md w-full p-4 shadow-2xl" @click.away="showNewModal = false">
-                <div class="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-slate-800 pb-2.5">
-                    <h3 class="text-xs font-bold text-slate-900 dark:text-white">Create New Membership Plan</h3>
-                    <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
-                </div>
+        @if(auth()->user()->hasPermission('memberships.manage'))
+            <!-- Create Membership Plan Modal -->
+            <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-xl max-w-md w-full p-4 shadow-2xl" @click.away="showNewModal = false">
+                    <div class="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white">Create New Membership Plan</h3>
+                        <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    </div>
 
                 <form action="{{ route('app.membership-plans.store') }}" method="POST" class="space-y-3">
                     @csrf
@@ -373,12 +380,13 @@
                         </div>
 
                         <div class="flex justify-end gap-2 pt-2.5 border-t border-slate-200 dark:border-slate-800">
-                            <button type="button" @click="editPlan = null" class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-semibold">Cancel</button>
-                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm">Update Plan</button>
+                            <button type="button" @click="editPlan = null" class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-semibold cursor-pointer">Cancel</button>
+                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-sm cursor-pointer">Update Plan</button>
                         </div>
                     </form>
                 </template>
             </div>
         </div>
+        @endif
     </div>
 </x-app-layout>

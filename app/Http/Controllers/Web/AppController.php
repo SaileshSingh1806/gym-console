@@ -981,6 +981,10 @@ class AppController extends Controller
 
     public function storeMembershipPlan(Request $request): RedirectResponse
     {
+        if (! auth()->user()->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        }
+
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
         $validated = $request->validate([
@@ -1011,6 +1015,10 @@ class AppController extends Controller
 
     public function updateMembershipPlan(Request $request, int $id): RedirectResponse
     {
+        if (! auth()->user()->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        }
+
         $plan = MembershipPlan::findOrFail($id);
 
         $validated = $request->validate([
@@ -1040,6 +1048,10 @@ class AppController extends Controller
 
     public function deleteMembershipPlan(int $id): RedirectResponse
     {
+        if (! auth()->user()->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        }
+
         $plan = MembershipPlan::findOrFail($id);
 
         if ($plan->memberships()->where('status', 'ACTIVE')->exists()) {

@@ -106,8 +106,8 @@ class AdminController extends Controller implements HasMiddleware
             ->count();
         $openTicketsCount = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->count();
         $recentGyms = Tenant::with(['activeSubscription.plan', 'users', 'branches'])->latest()->take(6)->get();
-        $recentInvoices = PlatformInvoice::with(['tenant', 'subscription.plan'])->latest('invoice_date')->take(6)->get();
-        $expiringSubscriptions = Subscription::with(['tenant', 'plan'])->where('status', 'ACTIVE')->whereBetween('ends_at', [now(), now()->addDays(30)])->orderBy('ends_at')->take(5)->get();
+        $recentInvoices = PlatformInvoice::with(['tenant.users', 'subscription.plan'])->latest('invoice_date')->take(6)->get();
+        $expiringSubscriptions = Subscription::with(['tenant.users', 'plan'])->where('status', 'ACTIVE')->whereBetween('ends_at', [now(), now()->addDays(30)])->orderBy('ends_at')->take(5)->get();
         $openSupportTickets = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->with('tenant')->latest()->take(5)->get();
         $recentPayments = SubscriptionPayment::with(['tenant', 'subscription.plan'])->latest('paid_at')->take(6)->get();
         $plans = Plan::where('is_active', true)->withCount(['subscriptions' => fn ($q) => $q->where('status', 'ACTIVE')])->orderBy('sort_order')->get();
@@ -485,7 +485,7 @@ class AdminController extends Controller implements HasMiddleware
         }
 
         $subscriptions = $query->latest()->paginate(15);
-        $invoices = PlatformInvoice::with(['tenant', 'subscription.plan'])->latest('invoice_date')->paginate(15);
+        $invoices = PlatformInvoice::with(['tenant.users', 'subscription.plan', 'payment'])->latest('invoice_date')->paginate(15);
         $gyms = Tenant::all();
         $plans = Plan::with('features')->get();
 
