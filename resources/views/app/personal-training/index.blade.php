@@ -604,17 +604,17 @@
                 </div>
 
                 <!-- Subtab Selector -->
-                <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold">
-                    <button @click="sessionsSubTab = 'dashboard'" :class="sessionsSubTab === 'dashboard' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors">
+                <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold overflow-x-auto max-w-full">
+                    <button @click="sessionsSubTab = 'dashboard'" :class="sessionsSubTab === 'dashboard' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors shrink-0">
                         Dashboard
                     </button>
-                    <button @click="sessionsSubTab = 'scheduled'" :class="sessionsSubTab === 'scheduled' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors">
+                    <button @click="sessionsSubTab = 'scheduled'" :class="sessionsSubTab === 'scheduled' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors shrink-0">
                         Scheduled
                     </button>
-                    <button @click="sessionsSubTab = 'calendar'" :class="sessionsSubTab === 'calendar' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors">
+                    <button @click="sessionsSubTab = 'calendar'" :class="sessionsSubTab === 'calendar' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors shrink-0">
                         Calendar
                     </button>
-                    <button @click="sessionsSubTab = 'logs'" :class="sessionsSubTab === 'logs' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors">
+                    <button @click="sessionsSubTab = 'logs'" :class="sessionsSubTab === 'logs' ? 'bg-indigo-600 text-white shadow' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'" class="px-2.5 py-1 rounded transition-colors shrink-0">
                         Session Log
                     </button>
                 </div>
@@ -623,7 +623,7 @@
             <!-- ================= SUBTAB 1: DASHBOARD ================= -->
             <div x-show="sessionsSubTab === 'dashboard'" class="space-y-4">
                 <!-- 5 Session KPI Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-2.5">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                     <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/20 shadow-sm">
                         <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">ACTIVE PACKAGES</div>
                         <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $activePackagesCount }}</div>
@@ -640,7 +640,7 @@
                         <div class="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">THIS MONTH</div>
                         <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $thisMonthSessionsCount }}</div>
                     </div>
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-rose-500/20 shadow-sm col-span-2 md:col-span-1">
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-rose-500/20 shadow-sm col-span-2 sm:col-span-1 lg:col-span-1">
                         <div class="text-[9px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">NO-SHOWS (MONTH)</div>
                         <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $noShowsMonthCount }}</div>
                     </div>
@@ -1254,8 +1254,8 @@
         </div>
 
         <!-- ==================== MODAL 1: ADD / EDIT PT PLAN ==================== -->
-        <div x-show="showPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-xl w-full p-4 sm:p-5 shadow-2xl space-y-4" @click.away="showPlanModal = false">
+        <div x-show="showPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 md:p-6 shadow-2xl space-y-4" @click.away="showPlanModal = false">
                 <!-- Header -->
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
@@ -1372,8 +1372,8 @@
         </div>
 
         <!-- ==================== MODAL 2: ASSIGN PT PACKAGE ==================== -->
-        <div x-show="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-lg w-full p-4 sm:p-5 shadow-2xl space-y-4" @click.away="showAssignModal = false">
+        <div x-show="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 md:p-6 shadow-2xl space-y-4" @click.away="showAssignModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">Assign PT Package</h3>
@@ -1496,8 +1496,8 @@
         </div>
 
         <!-- ==================== MODAL 3: SCHEDULE PT SESSION ==================== -->
-        <div x-show="showScheduleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-4" @click.away="showScheduleModal = false">
+        <div x-show="showScheduleModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 md:p-6 shadow-2xl space-y-4" @click.away="showScheduleModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">Schedule PT Session</h3>
@@ -1583,8 +1583,8 @@
         </div>
 
         <!-- ==================== MODAL 4: ADD TRAINER ==================== -->
-        <div x-show="showTrainerModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-xl w-full p-4 sm:p-5 shadow-2xl space-y-4" @click.away="showTrainerModal = false">
+        <div x-show="showTrainerModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 md:p-6 shadow-2xl space-y-4" @click.away="showTrainerModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">Add Fitness Trainer</h3>
@@ -1692,8 +1692,8 @@
         </div>
 
         <!-- ==================== MODAL 5: EDIT TRAINER & ASSIGN MEMBERS ==================== -->
-        <div x-show="showTrainerEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 shadow-2xl space-y-4" @click.away="showTrainerEditModal = false">
+        <div x-show="showTrainerEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-5 md:p-6 shadow-2xl space-y-4" @click.away="showTrainerEditModal = false">
                 
                 <!-- Modal Top Header -->
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">

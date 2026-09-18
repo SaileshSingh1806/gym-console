@@ -348,10 +348,10 @@
     </div>
 
     <!-- ==================== WHATSAPP DISPATCH MODAL ==================== -->
-    <div id="whatsappModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200">
+    <div id="whatsappModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
             <!-- Modal Header -->
-            <div class="p-5 bg-gradient-to-r from-emerald-50 via-slate-50 to-white dark:from-emerald-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-slate-50 to-white dark:from-emerald-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center shadow-inner">
                         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
@@ -361,11 +361,11 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Review recipient phone number and live preview before sending.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
+                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
             </div>
 
             <!-- Modal Body -->
-            <div class="p-6 space-y-5">
+            <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
                 <!-- Recipient Phone & Plan Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -406,20 +406,20 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
+            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
                     Cancel
                 </button>
 
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5">
+                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         <span>Copy Text</span>
                     </button>
 
-                    <button type="button" onclick="sendWhatsAppNow()" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all">
+                    <button type="button" onclick="sendWhatsAppNow()" class="px-5 sm:px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
-                        <span>Open WhatsApp Now</span>
+                        <span>WhatsApp</span>
                     </button>
                 </div>
             </div>
@@ -427,14 +427,14 @@
     </div>
 
     <!-- ==================== CREATE / EDIT DIET PLAN MODAL ==================== -->
-    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200">
-            <form id="dietPlanForm" method="POST" action="{{ route('app.diets.store') }}">
+    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
+            <form id="dietPlanForm" method="POST" action="{{ route('app.diets.store') }}" class="flex flex-col max-h-[90vh]">
                 @csrf
                 <input type="hidden" name="_method" id="dietFormMethod" value="POST">
 
                 <!-- Modal Header -->
-                <div class="p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -444,11 +444,11 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400">Configure calories, macro targets, and scheduled meals.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
+                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
                 </div>
 
                 <!-- Modal Form Body -->
-                <div class="p-6 space-y-5 max-h-[72vh] overflow-y-auto">
+                <div class="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1">
                     <!-- Title & Plan Type -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="sm:col-span-2">
@@ -1175,8 +1175,8 @@
     </script>
 
     <!-- ==================== AI DIET GENERATOR MODAL ==================== -->
-    <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
-        <div class="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
+    <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl my-auto overflow-hidden max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
             
             <!-- Modal Header -->
             @php
@@ -1184,9 +1184,9 @@
                 $globalGeminiModel = \App\Models\Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-1.5-flash');
                 $hasGeminiConfigured = !empty($globalGeminiKey);
             @endphp
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between shrink-0">
+            <div class="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30 shrink-0">
                         ✨
                     </div>
                     <div>
@@ -1203,7 +1203,7 @@
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
@@ -1212,7 +1212,7 @@
             </div>
 
             <!-- Modal Content (Scrollable) -->
-            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6">
 
                 <!-- 1. FORM INPUT VIEW -->
                 <div id="aiDietFormView" class="space-y-6">

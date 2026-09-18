@@ -30,6 +30,10 @@
             <form action="{{ route('admin.gyms') }}" method="GET" class="flex flex-wrap items-center gap-3 flex-grow max-w-3xl">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search gym name, slug, email, phone..." class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[200px] shadow-sm">
                 <select name="status" class="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-sm cursor-pointer" onchange="this.form.submit()">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <form action="{{ route('admin.gyms') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 flex-grow max-w-3xl w-full sm:w-auto">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search gym name, slug, email, phone..." class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[150px] shadow-sm">
+                <select name="status" class="px-3 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-sm cursor-pointer" onchange="this.form.submit()">
                     <option value="">All Statuses</option>
                     <option value="ACTIVE" {{ request('status') === 'ACTIVE' ? 'selected' : '' }}>Active</option>
                     <option value="TRIAL" {{ request('status') === 'TRIAL' ? 'selected' : '' }}>Trial</option>
@@ -37,17 +41,20 @@
                     <option value="CANCELLED" {{ request('status') === 'CANCELLED' ? 'selected' : '' }}>Cancelled</option>
                 </select>
                 <select name="plan_id" class="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-sm cursor-pointer" onchange="this.form.submit()">
+                <select name="plan_id" class="px-3 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-sm cursor-pointer" onchange="this.form.submit()">
                     <option value="">All Plans</option>
                     @foreach($plans as $p)
                         <option value="{{ $p->id }}" {{ request('plan_id') == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
                     @endforeach
                 </select>
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                <button type="submit" class="px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white dark:border-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer">
                     Filter
                 </button>
             </form>
 
             <button @click="showNewModal = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 shrink-0 transition-colors cursor-pointer">
+            <button @click="showNewModal = true" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 shrink-0 transition-colors cursor-pointer">
                 + Register New Gym
             </button>
         </div>
@@ -56,6 +63,7 @@
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[750px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="py-3.5 px-4 font-semibold">Gym Business &amp; Tenant</th>
@@ -203,8 +211,11 @@
         <!-- Edit Gym Modal -->
         <div x-show="editGym !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl transition-colors" @click.away="editGym = null">
+        <div x-show="editGym !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="editGym = null">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Edit Gym Tenant Details</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit Gym Tenant Details</h3>
                     <button @click="editGym = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                 </div>
 
@@ -212,6 +223,7 @@
                     <form :action="'/admin/gyms/' + editGym.id" method="POST" class="space-y-4">
                         @csrf
                         <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Gym Name *</label>
                                 <input type="text" name="name" x-model="editGym.name" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -223,6 +235,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
                                 <input type="email" name="email" x-model="editGym.email" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -234,9 +247,11 @@
                         </div>
 
                         <div class="grid grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status / Mode</label>
                                 <select name="status" x-model="editGym.status" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                                <select name="status" x-model="editGym.status" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                     <option value="TRIAL">🟡 TRIAL (Free Trial)</option>
                                     <option value="ACTIVE">🟢 ACTIVE (Paid Subscription)</option>
                                     <option value="PAST_DUE">🟠 PAST DUE</option>
@@ -247,6 +262,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Plan</label>
                                 <select name="plan_id" x-model="editGym.plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                                <select name="plan_id" x-model="editGym.plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                     @foreach($plans as $p)
                                         <option value="{{ $p->id }}">{{ $p->name }}</option>
                                     @endforeach
@@ -255,6 +271,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Billing Cycle</label>
                                 <select name="billing_cycle" x-model="editGym.billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                                <select name="billing_cycle" x-model="editGym.billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                     <option value="yearly">📅 Yearly (Annual)</option>
                                     <option value="monthly">🗓️ Monthly</option>
                                 </select>
@@ -262,6 +279,7 @@
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Currency</label>
                                 <select name="currency" x-model="editGym.currency" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                                <select name="currency" x-model="editGym.currency" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                     <option value="INR">INR (₹) - Indian Rupee</option>
                                     <option value="USD">USD ($) - US Dollar</option>
                                     <option value="EUR">EUR (€) - Euro</option>
@@ -278,6 +296,7 @@
 
                         <!-- Free Trial Duration Controls -->
                         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 sm:space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Set Custom Trial Expiry (If in Trial mode)</span>
                                 <span class="text-[10px] text-slate-500 dark:text-slate-400">Overrides plan default</span>
@@ -297,14 +316,18 @@
         <!-- Add New Gym Modal -->
         <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl transition-colors" @click.away="showNewModal = false">
+        <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showNewModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Register New Gym Tenant</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Register New Gym Tenant</h3>
                     <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                 </div>
 
                 <form action="{{ route('admin.gyms.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Gym Name *</label>
                             <input type="text" name="gym_name" required placeholder="Olympus Gym" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -316,6 +339,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Owner Name *</label>
                             <input type="text" name="owner_name" required placeholder="Alex Turner" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -327,6 +351,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone</label>
                             <input type="text" name="phone" placeholder="+1 555-0100" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -338,9 +363,11 @@
                     </div>
 
                     <div class="grid grid-cols-4 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">SaaS Plan *</label>
                             <select name="plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                            <select name="plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
                                 @endforeach
@@ -349,6 +376,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Billing Cycle *</label>
                             <select name="billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                            <select name="billing_cycle" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 <option value="yearly" selected>📅 Yearly (Annual)</option>
                                 <option value="monthly">🗓️ Monthly</option>
                             </select>
@@ -356,6 +384,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status / Mode</label>
                             <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                            <select name="status" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 <option value="TRIAL">🟡 TRIAL (Free Trial)</option>
                                 <option value="ACTIVE" selected>🟢 ACTIVE (Paid Activation)</option>
                                 <option value="SUSPENDED">🔴 SUSPENDED</option>
@@ -364,6 +393,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Currency</label>
                             <select name="currency" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
+                            <select name="currency" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 <option value="INR" selected>INR (₹) - Indian Rupee</option>
                                 <option value="USD">USD ($) - US Dollar</option>
                                 <option value="EUR">EUR (€) - Euro</option>
@@ -396,6 +426,8 @@
         <!-- ========================================== -->
         <div x-show="deleteGymModal !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/85 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-rose-500/40 rounded-3xl max-w-md w-full p-6 shadow-2xl relative transition-colors" @click.away="deleteGymModal = null">
+        <div x-show="deleteGymModal !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-rose-500/40 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative transition-colors" @click.away="deleteGymModal = null">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-red-500/20 text-rose-600 dark:text-red-400 flex items-center justify-center font-bold text-lg shrink-0 border border-rose-500/30">
                         ⚠️

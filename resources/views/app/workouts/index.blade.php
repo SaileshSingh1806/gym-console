@@ -40,7 +40,7 @@
         </div>
 
         <!-- Metric Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Routines</div>
                 <div class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ $plans->total() }}</div>
@@ -53,7 +53,7 @@
                 <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Assigned to clients</div>
             </div>
 
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 sm:col-span-1">
                 <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Routine Templates</div>
                 <div class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{{ $plans->where('is_template', true)->count() }}</div>
                 <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Reusable splits</div>
@@ -168,11 +168,11 @@
     </div>
 
     <!-- Create Workout Routine Modal -->
-    <div id="workoutModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200">
-            <form method="POST" action="{{ route('app.workouts.store') }}">
+    <div id="workoutModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
+            <form method="POST" action="{{ route('app.workouts.store') }}" class="flex flex-col max-h-[90vh]">
                 @csrf
-                <div class="p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -182,10 +182,10 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400">Configure routine name, target goal, experience level, and exercises.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeWorkoutModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
+                    <button type="button" onclick="closeWorkoutModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
                 </div>
 
-                <div class="p-6 space-y-4 max-h-[72vh] overflow-y-auto">
+                <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Routine Title *</label>
@@ -243,17 +243,17 @@
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400">Add exercises, sets, reps, and weights.</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button type="button" onclick="loadPplPreset()" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-[11px] font-semibold border border-slate-200 dark:border-slate-700 transition-colors">
+                                <button type="button" onclick="loadPplPreset()" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-[11px] font-semibold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
                                     + Insert Push Day Sample
                                 </button>
-                                <button type="button" onclick="addExerciseRow()" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition-colors">
+                                <button type="button" onclick="addExerciseRow()" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition-colors cursor-pointer">
                                     + Add Exercise
                                 </button>
                             </div>
                         </div>
 
                         <div id="exerciseContainer" class="space-y-2">
-                            <!-- Dynamic exercises -->
+                            <!-- Dynamic Exercise Rows Added Here -->
                         </div>
                     </div>
 
@@ -264,11 +264,11 @@
                     </div>
                 </div>
 
-                <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                    <button type="button" onclick="closeWorkoutModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
+                <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                    <button type="button" onclick="closeWorkoutModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
                         Save Workout Routine
                     </button>
                 </div>

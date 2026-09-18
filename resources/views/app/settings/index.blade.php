@@ -69,7 +69,7 @@
     }" class="space-y-6 w-full">
 
         <!-- ==================== TOP HORIZONTAL NAVIGATION TABS ==================== -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 text-xs font-bold">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-1 border-b border-slate-200 dark:border-slate-800 text-xs font-bold">
             <!-- 1. Business Info -->
             <button type="button" @click="tab = 'business_info'"
                     :class="tab === 'business_info' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
@@ -1144,11 +1144,11 @@
         <!-- ========================================================================= -->
         <!-- MODAL 1: ADD NEW BRANCH -->
         <!-- ========================================================================= -->
-        <div x-show="showAddBranchModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm">
-            <div @click.away="showAddBranchModal = false" class="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
-                <div class="p-5 bg-indigo-50 dark:bg-indigo-600/10 border-b border-indigo-100 dark:border-indigo-500/20 flex items-center justify-between">
+        <div x-show="showAddBranchModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+            <div @click.away="showAddBranchModal = false" class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
+                <div class="p-4 sm:p-5 bg-indigo-50 dark:bg-indigo-600/10 border-b border-indigo-100 dark:border-indigo-500/20 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         </div>
                         <div>
@@ -1159,7 +1159,7 @@
                     <button type="button" @click="showAddBranchModal = false" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
                 </div>
 
-                <form action="{{ route('app.branches.store') }}" method="POST" class="p-6 space-y-4">
+                <form action="{{ route('app.branches.store') }}" method="POST" class="p-4 sm:p-6 space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Branch Name *</label>
@@ -1167,7 +1167,7 @@
                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Branch Code</label>
                             <input type="text" name="code" placeholder="e.g. SOUTH01" 
@@ -1180,7 +1180,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
                             <input type="email" name="email" placeholder="branch@gym.com" 
@@ -1193,7 +1193,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">State</label>
                             <input type="text" name="state" placeholder="e.g. Delhi" 
@@ -1229,11 +1229,11 @@
         <!-- ========================================================================= -->
         <!-- MODAL 2: EDIT BRANCH -->
         <!-- ========================================================================= -->
-        <div x-show="showEditBranchModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm">
-            <div @click.away="showEditBranchModal = false" class="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
-                <div class="p-5 bg-indigo-50 dark:bg-indigo-600/10 border-b border-indigo-100 dark:border-indigo-500/20 flex items-center justify-between">
+        <div x-show="showEditBranchModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+            <div @click.away="showEditBranchModal = false" class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
+                <div class="p-4 sm:p-5 bg-indigo-50 dark:bg-indigo-600/10 border-b border-indigo-100 dark:border-indigo-500/20 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </div>
                         <div>
@@ -1244,15 +1244,15 @@
                     <button type="button" @click="showEditBranchModal = false" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
                 </div>
 
-                <form :action="'{{ url('/app/branches') }}/' + editBranchData.id" method="POST" class="p-6 space-y-4">
+                <form :action="'{{ url('/app/branches') }}/' + editBranchData.id" method="POST" class="p-4 sm:p-6 space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Branch Name *</label>
                         <input type="text" name="name" required x-model="editBranchData.name" 
-                               class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Branch Code *</label>
                             <input type="text" name="code" required x-model="editBranchData.code" 
@@ -1268,7 +1268,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Phone Number</label>
                             <input type="text" name="phone" x-model="editBranchData.phone" 
@@ -1281,7 +1281,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">City</label>
                             <input type="text" name="city" x-model="editBranchData.city" 
@@ -1326,11 +1326,11 @@
         <!-- ========================================================================= -->
         <!-- MODAL 3: REGISTER BIOMETRIC DEVICE -->
         <!-- ========================================================================= -->
-        <div x-show="showAddDeviceModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm">
-            <div @click.away="showAddDeviceModal = false" class="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
-                <div class="p-5 bg-teal-50 dark:bg-teal-600/10 border-b border-teal-100 dark:border-teal-500/20 flex items-center justify-between">
+        <div x-show="showAddDeviceModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+            <div @click.away="showAddDeviceModal = false" class="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl space-y-0 text-slate-900 dark:text-slate-100">
+                <div class="p-4 sm:p-5 bg-teal-50 dark:bg-teal-600/10 border-b border-teal-100 dark:border-teal-500/20 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-teal-500/15 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-2xl bg-teal-500/15 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
                         </div>
                         <div>
@@ -1341,7 +1341,7 @@
                     <button type="button" @click="showAddDeviceModal = false" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
                 </div>
 
-                <form action="{{ route('app.devices.store') }}" method="POST" class="p-6 space-y-4">
+                <form action="{{ route('app.devices.store') }}" method="POST" class="p-4 sm:p-6 space-y-4">
                     @csrf
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Device Name *</label>
@@ -1349,7 +1349,7 @@
                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-teal-500 focus:outline-none">
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Device Type / Protocol *</label>
                             <select name="type" required 
@@ -1369,7 +1369,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Branch Location *</label>
                             <select name="branch_id" required 
@@ -1390,7 +1390,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">LAN IP Address (Optional)</label>
                             <input type="text" name="ip_address" placeholder="192.168.1.201" 

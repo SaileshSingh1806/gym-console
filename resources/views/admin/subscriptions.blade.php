@@ -1,19 +1,91 @@
 <x-admin-layout header="Subscriptions & Payment Reconciliation">
     <div class="space-y-8" x-data="{ showManualPayModal: false, editSub: null }">
         <!-- Action Toolbar -->
-        <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tenant SaaS Subscriptions</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Manage plan terms, subscription state overrides, and offline bank transfer payments</p>
             </div>
-            <button @click="showManualPayModal = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-all cursor-pointer">
+            <button @click="showManualPayModal = true" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 transition-all cursor-pointer">
                 + Record Manual Payment
             </button>
         </div>
 
-        <!-- Subscriptions Table -->
+        <!-- Subscriptions Table & Mobile Cards -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
-            <div class="overflow-x-auto">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tenant Gym Subscriptions</h3>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    {{ $subscriptions->total() }} Tenants
+                </span>
+            </div>
+
+            <!-- Mobile View: Subscriptions Cards List (md:hidden) -->
+            <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-3 space-y-3">
+                @forelse($subscriptions as $sub)
+                    @php
+                        $owner = $sub->tenant?->users?->firstWhere('role', 'gym_owner') ?? $sub->tenant?->users?->first();
+                        $latestInvoice = $sub->invoices->first() ?? ($sub->tenant_id ? \App\Models\PlatformInvoice::where('tenant_id', $sub->tenant_id)->latest('invoice_date')->first() : null);
+                        $daysLeft = $sub->ends_at ? (int) now()->diffInDays($sub->ends_at, false) : null;
+                        $badge = match($sub->status) {
+                            'ACTIVE' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                            'TRIAL' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                            default => 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+                        };
+                    @endphp
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ $sub->tenant->name }}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $owner?->name ?? 'Owner' }} &bull; {{ $owner?->email ?? $sub->tenant->email }}</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border {{ $badge }} shrink-0">
+                                {{ $sub->status }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200 dark:border-slate-800/60">
+                            <div>
+                                <span class="font-black text-amber-600 dark:text-amber-400">{{ $sub->plan->name }}</span>
+                                <span class="text-[10px] text-slate-400 block">{{ $sub->tenant->currency_symbol ?? '₹' }}{{ number_format($sub->billing_cycle === 'yearly' ? $sub->plan->price_yearly : $sub->plan->price_monthly, 2) }}/{{ $sub->billing_cycle }}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[11px] text-slate-700 dark:text-slate-300 font-semibold block">
+                                    {{ $sub->ends_at ? $sub->ends_at->format('M d, Y') : ($sub->trial_ends_at ? $sub->trial_ends_at->format('M d, Y') . ' (Trial)' : '—') }}
+                                </span>
+                                @if($sub->ends_at && $daysLeft !== null)
+                                    <span class="text-[10px] {{ $daysLeft < 15 ? 'text-rose-500 font-bold' : 'text-slate-400' }} block">
+                                        {{ max(0, $daysLeft) }} days left
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <button @click="editSub = {{ json_encode([
+                                'id' => $sub->id,
+                                'tenant_name' => $sub->tenant->name,
+                                'plan_id' => $sub->plan_id,
+                                'billing_cycle' => $sub->billing_cycle,
+                                'status' => $sub->status,
+                                'ends_at' => $sub->ends_at?->toDateString(),
+                                'trial_ends_at' => $sub->trial_ends_at?->toDateString(),
+                            ]) }}" class="w-full py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold transition-all text-center cursor-pointer">
+                                ⚙️ Modify Plan / Status
+                            </button>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-6 text-center text-xs text-slate-400">
+                        No tenant subscriptions found.
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Desktop View: Subscriptions Table (hidden md:block) -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left text-xs min-w-[700px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
@@ -76,7 +148,7 @@
                                     @php
                                         $badge = match($sub->status) {
                                             'ACTIVE' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-                                            'TRIAL' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+                                             'TRIAL' => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
                                             default => 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
                                         };
                                     @endphp
@@ -126,18 +198,57 @@
             @endif
         </div>
 
-        <!-- Platform Invoices Table -->
+        <!-- Platform Invoices Table & Mobile Cards -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                     <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Generated SaaS Platform Invoices (Gym Owner Subscriptions)</h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">Official platform billing receipts issued to gym owners for software licenses and subscriptions</p>
                 </div>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 w-fit">
                     {{ $invoices->total() }} Invoices Logged
                 </span>
             </div>
-            <div class="overflow-x-auto">
+
+            <!-- Mobile View: Platform Invoices Cards (md:hidden) -->
+            <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800/60 p-3 space-y-3">
+                @forelse($invoices as $inv)
+                    @php
+                        $owner = $inv->tenant?->users?->firstWhere('role', 'gym_owner') ?? $inv->tenant?->users?->first();
+                    @endphp
+                    <div class="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono font-bold text-red-600 dark:text-red-400 text-xs">{{ $inv->invoice_number }}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                {{ $inv->status }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-900 dark:text-white text-xs block">{{ $owner?->name ?? 'Gym Owner' }}</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">🏢 {{ $inv->tenant?->name ?? 'Gym Facility' }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200 dark:border-slate-800/60">
+                            <div>
+                                <span class="font-semibold text-amber-600 dark:text-amber-400 text-xs">{{ $inv->subscription?->plan?->name ?? 'Plan' }}</span>
+                                <span class="text-[10px] text-slate-400 block">{{ $inv->invoice_date->format('M d, Y') }}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-bold text-slate-900 dark:text-white text-sm">
+                                    {{ $inv->currency === 'INR' ? '₹' : ($inv->currency === 'EUR' ? '€' : ($inv->currency === 'GBP' ? '£' : '$')) }}{{ number_format($inv->total, 2) }}
+                                </span>
+                                <span class="text-[10px] text-slate-400 block">{{ ucfirst($inv->payment?->gateway ?? ($inv->subscription?->gateway_name ?? 'Razorpay')) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-6 text-center text-xs text-slate-400">
+                        No SaaS platform invoices logged.
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Desktop View: Platform Invoices Table (hidden md:block) -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left text-xs min-w-[750px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
@@ -230,11 +341,11 @@
         </div>
 
         <!-- Edit Subscription Modal -->
-        <div x-show="editSub !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-colors" @click.away="editSub = null">
+        <div x-show="editSub !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="editSub = null">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Modify Subscription</h3>
-                    <button @click="editSub = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    <button @click="editSub = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
                 <template x-if="editSub !== null">
@@ -279,9 +390,9 @@
                             <input type="date" name="ends_at" x-model="editSub.ends_at" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                         </div>
 
-                        <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                            <button type="button" @click="editSub = null" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Update Status</button>
+                        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                            <button type="button" @click="editSub = null" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
+                            <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Update Status</button>
                         </div>
                     </form>
                 </template>
@@ -289,11 +400,11 @@
         </div>
 
         <!-- Record Manual Payment Modal -->
-        <div x-show="showManualPayModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-colors" @click.away="showManualPayModal = false">
+        <div x-show="showManualPayModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showManualPayModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Record Offline SaaS Payment</h3>
-                    <button @click="showManualPayModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    <button @click="showManualPayModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
                 <form action="{{ route('admin.subscriptions.manual-payment') }}" method="POST" class="space-y-4">
@@ -316,7 +427,7 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Amount (₹ / $) *</label>
                             <input type="number" step="0.01" name="amount" required placeholder="12000.00" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -340,9 +451,9 @@
                         <input type="text" name="notes" placeholder="Invoice # or receipt reference" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showManualPayModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Activate Subscription</button>
+                    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showManualPayModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Activate Subscription</button>
                     </div>
                 </form>
             </div>

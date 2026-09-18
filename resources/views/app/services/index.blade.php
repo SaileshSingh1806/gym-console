@@ -130,11 +130,11 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm max-w-fit">
+        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm max-w-full overflow-x-auto">
             <!-- Services Tab -->
             <button type="button" @click="activeTab = 'services'"
                     :class="activeTab === 'services' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold'"
-                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all shrink-0">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                 <span>Services</span>
                 <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-950/40 text-slate-700 dark:text-slate-300 font-mono">{{ $services->count() }}</span>
@@ -143,7 +143,7 @@
             <!-- Booking Requests Tab -->
             <button type="button" @click="activeTab = 'requests'"
                     :class="activeTab === 'requests' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold'"
-                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/></svg>
                 <span>Booking Requests</span>
                 @if($bookingRequests->count() > 0)
@@ -154,7 +154,7 @@
             <!-- All Bookings Tab -->
             <button type="button" @click="activeTab = 'bookings'"
                     :class="activeTab === 'bookings' ? 'bg-indigo-600 text-white shadow-md font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold'"
-                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all">
+                    class="px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                 <span>All Bookings</span>
                 <span class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 dark:bg-slate-950/40 text-slate-700 dark:text-slate-300 font-mono">{{ $allBookings->total() }}</span>
@@ -294,7 +294,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-xs min-w-[650px]">
                         <thead class="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                             <tr>
                                 <th class="py-3.5 px-4 font-semibold">Member</th>
@@ -395,7 +395,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-xs min-w-[650px]">
                         <thead class="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                             <tr>
                                 <th class="py-4 px-4 font-semibold">MEMBER</th>
@@ -520,11 +520,11 @@
         </div>
 
         <!-- ==================== MODAL: ADD / EDIT SERVICE ==================== -->
-        <div x-show="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200" @click.away="showServiceModal = false">
-                <form :action="serviceFormAction" method="POST">
+        <div x-show="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200" @click.away="showServiceModal = false">
+                <form :action="serviceFormAction" method="POST" class="flex flex-col max-h-[90vh]">
                     @csrf
-                    <div class="p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
@@ -534,10 +534,10 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Configure service pricing, duration, sessions, and member portal availability.</p>
                             </div>
                         </div>
-                        <button type="button" @click="showServiceModal = false" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
+                        <button type="button" @click="showServiceModal = false" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
                     </div>
 
-                    <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                    <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Service Name <span class="text-rose-500">*</span></label>
@@ -622,11 +622,11 @@
                         </div>
                     </div>
 
-                    <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                        <button type="button" @click="showServiceModal = false" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
+                    <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                        <button type="button" @click="showServiceModal = false" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
                             Cancel
                         </button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             <span x-text="isEditingService ? 'Update Service' : 'Add Service'">Add Service</span>
                         </button>
@@ -636,11 +636,11 @@
         </div>
 
         <!-- ==================== MODAL: BOOK SERVICE FOR MEMBER ==================== -->
-        <div x-show="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4 overflow-y-auto" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative my-8 text-slate-900 dark:text-slate-200" @click.away="showBookingModal = false">
-                <form action="{{ route('app.services.bookings.store') }}" method="POST">
+        <div x-show="showBookingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200" @click.away="showBookingModal = false">
+                <form action="{{ route('app.services.bookings.store') }}" method="POST" class="flex flex-col max-h-[90vh]">
                     @csrf
-                    <div class="p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -650,10 +650,10 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Enroll a member into an add-on gym service or assign a locker.</p>
                             </div>
                         </div>
-                        <button type="button" @click="showBookingModal = false" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors">✕</button>
+                        <button type="button" @click="showBookingModal = false" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
                     </div>
 
-                    <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                    <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Select Member <span class="text-rose-500">*</span></label>
                             <select name="member_id" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
@@ -711,11 +711,11 @@
                         </div>
                     </div>
 
-                    <div class="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                        <button type="button" @click="showBookingModal = false" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors">
+                    <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                        <button type="button" @click="showBookingModal = false" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
                             Cancel
                         </button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
                             Confirm Booking
                         </button>
                     </div>

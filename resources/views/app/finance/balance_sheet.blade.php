@@ -81,14 +81,14 @@
         </div>
 
         <!-- ==================== 4 TOP KPI METRIC CARDS ==================== -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <!-- 1. Total Income -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                    <span>Total Income</span>
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-bold mb-1">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                    <span class="truncate">Total Income</span>
                 </div>
-                <div class="text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($totalIncome, 2) }}
                 </div>
                 <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
@@ -97,64 +97,64 @@
             </div>
 
             <!-- 2. Total Expenses -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="flex items-center gap-2 text-rose-600 dark:text-red-400 text-xs font-bold mb-1">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                    <span>Total Expenses</span>
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-rose-600 dark:text-red-400 text-[11px] sm:text-xs font-bold mb-1">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                    <span class="truncate">Total Expenses</span>
                 </div>
-                <div class="text-2xl lg:text-3xl font-black text-rose-600 dark:text-red-400 tracking-tight">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-rose-600 dark:text-red-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($totalExpenses, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
                     {{ $categoryCount }} categories
                 </div>
             </div>
 
             <!-- 3. Net Profit -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="text-xs font-bold text-sky-600 dark:text-sky-400 mb-1">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
+                <div class="text-[11px] sm:text-xs font-bold text-sky-600 dark:text-sky-400 mb-1 truncate">
                     Net Profit
                 </div>
-                <div class="text-2xl lg:text-3xl font-black text-sky-600 dark:text-sky-400 tracking-tight">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-sky-600 dark:text-sky-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($netProfit, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
                     {{ number_format($marginPercent, 1) }}% margin
                 </div>
             </div>
 
             <!-- 4. Expense Ratio -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="text-xs font-bold text-purple-600 dark:text-purple-400 mb-1">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
+                <div class="text-[11px] sm:text-xs font-bold text-purple-600 dark:text-purple-400 mb-1 truncate">
                     % Expense Ratio
                 </div>
-                <div class="text-2xl lg:text-3xl font-black text-purple-600 dark:text-purple-400 tracking-tight">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-purple-600 dark:text-purple-400 tracking-tight truncate">
                     {{ number_format($expenseRatio, 1) }}%
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
                     of total income
                 </div>
             </div>
         </div>
 
         <!-- ==================== RECEIVABLES & OUTSTANDING DUES ==================== -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
                 <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Outstanding Receivables & Dues</h3>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Separated tracking for General Memberships and Personal Training (PT) packages</p>
+                    <div class="min-w-0">
+                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider truncate">Outstanding Receivables & Dues</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Separated tracking for General Memberships and Personal Training (PT) packages</p>
                     </div>
                 </div>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 self-start sm:self-auto">
                     Total Due: {{ $currency }}{{ number_format($totalDues, 2) }}
                 </span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <!-- 1. General Membership Dues -->
                 <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div>
@@ -351,8 +351,8 @@
         </div>
 
         <!-- ==================== MODAL: ADD EXPENSE ==================== -->
-        <div x-show="showExpenseModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showExpenseModal = false">
+        <div x-show="showExpenseModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showExpenseModal = false">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">Record Operational Expense</h3>
                     <button type="button" @click="showExpenseModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
@@ -365,7 +365,7 @@
                         <input type="text" name="title" required placeholder="e.g. Rent, Electricity, Dumbbells" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Amount ({{ $currency }}) *</label>
                             <input type="number" step="0.01" name="amount" required placeholder="0.00" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
@@ -377,7 +377,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
                             <select name="expense_category_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">

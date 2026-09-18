@@ -3,12 +3,12 @@
         $currency = $tenant->currency_symbol ?? '₹';
     @endphp
 
-    <div class="space-y-6 max-w-7xl mx-auto">
+    <div class="space-y-6 w-full">
         <!-- ==================== HEADER & TOP CONTROLS ==================== -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900/60 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white dark:bg-slate-900/60 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shadow-inner shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shadow-inner shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 </div>
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
@@ -19,12 +19,12 @@
             </div>
 
             <!-- Filter Toolbar -->
-            <form action="{{ route('app.finance.member-report') }}" method="GET" class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300">
-                    <span class="text-slate-500 dark:text-slate-400 font-medium">Dates:</span>
-                    <input type="date" name="start_date" value="{{ $startDate }}" class="bg-transparent border-0 text-slate-900 dark:text-white text-xs p-0 focus:ring-0 focus:outline-none">
-                    <span class="text-slate-400 dark:text-slate-500">&mdash;</span>
-                    <input type="date" name="end_date" value="{{ $endDate }}" class="bg-transparent border-0 text-slate-900 dark:text-white text-xs p-0 focus:ring-0 focus:outline-none">
+            <form action="{{ route('app.finance.member-report') }}" method="GET" class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 w-full sm:w-auto">
+                    <span class="text-slate-500 dark:text-slate-400 font-medium shrink-0">Dates:</span>
+                    <input type="date" name="start_date" value="{{ $startDate }}" class="bg-transparent border-0 text-slate-900 dark:text-white text-xs p-0 focus:ring-0 focus:outline-none min-w-0 flex-1">
+                    <span class="text-slate-400 dark:text-slate-500 shrink-0">&mdash;</span>
+                    <input type="date" name="end_date" value="{{ $endDate }}" class="bg-transparent border-0 text-slate-900 dark:text-white text-xs p-0 focus:ring-0 focus:outline-none min-w-0 flex-1">
                 </div>
 
                 <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
@@ -37,8 +37,8 @@
 
                 <!-- Gym Badge -->
                 <div class="px-3.5 py-2 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 dark:border-indigo-500/25 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    <span>{{ $tenant->name ?? 'PowerFit Gym' }}</span>
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span class="truncate">{{ $tenant->name ?? 'PowerFit Gym' }}</span>
                 </div>
 
                 <!-- Branch Filter -->
@@ -51,77 +51,77 @@
 
                 <!-- Download PDF -->
                 <a href="{{ route('app.finance.member-report.pdf', request()->query()) }}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/25 transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Download PDF</span>
                 </a>
             </form>
         </div>
 
         <!-- ==================== 6 TOP KPI CARDS ==================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             <!-- 1. Total Members -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{{ $totalMembers }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">Total Members</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none truncate">{{ $totalMembers }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">Total Members</div>
                 </div>
             </div>
 
             <!-- 2. Active -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none">{{ $activeMembers }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">Active</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none truncate">{{ $activeMembers }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">Active</div>
                 </div>
             </div>
 
             <!-- 3. Expired -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-rose-500/10 dark:bg-red-500/15 text-rose-600 dark:text-red-400 border border-rose-500/20 dark:border-red-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-rose-500/10 dark:bg-red-500/15 text-rose-600 dark:text-red-400 border border-rose-500/20 dark:border-red-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-rose-600 dark:text-red-400 tracking-tight leading-none">{{ $expiredMembers }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">Expired</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-rose-600 dark:text-red-400 tracking-tight leading-none truncate">{{ $expiredMembers }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">Expired</div>
                 </div>
             </div>
 
             <!-- 4. Frozen -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 dark:border-amber-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9H3m15.364 6.364l-12.728-12.728m12.728 0L5.636 18.364"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 dark:border-amber-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9H3m15.364 6.364l-12.728-12.728m12.728 0L5.636 18.364"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none">{{ $frozenMembers }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">Frozen</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none truncate">{{ $frozenMembers }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">Frozen</div>
                 </div>
             </div>
 
             <!-- 5. New This Month -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 dark:border-purple-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 dark:border-purple-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-purple-600 dark:text-purple-400 tracking-tight leading-none">{{ $newThisMonth }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">New This Month</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-purple-600 dark:text-purple-400 tracking-tight leading-none truncate">{{ $newThisMonth }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">New Month</div>
                 </div>
             </div>
 
             <!-- 6. Today's Check-ins -->
-            <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/20 dark:border-sky-500/25 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5 sm:gap-3.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/20 dark:border-sky-500/25 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 </div>
-                <div>
-                    <div class="text-2xl font-black text-sky-600 dark:text-sky-400 tracking-tight leading-none">{{ $todayCheckins }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1">Today Check-Ins</div>
+                <div class="min-w-0">
+                    <div class="text-xl sm:text-2xl font-black text-sky-600 dark:text-sky-400 tracking-tight leading-none truncate">{{ $todayCheckins }}</div>
+                    <div class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider mt-1 truncate">Check-Ins</div>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@
             <!-- Left Column: Plan Distribution & Gender Split (5 cols) -->
             <div class="lg:col-span-5 space-y-6">
                 <!-- Plan Distribution -->
-                <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                     <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-4">
                         <div class="w-8 h-8 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg>
@@ -143,7 +143,7 @@
                         @forelse($plans as $plan)
                             @php
                                 $cnt = $plan->memberships_count ?? 0;
-                                $pct = round(($cnt / $maxPlanCount) * 100);
+                                $pct = $maxPlanCount > 0 ? round(($cnt / $maxPlanCount) * 100) : 0;
                             @endphp
                             <div class="space-y-1.5">
                                 <div class="flex items-center justify-between text-xs sm:text-sm">
@@ -161,7 +161,7 @@
                 </div>
 
                 <!-- Gender Split -->
-                <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                <div class="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                     <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-4">
                         <div class="w-8 h-8 rounded-xl bg-purple-500/10 dark:bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -169,30 +169,30 @@
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Gender Split</h3>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3.5">
+                    <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5">
                         <!-- Male -->
-                        <div class="p-4 rounded-2xl bg-sky-50 dark:bg-slate-950/80 border border-sky-100 dark:border-slate-800 text-center">
-                            <div class="text-3xl font-black text-sky-600 dark:text-sky-400 leading-none">{{ $maleCount }}</div>
-                            <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1.5">Male</div>
+                        <div class="p-3 sm:p-4 rounded-2xl bg-sky-50 dark:bg-slate-950/80 border border-sky-100 dark:border-slate-800 text-center">
+                            <div class="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400 leading-none">{{ $maleCount }}</div>
+                            <div class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1.5 truncate">Male</div>
                         </div>
 
                         <!-- Female -->
-                        <div class="p-4 rounded-2xl bg-pink-50 dark:bg-pink-500/10 border border-pink-100 dark:border-pink-500/20 text-center">
-                            <div class="text-3xl font-black text-pink-600 dark:text-pink-400 leading-none">{{ $femaleCount }}</div>
-                            <div class="text-xs font-bold text-pink-700 dark:text-pink-300 uppercase tracking-wider mt-1.5">Female</div>
+                        <div class="p-3 sm:p-4 rounded-2xl bg-pink-50 dark:bg-pink-500/10 border border-pink-100 dark:border-pink-500/20 text-center">
+                            <div class="text-2xl sm:text-3xl font-black text-pink-600 dark:text-pink-400 leading-none">{{ $femaleCount }}</div>
+                            <div class="text-[11px] sm:text-xs font-bold text-pink-700 dark:text-pink-300 uppercase tracking-wider mt-1.5 truncate">Female</div>
                         </div>
 
                         <!-- Other -->
-                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
-                            <div class="text-3xl font-black text-purple-600 dark:text-purple-400 leading-none">{{ $otherCount }}</div>
-                            <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1.5">Other / NA</div>
+                        <div class="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
+                            <div class="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 leading-none">{{ $otherCount }}</div>
+                            <div class="text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1.5 truncate">Other / NA</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column: Attendance Overview (7 cols) -->
-            <div class="lg:col-span-7 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
+            <div class="lg:col-span-7 p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6">
                 <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-4">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -200,36 +200,36 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Attendance Overview</h3>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3.5">
+                <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5">
                     <!-- Today Check-Ins -->
-                    <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-100 dark:border-emerald-500/25 text-center">
-                        <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{{ $todayCheckins }}</div>
-                        <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mt-1.5">Today Check-Ins</div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-100 dark:border-emerald-500/25 text-center">
+                        <div class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{{ $todayCheckins }}</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider mt-1.5 truncate">Today Check-Ins</div>
                     </div>
 
                     <!-- Currently In -->
-                    <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-100 dark:border-amber-500/25 text-center">
-                        <div class="text-3xl font-black text-amber-600 dark:text-amber-400 leading-none">{{ $currentlyIn }}</div>
-                        <div class="text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider mt-1.5">Currently In</div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-100 dark:border-amber-500/25 text-center">
+                        <div class="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 leading-none">{{ $currentlyIn }}</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider mt-1.5 truncate">Currently In</div>
                     </div>
 
                     <!-- Checked Out -->
-                    <div class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-500/15 border border-sky-100 dark:border-sky-500/25 text-center">
-                        <div class="text-3xl font-black text-sky-600 dark:text-sky-400 leading-none">{{ $checkedOut }}</div>
-                        <div class="text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider mt-1.5">Checked Out</div>
+                    <div class="p-3 sm:p-4 rounded-2xl bg-sky-50 dark:bg-sky-500/15 border border-sky-100 dark:border-sky-500/25 text-center">
+                        <div class="text-2xl sm:text-3xl font-black text-sky-600 dark:text-sky-400 leading-none">{{ $checkedOut }}</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-sky-700 dark:text-sky-300 uppercase tracking-wider mt-1.5 truncate">Checked Out</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Unique This Week -->
-                    <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
-                        <div class="text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 leading-none">{{ $uniqueThisWeek }}</div>
+                    <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-purple-600 dark:text-purple-400 leading-none">{{ $uniqueThisWeek }}</div>
                         <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-2">Weekly Unique Members</div>
                     </div>
 
                     <!-- Avg Session -->
-                    <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
-                        <div class="text-3xl sm:text-4xl font-black text-pink-600 dark:text-pink-400 leading-none">{{ $avgSession }} min</div>
+                    <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-pink-600 dark:text-pink-400 leading-none">{{ $avgSession }} min</div>
                         <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-2">Avg Workout Duration</div>
                     </div>
                 </div>
@@ -263,7 +263,7 @@
 
                 @if($recentlyExpired->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
+                        <table class="w-full min-w-[550px] text-left text-xs sm:text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-800/60">
                                 <tr>
                                     <th class="py-3 px-5">Member Name</th>
@@ -302,7 +302,7 @@
 
                 @if($expiringSoon->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
+                        <table class="w-full min-w-[550px] text-left text-xs sm:text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-800/60">
                                 <tr>
                                     <th class="py-3 px-5">Member Name</th>
@@ -315,7 +315,6 @@
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                                 @foreach($expiringSoon as $exp)
                                     @php
-                                        $daysLeft = max(0, \Carbon\Carbon::parse($exp->end_date)->diffInDays(now()));
                                         $daysLeft = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
@@ -351,7 +350,7 @@
 
                 @if($newMembers->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
+                        <table class="w-full min-w-[550px] text-left text-xs sm:text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-800/60">
                                 <tr>
                                     <th class="py-3 px-5">Member Name</th>
@@ -390,7 +389,7 @@
 
                 @if($inactiveMembers->count() > 0)
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
+                        <table class="w-full min-w-[550px] text-left text-xs sm:text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 uppercase text-xs font-bold border-b border-slate-200 dark:border-slate-800/60">
                                 <tr>
                                     <th class="py-3 px-5">Member Name</th>

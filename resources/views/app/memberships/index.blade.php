@@ -243,8 +243,8 @@
 
         @if(auth()->user()->hasPermission('memberships.manage'))
             <!-- Create Membership Plan Modal -->
-            <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-xl max-w-md w-full p-4 shadow-2xl" @click.away="showNewModal = false">
+            <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl" @click.away="showNewModal = false">
                     <div class="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-slate-800 pb-2.5">
                         <h3 class="text-xs font-bold text-slate-900 dark:text-white">Create New Membership Plan</h3>
                         <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
@@ -343,8 +343,8 @@
         </div>
 
         <!-- Edit Membership Plan Modal -->
-        <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-xl max-w-md w-full p-4 shadow-2xl" @click.away="editPlan = null">
+        <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl" @click.away="editPlan = null">
                 <div class="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-slate-800 pb-2.5">
                     <h3 class="text-xs font-bold text-slate-900 dark:text-white">Edit Membership Plan</h3>
                     <button @click="editPlan = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>

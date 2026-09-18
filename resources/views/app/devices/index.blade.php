@@ -71,7 +71,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[600px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="py-3 px-4 font-semibold">Event Time</th>
@@ -113,13 +113,24 @@
         </div>
 
         <!-- Add Device Modal -->
-        <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl text-slate-900 dark:text-slate-200" @click.away="showModal = false">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Register IoT Access Hardware</h3>
-                <form action="{{ route('app.devices.store') }}" method="POST" class="space-y-4">
+        <div x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl text-slate-900 dark:text-slate-200 overflow-hidden" @click.away="showModal = false">
+                <div class="p-3.5 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span class="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </span>
+                        Register IoT Access Hardware
+                    </h3>
+                    <button @click="showModal = false" type="button" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('app.devices.store') }}" method="POST" class="p-4 sm:p-5 space-y-3.5 overflow-y-auto flex-1">
                     @csrf
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Device Name *</label>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Device Name <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" required placeholder="e.g. Front Gate Facial Scanner" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-amber-500 focus:outline-none">
                     </div>
 
@@ -133,7 +144,7 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">IP Address</label>
                             <input type="text" name="ip_address" placeholder="192.168.1.100" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-amber-500 focus:outline-none">
@@ -144,7 +155,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Direction</label>
                             <select name="direction" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
@@ -163,9 +174,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800 shrink-0">
                         <button type="button" @click="showModal = false" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition">Register Device</button>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition shadow-sm">Register Device</button>
                     </div>
                 </form>
             </div>

@@ -695,11 +695,11 @@
         <div x-show="showRecordPaymentModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md p-3 sm:p-6" 
-             style="display: none;">
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" 
+             style="display: none;"
+             x-cloak>
             
-            <div class="min-h-full flex items-center justify-center py-4 sm:py-6">
-                <div @click.away="showRecordPaymentModal = false" class="w-full max-w-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl shadow-2xl p-5 sm:p-8 space-y-6 text-xs relative">
+            <div @click.away="showRecordPaymentModal = false" class="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-2xl shadow-2xl p-4 sm:p-6 space-y-5 text-xs relative">
                     
                     <!-- Top-Right Close Button -->
                     <button type="button" 
@@ -1130,49 +1130,49 @@
         <div x-show="showInvoiceModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md p-4 sm:p-6" 
-             style="display: none;">
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" 
+             style="display: none;"
+             x-cloak>
             
-            <div class="min-h-full flex items-center justify-center py-6">
-                <div @click.away="showInvoiceModal = false" class="w-full max-w-2xl space-y-3">
-                    
-                    <!-- Modal Header Toolbar -->
-                    <div class="flex items-center justify-between px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
-                        <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-xs">
-                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span>Invoice Preview</span>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <a :href="'/app/invoices/' + selectedInvoice.id" 
-                               target="_blank" 
-                               title="Open in new tab"
-                               class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
-                            <button type="button" 
-                                    @click="showInvoiceModal = false" 
-                                    title="Close"
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
+            <div @click.away="showInvoiceModal = false" class="w-full max-w-2xl max-h-[92vh] overflow-y-auto space-y-3">
+                
+                <!-- Modal Header Toolbar -->
+                <div class="flex items-center justify-between px-4 sm:px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
+                    <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-xs">
+                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Invoice Preview</span>
                     </div>
 
-                    <!-- Action Bar Toolbar -->
-                    <div class="flex items-center justify-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <a :href="'/app/invoices/' + selectedInvoice.id" 
+                           target="_blank" 
+                           title="Open in new tab"
+                           class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
                         <button type="button" 
                                 @click="showInvoiceModal = false" 
-                                class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
-                            Close
+                                title="Close"
+                                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
+                    </div>
+                </div>
 
-                        <button type="button" 
-                                onclick="window.print()" 
-                                class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            <span>Print</span>
-                        </button>
+                <!-- Action Bar Toolbar -->
+                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                    <button type="button" 
+                            @click="showInvoiceModal = false" 
+                            class="px-4 sm:px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
+                        Close
+                    </button>
+
+                    <button type="button" 
+                            onclick="window.print()" 
+                            class="px-4 sm:px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        <span>Print</span>
+                    </button>
 
                         <form :action="'/app/payments/' + selectedInvoice.id + '/send-email'" method="POST" class="inline"
                               data-confirm="Send official payment receipt email directly to this member?"

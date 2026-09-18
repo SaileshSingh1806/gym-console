@@ -3,17 +3,17 @@
 
     <!-- Header & Breadcrumbs -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div class="flex items-center gap-3">
+        <div class="flex items-start sm:items-center gap-3">
             <a href="{{ route('admin.tickets.index') }}" 
-               class="p-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition-colors shadow-xs">
+               class="p-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition-colors shadow-xs shrink-0 mt-0.5 sm:mt-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </a>
             <div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="font-mono text-xs font-bold text-red-600 dark:text-red-400">{{ $ticket->ticket_number }}</span>
-                    <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">{{ $ticket->subject }}</h1>
+                    <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight break-words">{{ $ticket->subject }}</h1>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <div class="flex items-center flex-wrap gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">
                     <span>From <strong>{{ $ticket->tenant->name ?? 'Gym Tenant' }}</strong></span>
                     <span>•</span>
                     <span>By {{ $ticket->user->name ?? 'User' }} ({{ $ticket->user->email ?? '' }})</span>
@@ -23,15 +23,16 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
             <form action="{{ route('admin.tickets.delete', $ticket->id) }}" method="POST"
                   data-confirm="Are you sure you want to delete ticket #{{ $ticket->ticket_number }} ({{ $ticket->subject }})? All conversation history will be permanently removed."
                   data-confirm-title="Delete Support Ticket"
                   data-confirm-btn="Delete Ticket"
-                  data-confirm-type="danger">
+                  data-confirm-type="danger"
+                  class="w-full sm:w-auto">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20 transition-colors cursor-pointer flex items-center gap-1.5">
+                <button type="submit" class="w-full sm:w-auto px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20 transition-colors cursor-pointer flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     <span>Delete Ticket</span>
                 </button>
@@ -48,15 +49,15 @@
             <!-- Message Thread -->
             <div class="space-y-4">
                 @foreach($ticket->replies as $reply)
-                <div class="p-5 rounded-2xl border {{ $reply->is_admin_reply ? 'bg-red-50/60 dark:bg-red-950/20 border-red-200 dark:border-red-500/30 shadow-xs' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs' }} space-y-3 transition-colors">
+                <div class="p-4 sm:p-5 rounded-2xl border {{ $reply->is_admin_reply ? 'bg-red-50/60 dark:bg-red-950/20 border-red-200 dark:border-red-500/30 shadow-xs' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs' }} space-y-3 transition-colors">
                     <!-- Reply Header -->
                     <div class="flex items-center justify-between gap-3 border-b {{ $reply->is_admin_reply ? 'border-red-200 dark:border-red-500/20' : 'border-slate-200 dark:border-slate-800' }} pb-3">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl {{ $reply->is_admin_reply ? 'bg-gradient-to-tr from-red-500 to-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }} flex items-center justify-center font-bold text-xs shadow-xs">
+                            <div class="w-8 h-8 rounded-xl {{ $reply->is_admin_reply ? 'bg-gradient-to-tr from-red-500 to-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }} flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
                                 {{ substr($reply->user->name ?? ($reply->is_admin_reply ? 'Admin' : 'User'), 0, 1) }}
                             </div>
                             <div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="font-bold text-slate-900 dark:text-white text-xs">{{ $reply->user->name ?? ($reply->is_admin_reply ? 'Super Admin' : 'User') }}</span>
                                     @if($reply->is_admin_reply)
                                         <span class="px-2 py-0.2 rounded-full text-[9px] font-black bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 uppercase tracking-wider">Super Admin</span>
@@ -70,7 +71,7 @@
                     </div>
 
                     <!-- Message Body -->
-                    <div class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line">
+                    <div class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed whitespace-pre-line break-words overflow-hidden">
                         {{ $reply->message }}
                     </div>
 
@@ -78,9 +79,9 @@
                     @if($reply->attachment_path)
                     <div class="pt-2 border-t {{ $reply->is_admin_reply ? 'border-red-200 dark:border-red-500/20' : 'border-slate-200 dark:border-slate-800/80' }}">
                         <a href="{{ asset('storage/'.$reply->attachment_path) }}" target="_blank" 
-                           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/80 dark:hover:bg-slate-950 border border-slate-300 dark:border-slate-800 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                            <span>{{ $reply->attachment_name ?? 'Download Attachment' }}</span>
+                           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-950/80 dark:hover:bg-slate-950 border border-slate-300 dark:border-slate-800 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors max-w-full truncate">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                            <span class="truncate">{{ $reply->attachment_name ?? 'Download Attachment' }}</span>
                         </a>
                     </div>
                     @endif
@@ -89,10 +90,10 @@
             </div>
 
             <!-- Admin Reply Box -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-xl space-y-4 transition-colors">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-xl space-y-4 transition-colors">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                        <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
                         <span>Post Official Response</span>
                     </h3>
                     <span class="text-[11px] text-slate-500 dark:text-slate-400">An automated email notification will be dispatched to the gym owner.</span>
@@ -107,7 +108,7 @@
                                   class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-red-500 focus:outline-none text-xs"></textarea>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div class="space-y-1">
                             <label class="font-bold text-slate-700 dark:text-slate-300">Update Ticket Status To</label>
                             <select name="status" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none text-xs cursor-pointer">
@@ -126,7 +127,7 @@
                     </div>
 
                     <div class="pt-2 flex justify-end">
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/20 transition-all flex items-center gap-2 cursor-pointer">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                             <span>Send Response & Notify Gym</span>
                         </button>

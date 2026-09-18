@@ -4,6 +4,9 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <form action="{{ route('admin.logs') }}" method="GET" class="flex flex-wrap items-center gap-3 flex-grow max-w-xl">
                 <input type="text" name="action" value="{{ request('action') }}" placeholder="Filter by action (e.g. member_created, subscription_activated)..." class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <form action="{{ route('admin.logs') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 flex-grow max-w-xl w-full sm:w-auto">
+                <input type="text" name="action" value="{{ request('action') }}" placeholder="Filter by action (e.g. member_created)..." class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[140px] shadow-xs">
                 <select name="tenant_id" class="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                     <option value="">All Gyms</option>
                     @foreach($gyms as $g)
@@ -20,8 +23,11 @@
                   data-confirm-title="Purge Activity Logs"
                   data-confirm-btn="Purge Logs"
                   data-confirm-type="danger">
+                  data-confirm-type="danger"
+                  class="w-full sm:w-auto">
                 @csrf
                 <button type="submit" class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 font-bold text-xs border border-red-500/20 transition-all cursor-pointer">
+                <button type="submit" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-600 hover:text-white text-red-600 dark:text-red-400 font-bold text-xs border border-red-500/20 transition-all cursor-pointer">
                     Purge All Logs
                 </button>
             </form>
@@ -31,6 +37,7 @@
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs min-w-[700px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
                             <th class="py-3.5 px-4 font-semibold">Timestamp</th>

@@ -107,64 +107,69 @@
                 </a>
             </div>
 
-            <!-- Weekday Column Headers (Mon - Sun) -->
-            <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 text-center text-xs font-bold text-slate-500 dark:text-slate-400 py-2.5">
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-                <div>Sun</div>
-            </div>
-
-            <!-- Calendar Days Grid -->
-            <div class="grid grid-cols-7 divide-x divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-950/20">
-                <!-- Previous month trailing days -->
-                @for($i = $startDayOfWeek - 1; $i >= 1; $i--)
-                    @php $prevDayNum = $prevMonthDays - $i + 1; @endphp
-                    <div class="min-h-[100px] p-2 bg-slate-50 dark:bg-slate-950/30 text-slate-400 dark:text-slate-600 text-xs">
-                        <span class="font-bold">{{ $prevDayNum }}</span>
+            <!-- Scrollable Calendar Grid Container on Mobile -->
+            <div class="overflow-x-auto">
+                <div class="min-w-[640px]">
+                    <!-- Weekday Column Headers (Mon - Sun) -->
+                    <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 text-center text-xs font-bold text-slate-500 dark:text-slate-400 py-2.5">
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
                     </div>
-                @endfor
 
-                <!-- Current month days -->
-                @for($d = 1; $d <= $daysInMonth; $d++)
-                    @php
-                        $dayDateString = sprintf('%04d-%02d-%02d', $year, $month, $d);
-                        $isToday = $dayDateString === date('Y-m-d');
-                        $dayTrials = $trials->filter(function($t) use ($dayDateString) {
-                            return $t->trial_date && $t->trial_date->toDateString() === $dayDateString;
-                        });
-                    @endphp
-                    <div class="min-h-[100px] p-2 {{ $isToday ? 'bg-indigo-50/70 dark:bg-indigo-950/20 ring-1 ring-inset ring-indigo-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/20' }} transition-colors relative flex flex-col justify-between">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-bold {{ $isToday ? 'text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20' : 'text-slate-700 dark:text-slate-300' }}">{{ $d }}</span>
-                        </div>
+                    <!-- Calendar Days Grid -->
+                    <div class="grid grid-cols-7 divide-x divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-950/20">
+                        <!-- Previous month trailing days -->
+                        @for($i = $startDayOfWeek - 1; $i >= 1; $i--)
+                            @php $prevDayNum = $prevMonthDays - $i + 1; @endphp
+                            <div class="min-h-[100px] p-2 bg-slate-50 dark:bg-slate-950/30 text-slate-400 dark:text-slate-600 text-xs">
+                                <span class="font-bold">{{ $prevDayNum }}</span>
+                            </div>
+                        @endfor
 
-                        <!-- Scheduled Demo Event Chips -->
-                        <div class="space-y-1 overflow-y-auto max-h-20">
-                            @foreach($dayTrials as $tr)
-                                <button type="button" @click="viewTrial({{ Js::from($tr) }})" class="w-full text-left p-1 rounded-md bg-indigo-50 dark:bg-indigo-950/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/90 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-semibold truncate transition-colors flex items-center gap-1 cursor-pointer" title="{{ $tr->trial_time }} {{ $tr->lead?->name }}">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0"></span>
-                                    <span class="font-mono text-[9px] text-indigo-600 dark:text-indigo-200">{{ $tr->trial_time ? substr($tr->trial_time, 0, 5) : '10:00' }}</span>
-                                    <span class="truncate">{{ $tr->lead?->name ?? 'Guest Demo' }}</span>
-                                </button>
-                            @endforeach
-                        </div>
+                        <!-- Current month days -->
+                        @for($d = 1; $d <= $daysInMonth; $d++)
+                            @php
+                                $dayDateString = sprintf('%04d-%02d-%02d', $year, $month, $d);
+                                $isToday = $dayDateString === date('Y-m-d');
+                                $dayTrials = $trials->filter(function($t) use ($dayDateString) {
+                                    return $t->trial_date && $t->trial_date->toDateString() === $dayDateString;
+                                });
+                            @endphp
+                            <div class="min-h-[100px] p-2 {{ $isToday ? 'bg-indigo-50/70 dark:bg-indigo-950/20 ring-1 ring-inset ring-indigo-500/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/20' }} transition-colors relative flex flex-col justify-between">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold {{ $isToday ? 'text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-500/20' : 'text-slate-700 dark:text-slate-300' }}">{{ $d }}</span>
+                                </div>
+
+                                <!-- Scheduled Demo Event Chips -->
+                                <div class="space-y-1 overflow-y-auto max-h-20">
+                                    @foreach($dayTrials as $tr)
+                                        <button type="button" @click="viewTrial({{ Js::from($tr) }})" class="w-full text-left p-1 rounded-md bg-indigo-50 dark:bg-indigo-950/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/90 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 text-[10px] font-semibold truncate transition-colors flex items-center gap-1 cursor-pointer" title="{{ $tr->trial_time }} {{ $tr->lead?->name }}">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0"></span>
+                                            <span class="font-mono text-[9px] text-indigo-600 dark:text-indigo-200">{{ $tr->trial_time ? substr($tr->trial_time, 0, 5) : '10:00' }}</span>
+                                            <span class="truncate">{{ $tr->lead?->name ?? 'Guest Demo' }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endfor
+
+                        <!-- Next month trailing days to complete last row -->
+                        @php
+                            $totalCells = ($startDayOfWeek - 1) + $daysInMonth;
+                            $remainingCells = (7 - ($totalCells % 7)) % 7;
+                        @endphp
+                        @for($n = 1; $n <= $remainingCells; $n++)
+                            <div class="min-h-[100px] p-2 bg-slate-50 dark:bg-slate-950/30 text-slate-400 dark:text-slate-600 text-xs">
+                                <span class="font-bold">{{ $n }}</span>
+                            </div>
+                        @endfor
                     </div>
-                @endfor
-
-                <!-- Next month trailing days to complete last row -->
-                @php
-                    $totalCells = ($startDayOfWeek - 1) + $daysInMonth;
-                    $remainingCells = (7 - ($totalCells % 7)) % 7;
-                @endphp
-                @for($n = 1; $n <= $remainingCells; $n++)
-                    <div class="min-h-[100px] p-2 bg-slate-50 dark:bg-slate-950/30 text-slate-400 dark:text-slate-600 text-xs">
-                        <span class="font-bold">{{ $n }}</span>
-                    </div>
-                @endfor
+                </div>
             </div>
         </div>
 

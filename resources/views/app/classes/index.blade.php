@@ -592,8 +592,8 @@
         </div>
 
         <!-- ==================== MODAL: ADD NEW CLASS ==================== -->
-        <div x-show="showAddClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl space-y-6 text-slate-900 dark:text-slate-200" @click.away="showAddClassModal = false">
+        <div x-show="showAddClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 sm:p-8 shadow-2xl space-y-6 text-slate-900 dark:text-slate-200" @click.away="showAddClassModal = false">
                 
                 <!-- Modal Top Header -->
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -836,8 +836,8 @@
         </div>
 
         <!-- ==================== MODAL: EDIT CLASS ==================== -->
-        <div x-show="showEditClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl space-y-6 text-slate-900 dark:text-slate-200" @click.away="showEditClassModal = false">
+        <div x-show="showEditClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 md:p-8 shadow-2xl space-y-6 text-slate-900 dark:text-slate-200" @click.away="showEditClassModal = false">
                 
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div>
@@ -1048,8 +1048,8 @@
         </div>
 
         <!-- ==================== MODAL: BOOK MEMBER FOR CLASS ==================== -->
-        <div x-show="showBookClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 text-slate-900 dark:text-slate-200" @click.away="showBookClassModal = false">
+        <div x-show="showBookClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl space-y-5 text-slate-900 dark:text-slate-200" @click.away="showBookClassModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-base font-extrabold text-slate-900 dark:text-white">Book Class Session</h3>
@@ -1086,8 +1086,8 @@
         </div>
 
         <!-- ==================== MODAL: DELETE CONFIRMATION ==================== -->
-        <div x-show="showDeleteClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 text-center text-slate-900 dark:text-slate-200" @click.away="showDeleteClassModal = false">
+        <div x-show="showDeleteClassModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 shadow-2xl space-y-5 text-center text-slate-900 dark:text-slate-200" @click.away="showDeleteClassModal = false">
                 <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto shadow-lg shadow-rose-500/10">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </div>

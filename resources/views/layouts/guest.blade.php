@@ -100,31 +100,31 @@
 <body class="flex flex-col min-h-screen antialiased bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
 
     <!-- Top Navigation -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="flex items-center gap-3 group">
+            <a href="{{ route('home') }}" class="flex items-center gap-2.5 sm:gap-3 group">
                 @if(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-10 w-10 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800 shadow-md group-hover:scale-105 transition-transform shrink-0">
-                    <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800 shadow-md group-hover:scale-105 transition-transform shrink-0">
+                    <span class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
                         {{ $platformSettings['app_name'] ?? 'Gym Console' }}
-                        <span class="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
+                        <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
                     </span>
                 @else
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                        <svg class="w-6 h-6 text-slate-950 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
                             GYM<span class="text-amber-400">CONSOLE</span>
-                            <span class="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
+                            <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
                         </span>
                     </div>
                 @endif
             </a>
 
-            <!-- Nav Links -->
+            <!-- Desktop Nav Links -->
             <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
                 <a href="{{ route('home') }}" class="hover:text-amber-400 transition-colors">Home</a>
                 <a href="{{ route('features') }}" class="hover:text-amber-400 transition-colors">Features</a>
@@ -133,23 +133,57 @@
                 <a href="{{ route('contact') }}" class="hover:text-amber-400 transition-colors">Contact</a>
             </nav>
 
-            <!-- Auth Buttons -->
-            <div class="flex items-center gap-4">
+            <!-- Desktop Auth Buttons & Mobile Menu Button -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div class="hidden sm:flex items-center gap-3">
+                    @auth
+                        @if(auth()->user()->isSuperAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Super Admin</a>
+                        @elseif(auth()->user()->tenant && auth()->user()->tenant->isSubscriptionActive())
+                            <a href="{{ route('app.dashboard') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Dashboard</a>
+                        @else
+                            <a href="{{ route('auth.checkout') }}" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">💳 Pay to Activate</a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">Sign Out</button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="text-xs sm:text-sm font-medium text-slate-300 hover:text-white transition-colors px-2 py-1">Sign In</a>
+                        <a href="{{ route('register') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap">Get Started</a>
+                    @endauth
+                </div>
+
+                <!-- Mobile Hamburger Toggle -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white focus:outline-none cursor-pointer" aria-label="Toggle navigation menu">
+                    <svg x-show="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg x-show="mobileMenuOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Drawer -->
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-lg px-4 pt-3 pb-5 space-y-3">
+            <nav class="flex flex-col space-y-1 text-sm font-medium text-slate-300">
+                <a href="{{ route('home') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Home</a>
+                <a href="{{ route('features') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Features</a>
+                <a href="{{ route('pricing') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Pricing</a>
+                <a href="{{ route('about') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">About</a>
+                <a href="{{ route('contact') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Contact</a>
+            </nav>
+
+            <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
                 @auth
                     @if(auth()->user()->isSuperAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-sm font-semibold px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Super Admin</a>
+                        <a href="{{ route('admin.dashboard') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">Platform Super Admin</a>
                     @elseif(auth()->user()->tenant && auth()->user()->tenant->isSubscriptionActive())
-                        <a href="{{ route('app.dashboard') }}" class="text-sm font-semibold px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Dashboard</a>
+                        <a href="{{ route('app.dashboard') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">Gym Dashboard</a>
                     @else
-                        <a href="{{ route('auth.checkout') }}" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">💳 Pay to Activate</a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">Sign Out</button>
-                        </form>
+                        <a href="{{ route('auth.checkout') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">💳 Pay to Activate</a>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Sign In</a>
-                    <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-orange-500/20">Get Started</a>
+                    <a href="{{ route('login') }}" class="text-center font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs">Sign In</a>
+                    <a href="{{ route('register') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs">Get Started Free</a>
                 @endauth
             </div>
         </div>

@@ -2,15 +2,19 @@
     <div class="space-y-8" x-data="{ showNewPlanModal: false, showNewFeatureModal: false, editPlan: null }">
         <!-- Top Toolbar -->
         <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
                 <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Configured Subscription Tiers</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Control feature gating, quotas, trial duration, and monthly/annual pricing</p>
             </div>
             <div class="flex items-center gap-3">
                 <button @click="showNewFeatureModal = true" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs transition-colors cursor-pointer shadow-sm">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <button @click="showNewFeatureModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs transition-colors cursor-pointer shadow-sm">
                     + Add New Feature Code
                 </button>
                 <button @click="showNewPlanModal = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-colors cursor-pointer">
+                <button @click="showNewPlanModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-colors cursor-pointer">
                     + Create SaaS Plan
                 </button>
             </div>
@@ -18,12 +22,15 @@
 
         <!-- Plans Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             @foreach($plans as $plan)
                 <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border {{ $plan->is_popular ? 'border-red-500 shadow-xl shadow-red-500/10' : 'border-slate-200 dark:border-slate-800 shadow-sm' }} flex flex-col justify-between transition-colors">
+                <div class="p-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border {{ $plan->is_popular ? 'border-red-500 shadow-xl shadow-red-500/10' : 'border-slate-200 dark:border-slate-800 shadow-sm' }} flex flex-col justify-between transition-colors">
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <h4 class="font-bold text-slate-900 dark:text-white text-lg">{{ $plan->name }}</h4>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg">{{ $plan->name }}</h4>
                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{{ $plan->slug }}</span>
                             </div>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $plan->is_active ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
@@ -108,8 +115,11 @@
         <!-- Edit Plan Modal -->
         <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl transition-colors" @click.away="editPlan = null">
+        <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="editPlan = null">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Edit SaaS Subscription Plan</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit SaaS Subscription Plan</h3>
                     <button @click="editPlan = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                 </div>
 
@@ -117,6 +127,7 @@
                     <form :action="'/admin/plans/' + editPlan.id" method="POST" class="space-y-4">
                         @csrf
                         <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Plan Name *</label>
                                 <input type="text" name="name" x-model="editPlan.name" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -133,6 +144,7 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Yearly / Annual Price (₹ / $) *</label>
                                 <input type="number" step="0.01" name="price_yearly" x-model="editPlan.price_yearly" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -144,6 +156,7 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Member Limit (-1 unltd)</label>
                                 <input type="number" name="member_limit" x-model="editPlan.member_limit" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -175,6 +188,7 @@
                         </div>
 
                         <div class="flex items-center gap-6 py-1">
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-6 py-1">
                             <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                                 <input type="checkbox" name="is_active" value="1" x-model="editPlan.is_active" class="rounded bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-red-600 focus:ring-0">
                                 Active &amp; Available
@@ -197,14 +211,18 @@
         <!-- Create Plan Modal -->
         <div x-show="showNewPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl transition-colors" @click.away="showNewPlanModal = false">
+        <div x-show="showNewPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showNewPlanModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Create New SaaS Plan</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New SaaS Plan</h3>
                     <button @click="showNewPlanModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                 </div>
 
                 <form action="{{ route('admin.plans.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Plan Name *</label>
                             <input type="text" name="name" required placeholder="Growth Plan" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -221,6 +239,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Yearly / Annual Price (₹ / $) *</label>
                             <input type="number" step="0.01" name="price_yearly" required placeholder="12000.00" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -232,6 +251,7 @@
                     </div>
 
                     <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Member Limit (-1 unltd)</label>
                             <input type="number" name="member_limit" value="500" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
@@ -272,8 +292,11 @@
         <!-- Add Feature Code Modal -->
         <div x-show="showNewFeatureModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-colors" @click.away="showNewFeatureModal = false">
+        <div x-show="showNewFeatureModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showNewFeatureModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">Create New Feature Code</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New Feature Code</h3>
                     <button @click="showNewFeatureModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                 </div>
 

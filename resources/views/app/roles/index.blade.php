@@ -66,6 +66,7 @@
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
+                <table class="w-full min-w-[550px] text-left text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200 dark:border-slate-800">
                         <tr>
                             <th class="py-3 px-4">Role Name</th>
@@ -172,6 +173,7 @@
                 <!-- Matrix Table -->
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full min-w-[650px] text-left text-xs border-collapse">
                         <!-- Table Head: Roles Columns -->
                         <thead class="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 uppercase tracking-wider text-[10px] font-black border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
                             <tr>
@@ -256,6 +258,8 @@
         <!-- ========================================== -->
         <div x-show="showAddRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showAddRoleModal = false">
+        <div x-show="showAddRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showAddRoleModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">Create Custom Role</h3>
@@ -299,6 +303,8 @@
         <!-- ========================================== -->
         <div x-show="showEditRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showEditRoleModal = false">
+        <div x-show="showEditRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showEditRoleModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white">Edit Role</h3>

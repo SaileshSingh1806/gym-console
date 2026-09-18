@@ -178,45 +178,45 @@
         paymentMethod: 'cash',
         paymentRef: '',
         paymentNotes: ''
-    }" class="space-y-6 pb-20 max-w-7xl mx-auto">
+    }" class="space-y-4 sm:space-y-6 pb-20 max-w-7xl mx-auto">
 
         <!-- Top Bar Navigation -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3">
             <a href="{{ route('app.members.index') }}" 
-               class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold flex items-center gap-2 transition-all shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+               class="px-3.5 sm:px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold flex items-center gap-2 transition-all shadow-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 <span>Back to Members</span>
             </a>
 
             <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                <span class="w-2 h-2 rounded-full {{ $member->status === 'ACTIVE' ? 'bg-emerald-400' : ($member->status === 'SUSPENDED' ? 'bg-rose-400' : 'bg-orange-400') }}"></span>
+                <span class="w-2 h-2 rounded-full shrink-0 {{ $member->status === 'ACTIVE' ? 'bg-emerald-400' : ($member->status === 'SUSPENDED' ? 'bg-rose-400' : 'bg-orange-400') }}"></span>
                 <span>Branch: <strong class="text-slate-900 dark:text-white">{{ $member->branch->name ?? 'Main Branch' }}</strong></span>
             </div>
         </div>
 
         <!-- Feedback Alerts -->
         @if (session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-3 shadow-sm">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-3 shadow-sm">
                 <svg class="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                <span>{{ session('success') }}</span>
+                <span class="leading-relaxed">{{ session('success') }}</span>
             </div>
         @endif
 
         @if (session('error'))
-            <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-3 shadow-sm">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-3 shadow-sm">
                 <svg class="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>{{ session('error') }}</span>
+                <span class="leading-relaxed">{{ session('error') }}</span>
             </div>
         @endif
 
         <!-- Top Header Profile Banner -->
-        <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6">
+        <div class="p-3.5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
             <!-- Left Info Block -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">
-                <div>
+                <div class="min-w-0 w-full sm:w-auto">
                     <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{{ $member->full_name }}</h1>
-                        <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold">
+                        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">{{ $member->full_name }}</h1>
+                        <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold shrink-0">
                             {{ $member->member_code }}
                         </span>
                     </div>
@@ -224,37 +224,37 @@
                     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5">
                         <!-- Status Badge -->
                         @if($member->status === 'ACTIVE')
-                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm">
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
                                 <span>Active</span>
                             </span>
                         @elseif($member->status === 'SUSPENDED')
-                            <span class="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm">
+                            <span class="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-rose-500 dark:bg-rose-400"></span>
                                 <span>Frozen</span>
                             </span>
                         @else
-                            <span class="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 text-orange-700 dark:text-orange-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm">
+                            <span class="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 text-orange-700 dark:text-orange-400 font-extrabold text-[11px] flex items-center gap-1.5 shadow-sm shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-orange-500 dark:bg-orange-400"></span>
                                 <span>{{ $member->status }}</span>
                             </span>
                         @endif
 
                         <!-- ID Badge -->
-                        <span class="p-1 rounded-md bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 text-xs font-bold" title="Digital ID Card">
+                        <span class="p-1 rounded-md bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400 text-xs font-bold shrink-0" title="Digital ID Card">
                             💳
                         </span>
 
                         <!-- Plan Badge -->
                         @if($activeMembership && $activeMembership->plan)
-                            <span class="px-2.5 sm:px-3 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center gap-1.5 shadow-sm">
+                            <span class="px-2.5 sm:px-3 py-1 rounded-lg bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center gap-1.5 shadow-sm shrink-0">
                                 <span>👑</span>
                                 <span>{{ $activeMembership->plan->name }}</span>
                             </span>
                         @endif
 
                         <!-- Phone -->
-                        <a href="tel:{{ $member->phone }}" class="px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700/60 dark:text-slate-300 dark:hover:text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm">
+                        <a href="tel:{{ $member->phone }}" class="px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700/60 dark:text-slate-300 dark:hover:text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm shrink-0">
                             <span>📞</span>
                             <span>{{ $member->phone }}</span>
                         </a>
@@ -263,12 +263,12 @@
             </div>
 
             <!-- Right Metrics & Actions Block -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto justify-start lg:justify-end">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full lg:w-auto justify-start lg:justify-end">
                 <!-- Metrics Grid on Mobile -->
                 <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3 shrink-0">
                     <!-- Metric 1: Days Left -->
                     <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
-                        <p class="text-lg sm:text-xl font-black {{ ($daysLeft !== null && $daysLeft < 7) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
+                        <p class="text-base sm:text-xl font-black {{ ($daysLeft !== null && $daysLeft < 7) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }}">
                             {{ $daysLeft !== null ? max(0, $daysLeft) : '0' }}
                         </p>
                         <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">DAYS LEFT</span>
@@ -276,51 +276,51 @@
 
                     <!-- Metric 2: Months Active -->
                     <div class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
-                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">{{ $monthsActive }}</p>
+                        <p class="text-base sm:text-xl font-black text-slate-900 dark:text-white">{{ $monthsActive }}</p>
                         <span class="text-[9px] sm:text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mt-0.5">MONTHS ACTIVE</span>
                     </div>
                 </div>
 
                 <!-- Actions Buttons Grid on Mobile -->
-                <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
                     <!-- Actions: Add Payment -->
                     <button type="button" 
                             @click="showAddPaymentModal = true" 
-                            class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span>Add Payment</span>
                     </button>
 
                     <!-- Actions: Edit -->
                     <button type="button" 
                             @click="showEditModal = true" 
-                            class="px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         <span>Edit</span>
                     </button>
 
                     <!-- Actions: WhatsApp Menu -->
-                    <div class="relative" @click.away="showWhatsappMenu = false">
+                    <div class="relative w-full sm:w-auto" @click.away="showWhatsappMenu = false">
                         <button type="button" 
                                 @click="showWhatsappMenu = !showWhatsappMenu" 
-                                class="w-full px-3 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                class="w-full sm:w-auto px-3 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-emerald-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                             <span>WhatsApp</span>
-                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
                         <div x-show="showWhatsappMenu" 
                              x-transition 
-                             class="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl py-2 z-50 text-xs">
+                             class="absolute right-0 sm:right-0 mt-2 w-56 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl py-2 z-50 text-xs">
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Hello ' . $member->first_name . ', greeting from ' . (auth()->user()->tenant->name ?? 'Gym') . '!') }}" 
-                               target="_blank" 
-                               class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                target="_blank" 
+                                class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                 <span>💬</span>
                                 <span>Direct Chat</span>
                             </a>
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Dear ' . $member->first_name . ', your membership expires on ' . ($activeMembership ? $activeMembership->end_date->format('d M Y') : 'soon') . '. Please renew to continue your workout routine without interruption.') }}" 
-                               target="_blank" 
-                               class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                target="_blank" 
+                                class="px-4 py-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                 <span>⏳</span>
                                 <span>Send Renewal Reminder</span>
                             </a>
@@ -344,8 +344,8 @@
                           class="w-full sm:w-auto">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="w-full px-3 py-2 sm:py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-400 dark:border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <button type="submit" class="w-full sm:w-auto px-3 py-2 sm:py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-400 dark:border-rose-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             <span>Delete</span>
                         </button>
                     </form>
@@ -354,12 +354,12 @@
         </div>
 
         <!-- Main Layout: Left Sidebar Profile & Right Content Tabs -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
             
             <!-- ========================================================================= -->
             <!-- LEFT COLUMN: MEMBER PROFILE, MEMBERSHIP, FITNESS & GOALS, CONTACT & SYSTEM -->
             <!-- ========================================================================= -->
-            <div class="lg:col-span-4 space-y-6">
+            <div class="lg:col-span-4 space-y-4 sm:space-y-6">
 
                 <!-- 1. PHOTO BANNER & IDENTITY CARD -->
                 <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
@@ -630,84 +630,84 @@
             <!-- ========================================================================= -->
             <!-- RIGHT COLUMN: TAB NAVIGATION & TABBED CONTENT -->
             <!-- ========================================================================= -->
-            <div class="lg:col-span-8 space-y-6">
+            <div class="lg:col-span-8 space-y-4 sm:space-y-6 min-w-0">
 
                 <!-- Scrollable Tab Header Bar -->
                 <div class="flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold no-scrollbar shadow-sm -mx-3 px-3 sm:mx-0 sm:px-1.5">
                     <button type="button" 
                             @click="activeTab = 'subscriptions'"
-                            class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'subscriptions' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Subscriptions
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'pt_packages'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'pt_packages' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         PT Packages
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'services'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'services' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Services
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'invoices'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'invoices' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Invoices
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'workouts'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Workout Plans
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'diets'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'diets' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Diet Plans
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'classes'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'classes' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Classes
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'attendance'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'attendance' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Attendance
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'measurements'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'measurements' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Measurements
                     </button>
 
                     <button type="button" 
                             @click="activeTab = 'audit_trail'"
-                            class="px-4 py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
                             :class="activeTab === 'audit_trail' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
                         Audit Trail <span class="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] ml-1">{{ $auditLogs->count() }}</span>
                     </button>
                 </div>
 
                 <!-- TAB 1: SUBSCRIPTIONS HISTORY -->
-                <div x-show="activeTab === 'subscriptions'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden space-y-4 p-5">
-                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div x-show="activeTab === 'subscriptions'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden space-y-4 p-4 sm:p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h2 class="text-base font-black text-slate-900 dark:text-white">Subscription History</h2>
                             <p class="text-xs text-slate-500 dark:text-slate-400">All current and previous gym membership packages</p>
@@ -715,15 +715,15 @@
 
                         <button type="button" 
                                 @click="showAddSubscriptionModal = true" 
-                                class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Add Subscription</span>
                         </button>
                     </div>
 
                     <!-- Subscription Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <table class="w-full text-left text-xs min-w-[620px]">
                             <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
                                     <th class="py-3 px-3 font-semibold">Plan</th>
@@ -837,16 +837,16 @@
                 </div>
 
                 <!-- TAB 2: PT PACKAGES -->
-                <div x-show="activeTab === 'pt_packages'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div x-show="activeTab === 'pt_packages'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white">Personal Training</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400">Assigned personal training packages, sessions and dedicated coaching</p>
                         </div>
                         <button type="button" 
                                 @click="showAddPtModal = true" 
-                                class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Add PT Package</span>
                         </button>
                     </div>
@@ -862,9 +862,9 @@
                     @else
                         <div class="space-y-3">
                             @if($assignedTrainer && empty($ptPackages))
-                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
+                                <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
                                             🏋️
                                         </div>
                                         <div>
@@ -872,16 +872,16 @@
                                             <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ $assignedTrainer->specialization ?? 'Personal Trainer' }}</p>
                                         </div>
                                     </div>
-                                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/20">
+                                    <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/20 shrink-0">
                                         Assigned Coach
                                     </span>
                                 </div>
                             @endif
 
                             @foreach($ptPackages as $pt)
-                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                                <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shadow-sm">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-base">
+                                        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-base shrink-0">
                                             🏋️
                                         </div>
                                         <div>
@@ -894,13 +894,13 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="text-right">
+                                    <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800">
+                                        <div class="text-left sm:text-right">
                                             <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold">TOTAL / PAID</span>
                                             <span class="font-bold text-slate-900 dark:text-white text-xs">{{ $currency }}{{ number_format($pt['total'] ?? 0, 2) }}</span>
                                             <span class="text-emerald-600 dark:text-emerald-400 text-[11px] block font-semibold">{{ $currency }}{{ number_format($pt['paid'] ?? 0, 2) }}</span>
                                         </div>
-                                        <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/20">
+                                        <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-xs border border-emerald-200 dark:border-emerald-500/20 shrink-0">
                                             {{ $pt['status'] ?? 'Active' }}
                                         </span>
                                     </div>
@@ -911,7 +911,7 @@
                 </div>
 
                 <!-- TAB 3: SERVICES -->
-                <div x-show="activeTab === 'services'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
+                <div x-show="activeTab === 'services'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
                         <h3 class="text-base font-black text-slate-900 dark:text-white">Gym Amenities & Services</h3>
                     </div>
@@ -930,11 +930,11 @@
                             <p class="text-[11px] text-slate-500 dark:text-slate-500 mt-1">Services booked for this member will appear here.</p>
                         </div>
                     @else
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
                             @foreach($memberServiceBookings as $booking)
-                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm">
-                                    <div>
-                                        <span class="font-bold text-slate-900 dark:text-white block">{{ $booking->service?->name ?? 'Service' }}</span>
+                                <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm">
+                                    <div class="min-w-0">
+                                        <span class="font-bold text-slate-900 dark:text-white block truncate">{{ $booking->service?->name ?? 'Service' }}</span>
                                         <span class="text-[11px] text-slate-500 dark:text-slate-400">
                                             Booked: {{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '—' }}
                                             @if($booking->service?->is_session_countable)
@@ -952,8 +952,8 @@
                 </div>
 
                 <!-- TAB 4: INVOICES & PAYMENT TRAIL -->
-                <div x-show="activeTab === 'invoices'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div x-show="activeTab === 'invoices'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                                 <span>💳</span>
@@ -963,14 +963,14 @@
                         </div>
                         <button type="button" 
                                 @click="showAddPaymentModal = true" 
-                                class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer self-start sm:self-auto">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Collect Payment</span>
                         </button>
                     </div>
 
                     <!-- Subscription Payment Cards Trail -->
-                    <div class="space-y-6">
+                    <div class="space-y-4 sm:space-y-6">
                         @php
                             $allSubs = $member->memberships()->with(['plan', 'payments'])->latest()->get();
                         @endphp
@@ -988,9 +988,9 @@
                             <div class="rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                                 
                                 <!-- Card Header Summary Banner -->
-                                <div class="p-4 bg-slate-100/80 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div class="p-3.5 sm:p-4 bg-slate-100/80 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800/80 flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                                        <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shrink-0">
                                             🏋️
                                         </div>
                                         <div>
@@ -1018,23 +1018,23 @@
                                     </div>
 
                                     <!-- Right Financial Statistics -->
-                                    <div class="flex items-center gap-4 text-right flex-wrap md:flex-nowrap">
-                                        <div class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm">
+                                    <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 text-right flex-wrap lg:flex-nowrap">
+                                        <div class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm text-center sm:text-right">
                                             <span class="text-[9px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">PLAN PRICE</span>
                                             <span class="text-xs font-black text-slate-900 dark:text-white">{{ $currency }}{{ number_format($planPrice, 2) }}</span>
                                         </div>
 
-                                        <div class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm">
+                                        <div class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-sm text-center sm:text-right">
                                             <span class="text-[9px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">DISCOUNT</span>
                                             <span class="text-xs font-black text-slate-700 dark:text-slate-300">{{ $currency }}{{ number_format($discount, 2) }}</span>
                                         </div>
 
-                                        <div class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/20 shadow-sm">
+                                        <div class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/20 shadow-sm text-center sm:text-right">
                                             <span class="text-[9px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">RECEIVED</span>
                                             <span class="text-xs font-black text-emerald-700 dark:text-emerald-400">{{ $currency }}{{ number_format($received, 2) }}</span>
                                         </div>
 
-                                        <div class="px-2.5 py-1 rounded-lg {{ $due > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80' }} shadow-sm">
+                                        <div class="px-2.5 py-1 rounded-lg {{ $due > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80' }} shadow-sm text-center sm:text-right">
                                             <span class="text-[9px] font-extrabold {{ $due > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400' }} uppercase tracking-wider block">DUE</span>
                                             <span class="text-xs font-black {{ $due > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400' }}">{{ $currency }}{{ number_format($due, 2) }}</span>
                                         </div>
@@ -1043,7 +1043,7 @@
 
                                 <!-- Payment Records Table for this Subscription -->
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-left text-xs">
+                                    <table class="w-full text-left text-xs min-w-[580px]">
                                         <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-100/50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800/80">
                                             <tr>
                                                 <th class="py-2.5 px-4 font-semibold">Receipt ID</th>
@@ -1079,7 +1079,7 @@
                                                                     paid: '{{ number_format($p->amount, 2) }}'
                                                                 })"
                                                                 class="inline-flex items-center gap-1.5 font-mono font-bold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:underline cursor-pointer">
-                                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                                             <span>{{ $receiptNum }}</span>
                                                         </button>
                                                     </td>
@@ -1159,7 +1159,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
+                            <div class="p-6 sm:p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
                                 No membership subscription or payment records found for this member yet.
                             </div>
                         @endforelse
@@ -1167,11 +1167,11 @@
                 </div>
 
                 <!-- TAB 5: WORKOUT PLANS -->
-                <div x-show="activeTab === 'workouts'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
+                <div x-show="activeTab === 'workouts'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
                     <h3 class="text-base font-black text-slate-900 dark:text-white">Assigned Workout Routines</h3>
                     <div class="space-y-3">
                         @forelse($member->workoutPlans as $wp)
-                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
                                 <h4 class="font-black text-slate-900 dark:text-white text-xs">{{ $wp->title }}</h4>
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{{ $wp->description ?? 'Custom workout split' }}</p>
                             </div>
@@ -1182,11 +1182,11 @@
                 </div>
 
                 <!-- TAB 6: DIET PLANS -->
-                <div x-show="activeTab === 'diets'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
+                <div x-show="activeTab === 'diets'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
                     <h3 class="text-base font-black text-slate-900 dark:text-white">Assigned Diet & Nutrition Charts</h3>
                     <div class="space-y-3">
                         @forelse($member->dietPlans as $dp)
-                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
                                 <h4 class="font-black text-slate-900 dark:text-white text-xs">{{ $dp->title }} ({{ $dp->daily_calories ?? 2000 }} kcal)</h4>
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{{ $dp->description ?? 'Nutritional guidelines' }}</p>
                             </div>
@@ -1197,23 +1197,23 @@
                 </div>
 
                 <!-- TAB 7: CLASSES -->
-                <div x-show="activeTab === 'classes'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div x-show="activeTab === 'classes'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white">Enrolled Fitness & Studio Classes</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Classes and group session schedules enrolled by this member</p>
                         </div>
                         <button type="button" 
                                 @click="openEnrollClass('')" 
-                                class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                class="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>+ Enroll in Class</span>
                         </button>
                     </div>
 
                     <!-- Enrolled Classes List -->
                     @if($member->classBookings->isNotEmpty())
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                             @foreach($member->classBookings as $booking)
                                 @php
                                     $sch = $booking->schedule;
@@ -1230,7 +1230,7 @@
                                         default => '⚡',
                                     };
                                 @endphp
-                                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-4 shadow-sm hover:border-indigo-500/40 transition-all">
+                                <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-4 shadow-sm hover:border-indigo-500/40 transition-all">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex items-start gap-3">
                                             <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg shrink-0 border border-indigo-200 dark:border-indigo-500/20">
@@ -1247,7 +1247,7 @@
                                                 <div class="mt-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                                                     @if($sch)
                                                         <p class="flex items-center gap-1.5">
-                                                            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                            <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                             <span>{{ ucfirst($sch->day_of_week) }} • {{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($sch->end_time)->format('g:i A') }}</span>
                                                         </p>
                                                     @endif
@@ -1293,7 +1293,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 <span>Remove</span>
                                             </button>
                                         </form>
@@ -1302,7 +1302,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                        <div class="p-6 sm:p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
                             <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl border border-indigo-200 dark:border-indigo-500/20">
                                 🧘
                             </div>
@@ -1313,7 +1313,7 @@
                             <button type="button" 
                                     @click="openEnrollClass('')" 
                                     class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                 <span>Enroll In A Class Now</span>
                             </button>
                         </div>
@@ -1342,10 +1342,10 @@
                                                 <div class="mt-2 space-y-1">
                                                     @foreach($gc->schedules as $sch)
                                                         <div class="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800/60">
-                                                            <span class="font-medium">{{ ucfirst($sch->day_of_week) }} ({{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }})</span>
+                                                            <span class="font-medium truncate mr-2">{{ ucfirst($sch->day_of_week) }} ({{ \Carbon\Carbon::parse($sch->start_time)->format('g:i A') }})</span>
                                                             <button type="button" 
                                                                     @click="openEnrollClass('{{ $sch->id }}')" 
-                                                                    class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[10px] cursor-pointer">
+                                                                    class="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[10px] cursor-pointer shrink-0">
                                                                 + Enroll
                                                             </button>
                                                         </div>
@@ -1369,10 +1369,10 @@
                 </div>
 
                 <!-- TAB 8: ATTENDANCE HISTORY -->
-                <div x-show="activeTab === 'attendance'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-4">
+                <div x-show="activeTab === 'attendance'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
                     <h3 class="text-base font-black text-slate-900 dark:text-white">Recent Attendance Logs (Last 30 Check-ins)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <table class="w-full text-left text-xs min-w-[420px]">
                             <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
                                     <th class="py-2.5 px-3">Date</th>
@@ -1402,8 +1402,8 @@
                 </div>
 
                 <!-- TAB 9: MEASUREMENTS -->
-                <div x-show="activeTab === 'measurements'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <div x-show="activeTab === 'measurements'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                                 <span>📏</span>
@@ -1413,15 +1413,15 @@
                         </div>
                         <button type="button" 
                                 @click="showAddMeasurementModal = true" 
-                                class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer self-start sm:self-auto">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Log New Measurement</span>
                         </button>
                     </div>
 
                     @if(empty($latestMeasurement))
                         <!-- Clean Empty State when no measurements logged -->
-                        <div class="text-center py-12 px-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="text-center py-10 sm:py-12 px-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
                             <div class="w-14 h-14 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center mx-auto text-2xl shadow-inner">
                                 📏
                             </div>
@@ -1432,7 +1432,7 @@
                             <button type="button" 
                                     @click="showAddMeasurementModal = true" 
                                     class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                 <span>Log First Measurement</span>
                             </button>
                         </div>
@@ -1446,77 +1446,77 @@
                                 @endif
                             </div>
 
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                 <!-- Metric 1: Weight -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">WEIGHT</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['weight'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">kg</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['weight'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">kg</span></p>
                                 </div>
 
                                 <!-- Metric 2: Body Fat -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">BODY FAT</span>
-                                    <p class="text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ $latestMeasurement['body_fat'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">%</span></p>
+                                    <p class="text-base sm:text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ $latestMeasurement['body_fat'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">%</span></p>
                                 </div>
 
                                 <!-- Metric 3: Chest -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">CHEST</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['chest'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['chest'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 4: Shoulders -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">SHOULDERS</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['shoulders'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['shoulders'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 5: Waist -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">WAIST</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['waist'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['waist'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 6: Hips -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">HIPS</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['hips'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['hips'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 7: Left Bicep -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">LEFT BICEP</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 8: Right Bicep -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">RIGHT BICEP</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 9: Left Thigh -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">LEFT THIGH</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 10: Right Thigh -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">RIGHT THIGH</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 11: Calves -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">CALVES</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['calves'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['calves'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
 
                                 <!-- Metric 12: Neck -->
-                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">NECK</span>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['neck'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['neck'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
                                 </div>
                             </div>
                         </div>
@@ -1526,8 +1526,8 @@
                     <div class="space-y-3 pt-2">
                         <h4 class="text-xs font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider">Measurement History</h4>
                         
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-xs">
+                        <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                            <table class="w-full text-left text-xs min-w-[550px]">
                                 <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
                                     <tr>
                                         <th class="py-2.5 px-3 font-semibold">Date</th>
@@ -1564,7 +1564,7 @@
                 </div>
 
                 <!-- TAB 10: AUDIT TRAIL -->
-                <div x-show="activeTab === 'audit_trail'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
+                <div x-show="activeTab === 'audit_trail'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
                         <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                             <span>🕒</span>
@@ -1576,7 +1576,7 @@
                     <!-- Audit Trail Timeline / List -->
                     <div class="space-y-3">
                         @forelse($auditLogs as $log)
-                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4 shadow-sm">
+                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 sm:gap-4 shadow-sm">
                                 <div class="flex items-start gap-3">
                                     <div class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
                                         @if(str_contains($log->action, 'payment') || str_contains($log->action, 'fee'))
@@ -1591,12 +1591,12 @@
                                             📝
                                         @endif
                                     </div>
-                                    <div>
-                                        <div class="flex items-center gap-2">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
                                             <span class="font-bold text-slate-900 dark:text-white text-xs">{{ ucwords(str_replace('_', ' ', $log->action)) }}</span>
                                             <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">• By {{ $log->user->name ?? 'System' }}</span>
                                         </div>
-                                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">{{ $log->description }}</p>
+                                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">{{ $log->description }}</p>
                                     </div>
                                 </div>
 
@@ -1606,7 +1606,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
+                            <div class="p-6 sm:p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
                                 No audit log records recorded yet for this member.
                             </div>
                         @endforelse
@@ -1666,9 +1666,9 @@
                         <textarea name="notes" rows="2" placeholder="Fee receipt note..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-emerald-500 focus:outline-none"></textarea>
                     </div>
 
-                    <div class="flex items-center justify-between pt-2">
-                        <button type="button" @click="showAddPaymentModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black shadow-lg shadow-emerald-500/20 cursor-pointer">Record Payment</button>
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
+                        <button type="button" @click="showAddPaymentModal = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all text-center">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black shadow-lg shadow-emerald-500/20 cursor-pointer text-center">Record Payment</button>
                     </div>
                 </form>
             </div>
@@ -1703,7 +1703,7 @@
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Start Date *</label>
                             <input type="date" name="start_date" value="{{ now()->toDateString() }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
@@ -1714,7 +1714,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Paid Now ({{ $currency }})</label>
                             <input type="number" name="initial_payment_amount" x-model="newSubPaidNow" min="0" placeholder="0" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
@@ -1731,9 +1731,9 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between pt-2">
-                        <button type="button" @click="showAddSubscriptionModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg shadow-indigo-600/30 cursor-pointer">Assign Subscription</button>
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
+                        <button type="button" @click="showAddSubscriptionModal = false" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all text-center">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg shadow-indigo-600/30 cursor-pointer text-center">Assign Subscription</button>
                     </div>
                 </form>
             </div>
@@ -2047,11 +2047,11 @@
                     </div>
 
                     <!-- Modal Actions Footer -->
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showEditModal = false" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold transition-all cursor-pointer">
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showEditModal = false" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold transition-all cursor-pointer text-center">
                             Cancel
                         </button>
-                        <button type="submit" class="px-7 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer">
+                        <button type="submit" class="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>Save Changes</span>
                         </button>
@@ -2090,11 +2090,11 @@
                     <canvas x-ref="editCameraCanvas" class="hidden"></canvas>
                 </div>
 
-                <div class="flex items-center justify-between pt-2">
-                    <button type="button" @click="closeEditWebcam()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 text-xs font-bold transition-all">
+                <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
+                    <button type="button" @click="closeEditWebcam()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 text-xs font-bold transition-all text-center">
                         Cancel
                     </button>
-                    <button type="button" @click="takeEditSnapshot()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="button" @click="takeEditSnapshot()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Capture Photo</span>
                     </button>
@@ -2120,7 +2120,7 @@
 
                 <form action="{{ route('app.members.store-measurement', $member->id) }}" method="POST" class="space-y-4 text-xs">
                     @csrf
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Measurement Date *</label>
                             <input type="date" name="date" value="{{ date('Y-m-d') }}" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
@@ -2173,7 +2173,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Calves (in)</label>
                             <input type="number" step="0.1" name="calves" placeholder="e.g. 15" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
@@ -2189,9 +2189,9 @@
                         <textarea name="notes" rows="2" placeholder="e.g. Body fat dropped by 1.2%, improved quad definition..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-indigo-500 focus:outline-none shadow-sm"></textarea>
                     </div>
 
-                    <div class="flex items-center justify-between pt-2">
-                        <button type="button" @click="showAddMeasurementModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg shadow-indigo-600/30 cursor-pointer">Save Measurements</button>
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-2">
+                        <button type="button" @click="showAddMeasurementModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 font-bold transition-all text-center">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black shadow-lg shadow-indigo-600/30 cursor-pointer text-center">Save Measurements</button>
                     </div>
                 </form>
             </div>
@@ -2203,14 +2203,14 @@
         <div x-show="showInvoiceModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 dark:bg-black/85 backdrop-blur-md p-4 sm:p-6" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 dark:bg-black/85 backdrop-blur-md p-3 sm:p-6" 
              style="display: none;">
             
-            <div class="min-h-full flex items-center justify-center py-6">
+            <div class="min-h-full flex items-center justify-center py-4 sm:py-6">
                 <div @click.away="showInvoiceModal = false" class="w-full max-w-2xl space-y-3">
                     
                     <!-- Modal Window Title Header -->
-                    <div class="flex items-center justify-between px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
+                    <div class="flex items-center justify-between px-4 sm:px-5 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
                         <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-xs">
                             <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             <span>Invoice Preview</span>
@@ -2233,56 +2233,56 @@
                     </div>
 
                     <!-- Action Bar Toolbar (Close, Print, Download PDF) -->
-                    <div class="flex items-center justify-center gap-3">
+                    <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                         <button type="button" 
                                 @click="showInvoiceModal = false" 
-                                class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
+                                class="px-4 sm:px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
                             Close
                         </button>
 
                         <button type="button" 
                                 onclick="window.print()" 
-                                class="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                                class="px-4 sm:px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                             <span>Print</span>
                         </button>
 
                         <a :href="'/app/invoices/' + selectedInvoice.id" 
                            target="_blank" 
-                           class="px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all">
+                           class="px-4 sm:px-6 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             <span>Download PDF</span>
                         </a>
                     </div>
 
                     <!-- Printable Invoice Sheet (A4 Proportion) -->
-                    <div class="relative w-full min-h-[820px] bg-white text-slate-900 rounded-2xl shadow-2xl p-8 sm:p-12 overflow-hidden border border-slate-200 text-xs flex flex-col justify-between">
+                    <div class="relative w-full min-h-[600px] sm:min-h-[820px] bg-white text-slate-900 rounded-2xl shadow-2xl p-4 sm:p-8 md:p-12 overflow-hidden border border-slate-200 text-xs flex flex-col justify-between">
                         
                         <!-- Faded Background Logo Watermark -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none">
                             @if(!empty($logoUrl))
                                 <img src="{{ $logoUrl }}" alt="" class="w-72 h-72 object-contain grayscale">
                             @else
-                                <div class="text-center font-black tracking-widest text-7xl uppercase text-slate-900 rotate-[-15deg]">
+                                <div class="text-center font-black tracking-widest text-5xl sm:text-7xl uppercase text-slate-900 rotate-[-15deg]">
                                     {{ auth()->user()->tenant->name ?? 'GYM CONSOLE' }}
                                 </div>
                             @endif
                         </div>
 
-                        <div class="relative z-10 space-y-8">
+                        <div class="relative z-10 space-y-6 sm:space-y-8">
                             
                             <!-- Header Section: Logo, Gym Info & INVOICE Meta -->
-                            <div class="flex items-start justify-between border-b border-slate-200 pb-6">
+                            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 border-b border-slate-200 pb-6">
                                 <div class="flex items-center gap-3.5">
                                     @if(!empty($logoUrl))
-                                        <img src="{{ $logoUrl }}" alt="{{ auth()->user()->tenant->name ?? 'Gym Logo' }}" class="h-16 w-auto max-w-[140px] object-contain shrink-0">
+                                        <img src="{{ $logoUrl }}" alt="{{ auth()->user()->tenant->name ?? 'Gym Logo' }}" class="h-14 sm:h-16 w-auto max-w-[140px] object-contain shrink-0">
                                     @else
-                                        <div class="w-14 h-14 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+                                        <div class="w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-xl sm:text-2xl shadow-md shrink-0">
                                             🏋️
                                         </div>
                                     @endif
                                     <div>
-                                        <h2 class="text-xl font-black text-slate-950 tracking-tight">{{ auth()->user()->tenant->name ?? 'PowerFit Gym' }}</h2>
+                                        <h2 class="text-lg sm:text-xl font-black text-slate-950 tracking-tight">{{ auth()->user()->tenant->name ?? 'PowerFit Gym' }}</h2>
                                         <p class="text-xs text-slate-500 mt-0.5">{{ $member->branch->address ?? (auth()->user()->tenant->address ?? '123 Fitness Street, Health City') }}</p>
                                         @if(!empty(auth()->user()->tenant->phone) || !empty(auth()->user()->tenant->email))
                                             <p class="text-[11px] text-slate-400 mt-0.5">{{ auth()->user()->tenant->phone ?? '' }} @if(!empty(auth()->user()->tenant->phone) && !empty(auth()->user()->tenant->email)) • @endif {{ auth()->user()->tenant->email ?? '' }}</p>
@@ -2290,15 +2290,15 @@
                                     </div>
                                 </div>
 
-                                <div class="text-right">
-                                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">INVOICE</h1>
+                                <div class="text-left sm:text-right">
+                                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">INVOICE</h1>
                                     <p class="text-xs font-mono font-bold text-slate-600 mt-1" x-text="selectedInvoice.receipt_no"></p>
                                     <p class="text-xs text-slate-400 mt-0.5" x-text="selectedInvoice.date"></p>
                                 </div>
                             </div>
 
                             <!-- Bill To & Plan Details (2 Columns) -->
-                            <div class="grid grid-cols-2 gap-6 border-b border-slate-200 pb-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 border-b border-slate-200 pb-6">
                                 <!-- Bill To Column -->
                                 <div>
                                     <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">BILL TO</span>
@@ -2324,8 +2324,8 @@
                             </div>
 
                             <!-- Items & Amount Table -->
-                            <div>
-                                <table class="w-full text-left text-xs">
+                            <div class="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+                                <table class="w-full text-left text-xs min-w-[280px]">
                                     <thead>
                                         <tr class="border-b-2 border-slate-200 text-slate-500 font-extrabold text-[10px] uppercase tracking-wider">
                                             <th class="py-3">DESCRIPTION</th>
@@ -2751,14 +2751,14 @@
                     </div>
 
                     <!-- Actions -->
-                    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" 
                                 @click="showEnrollClassModal = false" 
-                                class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer">
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
                             Cancel
                         </button>
                         <button type="submit" 
-                                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5">
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>Confirm Enrollment</span>
                         </button>

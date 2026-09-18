@@ -190,38 +190,38 @@
     }" class="space-y-6 pb-20 max-w-6xl mx-auto">
 
         <!-- Top Header & Navigation Breadcrumb -->
-        <div class="flex items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div class="flex items-center gap-3">
                 <a href="{{ route('app.members.index') }}" 
-                   class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+                   class="p-2 sm:p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>
-                <div>
-                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-0.5">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-0.5 truncate">
                         <a href="{{ route('app.members.index') }}" class="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Members</a>
                         <span>/</span>
                         <span class="text-amber-600 dark:text-amber-400">Add Member</span>
                     </div>
-                    <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Add Member</h1>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Add Member</h1>
                 </div>
             </div>
 
             <a href="{{ route('app.members.index') }}" 
-               class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all shadow-sm">
+               class="self-start sm:self-auto px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all shadow-sm">
                 Cancel
             </a>
         </div>
 
         <!-- Feedback Messages -->
         @if (session('error'))
-            <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-3 shadow-sm">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-3 shadow-sm">
                 <svg class="w-5 h-5 shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span>{{ session('error') }}</span>
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs space-y-1 shadow-sm">
+            <div class="p-3.5 sm:p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs space-y-1 shadow-sm">
                 <p class="font-bold flex items-center gap-2">
                     <svg class="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Please correct the following errors:
@@ -235,21 +235,21 @@
         @endif
 
         <!-- Mode Selection Dual Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <!-- Option 1: Register New Member -->
             <button type="button" 
                     @click="mode = 'new'"
-                    class="p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-4 cursor-pointer"
+                    class="p-4 sm:p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-3 sm:gap-4 cursor-pointer"
                     :class="mode === 'new' ? 'bg-gradient-to-br from-indigo-50/80 to-white dark:from-indigo-950/60 dark:to-slate-900 border-indigo-500 shadow-xl shadow-indigo-500/10 ring-2 ring-indigo-500/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm opacity-80 hover:opacity-100'">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all"
                      :class="mode === 'new' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 </div>
-                <div class="flex-grow pr-6">
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Register New Member</h3>
+                <div class="flex-grow pr-6 min-w-0">
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white truncate">Register New Member</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Create a new member account and add to your gym</p>
                 </div>
-                <div x-show="mode === 'new'" class="absolute top-4 right-4 w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-black shadow-md">
+                <div x-show="mode === 'new'" class="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-black shadow-md">
                     ✓
                 </div>
             </button>
@@ -257,17 +257,17 @@
             <!-- Option 2: Assign Existing Member -->
             <button type="button" 
                     @click="mode = 'existing'"
-                    class="p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-4 cursor-pointer"
+                    class="p-4 sm:p-5 rounded-2xl border text-left transition-all relative overflow-hidden flex items-start gap-3 sm:gap-4 cursor-pointer"
                     :class="mode === 'existing' ? 'bg-gradient-to-br from-amber-50/80 to-white dark:from-amber-950/40 dark:to-slate-900 border-amber-500 shadow-xl shadow-amber-500/10 ring-2 ring-amber-500/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm opacity-80 hover:opacity-100'">
-                <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all"
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all"
                      :class="mode === 'existing' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-                <div class="flex-grow pr-6">
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Assign Existing Member</h3>
+                <div class="flex-grow pr-6 min-w-0">
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white truncate">Assign Existing Member</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Add an existing member to your gym using their phone number</p>
                 </div>
-                <div x-show="mode === 'existing'" class="absolute top-4 right-4 w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-black shadow-md">
+                <div x-show="mode === 'existing'" class="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-black shadow-md">
                     ✓
                 </div>
             </button>
@@ -280,13 +280,13 @@
               action="{{ route('app.members.store') }}" 
               method="POST" 
               enctype="multipart/form-data" 
-              class="space-y-6">
+              class="space-y-4 sm:space-y-6">
             @csrf
             <input type="hidden" name="mode" value="new">
             <input type="hidden" name="photo_data" :value="capturedPhotoData">
 
             <!-- 1. PERSONAL INFORMATION SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
                     <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -480,9 +480,9 @@
             </div>
 
             <!-- 2. MEMBERSHIP DETAILS SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
                     </div>
                     <div>
@@ -602,7 +602,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Discount Amount ({{ $currency }})</label>
                             <input type="number" 
@@ -644,7 +644,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / Cheque No</label>
                             <input type="text" 
@@ -669,10 +669,10 @@
             </div>
 
             <!-- 2.1 DUO PLAN: 2ND PERSON DETAILS (Appears when Duo Plan selected) -->
-            <div x-show="isDuo" x-transition class="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/40 shadow-sm space-y-6">
+            <div x-show="isDuo" x-transition class="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/40 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center justify-between border-b border-indigo-200 dark:border-indigo-500/20 pb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold shrink-0">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
                         <div>
@@ -748,11 +748,11 @@
             </div>
 
             <!-- 2.2 FAMILY / GROUP PLAN: MEMBERS 2, 3 & 4 (Appears when Family Plan selected) -->
-            <div x-show="isFamily" x-transition class="p-6 rounded-2xl bg-gradient-to-br from-purple-50/70 via-white to-white dark:from-purple-950/40 dark:via-slate-900 dark:to-slate-900 border border-purple-200 dark:border-purple-500/40 shadow-sm space-y-6">
+            <div x-show="isFamily" x-transition class="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-50/70 via-white to-white dark:from-purple-950/40 dark:via-slate-900 dark:to-slate-900 border border-purple-200 dark:border-purple-500/40 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center justify-between border-b border-purple-200 dark:border-purple-500/20 pb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 flex items-center justify-center font-bold">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 flex items-center justify-center font-bold shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
@@ -764,13 +764,13 @@
                     </div>
                 </div>
 
-                <div class="space-y-6">
+                <div class="space-y-4 sm:space-y-6">
                     @foreach([
                         ['idx' => 0, 'label' => 'Member #2', 'default_rel' => 'Spouse / Partner'],
                         ['idx' => 1, 'label' => 'Member #3', 'default_rel' => 'Child / Sibling'],
                         ['idx' => 2, 'label' => 'Member #4', 'default_rel' => 'Family Member'],
                     ] as $slot)
-                        <div class="p-4 rounded-xl bg-slate-50/90 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/90 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-3">
                             <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2">
                                 <span class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
                                     <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -838,9 +838,9 @@
             </div>
 
             <!-- 3. FITNESS INFORMATION SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <div>
@@ -918,9 +918,9 @@
             </div>
 
             <!-- 4. EMERGENCY CONTACT SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                    <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                     </div>
                     <div>
@@ -964,10 +964,10 @@
             </div>
 
             <!-- 5. IDENTIFICATION DOCUMENTS SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 sm:space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
                         </div>
                         <div>
@@ -978,7 +978,7 @@
 
                     <button type="button" 
                             @click="addIdDoc()" 
-                            class="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 dark:text-cyan-400 dark:border-cyan-500/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            class="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/15 dark:hover:bg-cyan-500/25 dark:text-cyan-400 dark:border-cyan-500/30 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span>+ Add ID</span>
                     </button>
@@ -987,7 +987,7 @@
                 <!-- Dynamic ID Rows -->
                 <div class="space-y-3">
                     <template x-for="(doc, index) in idDocs" :key="index">
-                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+                        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
                             <!-- ID Type Dropdown -->
                             <div class="w-full lg:w-48">
                                 <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">ID Type</label>
@@ -1056,9 +1056,9 @@
             </div>
 
             <!-- 6. ADDITIONAL NOTES SECTION -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                    <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </div>
                     <div>
@@ -1074,14 +1074,14 @@
             </div>
 
             <!-- Bottom Actions Bar -->
-            <div class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <a href="{{ route('app.members.index') }}" 
-                   class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold transition-all">
+                   class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold text-center transition-all">
                     Cancel
                 </a>
 
                 <button type="submit" 
-                        class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
+                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     <span>Add Member</span>
                 </button>
@@ -1091,11 +1091,11 @@
         <!-- ========================================================================= -->
         <!-- MODE 2: ASSIGN EXISTING MEMBER BY PHONE -->
         <!-- ========================================================================= -->
-        <div x-show="mode === 'existing'" class="space-y-6">
+        <div x-show="mode === 'existing'" class="space-y-4 sm:space-y-6">
             <!-- Search Phone Input Card -->
-            <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                 <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <div>
@@ -1131,38 +1131,38 @@
 
             <!-- When Member Found -->
             <template x-if="lookupCompleted && existingMember">
-                <form action="{{ route('app.members.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('app.members.store') }}" method="POST" class="space-y-4 sm:space-y-6">
                     @csrf
                     <input type="hidden" name="mode" value="existing">
                     <input type="hidden" name="existing_member_id" :value="existingMember.id">
 
                     <!-- Member Profile Summary Card -->
-                    <div class="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/60 to-white dark:from-slate-900 dark:to-slate-950 border border-emerald-200 dark:border-emerald-500/40 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-emerald-500/50 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+                    <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50/60 to-white dark:from-slate-900 dark:to-slate-950 border border-emerald-200 dark:border-emerald-500/40 shadow-sm space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-4">
+                            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-emerald-500/50 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
                                     <template x-if="existingMember.photo_path">
                                         <img :src="'/storage/' + existingMember.photo_path" class="w-full h-full object-cover">
                                     </template>
                                     <template x-if="!existingMember.photo_path">
-                                        <span class="text-lg font-black text-emerald-600 dark:text-emerald-400" x-text="existingMember.first_name[0] + (existingMember.last_name ? existingMember.last_name[0] : '')"></span>
+                                        <span class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400" x-text="existingMember.first_name[0] + (existingMember.last_name ? existingMember.last_name[0] : '')"></span>
                                     </template>
                                 </div>
-                                <div>
+                                <div class="min-w-0">
                                     <div class="flex items-center gap-2">
-                                        <h3 class="text-base font-black text-slate-900 dark:text-white" x-text="existingMember.full_name"></h3>
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase"
+                                        <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white truncate" x-text="existingMember.full_name"></h3>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase shrink-0"
                                               :class="existingMember.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
                                               x-text="existingMember.status"></span>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-3">
+                                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
                                         <span>📞 <strong class="text-slate-800 dark:text-slate-200" x-text="existingMember.phone"></strong></span>
                                         <span x-show="existingMember.email">✉️ <span class="text-slate-600 dark:text-slate-300" x-text="existingMember.email"></span></span>
                                         <span>📍 <span class="text-slate-600 dark:text-slate-300" x-text="existingMember.branch_name"></span></span>
                                     </p>
                                 </div>
                             </div>
-                            <span class="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-xs font-black shadow-sm">
+                            <span class="self-start sm:self-auto px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-xs font-black shadow-sm">
                                 Account Found
                             </span>
                         </div>
@@ -1175,7 +1175,7 @@
                     </div>
 
                     <!-- Assign Branch & Plan Details -->
-                    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="p-4 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                         <h3 class="text-sm font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-3">Assign to Branch & New Plan</h3>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1216,7 +1216,7 @@
                         </div>
 
                         <!-- Payment Fields if plan selected -->
-                        <div x-show="existingSelectedPlanId" class="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-200 dark:border-slate-800">
+                        <div x-show="existingSelectedPlanId" class="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 border-t border-slate-200 dark:border-slate-800">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Discount Amount ({{ $currency }})</label>
                                 <input type="number" 
@@ -1251,11 +1251,11 @@
                     </div>
 
                     <!-- Submit Assign Member -->
-                    <div class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <button type="button" @click="existingMember = null; lookupCompleted = false;" class="text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white font-bold transition-colors">
+                    <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <button type="button" @click="existingMember = null; lookupCompleted = false;" class="w-full sm:w-auto text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white font-bold transition-colors py-2 text-center">
                             Cancel
                         </button>
-                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>Assign Member to Gym</span>
                         </button>
@@ -1265,7 +1265,7 @@
 
             <!-- When Member Not Found -->
             <template x-if="lookupCompleted && !existingMember">
-                <div class="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+                <div class="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
                     <div class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
                         🔍
                     </div>
@@ -1288,9 +1288,9 @@
         <!-- ========================================================================= -->
         <div x-show="showCameraModal" 
              x-transition 
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 dark:bg-black/80 backdrop-blur-sm"
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/70 dark:bg-black/85 backdrop-blur-sm overflow-y-auto"
              style="display: none;">
-            <div @click.away="closeWebcam()" class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl space-y-4 p-5 text-slate-900 dark:text-white">
+            <div @click.away="closeWebcam()" class="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xl space-y-4 p-4 sm:p-5 text-slate-900 dark:text-white max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div class="flex items-center gap-2">
                         <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>

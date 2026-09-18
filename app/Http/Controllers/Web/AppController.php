@@ -38,6 +38,7 @@ use App\Models\Role;
 use App\Models\Scopes\BranchScope;
 use App\Models\Setting;
 use App\Models\SupportTicket;
+use App\Models\Tenant;
 use App\Models\Trainer;
 use App\Models\User;
 use App\Models\WorkoutExercise;
@@ -79,20 +80,35 @@ class AppController extends Controller
         protected FeatureGateService $featureGateService
     ) {}
 
-    public function dashboard(): View|RedirectResponse
+    protected function resolveTenant(): ?Tenant
     {
         $user = auth()->user();
         $tenant = TenantContext::getTenant() ?? $user?->tenant;
 
+        if (! $tenant && $user) {
+            if (session('active_tenant_id')) {
+                $tenant = Tenant::find(session('active_tenant_id'));
+            }
+            if (! $tenant && $user->isSuperAdmin()) {
+                $tenant = Tenant::first();
+            }
+        }
+
+        if ($tenant) {
+            TenantContext::setTenant($tenant);
+        }
+
+        return $tenant;
+    }
+
+    public function dashboard(): View|RedirectResponse
+    {
+        $user = auth()->user();
+        $tenant = $this->resolveTenant();
+
         if (! $tenant) {
             if ($user && $user->isSuperAdmin()) {
-                $firstTenant = Tenant::first();
-                if ($firstTenant) {
-                    $tenant = $firstTenant;
-                    TenantContext::setTenant($tenant);
-                } else {
-                    return redirect()->route('admin.dashboard')->with('info', 'No gyms created yet. Create a gym tenant first.');
-                }
+                return redirect()->route('admin.dashboard')->with('info', 'No gyms created yet. Create a gym tenant first.');
             } else {
                 return redirect()->route('login');
             }
@@ -3282,26 +3298,26 @@ class AppController extends Controller
 
     public function createLead(Request $request): View
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
-        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->get() : collect();
+        $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
 
         return view('app.crm.create_lead', compact('tenant', 'staffMembers', 'branches'));
     }
 
     public function editLead(Request $request, $id): View
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
-        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
-        $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        $lead = Lead::when($tenant, fn ($q) => $q->where('tenant_id', $tenant->id))->findOrFail($id);
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->get() : collect();
+        $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
 
         return view('app.crm.edit_lead', compact('tenant', 'lead', 'staffMembers', 'branches'));
     }
 
     public function storeLead(Request $request): RedirectResponse
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -3336,7 +3352,7 @@ class AppController extends Controller
         };
 
         $lead = Lead::create([
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant?->id,
             'branch_id' => $validated['branch_id'] ?? null,
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? '',
@@ -3362,8 +3378,8 @@ class AppController extends Controller
 
     public function updateLead(Request $request, $id): RedirectResponse
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
-        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        $lead = Lead::when($tenant, fn ($q) => $q->where('tenant_id', $tenant->id))->findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -3427,8 +3443,8 @@ class AppController extends Controller
 
     public function updateLeadStage(Request $request, $id): JsonResponse|RedirectResponse
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
-        $lead = Lead::where('tenant_id', $tenant->id)->findOrFail($id);
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        $lead = Lead::when($tenant, fn ($q) => $q->where('tenant_id', $tenant->id))->findOrFail($id);
         $stage = $request->input('stage', 'NEW_LEAD');
 
         $status = match (strtoupper(str_replace(' ', '_', $stage))) {
@@ -3757,7 +3773,7 @@ class AppController extends Controller
 
     public function storeEnquiry(Request $request): RedirectResponse
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -3826,9 +3842,14 @@ class AppController extends Controller
         ]);
     }
 
-    public function crmReports(Request $request): View|StreamedResponse
+    public function crmReports(Request $request): View|StreamedResponse|RedirectResponse
     {
-        $tenant = $request->get('tenant') ?? Auth::user()->tenant;
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
+
         $currency = $tenant->currency_symbol ?? '₹';
 
         $startDateInput = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
@@ -4090,9 +4111,12 @@ class AppController extends Controller
         ));
     }
 
-    public function balanceSheet(Request $request): View
+    public function balanceSheet(Request $request): View|RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
         $branches = Branch::where('tenant_id', $tenant->id)->get();
 
         if ($request->has('branch_id')) {
@@ -4309,9 +4333,12 @@ class AppController extends Controller
         ));
     }
 
-    public function balanceSheetPdf(Request $request): View
+    public function balanceSheetPdf(Request $request): View|RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
         $branches = Branch::where('tenant_id', $tenant->id)->get();
 
         if ($request->has('branch_id')) {
@@ -4431,9 +4458,12 @@ class AppController extends Controller
         ));
     }
 
-    public function expenseReport(Request $request): View
+    public function expenseReport(Request $request): View|RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
         $branches = Branch::where('tenant_id', $tenant->id)->get();
         $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
         $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : null;
@@ -4558,9 +4588,12 @@ class AppController extends Controller
         ));
     }
 
-    public function memberReportPdf(Request $request): View
+    public function memberReportPdf(Request $request): View|RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
         $branches = Branch::where('tenant_id', $tenant->id)->get();
         $branchId = $request->filled('branch_id') && $request->branch_id !== 'all' ? (int) $request->branch_id : null;
         $activeBranch = $branchId ? $branches->firstWhere('id', $branchId) : $branches->first();
@@ -4726,9 +4759,12 @@ class AppController extends Controller
         ));
     }
 
-    public function expenses(Request $request): View
+    public function expenses(Request $request): View|RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return redirect()->route('app.dashboard')->with('error', 'No active gym tenant found.');
+        }
         $branches = Branch::where('tenant_id', $tenant->id)->get();
         $categories = ExpenseCategory::where('tenant_id', $tenant->id)->get();
 
@@ -4757,12 +4793,15 @@ class AppController extends Controller
             ->where('expense_date', '>=', now()->startOfMonth()->toDateString())
             ->sum('amount');
 
-        return view('app.expenses.index', compact('expenses', 'categories', 'branches', 'totalAmount', 'thisMonthAmount'));
+        return view('app.expenses.index', compact('tenant', 'expenses', 'categories', 'branches', 'totalAmount', 'thisMonthAmount'));
     }
 
     public function storeExpense(Request $request): RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return back()->with('error', 'No active gym tenant found.');
+        }
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
@@ -4784,7 +4823,10 @@ class AppController extends Controller
 
     public function deleteExpense(int $id): RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return back()->with('error', 'No active gym tenant found.');
+        }
         $expense = Expense::where('tenant_id', $tenant->id)->findOrFail($id);
         $expense->delete();
 
@@ -4793,7 +4835,10 @@ class AppController extends Controller
 
     public function storeExpenseCategory(Request $request): RedirectResponse
     {
-        $tenant = auth()->user()->tenant;
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return back()->with('error', 'No active gym tenant found.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:100',
         ]);
@@ -4808,7 +4853,11 @@ class AppController extends Controller
 
     public function subscription(): View
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $tenant = TenantContext::getTenant() ?? auth()->user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        if (!$tenant) {
+            abort(404, 'No active gym tenant found. Please set up a gym profile first.');
+        }
+
         $subscription = $tenant->activeSubscription ?? $tenant->latestSubscription;
         $plans = Plan::with('features')->where('is_active', true)->orderBy('sort_order')->get();
         $invoices = $tenant->subscriptions()->with('invoices')->get()->pluck('invoices')->flatten();
@@ -4898,7 +4947,10 @@ class AppController extends Controller
             'razorpay_signature' => 'nullable|string|max:255',
         ]);
 
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $tenant = TenantContext::getTenant() ?? auth()->user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
+        if (!$tenant) {
+            return back()->with('error', 'Unable to identify active gym tenant.');
+        }
         $plan = Plan::findOrFail($request->plan_id);
         $originalPrice = $request->billing_cycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
 

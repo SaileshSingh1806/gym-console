@@ -52,28 +52,28 @@
     }">
 
         <!-- Navigation Tabs Bar -->
-        <div class="p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap gap-2 transition-colors">
-            <button type="button" @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+        <div class="p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-2 transition-colors">
+            <button type="button" @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span>🏢 General & Branding</span>
             </button>
 
-            <button type="button" @click="activeTab = 'email'" :class="activeTab === 'email' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <button type="button" @click="activeTab = 'email'" :class="activeTab === 'email' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                 <span>✉️ Email / SMTP</span>
             </button>
 
-            <button type="button" @click="activeTab = 'payment'" :class="activeTab === 'payment' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <button type="button" @click="activeTab = 'payment'" :class="activeTab === 'payment' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span>💳 Payment Gateways</span>
             </button>
 
-            <button type="button" @click="activeTab = 'seo'" :class="activeTab === 'seo' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <button type="button" @click="activeTab = 'seo'" :class="activeTab === 'seo' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 <span>🔍 Site SEO & Analytics</span>
             </button>
 
-            <button type="button" @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-600/25' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <button type="button" @click="activeTab = 'ai'" :class="activeTab === 'ai' ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 text-white font-bold shadow-lg shadow-purple-600/25' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 <span>✨ AI & Google Gemini</span>
                 @if(!empty($settings['gemini_api_key']) || !empty(config('services.gemini.api_key')))
@@ -81,7 +81,7 @@
                 @endif
             </button>
 
-            <button type="button" @click="activeTab = 'security'" :class="activeTab === 'security' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer">
+            <button type="button" @click="activeTab = 'security'" :class="activeTab === 'security' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 <span>🔒 Security & Password</span>
             </button>
