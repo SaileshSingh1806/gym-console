@@ -5309,6 +5309,41 @@ class AppController extends Controller
             ];
         }
 
+        // Handle Gym Invoice & Receipt Template Settings
+        if ($request->has('invoice') || $request->input('active_tab') === 'invoice_settings') {
+            $existingInvoice = $settings['invoice'] ?? [];
+            $invoiceData = [
+                'title' => trim($request->input('invoice_title', 'TAX INVOICE')),
+                'prefix' => trim($request->input('invoice_prefix', '#ARM-')),
+                'gym_name' => trim($request->input('invoice_gym_name', '')),
+                'address' => trim($request->input('invoice_address', '')),
+                'phone' => trim($request->input('invoice_phone', '')),
+                'email' => trim($request->input('invoice_email', '')),
+                'website' => trim($request->input('invoice_website', '')),
+                'gstin' => trim($request->input('invoice_gstin', '')),
+                'status_text' => trim($request->input('invoice_status_text', 'PAID IN FULL')),
+                'verification_text' => trim($request->input('invoice_verification_text', 'Verified & Recorded')),
+                'terms' => trim($request->input('invoice_terms', '')),
+                'thank_you' => trim($request->input('invoice_thank_you', '')),
+                'helpline' => trim($request->input('invoice_helpline', '')),
+                'footer_email' => trim($request->input('invoice_footer_email', '')),
+                'footer_web' => trim($request->input('invoice_footer_web', '')),
+                'tagline' => trim($request->input('invoice_tagline', 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU')),
+                'seal_text' => trim($request->input('invoice_seal_text', 'Authorized Signature / Seal')),
+                'seal_url' => $existingInvoice['seal_url'] ?? null,
+            ];
+
+            // Handle optional Custom Seal image upload
+            if ($request->hasFile('invoice_seal')) {
+                $file = $request->file('invoice_seal');
+                $filename = 'seal_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs('seals', $filename, 'public');
+                $invoiceData['seal_url'] = asset('storage/'.$path);
+            }
+
+            $settings['invoice'] = $invoiceData;
+        }
+
         // Handle Logo Upload
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');

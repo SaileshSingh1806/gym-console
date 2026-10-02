@@ -1196,116 +1196,252 @@
                     </div>
 
                     <!-- Printable Invoice Sheet (A4 Proportion) -->
-                    <div class="relative w-full min-h-[820px] bg-white text-slate-900 rounded-2xl shadow-2xl p-8 sm:p-12 overflow-hidden border border-slate-200 text-xs flex flex-col justify-between">
+                    @php
+                        $tenantSettings = $tenant->settings ?? [];
+                        $invSettings = $tenantSettings['invoice'] ?? [];
+                        $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant->name ?? 'ARMOUR 24-7 GYM');
+                        $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : ($tenant->address ?? '6th Floor, Shalin Square, Nr Hathijan Circle, Ahmedabad - 382445');
+                        $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenant->phone ?? '+91 83065 30583');
+                        $gymEmail = !empty($invSettings['email']) ? $invSettings['email'] : ($tenant->email ?? 'management@armour247gym.com');
+                        $gymWeb = !empty($invSettings['website']) ? $invSettings['website'] : 'www.armour247gym.com';
+                        $invoiceTitle = !empty($invSettings['title']) ? $invSettings['title'] : 'TAX INVOICE';
+                        $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
+                        $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
+
+                        $defaultTerms = [
+                            "Fees once paid are strictly non-refundable and non-transferable under any circumstances.",
+                            "Membership is non-transferable and valid exclusively for the registered individual and specified tenure.",
+                            "Members are required to carry clean training footwear, workout towel, and follow gym etiquette at all times.",
+                            "Management reserves the right to adjust facility operating hours and enforce safety protocols.",
+                            "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access."
+                        ];
+                        $termsList = !empty($invSettings['terms']) ? array_filter(array_map('trim', explode("\n", $invSettings['terms']))) : $defaultTerms;
+
+                        $thankYouText = !empty($invSettings['thank_you']) ? $invSettings['thank_you'] : ("Thank you for training with " . $gymName . "!");
+                        $helpline = !empty($invSettings['helpline']) ? $invSettings['helpline'] : $gymPhone;
+                        $footerEmail = !empty($invSettings['footer_email']) ? $invSettings['footer_email'] : $gymEmail;
+                        $footerWeb = !empty($invSettings['footer_web']) ? $invSettings['footer_web'] : $gymWeb;
+                        $tagline = !empty($invSettings['tagline']) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
+                        $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
+                        $sealUrl = $invSettings['seal_url'] ?? null;
+                    @endphp
+
+                    <div class="relative w-full bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-200/90 text-xs flex flex-col justify-between overflow-hidden">
                         
-                        <!-- Faded Background Logo Watermark -->
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none">
+                        <!-- Top Accent Bar -->
+                        <div class="h-2 w-full bg-slate-950 absolute top-0 left-0 right-0"></div>
+
+                        <!-- Faded Center Background Logo Watermark -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none">
                             @if(!empty($logoUrl))
-                                <img src="{{ $logoUrl }}" alt="" class="w-72 h-72 object-contain grayscale">
+                                <img src="{{ $logoUrl }}" alt="" class="w-80 h-80 object-contain grayscale">
                             @else
-                                <div class="text-center font-black tracking-widest text-7xl uppercase text-slate-900 rotate-[-15deg]">
-                                    {{ $tenant->name ?? 'GYM CONSOLE' }}
+                                <div class="text-center font-black tracking-widest text-6xl uppercase text-slate-900 rotate-[-15deg]">
+                                    {{ $gymName }}
                                 </div>
                             @endif
                         </div>
 
-                        <div class="relative z-10 space-y-8">
+                        <div class="relative z-10 space-y-6">
                             
-                            <!-- Header Section: Logo, Gym Info & INVOICE Meta -->
-                            <div class="flex items-start justify-between border-b border-slate-200 pb-6">
-                                <div class="flex items-center gap-3.5">
+                            <!-- 1. Header Section: Brand & Invoice Meta -->
+                            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 pt-2 border-b border-slate-200 pb-5">
+                                <div class="flex items-start gap-3.5 max-w-md">
                                     @if(!empty($logoUrl))
-                                        <img src="{{ $logoUrl }}" alt="{{ $tenant->name ?? 'Gym Logo' }}" class="h-16 w-auto max-w-[140px] object-contain shrink-0">
+                                        <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-14 w-14 object-contain rounded-xl bg-slate-950 p-1.5 border border-slate-800 shadow-md shrink-0">
                                     @else
-                                        <div class="w-14 h-14 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+                                        <div class="w-12 h-12 rounded-xl bg-slate-950 text-white flex items-center justify-center font-black text-xs shadow-md shrink-0">
                                             🏋️
                                         </div>
                                     @endif
                                     <div>
-                                        <h2 class="text-xl font-black text-slate-950 tracking-tight">{{ $tenant->name ?? 'PowerFit Gym' }}</h2>
-                                        <p class="text-xs text-slate-500 mt-0.5">{{ $tenant->address ?? '123 Fitness Street, Health City' }}</p>
-                                        @if(!empty($tenant->phone) || !empty($tenant->email))
-                                            <p class="text-[11px] text-slate-400 mt-0.5">{{ $tenant->phone ?? '' }} @if(!empty($tenant->phone) && !empty($tenant->email)) • @endif {{ $tenant->email ?? '' }}</p>
-                                        @endif
-                                        @if(!empty($tenant->gst_number))
-                                            <p class="text-[10px] font-mono text-slate-500 mt-0.5 font-bold">GSTIN: {{ $tenant->gst_number }}</p>
+                                        <h2 class="text-lg sm:text-xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h2>
+                                        <p class="text-[11px] text-slate-600 mt-1 leading-snug font-medium">{{ $gymAddress }}</p>
+                                        <div class="flex flex-wrap items-center gap-x-2 text-[10.5px] text-slate-600 mt-0.5 font-medium">
+                                            <span>Phone: {{ $gymPhone }}</span>
+                                            <span>|</span>
+                                            <span>Email: {{ $gymEmail }}</span>
+                                        </div>
+                                        @if(!empty($gymWeb))
+                                            <p class="text-[10.5px] text-slate-600 font-medium">Website: {{ $gymWeb }}</p>
                                         @endif
                                     </div>
                                 </div>
 
-                                <div class="text-right">
-                                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">INVOICE</h1>
-                                    <p class="text-xs font-mono font-bold text-slate-600 mt-1" x-text="selectedInvoice.receipt_no"></p>
-                                    <p class="text-xs text-slate-400 mt-0.5" x-text="selectedInvoice.date"></p>
+                                <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto">
+                                    <span class="inline-block px-3 py-1 rounded-lg bg-slate-950 text-white font-black text-[11px] tracking-wider uppercase">
+                                        {{ $invoiceTitle }}
+                                    </span>
+                                    <p class="text-xs font-bold text-slate-900 mt-1.5 font-mono">Invoice No: <span class="text-slate-900 font-extrabold" x-text="selectedInvoice.receipt_no"></span></p>
+                                    <p class="text-[11px] text-slate-600 mt-0.5 font-medium" x-text="'Date: ' + selectedInvoice.date"></p>
+                                    <span class="inline-block mt-1.5 px-3 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
+                                        {{ $statusText }}
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Bill To & Plan Details (2 Columns) -->
-                            <div class="grid grid-cols-2 gap-6 border-b border-slate-200 pb-6">
-                                <!-- Bill To Column -->
-                                <div>
-                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">BILL TO</span>
-                                    <h3 class="text-sm font-black text-slate-950" x-text="selectedInvoice.member_name"></h3>
-                                    <p class="text-xs font-mono font-semibold text-slate-500 mt-0.5" x-text="selectedInvoice.member_code"></p>
-                                    <p class="text-xs text-slate-600 mt-0.5" x-text="selectedInvoice.member_phone"></p>
-                                    <p class="text-xs text-slate-500 mt-0.5" x-show="selectedInvoice.member_email" x-text="selectedInvoice.member_email"></p>
+                            <!-- 2. Two Cards Row: Member & Plan Details -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <!-- Card 1: Member Details -->
+                                <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2">
+                                    <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-slate-900 uppercase tracking-wider mb-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                                        <span>MEMBER DETAILS (BILLED TO)</span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Full Name:</span>
+                                        <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_name"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Member ID:</span>
+                                        <span class="font-bold font-mono text-slate-950 col-span-2" x-text="selectedInvoice.member_code"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Phone No:</span>
+                                        <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_phone"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Payment Mode:</span>
+                                        <span class="font-bold uppercase text-slate-950 col-span-2" x-text="selectedInvoice.method || 'UPI'"></span>
+                                    </div>
                                 </div>
 
-                                <!-- Plan Details Column -->
-                                <div>
-                                    <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">PLAN DETAILS</span>
-                                    <h3 class="text-sm font-black text-slate-950" x-text="selectedInvoice.plan_name"></h3>
-                                    <p class="text-xs text-slate-600 mt-0.5" x-show="selectedInvoice.plan_duration" x-text="selectedInvoice.plan_duration"></p>
+                                <!-- Card 2: Membership & Plan Details -->
+                                <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2">
+                                    <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-slate-900 uppercase tracking-wider mb-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                                        <span>MEMBERSHIP &amp; PLAN DETAILS</span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Package Duration:</span>
+                                        <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.plan_duration || '12 Months'"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Start Date:</span>
+                                        <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.date"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Plan Name:</span>
+                                        <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.plan_name"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium col-span-1">Status:</span>
+                                        <span class="font-bold text-emerald-600 col-span-2">Active Membership</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Items & Amount Table -->
+                            <!-- 3. Table -->
                             <div>
-                                <table class="w-full text-left text-xs">
+                                <table class="w-full text-left text-xs border-collapse">
                                     <thead>
-                                        <tr class="border-b-2 border-slate-200 text-slate-500 font-extrabold text-[10px] uppercase tracking-wider">
-                                            <th class="py-3">DESCRIPTION</th>
-                                            <th class="py-3 text-right">AMOUNT</th>
+                                        <tr class="bg-slate-950 text-white uppercase text-[10.5px] font-extrabold tracking-wider">
+                                            <th class="py-2.5 px-3 rounded-l-xl w-10 text-center">#</th>
+                                            <th class="py-2.5 px-3">SERVICE / ITEM DESCRIPTION</th>
+                                            <th class="py-2.5 px-3 text-center">DURATION</th>
+                                            <th class="py-2.5 px-3 text-right">RATE (INR)</th>
+                                            <th class="py-2.5 px-3 text-right rounded-r-xl">AMOUNT (INR)</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        <tr>
-                                            <td class="py-4">
-                                                <span class="font-bold text-slate-900 block text-sm" x-text="selectedInvoice.plan_name"></span>
-                                                <span class="text-slate-500 text-[11px] block mt-0.5" x-show="selectedInvoice.plan_duration" x-text="selectedInvoice.plan_duration"></span>
-                                                <span class="text-slate-400 text-[10px] block mt-0.5">
-                                                    Payment Method: <span class="font-semibold text-slate-600 uppercase" x-text="selectedInvoice.method"></span>
-                                                    <span x-show="selectedInvoice.ref" x-text="' — Ref: ' + selectedInvoice.ref"></span>
-                                                </span>
+                                        <tr class="text-slate-900 font-semibold">
+                                            <td class="py-3 px-3 text-center text-slate-500 font-bold">1</td>
+                                            <td class="py-3 px-3">
+                                                <span class="font-black text-slate-950 text-xs sm:text-sm block" x-text="selectedInvoice.plan_name"></span>
                                             </td>
-                                            <td class="py-4 text-right font-black text-slate-900 text-sm">
-                                                {{ $currency }}<span x-text="selectedInvoice.amount"></span>
-                                            </td>
+                                            <td class="py-3 px-3 text-center font-bold text-slate-800" x-text="selectedInvoice.plan_duration || '12 Months'"></td>
+                                            <td class="py-3 px-3 text-right font-bold text-slate-800">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
+                                            <td class="py-3 px-3 text-right font-black text-slate-950 text-xs sm:text-sm">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
                                         </tr>
                                     </tbody>
-                                    <tfoot class="border-t-2 border-slate-200 text-xs">
-                                        <tr>
-                                            <td class="py-3 font-bold text-slate-600">Total</td>
-                                            <td class="py-3 text-right font-black text-slate-900 text-sm">
-                                                {{ $currency }}<span x-text="selectedInvoice.total || selectedInvoice.amount"></span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="py-2 font-bold text-emerald-700">Paid</td>
-                                            <td class="py-2 text-right font-black text-emerald-600 text-base">
-                                                {{ $currency }}<span x-text="selectedInvoice.amount"></span>
-                                            </td>
-                                        </tr>
-                                    </tfoot>
                                 </table>
                             </div>
 
-                        </div>
+                            <!-- 4. Bottom Split: Verification & Summary -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2">
+                                    <div class="text-[11px] font-extrabold text-slate-900 uppercase tracking-wider mb-1.5">
+                                        PAYMENT DETAIL &amp; VERIFICATION
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium">Payment Mode:</span>
+                                        <span class="font-bold text-slate-950 col-span-2 uppercase" x-text="selectedInvoice.method || 'UPI'"></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium">Payment Status:</span>
+                                        <span class="font-bold text-emerald-600 col-span-2">Completed</span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <span class="text-slate-500 font-medium">Payment Verification:</span>
+                                        <span class="font-bold text-emerald-600 col-span-2">{{ $verificationText }}</span>
+                                    </div>
+                                </div>
 
-                        <!-- Bottom Note / Thank You Footer -->
-                        <div class="relative z-10 pt-8 border-t border-slate-100 text-center mt-auto">
-                            <p class="text-xs font-semibold text-slate-500">Thank you for your membership!</p>
-                            <p class="text-[10px] text-slate-400 mt-1">Generated by {{ $tenant->name ?? 'Gym Console' }} — All rights reserved.</p>
+                                <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-600 font-medium">Subtotal</span>
+                                        <span class="font-bold text-slate-900">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-600 font-medium">Taxes &amp; Gym Surcharge</span>
+                                        <span class="font-bold text-slate-700">{{ $currency }}0 (Inclusive)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-200/80">
+                                        <span class="text-xs font-black text-slate-950">Total Amount</span>
+                                        <span class="text-xs font-black text-slate-950">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-black text-slate-700">Amount Received</span>
+                                        <span class="text-xs font-black text-emerald-600">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
+                                    </div>
+                                    <div class="p-2 rounded-xl bg-emerald-100/60 border border-emerald-300 flex items-center justify-between text-emerald-900 mt-1">
+                                        <span class="font-black text-[11px] uppercase tracking-wider">Balance Due</span>
+                                        <span class="font-black text-xs">{{ $currency }}0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Terms & Conditions -->
+                            <div class="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 text-[10px] text-slate-600 leading-relaxed space-y-1">
+                                <div class="text-[11px] font-black text-slate-900 uppercase tracking-wider mb-1">
+                                    TERMS &amp; CONDITIONS
+                                </div>
+                                <ol class="list-decimal pl-3.5 space-y-0.5">
+                                    @foreach($termsList as $term)
+                                        <li>{{ $term }}</li>
+                                    @endforeach
+                                </ol>
+                            </div>
+
+                            <!-- 6. Footer Helpline & Seal -->
+                            <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-4">
+                                <div class="text-left space-y-0.5">
+                                    <p class="font-extrabold text-xs text-slate-950">{{ $thankYouText }}</p>
+                                    <div class="text-[10px] text-slate-600 font-medium">
+                                        <span>Official Helpline: {{ $helpline }}</span> | <span>Email: {{ $footerEmail }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col items-end shrink-0">
+                                    @if(!empty($sealUrl))
+                                        <img src="{{ $sealUrl }}" alt="Seal" class="h-12 w-12 object-contain">
+                                    @else
+                                        <div class="w-12 h-12 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-0.5 text-slate-700 select-none">
+                                            <span class="text-[6.5px] font-black uppercase leading-none">{{ substr($gymName, 0, 12) }}</span>
+                                            <span class="text-[6px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                        </div>
+                                    @endif
+                                    <span class="text-[9px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider">{{ $sealText }}</span>
+                                </div>
+                            </div>
+
+                            <!-- 7. Tagline -->
+                            @if(!empty($tagline))
+                                <div class="pt-2 border-t border-slate-200 text-center">
+                                    <p class="text-[11px] font-black tracking-widest text-slate-900 uppercase">{{ $tagline }}</p>
+                                </div>
+                            @endif
+
                         </div>
 
                     </div>

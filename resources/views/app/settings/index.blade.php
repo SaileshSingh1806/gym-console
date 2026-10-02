@@ -138,6 +138,14 @@
                     <span class="px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold">ACTIVE</span>
                 @endif
             </button>
+
+            <!-- 9. Invoice & Receipt Template -->
+            <button type="button" @click="tab = 'invoice_settings'"
+                    :class="tab === 'invoice_settings' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
+                    class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Invoice &amp; Print Template</span>
+            </button>
         </div>
 
         <!-- ========================================================================= -->
@@ -1139,6 +1147,214 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 9: INVOICE & RECEIPT TEMPLATE SETTINGS -->
+        <!-- ========================================================================= -->
+        <div x-show="tab === 'invoice_settings'" x-cloak class="space-y-6">
+            <form action="{{ route('app.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                @csrf
+                <input type="hidden" name="active_tab" value="invoice_settings">
+                <input type="hidden" name="invoice" value="1">
+
+                @php
+                    $inv = $tenantSettings['invoice'] ?? [];
+                    $defaultTermsText = "1. Fees once paid are strictly non-refundable and non-transferable under any circumstances.\n2. Membership is non-transferable and valid exclusively for the registered individual and specified tenure.\n3. Members are required to carry clean training footwear, workout towel, and follow gym etiquette at all times.\n4. Management reserves the right to adjust facility operating hours and enforce safety protocols.\n5. Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access.";
+                @endphp
+
+                <!-- 1. Invoice Header & Branding Details -->
+                <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-wide">Invoice Header &amp; Branding Details</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Configure how your gym name, address, and invoice badge appear at the top</p>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('app.payments.index') }}" target="_blank" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                            <span>View Payments &amp; Invoices</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Invoice Title / Badge</label>
+                            <input type="text" name="invoice_title" value="{{ old('invoice_title', $inv['title'] ?? 'TAX INVOICE') }}"
+                                   placeholder="e.g. TAX INVOICE"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold uppercase focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Invoice No. Prefix</label>
+                            <input type="text" name="invoice_prefix" value="{{ old('invoice_prefix', $inv['prefix'] ?? '#ARM-') }}"
+                                   placeholder="e.g. #ARM- or #GYM-"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Payment Status Badge Label</label>
+                            <input type="text" name="invoice_status_text" value="{{ old('invoice_status_text', $inv['status_text'] ?? 'PAID IN FULL') }}"
+                                   placeholder="e.g. PAID IN FULL"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold uppercase focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Gym Display Name on Invoice</label>
+                            <input type="text" name="invoice_gym_name" value="{{ old('invoice_gym_name', $inv['gym_name'] ?? $tenant->name) }}"
+                                   placeholder="e.g. ARMOUR 24-7 GYM"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold uppercase focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Website URL</label>
+                            <input type="text" name="invoice_website" value="{{ old('invoice_website', $inv['website'] ?? 'www.armour247gym.com') }}"
+                                   placeholder="e.g. www.armour247gym.com"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Phone / Helpline</label>
+                            <input type="text" name="invoice_phone" value="{{ old('invoice_phone', $inv['phone'] ?? $tenant->phone) }}"
+                                   placeholder="e.g. +91 83065 30583"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Email Address</label>
+                            <input type="email" name="invoice_email" value="{{ old('invoice_email', $inv['email'] ?? $tenant->email) }}"
+                                   placeholder="e.g. management@armour247gym.com"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Full Detailed Address (Printed on Invoice Header)</label>
+                        <textarea name="invoice_address" rows="2"
+                                  placeholder="e.g. 6th Floor, Shalin Square, Nr Hathijan Circle, Ahmedabad - 382445"
+                                  class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">{{ old('invoice_address', $inv['address'] ?? $tenant->address) }}</textarea>
+                    </div>
+                </div>
+
+                <!-- 2. Verification Box & Terms and Conditions -->
+                <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                    <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-wide">Verification &amp; Terms &amp; Conditions</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Manage payment verification status text and legal invoice terms</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Payment Verification Status Text</label>
+                        <input type="text" name="invoice_verification_text" value="{{ old('invoice_verification_text', $inv['verification_text'] ?? 'Verified & Recorded') }}"
+                               placeholder="e.g. Verified & Recorded"
+                               class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold text-emerald-600 focus:border-indigo-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Terms &amp; Conditions (One point per line)</label>
+                        <textarea name="invoice_terms" rows="6"
+                                  placeholder="Enter your gym policy and non-refundable terms..."
+                                  class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs leading-relaxed focus:border-indigo-500 focus:outline-none font-mono">{{ old('invoice_terms', !empty($inv['terms']) ? $inv['terms'] : $defaultTermsText) }}</textarea>
+                    </div>
+                </div>
+
+                <!-- 3. Footer, Helpline, Signature Seal & Tagline -->
+                <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                    <div class="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800/80 pb-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-wide">Footer, Official Seal &amp; Tagline Banner</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Configure closing thank you message, helpline info, official seal, and bottom motto</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Thank You Heading Text</label>
+                            <input type="text" name="invoice_thank_you" value="{{ old('invoice_thank_you', $inv['thank_you'] ?? ('Thank you for training with ' . $tenant->name . '!')) }}"
+                                   placeholder="e.g. Thank you for training with Armour 24-7 Gym!"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Authorized Seal Label</label>
+                            <input type="text" name="invoice_seal_text" value="{{ old('invoice_seal_text', $inv['seal_text'] ?? 'Authorized Signature / Seal') }}"
+                                   placeholder="e.g. Authorized Signature / Seal"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Helpline</label>
+                            <input type="text" name="invoice_helpline" value="{{ old('invoice_helpline', $inv['helpline'] ?? $tenant->phone) }}"
+                                   placeholder="e.g. +91 83065 30583"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Email</label>
+                            <input type="email" name="invoice_footer_email" value="{{ old('invoice_footer_email', $inv['footer_email'] ?? $tenant->email) }}"
+                                   placeholder="e.g. management@armour247gym.com"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Website</label>
+                            <input type="text" name="invoice_footer_web" value="{{ old('invoice_footer_web', $inv['footer_web'] ?? 'www.armour247gym.com') }}"
+                                   placeholder="e.g. www.armour247gym.com"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Seal Image Upload & Bottom Tagline -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Upload Official Stamp / Signature Image (Optional)</label>
+                            <div class="flex items-center gap-3">
+                                @if(!empty($inv['seal_url']))
+                                    <img src="{{ $inv['seal_url'] }}" alt="Current Seal" class="h-14 w-14 object-contain rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800">
+                                @endif
+                                <input type="file" name="invoice_seal" accept="image/png,image/jpeg,image/webp"
+                                       class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/40 dark:file:text-indigo-300">
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1">Leave empty to use the auto-generated high-resolution circular official gym seal.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Bottom Tagline Motto Banner</label>
+                            <input type="text" name="invoice_tagline" value="{{ old('invoice_tagline', $inv['tagline'] ?? 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU') }}"
+                                   placeholder="e.g. BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU"
+                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black tracking-wider uppercase focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button Bar -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="submit"
+                            class="px-8 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:brightness-110 text-white font-black text-sm shadow-xl shadow-indigo-600/30 transition-all cursor-pointer flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>Save Invoice Template Settings</span>
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- ========================================================================= -->
