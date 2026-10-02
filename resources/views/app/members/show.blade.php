@@ -2269,6 +2269,7 @@
                         $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
                         $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
 
+                        // Terms
                         $defaultTerms = [
                             "Fees once paid are strictly non-refundable and non-transferable under any circumstances.",
                             "Membership is non-transferable and valid exclusively for the registered individual and specified tenure.",
@@ -2276,7 +2277,14 @@
                             "Management reserves the right to adjust facility operating hours and enforce safety protocols.",
                             "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access."
                         ];
-                        $termsList = !empty($invSettings['terms']) ? array_filter(array_map('trim', explode("\n", $invSettings['terms']))) : $defaultTerms;
+                        if (!empty($invSettings['terms'])) {
+                            $rawTerms = array_filter(array_map('trim', explode("\n", $invSettings['terms'])));
+                            $termsList = array_map(function($t) {
+                                return preg_replace('/^\s*\d+[\.\)]\s*/', '', $t);
+                            }, $rawTerms);
+                        } else {
+                            $termsList = $defaultTerms;
+                        }
 
                         $thankYouText = !empty($invSettings['thank_you']) ? $invSettings['thank_you'] : ("Thank you for training with " . $gymName . "!");
                         $helpline = !empty($invSettings['helpline']) ? $invSettings['helpline'] : $gymPhone;
@@ -2485,24 +2493,26 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col items-end shrink-0 min-w-[120px]">
-                                    <div class="relative flex items-center justify-center min-h-[50px] min-w-[100px]">
+                                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[140px]">
+                                    <div class="relative flex items-center justify-center w-28 h-24 select-none">
                                         @if(!empty($sealUrl))
-                                            <img src="{{ $sealUrl }}" alt="Seal" class="h-12 w-12 object-contain">
+                                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-20 w-20 object-contain drop-shadow-sm">
                                         @else
-                                            <div class="w-12 h-12 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-0.5 text-slate-700 select-none">
-                                                <span class="text-[6.5px] font-black uppercase leading-none">{{ substr($gymName, 0, 12) }}</span>
-                                                <span class="text-[6px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                            <div class="w-18 h-18 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                                <span class="text-[7.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                                <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                                <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
                                             </div>
                                         @endif
 
                                         @if(!empty($signatureUrl))
-                                            <img src="{{ $signatureUrl }}" alt="Signature" class="absolute -bottom-1 -right-2 h-10 w-auto max-w-[90px] object-contain rotate-[-4deg] drop-shadow-sm pointer-events-none">
+                                            <img src="{{ $signatureUrl }}" alt="Signature" 
+                                                 class="absolute inset-0 m-auto h-16 w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-sm pointer-events-none z-10">
                                         @endif
                                     </div>
-                                    <span class="text-[9px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider">{{ $sealText }}</span>
+                                    <span class="text-[10px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                                     @if(!empty($signatoryName))
-                                        <span class="text-[8.5px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
+                                        <span class="text-[9px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
                                     @endif
                                 </div>
                             </div>

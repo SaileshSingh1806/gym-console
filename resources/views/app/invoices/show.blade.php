@@ -87,7 +87,10 @@
             "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access."
         ];
         if (!empty($invSettings['terms'])) {
-            $termsList = array_filter(array_map('trim', explode("\n", $invSettings['terms'])));
+            $rawTerms = array_filter(array_map('trim', explode("\n", $invSettings['terms'])));
+            $termsList = array_map(function($t) {
+                return preg_replace('/^\s*\d+[\.\)]\s*/', '', $t);
+            }, $rawTerms);
         } else {
             $termsList = $defaultTerms;
         }
@@ -364,14 +367,14 @@
                 </div>
 
                 <!-- Right: Official Seal / Stamp & Signature -->
-                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[130px]">
-                    <div class="relative flex items-center justify-center min-h-[64px] min-w-[120px]">
+                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[140px]">
+                    <div class="relative flex items-center justify-center w-28 h-24 select-none">
                         @if(!empty($sealUrl))
                             <!-- Uploaded Stamp / Seal Image -->
-                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 object-contain">
+                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-20 w-20 object-contain drop-shadow-sm">
                         @else
                             <!-- Vector Circular Seal Matching Image -->
-                            <div class="w-16 h-16 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                            <div class="w-18 h-18 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
                                 <span class="text-[7.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
                                 <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
                                 <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
@@ -379,11 +382,12 @@
                         @endif
 
                         @if(!empty($signatureUrl))
-                            <!-- Uploaded Signature Image (Overlapping on top of stamp) -->
-                            <img src="{{ $signatureUrl }}" alt="Signature" class="absolute -bottom-1 -right-2 h-12 w-auto max-w-[110px] object-contain rotate-[-4deg] drop-shadow-sm pointer-events-none">
+                            <!-- Uploaded Signature Image (Directly Overlapping on TOP of stamp with blend-mode multiply) -->
+                            <img src="{{ $signatureUrl }}" alt="Signature" 
+                                 class="absolute inset-0 m-auto h-16 w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-sm pointer-events-none z-10">
                         @endif
                     </div>
-                    <span class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                    <span class="text-[10px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                     @if(!empty($signatoryName))
                         <span class="text-[9px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
                     @endif
