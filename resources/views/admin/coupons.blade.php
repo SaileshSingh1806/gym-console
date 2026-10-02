@@ -1,4 +1,4 @@
-<x-admin-layout header="SaaS Promo Coupons &amp; Discount Codes">
+<x-admin-layout header="SaaS Promo Coupons & Discount Codes">
     <div class="space-y-6" x-data="{
         showCreateModal: false,
         showEditModal: false,
@@ -38,53 +38,33 @@
     }">
 
         <!-- Quick Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Total Promo Coupons</span>
-                <span class="text-3xl font-extrabold text-slate-900 dark:text-white">{{ $stats['total_coupons'] }}</span>
+                <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ $stats['total_coupons'] }}</span>
                 <span class="text-xs text-slate-400 block mt-1">Configured in system</span>
-        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div class="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                <span class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Total Promo Coupons</span>
-                <span class="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ $stats['total_coupons'] }}</span>
-                <span class="text-[10px] sm:text-xs text-slate-400 block mt-1">Configured in system</span>
             </div>
 
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Active Coupons</span>
-                <span class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ $stats['active_coupons'] }}</span>
+                <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ $stats['active_coupons'] }}</span>
                 <span class="text-xs text-slate-400 block mt-1">Currently redeemable</span>
-            <div class="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                <span class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Active Coupons</span>
-                <span class="text-xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ $stats['active_coupons'] }}</span>
-                <span class="text-[10px] sm:text-xs text-slate-400 block mt-1">Currently redeemable</span>
             </div>
 
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Total Redemptions</span>
-                <span class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{{ $stats['total_used'] }}</span>
+                <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400">{{ $stats['total_used'] }}</span>
                 <span class="text-xs text-slate-400 block mt-1">Times used across gyms</span>
-            <div class="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                <span class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Total Redemptions</span>
-                <span class="text-xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400">{{ $stats['total_used'] }}</span>
-                <span class="text-[10px] sm:text-xs text-slate-400 block mt-1">Times used across gyms</span>
             </div>
 
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Discounts Provided</span>
-                <span class="text-3xl font-extrabold text-rose-600 dark:text-rose-400">₹{{ number_format($stats['total_discount_given'], 2) }}</span>
+                <span class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400">₹{{ number_format($stats['total_discount_given'], 2) }}</span>
                 <span class="text-xs text-slate-400 block mt-1">Total customer savings</span>
-            <div class="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-                <span class="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 block mb-1">Discounts Provided</span>
-                <span class="text-xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400">₹{{ number_format($stats['total_discount_given'], 2) }}</span>
-                <span class="text-[10px] sm:text-xs text-slate-400 block mt-1">Total customer savings</span>
             </div>
         </div>
 
         <!-- Controls & Header Bar -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
-            <form action="{{ route('admin.coupons') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                <div class="relative flex-1 sm:w-64">
         <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 transition-colors">
             <form action="{{ route('admin.coupons') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
                 <div class="relative flex-1 sm:w-64 min-w-[140px]">
@@ -103,7 +83,6 @@
                 @endif
             </form>
 
-            <button @click="showCreateModal = true" class="w-full md:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs hover:brightness-110 shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all">
             <button @click="showCreateModal = true" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs hover:brightness-110 shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>+ Create Promo Coupon</span>
@@ -113,7 +92,6 @@
         <!-- Coupons Table -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm dark:shadow-xl transition-colors">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
                 <table class="w-full text-left text-xs min-w-[700px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
@@ -232,22 +210,18 @@
         </div>
 
         <!-- Create Coupon Modal -->
-        <div x-show="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl transition-colors" @click.away="showCreateModal = false">
         <div x-show="showCreateModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showCreateModal = false">
-                <div class="flex justify-between items-center mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Create New SaaS Promo Coupon</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Add a discount code for Gym Owners when purchasing SaaS plans</p>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New SaaS Promo Coupon</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Add a discount code for Gym Owners when purchasing SaaS plans</p>
                     </div>
-                    <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                     <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
                 <form action="{{ route('admin.coupons.store') }}" method="POST" class="space-y-4 text-xs">
                     @csrf
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Coupon Code *</label>
@@ -261,7 +235,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Discount Type *</label>
@@ -287,7 +260,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min Order Amount (₹)</label>
@@ -305,7 +277,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Valid From (Optional)</label>
@@ -328,9 +299,6 @@
                         <label for="create_is_active" class="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">Active &amp; immediately redeemable</label>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showCreateModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/20 cursor-pointer">Save &amp; Create Coupon</button>
                     <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" @click="showCreateModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold cursor-pointer">Cancel</button>
                         <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/20 cursor-pointer">Save &amp; Create Coupon</button>
@@ -340,22 +308,18 @@
         </div>
 
         <!-- Edit Coupon Modal -->
-        <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl transition-colors" @click.away="showEditModal = false">
         <div x-show="showEditModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showEditModal = false">
-                <div class="flex justify-between items-center mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Edit Promo Coupon: <span class="font-mono text-red-600 dark:text-red-400" x-text="editCoupon.code"></span></h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Update discount terms or validity</p>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit Promo Coupon: <span class="font-mono text-red-600 dark:text-red-400" x-text="editCoupon.code"></span></h3>
+                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Update discount terms or validity</p>
                     </div>
-                    <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
                     <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
                 <form :action="'{{ url('admin/coupons') }}/' + editCoupon.id" method="POST" class="space-y-4 text-xs">
                     @csrf
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Coupon Code *</label>
@@ -368,7 +332,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Discount Type *</label>
@@ -394,7 +357,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min Order Amount (₹)</label>
@@ -412,7 +374,6 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Valid From</label>
@@ -435,9 +396,6 @@
                         <label for="edit_is_active" class="font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">Active &amp; redeemable</label>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/20 cursor-pointer">Update Coupon</button>
                     <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" @click="showEditModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold cursor-pointer">Cancel</button>
                         <button type="submit" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-600/20 cursor-pointer">Update Coupon</button>

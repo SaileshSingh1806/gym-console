@@ -1,24 +1,39 @@
-<x-guest-layout title="Gym Console - Modern Multi-Tenant Gym Management SaaS">
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32">
+<x-guest-layout title="Gym Console - Modern Multi-Branch Gym Management Platform">
+    <!-- Hero Section with Modern Ambient Glow -->
+    <section class="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-28 lg:pb-36">
+        <!-- Ambient Background Glow Accents -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] sm:w-[850px] h-[350px] sm:h-[450px] bg-gradient-to-tr from-amber-500/15 via-orange-500/10 to-transparent rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div class="absolute -top-10 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-3xl mx-auto">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold mb-8">
+            <div class="text-center max-w-4xl mx-auto">
+                
+                <!-- Pill Badge -->
+                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs sm:text-sm font-bold mb-8 shadow-sm backdrop-blur-md">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    Multi-Tenant SaaS • Hikvision Biometrics • Flutter Mobile App
+                    <span>⚡ Enterprise Biometrics • Multi-Branch Operations • Mobile Apps</span>
                 </div>
-                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Scale Your Gym Empire with <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200">Ultimate Precision</span>
+
+                <!-- Hero Main Headline -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
+                    Scale Your Gym Empire with <br class="hidden sm:inline" />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200">Ultimate Precision</span>
                 </h1>
-                <p class="mt-6 text-lg text-slate-400 leading-relaxed">
+
+                <!-- Hero Subheadline -->
+                <p class="mt-6 sm:mt-8 text-base sm:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-3xl mx-auto font-normal">
                     The all-in-one multi-branch fitness management platform. Automated memberships, real-time Hikvision turnstile biometric access control, workout & diet builders, financial POS, and mobile apps.
                 </p>
-                <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold hover:brightness-110 shadow-xl shadow-orange-500/20 transition-all text-center">
-                        Start 14-Day Free Trial
+
+                <!-- Hero Action Buttons -->
+                <div class="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
+                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 sm:px-9 py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 text-slate-950 font-black text-base hover:brightness-110 shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <span>Start 14-Day Free Trial</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
-                    <a href="#plans" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 font-semibold hover:bg-slate-800 transition-all text-center">
-                        View SaaS Pricing
+                    <a href="#plans" class="w-full sm:w-auto px-8 sm:px-9 py-4 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-slate-200 font-bold text-base hover:bg-slate-800 hover:text-white hover:border-slate-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/30">
+                        <span>Explore Pricing & Plans</span>
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </a>
                 </div>
             </div>

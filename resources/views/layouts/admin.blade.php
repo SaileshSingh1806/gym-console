@@ -260,6 +260,22 @@
             {{ $slot ?? '' }}
             @yield('content')
         </main>
+
+        <!-- Super Admin Footer -->
+        <footer class="mt-auto px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur text-slate-500 dark:text-slate-400 text-xs flex flex-col sm:flex-row items-center justify-between gap-2.5 transition-colors duration-200">
+            <div class="flex items-center gap-2 text-center sm:text-left flex-wrap justify-center sm:justify-start">
+                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $platformSettings['app_name'] ?? 'Gym Console' }}</span>
+                <span>•</span>
+                <span>{{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' All rights reserved.') }}</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px]">
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 font-mono font-bold text-slate-700 dark:text-slate-300">v{{ config('app.version', '2.5.0') }}</span>
+                <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Systems Operational
+                </span>
+            </div>
+        </footer>
     </div>
 
     <x-confirm-modal />

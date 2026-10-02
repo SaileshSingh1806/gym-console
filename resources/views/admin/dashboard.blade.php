@@ -479,9 +479,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showNewGymModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Create Gym & Account</button>
+                    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showNewGymModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Create Gym & Account</button>
                     </div>
                 </form>
             </div>
@@ -492,7 +492,7 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl" @click.away="showNewPlanModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create SaaS Subscription Plan</h3>
-                    <button @click="showNewPlanModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    <button @click="showNewPlanModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
                 <form action="{{ route('admin.plans.store') }}" method="POST" class="space-y-4">
@@ -534,9 +534,9 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showNewPlanModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Save SaaS Plan</button>
+                    <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showNewPlanModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Save SaaS Plan</button>
                     </div>
                 </form>
             </div>

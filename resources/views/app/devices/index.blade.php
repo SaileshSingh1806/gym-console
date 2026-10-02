@@ -138,6 +138,7 @@
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Device Type</label>
                         <select name="type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
                             <option value="hikvision_facial">Hikvision Facial Terminal (ISAPI)</option>
+                            <option value="hikvision_facial">Hikvision Face Terminal (DS-K1T343 Series / ISAPI)</option>
                             <option value="hikvision_turnstile">Hikvision Turnstile Barrier Gate</option>
                             <option value="rfid_reader">RFID Card Scanner</option>
                             <option value="qr_scanner">Dynamic QR Code Scanner</option>

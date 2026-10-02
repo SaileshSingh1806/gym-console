@@ -1,12 +1,10 @@
-<x-admin-layout header="Platform Users &amp; Roles">
+<x-admin-layout header="Platform Users & Roles">
     <div class="space-y-6" x-data="{ showNewModal: false, editUser: null }">
         <!-- Top Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <form action="{{ route('admin.users') }}" method="GET" class="flex flex-wrap items-center gap-3 flex-grow max-w-2xl">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user name, email, phone..." class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <form action="{{ route('admin.users') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 flex-grow max-w-2xl w-full sm:w-auto">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user name, email, phone..." class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[140px] shadow-xs">
-                <select name="role" class="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs" onchange="this.form.submit()">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user name, email, phone..." class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[140px] shadow-xs">
+                <select name="role" class="px-3 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs cursor-pointer" onchange="this.form.submit()">
                     <option value="" {{ ($selectedRole ?? '') === '' || ($selectedRole ?? '') === 'all' ? 'selected' : '' }}>All Roles</option>
                     <option value="gym_owner" {{ ($selectedRole ?? '') === 'gym_owner' ? 'selected' : '' }}>Gym Owner</option>
                     <option value="super_admin" {{ ($selectedRole ?? '') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
@@ -16,12 +14,14 @@
                     <option value="accountant" {{ ($selectedRole ?? '') === 'accountant' ? 'selected' : '' }}>Accountant</option>
                     <option value="staff" {{ ($selectedRole ?? '') === 'staff' ? 'selected' : '' }}>Staff</option>
                 </select>
-                <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-semibold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer">
+                <button type="submit" class="px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-semibold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer">
                     Filter
                 </button>
+                @if(request('search') || request('role'))
+                    <a href="{{ route('admin.users') }}" class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 underline">Clear</a>
+                @endif
             </form>
 
-            <button @click="showNewModal = true" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-all cursor-pointer shrink-0">
             <button @click="showNewModal = true" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 transition-all cursor-pointer shrink-0">
                 + Create User Account
             </button>
@@ -30,7 +30,6 @@
         <!-- Users Table -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
                 <table class="w-full text-left text-xs min-w-[700px]">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                         <tr>
@@ -119,13 +118,10 @@
         </div>
 
         <!-- Edit User Modal -->
-        <div x-show="editUser !== null" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-colors" @click.away="editUser = null">
         <div x-show="editUser !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="editUser = null">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Edit User Account</h3>
-                    <button @click="editUser = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit User Account</h3>
                     <button @click="editUser = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
@@ -147,7 +143,6 @@
                             <input type="text" name="phone" x-model="editUser.phone" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Role</label>
@@ -186,9 +181,6 @@
                             <input type="password" name="password" placeholder="New password..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                         </div>
 
-                        <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                            <button type="button" @click="editUser = null" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                            <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Update User</button>
                         <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                             <button type="button" @click="editUser = null" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
                             <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Update User</button>
@@ -199,13 +191,10 @@
         </div>
 
         <!-- Add User Modal -->
-        <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-colors" @click.away="showNewModal = false">
         <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showNewModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Create New User Account</h3>
-                    <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer">✕</button>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New User Account</h3>
                     <button @click="showNewModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
@@ -226,7 +215,6 @@
                         <input type="text" name="phone" placeholder="+1 555-0100" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Role *</label>
@@ -265,9 +253,6 @@
                         <input type="password" name="password" required value="password" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none">
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showNewModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Create Account</button>
                     <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" @click="showNewModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
                         <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/20 cursor-pointer">Create Account</button>

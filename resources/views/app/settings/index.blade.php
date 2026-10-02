@@ -1356,6 +1356,7 @@
                                     class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-teal-500 focus:outline-none cursor-pointer">
                                 <option value="essl_desktop">eSSL Biometric (Desktop Middleware / LAN)</option>
                                 <option value="hikvision_facial">Hikvision Face Terminal (ISAPI)</option>
+                                <option value="hikvision_facial">Hikvision Face Terminal (DS-K1T343 Series / ISAPI)</option>
                                 <option value="hikvision_turnstile">Hikvision Turnstile Barrier Gate</option>
                                 <option value="zkteco_biometric">ZKTeco / Realtime Biometric Push</option>
                                 <option value="rfid_reader">RFID Card / NFC Reader</option>

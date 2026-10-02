@@ -77,13 +77,29 @@ class HikvisionISAPIDriver implements DeviceDriverInterface
 
     public function parseEventPayload(array $payload): array
     {
+        // Handle multipart event_log JSON string if sent by Hikvision firmware
+        if (isset($payload['event_log']) && is_string($payload['event_log'])) {
+            $decoded = json_decode($payload['event_log'], true);
+            if (is_array($decoded)) {
+                $payload = array_merge($payload, $decoded);
+            }
+        }
+
         // Extracts event parameters from Hikvision AlertStream / Webhook JSON
         $eventObj = $payload['AccessControllerEvent'] ?? $payload;
 
         $cardNo = $eventObj['cardNo'] ?? $payload['card_id'] ?? null;
+        $cardNo = $eventObj['cardNo'] ?? $payload['card_id'] ?? $payload['cardNo'] ?? null;
         $faceId = $eventObj['faceId'] ?? $payload['face_id'] ?? null;
         $employeeNo = $eventObj['employeeNoString'] ?? $payload['member_code'] ?? null;
         $eventTime = $payload['dateTime'] ?? now()->toIso8601String();
+        $employeeNo = $eventObj['employeeNoString'] 
+            ?? $eventObj['employeeNo'] 
+            ?? $payload['employeeNoString'] 
+            ?? $payload['member_code'] 
+            ?? null;
+            
+        $eventTime = $payload['dateTime'] ?? $eventObj['dateTime'] ?? now()->toIso8601String();
 
         return [
             'card_no' => $cardNo,

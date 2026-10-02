@@ -35,14 +35,23 @@ class AccessControlService
         $eventTime = isset($parsed['event_time']) ? Carbon::parse($parsed['event_time']) : now();
 
         // Find member within tenant
+        // Find member within tenant (by member_code, id, phone, or card/RFID)
         $member = null;
         if ($memberCode) {
             $member = Member::where('tenant_id', $device->tenant_id)->where('member_code', $memberCode)->first();
+            $member = Member::where('tenant_id', $device->tenant_id)
+                ->where(function ($q) use ($memberCode) {
+                    $q->where('member_code', $memberCode)
+                      ->orWhere('id', is_numeric($memberCode) ? (int)$memberCode : -1)
+                      ->orWhere('phone', $memberCode)
+                      ->orWhere('phone', 'like', "%{$memberCode}");
+                })->first();
         }
         if (! $member && $cardNo) {
             $member = Member::where('tenant_id', $device->tenant_id)
                 ->where(function ($q) use ($cardNo) {
                     $q->where('qr_code_token', $cardNo)
+                        ->orWhere('member_code', $cardNo)
                         ->orWhereJsonContains('metadata->card_number', $cardNo);
                 })->first();
         }

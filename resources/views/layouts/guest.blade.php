@@ -99,91 +99,119 @@
 </head>
 <body class="flex flex-col min-h-screen antialiased bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
 
-    <!-- Top Navigation -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80" x-data="{ mobileMenuOpen: false }">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <a href="{{ route('home') }}" class="flex items-center gap-2.5 sm:gap-3 group">
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/85 border-b border-slate-800/80 transition-all duration-200 shadow-xl shadow-black/20" x-data="{ mobileMenuOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
+            
+            <!-- Brand Logo (Prominent & Clean, SaaS removed) -->
+            <a href="{{ route('home') }}" class="flex items-center gap-3 sm:gap-3.5 group shrink-0">
                 @if(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800 shadow-md group-hover:scale-105 transition-transform shrink-0">
-                    <span class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5 truncate">
+                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl object-contain bg-slate-900 p-1.5 border border-slate-700/80 shadow-lg shadow-black/40 group-hover:scale-105 group-hover:border-amber-500/50 transition-all duration-200 shrink-0">
+                    <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-amber-400 transition-colors truncate">
                         {{ $platformSettings['app_name'] ?? 'Gym Console' }}
-                        <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
                     </span>
                 @else
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform shrink-0">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/25 border border-amber-300/30 group-hover:scale-105 group-hover:shadow-amber-500/40 transition-all duration-200 shrink-0">
+                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-slate-950 font-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+                    <div class="flex items-center">
+                        <span class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center">
                             GYM<span class="text-amber-400">CONSOLE</span>
-                            <span class="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20">SaaS</span>
                         </span>
                     </div>
                 @endif
             </a>
 
-            <!-- Desktop Nav Links -->
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-                <a href="{{ route('home') }}" class="hover:text-amber-400 transition-colors">Home</a>
-                <a href="{{ route('features') }}" class="hover:text-amber-400 transition-colors">Features</a>
-                <a href="{{ route('pricing') }}" class="hover:text-amber-400 transition-colors">Pricing</a>
-                <a href="{{ route('about') }}" class="hover:text-amber-400 transition-colors">About</a>
-                <a href="{{ route('contact') }}" class="hover:text-amber-400 transition-colors">Contact</a>
+            <!-- Desktop Navigation Menu (Bigger, Bolder, Professional) -->
+            <nav class="hidden md:flex items-center gap-1.5 lg:gap-2">
+                <a href="{{ route('home') }}" 
+                   class="px-3.5 lg:px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-150 {{ request()->routeIs('home') ? 'text-amber-400 bg-amber-400/10 font-bold border border-amber-400/20 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-900/80' }}">
+                    Home
+                </a>
+                <a href="{{ route('features') }}" 
+                   class="px-3.5 lg:px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-150 {{ request()->routeIs('features') ? 'text-amber-400 bg-amber-400/10 font-bold border border-amber-400/20 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-900/80' }}">
+                    Features
+                </a>
+                <a href="{{ route('pricing') }}" 
+                   class="px-3.5 lg:px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-150 {{ request()->routeIs('pricing') ? 'text-amber-400 bg-amber-400/10 font-bold border border-amber-400/20 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-900/80' }}">
+                    Pricing
+                </a>
+                <a href="{{ route('about') }}" 
+                   class="px-3.5 lg:px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-150 {{ request()->routeIs('about') ? 'text-amber-400 bg-amber-400/10 font-bold border border-amber-400/20 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-900/80' }}">
+                    About
+                </a>
+                <a href="{{ route('contact') }}" 
+                   class="px-3.5 lg:px-4 py-2 rounded-xl text-[15px] font-semibold transition-all duration-150 {{ request()->routeIs('contact') ? 'text-amber-400 bg-amber-400/10 font-bold border border-amber-400/20 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-900/80' }}">
+                    Contact
+                </a>
             </nav>
 
-            <!-- Desktop Auth Buttons & Mobile Menu Button -->
-            <div class="flex items-center gap-2 sm:gap-4">
+            <!-- Desktop Auth Buttons & Mobile Menu Toggle -->
+            <div class="flex items-center gap-3 sm:gap-4">
                 <div class="hidden sm:flex items-center gap-3">
                     @auth
                         @if(auth()->user()->isSuperAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Super Admin</a>
+                            <a href="{{ route('admin.dashboard') }}" class="text-sm font-bold px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white hover:brightness-110 transition-all shadow-md shadow-red-600/20 flex items-center gap-1.5">
+                                <span>⚙️ Super Admin</span>
+                            </a>
                         @elseif(auth()->user()->tenant && auth()->user()->tenant->isSubscriptionActive())
-                            <a href="{{ route('app.dashboard') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">Dashboard</a>
+                            <a href="{{ route('app.dashboard') }}" class="text-sm font-extrabold px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-1.5">
+                                <span>🚀 Open Dashboard</span>
+                            </a>
                         @else
-                            <a href="{{ route('auth.checkout') }}" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/10">💳 Pay to Activate</a>
+                            <a href="{{ route('auth.checkout') }}" class="text-xs sm:text-sm font-bold px-4 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-md shadow-amber-500/20">
+                                💳 Pay to Activate
+                            </a>
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
-                                <button type="submit" class="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer">Sign Out</button>
+                                <button type="submit" class="text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer px-2 py-1">
+                                    Sign Out
+                                </button>
                             </form>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="text-xs sm:text-sm font-medium text-slate-300 hover:text-white transition-colors px-2 py-1">Sign In</a>
-                        <a href="{{ route('register') }}" class="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap">Get Started</a>
+                        <a href="{{ route('login') }}" class="text-[15px] font-semibold text-slate-300 hover:text-white transition-colors px-3.5 py-2 rounded-xl hover:bg-slate-900/80">
+                            Sign In
+                        </a>
+                        <a href="{{ route('register') }}" class="text-[15px] font-extrabold px-5 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 text-slate-950 hover:brightness-110 hover:shadow-amber-500/30 active:scale-[0.98] transition-all shadow-lg shadow-amber-500/20 whitespace-nowrap flex items-center gap-1.5">
+                            <span>Get Started Free</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
                     @endauth
                 </div>
 
-                <!-- Mobile Hamburger Toggle -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white focus:outline-none cursor-pointer" aria-label="Toggle navigation menu">
-                    <svg x-show="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    <svg x-show="mobileMenuOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <!-- Mobile Hamburger Button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none cursor-pointer transition-colors" aria-label="Toggle navigation menu">
+                    <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Nav Drawer -->
-        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-lg px-4 pt-3 pb-5 space-y-3">
-            <nav class="flex flex-col space-y-1 text-sm font-medium text-slate-300">
-                <a href="{{ route('home') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Home</a>
-                <a href="{{ route('features') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Features</a>
-                <a href="{{ route('pricing') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Pricing</a>
-                <a href="{{ route('about') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">About</a>
-                <a href="{{ route('contact') }}" class="px-3 py-2 rounded-lg hover:bg-slate-900 hover:text-amber-400 transition-colors">Contact</a>
+        <!-- Mobile Navigation Drawer -->
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-slate-800/80 bg-slate-950/98 backdrop-blur-2xl px-5 pt-4 pb-6 space-y-3 shadow-2xl">
+            <nav class="flex flex-col space-y-1 text-base font-semibold text-slate-200">
+                <a href="{{ route('home') }}" class="px-3.5 py-2.5 rounded-xl {{ request()->routeIs('home') ? 'bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20' : 'hover:bg-slate-900 hover:text-amber-400' }} transition-colors">Home</a>
+                <a href="{{ route('features') }}" class="px-3.5 py-2.5 rounded-xl {{ request()->routeIs('features') ? 'bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20' : 'hover:bg-slate-900 hover:text-amber-400' }} transition-colors">Features</a>
+                <a href="{{ route('pricing') }}" class="px-3.5 py-2.5 rounded-xl {{ request()->routeIs('pricing') ? 'bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20' : 'hover:bg-slate-900 hover:text-amber-400' }} transition-colors">Pricing</a>
+                <a href="{{ route('about') }}" class="px-3.5 py-2.5 rounded-xl {{ request()->routeIs('about') ? 'bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20' : 'hover:bg-slate-900 hover:text-amber-400' }} transition-colors">About</a>
+                <a href="{{ route('contact') }}" class="px-3.5 py-2.5 rounded-xl {{ request()->routeIs('contact') ? 'bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20' : 'hover:bg-slate-900 hover:text-amber-400' }} transition-colors">Contact</a>
             </nav>
 
-            <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
+            <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
                 @auth
                     @if(auth()->user()->isSuperAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">Platform Super Admin</a>
+                        <a href="{{ route('admin.dashboard') }}" class="text-center font-bold px-4 py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white text-sm shadow-md">Platform Super Admin</a>
                     @elseif(auth()->user()->tenant && auth()->user()->tenant->isSubscriptionActive())
-                        <a href="{{ route('app.dashboard') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">Gym Dashboard</a>
+                        <a href="{{ route('app.dashboard') }}" class="text-center font-bold px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 text-sm shadow-md">Open Gym Dashboard</a>
                     @else
-                        <a href="{{ route('auth.checkout') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs">💳 Pay to Activate</a>
+                        <a href="{{ route('auth.checkout') }}" class="text-center font-bold px-4 py-3 rounded-xl bg-amber-500 text-slate-950 text-sm">💳 Pay to Activate</a>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="text-center font-bold px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs">Sign In</a>
-                    <a href="{{ route('register') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-xs">Get Started Free</a>
+                    <a href="{{ route('login') }}" class="text-center font-bold px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm hover:bg-slate-800 transition-colors">Sign In</a>
+                    <a href="{{ route('register') }}" class="text-center font-extrabold px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 text-slate-950 text-sm shadow-lg shadow-amber-500/20">Get Started Free</a>
                 @endauth
             </div>
         </div>
@@ -195,19 +223,19 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 border-t border-slate-800/80 py-12">
+    <footer class="bg-slate-950 border-t border-slate-800/80 py-12 sm:py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3.5">
                 @if(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="w-8 h-8 rounded-lg object-contain bg-slate-900 p-1 border border-slate-800">
+                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="w-9 h-9 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800">
                 @else
-                    <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                 @endif
-                <span class="font-bold text-slate-200">{{ $platformSettings['app_name'] ?? 'Gym Console SaaS' }}</span>
+                <span class="font-extrabold text-slate-200 text-base tracking-tight">{{ $platformSettings['app_name'] ?? 'Gym Console' }}</span>
             </div>
-            <p class="text-sm text-slate-500">{{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'Gym Console') . '. Production-Grade Multi-Tenant Gym Architecture. Built with Laravel & Flutter.') }}</p>
+            <p class="text-sm text-slate-500 text-center md:text-right">{{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'Gym Console') . '. Enterprise Multi-Branch Gym Management Architecture.') }}</p>
         </div>
     </footer>
 
