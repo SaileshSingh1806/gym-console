@@ -1,4 +1,4 @@
-<x-guest-layout title="Pricing Plans - Gym Console SaaS">
+<x-guest-layout title="Pricing Plans - Gym Console">
     <div class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Top WhatsApp Link -->

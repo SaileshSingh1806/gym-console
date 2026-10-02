@@ -1,4 +1,4 @@
-<x-guest-layout title="Gym Console - Modern Multi-Branch Gym Management Platform">
+<x-guest-layout title="Gym Console - Enterprise Gym Management Platform">
     <!-- Hero Section with Modern Ambient Glow -->
     <section class="relative overflow-hidden pt-16 pb-20 sm:pt-24 sm:pb-28 lg:pt-28 lg:pb-36">
         <!-- Ambient Background Glow Accents -->
@@ -8,14 +8,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-4xl mx-auto">
                 
-                <!-- Pill Badge -->
+                <!-- Refined Pill Badge without 'SaaS' -->
                 <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs sm:text-sm font-bold mb-8 shadow-sm backdrop-blur-md">
-                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
                     <span>⚡ Enterprise Biometrics • Multi-Branch Operations • Mobile Apps</span>
                 </div>
 
                 <!-- Hero Main Headline -->
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.1]">
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.15]">
                     Scale Your Gym Empire with <br class="hidden sm:inline" />
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200">Ultimate Precision</span>
                 </h1>
@@ -44,8 +44,8 @@
     <section class="py-20 bg-slate-900/50 border-y border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16">
-                <h2 class="text-xs uppercase font-bold tracking-widest text-amber-400">Engineered for Fitness Businesses</h2>
-                <p class="mt-2 text-3xl font-bold text-white">Everything needed to run 1 or 50 gym branches</p>
+                <h2 class="text-xs uppercase font-extrabold tracking-widest text-amber-400">Engineered for Fitness Businesses</h2>
+                <p class="mt-2 text-3xl font-extrabold text-white">Everything needed to run 1 or 50 gym branches</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -54,8 +54,8 @@
                     <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-6">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Multi-Tenant & Multi-Branch</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Each gym business has strictly isolated data, role-based staff permissions, and unified management across multiple facility branches.</p>
+                    <h3 class="text-xl font-bold text-white mb-2">Multi-Branch Management</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Each gym business has isolated data, role-based staff permissions, and unified control across multiple facility branches.</p>
                 </div>
 
                 <!-- Card 2 -->
@@ -64,7 +64,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11a7.96 7.96 0 001.328 4.417m11.536-1.077a9 9 0 01-1.364 3.79"/></svg>
                     </div>
                     <h3 class="text-xl font-bold text-white mb-2">Hikvision & IoT Biometrics</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Automatic turnstile gate unlocking, facial recognition scanners, RFID check-in, and instant anti-passback access denial for expired members.</p>
+                    <p class="text-slate-400 text-sm leading-relaxed">Automatic turnstile gate unlocking, facial recognition scanners (DS-K1T343EWX), RFID check-in, and instant anti-passback access denial for expired members.</p>
                 </div>
 
                 <!-- Card 3 -->
@@ -72,8 +72,8 @@
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Flutter Mobile API (/api/v1)</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">High-performance Laravel REST API with Sanctum tokens. Members can generate dynamic turnstile QR codes, check routines, and log workouts.</p>
+                    <h3 class="text-xl font-bold text-white mb-2">Mobile App Ecosystem</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">High-performance REST API with Sanctum tokens. Members can generate dynamic turnstile QR codes, view workout routines, and track diet plans.</p>
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Top WhatsApp Link -->
             <div class="text-center mb-10">
-                <a href="https://wa.me/919876543210?text=Hi,%20I%20am%20interested%20in%20custom%20pricing%20for%20Gym%20Console" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-500/10 border border-emerald-500/20 px-5 py-2 rounded-full">
+                <a href="https://wa.me/919876543210?text=Hi,%20I%20am%20interested%20in%20custom%20pricing%20for%20Gym%20Console" target="_blank" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-500/10 border border-emerald-500/20 px-5 py-2.5 rounded-full shadow-sm hover:bg-emerald-500/20">
                     <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/>
                     </svg>
@@ -125,7 +125,7 @@
                             <li class="flex items-start gap-2.5"><span class="text-slate-800 font-bold">✓</span><span>Export your data anytime</span></li>
                             <li class="flex items-start gap-2.5 text-slate-400 line-through"><span>—</span><span>WhatsApp reminders</span></li>
                             <li class="flex items-start gap-2.5 text-slate-400 line-through"><span>—</span><span>Face, thumb & RFID attendance</span></li>
-                            <li class="flex items-start gap-2.5 text-slate-400 line-through"><span>—</span><span>Fitplex member app</span></li>
+                            <li class="flex items-start gap-2.5 text-slate-400 line-through"><span>—</span><span>Member mobile app</span></li>
                             <li class="flex items-start gap-2.5 text-slate-400 line-through"><span>—</span><span>GST reports</span></li>
                         </ul>
                     </div>
@@ -171,7 +171,7 @@
                             <li class="flex items-start gap-2.5"><span class="font-bold">✓</span><span>Automated WhatsApp reminders with UPI link</span></li>
                             <li class="flex items-start gap-2.5"><span class="font-bold">✓</span><span>GST billing, invoices & GST reports</span></li>
                             <li class="space-y-1.5">
-                                <div class="flex items-start gap-2.5"><span class="font-bold">✓</span><span>Fitplex Member App (Android & iOS)</span></div>
+                                <div class="flex items-start gap-2.5"><span class="font-bold">✓</span><span>Fitness Member App (Android & iOS)</span></div>
                                 <div class="flex items-center gap-2 pl-6">
                                     <span class="px-2.5 py-1 rounded-md bg-white/20 text-[10px] font-bold flex items-center gap-1 border border-white/30">
                                         <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.67.41.67 1.39 0 1.8l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg> Google Play
@@ -249,4 +249,3 @@
         </div>
     </section>
 </x-guest-layout>
-

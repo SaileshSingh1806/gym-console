@@ -1,4 +1,4 @@
-<x-guest-layout title="Contact Support - Gym Console SaaS">
+<x-guest-layout title="Contact Support - Gym Console">
     <div class="py-20 max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800">
             <h1 class="text-2xl font-bold text-white mb-2">Get in Touch</h1>
