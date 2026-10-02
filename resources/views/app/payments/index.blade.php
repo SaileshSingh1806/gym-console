@@ -1224,6 +1224,8 @@
                         $tagline = !empty($invSettings['tagline']) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
                         $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
                         $sealUrl = $invSettings['seal_url'] ?? null;
+                        $signatureUrl = $invSettings['signature_url'] ?? null;
+                        $signatoryName = $invSettings['signatory_name'] ?? null;
                     @endphp
 
                     <div class="relative w-full bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-200/90 text-xs flex flex-col justify-between overflow-hidden">
@@ -1422,16 +1424,25 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-col items-end shrink-0">
-                                    @if(!empty($sealUrl))
-                                        <img src="{{ $sealUrl }}" alt="Seal" class="h-12 w-12 object-contain">
-                                    @else
-                                        <div class="w-12 h-12 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-0.5 text-slate-700 select-none">
-                                            <span class="text-[6.5px] font-black uppercase leading-none">{{ substr($gymName, 0, 12) }}</span>
-                                            <span class="text-[6px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                                        </div>
-                                    @endif
+                                <div class="flex flex-col items-end shrink-0 min-w-[120px]">
+                                    <div class="relative flex items-center justify-center min-h-[50px] min-w-[100px]">
+                                        @if(!empty($sealUrl))
+                                            <img src="{{ $sealUrl }}" alt="Seal" class="h-12 w-12 object-contain">
+                                        @else
+                                            <div class="w-12 h-12 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-0.5 text-slate-700 select-none">
+                                                <span class="text-[6.5px] font-black uppercase leading-none">{{ substr($gymName, 0, 12) }}</span>
+                                                <span class="text-[6px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                            </div>
+                                        @endif
+
+                                        @if(!empty($signatureUrl))
+                                            <img src="{{ $signatureUrl }}" alt="Signature" class="absolute -bottom-1 -right-2 h-10 w-auto max-w-[90px] object-contain rotate-[-4deg] drop-shadow-sm pointer-events-none">
+                                        @endif
+                                    </div>
                                     <span class="text-[9px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider">{{ $sealText }}</span>
+                                    @if(!empty($signatoryName))
+                                        <span class="text-[8.5px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
+                                    @endif
                                 </div>
                             </div>
 

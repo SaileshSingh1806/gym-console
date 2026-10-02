@@ -5330,15 +5330,25 @@ class AppController extends Controller
                 'footer_web' => trim($request->input('invoice_footer_web', '')),
                 'tagline' => trim($request->input('invoice_tagline', 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU')),
                 'seal_text' => trim($request->input('invoice_seal_text', 'Authorized Signature / Seal')),
-                'seal_url' => $existingInvoice['seal_url'] ?? null,
+                'signatory_name' => trim($request->input('invoice_signatory_name', '')),
+                'seal_url' => $request->boolean('remove_invoice_seal') ? null : ($existingInvoice['seal_url'] ?? null),
+                'signature_url' => $request->boolean('remove_invoice_signature') ? null : ($existingInvoice['signature_url'] ?? null),
             ];
 
-            // Handle optional Custom Seal image upload
+            // 1. Handle Custom Seal / Stamp Image Upload
             if ($request->hasFile('invoice_seal')) {
                 $file = $request->file('invoice_seal');
                 $filename = 'seal_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
                 $path = $file->storeAs('seals', $filename, 'public');
                 $invoiceData['seal_url'] = asset('storage/'.$path);
+            }
+
+            // 2. Handle Custom Authorized Signature Image Upload
+            if ($request->hasFile('invoice_signature')) {
+                $file = $request->file('invoice_signature');
+                $filename = 'sig_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs('signatures', $filename, 'public');
+                $invoiceData['signature_url'] = asset('storage/'.$path);
             }
 
             $settings['invoice'] = $invoiceData;

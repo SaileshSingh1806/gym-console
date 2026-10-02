@@ -100,6 +100,8 @@
         $tagline = !empty($invSettings['tagline']) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
         $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
         $sealUrl = $invSettings['seal_url'] ?? null;
+        $signatureUrl = $invSettings['signature_url'] ?? null;
+        $signatoryName = $invSettings['signatory_name'] ?? null;
     @endphp
 
     <!-- Top Action Toolbar -->
@@ -361,19 +363,30 @@
                     </div>
                 </div>
 
-                <!-- Right: Official Seal / Signature -->
-                <div class="flex flex-col items-center sm:items-end shrink-0">
-                    @if(!empty($sealUrl))
-                        <img src="{{ $sealUrl }}" alt="Seal" class="h-16 w-16 object-contain">
-                    @else
-                        <!-- Vector Circular Seal Matching Image -->
-                        <div class="w-16 h-16 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                            <span class="text-[7.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
-                            <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                            <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
-                        </div>
+                <!-- Right: Official Seal / Stamp & Signature -->
+                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[130px]">
+                    <div class="relative flex items-center justify-center min-h-[64px] min-w-[120px]">
+                        @if(!empty($sealUrl))
+                            <!-- Uploaded Stamp / Seal Image -->
+                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 object-contain">
+                        @else
+                            <!-- Vector Circular Seal Matching Image -->
+                            <div class="w-16 h-16 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                <span class="text-[7.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
+                            </div>
+                        @endif
+
+                        @if(!empty($signatureUrl))
+                            <!-- Uploaded Signature Image (Overlapping on top of stamp) -->
+                            <img src="{{ $signatureUrl }}" alt="Signature" class="absolute -bottom-1 -right-2 h-12 w-auto max-w-[110px] object-contain rotate-[-4deg] drop-shadow-sm pointer-events-none">
+                        @endif
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                    @if(!empty($signatoryName))
+                        <span class="text-[9px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
                     @endif
-                    <span class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wider">{{ $sealText }}</span>
                 </div>
 
             </div>

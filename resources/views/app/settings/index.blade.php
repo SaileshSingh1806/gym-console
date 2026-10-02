@@ -1323,26 +1323,77 @@
                         </div>
                     </div>
 
-                    <!-- Seal Image Upload & Bottom Tagline -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Upload Official Stamp / Signature Image (Optional)</label>
-                            <div class="flex items-center gap-3">
-                                @if(!empty($inv['seal_url']))
-                                    <img src="{{ $inv['seal_url'] }}" alt="Current Seal" class="h-14 w-14 object-contain rounded-xl bg-slate-100 dark:bg-slate-950 p-1 border border-slate-200 dark:border-slate-800">
-                                @endif
-                                <input type="file" name="invoice_seal" accept="image/png,image/jpeg,image/webp"
-                                       class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/40 dark:file:text-indigo-300">
+                    <!-- Dual Uploads: 1. Official Seal / Stamp and 2. Authorized Signature -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                        
+                        <!-- Upload 1: Official Stamp / Seal -->
+                        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="p-1.5 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-bold text-xs">🔴 1</span>
+                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Official Gym Stamp / Seal (मुहर)</h4>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-1">Leave empty to use the auto-generated high-resolution circular official gym seal.</p>
+
+                            @if(!empty($inv['seal_url']))
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                    <img src="{{ $inv['seal_url'] }}" alt="Current Stamp" class="h-16 w-16 object-contain rounded-lg p-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">✓ Active Stamp Active</span>
+                                        <label class="flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-semibold cursor-pointer">
+                                            <input type="checkbox" name="remove_invoice_seal" value="1" class="rounded text-rose-600">
+                                            <span>Remove &amp; Use Default Vector Seal</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                                    {{ !empty($inv['seal_url']) ? 'Replace Stamp Image' : 'Upload Stamp / Seal Image (PNG / JPEG)' }}
+                                </label>
+                                <input type="file" name="invoice_seal" accept="image/png,image/jpeg,image/webp"
+                                       class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/40 dark:file:text-indigo-300">
+                                <p class="text-[10px] text-slate-400 mt-1">Recommended: Transparent PNG image of your circular/square official gym rubber stamp.</p>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Bottom Tagline Motto Banner</label>
-                            <input type="text" name="invoice_tagline" value="{{ old('invoice_tagline', $inv['tagline'] ?? 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU') }}"
-                                   placeholder="e.g. BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU"
-                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black tracking-wider uppercase focus:border-indigo-500 focus:outline-none">
+                        <!-- Upload 2: Authorized Signature -->
+                        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold text-xs">✍️ 2</span>
+                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Authorized Signatory Signature (साइन)</h4>
+                            </div>
+
+                            @if(!empty($inv['signature_url']))
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                    <img src="{{ $inv['signature_url'] }}" alt="Current Signature" class="h-16 w-32 object-contain rounded-lg p-1 bg-white border border-slate-200 dark:border-slate-800">
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">✓ Signature Uploaded</span>
+                                        <label class="flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-semibold cursor-pointer">
+                                            <input type="checkbox" name="remove_invoice_signature" value="1" class="rounded text-rose-600">
+                                            <span>Remove Signature</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+                                    {{ !empty($inv['signature_url']) ? 'Replace Signature Image' : 'Upload Signature Image (PNG / JPEG)' }}
+                                </label>
+                                <input type="file" name="invoice_signature" accept="image/png,image/jpeg,image/webp"
+                                       class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 dark:file:bg-emerald-900/40 dark:file:text-emerald-300">
+                                <p class="text-[10px] text-slate-400 mt-1">Recommended: Clean PNG signature with transparent or white background.</p>
+                            </div>
                         </div>
+
+                    </div>
+
+                    <!-- Bottom Tagline Banner -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Bottom Tagline Motto Banner</label>
+                        <input type="text" name="invoice_tagline" value="{{ old('invoice_tagline', $inv['tagline'] ?? 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU') }}"
+                               placeholder="e.g. BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU"
+                               class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black tracking-wider uppercase focus:border-indigo-500 focus:outline-none">
                     </div>
                 </div>
 
