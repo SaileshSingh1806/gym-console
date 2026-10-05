@@ -9,6 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             -webkit-print-color-adjust: exact !important;
@@ -16,14 +19,16 @@
         }
         @page {
             size: A4 portrait;
-            margin: 8mm 10mm;
+            margin: 5mm 6mm;
         }
         @media print {
-            body {
-                background: white !important;
-                color: #0f172a !important;
-                padding: 0 !important;
+            html, body {
+                height: auto !important;
+                min-height: 0 !important;
                 margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                overflow: hidden !important;
             }
             .no-print {
                 display: none !important;
@@ -34,15 +39,17 @@
                 max-width: 100% !important;
                 width: 100% !important;
                 margin: 0 !important;
-                padding: 16px 20px !important;
-                border-radius: 12px !important;
+                padding: 14px 18px !important;
+                border-radius: 8px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
             }
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen py-6 px-3 sm:px-6 flex flex-col items-center antialiased">
+<body class="bg-slate-100 text-slate-900 min-h-screen py-4 sm:py-6 px-3 sm:px-6 flex flex-col items-center antialiased">
 
     @php
         $tenantSettings = $tenant->settings ?? [];
@@ -409,6 +416,16 @@
         </div>
 
     </div>
+
+    <script>
+        if (window.location.search.includes('print=1') || window.location.search.includes('autoprint=1')) {
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    window.print();
+                }, 300);
+            });
+        }
+    </script>
 
 </body>
 </html>
