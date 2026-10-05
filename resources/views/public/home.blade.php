@@ -241,91 +241,11 @@
         </div>
     </section>
 
-    {{-- ══════════════════════════════════════════════════════════════
-         FEATURE HIGHLIGHT: BIOMETRICS
-    ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-24 lg:py-32">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-                {{-- Left: Content --}}
-                <div>
-                    <span class="inline-block text-xs font-extrabold tracking-widest text-amber-400 uppercase mb-4">Biometric Integration</span>
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight mb-6">
-                        Real Biometric Access Control with <span class="text-gradient">Hikvision Hardware</span>
-                    </h2>
-                    <p class="text-slate-400 text-lg leading-relaxed mb-8">
-                        Gym Console is one of the few platforms with real, production-tested integration for Hikvision DS-K1T343EWX facial recognition terminals. No more manual check-ins.
-                    </p>
-
-                    <div class="space-y-4">
-                        @foreach([
-                            ['title'=>'Facial Recognition',       'desc'=>'DS-K1T343EWX terminal identifies members in under 0.3 seconds.'],
-                            ['title'=>'RFID & QR Code Entry',     'desc'=>'Tap your card or scan a QR code from the mobile app.'],
-                            ['title'=>'Turnstile Gate Automation','desc'=>'Gate unlocks for valid members, stays locked for expired ones.'],
-                            ['title'=>'Anti-Passback Enforcement','desc'=>'Prevents credential sharing and unauthorized access attempts.'],
-                        ] as $item)
-                            <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                                <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white text-sm mb-0.5">{{ $item['title'] }}</div>
-                                    <div class="text-slate-400 text-xs leading-relaxed">{{ $item['desc'] }}</div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                {{-- Right: Illustrated terminal card --}}
-                <div class="relative flex items-center justify-center">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-500/5 rounded-3xl blur-2xl"></div>
-                    <div class="relative w-full max-w-sm mx-auto">
-                        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/40">
-                            {{-- Device mockup --}}
-                            <div class="flex items-center gap-3 mb-6">
-                                <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11"/></svg>
-                                </div>
-                                <div>
-                                    <div class="text-white font-bold text-sm">DS-K1T343EWX</div>
-                                    <div class="text-emerald-400 text-xs font-semibold flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                                        Online · Active
-                                    </div>
-                                </div>
-                            </div>
-                            {{-- Simulated face scan --}}
-                            <div class="relative bg-slate-950 rounded-2xl aspect-square flex items-center justify-center border border-slate-800 mb-6 overflow-hidden">
-                                <div class="absolute inset-4 rounded-xl border-2 border-amber-500/40 border-dashed animate-pulse"></div>
-                                <svg class="w-20 h-20 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                {{-- Scan line --}}
-                                <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-80" style="animation: scan 2s linear infinite">
-                                </div>
-                            </div>
-                            <style>
-                                @keyframes scan {
-                                    0%   { transform: translateY(0); opacity: 1; }
-                                    100% { transform: translateY(220px); opacity: 0; }
-                                }
-                            </style>
-                            {{-- Status --}}
-                            <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                                <span class="text-emerald-400 text-sm font-bold">✓ Access Granted</span>
-                                <span class="text-emerald-400/60 text-xs">Gate Unlocked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     {{-- ══════════════════════════════════════════════════════════════
          TESTIMONIALS
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-24 lg:py-32 bg-slate-900/40 border-y border-slate-800/60">
+    <section class="py-24 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16">
                 <span class="inline-block text-xs font-extrabold tracking-widest text-amber-400 uppercase mb-3">Trusted by Gyms</span>
@@ -389,7 +309,7 @@
     {{-- ══════════════════════════════════════════════════════════════
          PRICING SECTION
     ══════════════════════════════════════════════════════════════ --}}
-    <section id="plans" class="py-24 lg:py-32">
+    <section id="plans" class="py-24 lg:py-32 bg-slate-900/40 border-y border-slate-800/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <div class="text-center max-w-3xl mx-auto mb-6">
@@ -503,7 +423,7 @@
     {{-- ══════════════════════════════════════════════════════════════
          FAQ SECTION
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-24 lg:py-32 bg-slate-900/40 border-y border-slate-800/60">
+    <section class="py-24 lg:py-32">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-14">
                 <span class="inline-block text-xs font-extrabold tracking-widest text-amber-400 uppercase mb-3">FAQ</span>
