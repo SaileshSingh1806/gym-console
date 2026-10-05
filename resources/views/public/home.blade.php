@@ -106,8 +106,8 @@
                     [
                         'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
                         'color' => 'amber',
-                        'title' => 'Biometric Access Control',
-                        'desc'  => 'Hikvision DS-K1T343EWX facial recognition, thumb scanners, RFID cards, and QR codes. Auto-deny expired members at turnstile gates.',
+                        'title' => 'Biometric & Access Control',
+                        'desc'  => 'Compatible with eSSL, Hikvision, Realtime, ZKTeco & Mantra. Facial recognition, thumb fingerprint scanners, RFID cards & turnstile gate gating.',
                         'tag'   => 'Hardware Integration',
                     ],
                     [
@@ -435,7 +435,7 @@
             <div class="space-y-4" x-data="{ open: null }">
                 @foreach([
                     ['q'=>'Is the free plan really free forever?',                 'a'=>'Yes. The Free Forever plan has no time limit. You can manage up to 75 members at no cost, with no credit card required. Upgrade only when your gym grows beyond 75 members.'],
-                    ['q'=>'Which biometric devices are supported?',                 'a'=>'We officially support Hikvision DS-K1T343EWX (facial recognition + RFID), Hikvision MinMoe series terminals, and standard RFID readers. QR code generation via the mobile app also works with most readers.'],
+                    ['q'=>'Which biometric devices are supported?',                 'a'=>'We support all major biometric machines including eSSL (SilkBio, Identix, MB20, X990 series), Hikvision (Face MinMoe DS-K1T series), ZKTeco, Realtime, Mantra thumb readers, RFID smartcards, turnstile gates, and QR code check-in via the mobile app.'],
                     ['q'=>'Can I import my existing member data?',                  'a'=>'Yes. We support CSV import for member data. Our team also provides free assisted migration from common gym software during your onboarding.'],
                     ['q'=>'How does multi-branch management work?',                 'a'=>'Each branch operates as a separate location under your account. Members can be enrolled at specific branches, and you get consolidated reports across all locations from a single Super Admin dashboard.'],
                     ['q'=>'Is the mobile app available for download right now?',   'a'=>'The Fitness Member App (Android & iOS) is included in Starter and Pro plans. Your branded version for the Pro plan takes 3–5 working days after account setup.'],

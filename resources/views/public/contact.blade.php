@@ -15,7 +15,7 @@
             </h1>
 
             <p class="mt-5 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                Have questions about pricing, multi-branch scaling, or Hikvision facial biometric terminal integration? Our specialist team is ready to assist you.
+                Have questions about pricing, multi-branch scaling, or biometric machine integration (eSSL, Hikvision, Realtime, ZKTeco)? Our specialist team is ready to assist you.
             </p>
         </div>
     </section>
@@ -73,8 +73,8 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-blue-400 uppercase tracking-wider">Biometric Setup Guidance</div>
-                            <div class="text-base font-bold text-white mt-0.5">Hikvision DS-K1T343EWX</div>
-                            <div class="text-xs text-slate-400 mt-1">Free network and turnstile wiring consultation</div>
+                            <div class="text-base font-bold text-white mt-0.5">eSSL, Hikvision &amp; ZKTeco</div>
+                            <div class="text-xs text-slate-400 mt-1">Free network, desktop middleware, and turnstile wiring consultation</div>
                         </div>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
                                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Inquiry Type</label>
                                         <select class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-amber-500 focus:outline-none text-sm transition-colors">
                                             <option value="pricing">Custom Pricing & Plans</option>
-                                            <option value="biometrics">Hikvision Hardware Integration</option>
+                                            <option value="biometrics">Biometric &amp; Turnstile Integration (eSSL, Hikvision, ZKTeco, Realtime)</option>
                                             <option value="demo">Live Platform Demo</option>
                                             <option value="migration">Data Migration from Old Software</option>
                                             <option value="other">General Support</option>

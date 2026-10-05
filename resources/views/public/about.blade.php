@@ -58,7 +58,7 @@
                             For years, gym owners have struggled with fragmented tools: paper registers that lose track of expired memberships, WhatsApp messages sent manually one-by-one, hardware turnstiles that require offline USB drives, and Excel spreadsheets that cause revenue leaks.
                         </p>
                         <p>
-                            We built <strong class="text-white">Gym Console</strong> to eliminate this chaos. By combining real-time Hikvision IoT biometric hardware drivers, automated UPI billing with WhatsApp triggers, multi-branch data synchronization, and native mobile apps into one unified platform, we help gym owners regain total control over their business.
+                            We built <strong class="text-white">Gym Console</strong> to eliminate this chaos. By combining universal biometric hardware integration (eSSL, Hikvision, Realtime, ZKTeco), automated UPI billing with WhatsApp triggers, multi-branch data synchronization, and native mobile apps into one unified platform, we help gym owners regain total control over their business.
                         </p>
                     </div>
 
@@ -87,7 +87,7 @@
                                 <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
                                 <div>
                                     <div class="text-sm font-bold text-white">Hardware-First Reliability</div>
-                                    <div class="text-xs text-slate-400 mt-0.5">Biometric turnstiles and gates must work seamlessly in sub-second response times.</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Biometric turnstiles, eSSL fingerprint readers, and Hikvision facial gates work seamlessly with sub-second response.</div>
                                 </div>
                             </div>
                             <div class="flex items-start gap-4 p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80">
@@ -125,8 +125,8 @@
                     <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-6">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Hikvision ISAPI & Webhook Engine</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Direct hardware communication layer with Hikvision facial terminals (DS-K1T343EWX), turnstiles, and RFID readers with zero latency.</p>
+                    <h3 class="text-xl font-bold text-white mb-2">Universal Biometric & IoT Sync Engine</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Direct hardware integration layer for eSSL desktop middleware, Hikvision facial terminals, Realtime, ZKTeco, and turnstile gates with zero latency.</p>
                 </div>
 
                 <div class="p-8 rounded-3xl bg-slate-950 border border-slate-800 hover:border-orange-500/40 transition-colors">

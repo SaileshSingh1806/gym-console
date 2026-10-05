@@ -1,10 +1,10 @@
-<x-app-layout header="Hikvision Biometric Devices & IoT Access Control">
+<x-app-layout header="Biometric Devices & IoT Access Control">
     <div class="space-y-8" x-data="{ showModal: false }">
         <!-- Devices Grid Header -->
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
             <div>
-                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Connected Biometric Terminals & Turnstiles</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Hardware abstraction layer for facial recognition, RFID readers, and barrier gates</p>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Connected Biometric Terminals, Turnstiles &amp; Readers</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Universal integration for eSSL, Hikvision, Realtime, ZKTeco, Mantra, facial terminals &amp; turnstile gates</p>
             </div>
             <button @click="showModal = true" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-sm transition">
                 + Register Hardware Device
@@ -23,7 +23,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ $device->name }}</h4>
-                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ $device->model ?? 'Hikvision Terminal' }} • {{ $device->branch->name ?? 'Main Branch' }}</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ $device->model ?? 'Biometric Terminal' }} • {{ $device->branch->name ?? 'Main Branch' }}</span>
                                 </div>
                             </div>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $device->status === 'ONLINE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' }}">
@@ -58,7 +58,7 @@
                 </div>
             @empty
                 <div class="col-span-2 p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 text-xs shadow-sm">
-                    No biometric devices configured. Click "+ Register Hardware Device" to connect Hikvision facial terminals.
+                    No biometric devices configured. Click "+ Register Hardware Device" to connect eSSL, Hikvision, Realtime, or ZKTeco machines.
                 </div>
             @endforelse
         </div>
@@ -137,9 +137,10 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Device Type</label>
                         <select name="type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
-                            <option value="hikvision_facial">Hikvision Facial Terminal (ISAPI)</option>
-                            <option value="hikvision_facial">Hikvision Face Terminal (DS-K1T343 Series / ISAPI)</option>
-                            <option value="hikvision_turnstile">Hikvision Turnstile Barrier Gate</option>
+                            <option value="essl_desktop">eSSL Biometric (Desktop Middleware / LAN)</option>
+                            <option value="hikvision_facial">Hikvision Facial Terminal (ISAPI / MinMoe)</option>
+                            <option value="zkteco_biometric">ZKTeco / Realtime Biometric Push (ADMS)</option>
+                            <option value="hikvision_turnstile">Turnstile Barrier Gate</option>
                             <option value="rfid_reader">RFID Card Scanner</option>
                             <option value="qr_scanner">Dynamic QR Code Scanner</option>
                         </select>

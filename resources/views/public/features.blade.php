@@ -31,16 +31,16 @@
                         ⚡ Hardware Integration
                     </span>
                     <h2 class="text-3xl sm:text-4xl font-black text-white leading-tight">
-                        Biometric Turnstile & <br><span class="text-gradient">Face Recognition Access</span>
+                        Biometric Turnstile, Fingerprint &amp; <br><span class="text-gradient">Face Recognition Access</span>
                     </h2>
                     <p class="mt-4 text-slate-300 text-base leading-relaxed">
-                        Eliminate proxy attendance, member card sharing, and unauthorized entry. Gym Console features a direct hardware abstraction driver designed for Hikvision terminals and turnstiles.
+                        Eliminate proxy attendance, member card sharing, and unauthorized entry. Gym Console features a universal biometric integration engine compatible with eSSL, Hikvision, Realtime, ZKTeco, Mantra, facial scanners, thumb readers, and turnstile gates.
                     </p>
 
                     <div class="mt-6 space-y-3">
                         <div class="flex items-start gap-3">
                             <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">✓</span>
-                            <p class="text-sm text-slate-300"><strong class="text-white">Hikvision DS-K1T343EWX Driver:</strong> Sub-second face recognition & RFID check-in with live event webhooks.</p>
+                            <p class="text-sm text-slate-300"><strong class="text-white">Multi-Brand Hardware Support:</strong> Sub-second face recognition (Hikvision/eSSL), fingerprint thumb scans (eSSL/ZKTeco/Realtime/Mantra), RFID cards, and QR scan check-in.</p>
                         </div>
                         <div class="flex items-start gap-3">
                             <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">✓</span>
@@ -59,7 +59,7 @@
                             <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
                             <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Live Biometric Feed</span>
                         </div>
-                        <span class="text-xs font-semibold text-slate-500">Hikvision ISAPI v2.0</span>
+                        <span class="text-xs font-semibold text-slate-500">Universal Biometric Engine</span>
                     </div>
 
                     <div class="space-y-3 text-xs font-mono">
