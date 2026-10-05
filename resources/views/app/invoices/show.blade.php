@@ -108,7 +108,7 @@
     @endphp
 
     <!-- Top Action Toolbar -->
-    <div class="no-print w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div class="no-print w-full max-w-4xl flex flex-wrap items-center justify-between gap-3 mb-5">
         <a href="{{ route('app.members.show', $member->id) }}" 
            class="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -133,60 +133,60 @@
     </div>
 
     <!-- ==================== INVOICE A4 SHEET ==================== -->
-    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-200/90 flex flex-col justify-between overflow-hidden">
+    <div class="invoice-card relative w-full max-w-4xl bg-white text-slate-900 rounded-3xl shadow-2xl p-8 sm:p-12 border border-slate-200/90 flex flex-col justify-between overflow-hidden">
         
         <!-- Top Accent Color Stripe -->
-        <div class="h-2 w-full bg-slate-950 absolute top-0 left-0 right-0"></div>
+        <div class="h-2.5 w-full bg-slate-950 absolute top-0 left-0 right-0"></div>
 
         <!-- Faded Center Background Watermark -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
             @if(!empty($logoUrl))
-                <img src="{{ $logoUrl }}" alt="" class="w-96 h-96 object-contain grayscale">
+                <img src="{{ $logoUrl }}" alt="" class="w-[450px] h-[450px] object-contain grayscale">
             @else
-                <div class="text-center font-black tracking-widest text-7xl uppercase text-slate-900 rotate-[-15deg]">
+                <div class="text-center font-black tracking-widest text-8xl uppercase text-slate-900 rotate-[-15deg]">
                     {{ $gymName }}
                 </div>
             @endif
         </div>
 
-        <div class="relative z-10 space-y-6">
+        <div class="relative z-10 space-y-7">
             
             <!-- ══════════════════════════════════════════
                  1. HEADER: BRAND & INVOICE META
             ══════════════════════════════════════════ -->
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 pt-2">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-6 pt-2 border-b border-slate-200/80 pb-6">
                 <!-- Gym Brand (Left) -->
-                <div class="flex items-start gap-3.5 max-w-md">
+                <div class="flex items-start gap-4 max-w-lg">
                     @if(!empty($logoUrl))
-                        <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-16 w-16 object-contain rounded-xl bg-slate-950 p-1.5 border border-slate-800 shadow-md shrink-0">
+                        <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-2xl bg-slate-950 p-2 border border-slate-800 shadow-md shrink-0">
                     @else
-                        <div class="w-14 h-14 rounded-xl bg-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tighter shadow-md shrink-0 p-1 text-center">
-                            <span class="text-amber-400 text-sm">🏋️</span>
-                            <span class="text-[9px] uppercase leading-none font-bold">GYM</span>
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-950 text-white flex flex-col items-center justify-center font-black text-sm tracking-tight shadow-md shrink-0 p-1 text-center">
+                            <span class="text-amber-400 text-xl">🏋️</span>
+                            <span class="text-[10px] uppercase leading-none font-bold mt-0.5">GYM</span>
                         </div>
                     @endif
                     <div>
-                        <h1 class="text-xl sm:text-2xl font-black text-slate-950 tracking-tight uppercase leading-none">{{ $gymName }}</h1>
-                        <p class="text-[11px] sm:text-xs text-slate-600 mt-1.5 leading-snug font-medium">{{ $gymAddress }}</p>
-                        <div class="flex flex-wrap items-center gap-x-2 text-[11px] text-slate-600 mt-1 font-medium">
-                            @if(!empty($gymPhone))<span>Phone: {{ $gymPhone }}</span>@endif
+                        <h1 class="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h1>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-snug font-medium">{{ $gymAddress }}</p>
+                        <div class="flex flex-wrap items-center gap-x-2 text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+                            @if(!empty($gymPhone))<span>Phone: <strong class="text-slate-800">{{ $gymPhone }}</strong></span>@endif
                             @if(!empty($gymPhone) && !empty($gymEmail))<span>|</span>@endif
-                            @if(!empty($gymEmail))<span>Email: {{ $gymEmail }}</span>@endif
+                            @if(!empty($gymEmail))<span>Email: <strong class="text-slate-800">{{ $gymEmail }}</strong></span>@endif
                         </div>
                         @if(!empty($gymWeb))
-                            <p class="text-[11px] text-slate-600 font-medium">Website: {{ $gymWeb }}</p>
+                            <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">Website: <strong class="text-slate-800">{{ $gymWeb }}</strong></p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Invoice Meta (Right) -->
                 <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
-                    <span class="inline-block px-4 py-1 rounded-lg bg-slate-950 text-white font-black text-xs tracking-wider uppercase shadow-sm">
+                    <span class="inline-block px-5 py-1.5 rounded-xl bg-slate-950 text-white font-black text-sm tracking-wider uppercase shadow-sm">
                         {{ $invoiceTitle }}
                     </span>
-                    <p class="text-xs font-bold text-slate-900 mt-2 font-mono">Invoice No: <span class="text-slate-900 font-extrabold">{{ $invoiceNo }}</span></p>
-                    <p class="text-xs text-slate-600 mt-0.5 font-medium">Date: {{ $invoiceDate }}</p>
-                    <span class="inline-block mt-2 px-3.5 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-wider">
+                    <p class="text-sm font-bold text-slate-900 mt-2.5 font-mono">Invoice No: <span class="text-slate-950 font-black text-base">{{ $invoiceNo }}</span></p>
+                    <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">Date: <strong class="text-slate-800">{{ $invoiceDate }}</strong></p>
+                    <span class="inline-block mt-2.5 px-4 py-1 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-black uppercase tracking-wider">
                         {{ $statusText }}
                     </span>
                 </div>
@@ -195,52 +195,52 @@
             <!-- ══════════════════════════════════════════
                  2. TWO CARDS: MEMBER & PLAN DETAILS
             ══════════════════════════════════════════ -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
                 
                 <!-- Card 1: MEMBER DETAILS (BILLED TO) -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
-                    <div class="flex items-center gap-1.5 text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-2">
-                        <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/95 border border-slate-200/90 space-y-3 shadow-sm">
+                    <div class="flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
                         <span>MEMBER DETAILS (BILLED TO)</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Full Name:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Full Name:</span>
                         <span class="font-bold text-slate-950 col-span-2">{{ $member->full_name }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Member ID:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Member ID:</span>
                         <span class="font-bold font-mono text-slate-950 col-span-2">{{ $member->member_code }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Phone No:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Phone No:</span>
                         <span class="font-bold text-slate-950 col-span-2">{{ $member->phone }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Payment Mode:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Payment Mode:</span>
                         <span class="font-bold uppercase text-slate-950 col-span-2">{{ $payment->payment_method ?? 'UPI' }}</span>
                     </div>
                 </div>
 
                 <!-- Card 2: MEMBERSHIP & PLAN DETAILS -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
-                    <div class="flex items-center gap-1.5 text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-2">
-                        <span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+                <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/95 border border-slate-200/90 space-y-3 shadow-sm">
+                    <div class="flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
                         <span>MEMBERSHIP &amp; PLAN DETAILS</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Package Duration:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Package Duration:</span>
                         <span class="font-bold text-slate-950 col-span-2">{{ $durationFormatted }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Start Date:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Start Date:</span>
                         <span class="font-bold text-slate-950 col-span-2">{{ $startDate }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Expiry Date:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Expiry Date:</span>
                         <span class="font-bold text-slate-950 col-span-2">{{ $endDate }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium col-span-1">Status:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold col-span-1">Status:</span>
                         <span class="font-bold text-emerald-600 col-span-2">{{ $membershipStatus }}</span>
                     </div>
                 </div>
@@ -251,28 +251,28 @@
                  3. SERVICE / ITEM DESCRIPTION TABLE
             ══════════════════════════════════════════ -->
             <div>
-                <table class="w-full text-left text-xs border-collapse">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-950 text-white uppercase text-[11px] font-extrabold tracking-wider">
-                            <th class="py-3 px-3 rounded-l-xl w-10 text-center">#</th>
-                            <th class="py-3 px-3">SERVICE / ITEM DESCRIPTION</th>
-                            <th class="py-3 px-3 text-center">DURATION</th>
-                            <th class="py-3 px-3 text-right">RATE (INR)</th>
-                            <th class="py-3 px-3 text-right rounded-r-xl">AMOUNT (INR)</th>
+                        <tr class="bg-slate-950 text-white uppercase text-xs font-black tracking-wider">
+                            <th class="py-3.5 px-4 rounded-l-xl w-12 text-center">#</th>
+                            <th class="py-3.5 px-4">SERVICE / ITEM DESCRIPTION</th>
+                            <th class="py-3.5 px-4 text-center">DURATION</th>
+                            <th class="py-3.5 px-4 text-right">RATE (INR)</th>
+                            <th class="py-3.5 px-4 text-right rounded-r-xl">AMOUNT (INR)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <tr class="text-slate-900 font-semibold">
-                            <td class="py-4 px-3 text-center text-slate-500 font-bold">1</td>
-                            <td class="py-4 px-3">
-                                <span class="font-black text-slate-950 text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
+                            <td class="py-5 px-4 text-center text-slate-500 font-bold">1</td>
+                            <td class="py-5 px-4">
+                                <span class="font-black text-slate-950 text-base block">{{ $plan->name ?? 'Gym Membership' }}</span>
                                 @if($payment->notes)
-                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $payment->notes }}</span>
+                                    <span class="text-xs text-slate-500 block mt-1">{{ $payment->notes }}</span>
                                 @endif
                             </td>
-                            <td class="py-4 px-3 text-center font-bold text-slate-800">{{ $durationFormatted }}</td>
-                            <td class="py-4 px-3 text-right font-bold text-slate-800">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
-                            <td class="py-4 px-3 text-right font-black text-slate-950 text-sm">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
+                            <td class="py-5 px-4 text-center font-bold text-slate-800 text-sm">{{ $durationFormatted }}</td>
+                            <td class="py-5 px-4 text-right font-bold text-slate-800 text-sm">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
+                            <td class="py-5 px-4 text-right font-black text-slate-950 text-base">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -281,56 +281,56 @@
             <!-- ══════════════════════════════════════════
                  4. TWO BOXES: PAYMENT DETAIL & SUMMARY
             ══════════════════════════════════════════ -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
                 
                 <!-- Left: PAYMENT DETAIL & VERIFICATION -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
-                    <div class="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-2">
+                <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/95 border border-slate-200/90 space-y-3 shadow-sm">
+                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
                         PAYMENT DETAIL &amp; VERIFICATION
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium">Payment Mode:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold">Payment Mode:</span>
                         <span class="font-bold text-slate-950 col-span-2 uppercase">{{ $payment->payment_method ?? 'UPI' }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium">Payment Status:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold">Payment Status:</span>
                         <span class="font-bold text-emerald-600 col-span-2">Completed</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <span class="text-slate-500 font-medium">Payment Verification:</span>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs sm:text-sm">
+                        <span class="text-slate-500 font-semibold">Verification:</span>
                         <span class="font-bold text-emerald-600 col-span-2">{{ $verificationText }}</span>
                     </div>
                     @if($payment->transaction_reference)
-                        <div class="grid grid-cols-3 gap-1 pt-1 border-t border-slate-200/60">
-                            <span class="text-slate-500 font-medium">Txn Ref ID:</span>
-                            <span class="font-mono text-slate-700 col-span-2 font-semibold">{{ $payment->transaction_reference }}</span>
+                        <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200/80 text-xs sm:text-sm">
+                            <span class="text-slate-500 font-semibold">Txn Ref ID:</span>
+                            <span class="font-mono text-slate-900 col-span-2 font-bold">{{ $payment->transaction_reference }}</span>
                         </div>
                     @endif
                 </div>
 
                 <!-- Right: TOTALS SUMMARY -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-600 font-medium">Subtotal</span>
+                <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/95 border border-slate-200/90 space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <span class="text-slate-600 font-semibold">Subtotal</span>
                         <span class="font-bold text-slate-900">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-600 font-medium">Taxes &amp; Gym Surcharge</span>
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <span class="text-slate-600 font-semibold">Taxes &amp; Surcharge</span>
                         <span class="font-bold text-slate-700">{{ $currency }}0 (Inclusive)</span>
                     </div>
-                    <div class="flex items-center justify-between pt-1 border-t border-slate-200/80">
-                        <span class="text-sm font-black text-slate-950">Total Amount</span>
-                        <span class="text-sm font-black text-slate-950">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <span class="text-base font-black text-slate-950">Total Amount</span>
+                        <span class="text-base font-black text-slate-950">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-black text-slate-700">Amount Received</span>
-                        <span class="text-sm font-black text-emerald-600">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
+                        <span class="text-sm font-bold text-slate-700">Amount Received</span>
+                        <span class="text-base font-black text-emerald-600">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
                     </div>
                     
-                    <!-- Balance Due Pill Box -->
-                    <div class="mt-2 p-2.5 rounded-xl bg-emerald-100/60 border border-emerald-300 flex items-center justify-between text-emerald-900">
+                    <!-- Balance Due Box -->
+                    <div class="mt-2 p-3 rounded-xl bg-emerald-100/70 border border-emerald-300 flex items-center justify-between text-emerald-950">
                         <span class="font-black text-xs uppercase tracking-wider">Balance Due</span>
-                        <span class="font-black text-sm">{{ $currency }}0</span>
+                        <span class="font-black text-base">{{ $currency }}0</span>
                     </div>
                 </div>
 
@@ -339,11 +339,11 @@
             <!-- ══════════════════════════════════════════
                  5. TERMS & CONDITIONS
             ══════════════════════════════════════════ -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 text-[10.5px] sm:text-[11px] text-slate-600 leading-relaxed space-y-1.5">
-                <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-1.5">
+            <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 border border-slate-200/90 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+                <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
                     TERMS &amp; CONDITIONS
                 </div>
-                <ol class="list-decimal pl-4 space-y-1">
+                <ol class="list-decimal pl-4 space-y-1.5">
                     @foreach($termsList as $term)
                         <li>{{ $term }}</li>
                     @endforeach
@@ -353,43 +353,43 @@
             <!-- ══════════════════════════════════════════
                  6. FOOTER: HELPLINE & SIGNATURE SEAL
             ══════════════════════════════════════════ -->
-            <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-5">
                 
                 <!-- Left: Thank you & Contacts -->
-                <div class="text-left space-y-1">
-                    <p class="font-extrabold text-xs text-slate-950">{{ $thankYouText }}</p>
-                    <div class="text-[10.5px] text-slate-600 flex flex-wrap items-center gap-x-2 font-medium">
-                        @if(!empty($helpline))<span>Official Helpline: {{ $helpline }}</span>@endif
+                <div class="text-left space-y-1.5">
+                    <p class="font-black text-sm text-slate-950">{{ $thankYouText }}</p>
+                    <div class="text-xs sm:text-sm text-slate-600 flex flex-wrap items-center gap-x-2 font-medium">
+                        @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800">{{ $helpline }}</strong></span>@endif
                         @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
-                        @if(!empty($footerEmail))<span>Email: {{ $footerEmail }}</span>@endif
-                        @if(!empty($footerWeb))<span>|</span><span>Web: {{ $footerWeb }}</span>@endif
+                        @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800">{{ $footerEmail }}</strong></span>@endif
+                        @if(!empty($footerWeb))<span>|</span><span>Web: <strong class="text-slate-800">{{ $footerWeb }}</strong></span>@endif
                     </div>
                 </div>
 
                 <!-- Right: Official Seal / Stamp & Signature -->
-                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[140px]">
-                    <div class="relative flex items-center justify-center w-28 h-24 select-none">
+                <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[160px]">
+                    <div class="relative flex items-center justify-center w-32 h-28 select-none">
                         @if(!empty($sealUrl))
                             <!-- Uploaded Stamp / Seal Image -->
-                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-20 w-20 object-contain drop-shadow-sm">
+                            <img src="{{ $sealUrl }}" alt="Stamp" class="h-24 w-24 object-contain drop-shadow-sm">
                         @else
                             <!-- Vector Circular Seal Matching Image -->
-                            <div class="w-18 h-18 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                                <span class="text-[7.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
-                                <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                                <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
+                            <div class="w-20 h-20 rounded-full border-2 border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1.5 text-slate-700 select-none">
+                                <span class="text-[9px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                <span class="text-[8px] text-slate-500 font-bold leading-none mt-1">★ SEAL ★</span>
+                                <span class="text-[7.5px] font-semibold text-slate-400 leading-none mt-1">VERIFIED</span>
                             </div>
                         @endif
 
                         @if(!empty($signatureUrl))
                             <!-- Uploaded Signature Image (Directly Overlapping on TOP of stamp with blend-mode multiply) -->
                             <img src="{{ $signatureUrl }}" alt="Signature" 
-                                 class="absolute inset-0 m-auto h-16 w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-sm pointer-events-none z-10">
+                                 class="absolute inset-0 m-auto h-20 w-36 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-sm pointer-events-none z-10">
                         @endif
                     </div>
-                    <span class="text-[10px] font-bold text-slate-500 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                    <span class="text-xs font-bold text-slate-600 mt-1 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                     @if(!empty($signatoryName))
-                        <span class="text-[9px] font-semibold text-slate-400 -mt-0.5">{{ $signatoryName }}</span>
+                        <span class="text-[11px] font-bold text-slate-500">{{ $signatoryName }}</span>
                     @endif
                 </div>
 
@@ -399,8 +399,8 @@
                  7. VERY BOTTOM TAGLINE BANNER
             ══════════════════════════════════════════ -->
             @if(!empty($tagline))
-                <div class="pt-3 border-t border-slate-200 text-center">
-                    <p class="text-xs font-black tracking-widest text-slate-900 uppercase">{{ $tagline }}</p>
+                <div class="pt-4 border-t border-slate-200 text-center">
+                    <p class="text-xs sm:text-sm font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
                 </div>
             @endif
 
