@@ -1127,50 +1127,53 @@
         <!-- ========================================================================= -->
         <!-- MODAL: TAX INVOICE & FEE RECEIPT PREVIEW                                   -->
         <!-- ========================================================================= -->
+        <!-- ========================================================================= -->
+        <!-- MODAL: TAX INVOICE & RECEIPT PREVIEW -->
+        <!-- ========================================================================= -->
         <div x-show="showInvoiceModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-6" 
              style="display: none;"
              x-cloak>
             
-            <div @click.away="showInvoiceModal = false" class="w-full max-w-4xl max-h-[94vh] overflow-y-auto space-y-4">
+            <div @click.away="showInvoiceModal = false" class="w-full max-w-3xl max-h-[94vh] overflow-y-auto space-y-2.5 sm:space-y-3">
                 
                 <!-- Modal Header Toolbar -->
-                <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
-                    <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-sm">
-                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <div class="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl">
+                    <div class="flex items-center gap-2 text-slate-900 dark:text-white font-black text-xs sm:text-sm">
+                        <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         <span>Tax Invoice &amp; Receipt Preview</span>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
                         <a :href="'/app/invoices/' + selectedInvoice.id" 
                            target="_blank" 
                            title="Open in new tab"
-                           class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                           class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </a>
                         <button type="button" 
                                 @click="showInvoiceModal = false" 
                                 title="Close"
-                                class="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
                 </div>
 
                 <!-- Action Bar Toolbar -->
-                <div class="flex flex-wrap items-center justify-center gap-3">
+                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
                     <button type="button" 
                             @click="showInvoiceModal = false" 
-                            class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
+                            class="px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs shadow-sm transition-all cursor-pointer">
                         Close
                     </button>
 
                     <a :href="'/app/invoices/' + selectedInvoice.id + '?print=1'" 
                        target="_blank" 
-                       class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                       class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Print Invoice</span>
                     </a>
 
@@ -1181,16 +1184,16 @@
                           data-confirm-type="info">
                         @csrf
                         <button type="submit" 
-                                class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-blue-600/30 transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span>Send Email</span>
                         </button>
                     </form>
 
                     <a :href="'/app/invoices/' + selectedInvoice.id" 
                        target="_blank" 
-                       class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                       class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         <span>Download PDF</span>
                     </a>
                 </div>
@@ -1236,7 +1239,7 @@
                     $signatoryName = $invSettings['signatory_name'] ?? null;
                 @endphp
 
-                <div class="relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-6 sm:p-7 border border-slate-200/90 overflow-hidden mx-auto">
+                <div class="relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200/90 overflow-hidden mx-auto">
                     
                     <!-- Top Accent Bar -->
                     <div class="h-2 w-full bg-slate-950 absolute top-0 left-0 right-0"></div>
@@ -1244,98 +1247,98 @@
                     <!-- Faded Center Background Logo Watermark -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
                         @if(!empty($logoUrl))
-                            <img src="{{ $logoUrl }}" alt="" class="w-[340px] h-[340px] object-contain grayscale">
+                            <img src="{{ $logoUrl }}" alt="" class="w-[280px] sm:w-[340px] h-[280px] sm:h-[340px] object-contain grayscale">
                         @else
-                            <div class="text-center font-black tracking-widest text-7xl uppercase text-slate-900 rotate-[-15deg]">
+                            <div class="text-center font-black tracking-widest text-5xl sm:text-7xl uppercase text-slate-900 rotate-[-15deg]">
                                 {{ $gymName }}
                             </div>
                         @endif
                     </div>
 
-                    <div class="relative z-10 space-y-3.5 sm:space-y-4">
+                    <div class="relative z-10 space-y-3 sm:space-y-3.5">
                         
                         <!-- 1. Header Section: Brand & Invoice Meta -->
-                        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 pt-1 border-b border-slate-200/80 pb-3 sm:pb-3.5">
-                            <div class="flex items-start gap-3.5 max-w-lg">
+                        <div class="flex flex-col sm:flex-row items-start justify-between gap-3 pt-1 border-b border-slate-200/80 pb-3">
+                            <div class="flex items-start gap-3 max-w-lg">
                                 @if(!empty($logoUrl))
-                                    <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-14 w-14 sm:h-16 sm:w-16 object-contain rounded-xl bg-slate-950 p-1.5 border border-slate-800 shadow-sm shrink-0">
+                                    <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 object-contain rounded-xl bg-slate-950 p-1 sm:p-1.5 border border-slate-800 shadow-sm shrink-0">
                                 @else
-                                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-sm shrink-0 p-1 text-center">
-                                        <span class="text-amber-400 text-xl">🏋️</span>
-                                        <span class="text-[9px] uppercase leading-none font-bold mt-0.5">GYM</span>
+                                    <div class="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl bg-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-sm shrink-0 p-1 text-center">
+                                        <span class="text-amber-400 text-lg sm:text-xl">🏋️</span>
+                                        <span class="text-[8px] sm:text-[9px] uppercase leading-none font-bold mt-0.5">GYM</span>
                                     </div>
                                 @endif
                                 <div>
-                                    <h2 class="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h2>
-                                    <p class="text-xs sm:text-sm text-slate-600 mt-1 leading-snug font-medium">{{ $gymAddress }}</p>
-                                    <div class="flex flex-wrap items-center gap-x-2.5 text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+                                    <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h2>
+                                    <p class="text-[11px] sm:text-xs lg:text-sm text-slate-600 mt-0.5 sm:mt-1 leading-snug font-medium">{{ $gymAddress }}</p>
+                                    <div class="flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 gap-y-0.5 text-[11px] sm:text-xs text-slate-600 mt-0.5 sm:mt-1 font-medium">
                                         <span>Phone: <strong class="text-slate-800">{{ $gymPhone }}</strong></span>
                                         <span>|</span>
                                         <span>Email: <strong class="text-slate-800">{{ $gymEmail }}</strong></span>
                                     </div>
                                     @if(!empty($gymWeb))
-                                        <p class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">Website: <strong class="text-slate-800">{{ $gymWeb }}</strong></p>
+                                        <p class="text-[11px] sm:text-xs text-slate-600 font-medium mt-0.5">Website: <strong class="text-slate-800">{{ $gymWeb }}</strong></p>
                                     @endif
                                 </div>
                             </div>
 
                             <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto">
-                                <span class="inline-block px-4 py-1 rounded-lg bg-slate-950 text-white font-black text-xs sm:text-sm tracking-wider uppercase shadow-sm">
+                                <span class="inline-block px-3 sm:px-4 py-0.5 sm:py-1 rounded-lg bg-slate-950 text-white font-black text-[11px] sm:text-xs tracking-wider uppercase shadow-sm">
                                     {{ $invoiceTitle }}
                                 </span>
-                                <p class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5">Invoice No: <span class="text-slate-950 font-black text-sm sm:text-base" x-text="selectedInvoice.receipt_no"></span></p>
+                                <p class="text-xs sm:text-sm font-bold text-slate-900 mt-1 sm:mt-1.5">Invoice No: <span class="text-slate-950 font-black text-sm sm:text-base" x-text="selectedInvoice.receipt_no"></span></p>
                                 <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium" x-text="'Date: ' + selectedInvoice.date"></p>
-                                <span class="inline-block mt-1 px-3.5 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-black uppercase tracking-wider">
+                                <span class="inline-block mt-1 px-3 sm:px-3.5 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-black uppercase tracking-wider">
                                     {{ $statusText }}
                                 </span>
                             </div>
                         </div>
 
                         <!-- 2. Two Cards Row: Member & Plan Details -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                             <!-- Card 1: Member Details -->
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1.5 shadow-xs">
-                                <div class="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider mb-1">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1 sm:space-y-1.5 shadow-xs">
+                                <div class="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shrink-0"></span>
                                     <span>MEMBER DETAILS (BILLED TO)</span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Full Name:</span>
-                                    <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_name"></span>
+                                    <span class="font-bold text-slate-950 col-span-2 truncate" x-text="selectedInvoice.member_name"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Member ID:</span>
                                     <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_code"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Phone No:</span>
                                     <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_phone"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Payment Mode:</span>
                                     <span class="font-bold uppercase text-slate-950 col-span-2" x-text="selectedInvoice.method || 'UPI'"></span>
                                 </div>
                             </div>
 
                             <!-- Card 2: Membership & Plan Details -->
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1.5 shadow-xs">
-                                <div class="flex items-center gap-1.5 text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider mb-1">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1 sm:space-y-1.5 shadow-xs">
+                                <div class="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shrink-0"></span>
                                     <span>MEMBERSHIP &amp; PLAN DETAILS</span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Package Duration:</span>
                                     <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.plan_duration || '12 Months'"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Start Date:</span>
                                     <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.date"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Plan Name:</span>
                                     <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.plan_name"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold col-span-1">Status:</span>
                                     <span class="font-bold text-emerald-600 col-span-2">Active Membership</span>
                                 </div>
@@ -1343,81 +1346,81 @@
                         </div>
 
                         <!-- 3. Table -->
-                        <div>
-                            <table class="w-full text-left border-collapse">
+                        <div class="w-full overflow-x-auto">
+                            <table class="w-full min-w-[340px] text-left border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-950 text-white uppercase text-xs sm:text-sm font-black tracking-wider">
-                                        <th class="py-2.5 sm:py-3 px-3.5 rounded-l-lg w-10 text-center">#</th>
-                                        <th class="py-2.5 sm:py-3 px-3.5">SERVICE / ITEM DESCRIPTION</th>
-                                        <th class="py-2.5 sm:py-3 px-3.5 text-center">DURATION</th>
-                                        <th class="py-2.5 sm:py-3 px-3.5 text-right">RATE (INR)</th>
-                                        <th class="py-2.5 sm:py-3 px-3.5 text-right rounded-r-lg">AMOUNT (INR)</th>
+                                    <tr class="bg-slate-950 text-white uppercase text-[11px] sm:text-xs font-black tracking-wider">
+                                        <th class="py-2 sm:py-2.5 px-2.5 sm:px-3.5 rounded-l-lg w-8 sm:w-10 text-center">#</th>
+                                        <th class="py-2 sm:py-2.5 px-2.5 sm:px-3.5">SERVICE / ITEM DESCRIPTION</th>
+                                        <th class="py-2 sm:py-2.5 px-2.5 sm:px-3.5 text-center">DURATION</th>
+                                        <th class="py-2 sm:py-2.5 px-2.5 sm:px-3.5 text-right">RATE (INR)</th>
+                                        <th class="py-2 sm:py-2.5 px-2.5 sm:px-3.5 text-right rounded-r-lg">AMOUNT (INR)</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
                                     <tr class="text-slate-900 font-semibold">
-                                        <td class="py-3 px-3.5 text-center text-slate-500 font-bold text-xs sm:text-sm">1</td>
-                                        <td class="py-3 px-3.5">
-                                            <span class="font-black text-slate-950 text-sm sm:text-base block" x-text="selectedInvoice.plan_name"></span>
+                                        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-center text-slate-500 font-bold text-xs">1</td>
+                                        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5">
+                                            <span class="font-black text-slate-950 text-xs sm:text-sm block" x-text="selectedInvoice.plan_name"></span>
                                         </td>
-                                        <td class="py-3 px-3.5 text-center font-bold text-slate-800 text-xs sm:text-sm" x-text="selectedInvoice.plan_duration || '12 Months'"></td>
-                                        <td class="py-3 px-3.5 text-right font-bold text-slate-800 text-xs sm:text-sm">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
-                                        <td class="py-3 px-3.5 text-right font-black text-slate-950 text-sm sm:text-base">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
+                                        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-center font-bold text-slate-800 text-xs" x-text="selectedInvoice.plan_duration || '12 Months'"></td>
+                                        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right font-bold text-slate-800 text-xs">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
+                                        <td class="py-2.5 sm:py-3 px-2.5 sm:px-3.5 text-right font-black text-slate-950 text-xs sm:text-sm">{{ $currency }}<span x-text="selectedInvoice.amount"></span></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <!-- 4. Bottom Split: Verification & Summary -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5">
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1.5 shadow-xs">
-                                <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider mb-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1 sm:space-y-1.5 shadow-xs">
+                                <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
                                     PAYMENT DETAIL &amp; VERIFICATION
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold">Payment Mode:</span>
                                     <span class="font-bold text-slate-950 col-span-2 uppercase" x-text="selectedInvoice.method || 'UPI'"></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold">Payment Status:</span>
                                     <span class="font-bold text-emerald-600 col-span-2">Completed</span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
+                                <div class="grid grid-cols-3 gap-1 text-xs">
                                     <span class="text-slate-500 font-semibold">Verification:</span>
                                     <span class="font-bold text-emerald-600 col-span-2">{{ $verificationText }}</span>
                                 </div>
                             </div>
 
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1.5 shadow-xs">
-                                <div class="flex items-center justify-between text-xs sm:text-sm">
+                            <div class="p-3 sm:p-3.5 rounded-xl bg-slate-50/95 border border-slate-200/90 space-y-1 sm:space-y-1.5 shadow-xs">
+                                <div class="flex items-center justify-between text-xs">
                                     <span class="text-slate-600 font-semibold">Subtotal</span>
                                     <span class="font-bold text-slate-900">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
                                 </div>
-                                <div class="flex items-center justify-between text-xs sm:text-sm">
+                                <div class="flex items-center justify-between text-xs">
                                     <span class="text-slate-600 font-semibold">Taxes &amp; Surcharge</span>
                                     <span class="font-bold text-slate-700">{{ $currency }}0 (Inclusive)</span>
                                 </div>
-                                <div class="flex items-center justify-between pt-1.5 border-t border-slate-200">
-                                    <span class="text-sm sm:text-base font-black text-slate-950">Total Amount</span>
-                                    <span class="text-sm sm:text-base font-black text-slate-950">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
+                                <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                                    <span class="text-xs sm:text-sm font-black text-slate-950">Total Amount</span>
+                                    <span class="text-xs sm:text-sm font-black text-slate-950">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
                                 </div>
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs sm:text-sm font-bold text-slate-700">Amount Received</span>
-                                    <span class="text-sm sm:text-base font-black text-emerald-600">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
+                                    <span class="text-[11px] sm:text-xs font-bold text-slate-700">Amount Received</span>
+                                    <span class="text-xs sm:text-sm font-black text-emerald-600">{{ $currency }}<span x-text="selectedInvoice.amount"></span></span>
                                 </div>
-                                <div class="mt-1.5 p-2 rounded-lg bg-emerald-100/70 border border-emerald-300 flex items-center justify-between text-emerald-950">
-                                    <span class="font-black text-xs uppercase tracking-wider">Balance Due</span>
+                                <div class="mt-1 p-1.5 sm:p-2 rounded-lg bg-emerald-100/70 border border-emerald-300 flex items-center justify-between text-emerald-950">
+                                    <span class="font-black text-[10px] sm:text-xs uppercase tracking-wider">Balance Due</span>
                                     <span class="font-black text-xs sm:text-sm">{{ $currency }}0</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- 5. Terms & Conditions -->
-                        <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50/80 border border-slate-200/90 text-xs sm:text-sm text-slate-700 leading-snug space-y-1">
-                            <div class="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider mb-1">
+                        <div class="p-3 sm:p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/90 text-xs text-slate-700 leading-snug space-y-1">
+                            <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-0.5">
                                 TERMS &amp; CONDITIONS
                             </div>
-                            <ol class="list-decimal pl-4 space-y-1 text-xs sm:text-sm text-slate-600 leading-normal">
+                            <ol class="list-decimal pl-4 space-y-0.5 sm:space-y-1 text-[11px] sm:text-xs text-slate-600 leading-normal">
                                 @foreach($termsList as $term)
                                     <li>{{ $term }}</li>
                                 @endforeach
@@ -1425,10 +1428,10 @@
                         </div>
 
                         <!-- 6. Footer Helpline & Seal -->
-                        <div class="pt-3.5 sm:pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                            <div class="text-left space-y-1">
-                                <p class="font-black text-sm sm:text-base text-slate-950">{{ $thankYouText }}</p>
-                                <div class="text-xs sm:text-sm text-slate-600 flex flex-wrap items-center gap-x-2.5 font-medium mt-1">
+                        <div class="pt-3 sm:pt-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
+                            <div class="text-left space-y-0.5 sm:space-y-1">
+                                <p class="font-black text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
+                                <div class="text-[11px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 font-medium mt-0.5">
                                     @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800">{{ $helpline }}</strong></span>@endif
                                     @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
                                     @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800">{{ $footerEmail }}</strong></span>@endif
@@ -1436,34 +1439,34 @@
                                 </div>
                             </div>
 
-                            <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[140px]">
-                                <div class="relative flex items-center justify-center w-24 h-20 select-none">
+                            <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[120px] sm:min-w-[140px]">
+                                <div class="relative flex items-center justify-center w-20 h-16 sm:w-24 sm:h-20 select-none">
                                     @if(!empty($sealUrl))
-                                        <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 object-contain drop-shadow-xs">
+                                        <img src="{{ $sealUrl }}" alt="Stamp" class="h-14 w-14 sm:h-16 sm:w-16 object-contain drop-shadow-xs">
                                     @else
-                                        <div class="w-16 h-16 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                                            <span class="text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
-                                            <span class="text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                                            <span class="text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
+                                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                            <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                            <span class="text-[6.5px] sm:text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                            <span class="text-[6px] sm:text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
                                         </div>
                                     @endif
 
                                     @if(!empty($signatureUrl))
                                         <img src="{{ $signatureUrl }}" alt="Signature" 
-                                             class="absolute inset-0 m-auto h-14 w-28 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
+                                             class="absolute inset-0 m-auto h-12 w-24 sm:h-14 sm:w-28 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
                                     @endif
                                 </div>
-                                <span class="text-xs font-bold text-slate-600 mt-1 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                                <span class="text-[10px] sm:text-xs font-bold text-slate-600 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                                 @if(!empty($signatoryName))
-                                    <span class="text-xs font-bold text-slate-500">{{ $signatoryName }}</span>
+                                    <span class="text-[10px] sm:text-xs font-bold text-slate-500">{{ $signatoryName }}</span>
                                 @endif
                             </div>
                         </div>
 
                         <!-- 7. Tagline -->
                         @if(!empty($tagline))
-                            <div class="pt-2.5 sm:pt-3 border-t border-slate-200 text-center">
-                                <p class="text-xs sm:text-sm font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
+                            <div class="pt-2 sm:pt-2.5 border-t border-slate-200 text-center">
+                                <p class="text-[10px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
                             </div>
                         @endif
 
