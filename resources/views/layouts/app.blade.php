@@ -104,7 +104,7 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex h-screen overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100" x-data="{ sidebarOpen: false }">
+<body class="flex h-screen h-[100dvh] overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black/80 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
@@ -706,7 +706,7 @@
         @endif
 
         <!-- Page View Body -->
-        <main class="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
+        <main class="flex-1 p-3 sm:p-4 md:p-6 pb-24 sm:pb-8 overflow-y-auto overscroll-y-contain">
             {{ $slot }}
         </main>
     </div>
