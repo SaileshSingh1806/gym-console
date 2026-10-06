@@ -45,7 +45,7 @@
                 </div>
             </a>
 
-            <!-- Card 2: Total Platform Users (User requested: Platform user kitne hai total) -->
+            <!-- Card 2: Total Platform Users -->
             <a href="{{ route('admin.users') }}" class="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 shadow-sm hover:shadow-md dark:hover:shadow-blue-500/5 transition-all group block">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
                     <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Platform Users</span>
@@ -57,9 +57,9 @@
                     {{ $totalUsers }}
                 </div>
                 <div class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-1 sm:gap-1.5 font-medium">
-                    <span class="text-blue-600 dark:text-blue-300 font-semibold">{{ $totalStaffCount }} Staff</span>
+                    <span class="text-blue-600 dark:text-blue-300 font-semibold">{{ $gymOwnersCount }} Owners</span>
                     <span class="text-slate-400 hidden sm:inline">&bull;</span>
-                    <span class="text-slate-600 dark:text-slate-400">{{ $superAdminCount }} Admin</span>
+                    <span class="text-slate-600 dark:text-slate-400">{{ $totalStaffCount }} Staff</span>
                 </div>
             </a>
 

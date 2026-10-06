@@ -94,8 +94,9 @@ class AdminController extends Controller implements HasMiddleware
 
         $metrics = $this->reportService->getSuperAdminMetrics();
         $totalMembers = Member::count();
-        $totalUsers = User::count();
-        $totalStaffCount = User::whereNotNull('tenant_id')->where('role', '!=', 'super_admin')->count();
+        $totalUsers = User::where('role', '!=', 'super_admin')->count();
+        $gymOwnersCount = User::where('role', 'gym_owner')->count();
+        $totalStaffCount = User::where('role', '!=', 'super_admin')->where('role', '!=', 'gym_owner')->count();
         $superAdminCount = User::where('role', 'super_admin')->count();
         $totalTicketsCount = SupportTicket::withoutGlobalScopes()->count();
         $urgentTicketsCount = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->where('priority', 'urgent')->count();
@@ -116,6 +117,7 @@ class AdminController extends Controller implements HasMiddleware
             'metrics',
             'totalMembers',
             'totalUsers',
+            'gymOwnersCount',
             'totalStaffCount',
             'superAdminCount',
             'totalTicketsCount',
