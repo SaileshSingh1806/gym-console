@@ -1283,7 +1283,7 @@
                                 <span class="inline-block px-4 py-1 rounded-lg bg-slate-950 text-white font-black text-xs sm:text-sm tracking-wider uppercase shadow-sm">
                                     {{ $invoiceTitle }}
                                 </span>
-                                <p class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5 font-mono">Invoice No: <span class="text-slate-950 font-black text-sm sm:text-base" x-text="selectedInvoice.receipt_no"></span></p>
+                                <p class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5">Invoice No: <span class="text-slate-950 font-black text-sm sm:text-base" x-text="selectedInvoice.receipt_no"></span></p>
                                 <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium" x-text="'Date: ' + selectedInvoice.date"></p>
                                 <span class="inline-block mt-1 px-3.5 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-xs font-black uppercase tracking-wider">
                                     {{ $statusText }}
@@ -1305,7 +1305,7 @@
                                 </div>
                                 <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
                                     <span class="text-slate-500 font-semibold col-span-1">Member ID:</span>
-                                    <span class="font-bold font-mono text-slate-950 col-span-2" x-text="selectedInvoice.member_code"></span>
+                                    <span class="font-bold text-slate-950 col-span-2" x-text="selectedInvoice.member_code"></span>
                                 </div>
                                 <div class="grid grid-cols-3 gap-1 text-xs sm:text-sm">
                                     <span class="text-slate-500 font-semibold col-span-1">Phone No:</span>
