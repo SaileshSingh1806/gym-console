@@ -366,6 +366,7 @@
                     @endforeach
                 </ol>
             </div>
+            </div>
 
             <!-- FOOTER: Sections 6 & 7 (Anchored at bottom with spacing after Terms) -->
             <div class="mt-auto pt-4 sm:pt-6 space-y-2.5 sm:space-y-3">
