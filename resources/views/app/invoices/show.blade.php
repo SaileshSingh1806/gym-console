@@ -19,7 +19,7 @@
         }
         @page {
             size: A4 portrait;
-            margin: 4mm 6mm;
+            margin: 5mm 6mm;
         }
         @media print {
             html, body {
@@ -28,7 +28,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                overflow: visible !important;
             }
             .no-print {
                 display: none !important;
@@ -38,16 +37,14 @@
                 border: 1px solid #cbd5e1 !important;
                 max-width: 100% !important;
                 width: 100% !important;
-                height: 278mm !important;
-                min-height: 278mm !important;
-                max-height: 280mm !important;
+                height: 100% !important;
+                min-height: 275mm !important;
                 margin: 0 !important;
                 padding: 12px 18px !important;
                 border-radius: 8px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-between !important;
-                overflow: visible !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 page-break-after: avoid !important;
@@ -379,38 +376,38 @@
                     <!-- Left: Thank you & Contacts -->
                     <div class="text-left space-y-0.5 sm:space-y-1">
                         <p class="font-black text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
-                        <div class="text-[11px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 font-medium mt-0.5">
+                        <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-medium mt-0.5">
                             @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800">{{ $helpline }}</strong></span>@endif
-                            @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
+                            @if(!empty($helpline) && !empty($footerEmail))<span>•</span>@endif
                             @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800">{{ $footerEmail }}</strong></span>@endif
-                            @if(!empty($footerWeb))<span>|</span><span>Web: <strong class="text-slate-800">{{ $footerWeb }}</strong></span>@endif
+                            @if(!empty($footerWeb))<span>•</span><span>Web: <strong class="text-slate-800">{{ $footerWeb }}</strong></span>@endif
                         </div>
                     </div>
 
                     <!-- Right: Official Seal / Stamp & Signature -->
-                    <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[130px] sm:min-w-[150px]">
-                        <div class="relative flex items-center justify-center w-24 h-20 sm:w-28 sm:h-24 select-none">
+                    <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[120px] sm:min-w-[140px]">
+                        <div class="relative flex items-center justify-center w-22 h-18 sm:w-26 sm:h-22 select-none">
                             @if(!empty($sealUrl))
                                 <!-- Uploaded Stamp / Seal Image -->
-                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 sm:h-20 sm:w-20 object-contain drop-shadow-xs">
+                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-14 w-14 sm:h-18 sm:w-18 object-contain drop-shadow-xs">
                             @else
                                 <!-- Vector Circular Seal Matching Image -->
-                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                                    <span class="text-[7.5px] sm:text-[8.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
-                                    <span class="text-[7px] sm:text-[7.5px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                                    <span class="text-[6.5px] sm:text-[7px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
+                                <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                    <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                    <span class="text-[6.5px] sm:text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                    <span class="text-[6px] sm:text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
                                 </div>
                             @endif
 
                             @if(!empty($signatureUrl))
                                 <!-- Uploaded Signature Image (Directly Overlapping on TOP of stamp with blend-mode multiply) -->
                                 <img src="{{ $signatureUrl }}" alt="Signature" 
-                                     class="absolute inset-0 m-auto h-14 w-28 sm:h-18 sm:w-36 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
+                                     class="absolute inset-0 m-auto h-12 w-26 sm:h-16 sm:w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
                             @endif
                         </div>
                         <span class="text-[10px] sm:text-xs font-bold text-slate-700 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                         @if(!empty($signatoryName))
-                            <span class="text-[10px] sm:text-xs font-semibold text-slate-500">{{ $signatoryName }}</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500">{{ $signatoryName }}</span>
                         @endif
                     </div>
 
