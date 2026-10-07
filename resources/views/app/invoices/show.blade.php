@@ -149,7 +149,7 @@
     </div>
 
     <!-- ==================== INVOICE A4 SHEET ==================== -->
-    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col mx-auto">
+    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col justify-between min-h-0 sm:min-h-[1040px] print:min-h-[275mm] mx-auto">
         
         <!-- Faded Center Background Watermark -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
@@ -162,7 +162,7 @@
             @endif
         </div>
 
-        <div class="relative z-10 flex flex-col w-full">
+        <div class="relative z-10 flex flex-col justify-between h-full min-h-[inherit] flex-1">
             
             <!-- MAIN TOP CONTENT: Sections 1 through 5 -->
             <div class="space-y-3 sm:space-y-3.5">
@@ -371,8 +371,8 @@
             </div>
             </div>
 
-            <!-- FOOTER: Sections 6 & 7 (Natural spacing after Terms, ensuring tagline is always visible) -->
-            <div class="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3">
+            <!-- FOOTER: Sections 6 & 7 (Anchored at the bottom with generous whitespace after Terms) -->
+            <div class="mt-auto pt-6 sm:pt-8 space-y-2.5 sm:space-y-3">
                 <!-- ══════════════════════════════════════════
                  6. FOOTER: HELPLINE & SIGNATURE SEAL
                 ══════════════════════════════════════════ -->
@@ -381,7 +381,7 @@
                     <!-- Left: Thank you & Contacts -->
                     <div class="text-left space-y-0.5 sm:space-y-1">
                         <p class="font-bold text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
-                        <div class="text-[10px] sm:text-xs text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-normal mt-0.5">
+                        <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-normal mt-0.5">
                             @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800 font-medium">{{ $helpline }}</strong></span>@endif
                             @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
                             @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800 font-medium">{{ $footerEmail }}</strong></span>@endif
