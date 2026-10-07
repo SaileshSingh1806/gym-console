@@ -9,6 +9,7 @@
                 'max_members' => (int) ($p->max_members ?? 1),
                 'price' => (float) $p->price,
                 'duration_type' => $p->duration_type,
+                
                 'duration_value' => $p->duration_value,
                 'tax_rate' => (float) $p->tax_rate,
             ]];
@@ -2297,26 +2298,23 @@
                         $signatoryName = $invSettings['signatory_name'] ?? null;
                     @endphp
 
-                    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-3.5 sm:p-5 lg:p-6 border border-slate-200/90 overflow-hidden flex flex-col justify-between min-h-0 sm:min-h-[1020px] print:min-h-[280mm] mx-auto">
+                    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col mx-auto">
                         
-                        <!-- Top Accent Bar -->
-                        <div class="h-2 w-full bg-slate-950 absolute top-0 left-0 right-0"></div>
-
                         <!-- Faded Center Background Logo Watermark -->
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
                             @if(!empty($logoUrl))
-                                <img src="{{ $logoUrl }}" alt="" class="w-[280px] sm:w-[340px] h-[280px] sm:h-[340px] object-contain grayscale">
+                                <img src="{{ $logoUrl }}" alt="" class="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] object-contain grayscale">
                             @else
-                                <div class="text-center font-black tracking-widest text-5xl sm:text-7xl uppercase text-slate-900 rotate-[-15deg]">
+                                <div class="text-center font-black tracking-widest text-6xl sm:text-8xl uppercase text-slate-900 rotate-[-12deg]">
                                     {{ $gymName }}
                                 </div>
                             @endif
                         </div>
 
-                        <div class="relative z-10 flex flex-col justify-between h-full min-h-[inherit] flex-1">
+                        <div class="relative z-10 flex flex-col w-full">
                             
                             <!-- MAIN TOP CONTENT: Sections 1 through 5 -->
-                            <div class="space-y-2.5 sm:space-y-3">
+                            <div class="space-y-3 sm:space-y-3.5">
                                 <!-- 1. Header Section: Brand & Invoice Meta -->
                                 <div class="flex flex-col sm:flex-row items-start justify-between gap-3 pt-1 border-b border-slate-200 pb-3">
                                     <div class="flex items-start gap-3.5 max-w-lg">
@@ -2492,10 +2490,10 @@
                                 </div>
                             </div>
 
-                            <!-- FOOTER: Sections 6 & 7 (Anchored at bottom with spacing after Terms) -->
-                            <div class="mt-auto pt-3 sm:pt-4 space-y-2">
+                            <!-- FOOTER: Sections 6 & 7 (Natural spacing after Terms, ensuring tagline is always visible) -->
+                            <div class="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3">
                                 <!-- 6. Footer Helpline & Seal -->
-                                <div class="pt-2 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
+                                <div class="pt-2.5 sm:pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
                                     <div class="text-left space-y-0.5 sm:space-y-1">
                                         <p class="font-bold text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
                                         <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-normal mt-0.5">
@@ -2548,11 +2546,9 @@
                                 </div>
 
                                 <!-- 7. Tagline -->
-                                @if(!empty($tagline))
-                                    <div class="pt-1.5 sm:pt-2 border-t border-slate-200 text-center">
-                                        <p class="text-[10px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
-                                    </div>
-                                @endif
+                                <div class="pt-2 sm:pt-2.5 border-t border-slate-200 text-center">
+                                    <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ !empty(trim($tagline)) ? $tagline : 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU' }}</p>
+                                </div>
                             </div>
 
                         </div>

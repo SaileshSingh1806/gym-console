@@ -149,7 +149,7 @@
     </div>
 
     <!-- ==================== INVOICE A4 SHEET ==================== -->
-    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 overflow-hidden flex flex-col justify-between min-h-0 sm:min-h-[1020px] print:min-h-[280mm] mx-auto">
+    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col mx-auto">
         
         <!-- Faded Center Background Watermark -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
@@ -162,7 +162,7 @@
             @endif
         </div>
 
-        <div class="relative z-10 flex flex-col justify-between h-full min-h-[inherit] flex-1">
+        <div class="relative z-10 flex flex-col w-full">
             
             <!-- MAIN TOP CONTENT: Sections 1 through 5 -->
             <div class="space-y-3 sm:space-y-3.5">
@@ -371,12 +371,12 @@
             </div>
             </div>
 
-            <!-- FOOTER: Sections 6 & 7 (Anchored at bottom with spacing after Terms) -->
-            <div class="mt-auto pt-3 sm:pt-4 space-y-2">
+            <!-- FOOTER: Sections 6 & 7 (Natural spacing after Terms, ensuring tagline is always visible) -->
+            <div class="mt-4 sm:mt-5 space-y-2.5 sm:space-y-3">
                 <!-- ══════════════════════════════════════════
                  6. FOOTER: HELPLINE & SIGNATURE SEAL
                 ══════════════════════════════════════════ -->
-                <div class="pt-2 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
+                <div class="pt-2.5 sm:pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
                     
                     <!-- Left: Thank you & Contacts -->
                     <div class="text-left space-y-0.5 sm:space-y-1">
@@ -437,11 +437,9 @@
                 <!-- ══════════════════════════════════════════
                      7. VERY BOTTOM TAGLINE BANNER
                 ══════════════════════════════════════════ -->
-                @if(!empty($tagline))
-                    <div class="pt-1.5 sm:pt-2 border-t border-slate-200 text-center">
-                        <p class="text-[10px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
-                    </div>
-                @endif
+                <div class="pt-2 sm:pt-2.5 border-t border-slate-200 text-center">
+                    <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ !empty(trim($tagline)) ? $tagline : 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU' }}</p>
+                </div>
             </div>
 
         </div>
