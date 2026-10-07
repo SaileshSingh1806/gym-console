@@ -19,7 +19,7 @@
         }
         @page {
             size: A4 portrait;
-            margin: 5mm 6mm;
+            margin: 4mm 6mm;
         }
         @media print {
             html, body {
@@ -28,7 +28,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                overflow: hidden !important;
+                overflow: visible !important;
             }
             .no-print {
                 display: none !important;
@@ -38,14 +38,16 @@
                 border: 1px solid #cbd5e1 !important;
                 max-width: 100% !important;
                 width: 100% !important;
-                height: 285mm !important;
-                min-height: 285mm !important;
+                height: 278mm !important;
+                min-height: 278mm !important;
+                max-height: 280mm !important;
                 margin: 0 !important;
-                padding: 14px 18px !important;
+                padding: 12px 18px !important;
                 border-radius: 8px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-between !important;
+                overflow: visible !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 page-break-after: avoid !important;
@@ -114,7 +116,7 @@
         $helpline = !empty($invSettings['helpline']) ? $invSettings['helpline'] : $gymPhone;
         $footerEmail = !empty($invSettings['footer_email']) ? $invSettings['footer_email'] : $gymEmail;
         $footerWeb = !empty($invSettings['footer_web']) ? $invSettings['footer_web'] : $gymWeb;
-        $tagline = !empty($invSettings['tagline']) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
+        $tagline = !empty(trim($invSettings['tagline'] ?? '')) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
         $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
         $sealUrl = $invSettings['seal_url'] ?? null;
         $signatureUrl = $invSettings['signature_url'] ?? null;
@@ -185,13 +187,12 @@
                     <div>
                         <h1 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h1>
                         <p class="text-[11px] sm:text-xs lg:text-sm text-slate-600 mt-0.5 sm:mt-1 leading-snug font-medium">{{ $gymAddress }}</p>
-                        <div class="flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 gap-y-0.5 text-[11px] sm:text-xs text-slate-600 mt-0.5 sm:mt-1 font-medium">
-                            @if(!empty($gymPhone))<span>Phone: <strong class="text-slate-800">{{ $gymPhone }}</strong></span>@endif
-                            @if(!empty($gymPhone) && !empty($gymEmail))<span>|</span>@endif
-                            @if(!empty($gymEmail))<span>Email: <strong class="text-slate-800">{{ $gymEmail }}</strong></span>@endif
-                        </div>
-                        @if(!empty($gymWeb))
-                            <p class="text-[11px] sm:text-xs text-slate-600 font-medium mt-0.5">Website: <strong class="text-slate-800">{{ $gymWeb }}</strong></p>
+                        @if(!empty($gymEmail) || !empty($gymWeb))
+                            <div class="flex flex-wrap items-center gap-x-2 sm:gap-x-2.5 gap-y-0.5 text-[11px] sm:text-xs text-slate-600 mt-0.5 sm:mt-1 font-medium">
+                                @if(!empty($gymEmail))<span>Email: <strong class="text-slate-800">{{ $gymEmail }}</strong></span>@endif
+                                @if(!empty($gymEmail) && !empty($gymWeb))<span>|</span>@endif
+                                @if(!empty($gymWeb))<span>Web: <strong class="text-slate-800">{{ $gymWeb }}</strong></span>@endif
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -201,8 +202,8 @@
                     <span class="inline-block px-3 sm:px-4 py-0.5 sm:py-1 rounded-lg bg-slate-950 text-white font-black text-[11px] sm:text-xs tracking-wider uppercase shadow-sm">
                         {{ $invoiceTitle }}
                     </span>
-                    <p class="text-xs sm:text-sm font-bold text-slate-900 mt-1 sm:mt-1.5">Invoice No: <span class="text-slate-950 font-black text-sm sm:text-base">{{ $invoiceNo }}</span></p>
-                    <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium">Date: <strong class="text-slate-800">{{ $invoiceDate }}</strong></p>
+                    <p class="text-[11px] sm:text-xs font-semibold text-slate-600 mt-1">Invoice No: <span class="text-slate-950 font-extrabold text-xs sm:text-sm font-mono">{{ $invoiceNo }}</span></p>
+                    <p class="text-[11px] sm:text-xs text-slate-600 mt-0.5 font-medium">Date: <strong class="text-slate-800">{{ $invoiceDate }}</strong></p>
                     <span class="inline-block mt-1 px-3 sm:px-3.5 py-0.5 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-black uppercase tracking-wider">
                         {{ $statusText }}
                     </span>
@@ -387,29 +388,29 @@
                     </div>
 
                     <!-- Right: Official Seal / Stamp & Signature -->
-                    <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[120px] sm:min-w-[140px]">
-                        <div class="relative flex items-center justify-center w-20 h-16 sm:w-24 sm:h-20 select-none">
+                    <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[130px] sm:min-w-[150px]">
+                        <div class="relative flex items-center justify-center w-24 h-20 sm:w-28 sm:h-24 select-none">
                             @if(!empty($sealUrl))
                                 <!-- Uploaded Stamp / Seal Image -->
-                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-14 w-14 sm:h-16 sm:w-16 object-contain drop-shadow-xs">
+                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 sm:h-20 sm:w-20 object-contain drop-shadow-xs">
                             @else
                                 <!-- Vector Circular Seal Matching Image -->
-                                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                                    <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
-                                    <span class="text-[6.5px] sm:text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
-                                    <span class="text-[6px] sm:text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                    <span class="text-[7.5px] sm:text-[8.5px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                    <span class="text-[7px] sm:text-[7.5px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
+                                    <span class="text-[6.5px] sm:text-[7px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
                                 </div>
                             @endif
 
                             @if(!empty($signatureUrl))
                                 <!-- Uploaded Signature Image (Directly Overlapping on TOP of stamp with blend-mode multiply) -->
                                 <img src="{{ $signatureUrl }}" alt="Signature" 
-                                     class="absolute inset-0 m-auto h-12 w-24 sm:h-14 sm:w-28 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
+                                     class="absolute inset-0 m-auto h-14 w-28 sm:h-18 sm:w-36 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
                             @endif
                         </div>
-                        <span class="text-[10px] sm:text-xs font-bold text-slate-600 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-700 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
                         @if(!empty($signatoryName))
-                            <span class="text-[10px] sm:text-xs font-bold text-slate-500">{{ $signatoryName }}</span>
+                            <span class="text-[10px] sm:text-xs font-semibold text-slate-500">{{ $signatoryName }}</span>
                         @endif
                     </div>
 
