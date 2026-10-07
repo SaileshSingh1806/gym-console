@@ -19,15 +19,16 @@
         }
         @page {
             size: A4 portrait;
-            margin: 5mm 6mm;
+            margin: 0;
         }
         @media print {
             html, body {
+                width: 100% !important;
                 height: 100% !important;
-                min-height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
+                overflow: hidden !important;
             }
             .no-print {
                 display: none !important;
@@ -37,9 +38,9 @@
                 border: 1px solid #cbd5e1 !important;
                 max-width: 100% !important;
                 width: 100% !important;
-                height: 100% !important;
-                min-height: 275mm !important;
-                margin: 0 !important;
+                height: 280mm !important;
+                max-height: 282mm !important;
+                margin: 5mm auto !important;
                 padding: 12px 18px !important;
                 border-radius: 8px !important;
                 display: flex !important;
@@ -49,6 +50,8 @@
                 break-inside: avoid !important;
                 page-break-after: avoid !important;
                 break-after: avoid !important;
+                page-break-before: avoid !important;
+                break-before: avoid !important;
             }
         }
     </style>
@@ -384,16 +387,16 @@
                         </div>
                     </div>
 
-                    <!-- Right: Official Seal / Stamp & Signature -->
-                    <div class="flex flex-col items-center sm:items-end shrink-0 min-w-[120px] sm:min-w-[140px]">
-                        <div class="relative flex items-center justify-center w-22 h-18 sm:w-26 sm:h-22 select-none">
+                    <!-- Right: Official Seal / Stamp & Signature (Centered) -->
+                    <div class="flex flex-col items-center justify-center shrink-0 min-w-[140px] sm:min-w-[160px] text-center">
+                        <div class="relative flex items-center justify-center w-26 h-20 sm:w-28 sm:h-22 select-none mx-auto">
                             @if(!empty($sealUrl))
                                 <!-- Uploaded Stamp / Seal Image -->
-                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-14 w-14 sm:h-18 sm:w-18 object-contain drop-shadow-xs">
+                                <img src="{{ $sealUrl }}" alt="Stamp" class="h-16 w-16 sm:h-18 sm:w-18 object-contain drop-shadow-xs">
                             @else
                                 <!-- Vector Circular Seal Matching Image -->
-                                <div class="w-14 h-14 sm:w-18 sm:h-18 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
-                                    <span class="text-[7px] sm:text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
+                                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full border border-slate-400 border-dashed flex flex-col items-center justify-center text-center p-1 text-slate-700 select-none">
+                                    <span class="text-[7.5px] sm:text-[8px] font-black uppercase tracking-tighter leading-none">{{ substr($gymName, 0, 14) }}</span>
                                     <span class="text-[6.5px] sm:text-[7px] text-slate-500 font-bold leading-none mt-0.5">★ SEAL ★</span>
                                     <span class="text-[6px] sm:text-[6.5px] font-semibold text-slate-400 leading-none mt-0.5">VERIFIED</span>
                                 </div>
@@ -402,12 +405,12 @@
                             @if(!empty($signatureUrl))
                                 <!-- Uploaded Signature Image (Directly Overlapping on TOP of stamp with blend-mode multiply) -->
                                 <img src="{{ $signatureUrl }}" alt="Signature" 
-                                     class="absolute inset-0 m-auto h-12 w-26 sm:h-16 sm:w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
+                                     class="absolute inset-0 m-auto h-14 w-26 sm:h-16 sm:w-32 object-contain mix-blend-multiply rotate-[-6deg] drop-shadow-xs pointer-events-none z-10">
                             @endif
                         </div>
-                        <span class="text-[10px] sm:text-xs font-bold text-slate-700 mt-0.5 uppercase tracking-wider text-center sm:text-right">{{ $sealText }}</span>
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-700 mt-1 uppercase tracking-wider text-center block w-full">{{ $sealText }}</span>
                         @if(!empty($signatoryName))
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500">{{ $signatoryName }}</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500 text-center block w-full">{{ $signatoryName }}</span>
                         @endif
                     </div>
 
