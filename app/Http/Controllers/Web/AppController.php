@@ -687,8 +687,10 @@ class AppController extends Controller
             'memberships.payments',
             'payments.membership.plan',
             'attendance' => fn ($q) => $q->latest()->take(30),
-            'workoutPlans',
-            'dietPlans',
+            'workoutPlans.exercises',
+            'workoutPlans.trainer',
+            'dietPlans.meals',
+            'dietPlans.trainer',
             'classBookings.schedule.gymClass.instructor',
             'classBookings.schedule.trainer',
             'serviceBookings.service',
@@ -734,6 +736,16 @@ class AppController extends Controller
             ->where('status', 'active')
             ->get();
 
+        $templateWorkoutPlans = WorkoutPlan::where('tenant_id', $tenant->id)
+            ->where('is_template', true)
+            ->with(['exercises', 'trainer'])
+            ->get();
+
+        $templateDietPlans = DietPlan::where('tenant_id', $tenant->id)
+            ->where('is_template', true)
+            ->with(['meals', 'trainer'])
+            ->get();
+
         return view('app.members.show', compact(
             'member',
             'activeMembership',
@@ -749,7 +761,9 @@ class AppController extends Controller
             'auditLogs',
             'availableClassSchedules',
             'allGymClasses',
-            'availableServices'
+            'availableServices',
+            'templateWorkoutPlans',
+            'templateDietPlans'
         ));
     }
 

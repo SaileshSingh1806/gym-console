@@ -84,6 +84,204 @@
                 this.selectedServiceSessionCount = 1;
             }
         },
+
+        // Workout Routine State
+        showAddWorkoutModal: false,
+        workoutTitle: '',
+        workoutGoal: 'General Fitness',
+        workoutLevel: 'beginner',
+        workoutTrainerId: '{{ $assignedTrainer?->id ?? '' }}',
+        workoutStartDate: '{{ now()->format('Y-m-d') }}',
+        workoutEndDate: '',
+        workoutNotes: '',
+        workoutExercises: [
+            { day: 'Day 1', exercise_name: 'Barbell Bench Press', sets: 4, reps: '8-10', weight: '60 kg', rest_seconds: 90, notes: 'Warm up thoroughly' },
+            { day: 'Day 1', exercise_name: 'Incline Dumbbell Press', sets: 3, reps: '10-12', weight: '22 kg', rest_seconds: 60, notes: 'Focus on upper chest squeeze' },
+            { day: 'Day 1', exercise_name: 'Tricep Cable Pushdown', sets: 3, reps: '12-15', weight: '25 kg', rest_seconds: 45, notes: '' }
+        ],
+        addWorkoutExercise() {
+            this.workoutExercises.push({ day: 'Day ' + (this.workoutExercises.length + 1), exercise_name: '', sets: 3, reps: '10-12', weight: '', rest_seconds: 60, notes: '' });
+        },
+        removeWorkoutExercise(idx) {
+            this.workoutExercises.splice(idx, 1);
+        },
+        openCreateWorkout() {
+            this.workoutTitle = '';
+            this.workoutGoal = 'General Fitness';
+            this.workoutLevel = 'beginner';
+            this.workoutTrainerId = '{{ $assignedTrainer?->id ?? '' }}';
+            this.workoutStartDate = '{{ now()->format('Y-m-d') }}';
+            this.workoutEndDate = '';
+            this.workoutNotes = '';
+            this.workoutExercises = [
+                { day: 'Day 1', exercise_name: 'Barbell Bench Press', sets: 4, reps: '8-10', weight: '60 kg', rest_seconds: 90, notes: 'Warm up thoroughly' },
+                { day: 'Day 1', exercise_name: 'Incline Dumbbell Press', sets: 3, reps: '10-12', weight: '22 kg', rest_seconds: 60, notes: 'Focus on upper chest squeeze' },
+                { day: 'Day 1', exercise_name: 'Tricep Cable Pushdown', sets: 3, reps: '12-15', weight: '25 kg', rest_seconds: 45, notes: '' }
+            ];
+            this.showAddWorkoutModal = true;
+        },
+        loadWorkoutPreset(presetType) {
+            if (presetType === 'push') {
+                this.workoutTitle = 'Push Day (Chest, Shoulders, Triceps)';
+                this.workoutGoal = 'Hypertrophy';
+                this.workoutLevel = 'intermediate';
+                this.workoutExercises = [
+                    { day: 'Day 1', exercise_name: 'Barbell Flat Bench Press', sets: 4, reps: '8-10', weight: '', rest_seconds: 90, notes: 'Heavy compound press' },
+                    { day: 'Day 1', exercise_name: 'Incline Dumbbell Press', sets: 3, reps: '10-12', weight: '', rest_seconds: 60, notes: 'Upper chest hypertrophy' },
+                    { day: 'Day 1', exercise_name: 'Dumbbell Lateral Raises', sets: 4, reps: '12-15', weight: '', rest_seconds: 45, notes: 'Strict form, no swinging' },
+                    { day: 'Day 1', exercise_name: 'Overhead Dumbbell Extension', sets: 3, reps: '10-12', weight: '', rest_seconds: 60, notes: 'Full stretch on triceps' }
+                ];
+            } else if (presetType === 'pull') {
+                this.workoutTitle = 'Pull Day (Back & Biceps)';
+                this.workoutGoal = 'Hypertrophy';
+                this.workoutLevel = 'intermediate';
+                this.workoutExercises = [
+                    { day: 'Day 2', exercise_name: 'Lat Pulldowns / Pull-ups', sets: 4, reps: '8-10', weight: '', rest_seconds: 90, notes: 'Engage lats first' },
+                    { day: 'Day 2', exercise_name: 'Barbell Bent-Over Rows', sets: 4, reps: '8-10', weight: '', rest_seconds: 90, notes: 'Keep back neutral' },
+                    { day: 'Day 2', exercise_name: 'Face Pulls', sets: 3, reps: '15', weight: '', rest_seconds: 45, notes: 'Rear delt and posture' },
+                    { day: 'Day 2', exercise_name: 'Barbell Bicep Curls', sets: 3, reps: '10-12', weight: '', rest_seconds: 60, notes: 'Controlled negative' }
+                ];
+            } else if (presetType === 'legs') {
+                this.workoutTitle = 'Leg Day (Quads, Hamstrings, Calves)';
+                this.workoutGoal = 'Strength';
+                this.workoutLevel = 'intermediate';
+                this.workoutExercises = [
+                    { day: 'Day 3', exercise_name: 'Barbell Back Squats', sets: 4, reps: '6-8', weight: '', rest_seconds: 120, notes: 'Hit parallel depth' },
+                    { day: 'Day 3', exercise_name: 'Romanian Deadlifts (RDL)', sets: 4, reps: '8-10', weight: '', rest_seconds: 90, notes: 'Hinge at the hips' },
+                    { day: 'Day 3', exercise_name: 'Leg Press', sets: 3, reps: '12-15', weight: '', rest_seconds: 60, notes: 'Continuous tension' },
+                    { day: 'Day 3', exercise_name: 'Standing Calf Raises', sets: 4, reps: '15-20', weight: '', rest_seconds: 45, notes: 'Pause at top and bottom' }
+                ];
+            }
+        },
+        loadWorkoutTemplate(tpl) {
+            this.workoutTitle = tpl.title;
+            this.workoutGoal = tpl.goal || 'General Fitness';
+            this.workoutLevel = tpl.level || 'beginner';
+            this.workoutTrainerId = tpl.trainer_id || '{{ $assignedTrainer?->id ?? '' }}';
+            this.workoutNotes = tpl.notes || '';
+            this.workoutStartDate = '{{ now()->format('Y-m-d') }}';
+            this.workoutEndDate = '';
+            if (tpl.exercises && tpl.exercises.length) {
+                this.workoutExercises = tpl.exercises.map(e => ({
+                    day: e.day || 'Day 1',
+                    exercise_name: e.exercise_name,
+                    sets: e.sets || 3,
+                    reps: e.reps || '10-12',
+                    weight: e.weight || '',
+                    rest_seconds: e.rest_seconds || 60,
+                    notes: e.notes || ''
+                }));
+            } else {
+                this.workoutExercises = [{ day: 'Day 1', exercise_name: '', sets: 3, reps: '10-12', weight: '', rest_seconds: 60, notes: '' }];
+            }
+            this.showAddWorkoutModal = true;
+        },
+
+        // Diet Plan State
+        showAddDietModal: false,
+        showAiDietModal: false,
+        dietTitle: '',
+        dietCalories: 2000,
+        dietProtein: 140,
+        dietCarbs: 220,
+        dietFat: 60,
+        dietStartDate: '{{ now()->format('Y-m-d') }}',
+        dietEndDate: '',
+        dietGuidelines: '',
+        dietTrainerId: '{{ $assignedTrainer?->id ?? '' }}',
+        dietMeals: [
+            { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450 },
+            { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650 },
+            { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300 },
+            { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500 }
+        ],
+        addDietMeal() {
+            this.dietMeals.push({ meal_type: 'lunch', recommended_time: '13:00', meal_name: 'Meal', items_description: '', calories: 500 });
+        },
+        removeDietMeal(idx) {
+            this.dietMeals.splice(idx, 1);
+        },
+        openCreateDiet() {
+            this.dietTitle = '';
+            this.dietCalories = 2000;
+            this.dietProtein = 140;
+            this.dietCarbs = 220;
+            this.dietFat = 60;
+            this.dietStartDate = '{{ now()->format('Y-m-d') }}';
+            this.dietEndDate = '';
+            this.dietGuidelines = 'Drink at least 3-4 liters of water daily. Avoid refined sugars and processed junk food.';
+            this.dietTrainerId = '{{ $assignedTrainer?->id ?? '' }}';
+            this.dietMeals = [
+                { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450 },
+                { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650 },
+                { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300 },
+                { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500 }
+            ];
+            this.showAddDietModal = true;
+        },
+        loadDietTemplate(tpl) {
+            this.dietTitle = tpl.title;
+            this.dietCalories = tpl.daily_calories || 2000;
+            this.dietProtein = tpl.protein_grams || 140;
+            this.dietCarbs = tpl.carbs_grams || 220;
+            this.dietFat = tpl.fat_grams || 60;
+            this.dietStartDate = '{{ now()->format('Y-m-d') }}';
+            this.dietEndDate = '';
+            this.dietGuidelines = tpl.guidelines || '';
+            this.dietTrainerId = tpl.trainer_id || '{{ $assignedTrainer?->id ?? '' }}';
+            if (tpl.meals && tpl.meals.length) {
+                this.dietMeals = tpl.meals.map(m => ({
+                    meal_type: m.meal_type || 'breakfast',
+                    recommended_time: m.recommended_time ? m.recommended_time.substring(0, 5) : '',
+                    meal_name: m.meal_name,
+                    items_description: m.items_description || '',
+                    calories: m.calories || 0
+                }));
+            } else {
+                this.dietMeals = [{ meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Breakfast', items_description: '', calories: 400 }];
+            }
+            this.showAddDietModal = true;
+        },
+
+        // AI Diet Generator State
+        aiDietGoal: 'weight_loss',
+        aiDietPreference: 'vegetarian',
+        aiDietCalories: 2000,
+        aiDietMealsPerDay: 4,
+        aiDietLoading: false,
+        aiDietError: null,
+        async generateAiDiet() {
+            this.aiDietLoading = true;
+            this.aiDietError = null;
+            try {
+                const res = await fetch('{{ route('app.diets.generate-ai') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        member_id: {{ $member->id }},
+                        goal: this.aiDietGoal,
+                        diet_preference: this.aiDietPreference,
+                        daily_calories: this.aiDietCalories,
+                        meals_per_day: this.aiDietMealsPerDay,
+                        auto_save: true
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    this.aiDietError = data.message || 'Failed to generate AI diet.';
+                }
+            } catch (err) {
+                this.aiDietError = 'Error generating AI diet plan. Please try again.';
+            } finally {
+                this.aiDietLoading = false;
+            }
+        },
         selectedInvoice: {
             id: null,
             receipt_no: '',
@@ -1358,33 +1556,414 @@
                 </div>
 
                 <!-- TAB 5: WORKOUT PLANS -->
-                <div x-show="activeTab === 'workouts'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Assigned Workout Routines</h3>
-                    <div class="space-y-3">
-                        @forelse($member->workoutPlans as $wp)
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
-                                <h4 class="font-black text-slate-900 dark:text-white text-xs">{{ $wp->title }}</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{{ $wp->description ?? 'Custom workout split' }}</p>
-                            </div>
-                        @empty
-                            <p class="text-xs text-slate-500 dark:text-slate-400">No workout plan assigned yet. You can create one under Workouts.</p>
-                        @endforelse
+                <div x-show="activeTab === 'workouts'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>🏋️</span>
+                                <span>Assigned Workout Routines & Splits</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Personalized exercise programs, splits, and training regimens for {{ $member->full_name }}</p>
+                        </div>
+                        <button type="button" 
+                                @click="openCreateWorkout()" 
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            <span>Create Workout Routine</span>
+                        </button>
                     </div>
+
+                    <!-- Member's Assigned Workout Routines -->
+                    @if($member->workoutPlans->isNotEmpty())
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            @foreach($member->workoutPlans as $wp)
+                                @php
+                                    $whatsappWorkoutText = "🏋️ *Workout Routine from " . (auth()->user()->tenant->name ?? 'Gym') . "*\n";
+                                    $whatsappWorkoutText .= "*Routine:* " . $wp->title . "\n";
+                                    if ($wp->goal) $whatsappWorkoutText .= "*Goal:* " . $wp->goal . " | *Level:* " . ucfirst($wp->level ?? 'General') . "\n";
+                                    $whatsappWorkoutText .= "---------------------------\n";
+                                    foreach ($wp->exercises as $exIdx => $ex) {
+                                        $whatsappWorkoutText .= ($exIdx + 1) . ". *" . ($ex->day ? "[$ex->day] " : '') . $ex->exercise_name . "*\n";
+                                        $whatsappWorkoutText .= "   Sets: " . $ex->sets . " × " . $ex->reps . ($ex->weight ? " (" . $ex->weight . ")" : "") . ($ex->rest_seconds ? " | Rest: " . $ex->rest_seconds . "s" : "") . "\n";
+                                    }
+                                    if ($wp->notes) {
+                                        $whatsappWorkoutText .= "---------------------------\n*Notes:* " . $wp->notes . "\n";
+                                    }
+                                    $whatsappWorkoutText .= "\nKeep pushing your limits! 💪";
+                                @endphp
+
+                                <div class="p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-indigo-500/40 transition-all">
+                                    <div>
+                                        <!-- Header -->
+                                        <div class="flex items-start justify-between gap-3 mb-2">
+                                            <div>
+                                                <h4 class="font-black text-slate-900 dark:text-white text-base leading-tight">{{ $wp->title }}</h4>
+                                                <div class="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    <span class="capitalize font-semibold text-slate-700 dark:text-slate-300">Level: {{ $wp->level ?? 'All Levels' }}</span>
+                                                    @if($wp->trainer)
+                                                        <span>• Coach: <strong class="text-slate-800 dark:text-slate-200">{{ $wp->trainer->full_name }}</strong></span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if($wp->goal)
+                                                <span class="px-2.5 py-1 rounded-xl text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold uppercase tracking-wider shrink-0">
+                                                    {{ $wp->goal }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        @if($wp->start_date)
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-500 mb-3 font-mono">
+                                                Active from {{ $wp->start_date->format('d M Y') }} {{ $wp->end_date ? 'to ' . $wp->end_date->format('d M Y') : '' }}
+                                            </div>
+                                        @endif
+
+                                        <!-- Exercises List -->
+                                        <div class="border-t border-slate-200 dark:border-slate-800/80 pt-3 mt-2">
+                                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+                                                Prescribed Exercises ({{ $wp->exercises->count() }})
+                                            </span>
+                                            <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                                                @forelse($wp->exercises as $ex)
+                                                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 text-xs">
+                                                        <div class="min-w-0 pr-2">
+                                                            <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate">
+                                                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono shrink-0">{{ $ex->day ?? 'Day 1' }}</span>
+                                                                <span class="truncate">{{ $ex->exercise_name }}</span>
+                                                            </div>
+                                                            @if($ex->notes)
+                                                                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">{{ $ex->notes }}</p>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-right shrink-0">
+                                                            <span class="text-amber-600 dark:text-amber-400 font-bold font-mono">{{ $ex->sets }} × {{ $ex->reps }}</span>
+                                                            @if($ex->weight)
+                                                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">{{ $ex->weight }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <span class="text-xs text-slate-400 dark:text-slate-500 italic">No exercises added to this routine yet.</span>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        @if($wp->notes)
+                                            <div class="p-2.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 text-[11px] text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
+                                                <span class="font-bold text-indigo-700 dark:text-indigo-400 block mb-0.5">Trainer Advice:</span>
+                                                {{ $wp->notes }}
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Actions Footer -->
+                                    <div class="border-t border-slate-200 dark:border-slate-800/80 pt-3 mt-4 flex items-center justify-between">
+                                        @if($member->phone)
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode($whatsappWorkoutText) }}" 
+                                               target="_blank" 
+                                               class="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1.5 transition-colors">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                                <span>Share on WhatsApp</span>
+                                            </a>
+                                        @else
+                                            <span></span>
+                                        @endif
+
+                                        <form action="{{ route('app.workouts.delete', $wp->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this workout routine?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Delete Routine</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-6 sm:p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl border border-indigo-200 dark:border-indigo-500/20">
+                                🏋️
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">No Workout Routine Assigned</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                                {{ $member->first_name }} does not have a customized workout plan assigned yet. Create a tailored split or assign one of the pre-made templates below.
+                            </p>
+                            <button type="button" 
+                                    @click="openCreateWorkout()" 
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Create Custom Routine</span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <!-- Pre-made Workout Templates Quick-Assign -->
+                    @if(isset($templateWorkoutPlans) && $templateWorkoutPlans->isNotEmpty())
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-black text-slate-900 dark:text-white text-xs uppercase tracking-wider">📋 Quick Assign from Workout Templates</h4>
+                                <a href="{{ route('app.workouts.index') }}" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold">Manage All Workouts →</a>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @foreach($templateWorkoutPlans as $tpl)
+                                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 shadow-xs hover:border-indigo-500/30 transition-all">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h5 class="font-bold text-slate-900 dark:text-white text-xs leading-snug">{{ $tpl->title }}</h5>
+                                                @if($tpl->goal)
+                                                    <span class="px-2 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold shrink-0">{{ $tpl->goal }}</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                                {{ $tpl->notes ?? 'Standard workout split template.' }}
+                                            </p>
+                                            <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                                                <span class="capitalize">Level: {{ $tpl->level ?? 'All' }}</span>
+                                                <span>•</span>
+                                                <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ $tpl->exercises->count() }} exercises</span>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" 
+                                                @click="loadWorkoutTemplate({{ Js::from($tpl) }})" 
+                                                class="w-full py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white dark:bg-indigo-600/20 dark:hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 dark:hover:text-white text-[11px] font-bold transition-all text-center cursor-pointer">
+                                            + Assign to {{ $member->first_name }}
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- TAB 6: DIET PLANS -->
-                <div x-show="activeTab === 'diets'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Assigned Diet & Nutrition Charts</h3>
-                    <div class="space-y-3">
-                        @forelse($member->dietPlans as $dp)
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
-                                <h4 class="font-black text-slate-900 dark:text-white text-xs">{{ $dp->title }} ({{ $dp->daily_calories ?? 2000 }} kcal)</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">{{ $dp->description ?? 'Nutritional guidelines' }}</p>
-                            </div>
-                        @empty
-                            <p class="text-xs text-slate-500 dark:text-slate-400">No diet plan assigned yet. You can create one under Diets.</p>
-                        @endforelse
+                <div x-show="activeTab === 'diets'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>🥗</span>
+                                <span>Assigned Diet & Nutrition Charts</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Meal timings, calorie distribution, and macro targets prescribed for {{ $member->full_name }}</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                            <button type="button" 
+                                    @click="showAiDietModal = true" 
+                                    class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+                                <span>✨</span>
+                                <span>AI Diet Generator</span>
+                            </button>
+                            <button type="button" 
+                                    @click="openCreateDiet()" 
+                                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Create Diet Plan</span>
+                            </button>
+                        </div>
                     </div>
+
+                    <!-- Member's Assigned Diet Plans -->
+                    @if($member->dietPlans->isNotEmpty())
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            @foreach($member->dietPlans as $dp)
+                                @php
+                                    $protein = (int) ($dp->protein_grams ?? 0);
+                                    $carbs = (int) ($dp->carbs_grams ?? 0);
+                                    $fat = (int) ($dp->fat_grams ?? 0);
+                                    $totalMacros = max(1, $protein + $carbs + $fat);
+                                    $pPct = round(($protein / $totalMacros) * 100);
+                                    $cPct = round(($carbs / $totalMacros) * 100);
+                                    $fPct = max(0, 100 - $pPct - $cPct);
+
+                                    $whatsappDietText = "🥗 *Diet & Nutrition Chart from " . (auth()->user()->tenant->name ?? 'Gym') . "*\n";
+                                    $whatsappDietText .= "*Plan:* " . $dp->title . "\n";
+                                    $whatsappDietText .= "*Target Calories:* " . ($dp->daily_calories ?? 2000) . " kcal\n";
+                                    $whatsappDietText .= "*Daily Macros:* P: " . $protein . "g | C: " . $carbs . "g | F: " . $fat . "g\n";
+                                    $whatsappDietText .= "---------------------------\n*MEAL SCHEDULE:*\n";
+                                    foreach ($dp->meals as $m) {
+                                        $whatsappDietText .= "• *" . strtoupper(str_replace('_', ' ', $m->meal_type)) . ($m->recommended_time ? " (" . substr($m->recommended_time, 0, 5) . ")" : "") . "*: " . $m->meal_name . "\n";
+                                        if ($m->items_description) $whatsappDietText .= "  Items: " . $m->items_description . "\n";
+                                    }
+                                    if ($dp->guidelines) {
+                                        $whatsappDietText .= "---------------------------\n*Guidelines:* " . $dp->guidelines . "\n";
+                                    }
+                                    $whatsappDietText .= "\nStay consistent and fueled! 🥗";
+                                @endphp
+
+                                <div class="p-4.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between shadow-sm hover:border-indigo-500/40 transition-all">
+                                    <div>
+                                        <!-- Header -->
+                                        <div class="flex items-start justify-between gap-3 mb-2">
+                                            <div>
+                                                <h4 class="font-black text-slate-900 dark:text-white text-base leading-tight">{{ $dp->title }}</h4>
+                                                @if($dp->trainer)
+                                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Nutritionist / Coach: <strong class="text-slate-800 dark:text-slate-200">{{ $dp->trainer->full_name }}</strong></p>
+                                                @endif
+                                            </div>
+                                            <div class="px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-black shrink-0 inline-flex items-center gap-1">
+                                                <span>🔥</span>
+                                                <span>{{ number_format($dp->daily_calories ?? 2000) }} kcal</span>
+                                            </div>
+                                        </div>
+
+                                        @if($dp->start_date)
+                                            <div class="text-[10px] text-slate-400 dark:text-slate-500 mb-3 font-mono">
+                                                Active from {{ $dp->start_date->format('d M Y') }} {{ $dp->end_date ? 'to ' . $dp->end_date->format('d M Y') : '' }}
+                                            </div>
+                                        @endif
+
+                                        <!-- Macro Target Distribution -->
+                                        <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 mb-3 space-y-2">
+                                            <div class="flex items-center justify-between text-[11px] font-bold">
+                                                <span class="text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Daily Macro Targets</span>
+                                                <div class="flex items-center gap-2.5 text-xs font-mono">
+                                                    <span class="text-rose-600 dark:text-rose-400"><strong>{{ $protein }}g</strong> <span class="text-[10px] text-slate-400">Protein</span></span>
+                                                    <span class="text-amber-600 dark:text-amber-400"><strong>{{ $carbs }}g</strong> <span class="text-[10px] text-slate-400">Carbs</span></span>
+                                                    <span class="text-cyan-600 dark:text-cyan-400"><strong>{{ $fat }}g</strong> <span class="text-[10px] text-slate-400">Fats</span></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 flex overflow-hidden">
+                                                <div class="bg-rose-500 h-full" style="width: {{ $pPct }}%" title="Protein: {{ $pPct }}%"></div>
+                                                <div class="bg-amber-400 h-full" style="width: {{ $cPct }}%" title="Carbs: {{ $cPct }}%"></div>
+                                                <div class="bg-cyan-400 h-full" style="width: {{ $fPct }}%" title="Fats: {{ $fPct }}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Meals List -->
+                                        <div class="border-t border-slate-200 dark:border-slate-800/80 pt-3">
+                                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">
+                                                Meal Schedule ({{ $dp->meals->count() }})
+                                            </span>
+                                            <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                                @forelse($dp->meals as $m)
+                                                    <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 text-xs">
+                                                        <div class="flex items-start justify-between gap-2">
+                                                            <div>
+                                                                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 uppercase font-mono font-bold">{{ str_replace('_', ' ', $m->meal_type) }}</span>
+                                                                    <span>{{ $m->meal_name }}</span>
+                                                                </div>
+                                                                @if($m->items_description)
+                                                                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1">{{ $m->items_description }}</p>
+                                                                @endif
+                                                            </div>
+                                                            <div class="text-right shrink-0">
+                                                                @if($m->recommended_time)
+                                                                    <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 block">⏰ {{ substr($m->recommended_time, 0, 5) }}</span>
+                                                                @endif
+                                                                @if($m->calories)
+                                                                    <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">{{ $m->calories }} kcal</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @empty
+                                                    <span class="text-xs text-slate-400 dark:text-slate-500 italic">No scheduled meals added yet.</span>
+                                                @endforelse
+                                            </div>
+                                        </div>
+
+                                        @if($dp->guidelines)
+                                            <div class="p-2.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 text-[11px] text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
+                                                <span class="font-bold text-emerald-700 dark:text-emerald-400 block mb-0.5">Hydration & Guidelines:</span>
+                                                {{ $dp->guidelines }}
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Actions Footer -->
+                                    <div class="border-t border-slate-200 dark:border-slate-800/80 pt-3 mt-4 flex items-center justify-between">
+                                        @if($member->phone)
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode($whatsappDietText) }}" 
+                                               target="_blank" 
+                                               class="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-1.5 transition-colors">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                                <span>Share on WhatsApp</span>
+                                            </a>
+                                        @else
+                                            <span></span>
+                                        @endif
+
+                                        <form action="{{ route('app.diets.delete', $dp->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this diet plan?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Delete Diet</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-6 sm:p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 dark:bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl border border-emerald-200 dark:border-emerald-500/20">
+                                🥗
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">No Diet Chart Assigned</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                                {{ $member->first_name }} does not have a nutrition plan or calorie chart assigned yet. Generate one instantly with AI or build a custom meal plan.
+                            </p>
+                            <div class="flex items-center justify-center gap-2 pt-1 flex-wrap">
+                                <button type="button" 
+                                        @click="showAiDietModal = true" 
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                                    <span>✨</span>
+                                    <span>AI Diet Generator</span>
+                                </button>
+                                <button type="button" 
+                                        @click="openCreateDiet()" 
+                                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                    <span>Create Custom Diet</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Pre-made Diet Templates Quick-Assign -->
+                    @if(isset($templateDietPlans) && $templateDietPlans->isNotEmpty())
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-black text-slate-900 dark:text-white text-xs uppercase tracking-wider">📋 Quick Assign from Diet Templates</h4>
+                                <a href="{{ route('app.diets.index') }}" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold">Manage All Diets →</a>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @foreach($templateDietPlans as $tpl)
+                                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 shadow-xs hover:border-emerald-500/30 transition-all">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h5 class="font-bold text-slate-900 dark:text-white text-xs leading-snug">{{ $tpl->title }}</h5>
+                                                <span class="px-2 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold shrink-0">🔥 {{ $tpl->daily_calories ?? 2000 }} kcal</span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                                {{ $tpl->guidelines ?? 'Standard nutritional diet chart.' }}
+                                            </p>
+                                            <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-500 dark:text-slate-400 font-semibold font-mono">
+                                                <span class="text-rose-600 dark:text-rose-400">{{ $tpl->protein_grams ?? 0 }}g P</span>
+                                                <span>•</span>
+                                                <span class="text-amber-600 dark:text-amber-400">{{ $tpl->carbs_grams ?? 0 }}g C</span>
+                                                <span>•</span>
+                                                <span class="text-cyan-600 dark:text-cyan-400">{{ $tpl->fat_grams ?? 0 }}g F</span>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" 
+                                                @click="loadDietTemplate({{ Js::from($tpl) }})" 
+                                                class="w-full py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:bg-emerald-600/20 dark:hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 dark:hover:text-white text-[11px] font-bold transition-all text-center cursor-pointer">
+                                            + Assign to {{ $member->first_name }}
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- TAB 7: CLASSES -->
@@ -3251,6 +3830,540 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- CREATE / ASSIGN WORKOUT ROUTINE MODAL      -->
+        <!-- ========================================== -->
+        <div x-show="showAddWorkoutModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto">
+            <div @click.away="showAddWorkoutModal = false" 
+                 class="w-full max-w-3xl my-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg font-bold border border-indigo-200 dark:border-indigo-500/30">
+                            🏋️
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base">Assign Workout Routine</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Custom workout split and exercises for <strong class="text-slate-800 dark:text-slate-200">{{ $member->full_name }}</strong></p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showAddWorkoutModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('app.workouts.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="member_id" value="{{ $member->id }}">
+
+                    <!-- Quick Preset Split Buttons -->
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">⚡ Quick Split Presets:</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" @click="loadWorkoutPreset('push')" class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-200 dark:border-indigo-500/30 transition-all cursor-pointer">
+                                Push Day
+                            </button>
+                            <button type="button" @click="loadWorkoutPreset('pull')" class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-200 dark:border-indigo-500/30 transition-all cursor-pointer">
+                                Pull Day
+                            </button>
+                            <button type="button" @click="loadWorkoutPreset('legs')" class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-[11px] font-bold border border-indigo-200 dark:border-indigo-500/30 transition-all cursor-pointer">
+                                Leg Day
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Title & Goal -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Routine Title *</label>
+                            <input type="text" 
+                                   name="title" 
+                                   x-model="workoutTitle" 
+                                   required 
+                                   placeholder="e.g. 4-Day Hypertrophy Split" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Goal</label>
+                            <select name="goal" 
+                                    x-model="workoutGoal" 
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <option value="General Fitness">General Fitness</option>
+                                <option value="Hypertrophy">Hypertrophy / Muscle Building</option>
+                                <option value="Strength">Strength & Power</option>
+                                <option value="Fat Loss">Fat Loss & Conditioning</option>
+                                <option value="Endurance">Endurance & Stamina</option>
+                                <option value="Mobility">Mobility & Posture</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Level & Coach -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Experience Level</label>
+                            <select name="level" 
+                                    x-model="workoutLevel" 
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Assigned Trainer / Coach</label>
+                            <select name="trainer_id" 
+                                    x-model="workoutTrainerId" 
+                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <option value="">-- No Specific Coach --</option>
+                                @foreach($trainers as $t)
+                                    <option value="{{ $t->id }}">{{ $t->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Start & End Date -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Start Date</label>
+                            <input type="date" 
+                                   name="start_date" 
+                                   x-model="workoutStartDate" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">End Date (Optional)</label>
+                            <input type="date" 
+                                   name="end_date" 
+                                   x-model="workoutEndDate" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Prescribed Exercises Table -->
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Prescribed Exercises List</label>
+                            <button type="button" 
+                                    @click="addWorkoutExercise()" 
+                                    class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Add Exercise</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <template x-for="(ex, idx) in workoutExercises" :key="idx">
+                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 relative">
+                                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                        <div class="sm:col-span-3">
+                                            <input type="text" 
+                                                   :name="'exercises[' + idx + '][day]'" 
+                                                   x-model="ex.day" 
+                                                   placeholder="Day (e.g. Day 1)" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div class="sm:col-span-9 flex items-center gap-2">
+                                            <input type="text" 
+                                                   :name="'exercises[' + idx + '][exercise_name]'" 
+                                                   x-model="ex.exercise_name" 
+                                                   required 
+                                                   placeholder="Exercise Name (e.g. Barbell Bench Press)" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                            <button type="button" 
+                                                    @click="removeWorkoutExercise(idx)" 
+                                                    class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition-colors shrink-0 cursor-pointer" 
+                                                    title="Remove Exercise">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Sets</label>
+                                            <input type="number" 
+                                                   :name="'exercises[' + idx + '][sets]'" 
+                                                   x-model="ex.sets" 
+                                                   min="1" 
+                                                   class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Reps</label>
+                                            <input type="text" 
+                                                   :name="'exercises[' + idx + '][reps]'" 
+                                                   x-model="ex.reps" 
+                                                   placeholder="e.g. 8-10" 
+                                                   class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Weight / Load</label>
+                                            <input type="text" 
+                                                   :name="'exercises[' + idx + '][weight]'" 
+                                                   x-model="ex.weight" 
+                                                   placeholder="e.g. 50 kg" 
+                                                   class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Rest (Sec)</label>
+                                            <input type="number" 
+                                                   :name="'exercises[' + idx + '][rest_seconds]'" 
+                                                   x-model="ex.rest_seconds" 
+                                                   placeholder="60" 
+                                                   class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <input type="text" 
+                                               :name="'exercises[' + idx + '][notes]'" 
+                                               x-model="ex.notes" 
+                                               placeholder="Execution cues / tempo (optional)..." 
+                                               class="w-full px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Coach Notes & Warmup Instructions</label>
+                        <textarea name="notes" 
+                                  x-model="workoutNotes" 
+                                  rows="2" 
+                                  placeholder="Warm-up thoroughly, focus on progressive overload, drink enough water..." 
+                                  class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none shadow-sm"></textarea>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" 
+                                @click="showAddWorkoutModal = false" 
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save & Assign Routine</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- CREATE / ASSIGN DIET PLAN MODAL            -->
+        <!-- ========================================== -->
+        <div x-show="showAddDietModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto">
+            <div @click.away="showAddDietModal = false" 
+                 class="w-full max-w-3xl my-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg font-bold border border-emerald-200 dark:border-emerald-500/30">
+                            🥗
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base">Assign Diet & Nutrition Chart</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Meal schedule & macros for <strong class="text-slate-800 dark:text-slate-200">{{ $member->full_name }}</strong></p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showAddDietModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('app.diets.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="member_id" value="{{ $member->id }}">
+
+                    <!-- Title & Calories -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Diet Title *</label>
+                            <input type="text" 
+                                   name="title" 
+                                   x-model="dietTitle" 
+                                   required 
+                                   placeholder="e.g. Lean Muscle Hypertrophy Diet" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Daily Calories (kcal)</label>
+                            <input type="number" 
+                                   step="50" 
+                                   name="daily_calories" 
+                                   x-model="dietCalories" 
+                                   placeholder="2000" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Macro Splits -->
+                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Target Daily Macronutrients</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase">Protein (g)</label>
+                                <input type="number" 
+                                       name="protein_grams" 
+                                       x-model="dietProtein" 
+                                       class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold text-rose-600 dark:text-rose-400 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase">Carbs (g)</label>
+                                <input type="number" 
+                                       name="carbs_grams" 
+                                       x-model="dietCarbs" 
+                                       class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold text-amber-600 dark:text-amber-400 focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase">Fat (g)</label>
+                                <input type="number" 
+                                       name="fat_grams" 
+                                       x-model="dietFat" 
+                                       class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 focus:outline-none focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coach & Dates -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nutritionist / Trainer</label>
+                            <select name="trainer_id" 
+                                    x-model="dietTrainerId" 
+                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <option value="">-- None / Self --</option>
+                                @foreach($trainers as $t)
+                                    <option value="{{ $t->id }}">{{ $t->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Start Date</label>
+                            <input type="date" 
+                                   name="start_date" 
+                                   x-model="dietStartDate" 
+                                   class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">End Date (Optional)</label>
+                            <input type="date" 
+                                   name="end_date" 
+                                   x-model="dietEndDate" 
+                                   class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Scheduled Meals List -->
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Scheduled Meals & Portions</label>
+                            <button type="button" 
+                                    @click="addDietMeal()" 
+                                    class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Add Meal</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <template x-for="(meal, idx) in dietMeals" :key="idx">
+                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 relative">
+                                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                        <div class="sm:col-span-4">
+                                            <select :name="'meals[' + idx + '][meal_type]'" 
+                                                    x-model="meal.meal_type" 
+                                                    class="w-full px-2 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                                <option value="breakfast">Breakfast</option>
+                                                <option value="morning_snack">Mid-Morning Snack</option>
+                                                <option value="lunch">Lunch</option>
+                                                <option value="evening_snack">Evening Snack</option>
+                                                <option value="post_workout">Post-Workout Fuel</option>
+                                                <option value="dinner">Dinner</option>
+                                            </select>
+                                        </div>
+                                        <div class="sm:col-span-3">
+                                            <input type="time" 
+                                                   :name="'meals[' + idx + '][recommended_time]'" 
+                                                   x-model="meal.recommended_time" 
+                                                   placeholder="Time" 
+                                                   class="w-full px-2 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div class="sm:col-span-5 flex items-center gap-2">
+                                            <input type="text" 
+                                                   :name="'meals[' + idx + '][meal_name]'" 
+                                                   x-model="meal.meal_name" 
+                                                   required 
+                                                   placeholder="Meal Title (e.g. Oats & Eggs)" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                            <button type="button" 
+                                                    @click="removeDietMeal(idx)" 
+                                                    class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 transition-colors shrink-0 cursor-pointer" 
+                                                    title="Remove Meal">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                        <div class="sm:col-span-9">
+                                            <input type="text" 
+                                                   :name="'meals[' + idx + '][items_description]'" 
+                                                   x-model="meal.items_description" 
+                                                   placeholder="Food items & quantities (e.g. 3 Boiled Eggs + 2 Brown Bread + 1 Apple)" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                        <div class="sm:col-span-3">
+                                            <input type="number" 
+                                                   :name="'meals[' + idx + '][calories]'" 
+                                                   x-model="meal.calories" 
+                                                   placeholder="Calories (kcal)" 
+                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none focus:border-indigo-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Guidelines -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hydration & Dietary Advice</label>
+                        <textarea name="guidelines" 
+                                  x-model="dietGuidelines" 
+                                  rows="2" 
+                                  placeholder="Drink 3-4 liters of water daily, avoid added refined sugar..." 
+                                  class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none shadow-sm"></textarea>
+                    </div>
+
+                    <!-- Modal Actions -->
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" 
+                                @click="showAddDietModal = false" 
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save & Assign Diet Plan</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- AI DIET GENERATOR MODAL                    -->
+        <!-- ========================================== -->
+        <div x-show="showAiDietModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto">
+            <div @click.away="showAiDietModal = false" 
+                 class="w-full max-w-lg my-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-2xl space-y-4">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center text-lg font-bold shadow-md shadow-indigo-500/20">
+                            ✨
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base">Instant AI Diet Generator</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Scientific nutrition plan for <strong class="text-slate-800 dark:text-slate-200">{{ $member->full_name }}</strong></p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showAiDietModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Error Alert -->
+                <div x-show="aiDietError" x-cloak class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold" x-text="aiDietError"></div>
+
+                <div class="space-y-3.5">
+                    <!-- Goal -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Fitness Goal</label>
+                        <select x-model="aiDietGoal" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                            <option value="weight_loss">Fat Loss & Calorie Deficit</option>
+                            <option value="muscle_gain">Lean Muscle Hypertrophy & Bulking</option>
+                            <option value="maintenance">Body Recomposition & Maintenance</option>
+                            <option value="endurance">Cardio & Athletic Endurance</option>
+                        </select>
+                    </div>
+
+                    <!-- Diet Preference -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Dietary Preference</label>
+                        <select x-model="aiDietPreference" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                            <option value="vegetarian">Vegetarian (Indian / Standard)</option>
+                            <option value="non_vegetarian">High-Protein Non-Vegetarian (Chicken/Eggs/Fish)</option>
+                            <option value="eggetarian">Eggetarian</option>
+                            <option value="vegan">100% Plant-Based Vegan</option>
+                            <option value="keto">Keto (Low Carb / High Fat)</option>
+                        </select>
+                    </div>
+
+                    <!-- Daily Calories -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Daily Target (kcal)</label>
+                            <input type="number" 
+                                   step="50" 
+                                   x-model="aiDietCalories" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Meals Per Day</label>
+                            <select x-model="aiDietMealsPerDay" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <option value="3">3 Meals (Breakfast, Lunch, Dinner)</option>
+                                <option value="4" selected>4 Meals (+ Evening Snack)</option>
+                                <option value="5">5 Meals (+ Pre/Post Workout)</option>
+                                <option value="6">6 Small Frequent Meals</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" 
+                            @click="showAiDietModal = false" 
+                            :disabled="aiDietLoading"
+                            class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
+                        Cancel
+                    </button>
+                    <button type="button" 
+                            @click="generateAiDiet()" 
+                            :disabled="aiDietLoading"
+                            class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50">
+                        <template x-if="aiDietLoading">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                        <template x-if="!aiDietLoading">
+                            <span>✨</span>
+                        </template>
+                        <span x-text="aiDietLoading ? 'Generating AI Diet...' : 'Generate & Assign Plan'"></span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
