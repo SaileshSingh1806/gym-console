@@ -44,6 +44,46 @@
             this.selectedScheduleId = scheduleId;
             this.showEnrollClassModal = true;
         },
+        showBookServiceModal: false,
+        selectedServiceId: '',
+        selectedServiceAmount: 0,
+        selectedServiceIsLocker: false,
+        selectedServiceIsCountable: false,
+        selectedServiceSessionCount: 1,
+        serviceBookingDate: '{{ now()->format('Y-m-d') }}',
+        serviceBookingTime: '',
+        serviceAmountPaid: 0,
+        serviceLockerNumber: '',
+        serviceNotes: '',
+        openBookService(serviceId = '', serviceAmount = 0, isLocker = false, isCountable = false, sessionCount = 1) {
+            this.selectedServiceId = serviceId;
+            this.selectedServiceAmount = serviceAmount;
+            this.serviceAmountPaid = serviceAmount;
+            this.selectedServiceIsLocker = isLocker;
+            this.selectedServiceIsCountable = isCountable;
+            this.selectedServiceSessionCount = sessionCount;
+            this.serviceBookingDate = '{{ now()->format('Y-m-d') }}';
+            this.serviceBookingTime = '';
+            this.serviceLockerNumber = '';
+            this.serviceNotes = '';
+            this.showBookServiceModal = true;
+        },
+        updateServiceSelection(e) {
+            const opt = e.target.selectedOptions[0];
+            if (opt && opt.dataset.price !== undefined) {
+                this.selectedServiceAmount = opt.dataset.price;
+                this.serviceAmountPaid = opt.dataset.price;
+                this.selectedServiceIsLocker = opt.dataset.locker === '1';
+                this.selectedServiceIsCountable = opt.dataset.countable === '1';
+                this.selectedServiceSessionCount = opt.dataset.sessions || 1;
+            } else {
+                this.selectedServiceAmount = 0;
+                this.serviceAmountPaid = 0;
+                this.selectedServiceIsLocker = false;
+                this.selectedServiceIsCountable = false;
+                this.selectedServiceSessionCount = 1;
+            }
+        },
         selectedInvoice: {
             id: null,
             receipt_no: '',
@@ -912,42 +952,192 @@
                 </div>
 
                 <!-- TAB 3: SERVICES -->
-                <div x-show="activeTab === 'services'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Gym Amenities & Services</h3>
+                <div x-show="activeTab === 'services'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>✨</span>
+                                <span>Gym Amenities & Services</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage spa, sauna, locker rental, and booked services for {{ $member->first_name }}</p>
+                        </div>
+                        <button type="button" 
+                                @click="openBookService()" 
+                                class="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            <span>+ Book Service</span>
+                        </button>
                     </div>
 
                     @php
-                        $memberServiceBookings = \App\Models\GymServiceBooking::with('service')
+                        $memberServiceBookings = $member->serviceBookings ?? \App\Models\GymServiceBooking::with('service')
                             ->where('member_id', $member->id)
                             ->latest()
                             ->get();
                     @endphp
 
                     @if($memberServiceBookings->isEmpty())
-                        <div class="py-10 text-center text-slate-500 dark:text-slate-400">
-                            <svg class="w-10 h-10 mx-auto mb-3 text-slate-400 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                            <p class="text-xs font-semibold">No services booked yet</p>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-500 mt-1">Services booked for this member will appear here.</p>
+                        <div class="p-6 sm:p-8 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                            <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-2xl border border-indigo-200 dark:border-indigo-500/20">
+                                🧖
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">No Services Booked Yet</h4>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                                {{ $member->first_name }} has not booked any gym amenities, spa/sauna, or locker services yet.
+                            </p>
+                            <button type="button" 
+                                    @click="openBookService()" 
+                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                <span>Book A Service Now</span>
+                            </button>
                         </div>
                     @else
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                             @foreach($memberServiceBookings as $booking)
-                                <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm">
-                                    <div class="min-w-0">
-                                        <span class="font-bold text-slate-900 dark:text-white block truncate">{{ $booking->service?->name ?? 'Service' }}</span>
-                                        <span class="text-[11px] text-slate-500 dark:text-slate-400">
-                                            Booked: {{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : '—' }}
-                                            @if($booking->service?->is_session_countable)
-                                                · {{ $booking->sessions_left }}/{{ $booking->total_sessions }} sessions left
-                                            @endif
-                                        </span>
+                                @php
+                                    $svc = $booking->service;
+                                    $svcNameLower = strtolower($svc?->name ?? '');
+                                    $icon = match(true) {
+                                        str_contains($svcNameLower, 'steam') || str_contains($svcNameLower, 'sauna') => '🧖',
+                                        str_contains($svcNameLower, 'massage') || str_contains($svcNameLower, 'spa') => '💆',
+                                        str_contains($svcNameLower, 'locker') => '🔒',
+                                        str_contains($svcNameLower, 'pool') || str_contains($svcNameLower, 'swim') => '🏊',
+                                        str_contains($svcNameLower, 'physio') || str_contains($svcNameLower, 'therapy') => '🩺',
+                                        str_contains($svcNameLower, 'diet') || str_contains($svcNameLower, 'nutrition') => '🥗',
+                                        str_contains($svcNameLower, 'towel') || str_contains($svcNameLower, 'laundry') => '🧺',
+                                        default => '✨',
+                                    };
+                                @endphp
+                                <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-4 shadow-sm hover:border-indigo-500/40 transition-all">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex items-start gap-3">
+                                            <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg shrink-0 border border-indigo-200 dark:border-indigo-500/20">
+                                                {{ $icon }}
+                                            </div>
+                                            <div>
+                                                <h4 class="font-extrabold text-slate-900 dark:text-white text-sm">{{ $svc?->name ?? 'Gym Service' }}</h4>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                                                    <span class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">{{ $currency }}{{ number_format($booking->amount_paid, 0) }}</span>
+                                                    @if($booking->locker_number)
+                                                        <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-[10px]">Locker: {{ $booking->locker_number }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="mt-2 text-xs font-semibold text-slate-700 dark:text-slate-300 space-y-0.5">
+                                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                                                        Booked: <strong class="text-slate-700 dark:text-slate-300">{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') : $booking->created_at->format('d M Y') }}</strong>
+                                                        @if($booking->booking_time)
+                                                            <span>• {{ $booking->booking_time }}</span>
+                                                        @endif
+                                                    </p>
+                                                    @if($svc?->is_session_countable)
+                                                        <p class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold">
+                                                            Sessions: {{ $booking->sessions_left }} / {{ $booking->total_sessions }} remaining
+                                                        </p>
+                                                    @endif
+                                                    @if($booking->notes)
+                                                        <p class="text-[10px] text-slate-400 dark:text-slate-500 italic mt-0.5">"{{ $booking->notes }}"</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Badge -->
+                                        @if($booking->status === 'active')
+                                            <span class="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-black text-[10px] border border-emerald-200 dark:border-emerald-500/20 shrink-0">
+                                                Active
+                                            </span>
+                                        @elseif($booking->status === 'completed')
+                                            <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-black text-[10px] border border-slate-200 dark:border-slate-700 shrink-0">
+                                                Completed
+                                            </span>
+                                        @elseif($booking->status === 'pending')
+                                            <span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black text-[10px] border border-amber-200 dark:border-amber-500/20 shrink-0">
+                                                Pending
+                                            </span>
+                                        @else
+                                            <span class="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 font-black text-[10px] border border-rose-200 dark:border-rose-500/20 shrink-0">
+                                                {{ ucfirst($booking->status) }}
+                                            </span>
+                                        @endif
                                     </div>
-                                    <span class="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold {{ $booking->status === 'active' ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' }}">
-                                        {{ ucfirst($booking->status) }}
-                                    </span>
+
+                                    <!-- Actions Footer -->
+                                    <div class="flex items-center justify-between pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
+                                        <div class="flex items-center gap-2">
+                                            @if($booking->status === 'active' && $booking->sessions_left > 0)
+                                                <form action="{{ route('app.services.bookings.deduct', $booking->id) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all cursor-pointer">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                        <span>Deduct Session</span>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <form action="{{ route('app.services.bookings.status', $booking->id) }}" method="POST" class="flex items-center gap-1.5">
+                                                @csrf
+                                                <select name="status" onchange="this.form.submit()" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:border-indigo-500">
+                                                    <option value="active" {{ $booking->status === 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="completed" {{ $booking->status === 'completed' ? 'selected' : '' }}>Completed</option>
+                                                    <option value="pending" {{ $booking->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="cancelled" {{ $booking->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                </select>
+                                            </form>
+                                        </div>
+
+                                        <form action="{{ route('app.services.bookings.delete', $booking->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this service booking record?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-rose-600 dark:text-rose-400 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                <span>Delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             @endforeach
+                        </div>
+                    @endif
+
+                    <!-- Available Amenities / Services Grid for Quick Booking -->
+                    @if(isset($availableServices) && $availableServices->isNotEmpty())
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-black text-slate-900 dark:text-white text-xs uppercase tracking-wider">Available Gym Amenities & Add-on Services</h4>
+                                <a href="{{ route('app.services.index') }}" class="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold">Manage All Services →</a>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                @foreach($availableServices as $svc)
+                                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-3 shadow-xs">
+                                        <div>
+                                            <div class="flex items-start justify-between gap-2">
+                                                <h5 class="font-bold text-slate-900 dark:text-white text-xs">{{ $svc->name }}</h5>
+                                                <span class="text-xs font-black text-amber-600 dark:text-amber-400 shrink-0">{{ $currency }}{{ number_format($svc->amount, 0) }}</span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                                {{ $svc->description ?? 'Gym amenity service available for members.' }}
+                                            </p>
+                                            <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                                                <span>⏱ {{ $svc->duration_minutes }} mins</span>
+                                                <span>•</span>
+                                                <span>{{ $svc->timeslot_availability ?? 'By Appointment' }}</span>
+                                                @if($svc->is_session_countable)
+                                                    <span>•</span>
+                                                    <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ $svc->session_count }} sessions</span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <button type="button" 
+                                                @click="openBookService('{{ $svc->id }}', {{ (float)$svc->amount }}, {{ $svc->is_locker_service ? 'true' : 'false' }}, {{ $svc->is_session_countable ? 'true' : 'false' }}, {{ (int)$svc->session_count }})" 
+                                                class="w-full py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 hover:text-white dark:bg-indigo-600/20 dark:hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 dark:hover:text-white text-[11px] font-bold transition-all text-center cursor-pointer">
+                                            + Book Service
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -2942,6 +3132,122 @@
                                 class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             <span>Confirm Enrollment</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- BOOK SERVICE MODAL -->
+        <div x-show="showBookServiceModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+            <div @click.away="showBookServiceModal = false" 
+                 class="w-full max-w-lg rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
+                            ✨
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base">Book Service for {{ $member->full_name }}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Enroll member into an add-on gym service or assign a locker</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showBookServiceModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form action="{{ route('app.services.bookings.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="member_id" value="{{ $member->id }}">
+                    
+                    <!-- Service Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Select Service / Amenity *</label>
+                        <select name="gym_service_id" 
+                                x-model="selectedServiceId" 
+                                @change="updateServiceSelection($event)"
+                                required 
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                            <option value="">-- Choose Service --</option>
+                            @if(isset($availableServices) && $availableServices->isNotEmpty())
+                                @foreach($availableServices as $s)
+                                    <option value="{{ $s->id }}" 
+                                            data-price="{{ $s->amount }}"
+                                            data-locker="{{ $s->is_locker_service ? '1' : '0' }}"
+                                            data-countable="{{ $s->is_session_countable ? '1' : '0' }}"
+                                            data-sessions="{{ $s->session_count }}">
+                                        {{ $s->name }} ({{ $currency }}{{ number_format($s->amount, 0) }} - {{ $s->is_session_countable ? $s->session_count . ' sessions' : 'single' }})
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <!-- Booking Date & Time -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Booking Date *</label>
+                            <input type="date" 
+                                   name="booking_date" 
+                                   x-model="serviceBookingDate" 
+                                   required
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Time (Optional)</label>
+                            <input type="time" 
+                                   name="booking_time" 
+                                   x-model="serviceBookingTime" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Amount Paid & Locker Number -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Amount Paid ({{ $currency }})</label>
+                            <input type="number" 
+                                   step="1" 
+                                   min="0"
+                                   name="amount_paid" 
+                                   x-model="serviceAmountPaid" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Locker Number (If Applicable)</label>
+                            <input type="text" 
+                                   name="locker_number" 
+                                   x-model="serviceLockerNumber" 
+                                   placeholder="e.g. L-102"
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Notes / Special Instructions</label>
+                        <textarea name="notes" 
+                                  x-model="serviceNotes" 
+                                  rows="2" 
+                                  placeholder="Optional booking notes..." 
+                                  class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none shadow-sm"></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" 
+                                @click="showBookServiceModal = false" 
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 font-bold text-xs transition-colors cursor-pointer text-center">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Confirm Service Booking</span>
                         </button>
                     </div>
                 </form>

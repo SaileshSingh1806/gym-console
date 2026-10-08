@@ -128,6 +128,11 @@ class Member extends Model
         return $this->hasMany(ClassBooking::class);
     }
 
+    public function serviceBookings(): HasMany
+    {
+        return $this->hasMany(GymServiceBooking::class);
+    }
+
     public function isMembershipActive(): bool
     {
         return $this->status === 'ACTIVE' && $this->activeMembership()->exists();

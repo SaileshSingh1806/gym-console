@@ -691,6 +691,7 @@ class AppController extends Controller
             'dietPlans',
             'classBookings.schedule.gymClass.instructor',
             'classBookings.schedule.trainer',
+            'serviceBookings.service',
         ])->findOrFail($id);
 
         $membershipPlans = MembershipPlan::where('is_active', true)->get();
@@ -729,6 +730,10 @@ class AppController extends Controller
             ->with(['schedules.trainer', 'instructor'])
             ->get();
 
+        $availableServices = GymService::where('tenant_id', $tenant->id)
+            ->where('status', 'active')
+            ->get();
+
         return view('app.members.show', compact(
             'member',
             'activeMembership',
@@ -743,7 +748,8 @@ class AppController extends Controller
             'salesRep',
             'auditLogs',
             'availableClassSchedules',
-            'allGymClasses'
+            'allGymClasses',
+            'availableServices'
         ));
     }
 
