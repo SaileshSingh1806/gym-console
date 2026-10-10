@@ -42,12 +42,12 @@ class Membership extends Model
 
     public function member(): BelongsTo
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Member::class)->withTrashed();
     }
 
     public function plan(): BelongsTo
     {
-        return $this->belongsTo(MembershipPlan::class, 'membership_plan_id');
+        return $this->belongsTo(MembershipPlan::class, 'membership_plan_id')->withTrashed();
     }
 
     public function payments(): HasMany

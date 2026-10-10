@@ -7,6 +7,7 @@
     <div x-data="{
         showAddRoleModal: false,
         showEditRoleModal: false,
+        searchQuery: '',
         roleForm: {
             id: null,
             display_name: '',
@@ -21,6 +22,16 @@
                 description: role.description || ''
             };
             this.showEditRoleModal = true;
+        },
+        toggleRoleColumn(roleId, selectAll) {
+            const checkboxes = document.querySelectorAll(`input[data-role='${roleId}']`);
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll;
+            });
+        },
+        matchesSearch(text) {
+            if (!this.searchQuery) return true;
+            return text.toLowerCase().includes(this.searchQuery.toLowerCase().trim());
         }
     }" class="space-y-6">
 
@@ -47,7 +58,7 @@
             <div>
                 <button type="button" @click="showAddRoleModal = true" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>New Role</span>
+                    <span>New Custom Role</span>
                 </button>
             </div>
         </div>
@@ -59,13 +70,12 @@
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                     <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Custom & System Roles</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Manage roles for your gym and customize their permission access levels below.</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Manage roles for your gym and customize their granular permission access levels below.</p>
                 </div>
                 <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">{{ $roles->count() }} Defined Roles</span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
                 <table class="w-full min-w-[550px] text-left text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-200 dark:border-slate-800">
                         <tr>
@@ -152,7 +162,7 @@
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900">
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Permission Matrix</h3>
+                            <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Granular Permission Matrix</h3>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">Role Access Control</span>
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 flex items-center gap-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>
@@ -160,30 +170,45 @@
                             </span>
                         </div>
                         <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                            Only permissions enabled in your gym's active subscription plan are shown below. Check the boxes to grant access to each role.
+                            Separated Create, View, Edit, Delete and Financials access. Check the boxes to grant or restrict specific actions for each role.
                         </p>
                     </div>
 
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1.5 transition-all self-start sm:self-auto cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Save Permission Matrix</span>
-                    </button>
+                    <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                        <!-- Search / Filter Input -->
+                        <div class="relative">
+                            <input type="text" 
+                                   x-model="searchQuery" 
+                                   placeholder="Filter permissions..." 
+                                   class="pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none w-44 sm:w-56">
+                            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow flex items-center gap-1.5 transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save Matrix</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Matrix Table -->
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                    <table class="w-full min-w-[650px] text-left text-xs border-collapse">
+                    <table class="w-full min-w-[700px] text-left text-xs border-collapse">
                         <!-- Table Head: Roles Columns -->
                         <thead class="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 uppercase tracking-wider text-[10px] font-black border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
                             <tr>
-                                <th class="py-3 px-4 min-w-[260px] bg-slate-50 dark:bg-slate-950">PERMISSION</th>
+                                <th class="py-3 px-4 min-w-[280px] bg-slate-50 dark:bg-slate-950">PERMISSION / ACTION</th>
                                 @foreach($roles as $role)
-                                    <th class="py-3 px-3 text-center min-w-[110px] border-l border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950">
+                                    <th class="py-3 px-3 text-center min-w-[120px] border-l border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950">
                                         <div class="font-extrabold text-slate-900 dark:text-white text-[11px] uppercase tracking-wide">{{ $role->display_name }}</div>
                                         @if(!$role->is_system)
                                             <div class="text-[9px] text-indigo-600 dark:text-indigo-400 font-bold lowercase tracking-normal">custom</div>
                                         @endif
+                                        <div class="flex items-center justify-center gap-1.5 mt-1 font-normal lowercase">
+                                            <button type="button" @click="toggleRoleColumn({{ $role->id }}, true)" class="text-[9px] text-indigo-600 dark:text-indigo-400 hover:underline">all</button>
+                                            <span class="text-slate-300 dark:text-slate-700">|</span>
+                                            <button type="button" @click="toggleRoleColumn({{ $role->id }}, false)" class="text-[9px] text-slate-400 hover:underline">none</button>
+                                        </div>
                                     </th>
                                 @endforeach
                             </tr>
@@ -207,12 +232,36 @@
                                     @php
                                         $permObj = $allPermissions->get($p['name']);
                                         $permId = $permObj?->id;
+                                        $pName = strtolower($p['name']);
+                                        
+                                        // Tag badge determination
+                                        $badgeType = 'VIEW';
+                                        $badgeClass = 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
+                                        if (str_contains($pName, 'create') || str_contains($pName, 'add') || str_contains($pName, 'record') || str_contains($pName, 'book')) {
+                                            $badgeType = 'CREATE';
+                                            $badgeClass = 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20';
+                                        } elseif (str_contains($pName, 'edit') || str_contains($pName, 'update') || str_contains($pName, 'manage') || str_contains($pName, 'freeze')) {
+                                            $badgeType = 'EDIT';
+                                            $badgeClass = 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20';
+                                        } elseif (str_contains($pName, 'delete') || str_contains($pName, 'cancel') || str_contains($pName, 'refund')) {
+                                            $badgeType = 'DELETE';
+                                            $badgeClass = 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20';
+                                        } elseif (str_contains($pName, 'financials') || str_contains($pName, 'balance_sheet')) {
+                                            $badgeType = 'FINANCE';
+                                            $badgeClass = 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-500/20';
+                                        }
                                     @endphp
-                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                    <tr x-show="matchesSearch('{{ addslashes($p['display_name'] . ' ' . $p['name'] . ' ' . $p['description'] . ' ' . $groupData['label']) }}')"
+                                        class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                                         <!-- Permission Info (Name, Description, Code) -->
                                         <td class="py-2.5 px-4">
-                                            <div class="font-bold text-slate-900 dark:text-white text-xs">{{ $p['display_name'] }}</div>
-                                            <div class="text-[10px] text-slate-500 dark:text-slate-400 leading-snug">{{ $p['description'] }}</div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-1.5 py-0.5 rounded text-[8px] font-black tracking-wider uppercase border {{ $badgeClass }}">
+                                                    {{ $badgeType }}
+                                                </span>
+                                                <span class="font-bold text-slate-900 dark:text-white text-xs">{{ $p['display_name'] }}</span>
+                                            </div>
+                                            <div class="text-[10px] text-slate-500 dark:text-slate-400 leading-snug mt-0.5">{{ $p['description'] }}</div>
                                             <div class="font-mono text-[9px] text-indigo-600 dark:text-indigo-400/70 mt-0.5">{{ $p['name'] }}</div>
                                         </td>
 
@@ -227,6 +276,7 @@
                                                         <input type="checkbox" 
                                                                name="matrix[{{ $role->id }}][]" 
                                                                value="{{ $permId }}" 
+                                                               data-role="{{ $role->id }}"
                                                                {{ $hasPerm ? 'checked' : '' }}
                                                                class="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-indigo-600 focus:ring-0 focus:ring-offset-0 cursor-pointer">
                                                     </label>
@@ -256,9 +306,7 @@
         <!-- ========================================== -->
         <!-- MODAL 1: ADD CUSTOM ROLE                   -->
         <!-- ========================================== -->
-        <div x-show="showAddRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showAddRoleModal = false">
-        <div x-show="showAddRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+        <div x-show="showAddRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showAddRoleModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
@@ -301,9 +349,7 @@
         <!-- ========================================== -->
         <!-- MODAL 2: EDIT ROLE                         -->
         <!-- ========================================== -->
-        <div x-show="showEditRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showEditRoleModal = false">
-        <div x-show="showEditRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+        <div x-show="showEditRoleModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showEditRoleModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>

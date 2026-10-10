@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Member;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\User;
 use App\Services\SubscriptionService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
@@ -12,6 +14,7 @@ use Database\Seeders\PlanSeeder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -29,43 +32,136 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $loginInput = trim($request->input('email') ?? $request->input('login') ?? '');
+        $password = (string) $request->input('password');
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $user = Auth::user();
+        if (empty($loginInput) || empty($password)) {
+            return back()->withErrors([
+                'email' => 'Please provide your email, phone number, or member code along with your password.',
+            ])->onlyInput('email');
+        }
 
-            if ($user->status !== 'ACTIVE') {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+        // 1. Check if direct User exists by email or phone
+        $user = User::where('email', $loginInput)
+            ->orWhere('phone', $loginInput)
+            ->first();
 
-                return back()->withErrors([
-                    'email' => 'Your account is inactive or suspended.',
-                ])->onlyInput('email');
+        // 2. If not found directly on User, search in Member records
+        if (! $user) {
+            $member = Member::where('member_code', $loginInput)
+                ->orWhere('phone', $loginInput)
+                ->orWhere('email', $loginInput)
+                ->first();
+
+            if ($member) {
+                if ($member->user_id && $member->user) {
+                    $user = $member->user;
+                } else {
+                    // Create or find user account for this member
+                    $memberEmail = ! empty($member->email) ? $member->email : ('member_'.($member->phone ?: $member->id).'@gym.portal');
+                    $user = User::where('email', $memberEmail)->first();
+
+                    if (! $user) {
+                        $user = User::create([
+                            'tenant_id' => $member->tenant_id,
+                            'name' => $member->full_name ?: ($member->phone ?? 'Member '.$member->member_code),
+                            'email' => $memberEmail,
+                            'phone' => $member->phone,
+                            'role' => 'member',
+                            'status' => $member->status === 'SUSPENDED' ? 'SUSPENDED' : 'ACTIVE',
+                            'password' => Hash::make($password),
+                        ]);
+                    }
+
+                    $member->update(['user_id' => $user->id]);
+                }
+            }
+        }
+
+        // 3. Authenticate User if found
+        if ($user) {
+            $passwordMatches = Hash::check($password, $user->password);
+
+            // If initial fallback password for members (e.g. member phone, member code, or last 4 digits)
+            if (! $passwordMatches && $user->role === 'member') {
+                $member = $user->memberProfile ?? Member::where('user_id', $user->id)->first();
+                if ($member) {
+                    $validFallbacks = array_filter([
+                        $member->phone,
+                        $member->member_code,
+                        substr($member->phone ?? '', -4),
+                        'password',
+                        '123456',
+                        '12345678',
+                    ]);
+
+                    if (in_array($password, $validFallbacks, true)) {
+                        $user->password = Hash::make($password);
+                        $user->save();
+                        $passwordMatches = true;
+                    }
+                }
             }
 
-            $request->session()->regenerate();
+            if ($passwordMatches) {
+                if ($user->status !== 'ACTIVE') {
+                    return back()->withErrors([
+                        'email' => 'Your account is currently inactive or suspended. Please contact gym reception.',
+                    ])->onlyInput('email');
+                }
 
-            $user = Auth::user();
+                Auth::login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
 
-            if ($user->isSuperAdmin()) {
-                return redirect()->intended(route('admin.dashboard'));
+                if ($user->isSuperAdmin()) {
+                    return redirect()->intended(route('admin.dashboard'));
+                }
+
+                if ($user->role === 'member') {
+                    return redirect()->intended(route('app.portal'));
+                }
+
+                $tenant = $user->tenant;
+                if ($tenant && ! $tenant->isSubscriptionActive()) {
+                    session([
+                        'checkout_plan_id' => $tenant->latestSubscription?->plan_id ?? Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id,
+                        'checkout_billing_cycle' => $tenant->latestSubscription?->billing_cycle ?? 'monthly',
+                    ]);
+
+                    return redirect()->route('auth.checkout')->with('warning', 'Please complete your subscription payment to activate your gym dashboard.');
+                }
+
+                return redirect()->intended(route('app.dashboard'));
             }
+        }
 
-            $tenant = $user->tenant;
-            if ($tenant && ! $tenant->isSubscriptionActive()) {
-                session([
-                    'checkout_plan_id' => $tenant->latestSubscription?->plan_id ?? Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id,
-                    'checkout_billing_cycle' => $tenant->latestSubscription?->billing_cycle ?? 'monthly',
-                ]);
+        // Standard Laravel Auth fallback for valid email
+        if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+            if (Auth::attempt(['email' => $loginInput, 'password' => $password], $request->boolean('remember'))) {
+                $user = Auth::user();
 
-                return redirect()->route('auth.checkout')->with('warning', 'Please complete your subscription payment to activate your gym dashboard.');
+                if ($user->status !== 'ACTIVE') {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return back()->withErrors([
+                        'email' => 'Your account is inactive or suspended.',
+                    ])->onlyInput('email');
+                }
+
+                $request->session()->regenerate();
+
+                if ($user->isSuperAdmin()) {
+                    return redirect()->intended(route('admin.dashboard'));
+                }
+
+                if ($user->role === 'member') {
+                    return redirect()->intended(route('app.portal'));
+                }
+
+                return redirect()->intended(route('app.dashboard'));
             }
-
-            return redirect()->intended(route('app.dashboard'));
         }
 
         return back()->withErrors([

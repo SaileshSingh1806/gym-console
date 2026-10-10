@@ -45,7 +45,7 @@ class MemberPtPackage extends Model
 
     public function member(): BelongsTo
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Member::class)->withTrashed();
     }
 
     public function trainer(): BelongsTo
@@ -55,7 +55,7 @@ class MemberPtPackage extends Model
 
     public function ptPlan(): BelongsTo
     {
-        return $this->belongsTo(PtPlan::class);
+        return $this->belongsTo(PtPlan::class)->withTrashed();
     }
 
     public function ptSessions(): HasMany

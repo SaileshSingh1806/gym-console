@@ -33,12 +33,12 @@ class MemberPayment extends Model
 
     public function member(): BelongsTo
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Member::class)->withTrashed();
     }
 
     public function membership(): BelongsTo
     {
-        return $this->belongsTo(Membership::class);
+        return $this->belongsTo(Membership::class)->withTrashed();
     }
 
     public function receivedBy(): BelongsTo

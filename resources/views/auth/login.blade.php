@@ -17,7 +17,7 @@
                     </div>
                 @endif
                 <h2 class="text-2xl font-black text-white tracking-tight">Sign in to {{ $platformSettings['app_name'] ?? 'Gym Console' }}</h2>
-                <p class="text-xs text-slate-400 mt-1.5 font-medium">Enter your gym staff, owner, or platform administrator credentials</p>
+                <p class="text-xs text-slate-400 mt-1.5 font-medium">Members, Staff, and Administrators Portal</p>
             </div>
 
             <!-- Error Alerts -->
@@ -31,9 +31,9 @@
             <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Email Address</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Email, Phone, or Member ID</label>
                     <div class="relative">
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="name@yourgym.com" 
+                        <input type="text" name="email" value="{{ old('email') }}" required autofocus placeholder="e.g. member@email.com / 9876543210 / M1001" 
                                class="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs transition-all">
                         <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
                     </div>

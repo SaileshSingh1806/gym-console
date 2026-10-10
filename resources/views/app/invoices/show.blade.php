@@ -382,7 +382,7 @@
                     <div class="text-left space-y-0.5 sm:space-y-1">
                         <p class="font-bold text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
                         <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-normal mt-0.5">
-                            @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800 font-medium">{{ $helpline }}</strong></span>@endif
+                            @ f(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800 font-medium">{{ $helpline }}</strong></span>@endif
                             @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
                             @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800 font-medium">{{ $footerEmail }}</strong></span>@endif
                             @if(!empty($footerWeb))<span>|</span><span>Web: <strong class="text-slate-800 font-medium">{{ $footerWeb }}</strong></span>@endif

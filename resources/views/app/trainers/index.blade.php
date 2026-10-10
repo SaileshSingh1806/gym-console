@@ -8,11 +8,18 @@
         $totalTodaySessions = $trainers->sum(function($t) {
             return $t->today_sessions_count ?? 0;
         });
+        $user = auth()->user();
+        $canCreateTrainer = $user->isGymOwner() || $user->hasPermission('trainers.create');
+        $canEditTrainer = $user->isGymOwner() || $user->hasPermission('trainers.edit');
+        $canAssignTrainer = $user->isGymOwner() || $user->hasPermission('trainers.assign') || $user->hasPermission('trainers.edit');
+        $canDeleteTrainer = $user->isGymOwner() || $user->hasPermission('trainers.delete');
+        $canViewStaff = $user->isGymOwner() || $user->hasPermission('staff.view');
     @endphp
 
     <div class="space-y-6" x-data="{
         showTrainerModal: false,
         showTrainerEditModal: false,
+        showAssignModal: false,
         showDeleteModal: false,
         trainerToDelete: { id: null, name: '' },
         trainerEditPhotoPreview: null,
@@ -104,6 +111,22 @@
                 this.trainerAddPhotoPreview = URL.createObjectURL(file);
             }
         },
+        openAssignTrainer(trainer) {
+            this.trainerForm = {
+                id: trainer.id,
+                full_name: trainer.full_name || (trainer.first_name + (trainer.last_name ? ' ' + trainer.last_name : '')),
+            };
+            if (trainer.assigned_members && Array.isArray(trainer.assigned_members)) {
+                this.trainerAssignedMemberIds = trainer.assigned_members.map(m => m.id);
+            } else if (trainer.assigned_members_ids && Array.isArray(trainer.assigned_members_ids)) {
+                this.trainerAssignedMemberIds = trainer.assigned_members_ids;
+            } else {
+                this.trainerAssignedMemberIds = this.membersList.filter(m => m.trainer_id === trainer.id).map(m => m.id);
+            }
+            this.trainerMemberFilter = 'all';
+            this.trainerMemberSearch = '';
+            this.showAssignModal = true;
+        },
         openEditTrainer(trainer) {
             this.trainerForm = {
                 id: trainer.id,
@@ -171,15 +194,19 @@
             </div>
 
             <div class="flex items-center gap-2.5">
+                @if($canCreateTrainer)
                 <button type="button" @click="showTrainerModal = true" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-indigo-600/25 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Add Trainer</span>
                 </button>
+                @endif
 
+                @if($canViewStaff)
                 <a href="{{ route('app.staff.index', ['role' => 'trainer']) }}" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center gap-1.5 transition-all shadow-sm">
                     <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
                     <span>Staff Roster</span>
                 </a>
+                @endif
             </div>
         </div>
 
@@ -284,10 +311,12 @@
                                 <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
                                 
                                 <div class="flex items-center gap-1.5 mt-1.5">
+                                    @if($canViewStaff)
                                     <a href="{{ route('app.staff.index', ['search' => $trainer->phone]) }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
                                         Staff
                                     </a>
+                                    @endif
                                     @if($trainer->is_featured)
                                         <span class="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
                                             ★ Featured
@@ -323,15 +352,29 @@
                     </div>
 
                     <!-- Action Buttons -->
+                    @if($canAssignTrainer || $canEditTrainer || $canDeleteTrainer)
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <button type="button" @click="openEditTrainer({{ Js::from($trainer) }})" class="flex-1 py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            <span>Edit &amp; Assign</span>
+                        @if($canAssignTrainer)
+                        <button type="button" @click="openAssignTrainer({{ Js::from($trainer) }})" class="flex-1 py-2 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer" title="Assign Members">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Assign</span>
                         </button>
+                        @endif
+
+                        @if($canEditTrainer)
+                        <button type="button" @click="openEditTrainer({{ Js::from($trainer) }})" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer" title="Edit Trainer Details">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Edit</span>
+                        </button>
+                        @endif
+
+                        @if($canDeleteTrainer)
                         <button type="button" @click="confirmDelete({{ $trainer->id }}, '{{ addslashes($trainer->full_name) }}')" title="Delete Trainer" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 hover:bg-rose-50 dark:hover:bg-rose-500/20 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-500/30 transition-all cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
+                        @endif
                     </div>
+                    @endif
                 </div>
             @empty
                 <div class="col-span-full p-10 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
@@ -340,9 +383,11 @@
                     </div>
                     <h4 class="font-bold text-slate-900 dark:text-white text-base">No trainers registered yet</h4>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">Register your certified fitness coaches to start scheduling workouts and assigning gym members.</p>
+                    @if($canCreateTrainer)
                     <button type="button" @click="showTrainerModal = true" class="mt-4 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-md shadow-indigo-600/25 cursor-pointer">
                         + Add Fitness Trainer
                     </button>
+                    @endif
                 </div>
             @endforelse
         </div>
@@ -659,6 +704,103 @@
                         <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                             <span>Update Trainer &amp; Assignments</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== MODAL: DEDICATED ASSIGN MEMBERS ==================== -->
+        <div x-show="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 md:p-8 shadow-2xl space-y-6" @click.away="showAssignModal = false">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Assign Members to Coach</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Allocate or reassign gym members to <span class="font-bold text-indigo-600 dark:text-indigo-400" x-text="trainerForm.full_name"></span>
+                        </p>
+                    </div>
+                    <button type="button" @click="showAssignModal = false" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <form :action="'{{ url('/app/trainers') }}/' + trainerForm.id + '/assign-members'" method="POST" class="space-y-4">
+                    @csrf
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
+                                <span x-text="assignedCount"></span> Assigned
+                            </span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                <span x-text="unassignedCount"></span> Unassigned
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                <input type="checkbox" :checked="isAllVisibleSelected()" @change="toggleAllVisible()" class="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-indigo-600 focus:ring-0">
+                                <span>Select all visible</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center gap-1.5 text-xs font-bold">
+                            <button type="button" @click="trainerMemberFilter = 'all'" :class="trainerMemberFilter === 'all' ? 'bg-indigo-600 text-white shadow' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer">
+                                All (<span x-text="membersList.length"></span>)
+                            </button>
+                            <button type="button" @click="trainerMemberFilter = 'assigned'" :class="trainerMemberFilter === 'assigned' ? 'bg-indigo-600 text-white shadow' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer">
+                                Assigned (<span x-text="assignedCount"></span>)
+                            </button>
+                            <button type="button" @click="trainerMemberFilter = 'unassigned'" :class="trainerMemberFilter === 'unassigned' ? 'bg-indigo-600 text-white shadow' : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer">
+                                Unassigned (<span x-text="unassignedCount"></span>)
+                            </button>
+                        </div>
+
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" x-model="trainerMemberSearch" placeholder="Search members..." class="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-1">
+                        <template x-for="m in filteredMembers" :key="m.id">
+                            <div @click="toggleMember(m.id)" :class="isMemberAssigned(m.id) ? 'bg-indigo-50 dark:bg-indigo-950/30 border-indigo-300 dark:border-indigo-500/40 ring-1 ring-indigo-500/30' : 'bg-white dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'" class="p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 select-none shadow-sm">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <input type="checkbox" name="member_ids[]" :value="m.id" :checked="isMemberAssigned(m.id)" @click.stop="toggleMember(m.id)" class="rounded border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-indigo-600 focus:ring-0 shrink-0">
+                                    
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center border border-slate-200 dark:border-slate-700 shrink-0">
+                                        <span x-text="((m.first_name || 'M').charAt(0) + (m.last_name || '').charAt(0)).toUpperCase()"></span>
+                                    </div>
+
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-slate-900 dark:text-white text-xs truncate" x-text="(m.first_name || '') + ' ' + (m.last_name || '')"></div>
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate" x-text="(m.member_code ? m.member_code + ' • ' : '') + (m.phone || 'No phone')"></div>
+                                    </div>
+                                </div>
+
+                                <template x-if="isMemberAssigned(m.id)">
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 shrink-0">
+                                        ✓ Assigned
+                                    </span>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template x-if="filteredMembers.length === 0">
+                            <div class="col-span-full py-8 text-center text-slate-500 text-xs">
+                                No members found matching your filter or search.
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showAssignModal = false" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer">Cancel</button>
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 flex items-center gap-2 transition-all cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save Assignments</span>
                         </button>
                     </div>
                 </form>

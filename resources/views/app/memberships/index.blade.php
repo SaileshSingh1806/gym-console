@@ -143,12 +143,12 @@
                         <div class="flex items-start justify-between gap-2">
                             <div>
                                 <a href="{{ route('app.members.show', $ms->member_id) }}" class="font-bold text-slate-900 dark:text-white text-xs hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
-                                    {{ $ms->member->full_name }}
+                                    {{ $ms->member?->full_name ?? ('Member #' . $ms->member_id) }}
                                 </a>
                                 <div class="flex items-center gap-1.5 mt-0.5">
-                                    <span class="text-amber-600 dark:text-amber-400 font-semibold text-[11px]">{{ $ms->plan->name }}</span>
-                                    @if(($ms->plan->plan_type ?? 'single') !== 'single')
-                                        <span class="text-[10px] text-slate-500 capitalize">({{ $ms->plan->plan_type }})</span>
+                                    <span class="text-amber-600 dark:text-amber-400 font-semibold text-[11px]">{{ $ms->plan?->name ?? 'Standard Plan' }}</span>
+                                    @if(($ms->plan?->plan_type ?? 'single') !== 'single')
+                                        <span class="text-[10px] text-slate-500 capitalize">({{ $ms->plan?->plan_type }})</span>
                                     @endif
                                 </div>
                             </div>
@@ -160,7 +160,7 @@
                         <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-xs space-y-1.5">
                             <div class="flex items-center justify-between text-[11px]">
                                 <span class="text-slate-500 dark:text-slate-400">Validity:</span>
-                                <span class="font-medium text-slate-800 dark:text-slate-200">{{ $ms->start_date->format('M d, Y') }} → {{ $ms->end_date->format('M d, Y') }}</span>
+                                <span class="font-medium text-slate-800 dark:text-slate-200">{{ $ms->start_date ? $ms->start_date->format('M d, Y') : '—' }} → {{ $ms->end_date ? $ms->end_date->format('M d, Y') : '—' }}</span>
                             </div>
                             <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200 dark:border-slate-800/60">
                                 <span class="text-slate-500 dark:text-slate-400">Total Contract:</span>
@@ -201,17 +201,17 @@
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
                                 <td class="py-2.5 px-3.5 font-bold text-slate-900 dark:text-white text-xs">
                                     <a href="{{ route('app.members.show', $ms->member_id) }}" class="hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
-                                        {{ $ms->member->full_name }}
+                                        {{ $ms->member?->full_name ?? ('Member #' . $ms->member_id) }}
                                     </a>
                                 </td>
                                 <td class="py-2.5 px-3.5">
-                                    <span class="text-amber-600 dark:text-amber-400 font-medium text-xs">{{ $ms->plan->name }}</span>
-                                    @if(($ms->plan->plan_type ?? 'single') !== 'single')
-                                        <span class="block text-[10px] text-slate-500 dark:text-slate-400 capitalize">({{ $ms->plan->plan_type }} plan)</span>
+                                    <span class="text-amber-600 dark:text-amber-400 font-medium text-xs">{{ $ms->plan?->name ?? 'Standard Plan' }}</span>
+                                    @if(($ms->plan?->plan_type ?? 'single') !== 'single')
+                                        <span class="block text-[10px] text-slate-500 dark:text-slate-400 capitalize">({{ $ms->plan?->plan_type }} plan)</span>
                                     @endif
                                 </td>
                                 <td class="py-2.5 px-3.5 text-slate-500 dark:text-slate-400 text-xs">
-                                    {{ $ms->start_date->format('M d, Y') }} → {{ $ms->end_date->format('M d, Y') }}
+                                    {{ $ms->start_date ? $ms->start_date->format('M d, Y') : '—' }} → {{ $ms->end_date ? $ms->end_date->format('M d, Y') : '—' }}
                                 </td>
                                 <td class="py-2.5 px-3.5 font-bold text-slate-900 dark:text-white text-xs">
                                     {{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($ms->final_amount, 2) }}

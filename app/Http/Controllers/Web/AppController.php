@@ -104,6 +104,11 @@ class AppController extends Controller
     public function dashboard(): View|RedirectResponse
     {
         $user = auth()->user();
+
+        if ($user && $user->role === 'member') {
+            return redirect()->route('app.portal');
+        }
+
         $tenant = $this->resolveTenant();
 
         if (! $tenant) {
@@ -126,6 +131,110 @@ class AppController extends Controller
         ];
 
         return view('app.dashboard', compact('tenant', 'branch', 'metrics', 'subscription', 'plan', 'quotas'));
+    }
+
+    public function memberPortal(Request $request): View|RedirectResponse
+    {
+        $user = auth()->user();
+        $tenant = $this->resolveTenant();
+
+        if (! $tenant) {
+            return redirect()->route('login');
+        }
+
+        $tab = $request->query('tab', 'overview');
+
+        // Locate member record
+        $member = Member::with([
+            'branch',
+            'assignedTrainer',
+            'activeMembership.plan',
+            'memberships.plan',
+            'memberships.payments',
+            'payments' => fn ($q) => $q->latest('payment_date'),
+            'payments.membership.plan',
+            'payments.receivedBy',
+            'memberPtPackages.ptPlan',
+            'memberPtPackages.trainer',
+            'workoutPlans.exercises',
+            'workoutPlans.trainer',
+            'activeWorkoutPlan.exercises',
+            'activeWorkoutPlan.trainer',
+            'dietPlans.meals',
+            'dietPlans.trainer',
+            'activeDietPlan.meals',
+            'activeDietPlan.trainer',
+            'classBookings.schedule.gymClass.instructor',
+            'classBookings.schedule.trainer',
+            'serviceBookings.service',
+            'attendance' => fn ($q) => $q->latest('date')->latest('id')->take(30),
+        ])->where('tenant_id', $tenant->id)
+          ->where(function ($q) use ($user) {
+              $q->where('user_id', $user->id);
+              if (! empty($user->phone)) {
+                  $q->orWhere('phone', $user->phone);
+              }
+              if (! empty($user->email)) {
+                  $q->orWhere('email', $user->email);
+              }
+          })->first();
+
+        // Fallback for admin or owner exploring member portal
+        if (! $member && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+            $member = Member::with([
+                'branch',
+                'assignedTrainer',
+                'activeMembership.plan',
+                'memberships.plan',
+                'memberships.payments',
+                'payments' => fn ($q) => $q->latest('payment_date'),
+                'payments.membership.plan',
+                'payments.receivedBy',
+                'memberPtPackages.ptPlan',
+                'memberPtPackages.trainer',
+                'workoutPlans.exercises',
+                'workoutPlans.trainer',
+                'activeWorkoutPlan.exercises',
+                'activeWorkoutPlan.trainer',
+                'dietPlans.meals',
+                'dietPlans.trainer',
+                'activeDietPlan.meals',
+                'activeDietPlan.trainer',
+                'classBookings.schedule.gymClass.instructor',
+                'classBookings.schedule.trainer',
+                'serviceBookings.service',
+                'attendance' => fn ($q) => $q->latest('date')->latest('id')->take(30),
+            ])->where('tenant_id', $tenant->id)->latest()->first();
+        }
+
+        $activeMembership = $member?->activeMembership ?? $member?->memberships()->latest()->first();
+        $daysLeft = $activeMembership && $activeMembership->end_date ? (int) now()->startOfDay()->diffInDays($activeMembership->end_date->startOfDay(), false) : null;
+
+        $measurements = $member?->metadata['measurements'] ?? [];
+        if (is_array($measurements)) {
+            usort($measurements, function ($a, $b) {
+                return strcmp($b['date'] ?? '', $a['date'] ?? '');
+            });
+        } else {
+            $measurements = [];
+        }
+
+        // Available active class schedules for enrolling or viewing
+        $availableClassSchedules = ClassSchedule::where('tenant_id', $tenant->id)
+            ->where('is_active', true)
+            ->with(['gymClass.instructor', 'trainer'])
+            ->get();
+
+        return view('app.portal.index', compact(
+            'tenant',
+            'user',
+            'member',
+            'tab',
+            'activeMembership',
+            'daysLeft',
+            'measurements',
+            'availableClassSchedules'
+        ));
     }
 
     public function members(Request $request): View
@@ -773,8 +882,14 @@ class AppController extends Controller
         $payment = MemberPayment::with(['member.branch', 'membership.plan', 'receivedBy'])->findOrFail($id);
         $user = auth()->user();
 
-        if ($user->role === 'member' && $payment->member?->user_id !== $user->id) {
-            abort(403, 'Unauthorized to view this invoice.');
+        if ($user->role === 'member') {
+            $isOwnInvoice = ($payment->member?->user_id === $user->id)
+                || (! empty($user->phone) && $payment->member?->phone === $user->phone)
+                || (! empty($user->email) && $payment->member?->email === $user->email);
+
+            if (! $isOwnInvoice) {
+                abort(403, 'Unauthorized to view this invoice.');
+            }
         }
 
         if (in_array($user->role, ['trainer', 'staff'])) {
@@ -2238,12 +2353,26 @@ class AppController extends Controller
         $trainer = Trainer::where('tenant_id', $tenant->id)->findOrFail($id);
 
         $memberIds = $request->input('member_ids', []);
+        if (! is_array($memberIds)) {
+            $memberIds = [];
+        }
 
+        // Unassign members previously assigned to this trainer who are not in the list
         Member::where('tenant_id', $tenant->id)
-            ->whereIn('id', $memberIds)
-            ->update(['trainer_id' => $trainer->id]);
+            ->where('trainer_id', $trainer->id)
+            ->whereNotIn('id', $memberIds)
+            ->update(['trainer_id' => null]);
 
-        return back()->with('success', 'Members assigned to trainer successfully!');
+        // Assign selected members
+        if (! empty($memberIds)) {
+            Member::where('tenant_id', $tenant->id)
+                ->whereIn('id', $memberIds)
+                ->update(['trainer_id' => $trainer->id]);
+        }
+
+        ActivityLog::log('trainer_members_assigned', "Updated assigned members for trainer '{$trainer->full_name}'", $trainer);
+
+        return back()->with('success', "Members assigned to trainer '{$trainer->full_name}' successfully!");
     }
 
     public function classes(Request $request): View
