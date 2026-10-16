@@ -3,11 +3,15 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Schema;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Execute scheduled WhatsApp automations (welcome, expiry reminders, renewal follow-ups, birthdays)
+Schedule::command('whatsapp:run-automations')->hourly();
 
 Artisan::command('system:purge-dummy-data', function () {
     $this->info('Purging all dummy gym and tenant data...');

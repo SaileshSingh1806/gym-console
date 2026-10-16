@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\AppController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\PublicController;
+use App\Http\Controllers\Web\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
 // Public Marketing Routes
@@ -169,6 +170,58 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/crm/enquiries', [AppController::class, 'storeEnquiry'])->name('app.crm.enquiries.store')->middleware('permission:crm.leads.create');
         Route::get('/crm/conversions', [AppController::class, 'crmConversions'])->name('app.crm.conversions')->middleware('permission:crm.reports,crm.view');
         Route::get('/crm/reports', [AppController::class, 'crmReports'])->name('app.crm.reports')->middleware('permission:crm.reports,crm.view');
+    });
+
+    // WhatsApp Marketing, Bulk Messaging & Cloud API Automation
+    Route::prefix('whatsapp')->name('app.whatsapp.')->group(function () {
+        Route::get('/dashboard', [WhatsAppController::class, 'dashboard'])->name('dashboard');
+
+        // Contacts
+        Route::get('/contacts', [WhatsAppController::class, 'contacts'])->name('contacts.index');
+        Route::post('/contacts', [WhatsAppController::class, 'storeContact'])->name('contacts.store');
+        Route::post('/contacts/{id}', [WhatsAppController::class, 'updateContact'])->name('contacts.update')->whereNumber('id');
+        Route::delete('/contacts/{id}', [WhatsAppController::class, 'deleteContact'])->name('contacts.delete')->whereNumber('id');
+        Route::post('/contacts/{id}/consent', [WhatsAppController::class, 'updateConsent'])->name('contacts.consent')->whereNumber('id');
+        Route::post('/contacts/sync-members', [WhatsAppController::class, 'syncMembers'])->name('contacts.sync-members');
+        Route::post('/contacts/sync-leads', [WhatsAppController::class, 'syncLeads'])->name('contacts.sync-leads');
+        Route::get('/contacts/export', [WhatsAppController::class, 'exportContacts'])->name('contacts.export');
+
+        // Import Contacts
+        Route::get('/contacts/import', [WhatsAppController::class, 'importContacts'])->name('contacts.import');
+        Route::post('/contacts/import/preview', [WhatsAppController::class, 'processImportPreview'])->name('contacts.import.preview');
+        Route::post('/contacts/import/confirm', [WhatsAppController::class, 'confirmImport'])->name('contacts.import.confirm');
+
+        // Message Templates
+        Route::get('/templates', [WhatsAppController::class, 'templates'])->name('templates.index');
+        Route::post('/templates/sync', [WhatsAppController::class, 'syncTemplates'])->name('templates.sync');
+        Route::post('/templates', [WhatsAppController::class, 'createTemplate'])->name('templates.store');
+
+        // Bulk Campaigns
+        Route::get('/campaigns', [WhatsAppController::class, 'campaigns'])->name('campaigns.index');
+        Route::post('/campaigns', [WhatsAppController::class, 'storeCampaign'])->name('campaigns.store');
+        Route::post('/campaigns/estimate', [WhatsAppController::class, 'estimateAudience'])->name('campaigns.estimate');
+        Route::post('/campaigns/test-message', [WhatsAppController::class, 'sendTestMessage'])->name('campaigns.test-message');
+        Route::post('/campaigns/{id}/pause', [WhatsAppController::class, 'pauseCampaign'])->name('campaigns.pause')->whereNumber('id');
+        Route::post('/campaigns/{id}/resume', [WhatsAppController::class, 'resumeCampaign'])->name('campaigns.resume')->whereNumber('id');
+        Route::post('/campaigns/{id}/cancel', [WhatsAppController::class, 'cancelCampaign'])->name('campaigns.cancel')->whereNumber('id');
+        Route::get('/campaigns/{id}/history', [WhatsAppController::class, 'campaignHistory'])->name('campaigns.history')->whereNumber('id');
+
+        // WhatsApp Inbox (2-column live chat)
+        Route::get('/inbox', [WhatsAppController::class, 'inbox'])->name('inbox');
+        Route::post('/inbox/{id}/reply-text', [WhatsAppController::class, 'sendInboxTextMessage'])->name('inbox.reply-text')->whereNumber('id');
+        Route::post('/inbox/{id}/reply-template', [WhatsAppController::class, 'sendInboxTemplateMessage'])->name('inbox.reply-template')->whereNumber('id');
+        Route::post('/inbox/{id}/toggle-optout', [WhatsAppController::class, 'toggleInboxOptOut'])->name('inbox.toggle-optout')->whereNumber('id');
+
+        // Automations
+        Route::get('/automations', [WhatsAppController::class, 'automations'])->name('automations.index');
+        Route::post('/automations/{id}/toggle', [WhatsAppController::class, 'toggleAutomation'])->name('automations.toggle')->whereNumber('id');
+        Route::post('/automations/{id}', [WhatsAppController::class, 'updateAutomation'])->name('automations.update')->whereNumber('id');
+        Route::post('/automations/{id}/run-now', [WhatsAppController::class, 'triggerAutomationRunNow'])->name('automations.run-now')->whereNumber('id');
+
+        // Settings & API Configuration
+        Route::get('/settings', [WhatsAppController::class, 'settings'])->name('settings');
+        Route::post('/settings', [WhatsAppController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/settings/test-connection', [WhatsAppController::class, 'testConnection'])->name('settings.test-connection');
     });
 
     // 12. Report & Finance

@@ -11,12 +11,12 @@
                 </div>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Platform Administrator Controls: Total system control over tenant gyms, platform users, active tickets, and annual revenue.</p>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <button @click="showNewGymModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-red-500/20 transition-all cursor-pointer">
+            <div class="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button @click="showNewGymModal = true" class="w-full sm:w-auto justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-red-500/20 transition-all cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Register Gym</span>
                 </button>
-                <button @click="showNewPlanModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer">
+                <button @click="showNewPlanModal = true" class="w-full sm:w-auto justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Create Plan</span>
                 </button>
@@ -24,7 +24,7 @@
         </div>
 
         <!-- TOP 4 PRIMARY METRIC CARDS (Custom requested metrics) -->
-        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             
             <!-- Card 1: Total Gym Businesses (User requested: Vahi Rakho) -->
             <a href="{{ route('admin.gyms') }}" class="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 shadow-sm hover:shadow-md dark:hover:shadow-indigo-500/5 transition-all group block">
@@ -102,7 +102,7 @@
         </div>
 
         <!-- QUICK SYSTEM VITALS STRIP -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
+        <div class="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 shadow-xs">
             <div class="flex items-center gap-2.5 sm:gap-3">
                 <div class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20 flex items-center justify-center text-sm shrink-0">
                     🏋️
@@ -152,7 +152,7 @@
                 
                 <!-- Recent Invoices Table -->
                 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm dark:shadow-xl">
-                    <div class="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 flex justify-between items-center">
+                    <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-0">
                         <div class="flex items-center gap-2.5">
                             <span class="text-lg">💳</span>
                             <div>
@@ -160,7 +160,7 @@
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400">Live transaction trail of annual gym subscriptions and renewals</p>
                             </div>
                         </div>
-                        <a href="{{ route('admin.subscriptions') }}" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors flex items-center gap-1">
+                        <a href="{{ route('admin.subscriptions') }}" class="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
                             <span>Manage Subscriptions</span>
                             <span>&rarr;</span>
                         </a>
@@ -234,7 +234,7 @@
 
                 <!-- Active Gym Businesses Directory -->
                 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm dark:shadow-xl">
-                    <div class="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 flex justify-between items-center">
+                    <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-0">
                         <div class="flex items-center gap-2.5">
                             <span class="text-lg">🏢</span>
                             <div>
@@ -242,7 +242,7 @@
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400">Quick roster of gyms onboarded on the platform</p>
                             </div>
                         </div>
-                        <a href="{{ route('admin.gyms') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1">
+                        <a href="{{ route('admin.gyms') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
                             <span>View All Gyms</span>
                             <span>&rarr;</span>
                         </a>
@@ -438,7 +438,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">SaaS Plan *</label>
                             <select name="plan_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">

@@ -19,6 +19,7 @@ class WorkoutExercise extends Model
         'weight',
         'rest_seconds',
         'notes',
+        'video_url',
         'sort_order',
     ];
 

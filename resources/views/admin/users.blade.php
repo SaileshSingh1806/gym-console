@@ -2,9 +2,9 @@
     <div class="space-y-6" x-data="{ showNewModal: false, editUser: null }">
         <!-- Top Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-            <form action="{{ route('admin.users') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 flex-grow max-w-2xl w-full sm:w-auto">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user name, email, phone..." class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow min-w-[140px] shadow-xs">
-                <select name="role" class="px-3 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs cursor-pointer" onchange="this.form.submit()">
+            <form action="{{ route('admin.users') }}" method="GET" class="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-2 sm:gap-3 flex-grow max-w-2xl w-full sm:w-auto">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search user name, email, phone..." class="w-full min-[480px]:w-auto min-w-0 sm:min-w-[140px] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none flex-grow shadow-xs">
+                <select name="role" class="w-full min-[480px]:w-auto px-3 py-2 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs cursor-pointer" onchange="this.form.submit()">
                     <option value="" {{ ($selectedRole ?? '') === '' || ($selectedRole ?? '') === 'all' ? 'selected' : '' }}>All Roles</option>
                     <option value="gym_owner" {{ ($selectedRole ?? '') === 'gym_owner' ? 'selected' : '' }}>Gym Owner</option>
                     <option value="super_admin" {{ ($selectedRole ?? '') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
@@ -14,11 +14,11 @@
                     <option value="accountant" {{ ($selectedRole ?? '') === 'accountant' ? 'selected' : '' }}>Accountant</option>
                     <option value="staff" {{ ($selectedRole ?? '') === 'staff' ? 'selected' : '' }}>Staff</option>
                 </select>
-                <button type="submit" class="px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-semibold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer">
+                <button type="submit" class="w-full min-[480px]:w-auto px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white text-xs font-semibold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer text-center">
                     Filter
                 </button>
                 @if(request('search') || request('role'))
-                    <a href="{{ route('admin.users') }}" class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 underline">Clear</a>
+                    <a href="{{ route('admin.users') }}" class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 underline self-center">Clear</a>
                 @endif
             </form>
 

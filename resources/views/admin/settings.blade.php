@@ -52,7 +52,7 @@
     }">
 
         <!-- Navigation Tabs Bar -->
-        <div class="p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-2 transition-colors">
+        <div class="p-1.5 sm:p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth flex-nowrap pb-2 transition-colors">
             <button type="button" @click="activeTab = 'general'" :class="activeTab === 'general' ? 'bg-red-600 text-white font-bold shadow-lg shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'" class="px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span>🏢 General & Branding</span>
@@ -209,8 +209,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save General Settings</span>
                     </button>
@@ -289,8 +289,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save Email Settings</span>
                     </button>
@@ -304,12 +304,12 @@
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">Verify your SMTP credentials by dispatching a real-time test notification message</p>
                 </div>
 
-                <form action="{{ route('admin.settings.email.test') }}" method="POST" class="flex flex-wrap items-center gap-3">
+                <form action="{{ route('admin.settings.email.test') }}" method="POST" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     @csrf
-                    <div class="flex-grow max-w-md">
+                    <div class="flex-grow w-full sm:max-w-md">
                         <input type="email" name="test_email" value="{{ auth()->user()->email }}" required placeholder="recipient@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                     </div>
-                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-700 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5">
                         🚀 Send Diagnostic Email
                     </button>
                 </form>
@@ -415,8 +415,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save Payment Gateways</span>
                     </button>
@@ -495,8 +495,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save SEO & Analytics</span>
                     </button>
@@ -551,7 +551,7 @@
                     </div>
 
                     <!-- Connection Diagnostic Status -->
-                    <div class="p-4 rounded-2xl bg-purple-500/5 dark:bg-purple-950/20 border border-purple-500/20 flex flex-wrap items-center justify-between gap-4">
+                    <div class="p-4 rounded-2xl bg-purple-500/5 dark:bg-purple-950/20 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl">🧠</span>
                             <div>
@@ -560,14 +560,14 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                             <template x-if="geminiTestStatus === 'success'">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" x-text="geminiTestMsg"></span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-center" x-text="geminiTestMsg"></span>
                             </template>
                             <template x-if="geminiTestStatus === 'error'">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20" x-text="geminiTestMsg"></span>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-center" x-text="geminiTestMsg"></span>
                             </template>
-                            <button type="button" @click="testGemini()" :disabled="testingGemini" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition-all cursor-pointer flex items-center gap-2">
+                            <button type="button" @click="testGemini()" :disabled="testingGemini" class="w-full sm:w-auto justify-center px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition-all cursor-pointer flex items-center gap-2">
                                 <span x-show="testingGemini" class="animate-spin">⏳</span>
                                 <span x-text="testingGemini ? 'Testing...' : '⚡ Test Connection'"></span>
                             </button>
@@ -575,8 +575,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-purple-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:opacity-90 text-white font-bold text-xs shadow-lg shadow-purple-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Save Gemini AI Settings</span>
                     </button>
@@ -671,8 +671,8 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <button type="submit" class="px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
+                <div class="flex justify-stretch sm:justify-end">
+                    <button type="submit" class="w-full sm:w-auto justify-center px-6 py-3 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-lg shadow-red-600/25 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         <span>Update Master Password</span>
                     </button>

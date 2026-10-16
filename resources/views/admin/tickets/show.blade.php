@@ -41,7 +41,7 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         
         <!-- Left 3 Cols: Conversation Timeline & Admin Reply Box -->
         <div class="lg:col-span-3 space-y-6">

@@ -6,11 +6,11 @@
                 <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Configured Subscription Tiers</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Control feature gating, quotas, trial duration, and monthly/annual pricing</p>
             </div>
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <button @click="showNewFeatureModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs transition-colors cursor-pointer shadow-sm">
+            <div class="flex flex-col min-[420px]:flex-row items-stretch min-[420px]:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <button @click="showNewFeatureModal = true" class="w-full sm:w-auto justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700/60 font-bold text-xs transition-colors cursor-pointer shadow-sm text-center">
                     + Add New Feature Code
                 </button>
-                <button @click="showNewPlanModal = true" class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-colors cursor-pointer">
+                <button @click="showNewPlanModal = true" class="w-full sm:w-auto justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-colors cursor-pointer text-center">
                     + Create SaaS Plan
                 </button>
             </div>

@@ -66,20 +66,20 @@
 
         <!-- Controls & Header Bar -->
         <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 transition-colors">
-            <form action="{{ route('admin.coupons') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-64 min-w-[140px]">
+            <form action="{{ route('admin.coupons') }}" method="GET" class="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div class="relative w-full min-[480px]:w-auto flex-1 sm:w-64 min-w-0 sm:min-w-[140px]">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Search code or offer name..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-red-500 focus:outline-none">
                     <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
 
-                <select name="status" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:border-red-500 focus:outline-none">
+                <select name="status" onchange="this.form.submit()" class="w-full min-[480px]:w-auto px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:border-red-500 focus:outline-none cursor-pointer">
                     <option value="">All Statuses</option>
                     <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active Only</option>
                     <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Disabled Only</option>
                 </select>
 
                 @if(request('search') || request('status'))
-                    <a href="{{ route('admin.coupons') }}" class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 underline">Clear</a>
+                    <a href="{{ route('admin.coupons') }}" class="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 underline self-center">Clear</a>
                 @endif
             </form>
 
@@ -235,7 +235,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Discount Type *</label>
                             <select name="discount_type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">
@@ -260,7 +260,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min Order Amount (₹)</label>
                             <input type="number" step="0.01" min="0" name="min_amount" value="0.00" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">
@@ -332,7 +332,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Discount Type *</label>
                             <select name="discount_type" x-model="editCoupon.discount_type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">
@@ -357,7 +357,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <div>
                             <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Min Order Amount (₹)</label>
                             <input type="number" step="0.01" min="0" name="min_amount" x-model="editCoupon.min_amount" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">

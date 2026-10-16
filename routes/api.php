@@ -7,8 +7,13 @@ use App\Http\Controllers\Api\V1\DietController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\MembershipController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\WhatsAppWebhookController;
 use App\Http\Controllers\Api\V1\WorkoutController;
 use Illuminate\Support\Facades\Route;
+
+// Meta WhatsApp Cloud API Webhook endpoints (Public for Meta challenge verification & event delivery)
+Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
+Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle']);
 
 Route::prefix('v1')->group(function () {
     // Public Authentication

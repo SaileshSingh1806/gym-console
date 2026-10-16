@@ -52,7 +52,7 @@
     <!-- Filter Bar & Search Toolbar -->
     <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3 transition-colors">
         <!-- Status Tabs -->
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-nowrap pb-1 lg:pb-0 text-xs font-semibold w-full lg:w-auto">
+        <div class="flex items-center gap-1.5 overflow-x-auto scroll-smooth flex-nowrap pb-1 lg:pb-0 text-xs font-semibold w-full lg:w-auto">
             <a href="{{ route('admin.tickets.index') }}" 
                class="px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap shrink-0 {{ !request('status') || request('status') === 'all' ? 'bg-red-600 text-white font-bold shadow-md shadow-red-600/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800' }}">
                 All ({{ $counts['total'] }})
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Filters Form -->
-        <form method="GET" action="{{ route('admin.tickets.index') }}" class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+        <form method="GET" action="{{ route('admin.tickets.index') }}" class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full lg:w-auto">
             @if(request('status'))
                 <input type="hidden" name="status" value="{{ request('status') }}">
             @endif
@@ -99,13 +99,13 @@
             </select>
 
             <!-- Search -->
-            <div class="relative flex-1 sm:flex-initial">
+            <div class="relative w-full sm:w-auto flex-1 sm:flex-initial">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search ticket #, subject..." 
                        class="w-full sm:w-52 pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-red-500 focus:outline-none">
                 <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
-            <button type="submit" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer shrink-0">
+            <button type="submit" class="w-full sm:w-auto justify-center px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer shrink-0 text-center">
                 Search
             </button>
         </form>

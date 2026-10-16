@@ -1589,6 +1589,9 @@
                                         $dayLabel = $ex->day ? "[" . ucwords(str_replace('_', ' ', $ex->day)) . "] " : '';
                                         $whatsappWorkoutText .= ($exIdx + 1) . ". *" . $dayLabel . $ex->exercise_name . "*\n";
                                         $whatsappWorkoutText .= "   Sets: " . $ex->sets . " × " . $ex->reps . ($ex->weight ? " (" . $ex->weight . ")" : "") . ($ex->rest_seconds ? " | Rest: " . $ex->rest_seconds . "s" : "") . "\n";
+                                        if (!empty($ex->video_url)) {
+                                            $whatsappWorkoutText .= "   ▶️ Video Demo: " . $ex->video_url . "\n";
+                                        }
                                     }
                                     if ($wp->notes) {
                                         $whatsappWorkoutText .= "---------------------------\n*Notes:* " . $wp->notes . "\n";
@@ -1631,11 +1634,17 @@
                                                 @forelse($wp->exercises as $ex)
                                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 text-xs">
                                                         <div class="min-w-0 flex-1">
-                                                            <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                            <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
                                                                 <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold shrink-0">
                                                                     {{ ucwords(str_replace('_', ' ', $ex->day ?? 'Day 1')) }}
                                                                 </span>
                                                                 <span class="truncate">{{ $ex->exercise_name }}</span>
+                                                                @if(!empty($ex->video_url))
+                                                                    <a href="{{ $ex->video_url }}" target="_blank" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 shrink-0 transition-colors" title="Watch Form Demo Video">
+                                                                        <span>▶️</span>
+                                                                        <span class="hidden sm:inline">Demo</span>
+                                                                    </a>
+                                                                @endif
                                                             </div>
                                                             @if($ex->notes)
                                                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">{{ $ex->notes }}</p>

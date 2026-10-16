@@ -2731,8 +2731,11 @@ class AppController extends Controller
         $plans = WorkoutPlan::with(['member', 'trainer', 'exercises'])->latest()->paginate(15);
         $members = Member::where('status', 'ACTIVE')->orderBy('first_name')->get();
         $trainers = Trainer::where('status', 'ACTIVE')->orderBy('first_name')->get();
+        $exercises = \App\Services\ExerciseDatabase::all();
+        $exerciseCategories = \App\Services\ExerciseDatabase::categories();
+        $exerciseEquipments = \App\Services\ExerciseDatabase::equipments();
 
-        return view('app.workouts.index', compact('plans', 'members', 'trainers'));
+        return view('app.workouts.index', compact('plans', 'members', 'trainers', 'exercises', 'exerciseCategories', 'exerciseEquipments'));
     }
 
     public function storeWorkout(Request $request): RedirectResponse
@@ -2757,6 +2760,7 @@ class AppController extends Controller
             'exercises.*.weight' => 'nullable|string',
             'exercises.*.rest_seconds' => 'nullable|integer',
             'exercises.*.notes' => 'nullable|string',
+            'exercises.*.video_url' => 'nullable|string|max:500',
         ]);
 
         $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
@@ -2802,6 +2806,7 @@ class AppController extends Controller
                         'weight' => $ex['weight'] ?? null,
                         'rest_seconds' => $ex['rest_seconds'] ?? 60,
                         'notes' => $ex['notes'] ?? null,
+                        'video_url' => $ex['video_url'] ?? null,
                         'sort_order' => $order++,
                     ]);
                 }
@@ -2837,8 +2842,10 @@ class AppController extends Controller
         $totalPlans = DietPlan::count();
         $memberPlansCount = DietPlan::whereNotNull('member_id')->where('is_template', false)->count();
         $templatePlansCount = DietPlan::where('is_template', true)->count();
+        $indianFoods = \App\Services\IndianFoodDatabase::all();
+        $foodCategories = \App\Services\IndianFoodDatabase::categories();
 
-        return view('app.diets.index', compact('plans', 'members', 'trainers', 'tenant', 'totalPlans', 'memberPlansCount', 'templatePlansCount'));
+        return view('app.diets.index', compact('plans', 'members', 'trainers', 'tenant', 'totalPlans', 'memberPlansCount', 'templatePlansCount', 'indianFoods', 'foodCategories'));
     }
 
     public function storeDiet(Request $request): RedirectResponse
@@ -6346,7 +6353,9 @@ class AppController extends Controller
         }
         $booking->save();
 
-        ActivityLog::log('service_session_deducted', "Deducted 1 session of '{$booking->service->name}' for {$booking->member->full_name}. Remaining: {$booking->sessions_left}", $booking);
+        $serviceName = $booking->service?->name ?? 'Service #' . $booking->gym_service_id;
+        $memberName = $booking->member?->full_name ?? 'Member #' . $booking->member_id;
+        ActivityLog::log('service_session_deducted', "Deducted 1 session of '{$serviceName}' for {$memberName}. Remaining: {$booking->sessions_left}", $booking);
 
         return back()->with('success', "1 session deducted. Remaining sessions: {$booking->sessions_left}/{$booking->total_sessions}");
     }

@@ -45,4 +45,16 @@ return [
         'secret' => env('RAZORPAY_SECRET'),
     ],
 
+    'whatsapp' => [
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v22.0'),
+        'webhook_verify_token' => env('WHATSAPP_WEBHOOK_VERIFY_TOKEN', 'armour_gym_secure_webhook_token_2026'),
+        'app_secret' => env('WHATSAPP_APP_SECRET'),
+        'currency' => env('WHATSAPP_CURRENCY', 'INR'),
+        'marketing_rate' => (float) env('WHATSAPP_MARKETING_RATE', 0.85),
+        'utility_rate' => (float) env('WHATSAPP_UTILITY_RATE', 0.35),
+    ],
+
 ];

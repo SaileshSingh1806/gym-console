@@ -311,28 +311,28 @@
                                     <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
                                         <div class="flex items-center gap-2">
                                             <div class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-[10px]">
-                                                {{ substr($req->member->first_name, 0, 1) }}
+                                                {{ substr($req->member?->first_name ?? 'M', 0, 1) }}
                                             </div>
-                                            <span>{{ $req->member->full_name }}</span>
-                                            @if($req->member->member_code)
+                                            <span>{{ $req->member?->full_name ?? 'Member #' . $req->member_id }}</span>
+                                            @if($req->member?->member_code)
                                                 <span class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">- {{ $req->member->member_code }}</span>
                                             @endif
                                         </div>
                                     </td>
                                     <td class="py-3.5 px-4 font-semibold text-teal-600 dark:text-teal-400">
-                                        {{ $req->service->name }}
+                                        {{ $req->service?->name ?? 'Service #' . $req->gym_service_id }}
                                     </td>
                                     <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">
-                                        {{ $req->booking_date->format('d M Y') }}
+                                        {{ $req->booking_date?->format('d M Y') ?? '-' }}
                                         @if($req->booking_time)
                                             <span class="text-[10px] text-slate-400 dark:text-slate-500 block">{{ date('h:i A', strtotime($req->booking_time)) }}</span>
                                         @endif
                                     </td>
                                     <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                        ₹{{ number_format($req->amount_paid, 0) }}
+                                        ₹{{ number_format($req->amount_paid ?? 0, 0) }}
                                     </td>
                                     <td class="py-3.5 px-4">
-                                        @if($req->service->is_locker_service)
+                                        @if($req->service?->is_locker_service)
                                             <form action="{{ route('app.services.bookings.status', $req->id) }}" method="POST" class="flex items-center gap-2">
                                                 @csrf
                                                 <input type="text" name="locker_number" value="{{ $req->locker_number }}" placeholder="e.g. L-102"
@@ -346,7 +346,7 @@
                                     </td>
                                     <td class="py-3.5 px-4 text-right">
                                         <div class="flex items-center justify-end gap-2">
-                                            @if(!$req->service->is_locker_service)
+                                            @if(!($req->service?->is_locker_service))
                                                 <form action="{{ route('app.services.bookings.status', $req->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     <input type="hidden" name="status" value="active">
@@ -413,20 +413,20 @@
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
                                         <div class="flex items-center gap-2">
-                                            <span>{{ $bk->member->full_name }}</span>
-                                            @if($bk->member->member_code)
+                                            <span>{{ $bk->member?->full_name ?? 'Member #' . $bk->member_id }}</span>
+                                            @if($bk->member?->member_code)
                                                 <span class="text-[11px] text-slate-400 dark:text-slate-500 font-mono">- {{ $bk->member->member_code }}</span>
                                             @endif
                                         </div>
                                     </td>
                                     <td class="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-200">
-                                        {{ $bk->service->name }}
+                                        {{ $bk->service?->name ?? 'Service #' . $bk->gym_service_id }}
                                     </td>
                                     <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                                        {{ number_format($bk->amount_paid, 0) }}
+                                        {{ number_format($bk->amount_paid ?? 0, 0) }}
                                     </td>
                                     <td class="py-3.5 px-4">
-                                        @if($bk->service->is_session_countable)
+                                        @if($bk->service?->is_session_countable)
                                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold {{ $bk->sessions_left > 0 ? 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 border border-teal-500/20 dark:border-teal-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
                                                 <span class="w-1.5 h-1.5 rounded-full {{ $bk->sessions_left > 0 ? 'bg-teal-500 dark:bg-teal-400' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                                                 <span>{{ $bk->sessions_left }}/{{ $bk->total_sessions }} left</span>
@@ -438,7 +438,7 @@
                                         @endif
                                     </td>
                                     <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-medium">
-                                        {{ $bk->booking_date->format('d M') }}
+                                        {{ $bk->booking_date?->format('d M') ?? '-' }}
                                     </td>
                                     <td class="py-3.5 px-4">
                                         @if($bk->locker_number)
@@ -472,7 +472,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             @if($bk->status === 'active' && $bk->sessions_left > 0)
                                                 <form action="{{ route('app.services.bookings.deduct', $bk->id) }}" method="POST" 
-                                                      data-confirm="Deduct 1 used session for {{ addslashes($bk->member->full_name ?? 'this member') }}?" 
+                                                      data-confirm="Deduct 1 used session for {{ addslashes($bk->member?->full_name ?? 'this member') }}?" 
                                                       data-confirm-title="Deduct Service Session" 
                                                       data-confirm-btn="Yes, Deduct Session" 
                                                       data-confirm-type="primary" 
