@@ -121,6 +121,13 @@ class PlanSeeder extends Seeder
                 'category' => 'Business & Growth',
                 'type' => 'boolean',
             ],
+            [
+                'code' => 'whatsapp_marketing',
+                'name' => 'WhatsApp Marketing & Automation',
+                'description' => 'Official Meta Cloud API bulk campaigns, 2-way inbox, automated member alerts & templates',
+                'category' => 'Business & Growth',
+                'type' => 'boolean',
+            ],
 
             // 4. Administration
             [
@@ -220,6 +227,7 @@ class PlanSeeder extends Seeder
             'diet_nutrition',
             'gym_services',
             'crm_leads',
+            'whatsapp_marketing',
             'reports_finance',
             'inventory_stock',
             'staff_roles',

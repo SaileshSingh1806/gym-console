@@ -1,6 +1,22 @@
+@php
+    $platformAppName = \App\Models\Setting::getGlobal('app_name', 'Gym Console');
+    $platformSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymconsole.com');
+    $platformSupportPhone = \App\Models\Setting::getGlobal('support_phone', '+91 9974995179');
+    $platformLogo = \App\Models\Setting::getGlobal('logo_url');
+    $cleanPhone = preg_replace('/[^0-9]/', '', (string)$platformSupportPhone);
+    $whatsAppUrl = !empty($cleanPhone) 
+        ? 'https://wa.me/' . $cleanPhone . '?text=' . urlencode('Hi ' . $platformAppName . ' Support, I have a query regarding my gym portal setup (' . $tenant->name . ').') 
+        : 'https://wa.me/919974995179';
+@endphp
+
 @extends('emails.layouts.master', [
-    'subject' => 'Welcome to ' . config('app.name', 'Gym Console') . ' - Your Gym Portal Credentials',
-    'headerSubtitle' => 'Multi-Branch Gym Management & Access Control Platform'
+    'isPlatformMail' => true,
+    'subject' => '🎉 Welcome to ' . $platformAppName . ' - Your Gym Portal Credentials for ' . $tenant->name,
+    'headerSubtitle' => 'Multi-Branch Gym Management & Access Control Platform',
+    'brandName' => $platformAppName,
+    'brandLogo' => $platformLogo,
+    'supportEmail' => $platformSupportEmail,
+    'supportPhone' => $platformSupportPhone,
 ])
 
 @section('content')
@@ -14,7 +30,7 @@
     </p>
 
     <!-- Credentials Highlight Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 28px;">
+    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
         <h3 style="margin: 0 0 14px 0; font-size: 13px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px;">
             🔑 Your Gym Owner Login Credentials
         </h3>
@@ -60,9 +76,22 @@
     </div>
 
     <!-- CTA Button -->
-    <div style="text-align: center; margin-bottom: 30px;">
+    <div style="text-align: center; margin-bottom: 24px;">
         <a href="{{ $loginUrl ?? url('/login') }}" style="display: inline-block; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); letter-spacing: 0.3px;">
             🚀 Sign In to Gym Console &rarr;
+        </a>
+    </div>
+
+    <!-- WhatsApp Support Box -->
+    <div style="background-color: #0b1f14; border: 1px solid #16a34a; border-radius: 16px; padding: 18px 20px; margin-bottom: 26px; text-align: center;">
+        <div style="font-size: 14px; font-weight: 800; color: #4ade80; margin-bottom: 4px;">
+            💬 Need Quick Help Setting Up Your Gym?
+        </div>
+        <p style="margin: 0 0 12px 0; font-size: 12px; color: #cbd5e1; line-height: 18px;">
+            Our specialist onboarding team is available on WhatsApp to assist with Excel member data import, staff roles, and biometric device integration.
+        </p>
+        <a href="{{ $whatsAppUrl }}" target="_blank" style="display: inline-block; background-color: #22c55e; color: #022c15; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+            Chat with Support on WhatsApp ({{ $platformSupportPhone }}) &rarr;
         </a>
     </div>
 
@@ -82,7 +111,7 @@
             </tr>
             <tr>
                 <td style="padding: 4px 0; vertical-align: top; color: #818cf8; font-weight: 800;">3.</td>
-                <td style="padding: 4px 0;"><strong>Biometric Access Control:</strong> Hook up eSSL desktop middleware or Hikvision turnstiles under <em>Settings &rarr; Biometric & IoT Devices</em>.</td>
+                <td style="padding: 4px 0;"><strong>Biometric Attendance & Access Control:</strong> Hook up Hikvision facial terminals, eSSL, or ZKTeco turnstile gates under <em>Settings &rarr; Biometric & IoT Devices</em>.</td>
             </tr>
             <tr>
                 <td style="padding: 4px 0; vertical-align: top; color: #818cf8; font-weight: 800;">4.</td>

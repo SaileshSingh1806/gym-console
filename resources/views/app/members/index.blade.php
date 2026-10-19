@@ -391,10 +391,28 @@
                 </div>
             </form>
 
-            <a href="{{ route('app.members.create') }}" class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all shrink-0 cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                <span>Enroll New Member</span>
-            </a>
+            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                @if(auth()->user()?->isGymOwner() || auth()->user()?->isSuperAdmin())
+                    <a href="{{ route('app.members.export', request()->all()) }}" 
+                       class="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+                       title="Export members to CSV with active filters">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Export CSV</span>
+                    </a>
+
+                    <a href="{{ route('app.members.import') }}" 
+                       class="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center gap-2 shadow-sm transition-colors cursor-pointer"
+                       title="Bulk import members from CSV">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>Import CSV</span>
+                    </a>
+                @endif
+
+                <a href="{{ route('app.members.create') }}" class="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all shrink-0 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    <span>Enroll Member</span>
+                </a>
+            </div>
         </div>
 
         <!-- Members List: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->

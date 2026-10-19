@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Feature;
 use App\Models\Permission;
+use App\Models\Plan;
 use App\Models\Role;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
@@ -147,6 +149,17 @@ class PermissionSeeder extends Seeder
                     ['name' => 'devices.manage', 'display_name' => 'Configure Hardware', 'description' => 'Add, test, and sync biometric hardware'],
                 ],
             ],
+            'whatsapp' => [
+                'label' => 'WhatsApp Marketing & Automation',
+                'permissions' => [
+                    ['name' => 'whatsapp.view', 'display_name' => 'Access WhatsApp Dashboard', 'description' => 'View campaign analytics, metrics, delivery reports & message dispatch counts'],
+                    ['name' => 'whatsapp.contacts', 'display_name' => 'Manage Contacts & Consent', 'description' => 'Create, edit, import CSV contacts, and manage WhatsApp marketing consent & opt-outs'],
+                    ['name' => 'whatsapp.campaigns', 'display_name' => 'Create & Send Campaigns', 'description' => 'Launch bulk broadcasts, preview campaigns, schedule and view broadcast history'],
+                    ['name' => 'whatsapp.templates', 'display_name' => 'Manage Templates', 'description' => 'Create, inspect, preview, and sync Meta message templates'],
+                    ['name' => 'whatsapp.inbox', 'display_name' => 'WhatsApp Live Inbox', 'description' => 'Read and reply to 2-way customer WhatsApp messages in 24h service window'],
+                    ['name' => 'whatsapp.settings', 'display_name' => 'WhatsApp API & Automation Config', 'description' => 'Configure Cloud API credentials, webhooks, and trigger event automations'],
+                ],
+            ],
             'administration' => [
                 'label' => 'Administration & Team Roles',
                 'permissions' => [
@@ -242,6 +255,14 @@ class PermissionSeeder extends Seeder
             'crm.trials' => 'crm_leads',
             'crm.reports' => 'crm_leads',
 
+            // WhatsApp Marketing & Automation
+            'whatsapp.view' => 'whatsapp_marketing',
+            'whatsapp.contacts' => 'whatsapp_marketing',
+            'whatsapp.campaigns' => 'whatsapp_marketing',
+            'whatsapp.templates' => 'whatsapp_marketing',
+            'whatsapp.inbox' => 'whatsapp_marketing',
+            'whatsapp.settings' => 'whatsapp_marketing',
+
             // Reports & Finance
             'reports.member_report' => 'reports_finance',
             'reports.balance_sheet' => 'reports_finance',
@@ -286,6 +307,7 @@ class PermissionSeeder extends Seeder
                 'diets.view', 'diets.create', 'diets.edit',
                 'services.view', 'services.create', 'services.edit', 'services.book',
                 'crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.trials', 'crm.reports',
+                'whatsapp.view', 'whatsapp.contacts', 'whatsapp.campaigns', 'whatsapp.templates', 'whatsapp.inbox', 'whatsapp.settings',
                 'reports.member_report',
                 'inventory.view', 'inventory.create', 'inventory.edit', 'equipment.maintenance',
                 'devices.view',
@@ -301,6 +323,7 @@ class PermissionSeeder extends Seeder
                 'pt.view', 'pt.create', 'pt.sessions_manage',
                 'services.view', 'services.book',
                 'crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.trials',
+                'whatsapp.view', 'whatsapp.contacts', 'whatsapp.inbox',
                 'inventory.view',
             ],
             'trainer' => [
@@ -331,15 +354,51 @@ class PermissionSeeder extends Seeder
         ];
     }
 
-    public function run(): void
+    protected static bool $syncedThisRequest = false;
+
+    public static function getDeclaredPermissionCount(): int
+    {
+        $count = 0;
+        foreach (self::getPermissionsGrouped() as $group) {
+            $count += count($group['permissions']);
+        }
+
+        return $count;
+    }
+
+    /**
+     * Ensure all declared permissions and default role mappings exist in database.
+     * Runs fast with lightweight count check so it can be called safely without overhead.
+     */
+    public static function ensureSynced(): void
+    {
+        if (self::$syncedThisRequest) {
+            return;
+        }
+
+        $declaredCount = self::getDeclaredPermissionCount();
+        $dbCount = Permission::count();
+
+        if ($dbCount < $declaredCount) {
+            self::sync();
+        }
+
+        self::$syncedThisRequest = true;
+    }
+
+    /**
+     * Auto-sync all declared permissions and default role bindings for all gyms/tenants.
+     * Automatically inserts new permissions into the permissions table,
+     * links default permissions to existing system roles without overriding custom tweaks,
+     * and guarantees that the features table and plan mappings are up to date.
+     */
+    public static function sync(bool $forceRoleDefaults = false): void
     {
         $groups = self::getPermissionsGrouped();
-        $validNames = [];
         $allPermMap = [];
 
         foreach ($groups as $groupKey => $groupData) {
             foreach ($groupData['permissions'] as $p) {
-                $validNames[] = $p['name'];
                 $perm = Permission::updateOrCreate(
                     ['name' => $p['name']],
                     [
@@ -352,37 +411,97 @@ class PermissionSeeder extends Seeder
             }
         }
 
-        // Keep existing role assignments and add new permissions
+        // Keep existing role assignments and attach newly introduced default permissions to system roles
         $tenants = Tenant::all();
         $defaultMappings = self::getDefaultRolePermissions();
 
         foreach ($tenants as $tenant) {
-            foreach ($defaultMappings as $roleSlug => $permNames) {
-                $role = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('name', $roleSlug)->first();
-                if (! $role) {
-                    $role = Role::withoutGlobalScopes()->create([
-                        'tenant_id' => $tenant->id,
-                        'name' => $roleSlug,
-                        'display_name' => match ($roleSlug) {
-                            'gym_manager' => 'Gym Manager',
-                            'receptionist' => 'Receptionist',
-                            'trainer' => 'Fitness Trainer',
-                            'accountant' => 'Accountant',
-                            'staff' => 'General Staff',
-                            default => ucfirst($roleSlug),
-                        },
-                        'is_system' => true,
-                    ]);
+            self::syncForTenant($tenant, $allPermMap, $defaultMappings, $forceRoleDefaults);
+        }
 
-                    $permIds = [];
-                    foreach ($permNames as $pName) {
-                        if (isset($allPermMap[$pName])) {
-                            $permIds[] = $allPermMap[$pName];
-                        }
+        // Ensure SaaS feature existence & plan mapping
+        self::syncFeatures();
+
+        self::$syncedThisRequest = true;
+    }
+
+    /**
+     * Synchronize permissions and default roles for a specific tenant.
+     */
+    public static function syncForTenant(Tenant $tenant, ?array $allPermMap = null, ?array $defaultMappings = null, bool $force = false): void
+    {
+        if ($allPermMap === null) {
+            $allPermMap = Permission::pluck('id', 'name')->toArray();
+        }
+        if ($defaultMappings === null) {
+            $defaultMappings = self::getDefaultRolePermissions();
+        }
+
+        foreach ($defaultMappings as $roleSlug => $permNames) {
+            $role = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('name', $roleSlug)->first();
+            if (! $role) {
+                $role = Role::withoutGlobalScopes()->create([
+                    'tenant_id' => $tenant->id,
+                    'name' => $roleSlug,
+                    'display_name' => match ($roleSlug) {
+                        'gym_manager' => 'Gym Manager',
+                        'receptionist' => 'Receptionist',
+                        'trainer' => 'Fitness Trainer',
+                        'accountant' => 'Accountant',
+                        'staff' => 'General Staff',
+                        default => ucfirst($roleSlug),
+                    },
+                    'is_system' => true,
+                ]);
+
+                $permIds = [];
+                foreach ($permNames as $pName) {
+                    if (isset($allPermMap[$pName])) {
+                        $permIds[] = $allPermMap[$pName];
                     }
-                    $role->permissions()->sync($permIds);
+                }
+                $role->permissions()->sync($permIds);
+            } else {
+                // If role already exists, attach any newly added default permissions without overriding customizations
+                $existingPermIds = $role->permissions()->pluck('permissions.id')->toArray();
+                $newPermIds = [];
+                foreach ($permNames as $pName) {
+                    if (isset($allPermMap[$pName]) && ! in_array($allPermMap[$pName], $existingPermIds)) {
+                        $newPermIds[] = $allPermMap[$pName];
+                    }
+                }
+                if (! empty($newPermIds)) {
+                    $role->permissions()->syncWithoutDetaching($newPermIds);
                 }
             }
         }
+    }
+
+    /**
+     * Ensure the whatsapp_marketing feature exists in features table and is attached to plans.
+     */
+    public static function syncFeatures(): void
+    {
+        $whatsappFeature = Feature::firstOrCreate(
+            ['code' => 'whatsapp_marketing'],
+            [
+                'name' => 'WhatsApp Marketing & Automation',
+                'description' => 'Official Meta Cloud API bulk campaigns, 2-way inbox, automated member alerts & templates',
+                'type' => 'boolean',
+            ]
+        );
+
+        // Ensure Starter, Pro and all active plans have whatsapp_marketing attached
+        $plans = Plan::all();
+        foreach ($plans as $plan) {
+            if (! $plan->features()->where('features.id', $whatsappFeature->id)->exists()) {
+                $plan->features()->attach($whatsappFeature->id, ['value' => '1']);
+            }
+        }
+    }
+
+    public function run(): void
+    {
+        self::sync(true);
     }
 }

@@ -140,6 +140,13 @@ class User extends Authenticatable
             if ($roleObj && $roleObj->permissions()->where('name', $permission)->exists()) {
                 return true;
             }
+
+            // If a newly added system permission is not yet attached, auto-sync once and re-check
+            PermissionSeeder::ensureSynced();
+
+            if ($roleObj && $roleObj->fresh()->permissions()->where('name', $permission)->exists()) {
+                return true;
+            }
         }
 
         return false;

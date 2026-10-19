@@ -1,4 +1,5 @@
 @extends('emails.layouts.master', [
+    'isPlatformMail' => true,
     'subject' => '⚡ SaaS Subscription Active: ' . $plan->name . ' - ' . ($tenant->name ?? 'Gym Console'),
     'headerSubtitle' => 'Gym Console SaaS Plan Invoice'
 ])

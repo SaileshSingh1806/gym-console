@@ -61,42 +61,42 @@
                     </div>
 
                     <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
+                        <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-slate-700 transition-colors">
                             <div class="text-white font-bold text-base mb-1">Zero Revenue Leakage</div>
-                            <p class="text-xs text-slate-400">Expired members are automatically blocked at the turnstile gate until payment is cleared.</p>
+                            <p class="text-xs text-slate-400">Automated WhatsApp payment alerts and instant turnstile gating eliminate unpaid attendance.</p>
                         </div>
-                        <div class="p-5 rounded-xl bg-slate-900 border border-slate-800">
+                        <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-slate-700 transition-colors">
                             <div class="text-white font-bold text-base mb-1">100% Cloud Synced</div>
-                            <p class="text-xs text-slate-400">Review member attendance and branch collections live from any smartphone or laptop.</p>
+                            <p class="text-xs text-slate-400">Monitor live footfall, member registrations, and collections from any smartphone or laptop.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl space-y-6">
+                <div class="rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
                     <h3 class="text-lg font-bold text-white">
-                        Our Guiding Principles
+                        Our Core Guiding Principles
                     </h3>
 
                     <div class="space-y-4">
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800/80">
-                            <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-[#080d17] border border-slate-800/80">
+                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 border border-amber-500/20">1</div>
                             <div>
-                                <div class="text-sm font-bold text-white">Hardware Reliability First</div>
-                                <div class="text-xs text-slate-400 mt-1">Biometric turnstiles, fingerprint readers, and Hikvision facial gates work seamlessly with sub-second response.</div>
+                                <div class="text-sm font-bold text-white">Reliability &amp; Real-Time Speed</div>
+                                <div class="text-xs text-slate-400 mt-1">Biometric attendance, facial gates, and WhatsApp notifications process in under 0.3 seconds.</div>
                             </div>
                         </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800/80">
-                            <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-[#080d17] border border-slate-800/80">
+                            <div class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 border border-blue-500/20">2</div>
                             <div>
                                 <div class="text-sm font-bold text-white">Strict Tenant Isolation</div>
-                                <div class="text-xs text-slate-400 mt-1">Every gym’s data, finances, and member records are isolated at the database level.</div>
+                                <div class="text-xs text-slate-400 mt-1">Every gym’s financial records, member profiles, and audits remain 100% isolated at the database level.</div>
                             </div>
                         </div>
-                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800/80">
-                            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
+                        <div class="flex items-start gap-4 p-4 rounded-2xl bg-[#080d17] border border-slate-800/80">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 border border-emerald-500/20">3</div>
                             <div>
-                                <div class="text-sm font-bold text-white">Simplicity & Speed</div>
-                                <div class="text-xs text-slate-400 mt-1">No complex onboarding. Staff and trainers can learn the entire system in under 10 minutes.</div>
+                                <div class="text-sm font-bold text-white">Zero Friction Onboarding</div>
+                                <div class="text-xs text-slate-400 mt-1">No complicated training. Gym owners, receptionists, and trainers master the platform in under 10 minutes.</div>
                             </div>
                         </div>
                     </div>
@@ -110,33 +110,33 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-14">
                 <span class="text-xs uppercase font-bold tracking-wider text-amber-400">Engineering & Reliability</span>
-                <h2 class="mt-2 text-2xl sm:text-4xl font-bold text-white">Built for high concurrency and uptime</h2>
-                <p class="mt-3 text-slate-400 text-sm sm:text-base">Under the hood, Gym Console is powered by modern, battle-tested software architecture.</p>
+                <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold text-white">Built for high concurrency and uptime</h2>
+                <p class="mt-3 text-slate-400 text-sm sm:text-base">Under the hood, Gym Console is powered by modern, battle-tested cloud architecture.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
+                <div class="p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-amber-500/30 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4 border border-amber-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Universal Biometric Engine</h3>
-                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">Direct hardware integration layer for eSSL desktop middleware, Hikvision facial terminals, Realtime, ZKTeco, and turnstile relays.</p>
+                    <h3 class="text-lg font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">Universal Biometric Engine</h3>
+                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">Direct integration layer for Hikvision facial terminals, eSSL fingerprint scanners, ZKTeco, and turnstile relays.</p>
                 </div>
 
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4">
+                <div class="p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-blue-500/30 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-4 border border-blue-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Multi-Tenant Scoping</h3>
-                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">Database-level multi-tenant scoping ensures each gym’s financial statements, member lists, and audit logs remain strictly segregated.</p>
+                    <h3 class="text-lg font-bold text-white mb-2 group-hover:text-blue-300 transition-colors">Multi-Tenant Scoping</h3>
+                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">Database-level multi-tenant isolation ensures each gym’s financial metrics, members, and staff records remain completely private.</p>
                 </div>
 
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+                <div class="p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-emerald-500/30 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4 border border-emerald-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">Native Mobile REST API</h3>
-                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">High-performance REST API powering native Android and iOS member apps with QR authentication, push notifications, and routine tracking.</p>
+                    <h3 class="text-lg font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">Mobile Member REST API</h3>
+                    <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">High-performance API powering native Android and iOS apps with digital QR check-in, animated workouts, and macro tracking.</p>
                 </div>
             </div>
         </div>

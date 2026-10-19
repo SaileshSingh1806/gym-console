@@ -38,13 +38,18 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     // 1. Members Management
     Route::middleware(['feature:members_management'])->group(function () {
         Route::get('/members', [AppController::class, 'members'])->name('app.members.index')->middleware('permission:members.view');
+        Route::get('/members/export', [AppController::class, 'exportMembers'])->name('app.members.export')->middleware(['role:gym_owner', 'permission:members.view']);
+        Route::get('/members/import', [AppController::class, 'importMembers'])->name('app.members.import')->middleware(['role:gym_owner', 'permission:members.create']);
+        Route::get('/members/import/sample', [AppController::class, 'downloadSampleImportCsv'])->name('app.members.import.sample')->middleware(['role:gym_owner', 'permission:members.create']);
+        Route::post('/members/import/preview', [AppController::class, 'previewImportMembers'])->name('app.members.import.preview')->middleware(['role:gym_owner', 'permission:members.create']);
+        Route::post('/members/import/confirm', [AppController::class, 'confirmImportMembers'])->name('app.members.import.confirm')->middleware(['role:gym_owner', 'permission:members.create']);
         Route::get('/members/create', [AppController::class, 'createMember'])->name('app.members.create')->middleware('permission:members.create');
         Route::get('/members/lookup-phone', [AppController::class, 'lookupMemberPhone'])->name('app.members.lookup-phone')->middleware('permission:members.create,members.view');
-        Route::get('/members/{id}', [AppController::class, 'showMember'])->name('app.members.show')->middleware('permission:members.view');
-        Route::get('/members/{id}/edit', [AppController::class, 'editMember'])->name('app.members.edit')->middleware('permission:members.edit');
+        Route::get('/members/{id}', [AppController::class, 'showMember'])->name('app.members.show')->whereNumber('id')->middleware('permission:members.view');
+        Route::get('/members/{id}/edit', [AppController::class, 'editMember'])->name('app.members.edit')->whereNumber('id')->middleware('permission:members.edit');
         Route::post('/members', [AppController::class, 'storeMember'])->name('app.members.store')->middleware('permission:members.create');
-        Route::post('/members/{id}', [AppController::class, 'updateMember'])->name('app.members.update')->middleware('permission:members.edit');
-        Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete')->middleware('permission:members.delete');
+        Route::post('/members/{id}', [AppController::class, 'updateMember'])->name('app.members.update')->whereNumber('id')->middleware('permission:members.edit');
+        Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete')->whereNumber('id')->middleware('permission:members.delete');
         Route::post('/members/{id}/collect-fee', [AppController::class, 'collectMemberFee'])->name('app.members.collect-fee')->middleware('permission:payments.record');
         Route::post('/members/{id}/freeze', [AppController::class, 'toggleFreezeMember'])->name('app.members.freeze')->middleware('permission:members.freeze');
         Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription')->middleware('permission:memberships.create');
@@ -173,55 +178,55 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     });
 
     // WhatsApp Marketing, Bulk Messaging & Cloud API Automation
-    Route::prefix('whatsapp')->name('app.whatsapp.')->group(function () {
-        Route::get('/dashboard', [WhatsAppController::class, 'dashboard'])->name('dashboard');
+    Route::middleware(['feature:whatsapp_marketing'])->prefix('whatsapp')->name('app.whatsapp.')->group(function () {
+        Route::get('/dashboard', [WhatsAppController::class, 'dashboard'])->name('dashboard')->middleware('permission:whatsapp.view');
 
         // Contacts
-        Route::get('/contacts', [WhatsAppController::class, 'contacts'])->name('contacts.index');
-        Route::post('/contacts', [WhatsAppController::class, 'storeContact'])->name('contacts.store');
-        Route::post('/contacts/{id}', [WhatsAppController::class, 'updateContact'])->name('contacts.update')->whereNumber('id');
-        Route::delete('/contacts/{id}', [WhatsAppController::class, 'deleteContact'])->name('contacts.delete')->whereNumber('id');
-        Route::post('/contacts/{id}/consent', [WhatsAppController::class, 'updateConsent'])->name('contacts.consent')->whereNumber('id');
-        Route::post('/contacts/sync-members', [WhatsAppController::class, 'syncMembers'])->name('contacts.sync-members');
-        Route::post('/contacts/sync-leads', [WhatsAppController::class, 'syncLeads'])->name('contacts.sync-leads');
-        Route::get('/contacts/export', [WhatsAppController::class, 'exportContacts'])->name('contacts.export');
+        Route::get('/contacts', [WhatsAppController::class, 'contacts'])->name('contacts.index')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts', [WhatsAppController::class, 'storeContact'])->name('contacts.store')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/{id}', [WhatsAppController::class, 'updateContact'])->name('contacts.update')->whereNumber('id')->middleware('permission:whatsapp.contacts');
+        Route::delete('/contacts/{id}', [WhatsAppController::class, 'deleteContact'])->name('contacts.delete')->whereNumber('id')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/{id}/consent', [WhatsAppController::class, 'updateConsent'])->name('contacts.consent')->whereNumber('id')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/sync-members', [WhatsAppController::class, 'syncMembers'])->name('contacts.sync-members')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/sync-leads', [WhatsAppController::class, 'syncLeads'])->name('contacts.sync-leads')->middleware('permission:whatsapp.contacts');
+        Route::get('/contacts/export', [WhatsAppController::class, 'exportContacts'])->name('contacts.export')->middleware('permission:whatsapp.contacts');
 
         // Import Contacts
-        Route::get('/contacts/import', [WhatsAppController::class, 'importContacts'])->name('contacts.import');
-        Route::post('/contacts/import/preview', [WhatsAppController::class, 'processImportPreview'])->name('contacts.import.preview');
-        Route::post('/contacts/import/confirm', [WhatsAppController::class, 'confirmImport'])->name('contacts.import.confirm');
+        Route::get('/contacts/import', [WhatsAppController::class, 'importContacts'])->name('contacts.import')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/import/preview', [WhatsAppController::class, 'processImportPreview'])->name('contacts.import.preview')->middleware('permission:whatsapp.contacts');
+        Route::post('/contacts/import/confirm', [WhatsAppController::class, 'confirmImport'])->name('contacts.import.confirm')->middleware('permission:whatsapp.contacts');
 
         // Message Templates
-        Route::get('/templates', [WhatsAppController::class, 'templates'])->name('templates.index');
-        Route::post('/templates/sync', [WhatsAppController::class, 'syncTemplates'])->name('templates.sync');
-        Route::post('/templates', [WhatsAppController::class, 'createTemplate'])->name('templates.store');
+        Route::get('/templates', [WhatsAppController::class, 'templates'])->name('templates.index')->middleware('permission:whatsapp.templates');
+        Route::post('/templates/sync', [WhatsAppController::class, 'syncTemplates'])->name('templates.sync')->middleware('permission:whatsapp.templates');
+        Route::post('/templates', [WhatsAppController::class, 'createTemplate'])->name('templates.store')->middleware('permission:whatsapp.templates');
 
         // Bulk Campaigns
-        Route::get('/campaigns', [WhatsAppController::class, 'campaigns'])->name('campaigns.index');
-        Route::post('/campaigns', [WhatsAppController::class, 'storeCampaign'])->name('campaigns.store');
-        Route::post('/campaigns/estimate', [WhatsAppController::class, 'estimateAudience'])->name('campaigns.estimate');
-        Route::post('/campaigns/test-message', [WhatsAppController::class, 'sendTestMessage'])->name('campaigns.test-message');
-        Route::post('/campaigns/{id}/pause', [WhatsAppController::class, 'pauseCampaign'])->name('campaigns.pause')->whereNumber('id');
-        Route::post('/campaigns/{id}/resume', [WhatsAppController::class, 'resumeCampaign'])->name('campaigns.resume')->whereNumber('id');
-        Route::post('/campaigns/{id}/cancel', [WhatsAppController::class, 'cancelCampaign'])->name('campaigns.cancel')->whereNumber('id');
-        Route::get('/campaigns/{id}/history', [WhatsAppController::class, 'campaignHistory'])->name('campaigns.history')->whereNumber('id');
+        Route::get('/campaigns', [WhatsAppController::class, 'campaigns'])->name('campaigns.index')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns', [WhatsAppController::class, 'storeCampaign'])->name('campaigns.store')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns/estimate', [WhatsAppController::class, 'estimateAudience'])->name('campaigns.estimate')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns/test-message', [WhatsAppController::class, 'sendTestMessage'])->name('campaigns.test-message')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns/{id}/pause', [WhatsAppController::class, 'pauseCampaign'])->name('campaigns.pause')->whereNumber('id')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns/{id}/resume', [WhatsAppController::class, 'resumeCampaign'])->name('campaigns.resume')->whereNumber('id')->middleware('permission:whatsapp.campaigns');
+        Route::post('/campaigns/{id}/cancel', [WhatsAppController::class, 'cancelCampaign'])->name('campaigns.cancel')->whereNumber('id')->middleware('permission:whatsapp.campaigns');
+        Route::get('/campaigns/{id}/history', [WhatsAppController::class, 'campaignHistory'])->name('campaigns.history')->whereNumber('id')->middleware('permission:whatsapp.campaigns');
 
         // WhatsApp Inbox (2-column live chat)
-        Route::get('/inbox', [WhatsAppController::class, 'inbox'])->name('inbox');
-        Route::post('/inbox/{id}/reply-text', [WhatsAppController::class, 'sendInboxTextMessage'])->name('inbox.reply-text')->whereNumber('id');
-        Route::post('/inbox/{id}/reply-template', [WhatsAppController::class, 'sendInboxTemplateMessage'])->name('inbox.reply-template')->whereNumber('id');
-        Route::post('/inbox/{id}/toggle-optout', [WhatsAppController::class, 'toggleInboxOptOut'])->name('inbox.toggle-optout')->whereNumber('id');
+        Route::get('/inbox', [WhatsAppController::class, 'inbox'])->name('inbox')->middleware('permission:whatsapp.inbox');
+        Route::post('/inbox/{id}/reply-text', [WhatsAppController::class, 'sendInboxTextMessage'])->name('inbox.reply-text')->whereNumber('id')->middleware('permission:whatsapp.inbox');
+        Route::post('/inbox/{id}/reply-template', [WhatsAppController::class, 'sendInboxTemplateMessage'])->name('inbox.reply-template')->whereNumber('id')->middleware('permission:whatsapp.inbox');
+        Route::post('/inbox/{id}/toggle-optout', [WhatsAppController::class, 'toggleInboxOptOut'])->name('inbox.toggle-optout')->whereNumber('id')->middleware('permission:whatsapp.inbox');
 
         // Automations
-        Route::get('/automations', [WhatsAppController::class, 'automations'])->name('automations.index');
-        Route::post('/automations/{id}/toggle', [WhatsAppController::class, 'toggleAutomation'])->name('automations.toggle')->whereNumber('id');
-        Route::post('/automations/{id}', [WhatsAppController::class, 'updateAutomation'])->name('automations.update')->whereNumber('id');
-        Route::post('/automations/{id}/run-now', [WhatsAppController::class, 'triggerAutomationRunNow'])->name('automations.run-now')->whereNumber('id');
+        Route::get('/automations', [WhatsAppController::class, 'automations'])->name('automations.index')->middleware('permission:whatsapp.settings');
+        Route::post('/automations/{id}/toggle', [WhatsAppController::class, 'toggleAutomation'])->name('automations.toggle')->whereNumber('id')->middleware('permission:whatsapp.settings');
+        Route::post('/automations/{id}', [WhatsAppController::class, 'updateAutomation'])->name('automations.update')->whereNumber('id')->middleware('permission:whatsapp.settings');
+        Route::post('/automations/{id}/run-now', [WhatsAppController::class, 'triggerAutomationRunNow'])->name('automations.run-now')->whereNumber('id')->middleware('permission:whatsapp.settings');
 
         // Settings & API Configuration
-        Route::get('/settings', [WhatsAppController::class, 'settings'])->name('settings');
-        Route::post('/settings', [WhatsAppController::class, 'updateSettings'])->name('settings.update');
-        Route::post('/settings/test-connection', [WhatsAppController::class, 'testConnection'])->name('settings.test-connection');
+        Route::get('/settings', [WhatsAppController::class, 'settings'])->name('settings')->middleware('permission:whatsapp.settings');
+        Route::post('/settings', [WhatsAppController::class, 'updateSettings'])->name('settings.update')->middleware('permission:whatsapp.settings');
+        Route::post('/settings/test-connection', [WhatsAppController::class, 'testConnection'])->name('settings.test-connection')->middleware('permission:whatsapp.settings');
     });
 
     // 12. Report & Finance
@@ -298,6 +303,14 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::get('/support/{id}', [AppController::class, 'showSupportTicket'])->name('app.support.show')->whereNumber('id');
     Route::post('/support/{id}/reply', [AppController::class, 'replySupportTicket'])->name('app.support.reply')->whereNumber('id');
     Route::post('/support/{id}/close', [AppController::class, 'closeSupportTicket'])->name('app.support.close')->whereNumber('id');
+
+    // In-App Notification Center
+    Route::get('/notifications/feed', [AppController::class, 'notificationFeed'])->name('app.notifications.feed');
+    Route::post('/notifications/mark-read', [AppController::class, 'markNotificationRead'])->name('app.notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [AppController::class, 'markAllNotificationsRead'])->name('app.notifications.mark-all-read');
+
+    // Self Profile & Security
+    Route::post('/profile/change-password', [AppController::class, 'changeOwnPassword'])->name('app.profile.change-password');
 
     // Settings (Owner Only)
     Route::middleware('role:super_admin,gym_owner')->group(function () {

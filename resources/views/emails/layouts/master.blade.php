@@ -30,9 +30,24 @@
                     
                     <!-- Top Gradient Header Brand Bar -->
                     @php
-                        $rawLogo = $brandLogo ?? ($tenant->logo_url ?? ($ticket->tenant->logo_url ?? \App\Models\Setting::getGlobal('logo_url')));
-                        $resolvedBrandName = $brandName ?? ($tenant->name ?? ($ticket->tenant->name ?? \App\Models\Setting::getGlobal('app_name', config('app.name', 'Gym Console'))));
-                        $resolvedSupportEmail = $supportEmail ?? ($tenant->email ?? ($ticket->tenant->email ?? \App\Models\Setting::getGlobal('support_email')));
+                        $isPlatform = $isPlatformMail ?? false;
+                        $globalAppName = \App\Models\Setting::getGlobal('app_name', config('app.name', 'Gym Console'));
+                        $globalLogo = \App\Models\Setting::getGlobal('logo_url');
+                        $globalSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymconsole.com');
+                        $globalSupportPhone = \App\Models\Setting::getGlobal('support_phone', '+91 9974995179');
+                        $globalFooterCopyright = $footerCopyright ?? \App\Models\Setting::getGlobal('footer_copyright', '© 2026 ' . $globalAppName . '. All rights reserved.');
+
+                        if ($isPlatform) {
+                            $rawLogo = $brandLogo ?? $globalLogo;
+                            $resolvedBrandName = $brandName ?? $globalAppName;
+                            $resolvedSupportEmail = $supportEmail ?? $globalSupportEmail;
+                            $resolvedSupportPhone = $supportPhone ?? $globalSupportPhone;
+                        } else {
+                            $rawLogo = $brandLogo ?? ($tenant->logo_url ?? ($ticket->tenant->logo_url ?? $globalLogo));
+                            $resolvedBrandName = $brandName ?? ($tenant->name ?? ($ticket->tenant->name ?? $globalAppName));
+                            $resolvedSupportEmail = $supportEmail ?? ($tenant->email ?? ($ticket->tenant->email ?? $globalSupportEmail));
+                            $resolvedSupportPhone = $supportPhone ?? ($tenant->phone ?? ($ticket->tenant->phone ?? $globalSupportPhone));
+                        }
 
                         $resolvedBrandLogo = null;
                         if (!empty($rawLogo)) {
@@ -45,6 +60,11 @@
                                 $resolvedBrandLogo = asset($rawLogo);
                             }
                         }
+
+                        $cleanPhone = preg_replace('/[^0-9]/', '', (string)$resolvedSupportPhone);
+                        $resolvedWhatsAppUrl = !empty($cleanPhone) 
+                            ? 'https://wa.me/' . $cleanPhone . '?text=' . urlencode('Hi ' . $resolvedBrandName . ' Support, I have a query regarding my gym portal.') 
+                            : null;
                     @endphp
                     <tr>
                         <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%); padding: 26px 32px; text-align: center;">
@@ -86,18 +106,33 @@
 
                     <!-- Footer Bar -->
                     <tr>
-                        <td style="background-color: #0f172a; padding: 24px 32px; border-top: 1px solid #1e293b; text-align: center;">
-                            <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 18px;">
-                                © {{ date('Y') }} <strong>{{ $resolvedBrandName }}</strong>. All rights reserved.
+                        <td style="background-color: #0f172a; padding: 26px 32px; border-top: 1px solid #1e293b; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; font-weight: 700; color: #cbd5e1; line-height: 18px;">
+                                © 2026 {{ $resolvedBrandName }}. All rights reserved.
                             </p>
-                            <p style="margin: 6px 0 0 0; font-size: 11px; color: #64748b; line-height: 16px;">
-                                This is an automated system notification regarding your gym management account. If you need assistance, contact our support team.
+                            <p style="margin: 6px 0 14px 0; font-size: 11px; color: #64748b; line-height: 16px;">
+                                This is an automated system notification regarding your gym management account. If you need assistance, please contact our team.
                             </p>
-                            @if(!empty($resolvedSupportEmail))
-                                <p style="margin: 8px 0 0 0; font-size: 11px;">
-                                    <a href="mailto:{{ $resolvedSupportEmail }}" style="color: #818cf8; text-decoration: none; font-weight: 600;">Contact: {{ $resolvedSupportEmail }}</a>
-                                </p>
-                            @endif
+
+                            <!-- Support Email & WhatsApp Links -->
+                            <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
+                                <tr>
+                                    @if(!empty($resolvedSupportEmail))
+                                        <td align="center" style="padding: 4px 8px;">
+                                            <a href="mailto:{{ $resolvedSupportEmail }}" style="color: #818cf8; text-decoration: none; font-size: 11px; font-weight: 600;">
+                                                ✉️ {{ $resolvedSupportEmail }}
+                                            </a>
+                                        </td>
+                                    @endif
+                                    @if(!empty($resolvedWhatsAppUrl))
+                                        <td align="center" style="padding: 4px 8px;">
+                                            <a href="{{ $resolvedWhatsAppUrl }}" target="_blank" style="color: #22c55e; text-decoration: none; font-size: 11px; font-weight: 700;">
+                                                💬 WhatsApp: {{ $resolvedSupportPhone }}
+                                            </a>
+                                        </td>
+                                    @endif
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 

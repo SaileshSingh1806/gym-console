@@ -48,7 +48,9 @@ use App\Services\AiDietPlannerService;
 use App\Services\AttendanceService;
 use App\Services\FeatureGateService;
 use App\Services\MemberPaymentService;
+use App\Services\MemberImportExportService;
 use App\Services\MembershipService;
+use App\Services\NotificationService;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
 use App\Services\SupportTicketService;
@@ -341,6 +343,142 @@ class AppController extends Controller
                 'active_plan_end' => $member->activeMembership?->end_date?->format('d M Y'),
             ],
         ]);
+    }
+
+    /**
+     * Export members to CSV with filters applied (Restricted to Gym Owner).
+     */
+    public function exportMembers(Request $request): StreamedResponse
+    {
+        if (! auth()->user()?->isGymOwner() && ! auth()->user()?->isSuperAdmin()) {
+            abort(403, 'Unauthorized. Only the Gym Owner is permitted to export member data.');
+        }
+
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        if (! $tenant) {
+            abort(403, 'Unauthorized. Tenant context missing.');
+        }
+
+        return MemberImportExportService::exportCsv($tenant, $request->all());
+    }
+
+    /**
+     * Show Bulk Import Members screen (Restricted to Gym Owner).
+     */
+    public function importMembers(): View
+    {
+        if (! auth()->user()?->isGymOwner() && ! auth()->user()?->isSuperAdmin()) {
+            abort(403, 'Unauthorized. Only the Gym Owner is permitted to import members.');
+        }
+
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $branches = Branch::where('tenant_id', $tenant?->id)->get();
+        $membershipPlans = MembershipPlan::where('tenant_id', $tenant?->id)->where('is_active', true)->get();
+
+        return view('app.members.import', compact('branches', 'membershipPlans'));
+    }
+
+    /**
+     * Download sample CSV template for member import.
+     */
+    public function downloadSampleImportCsv(): StreamedResponse
+    {
+        if (! auth()->user()?->isGymOwner() && ! auth()->user()?->isSuperAdmin()) {
+            abort(403, 'Unauthorized. Only the Gym Owner can download the member template.');
+        }
+
+        return MemberImportExportService::downloadSampleCsv();
+    }
+
+    /**
+     * Preview and validate uploaded CSV file before importing.
+     */
+    public function previewImportMembers(Request $request): View|RedirectResponse
+    {
+        if (! auth()->user()?->isGymOwner() && ! auth()->user()?->isSuperAdmin()) {
+            abort(403, 'Unauthorized. Only the Gym Owner is permitted to import members.');
+        }
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
+            'branch_id' => 'nullable|integer',
+            'duplicate_strategy' => 'nullable|in:skip,update',
+        ]);
+
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        if (! $tenant) {
+            abort(403, 'Tenant context missing.');
+        }
+
+        $file = $request->file('csv_file');
+        $branchId = $request->input('branch_id') ? (int) $request->input('branch_id') : null;
+        $duplicateStrategy = $request->input('duplicate_strategy', 'skip');
+
+        try {
+            $preview = MemberImportExportService::previewCsv($file->getRealPath(), $tenant, $branchId);
+
+            // Store preview in session temporarily for confirm step
+            session([
+                'member_import_preview' => $preview,
+                'member_import_branch_id' => $branchId,
+                'member_import_duplicate_strategy' => $duplicateStrategy,
+            ]);
+
+            $branches = Branch::where('tenant_id', $tenant->id)->get();
+            $membershipPlans = MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->get();
+
+            return view('app.members.import', compact('preview', 'branches', 'membershipPlans', 'branchId', 'duplicateStrategy'));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error processing CSV file: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    /**
+     * Confirm and commit previewed CSV member import.
+     */
+    public function confirmImportMembers(Request $request): RedirectResponse
+    {
+        if (! auth()->user()?->isGymOwner() && ! auth()->user()?->isSuperAdmin()) {
+            abort(403, 'Unauthorized. Only the Gym Owner is permitted to import members.');
+        }
+
+        $preview = session('member_import_preview');
+        $branchId = session('member_import_branch_id');
+        $duplicateStrategy = $request->input('duplicate_strategy', session('member_import_duplicate_strategy', 'skip'));
+
+        if (empty($preview) || (empty($preview['valid_rows']) && empty($preview['duplicate_rows']))) {
+            return redirect()->route('app.members.import')->with('error', 'No member data found in import session. Please upload your CSV again.');
+        }
+
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        if (! $tenant) {
+            abort(403, 'Tenant context missing.');
+        }
+
+        try {
+            $result = MemberImportExportService::commitImport(
+                rows: $preview['valid_rows'] ?? [],
+                tenant: $tenant,
+                defaultBranchId: $branchId,
+                duplicateStrategy: $duplicateStrategy,
+                duplicateRows: $preview['duplicate_rows'] ?? []
+            );
+
+            // Clean up session preview
+            session()->forget(['member_import_preview', 'member_import_branch_id', 'member_import_duplicate_strategy']);
+
+            $msg = "Successfully imported {$result['imported']} members!";
+            if ($result['updated'] > 0) {
+                $msg .= " Updated {$result['updated']} existing records.";
+            }
+            if ($result['skipped'] > 0) {
+                $msg .= " ({$result['skipped']} duplicate rows skipped).";
+            }
+
+            return redirect()->route('app.members.index')->with('success', $msg);
+        } catch (\Exception $e) {
+            return redirect()->route('app.members.import')->with('error', 'Import failed: ' . $e->getMessage());
+        }
     }
 
     public function storeMember(Request $request): RedirectResponse
@@ -6015,10 +6153,8 @@ class AppController extends Controller
         $tenantService = app(TenantService::class);
         $tenantService->createDefaultTenantRoles($tenant);
 
-        // Ensure permissions are seeded
-        if (Permission::count() === 0) {
-            (new PermissionSeeder)->run();
-        }
+        // Ensure all system permissions and default role bindings are auto-synced
+        PermissionSeeder::sync();
 
         $roles = Role::where('tenant_id', $tenant->id)
             ->with(['permissions', 'users'])
@@ -6966,5 +7102,82 @@ class AppController extends Controller
         ActivityLog::log('support_ticket_closed', "Closed ticket #{$ticket->ticket_number}", $ticket);
 
         return back()->with('success', "Ticket #{$ticket->ticket_number} has been closed.");
+    }
+
+    /**
+     * Get real-time operational notifications feed
+     */
+    public function notificationFeed(NotificationService $notificationService): JsonResponse
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return response()->json(['success' => false, 'notifications' => [], 'unread_count' => 0], 401);
+        }
+
+        $feed = $notificationService->getFeed($user);
+
+        return response()->json($feed);
+    }
+
+    /**
+     * Mark a single notification as read
+     */
+    public function markNotificationRead(Request $request, NotificationService $notificationService): JsonResponse
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $validated = $request->validate([
+            'id' => 'required|string',
+        ]);
+
+        $notificationService->markAsRead($user, $validated['id']);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all notifications as read
+     */
+    public function markAllNotificationsRead(Request $request, NotificationService $notificationService): JsonResponse
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $ids = $request->input('ids', []);
+        if (is_array($ids)) {
+            $notificationService->markAllAsRead($user, $ids);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Change user's own password from top navigation profile dropdown.
+     */
+    public function changeOwnPassword(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ], [
+            'current_password.current_password' => 'The provided current password does not match your account password.',
+            'password.different' => 'The new password must be different from your current password.',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        ActivityLog::log('user_password_updated', "User {$user->name} ({$user->email}) updated their login password", $user);
+
+        return back()->with('success', 'Your password has been changed successfully!');
     }
 }

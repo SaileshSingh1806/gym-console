@@ -11,6 +11,7 @@ use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -153,20 +154,7 @@ class TenantService
 
     public function createDefaultTenantRoles(Tenant $tenant): void
     {
-        $roles = [
-            ['name' => 'gym_manager', 'display_name' => 'Gym Manager', 'description' => 'Branch manager with operational access'],
-            ['name' => 'receptionist', 'display_name' => 'Receptionist', 'description' => 'Front desk reception and attendance'],
-            ['name' => 'trainer', 'display_name' => 'Fitness Trainer', 'description' => 'Personal trainer and class coach'],
-            ['name' => 'accountant', 'display_name' => 'Accountant', 'description' => 'Financial records and expense manager'],
-            ['name' => 'staff', 'display_name' => 'General Staff', 'description' => 'Basic staff access'],
-        ];
-
-        foreach ($roles as $r) {
-            Role::firstOrCreate(
-                ['tenant_id' => $tenant->id, 'name' => $r['name']],
-                ['display_name' => $r['display_name'], 'description' => $r['description'], 'is_system' => true]
-            );
-        }
+        PermissionSeeder::syncForTenant($tenant);
     }
 
     public function purgeTenantPermanently(int $tenantId): bool

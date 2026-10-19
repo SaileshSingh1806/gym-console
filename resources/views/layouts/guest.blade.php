@@ -70,6 +70,31 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
         }
+
+        /* Prevent browser autofill from turning inputs bright white/blue */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-text-fill-color: #f8fafc !important;
+            -webkit-box-shadow: 0 0 0 1000px #0b111e inset !important;
+            box-shadow: 0 0 0 1000px #0b111e inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        /* Seamless Infinite Horizontal Marquee */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            width: max-content;
+            animation: marquee 35s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
     </style>
 
     @if(!empty($platformSettings['google_analytics_id']))
@@ -103,6 +128,7 @@
 </head>
 <body class="flex flex-col min-h-screen antialiased bg-[#090d16] selection:bg-amber-500/25 selection:text-amber-200">
 
+    @if(!($hideNav ?? false))
     <!-- ═══════════════════════════════════════════════════
          CLEAN SAAS NAVIGATION HEADER
     ═══════════════════════════════════════════════════ -->
@@ -234,12 +260,14 @@
             </div>
         </div>
     </header>
+    @endif
 
     <!-- Main Content -->
     <main class="flex-grow">
         {{ $slot }}
     </main>
 
+    @if(!($hideFooter ?? false))
     <!-- ═══════════════════════════════════════════════════
          PROFESSIONAL B2B FOOTER
     ═══════════════════════════════════════════════════ -->
@@ -262,8 +290,17 @@
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm">
                         The all-in-one operating system for modern gyms and fitness clubs. Universal biometric access, automated fee collections, WhatsApp messaging, and multi-branch management.
                     </p>
+                    @php
+                        $guestPhone = $platformSettings['support_phone'] ?? '+91 9974995179';
+                        $cleanGuestPhone = preg_replace('/[^0-9]/', '', (string)$guestPhone);
+                        if (empty($cleanGuestPhone)) {
+                            $cleanGuestPhone = '919974995179';
+                        } elseif (strlen($cleanGuestPhone) === 10) {
+                            $cleanGuestPhone = '91' . $cleanGuestPhone;
+                        }
+                    @endphp
                     <div class="pt-2 flex items-center gap-3">
-                        <a href="https://wa.me/919876543210" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors">
+                        <a href="https://wa.me/{{ $cleanGuestPhone }}?text={{ urlencode('Hi, I need assistance with Gym Console') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/></svg>
                             <span>WhatsApp Support</span>
                         </a>
@@ -316,6 +353,7 @@
             </div>
         </div>
     </footer>
+    @endif
 
     @if(!empty($platformSettings['custom_footer_scripts']))
         {!! $platformSettings['custom_footer_scripts'] !!}

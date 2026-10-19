@@ -237,11 +237,17 @@
                                         // Tag badge determination
                                         $badgeType = 'VIEW';
                                         $badgeClass = 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
-                                        if (str_contains($pName, 'create') || str_contains($pName, 'add') || str_contains($pName, 'record') || str_contains($pName, 'book')) {
-                                            $badgeType = 'CREATE';
+                                        if (str_contains($pName, 'campaign') || str_contains($pName, 'create') || str_contains($pName, 'add') || str_contains($pName, 'record') || str_contains($pName, 'book')) {
+                                            $badgeType = str_contains($pName, 'campaign') ? 'CAMPAIGN' : 'CREATE';
                                             $badgeClass = 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20';
-                                        } elseif (str_contains($pName, 'edit') || str_contains($pName, 'update') || str_contains($pName, 'manage') || str_contains($pName, 'freeze')) {
-                                            $badgeType = 'EDIT';
+                                        } elseif (str_contains($pName, 'inbox')) {
+                                            $badgeType = 'INBOX';
+                                            $badgeClass = 'bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-200 dark:border-teal-500/20';
+                                        } elseif (str_contains($pName, 'contacts')) {
+                                            $badgeType = 'AUDIENCE';
+                                            $badgeClass = 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20';
+                                        } elseif (str_contains($pName, 'edit') || str_contains($pName, 'update') || str_contains($pName, 'manage') || str_contains($pName, 'freeze') || str_contains($pName, 'settings')) {
+                                            $badgeType = str_contains($pName, 'settings') ? 'CONFIG' : 'EDIT';
                                             $badgeClass = 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20';
                                         } elseif (str_contains($pName, 'delete') || str_contains($pName, 'cancel') || str_contains($pName, 'refund')) {
                                             $badgeType = 'DELETE';

@@ -172,6 +172,55 @@
     </section>
 
     {{-- ══════════════════════════════════════════════════════════════
+         INFINITE CAPABILITIES TICKER RIBBON (Brand Color Theme)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="border-y border-slate-800 bg-[#0a0e18]/90 py-4 sm:py-5 overflow-hidden relative select-none">
+        <!-- Edge Fading Gradient Masks matching page background -->
+        <div class="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-48 bg-gradient-to-r from-[#090d16] to-transparent z-10"></div>
+        <div class="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-48 bg-gradient-to-l from-[#090d16] to-transparent z-10"></div>
+
+        <!-- Marquee Track -->
+        <div class="animate-marquee items-center">
+            @php
+                $tickerItems = [
+                    'Membership Management',
+                    'Payment Collection',
+                    'Attendance Tracking',
+                    'WhatsApp Automation',
+                    'Multi-Branch Support',
+                    'Biometric Attendance and Access',
+                    'Personal Training & POS',
+                    'Diet & Workout Plans',
+                ];
+            @endphp
+
+            {{-- First Copy --}}
+            <div class="flex items-center shrink-0">
+                @foreach($tickerItems as $item)
+                    <div class="flex items-center whitespace-nowrap px-6 sm:px-8">
+                        <span class="text-slate-200 hover:text-amber-400 font-bold text-sm sm:text-base tracking-wide transition-colors cursor-default">
+                            {{ $item }}
+                        </span>
+                        <span class="text-amber-400/60 text-xs ml-6 sm:ml-8 select-none">&bull;</span>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Second Copy (for seamless loop) --}}
+            <div class="flex items-center shrink-0" aria-hidden="true">
+                @foreach($tickerItems as $item)
+                    <div class="flex items-center whitespace-nowrap px-6 sm:px-8">
+                        <span class="text-slate-200 hover:text-amber-400 font-bold text-sm sm:text-base tracking-wide transition-colors cursor-default">
+                            {{ $item }}
+                        </span>
+                        <span class="text-amber-400/60 text-xs ml-6 sm:ml-8 select-none">&bull;</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
          METRICS / SOCIAL PROOF STRIP
     ══════════════════════════════════════════════════════════════ --}}
     <section class="border-y border-slate-800 bg-slate-900/40">
@@ -192,6 +241,46 @@
                 <div>
                     <div class="text-3xl lg:text-4xl font-bold text-white mb-1">&lt; 2 mins</div>
                     <div class="text-xs sm:text-sm text-slate-400 font-medium">Setup &amp; Go Live Time</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
+         EXCEPTIONAL BRANDS CLIENT SHOWCASE
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-16 sm:py-20 lg:py-24 border-b border-slate-800 bg-[#090d16] relative overflow-hidden">
+        {{-- Subtle radial ambient glow --}}
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-amber-500/[0.03] rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-400 text-xs font-semibold mb-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span>Trusted Fitness Community</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                    We are fortunate to work with exceptional brands
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400 mt-2.5 font-normal max-w-xl mx-auto">
+                    Powering premier gyms, fitness studios, and athletic clubs across India with enterprise automation.
+                </p>
+            </div>
+
+            <!-- Brand Logos Only -->
+            <div class="flex flex-wrap items-center justify-center gap-10 sm:gap-16 lg:gap-24 max-w-4xl mx-auto pt-2">
+                <div class="flex items-center justify-center p-3 transition-transform duration-300 hover:scale-105">
+                    <img src="{{ asset('images/brands/armour-gym.png') }}" 
+                         alt="Armour 24-7 Gym" 
+                         loading="lazy"
+                         class="h-16 sm:h-20 lg:h-24 w-auto max-w-[280px] object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]">
+                </div>
+
+                <div class="flex items-center justify-center p-3 transition-transform duration-300 hover:scale-105">
+                    <img src="{{ asset('images/brands/fitness-world.png') }}" 
+                         alt="Fitness World Gym" 
+                         loading="lazy"
+                         class="h-16 sm:h-20 lg:h-24 w-auto max-w-[280px] object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]">
                 </div>
             </div>
         </div>
@@ -324,19 +413,38 @@
                 <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2 mb-4">
                     Get up and running in 4 simple steps
                 </h2>
-                <p class="text-slate-400 text-base">No technical experience needed. Fully cloud-hosted.</p>
+                <p class="text-slate-400 text-base">No technical experience needed. Fully cloud-hosted and ready in minutes.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach([
-                    ['num' => '01', 'title' => 'Create Workspace', 'desc' => 'Sign up your gym branch in 30 seconds. Choose your currency and timezone.'],
-                    ['num' => '02', 'title' => 'Connect Hardware', 'desc' => 'Download our lightweight desktop sync tool to connect your biometric turnstile or facial scanner.'],
-                    ['num' => '03', 'title' => 'Import Members', 'desc' => 'Upload existing members via CSV or add them on the fly with photos and package terms.'],
-                    ['num' => '04', 'title' => 'Automate & Collect', 'desc' => 'Start automated WhatsApp renewal reminders and control gate entry on autopilot.'],
+                    [
+                        'num' => '01',
+                        'title' => 'Register Gym Profile',
+                        'desc' => 'Sign up your gym branch in 30 seconds. Add your branch details, gym logo, operating hours, and billing preferences.',
+                    ],
+                    [
+                        'num' => '02',
+                        'title' => 'Create Membership Plans',
+                        'desc' => 'Set up your flexible packages — Monthly, Quarterly, Annual, or Personal Training with custom pricing, discounts, and GST.',
+                    ],
+                    [
+                        'num' => '03',
+                        'title' => 'Import Members',
+                        'desc' => 'Bulk upload your existing member database via Excel/CSV in 1 click or enroll new walk-ins with instant profile creation.',
+                    ],
+                    [
+                        'num' => '04',
+                        'title' => 'Automate & Collect',
+                        'desc' => 'Send automatic WhatsApp expiry reminders with direct UPI pay links and manage digital invoices and check-ins on autopilot.',
+                    ],
                 ] as $step)
-                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                        <div class="text-2xl font-black text-amber-400 mb-3 font-mono">{{ $step['num'] }}</div>
-                        <h3 class="text-base font-bold text-white mb-2">{{ $step['title'] }}</h3>
+                    <div class="p-6 sm:p-7 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 transition-all duration-200 group">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-2xl font-black text-amber-400 font-mono tracking-wider">{{ $step['num'] }}</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-2 group-hover:text-amber-300 transition-colors">{{ $step['title'] }}</h3>
                         <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">{{ $step['desc'] }}</p>
                     </div>
                 @endforeach
