@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Member;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\SubscriptionPayment;
 use App\Models\User;
 use App\Services\SubscriptionService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
 use Database\Seeders\PlanSeeder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -217,10 +220,34 @@ class AuthController extends Controller
         return redirect()->route('auth.checkout');
     }
 
-    public function showCheckout(): View
+    public function showCheckout(Request $request): View|RedirectResponse
     {
         $user = Auth::user();
         $tenant = $user?->tenant;
+
+        if ($tenant && strtolower($tenant->status) === 'active' && ! $tenant->isSubscriptionExpired()) {
+            return redirect()->route('app.dashboard')->with('success', 'Your subscription is already active.');
+        }
+
+        // Auto-activate if redirected back from Razorpay Payment Page with payment ID in URL
+        $returnedPaymentId = $request->query('razorpay_payment_id') ?: $request->query('payment_id');
+        if ($returnedPaymentId && $tenant) {
+            $request->merge(['razorpay_payment_id' => $returnedPaymentId, 'gateway' => 'razorpay']);
+
+            return $this->processCheckout($request);
+        }
+
+        $referer = strtolower($request->header('referer') ?? '');
+        $isComingFromRazorpay = str_contains($referer, 'razorpay') || $request->has('redirected') || $request->has('paid') || $request->has('from_rzp') || $request->has('auto_check');
+
+        // If returned from Razorpay, attempt automatic payment detection immediately
+        if ($isComingFromRazorpay && $tenant) {
+            $detectResponse = $this->autoDetectPayment($request);
+            $detectData = $detectResponse->getData(true);
+            if (! empty($detectData['success']) && ! empty($detectData['redirect'])) {
+                return redirect($detectData['redirect'])->with('success', $detectData['message'] ?? 'Payment verified successfully!');
+            }
+        }
 
         if (Plan::count() === 0) {
             (new PlanSeeder)->run();
@@ -237,7 +264,6 @@ class AuthController extends Controller
         $stripeEnabled = (bool) Setting::getGlobal('stripe_enabled', true);
 
         $amountInPaise = (int) round($price * 100);
-        $orderId = 'order_'.Str::random(14);
 
         $razorpayConfig = [
             'key' => $razorpayKeyId,
@@ -245,7 +271,6 @@ class AuthController extends Controller
             'currency' => $tenant?->currency ?? 'INR',
             'name' => Setting::getGlobal('app_name', 'Gym Console'),
             'description' => "Subscription to {$plan->name} ({$billingCycle})",
-            'order_id' => $orderId,
             'prefill' => [
                 'name' => $user?->name ?? 'Gym Owner',
                 'email' => $user?->email ?? '',
@@ -256,7 +281,7 @@ class AuthController extends Controller
             ],
         ];
 
-        return view('auth.checkout', compact('plan', 'billingCycle', 'price', 'razorpayConfig', 'razorpayEnabled', 'stripeEnabled', 'tenant', 'user'));
+        return view('auth.checkout', compact('plan', 'billingCycle', 'price', 'razorpayConfig', 'razorpayEnabled', 'stripeEnabled', 'tenant', 'user', 'isComingFromRazorpay'));
     }
 
     public function processCheckout(Request $request): RedirectResponse
@@ -271,11 +296,36 @@ class AuthController extends Controller
         $gateway = $request->input('gateway', 'razorpay');
         $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
 
-        $transactionId = match ($gateway) {
-            'razorpay' => $request->input('razorpay_payment_id') ?: ('pay_'.Str::random(14)),
-            'stripe' => $request->input('stripe_payment_id') ?: ('ch_'.Str::random(14)),
-            default => 'TXN-'.strtoupper(Str::random(12)),
-        };
+        if ($price > 0 && $gateway === 'razorpay') {
+            $paymentId = $request->input('razorpay_payment_id');
+            if (empty($paymentId)) {
+                return back()->with('error', 'Please complete the payment or provide a valid Razorpay Payment ID.');
+            }
+
+            $adapter = new \App\Services\Payment\RazorpayPaymentAdapter();
+            $verification = $adapter->verifyPayment($paymentId);
+
+            if (! $verification['valid']) {
+                return back()->with('error', 'Razorpay Payment verification failed: '.$verification['message']);
+            }
+
+            $transactionId = $verification['payment_id'];
+
+            // Prevent duplicate redemption across different tenants
+            $alreadyUsed = \App\Models\SubscriptionPayment::where('transaction_id', $transactionId)
+                ->where('status', 'SUCCESS')
+                ->where('tenant_id', '!=', $tenant->id)
+                ->exists();
+
+            if ($alreadyUsed) {
+                return back()->with('error', 'This Payment ID has already been redeemed by another account.');
+            }
+        } else {
+            $transactionId = match ($gateway) {
+                'stripe' => $request->input('stripe_payment_id') ?: ('ch_'.Str::random(14)),
+                default => 'TXN-'.strtoupper(Str::random(12)),
+            };
+        }
 
         $this->subscriptionService->activateSubscription(
             $tenant,
@@ -296,6 +346,130 @@ class AuthController extends Controller
         session()->forget(['checkout_plan_id', 'checkout_billing_cycle']);
 
         return redirect()->route('app.dashboard')->with('success', "Congratulations! Your {$plan->name} subscription has been activated successfully via ".ucfirst($gateway).'.');
+    }
+
+    /**
+     * AJAX Endpoint: Auto-detect recent captured Razorpay payment from external payment page.
+     */
+    public function autoDetectPayment(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $tenant = $user?->tenant;
+
+        if (! $tenant) {
+            return response()->json(['success' => false, 'message' => 'No active gym tenant profile found.'], 404);
+        }
+
+        $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id);
+        $billingCycle = session('checkout_billing_cycle', 'yearly');
+        $plan = Plan::find($planId) ?? Plan::first();
+        $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
+        $expectedPaise = (int) round($price * 100);
+
+        $keyId = Setting::getGlobal('razorpay_key_id', config('services.razorpay.key', env('RAZORPAY_KEY')));
+        $keySecret = Setting::getGlobal('razorpay_key_secret', config('services.razorpay.secret', env('RAZORPAY_SECRET')));
+
+        if (empty($keyId) || empty($keySecret)) {
+            return response()->json(['success' => false, 'message' => 'Razorpay credentials not configured.'], 400);
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->timeout(10)
+                ->withBasicAuth($keyId, $keySecret)
+                ->get('https://api.razorpay.com/v1/payments', [
+                    'count' => 20,
+                ]);
+
+            if (! $response->successful()) {
+                return response()->json(['success' => false, 'message' => 'Could not contact Razorpay API.'], 500);
+            }
+
+            $items = $response->json('items') ?? [];
+            $matchedPayment = null;
+
+            $userEmail = strtolower($user->email ?? '');
+            $tenantEmail = strtolower($tenant->email ?? '');
+            $userPhone = preg_replace('/[^0-9]/', '', $user->phone ?? ($tenant->phone ?? ''));
+            $userPhoneSuffix = strlen($userPhone) >= 10 ? substr($userPhone, -10) : $userPhone;
+
+            foreach ($items as $payment) {
+                if (($payment['status'] ?? '') !== 'captured') {
+                    continue;
+                }
+
+                $transactionId = $payment['id'];
+
+                // Check if already used by any tenant
+                $alreadyUsed = SubscriptionPayment::where('transaction_id', $transactionId)
+                    ->where('status', 'SUCCESS')
+                    ->exists();
+
+                if ($alreadyUsed) {
+                    continue;
+                }
+
+                // Payment must be within last 2 hours
+                $createdAt = $payment['created_at'] ?? 0;
+                if ($createdAt < (time() - 7200)) {
+                    continue;
+                }
+
+                $pEmail = strtolower($payment['email'] ?? '');
+                $pContact = preg_replace('/[^0-9]/', '', $payment['contact'] ?? '');
+
+                $emailMatches = ! empty($pEmail) && ($pEmail === $userEmail || $pEmail === $tenantEmail);
+                $phoneMatches = ! empty($userPhoneSuffix) && (str_ends_with($pContact, $userPhoneSuffix) || str_ends_with($userPhone, $pContact));
+
+                $pAmount = (int) ($payment['amount'] ?? 0);
+                // Verify amount (within ₹2 tolerance in paise for rounding)
+                $amountMatches = ($expectedPaise <= 0) || abs($pAmount - $expectedPaise) <= 200;
+
+                // Strict matching: Either email or phone MUST match AND amount must match
+                if (($emailMatches || $phoneMatches) && $amountMatches) {
+                    $matchedPayment = $payment;
+                    break;
+                }
+            }
+
+            if (! $matchedPayment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No recent matching captured payment found for your account on Razorpay. If you just paid, please wait a moment or enter the Payment ID below.',
+                ], 404);
+            }
+
+            $planId = session('checkout_plan_id', Plan::where('slug', 'starter')->value('id') ?? Plan::first()->id);
+            $billingCycle = session('checkout_billing_cycle', 'monthly');
+            $plan = Plan::findOrFail($planId);
+            $price = $billingCycle === 'yearly' ? (float) $plan->price_yearly : (float) $plan->price_monthly;
+
+            $this->subscriptionService->activateSubscription(
+                $tenant,
+                $plan,
+                $billingCycle,
+                'razorpay',
+                $matchedPayment['id'],
+                $price,
+                [
+                    'checkout_source' => 'auto_detect_razorpay',
+                    'razorpay_payment_id' => $matchedPayment['id'],
+                    'matched_email' => $matchedPayment['email'] ?? '',
+                    'matched_contact' => $matchedPayment['contact'] ?? '',
+                    'verified_at' => now()->toIso8601String(),
+                ]
+            );
+
+            session()->forget(['checkout_plan_id', 'checkout_billing_cycle']);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Payment {$matchedPayment['id']} verified! Your subscription is now active.",
+                'redirect' => route('app.dashboard'),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Error: '.$e->getMessage()], 500);
+        }
     }
 
     public function logout(Request $request): RedirectResponse

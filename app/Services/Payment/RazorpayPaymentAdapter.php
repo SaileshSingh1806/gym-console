@@ -82,4 +82,81 @@ class RazorpayPaymentAdapter implements SaaSPaymentGatewayInterface
     {
         return true;
     }
+
+    /**
+     * Verify a Razorpay Payment ID directly with Razorpay API.
+     *
+     * @param string $paymentId
+     * @return array
+     */
+    public function verifyPayment(string $paymentId): array
+    {
+        $cleanId = trim($paymentId);
+        if (!str_starts_with($cleanId, 'pay_')) {
+            $cleanId = 'pay_'.$cleanId;
+        }
+
+        $keyId = $this->keyId;
+        $keySecret = $this->keySecret;
+
+        if (empty($keyId) || empty($keySecret) || str_contains($keyId, 'samplekey')) {
+            return [
+                'valid' => false,
+                'message' => 'Razorpay API credentials are not configured in settings.',
+            ];
+        }
+
+        try {
+            // First attempt with primary configured credentials
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->timeout(10)
+                ->withBasicAuth($keyId, $keySecret)
+                ->get("https://api.razorpay.com/v1/payments/{$cleanId}");
+
+            // If not successful and env keys differ, try env keys
+            if (! $response->successful()) {
+                $envKey = env('RAZORPAY_KEY');
+                $envSecret = env('RAZORPAY_SECRET');
+                if ($envKey && $envKey !== $keyId && $envSecret) {
+                    $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                        ->timeout(10)
+                        ->withBasicAuth($envKey, $envSecret)
+                        ->get("https://api.razorpay.com/v1/payments/{$cleanId}");
+                }
+            }
+
+            if (! $response->successful()) {
+                $err = $response->json();
+                $description = $err['error']['description'] ?? 'Invalid Payment ID or payment not found on Razorpay.';
+
+                return [
+                    'valid' => false,
+                    'message' => $description,
+                ];
+            }
+
+            $data = $response->json();
+            $status = $data['status'] ?? '';
+
+            if ($status !== 'captured') {
+                return [
+                    'valid' => false,
+                    'message' => "Payment status is '{$status}', not captured.",
+                ];
+            }
+
+            return [
+                'valid' => true,
+                'payment_id' => $cleanId,
+                'amount' => isset($data['amount']) ? ((float) $data['amount'] / 100) : 0,
+                'currency' => $data['currency'] ?? 'INR',
+                'raw' => $data,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'valid' => false,
+                'message' => 'Unable to verify payment with Razorpay: '.$e->getMessage(),
+            ];
+        }
+    }
 }

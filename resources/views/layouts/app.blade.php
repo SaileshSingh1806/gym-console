@@ -1,45 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full">
+@php
+    $serverThemeMode = 'dark';
+    if (!empty($savedThemeSettings)) {
+        $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
+        if (!empty($st['mode']) && $st['mode'] === 'light') {
+            $serverThemeMode = 'light';
+        }
+    }
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $serverThemeMode }} h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <script>
-        // Synchronous Zero-FOUC Theme Initializer (Must execute before any rendering)
-        window.__SAVED_THEME__ = {{ Js::from($savedThemeSettings ?? null) }};
-        window.__THEME_STORAGE_KEY__ = '{{ $themeStorageKey ?? "admin" }}';
-        (function() {
-            try {
-                const serverTheme = window.__SAVED_THEME__;
-                const storageKey = 'gym_console_theme_' + window.__THEME_STORAGE_KEY__;
-                let theme = serverTheme;
-                if (!theme) {
-                    const local = localStorage.getItem(storageKey) || localStorage.getItem('gym_console_theme_settings');
-                    if (local) theme = JSON.parse(local);
-                }
-                if (theme && theme.mode === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.classList.remove('light');
-                }
-                if (theme && theme.direction) {
-                    document.documentElement.setAttribute('dir', theme.direction);
-                }
-                if (theme && theme.fontSize) {
-                    const scale = { 'sm': '92%', 'md': '100%', 'lg': '108%' }[theme.fontSize] || '100%';
-                    document.documentElement.style.fontSize = scale;
-                }
-                if (theme && theme.fontFamily) {
-                    document.body ? (document.body.style.fontFamily = `'${theme.fontFamily}', sans-serif`) : null;
-                }
-            } catch (e) {
-                document.documentElement.classList.add('dark');
-            }
-        })();
-    </script>
+    <x-theme-head-styles :saved-theme="$savedThemeSettings ?? null" :storage-key="$themeStorageKey ?? 'admin'" />
 
     <title>{{ $title ?? ($platformSettings['app_name'] ?? 'Gym Console') }}</title>
 
@@ -56,7 +31,11 @@
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: {}
+                extend: {
+                    screens: {
+                        'xs': '420px',
+                    }
+                }
             }
         };
     </script>
@@ -64,8 +43,23 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
         [x-cloak] { display: none !important; }
+
+        /* Mobile Touch & Scroll Fixes */
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         /* Sleek Transparent Scrollbar */
         * {
@@ -105,16 +99,26 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex h-screen h-[100dvh] overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100" x-data="{ sidebarOpen: false }">
+<body class="flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black/80 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs lg:hidden" 
+         @click="sidebarOpen = false" 
+         x-cloak></div>
 
-    <!-- Sidebar Navigation (Fixed on Left) -->
-    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-screen lg:shrink-0">
+    <!-- Sidebar Navigation (Drawer on Mobile, Fixed Column on Desktop) -->
+    <aside :class="sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full lg:translate-x-0'" 
+           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Brand Header -->
-        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/50 backdrop-blur">
-            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5">
+        <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/50 backdrop-blur">
+            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
                 @php
                     $tenant = auth()->user()->tenant ?? null;
                     $gymLogo = $tenant?->logo_url;
@@ -127,14 +131,14 @@
                     <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $gymName }}" class="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                     <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
                 @else
-                    <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20 shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
                 @endif
             </a>
-            <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -736,12 +740,12 @@
     </aside>
 
     <!-- Main Content Shell -->
-    <div class="flex-1 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
+    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
         @php
             $currentTenant = auth()->user()->tenant;
         @endphp
         @if($currentTenant && $currentTenant->isSubscriptionExpired())
-            <div class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white px-6 py-2.5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-b border-red-500/30">
+            <div class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white px-4 sm:px-6 py-2.5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-b border-red-500/30">
                 <div class="flex items-center gap-2.5">
                     <span class="flex h-2.5 w-2.5 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -758,18 +762,18 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200">
-            <div class="flex items-center gap-2 sm:gap-4 min-w-0">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1.5 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
                 <div class="flex items-center gap-2 min-w-0">
-                    <span class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{{ $header ?? 'Dashboard' }}</span>
+                    <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Dashboard' }}</h1>
                 </div>
             </div>
 
             <!-- Right Telemetry & Widget Badges -->
-            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                 
                 <!-- Live Gym Footfall Widget -->
                 @php
@@ -842,14 +846,15 @@
 
                     <!-- Dropdown Panel -->
                     <div x-show="isOpen" 
+                         x-cloak
+                         style="display: none;"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 scale-95 translate-y-2"
                          x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         x-cloak
-                         class="absolute right-0 sm:right-0 mt-2.5 w-[330px] sm:w-[400px] md:w-[440px] max-w-[calc(100vw-1.5rem)] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden font-sans">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 sm:mt-2.5 w-[calc(100vw-1.25rem)] max-w-sm sm:max-w-none sm:w-[400px] md:w-[440px] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden font-sans">
                         
                         <!-- Header -->
                         <div class="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-950/50">
@@ -1052,6 +1057,7 @@
                     <!-- Dropdown Menu -->
                     <div x-show="userMenuOpen"
                          x-cloak
+                         style="display: none;"
                          @click.away="userMenuOpen = false"
                          x-transition:enter="transition ease-out duration-150"
                          x-transition:enter-start="opacity-0 scale-95 translate-y-2"
@@ -1059,7 +1065,7 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="absolute right-0 top-full mt-2 w-72 sm:w-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                         
                         <!-- Account Summary Header -->
                         <div class="p-4 bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20">
@@ -1322,10 +1328,121 @@
         @endif
 
         <!-- Page View Body -->
-        <main class="flex-1 p-3 sm:p-4 md:p-6 pb-24 sm:pb-8 overflow-y-auto overscroll-y-contain">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-6 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
             {{ $slot }}
         </main>
     </div>
+
+    <!-- Mobile Bottom Navigation Bar (Visible only on mobile/tablet) -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors">
+        <div class="grid grid-cols-5 items-center gap-1 max-w-lg mx-auto">
+            @if(auth()->user()->role === 'member')
+                <!-- Member Navigation -->
+                <a href="{{ route('app.portal') }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.portal') && !request()->has('tab') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        @if(request()->routeIs('app.portal') && !request()->has('tab'))
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Portal</span>
+                </a>
+
+                <a href="{{ route('app.portal', ['tab' => 'memberships']) }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'memberships' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        @if(request()->query('tab') === 'memberships')
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Plans</span>
+                </a>
+
+                <a href="{{ route('app.portal', ['tab' => 'workouts']) }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'workouts' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        @if(request()->query('tab') === 'workouts')
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Workout</span>
+                </a>
+
+                <a href="{{ route('app.portal', ['tab' => 'attendance']) }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'attendance' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        @if(request()->query('tab') === 'attendance')
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Attendance</span>
+                </a>
+            @else
+                <!-- Admin / Owner / Staff Navigation -->
+                <!-- 1. Home / Dashboard -->
+                <a href="{{ route('app.dashboard') }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.dashboard') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        @if(request()->routeIs('app.dashboard'))
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Home</span>
+                </a>
+
+                <!-- 2. Members -->
+                <a href="{{ route('app.members.index') }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.members.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        @if(request()->routeIs('app.members.*'))
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Members</span>
+                </a>
+
+                <!-- 3. Attendance -->
+                <a href="{{ route('app.attendance.index') }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.attendance.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        @if(request()->routeIs('app.attendance.*'))
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Attendance</span>
+                </a>
+
+                <!-- 4. WhatsApp / POS -->
+                <a href="{{ route('app.whatsapp.inbox') }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.whatsapp.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        @if(request()->routeIs('app.whatsapp.*'))
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">WhatsApp</span>
+                </a>
+            @endif
+
+            <!-- 5. Menu / Drawer Toggle -->
+            <button type="button" 
+                    @click="sidebarOpen = true" 
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Menu</span>
+            </button>
+        </div>
+    </nav>
 
     <x-confirm-modal />
 
@@ -1345,6 +1462,7 @@
                 feedInterval: null,
 
                 init() {
+                    this.isOpen = false;
                     this.fetchFeed();
                     // Auto-refresh notifications periodically every 45 seconds
                     this.feedInterval = setInterval(() => {

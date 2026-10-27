@@ -48,6 +48,10 @@ class MemberPayment extends Model
 
     public function getReceiptNumberAttribute(): string
     {
-        return $this->invoice_number ?? 'RCP-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+        if (!empty($this->invoice_number) && !str_starts_with($this->invoice_number, 'RCP-') && !str_starts_with($this->invoice_number, 'ARM')) {
+            return $this->invoice_number;
+        }
+
+        return 'INV-' . str_pad((string) $this->id, 4, '0', STR_PAD_LEFT);
     }
 }

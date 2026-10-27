@@ -21,7 +21,8 @@ class MemberPaymentService
         ?string $notes = null
     ): MemberPayment {
         return DB::transaction(function () use ($member, $amount, $paymentMethod, $membership, $reference, $notes) {
-            $invoiceNumber = 'RCP-'.strtoupper(Str::random(6)).'-'.date('Ymd');
+            $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $member->tenant_id)->max('id') ?? 0) + 1;
+            $invoiceNumber = 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
 
             $payment = MemberPayment::create([
                 'tenant_id' => $member->tenant_id,

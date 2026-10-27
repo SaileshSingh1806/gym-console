@@ -300,6 +300,24 @@
             this.selectedInvoice = inv;
             this.showInvoiceModal = true;
         },
+        printInvoice(id) {
+            const invoiceId = id || this.selectedInvoice.id;
+            if (!invoiceId) return;
+            let frame = document.getElementById('tax-invoice-silent-frame');
+            if (!frame) {
+                frame = document.createElement('iframe');
+                frame.id = 'tax-invoice-silent-frame';
+                frame.style.position = 'fixed';
+                frame.style.right = '0';
+                frame.style.bottom = '0';
+                frame.style.width = '0';
+                frame.style.height = '0';
+                frame.style.border = '0';
+                frame.style.visibility = 'hidden';
+                document.body.appendChild(frame);
+            }
+            frame.src = '/app/invoices/' + invoiceId + '?print=1';
+        },
 
         // Edit Member Photo & Webcam State
         editPhotoPreview: '{{ $member->photo_path ? asset("storage/" . $member->photo_path) : "" }}',
@@ -1037,7 +1055,7 @@
                                                     <button type="button" 
                                                             @click="openInvoice({
                                                                 id: {{ $firstPayment->id }},
-                                                                receipt_no: '{{ $firstPayment->receipt_number ?? ('RCP' . str_pad($firstPayment->id, 8, '0', STR_PAD_LEFT)) }}',
+                                                                receipt_no: '{{ $firstPayment->receipt_number ?? ('INV-' . str_pad($firstPayment->id, 4, '0', STR_PAD_LEFT)) }}',
                                                                 date: '{{ $firstPayment->payment_date ? $firstPayment->payment_date->format('d M Y') : $firstPayment->created_at->format('d M Y') }}',
                                                                 amount: '{{ number_format($firstPayment->amount, 2) }}',
                                                                 method: '{{ strtoupper($firstPayment->payment_method) }}',
@@ -1446,7 +1464,7 @@
                                         <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                                             @forelse($sub->payments as $p)
                                                 @php
-                                                    $receiptNum = $p->receipt_number ?? ('RCP' . str_pad($p->id, 8, '0', STR_PAD_LEFT));
+                                                    $receiptNum = $p->receipt_number ?? ('INV-' . str_pad($p->id, 4, '0', STR_PAD_LEFT));
                                                     $payDateFormatted = $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y');
                                                 @endphp
                                                 <tr class="hover:bg-white dark:hover:bg-slate-900/40 transition-colors">
@@ -3026,7 +3044,7 @@
                         </button>
 
                         <button type="button" 
-                                onclick="window.print()" 
+                                @click="printInvoice(selectedInvoice.id)" 
                                 class="px-4 sm:px-6 py-1.5 sm:py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                             <span>Print</span>
@@ -3082,7 +3100,7 @@
                         $signatoryName = $invSettings['signatory_name'] ?? null;
                     @endphp
 
-                    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col justify-between min-h-0 sm:min-h-[1040px] print:min-h-[275mm] mx-auto">
+                    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col justify-between min-h-0 sm:min-h-[1040px] print:min-h-0 mx-auto">
                         
                         <!-- Faded Center Background Logo Watermark -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
@@ -3100,43 +3118,69 @@
                             <!-- MAIN TOP CONTENT: Sections 1 through 5 -->
                             <div class="space-y-3 sm:space-y-3.5">
                                 <!-- 1. Header Section: Brand & Invoice Meta -->
-                                <div class="flex flex-col sm:flex-row items-start justify-between gap-3 pt-1 border-b border-slate-200 pb-3">
-                                    <div class="flex items-start gap-3.5 max-w-lg">
+                                <div class="flex flex-col sm:flex-row items-start justify-between gap-4 pt-1 border-b border-slate-200/90 pb-3.5">
+                                    <div class="flex items-start gap-3.5 max-w-lg min-w-0">
                                         @if(!empty($logoUrl))
-                                            <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="h-14 w-14 sm:h-16 sm:w-16 object-contain rounded-xl bg-slate-950 p-1 sm:p-1.5 border border-slate-800 shadow-sm shrink-0">
+                                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 p-1.5 border border-slate-800 shadow-md flex items-center justify-center shrink-0">
+                                                <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="w-full h-full object-contain rounded-xl">
+                                            </div>
                                         @else
-                                            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-sm shrink-0 p-1 text-center">
-                                                <span class="text-amber-400 text-xl">🏋️</span>
-                                                <span class="text-[8px] sm:text-[9px] uppercase leading-none font-bold mt-0.5">GYM</span>
+                                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-md shrink-0 p-1 text-center border border-slate-800">
+                                                <span class="text-amber-400 text-2xl">🏋️</span>
+                                                <span class="text-[8px] sm:text-[9px] uppercase leading-none font-bold mt-1 text-slate-300">GYM</span>
                                             </div>
                                         @endif
-                                        <div>
-                                            <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h2>
-                                            <p class="text-xs sm:text-sm text-slate-600 mt-0.5 leading-snug font-medium">{{ $gymAddress }}</p>
-                                            <p class="text-xs sm:text-sm text-slate-600 mt-0.5 leading-snug font-medium">
-                                                <span>Phone: <strong class="text-slate-800 font-semibold">{{ $gymPhone }}</strong></span>
+                                        <div class="min-w-0">
+                                            <h2 class="text-xl sm:text-2xl lg:text-[26px] font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h2>
+                                            <p class="text-xs text-slate-600 mt-1 leading-snug font-medium line-clamp-2">{{ $gymAddress }}</p>
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600 mt-1.5 font-medium">
+                                                <span class="inline-flex items-center gap-1">
+                                                    <span class="text-slate-400">Phone:</span>
+                                                    <strong class="text-slate-900 font-semibold">{{ $gymPhone }}</strong>
+                                                </span>
                                                 @if(!empty($gymEmail))
-                                                    <span class="mx-1 text-slate-400">|</span>
-                                                    <span>Email: <strong class="text-slate-800 font-semibold">{{ $gymEmail }}</strong></span>
+                                                    <span class="text-slate-300">|</span>
+                                                    <span class="inline-flex items-center gap-1 truncate max-w-[220px]">
+                                                        <span class="text-slate-400">Email:</span>
+                                                        <strong class="text-slate-900 font-semibold truncate">{{ $gymEmail }}</strong>
+                                                    </span>
                                                 @endif
-                                            </p>
+                                            </div>
                                             @if(!empty($gymWeb))
-                                                <p class="text-xs sm:text-sm text-slate-600 leading-snug font-medium">
+                                                <div class="text-[11px] text-slate-500 mt-0.5 font-medium">
                                                     <span>Website: <strong class="text-slate-800 font-semibold">{{ $gymWeb }}</strong></span>
-                                                </p>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
 
-                                    <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto">
-                                        <span class="inline-block px-5 py-1.5 rounded-xl bg-slate-950 text-white font-black text-xs sm:text-sm tracking-wider uppercase shadow-xs">
-                                            {{ $invoiceTitle }}
-                                        </span>
-                                        <p class="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">Invoice No: <span class="text-slate-950 font-bold font-mono" x-text="selectedInvoice.receipt_no"></span></p>
-                                        <p class="text-xs sm:text-sm text-slate-600 mt-0.5 font-medium" x-text="'Date: ' + selectedInvoice.date"></p>
-                                        <span class="inline-block mt-1 px-3.5 py-0.5 rounded-full border border-emerald-400 bg-emerald-50/60 text-emerald-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                                            {{ $statusText }}
-                                        </span>
+                                    <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto self-start">
+                                        <!-- Tax Invoice Badge -->
+                                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white shadow-xs">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                            <span class="font-black text-xs sm:text-sm tracking-wider uppercase">{{ $invoiceTitle }}</span>
+                                        </div>
+
+                                        <!-- Clean Short Invoice Number -->
+                                        <div class="mt-2.5 flex items-center gap-2 sm:justify-end">
+                                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Invoice No:</span>
+                                            <span class="px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-300 text-slate-950 font-black font-mono text-xs sm:text-sm tracking-wider shadow-xs" x-text="selectedInvoice.receipt_no">
+                                            </span>
+                                        </div>
+
+                                        <!-- Date -->
+                                        <div class="mt-1 flex items-center gap-2 sm:justify-end text-xs">
+                                            <span class="text-slate-500 font-medium">Date:</span>
+                                            <span class="font-bold text-slate-800" x-text="selectedInvoice.date"></span>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="mt-1.5">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-emerald-400 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                {{ $statusText }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 

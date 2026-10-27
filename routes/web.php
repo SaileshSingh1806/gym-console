@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/checkout', [AuthController::class, 'showCheckout'])->name('auth.checkout');
     Route::post('/checkout', [AuthController::class, 'processCheckout'])->name('auth.checkout.process');
+    Route::post('/checkout/auto-detect', [AuthController::class, 'autoDetectPayment'])->name('auth.checkout.auto-detect');
     Route::post('/admin/leave-impersonation', [AdminController::class, 'leaveImpersonation'])->name('admin.leave-impersonation');
     Route::post('/theme-settings/save', [AppController::class, 'saveThemeSettings'])->name('theme.save');
 });
@@ -295,6 +296,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     // SaaS Subscription (Always available to view plan / upgrade)
     Route::get('/subscription', [AppController::class, 'subscription'])->name('app.subscription.index');
     Route::post('/subscription/upgrade', [AppController::class, 'upgradePlan'])->name('app.subscription.upgrade');
+    Route::post('/subscription/verify-payment', [\App\Http\Controllers\SubscriptionPaymentController::class, 'verifyPayment'])->name('app.subscription.verify-payment');
     Route::post('/coupon/validate', [AppController::class, 'validateCoupon'])->name('app.coupon.validate');
 
     // Help & Support Tickets

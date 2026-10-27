@@ -15,6 +15,7 @@
         couponMessage: '',
         couponError: '',
         isApplying: false,
+        linkPaymentId: '',
         async applyCoupon() {
             if (!this.couponCode.trim()) {
                 this.couponError = 'Please enter a coupon code.';
@@ -439,6 +440,41 @@
                                     </span>
                                 </template>
                             </button>
+
+                            @php
+                                $planPaymentUrl = null;
+                                if ($p->slug === 'starter' || str_contains(strtolower($p->name), 'starter')) {
+                                    $planPaymentUrl = 'https://rzp.io/rzp/seC7Xkmu';
+                                } elseif (str_contains(strtolower($p->name), 'enterprise') || $p->slug === 'pro') {
+                                    $planPaymentUrl = 'https://rzp.io/rzp/lisGNMno';
+                                }
+                            @endphp
+
+                            @if($planPaymentUrl)
+                                <a href="{{ $planPaymentUrl }}" 
+                                   target="_blank" 
+                                   class="w-full mt-2.5 py-2.5 px-3 rounded-xl font-black text-xs bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:brightness-110 text-white shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                    <span>Pay Now</span>
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
+
+                                <!-- Activate after payment via link -->
+                                <div class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-1.5 text-left">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-amber-500 font-bold text-xs">⚡</span>
+                                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Paid? Activate here:</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Paste your Payment ID (e.g. <span class="font-mono text-amber-500 font-bold">pay_...</span>) to activate immediately:</p>
+                                    <div class="flex gap-1.5 pt-1">
+                                        <input type="text" x-model="linkPaymentId" placeholder="e.g. pay_..." 
+                                               class="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-amber-500">
+                                        <button type="button" @click="if(!linkPaymentId.trim()){ alert('Please enter your Payment ID.'); return; } submitPayment({{ $p->id }}, linkPaymentId.trim(), '', '')" 
+                                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs cursor-pointer shadow-sm whitespace-nowrap">
+                                            Activate &rarr;
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
 
                             <!-- Sandbox / Key fallback notice if payment fails -->
                             <template x-if="paymentError">

@@ -5145,11 +5145,23 @@ class AppController extends Controller
         return back()->with('success', 'Expense category created successfully!');
     }
 
-    public function subscription(): View
+    public function subscription(Request $request): View|RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
-        if (!$tenant) {
+        if (! $tenant) {
             abort(404, 'No active gym tenant found. Please set up a gym profile first.');
+        }
+
+        // If redirected from Razorpay payment page with payment ID
+        $returnedPaymentId = $request->query('razorpay_payment_id') ?: $request->query('payment_id');
+        if ($returnedPaymentId) {
+            $enterprisePlanId = Plan::where('slug', 'pro')->value('id') ?? Plan::where('name', 'like', '%Enterprise%')->value('id') ?? Plan::first()->id;
+
+            return $this->upgradePlan($request->merge([
+                'plan_id' => $request->query('plan_id', $enterprisePlanId),
+                'billing_cycle' => $request->query('billing_cycle', 'yearly'),
+                'razorpay_payment_id' => $returnedPaymentId,
+            ]));
         }
 
         $subscription = $tenant->activeSubscription ?? $tenant->latestSubscription;
@@ -5267,12 +5279,34 @@ class AppController extends Controller
         }
 
         // Require Razorpay payment if plan is not free ($finalPrice > 0)
-        if ($finalPrice > 0 && empty($request->razorpay_payment_id)) {
-            return back()->with('error', 'Razorpay payment verification failed. No plan upgrade was made without payment confirmation.');
-        }
+        if ($finalPrice > 0) {
+            if (empty($request->razorpay_payment_id)) {
+                return back()->with('error', 'Razorpay payment verification failed. No plan upgrade was made without payment confirmation.');
+            }
 
-        $transactionId = $request->razorpay_payment_id ?: ('FREE-'.strtoupper(Str::random(10)));
-        $gatewayName = $finalPrice > 0 ? 'razorpay' : 'free';
+            $adapter = new \App\Services\Payment\RazorpayPaymentAdapter();
+            $verification = $adapter->verifyPayment($request->razorpay_payment_id);
+
+            if (! $verification['valid']) {
+                return back()->with('error', 'Razorpay verification failed: '.$verification['message']);
+            }
+
+            $transactionId = $verification['payment_id'];
+
+            $alreadyUsed = \App\Models\SubscriptionPayment::where('transaction_id', $transactionId)
+                ->where('status', 'SUCCESS')
+                ->where('tenant_id', '!=', $tenant->id)
+                ->exists();
+
+            if ($alreadyUsed) {
+                return back()->with('error', 'This Payment ID has already been redeemed by another gym.');
+            }
+
+            $gatewayName = 'razorpay';
+        } else {
+            $transactionId = 'FREE-'.strtoupper(Str::random(10));
+            $gatewayName = 'free';
+        }
 
         $this->subscriptionService->activateSubscription(
             $tenant,

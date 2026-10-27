@@ -1,44 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full">
+@php
+    $serverThemeMode = 'dark';
+    if (!empty($savedThemeSettings)) {
+        $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
+        if (!empty($st['mode']) && $st['mode'] === 'light') {
+            $serverThemeMode = 'light';
+        }
+    }
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $serverThemeMode }} h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     
-    <script>
-        // Synchronous Zero-FOUC Theme Initializer (Must execute before any rendering)
-        window.__SAVED_THEME__ = {{ Js::from($savedThemeSettings ?? null) }};
-        window.__THEME_STORAGE_KEY__ = '{{ $themeStorageKey ?? "admin" }}';
-        (function() {
-            try {
-                const serverTheme = window.__SAVED_THEME__;
-                const storageKey = 'gym_console_theme_' + window.__THEME_STORAGE_KEY__;
-                let theme = serverTheme;
-                if (!theme) {
-                    const local = localStorage.getItem(storageKey) || localStorage.getItem('gym_console_theme_settings');
-                    if (local) theme = JSON.parse(local);
-                }
-                if (theme && theme.mode === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    document.documentElement.classList.add('light');
-                } else {
-                    document.documentElement.classList.add('dark');
-                    document.documentElement.classList.remove('light');
-                }
-                if (theme && theme.direction) {
-                    document.documentElement.setAttribute('dir', theme.direction);
-                }
-                if (theme && theme.fontSize) {
-                    const scale = { 'sm': '92%', 'md': '100%', 'lg': '108%' }[theme.fontSize] || '100%';
-                    document.documentElement.style.fontSize = scale;
-                }
-                if (theme && theme.fontFamily) {
-                    document.body ? (document.body.style.fontFamily = `'${theme.fontFamily}', sans-serif`) : null;
-                }
-            } catch (e) {
-                document.documentElement.classList.add('dark');
-            }
-        })();
-    </script>
+    <x-theme-head-styles :saved-theme="$savedThemeSettings ?? null" :storage-key="$themeStorageKey ?? 'admin'" />
 
     <title>{{ $title ?? (($platformSettings['app_name'] ?? 'Gym Console') . ' - Super Admin') }}</title>
 
@@ -64,6 +39,14 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         [x-cloak] { display: none !important; }
+
+        /* Mobile touch & rendering ergonomics */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
 
         /* Sleek Transparent Scrollbar */
         * {
@@ -97,22 +80,40 @@
         .light ::-webkit-scrollbar-thumb:hover {
             background: rgba(100, 116, 139, 0.5);
         }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 
     @if(!empty($platformSettings['custom_header_scripts']))
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex h-screen overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100" x-data="{ sidebarOpen: false }">
+<body class="flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-red-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
-    <div x-show="sidebarOpen" class="fixed inset-0 z-40 bg-black/80 lg:hidden" @click="sidebarOpen = false" x-cloak></div>
+    <div x-show="sidebarOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs lg:hidden" 
+         @click="sidebarOpen = false" 
+         x-cloak></div>
 
     <!-- Super Admin Sidebar -->
-    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto lg:h-screen lg:shrink-0">
+    <aside :class="sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full lg:translate-x-0'" 
+           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Logo -->
-        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
+        <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
                 @if(!empty($platformSettings['logo_url']))
                     <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                     <div class="flex flex-col min-w-0">
@@ -120,17 +121,17 @@
                         <span class="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5">Super Admin</span>
                     </div>
                 @else
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-md shadow-red-500/20">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-md shadow-red-500/20 shrink-0">
                         ⚡
                     </div>
-                    <div class="flex flex-col">
-                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none">GYM<span class="text-red-500">CONSOLE</span></span>
+                    <div class="flex flex-col min-w-0">
+                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none truncate max-w-[135px]">GYM<span class="text-red-500">CONSOLE</span></span>
                         <span class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 font-bold">Super Admin</span>
                     </div>
                 @endif
             </a>
-            <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -214,14 +215,14 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
+    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/90 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-200">
-            <div class="flex items-center gap-2 sm:gap-4 min-w-0">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1.5 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0 transition-colors duration-200">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <h1 class="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{{ $header ?? 'SaaS Platform Control' }}</h1>
+                <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'SaaS Platform Control' }}</h1>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <x-theme-customizer />
@@ -256,7 +257,7 @@
             </div>
         @endif
 
-        <main class="flex-1 p-3 sm:p-4 md:p-6">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-6 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
@@ -277,6 +278,69 @@
             </div>
         </footer>
     </div>
+
+    <!-- Super Admin Mobile Bottom Navigation Bar -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors">
+        <div class="grid grid-cols-5 items-center gap-1 max-w-lg mx-auto">
+            <!-- 1. Dashboard -->
+            <a href="{{ route('admin.dashboard') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('admin.dashboard') ? 'text-red-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    @if(request()->routeIs('admin.dashboard'))
+                        <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    @endif
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Dashboard</span>
+            </a>
+
+            <!-- 2. Gyms -->
+            <a href="{{ route('admin.gyms') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('admin.gyms*') ? 'text-red-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    @if(request()->routeIs('admin.gyms*'))
+                        <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    @endif
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Gyms</span>
+            </a>
+
+            <!-- 3. Plans -->
+            <a href="{{ route('admin.plans') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('admin.plans*') ? 'text-red-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
+                    @if(request()->routeIs('admin.plans*'))
+                        <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    @endif
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Plans</span>
+            </a>
+
+            <!-- 4. Subscriptions -->
+            <a href="{{ route('admin.subscriptions') }}" 
+               class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('admin.subscriptions*') ? 'text-red-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    @if(request()->routeIs('admin.subscriptions*'))
+                        <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    @endif
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Billing</span>
+            </a>
+
+            <!-- 5. Menu / Drawer Toggle -->
+            <button type="button" 
+                    @click="sidebarOpen = true" 
+                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer">
+                <div class="relative p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5 truncate">Menu</span>
+            </button>
+        </div>
+    </nav>
 
     <x-confirm-modal />
 

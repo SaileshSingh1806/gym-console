@@ -379,6 +379,7 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
 
             const isLight = root.classList.contains('light');
 
+            styleTag.setAttribute('data-hex', hex);
             styleTag.innerHTML = `
                 :root {
                     --theme-accent: ${hex} !important;
@@ -396,6 +397,14 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
                 .bg-emerald-600 {
                     background-color: ${hex} !important;
                     color: #ffffff !important;
+                }
+
+                .hover\\:bg-emerald-600:hover,
+                .hover\\:bg-emerald-500:hover,
+                .hover\\:bg-amber-600:hover,
+                .hover\\:bg-red-600:hover {
+                    background-color: ${hex} !important;
+                    filter: brightness(0.9);
                 }
 
                 aside nav a.bg-amber-500,
@@ -423,21 +432,35 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
                 }
 
                 .text-amber-400,
+                .text-amber-500,
                 .text-red-400,
                 .text-emerald-400,
                 .text-emerald-500,
+                .text-emerald-600,
                 .text-cyan-400,
                 .theme-accent-text {
                     color: ${hex} !important;
                 }
 
+                .hover\\:text-emerald-400:hover,
+                .hover\\:text-emerald-300:hover,
+                .hover\\:text-emerald-600:hover,
+                .hover\\:text-amber-400:hover {
+                    color: ${hex} !important;
+                }
+
+                .bg-amber-500\\/5,
+                .bg-emerald-500\\/5,
                 .bg-amber-500\\/10,
                 .bg-red-500\\/10,
                 .bg-emerald-500\\/10,
                 .bg-amber-500\\/15,
                 .bg-red-500\\/15,
                 .bg-emerald-500\\/15,
-                .bg-emerald-500\\/20 {
+                .bg-emerald-500\\/20,
+                .bg-emerald-100,
+                .bg-emerald-50,
+                .bg-emerald-50\\/50 {
                     background-color: rgba(${rgbStr}, 0.14) !important;
                     color: ${hex} !important;
                 }
@@ -447,15 +470,21 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
                 .border-emerald-500,
                 .border-amber-500\\/20,
                 .border-red-500\\/20,
+                .border-emerald-500\\/15,
                 .border-emerald-500\\/20,
-                .border-emerald-500\\/30 {
+                .border-emerald-500\\/25,
+                .border-emerald-500\\/30,
+                .border-emerald-500\\/40,
+                .border-emerald-200 {
                     border-color: rgba(${rgbStr}, 0.35) !important;
                 }
 
                 .focus\\:ring-amber-500:focus,
                 .focus\\:ring-emerald-500:focus,
                 .focus\\:border-amber-500:focus,
-                .focus\\:border-emerald-500:focus {
+                .focus\\:border-emerald-500:focus,
+                .ring-emerald-500\\/30,
+                .ring-emerald-500\\/50 {
                     --tw-ring-color: ${hex} !important;
                     border-color: ${hex} !important;
                 }
