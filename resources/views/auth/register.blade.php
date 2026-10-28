@@ -1,4 +1,4 @@
-<x-guest-layout title="Create Gym Account - {{ $platformSettings['app_name'] ?? 'Gym Console' }}">
+<x-guest-layout title="Create Gym Account - {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
     <div class="py-8 sm:py-14 max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 relative" x-data="{ 
         planId: '{{ $selectedPlan?->id ?? 1 }}', 
         showPassword: false,
@@ -138,7 +138,7 @@
             <div class="p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6">
                 <div class="border-b border-slate-800 pb-4">
                     <h2 class="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">2. Gym Business &amp; Owner Details</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">These credentials will be used to log in to your gym console dashboard</p>
+                    <p class="text-xs text-slate-400 mt-0.5">These credentials will be used to log in to your GymDeskHub dashboard</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

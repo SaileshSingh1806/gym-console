@@ -15,7 +15,7 @@
     
     <x-theme-head-styles :saved-theme="$savedThemeSettings ?? null" :storage-key="$themeStorageKey ?? 'admin'" />
 
-    <title>{{ $title ?? (($platformSettings['app_name'] ?? 'Gym Console') . ' - Super Admin') }}</title>
+    <title>{{ $title ?? (($platformSettings['app_name'] ?? 'GymDeskHub') . ' - Super Admin') }}</title>
 
     @if(!empty($platformSettings['favicon_url']))
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
@@ -115,9 +115,9 @@
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
                 @if(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
+                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                     <div class="flex flex-col min-w-0">
-                        <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight leading-none truncate max-w-[135px]">{{ $platformSettings['app_name'] ?? 'Gym Console' }}</span>
+                        <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight leading-none truncate max-w-[135px]">{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}</span>
                         <span class="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5">Super Admin</span>
                     </div>
                 @else
@@ -125,7 +125,7 @@
                         ⚡
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none truncate max-w-[135px]">GYM<span class="text-red-500">CONSOLE</span></span>
+                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none truncate max-w-[135px]">GYMDESK<span class="text-red-500">HUB</span></span>
                         <span class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 font-bold">Super Admin</span>
                     </div>
                 @endif
@@ -265,7 +265,7 @@
         <!-- Super Admin Footer -->
         <footer class="mt-auto px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 backdrop-blur text-slate-500 dark:text-slate-400 text-xs flex flex-col sm:flex-row items-center justify-between gap-2.5 transition-colors duration-200">
             <div class="flex items-center gap-2 text-center sm:text-left flex-wrap justify-center sm:justify-start">
-                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $platformSettings['app_name'] ?? 'Gym Console' }}</span>
+                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}</span>
                 <span>•</span>
                 <span>{{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' All rights reserved.') }}</span>
             </div>

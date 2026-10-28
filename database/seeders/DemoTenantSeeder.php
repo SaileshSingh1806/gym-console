@@ -30,7 +30,7 @@ class DemoTenantSeeder extends Seeder
     {
         // 1. Create Super Admin
         User::updateOrCreate(
-            ['email' => 'admin@gymconsole.com'],
+            ['email' => 'admin@gymdeskhub.com'],
             [
                 'name' => 'SaaS Super Admin',
                 'role' => 'super_admin',

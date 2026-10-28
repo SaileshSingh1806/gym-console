@@ -1,4 +1,4 @@
-<x-guest-layout title="Pricing Plans — {{ ($platformSettings['app_name'] ?? 'Gym Console') }}">
+<x-guest-layout title="Pricing Plans — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
     <div class="py-12 sm:py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {{-- Header --}}
@@ -26,7 +26,7 @@
             }
         @endphp
         <div class="text-center mb-12">
-            <a href="https://wa.me/{{ $cleanPricingPhone }}?text={{ urlencode('Hi, I am interested in custom pricing for Gym Console') }}" target="_blank"
+            <a href="https://wa.me/{{ $cleanPricingPhone }}?text={{ urlencode('Hi, I am interested in custom pricing for GymDeskHub') }}" target="_blank"
                class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-full">
                 <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
                 <span>Need custom hardware deployment or 5+ branches? Chat with our team on WhatsApp</span>
@@ -151,9 +151,9 @@
             <h2 class="text-2xl sm:text-3xl font-bold text-white text-center mb-8">Frequently Asked Questions</h2>
             <div class="space-y-4" x-data="{ open: null }">
                 @foreach([
-                    ['q' => 'Do I need any special hardware to start using Gym Console?', 'a' => 'No hardware is required to get started! You can use Gym Console on any smartphone, tablet, or laptop immediately to manage members, packages, and billing. If you later choose to add automated turnstile gates or facial recognition attendance, Gym Console seamlessly pairs with standard Hikvision Face terminals, eSSL, and ZKTeco machines.'],
+                    ['q' => 'Do I need any special hardware to start using GymDeskHub?', 'a' => 'No hardware is required to get started! You can use GymDeskHub on any smartphone, tablet, or laptop immediately to manage members, packages, and billing. If you later choose to add automated turnstile gates or facial recognition attendance, GymDeskHub seamlessly pairs with standard Hikvision Face terminals, eSSL, and ZKTeco machines.'],
                     ['q' => 'Can I upgrade or downgrade plans later?', 'a' => 'Yes. You can upgrade from Free Forever to Starter or Pro at any time. When upgrading, all your existing members, packages, and historical logs are preserved without any downtime.'],
-                    ['q' => 'Are there any hidden transaction fees on WhatsApp or payments?', 'a' => 'Zero hidden fees from Gym Console. When members pay via your dynamic UPI links, 100% of the funds settle directly into your gym\'s bank account with instant reconciliation.'],
+                    ['q' => 'Are there any hidden transaction fees on WhatsApp or payments?', 'a' => 'Zero hidden fees from GymDeskHub. When members pay via your dynamic UPI links, 100% of the funds settle directly into your gym\'s bank account with instant reconciliation.'],
                     ['q' => 'How does the free data migration work?', 'a' => 'Simply share your existing member list in Excel or CSV format. Our onboarding specialists will format, clean, and import all your active members, packages, and contact numbers within 2 business hours for free.'],
                 ] as $i => $faq)
                     <div class="rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 overflow-hidden">

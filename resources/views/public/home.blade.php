@@ -1,4 +1,4 @@
-<x-guest-layout title="{{ ($platformSettings['app_name'] ?? 'Gym Console') }} — Modern Gym Management & Access Control Platform">
+<x-guest-layout title="{{ ($platformSettings['app_name'] ?? 'GymDeskHub') }} — Modern Gym Management & Access Control Platform">
 
     {{-- ══════════════════════════════════════════════════════════════
          HERO SECTION
@@ -69,7 +69,7 @@
                                 <div class="w-3 h-3 rounded-full bg-slate-700"></div>
                                 <div class="w-3 h-3 rounded-full bg-slate-700"></div>
                             </div>
-                            <span class="text-xs font-semibold text-slate-400 hidden sm:inline">app.gymconsole.in &bull; Downtown Branch</span>
+                            <span class="text-xs font-semibold text-slate-400 hidden sm:inline">app.gymdeskhub.in &bull; Downtown Branch</span>
                         </div>
                         <div class="flex items-center gap-3 text-xs">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
@@ -656,7 +656,7 @@
                 Ready to upgrade your gym management?
             </h2>
             <p class="text-slate-400 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
-                Join hundreds of gyms automating their turnstiles, attendance, and fee collection with Gym Console.
+                Join hundreds of gyms automating their turnstiles, attendance, and fee collection with GymDeskHub.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('register') }}"

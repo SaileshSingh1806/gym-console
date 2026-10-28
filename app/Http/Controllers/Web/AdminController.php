@@ -857,15 +857,15 @@ class AdminController extends Controller implements HasMiddleware
 
         // Fill standard defaults if not set yet
         $defaults = [
-            'app_name' => 'Gym Console',
+            'app_name' => 'GymDeskHub',
             'app_tagline' => 'Next-Gen Multi-Tenant Gym Management SaaS Platform',
             'logo_url' => null,
             'favicon_url' => null,
-            'support_email' => 'support@gymconsole.com',
+            'support_email' => 'support@gymdeskhub.com',
             'support_phone' => '+91 98765 43210',
             'default_currency' => 'INR',
             'default_timezone' => 'Asia/Kolkata',
-            'footer_copyright' => '© '.date('Y').' Gym Console SaaS. All rights reserved.',
+            'footer_copyright' => '© '.date('Y').' GymDeskHub SaaS. All rights reserved.',
             // Email / SMTP
             'mail_mailer' => 'smtp',
             'mail_host' => 'smtp.gmail.com',
@@ -873,8 +873,8 @@ class AdminController extends Controller implements HasMiddleware
             'mail_username' => '',
             'mail_password' => '',
             'mail_encryption' => 'tls',
-            'mail_from_address' => 'noreply@gymconsole.com',
-            'mail_from_name' => 'Gym Console Platform',
+            'mail_from_address' => 'noreply@gymdeskhub.com',
+            'mail_from_name' => 'GymDeskHub Platform',
             // Payments
             'razorpay_enabled' => true,
             'razorpay_mode' => 'sandbox',
@@ -886,7 +886,7 @@ class AdminController extends Controller implements HasMiddleware
             'stripe_secret' => '',
             'stripe_webhook_secret' => '',
             // SEO
-            'meta_title' => 'Gym Console - Multi-Tenant Gym Management SaaS',
+            'meta_title' => 'GymDeskHub - Multi-Tenant Gym Management SaaS',
             'meta_description' => 'Complete gym membership management, biometric access control with Hikvision, POS billing, and multi-tenant SaaS dashboard.',
             'meta_keywords' => 'gym software, gym management saas, gym attendance system, biometric access control, gym billing software in rupees',
             'og_image_url' => null,

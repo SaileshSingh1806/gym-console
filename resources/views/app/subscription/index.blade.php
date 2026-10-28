@@ -82,7 +82,7 @@
                     key: this.razorpayConfig.key,
                     amount: Math.round(finalAmount * 100),
                     currency: this.razorpayConfig.currency || 'INR',
-                    name: this.razorpayConfig.name || 'Gym Console',
+                    name: this.razorpayConfig.name || 'GymDeskHub',
                     description: 'Upgrade to ' + planName + ' (' + this.billingCycle + ')',
                     prefill: this.razorpayConfig.prefill || {},
                     theme: {

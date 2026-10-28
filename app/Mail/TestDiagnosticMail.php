@@ -19,7 +19,7 @@ class TestDiagnosticMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '✅ Test Email Delivery Successful - Gym Console',
+            subject: '✅ Test Email Delivery Successful - GymDeskHub',
         );
     }
 

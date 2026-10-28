@@ -138,7 +138,7 @@
                     $isMemberPlan = !$plan->is_template && $plan->member;
                     $recipientPhone = $plan->member?->phone ?? '';
                     $memberName = $plan->member?->full_name ?? ($plan->is_template ? 'Template Plan' : 'Unassigned Member');
-                    $gymName = $tenant->name ?? 'Gym Console';
+                    $gymName = $tenant->name ?? 'GymDeskHub';
 
                     $planJson = [
                         'id' => $plan->id,
@@ -520,7 +520,7 @@
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Recipient / Member</label>
                         <input type="text" id="waRecipientName" readonly
                                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm focus:outline-none cursor-default font-medium">
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Assigned recipient in gym console records.</p>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Assigned recipient in GymDeskHub records.</p>
                     </div>
                 </div>
 
@@ -1073,7 +1073,7 @@
         function buildWhatsAppMessage(plan, recipientName, gymName) {
             let text = "🥗 *DIET & NUTRITION PLAN* 🥗\n";
             text += "━━━━━━━━━━━━━━━━━━━━\n";
-            text += "🏋️ *Gym:* " + (gymName || 'Gym Console') + "\n";
+            text += "🏋️ *Gym:* " + (gymName || 'GymDeskHub') + "\n";
             if (recipientName && recipientName !== 'Template Plan') {
                 text += "👤 *Member:* " + recipientName + "\n";
             }
@@ -1122,7 +1122,7 @@
             }
 
             text += "💪 *Stay consistent & achieve your goals!*\n";
-            text += "— *" + (gymName || 'Gym Console') + " Nutrition Team*";
+            text += "— *" + (gymName || 'GymDeskHub') + " Nutrition Team*";
             return text;
         }
 

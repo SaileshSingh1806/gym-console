@@ -1,4 +1,4 @@
-<x-guest-layout title="Contact Us — {{ ($platformSettings['app_name'] ?? 'Gym Console') }}">
+<x-guest-layout title="Contact Us — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-20 lg:pt-24 lg:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -42,7 +42,7 @@
                             $cleanContactPhone = '91' . $cleanContactPhone;
                         }
                     @endphp
-                    <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I am interested in Gym Console') }}" target="_blank"
+                    <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I am interested in GymDeskHub') }}" target="_blank"
                        class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-[#0e1627] transition-all flex items-start gap-4 block group">
                         <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-105 transition-transform">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -65,8 +65,8 @@
                         </div>
                         <div>
                             <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Email Inquiry</div>
-                            <div class="text-sm font-bold text-white mt-0.5">sales@gymconsole.in</div>
-                            <div class="text-xs text-slate-400 mt-0.5">support@gymconsole.in for technical tickets</div>
+                            <div class="text-sm font-bold text-white mt-0.5">sales@gymdeskhub.in</div>
+                            <div class="text-xs text-slate-400 mt-0.5">support@gymdeskhub.in for technical tickets</div>
                         </div>
                     </div>
 
@@ -164,7 +164,7 @@
                                 Your inquiry has been received. One of our specialists will reach out via WhatsApp and Email within 2 business hours.
                             </p>
                             <div class="pt-2">
-                                <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I just submitted an inquiry on Gym Console.') }}" target="_blank"
+                                <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I just submitted an inquiry on GymDeskHub.') }}" target="_blank"
                                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors">
                                     Chat Now on WhatsApp
                                 </a>

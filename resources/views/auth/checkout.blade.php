@@ -1,4 +1,4 @@
-<x-guest-layout title="Order Summary & Checkout - {{ $platformSettings['app_name'] ?? 'Gym Console' }}">
+<x-guest-layout title="Order Summary & Checkout - {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
     @php
         $isEnterprise = str_contains(strtolower($plan->name ?? ''), 'enterprise') || ($plan->slug ?? '') === 'pro';
         $paymentPageUrl = $isEnterprise ? 'https://rzp.io/rzp/lisGNMno' : 'https://rzp.io/rzp/seC7Xkmu';
@@ -309,7 +309,7 @@
 
                         <h4 class="text-sm font-bold text-white mb-1">Securing Connection to Razorpay</h4>
                         <p class="text-xs text-slate-400 max-w-xs mb-4 leading-relaxed">
-                            Initializing encrypted payment gateway session for {{ $platformSettings['app_name'] ?? 'Gym Console' }}...
+                            Initializing encrypted payment gateway session for {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}...
                         </p>
 
                         <!-- Micro progress bar -->
@@ -420,7 +420,7 @@
                     key: razorpayConfig.key,
                     amount: razorpayConfig.amount,
                     currency: razorpayConfig.currency || 'INR',
-                    name: razorpayConfig.name || 'Gym Console',
+                    name: razorpayConfig.name || 'GymDeskHub',
                     description: razorpayConfig.description || 'SaaS Subscription Plan',
                     image: '{{ $platformSettings['logo_url'] ?? '' }}',
                     prefill: {

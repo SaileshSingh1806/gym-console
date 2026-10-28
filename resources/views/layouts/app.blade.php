@@ -16,7 +16,7 @@
     
     <x-theme-head-styles :saved-theme="$savedThemeSettings ?? null" :storage-key="$themeStorageKey ?? 'admin'" />
 
-    <title>{{ $title ?? ($platformSettings['app_name'] ?? 'Gym Console') }}</title>
+    <title>{{ $title ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}</title>
 
     @if(!empty($platformSettings['favicon_url']))
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
@@ -122,13 +122,13 @@
                 @php
                     $tenant = auth()->user()->tenant ?? null;
                     $gymLogo = $tenant?->logo_url;
-                    $gymName = $tenant?->name ?? ($platformSettings['app_name'] ?? 'Gym Console');
+                    $gymName = $tenant?->name ?? ($platformSettings['app_name'] ?? 'GymDeskHub');
                 @endphp
                 @if(!empty($gymLogo))
-                    <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
+                    <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                     <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
                 @elseif(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $gymName }}" class="h-9 w-9 rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
+                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $gymName }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                     <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
                 @else
                     <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20 shrink-0">

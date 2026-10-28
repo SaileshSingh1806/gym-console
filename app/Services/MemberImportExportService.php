@@ -160,7 +160,7 @@ class MemberImportExportService
      */
     public static function downloadSampleCsv(): StreamedResponse
     {
-        $fileName = 'gymconsole_members_sample_template.csv';
+        $fileName = 'gymdeskhub_members_sample_template.csv';
 
         return response()->streamDownload(function () {
             $output = fopen('php://output', 'w');

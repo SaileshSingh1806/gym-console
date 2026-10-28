@@ -27,7 +27,7 @@ class GymOwnerWelcomeMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = \App\Models\Setting::getGlobal('app_name', 'Gym Console');
+        $appName = \App\Models\Setting::getGlobal('app_name', 'GymDeskHub');
         return new Envelope(
             subject: "🎉 Welcome to {$appName} - Your Gym Portal Credentials for {$this->tenant->name}",
         );

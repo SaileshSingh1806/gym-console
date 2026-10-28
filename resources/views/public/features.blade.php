@@ -1,4 +1,4 @@
-<x-guest-layout title="Platform Features — {{ ($platformSettings['app_name'] ?? 'Gym Console') }}">
+<x-guest-layout title="Platform Features — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
 
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
@@ -13,7 +13,7 @@
             </h1>
 
             <p class="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                Explore every tool built into Gym Console — from sub-second biometric turnstile synchronization to automated WhatsApp UPI fee collections and branded mobile apps.
+                Explore every tool built into GymDeskHub — from sub-second biometric turnstile synchronization to automated WhatsApp UPI fee collections and branded mobile apps.
             </p>
         </div>
     </section>
@@ -33,7 +33,7 @@
                         Biometric Attendance and Access Control
                     </h2>
                     <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6">
-                        Eliminate proxy attendance, member card sharing, and unpaid walk-ins. Gym Console connects directly with Hikvision facial terminals, eSSL fingerprint readers, and automated turnstile gates for sub-second, tamper-proof access.
+                        Eliminate proxy attendance, member card sharing, and unpaid walk-ins. GymDeskHub connects directly with Hikvision facial terminals, eSSL fingerprint readers, and automated turnstile gates for sub-second, tamper-proof access.
                     </p>
 
                     <div class="space-y-4 text-sm text-slate-300">
@@ -238,7 +238,7 @@
                     {{-- Chat bubble --}}
                     <div class="p-4 rounded-2xl bg-[#080d17] border border-slate-800/80 mb-4 text-xs leading-relaxed">
                         <p class="text-slate-200">
-                            "Hello <strong class="text-white">Sameer</strong>, your Gold Annual Membership at <strong class="text-amber-400">GymConsole</strong> expires in 3 days (21 Oct).
+                            "Hello <strong class="text-white">Sameer</strong>, your Gold Annual Membership at <strong class="text-amber-400">GymDeskHub</strong> expires in 3 days (21 Oct).
                         </p>
                         <p class="text-slate-300 mt-2">
                             To ensure continuous turnstile biometric access, click below to renew with 1-click UPI:
@@ -337,7 +337,7 @@
     {{-- Bottom CTA --}}
     <section class="py-16 sm:py-20 bg-slate-900/40 border-t border-slate-800">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">Experience Gym Console in Action</h2>
+            <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">Experience GymDeskHub in Action</h2>
             <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8">
                 Start with our Free Forever tier or buy a high-performance license with full hardware support.
             </p>

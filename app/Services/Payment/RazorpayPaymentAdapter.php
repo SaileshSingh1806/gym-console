@@ -48,7 +48,7 @@ class RazorpayPaymentAdapter implements SaaSPaymentGatewayInterface
             'amount' => $amount,
             'amount_paise' => $amountInPaise,
             'currency' => $tenant->currency ?? 'INR',
-            'name' => Setting::getGlobal('app_name', config('app.name', 'Gym Console')),
+            'name' => Setting::getGlobal('app_name', config('app.name', 'GymDeskHub')),
             'description' => "Subscription to {$plan->name} ({$billingCycle})",
             'prefill' => [
                 'name' => $tenant->users()->first()?->name ?? $tenant->name,

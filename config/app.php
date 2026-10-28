@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Gym Console'),
+    'name' => env('APP_NAME', 'GymDeskHub'),
 
     /*
     |--------------------------------------------------------------------------

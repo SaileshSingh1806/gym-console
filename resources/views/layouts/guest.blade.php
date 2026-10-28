@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? ($platformSettings['meta_title'] ?? (($platformSettings['app_name'] ?? 'Gym Console') . ' - Gym Management Platform')) }}</title>
+    <title>{{ $title ?? ($platformSettings['meta_title'] ?? (($platformSettings['app_name'] ?? 'GymDeskHub') . ' - Gym Management Platform')) }}</title>
 
     @if(!empty($platformSettings['meta_description']))
         <meta name="description" content="{{ $platformSettings['meta_description'] }}">
@@ -13,7 +13,7 @@
     @endif
 
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $platformSettings['meta_title'] ?? ($platformSettings['app_name'] ?? 'Gym Console') }}">
+    <meta property="og:title" content="{{ $platformSettings['meta_title'] ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
     @if(!empty($platformSettings['meta_description']))
         <meta property="og:description" content="{{ $platformSettings['meta_description'] }}">
     @endif
@@ -143,11 +143,11 @@
                 <a href="{{ route('home') }}" class="flex items-center gap-3 shrink-0 focus:outline-none">
                     @if(!empty($platformSettings['logo_url']))
                         <img src="{{ $platformSettings['logo_url'] }}"
-                             alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}"
-                             class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain border border-slate-800 bg-[#0f1624] p-1 shadow-sm">
+                             alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                             class="h-9 sm:h-10 w-auto max-w-[150px] rounded-xl object-contain border border-slate-800 bg-[#0f1624] p-1 shadow-sm">
                         <div class="flex flex-col">
                             <span class="text-lg sm:text-xl font-bold tracking-tight text-white leading-none">
-                                {{ $platformSettings['app_name'] ?? 'Gym Console' }}
+                                {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}
                             </span>
                             <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">Management Platform</span>
                         </div>
@@ -279,13 +279,13 @@
                 <div class="lg:col-span-2 space-y-4">
                     <a href="{{ route('home') }}" class="flex items-center gap-2.5">
                         @if(!empty($platformSettings['logo_url']))
-                            <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'Gym Console' }}" class="w-8 h-8 rounded-lg object-contain bg-[#0f1624] p-1 border border-slate-800">
+                            <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-9 w-auto max-w-[140px] rounded-lg object-contain bg-[#0f1624] p-1 border border-slate-800">
                         @else
                             <div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             </div>
                         @endif
-                        <span class="text-lg font-bold text-white">{{ $platformSettings['app_name'] ?? 'Gym Console' }}</span>
+                        <span class="text-lg font-bold text-white">{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}</span>
                     </a>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm">
                         The all-in-one operating system for modern gyms and fitness clubs. Universal biometric access, automated fee collections, WhatsApp messaging, and multi-branch management.
@@ -300,7 +300,7 @@
                         }
                     @endphp
                     <div class="pt-2 flex items-center gap-3">
-                        <a href="https://wa.me/{{ $cleanGuestPhone }}?text={{ urlencode('Hi, I need assistance with Gym Console') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors">
+                        <a href="https://wa.me/{{ $cleanGuestPhone }}?text={{ urlencode('Hi, I need assistance with GymDeskHub') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/></svg>
                             <span>WhatsApp Support</span>
                         </a>
@@ -345,7 +345,7 @@
         <div class="border-t border-slate-800/60">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
                 <p>
-                    {{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'Gym Console') . '. All rights reserved.') }}
+                    {{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'GymDeskHub') . '. All rights reserved.') }}
                 </p>
                 <div class="flex items-center gap-4">
                     <span>Enterprise Security &amp; Tenant Isolation</span>

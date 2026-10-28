@@ -1,4 +1,4 @@
-<x-guest-layout title="About Us — {{ ($platformSettings['app_name'] ?? 'Gym Console') }}">
+<x-guest-layout title="About Us — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
 
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
@@ -13,7 +13,7 @@
             </h1>
 
             <p class="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                Gym Console was built to replace clunky desktop software, fragmented paper logs, and unreliable offline turnstiles with a clean, dependable cloud operating system.
+                GymDeskHub was built to replace clunky desktop software, fragmented paper logs, and unreliable offline turnstiles with a clean, dependable cloud operating system.
             </p>
         </div>
     </section>
@@ -56,7 +56,7 @@
                             For years, gym owners have struggled with fragmented tools: paper registers that lose track of expired memberships, manual WhatsApp messages sent one by one, turnstile gates that require USB drives for offline sync, and error-prone Excel spreadsheets.
                         </p>
                         <p>
-                            We built <strong class="text-white">Gym Console</strong> to eliminate this chaos. By combining universal biometric hardware integration (eSSL, Hikvision, Realtime, ZKTeco), automated WhatsApp fee collections, multi-branch synchronization, and native mobile apps into one unified platform, gym owners regain total control over their business.
+                            We built <strong class="text-white">GymDeskHub</strong> to eliminate this chaos. By combining universal biometric hardware integration (eSSL, Hikvision, Realtime, ZKTeco), automated WhatsApp fee collections, multi-branch synchronization, and native mobile apps into one unified platform, gym owners regain total control over their business.
                         </p>
                     </div>
 
@@ -111,7 +111,7 @@
             <div class="text-center max-w-3xl mx-auto mb-14">
                 <span class="text-xs uppercase font-bold tracking-wider text-amber-400">Engineering & Reliability</span>
                 <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold text-white">Built for high concurrency and uptime</h2>
-                <p class="mt-3 text-slate-400 text-sm sm:text-base">Under the hood, Gym Console is powered by modern, battle-tested cloud architecture.</p>
+                <p class="mt-3 text-slate-400 text-sm sm:text-base">Under the hood, GymDeskHub is powered by modern, battle-tested cloud architecture.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

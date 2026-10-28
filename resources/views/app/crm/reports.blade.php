@@ -72,7 +72,7 @@
             <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-2.5 w-full lg:w-auto pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800/80">
                 <span class="px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-bold text-xs flex items-center gap-1.5 shadow-sm truncate max-w-[200px] sm:max-w-none">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    <span class="truncate">{{ $tenant->name ?? 'Gym Console' }}</span>
+                    <span class="truncate">{{ $tenant->name ?? 'GymDeskHub' }}</span>
                 </span>
 
                 <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-950 dark:hover:bg-slate-800 dark:text-slate-300 dark:hover:text-white dark:border-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">

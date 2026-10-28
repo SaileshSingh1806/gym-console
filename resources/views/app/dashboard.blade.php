@@ -1207,7 +1207,7 @@
                                     <td class="py-2.5 px-3 text-slate-600 dark:text-slate-400">{{ $bm->dob ? \Carbon\Carbon::parse($bm->dob)->format('d M') : 'Today' }}</td>
                                     <td class="py-2.5 px-3">
                                         @if($bm->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'Gym Console') . '! 🎂🎉 Stay fit and healthy!') }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white font-bold text-[10px] transition-all inline-flex items-center gap-1">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'GymDeskHub') . '! 🎂🎉 Stay fit and healthy!') }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white font-bold text-[10px] transition-all inline-flex items-center gap-1">
                                                 <span>💬 Send Wish</span>
                                             </a>
                                         @endif

@@ -208,7 +208,7 @@ class AuthController extends Controller
         Auth::login($owner);
 
         if ($isFreePlan) {
-            return redirect()->route('app.dashboard')->with('success', "Welcome to Gym Console! Your {$plan->name} plan is now active.");
+            return redirect()->route('app.dashboard')->with('success', "Welcome to GymDeskHub! Your {$plan->name} plan is now active.");
         }
 
         // Store pending checkout details in session
@@ -269,7 +269,7 @@ class AuthController extends Controller
             'key' => $razorpayKeyId,
             'amount' => $amountInPaise,
             'currency' => $tenant?->currency ?? 'INR',
-            'name' => Setting::getGlobal('app_name', 'Gym Console'),
+            'name' => Setting::getGlobal('app_name', 'GymDeskHub'),
             'description' => "Subscription to {$plan->name} ({$billingCycle})",
             'prefill' => [
                 'name' => $user?->name ?? 'Gym Owner',

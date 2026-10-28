@@ -1,6 +1,6 @@
 @extends('emails.layouts.master', [
-    'subject' => 'Payment Receipt #' . $payment->receipt_number . ' - ' . ($tenant->name ?? 'Gym Console'),
-    'brandName' => $tenant->name ?? config('app.name', 'Gym Console'),
+    'subject' => 'Payment Receipt #' . $payment->receipt_number . ' - ' . ($tenant->name ?? 'GymDeskHub'),
+    'brandName' => $tenant->name ?? config('app.name', 'GymDeskHub'),
     'headerSubtitle' => 'Official Payment Receipt & Tax Invoice'
 ])
 

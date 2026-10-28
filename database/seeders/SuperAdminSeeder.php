@@ -13,7 +13,7 @@ class SuperAdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'singhshailesh79@gmail.com'],
             [
-                'name' => 'GymConsole',
+                'name' => 'GymDeskHub',
                 'role' => 'super_admin',
                 'status' => 'ACTIVE',
                 'password' => Hash::make('Admin@123'),

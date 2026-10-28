@@ -1,5 +1,5 @@
 @extends('emails.layouts.master', [
-    'subject' => '✅ Test Email Delivery Successful - Gym Console',
+    'subject' => '✅ Test Email Delivery Successful - GymDeskHub',
     'headerSubtitle' => 'Email System Diagnostics & Verification'
 ])
 
@@ -12,7 +12,7 @@
             Test Email Delivered Successfully!
         </h1>
         <p style="margin: 4px 0 0 0; font-size: 13px; color: #94a3b8;">
-            Your Gym Console mail configuration and SMTP connection are working properly.
+            Your GymDeskHub mail configuration and SMTP connection are working properly.
         </p>
     </div>
 

@@ -1,6 +1,6 @@
 @php
-    $platformAppName = \App\Models\Setting::getGlobal('app_name', 'Gym Console');
-    $platformSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymconsole.com');
+    $platformAppName = \App\Models\Setting::getGlobal('app_name', 'GymDeskHub');
+    $platformSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymdeskhub.com');
     $platformSupportPhone = \App\Models\Setting::getGlobal('support_phone', '+91 9974995179');
     $platformLogo = \App\Models\Setting::getGlobal('logo_url');
     $cleanPhone = preg_replace('/[^0-9]/', '', (string)$platformSupportPhone);
@@ -78,7 +78,7 @@
     <!-- CTA Button -->
     <div style="text-align: center; margin-bottom: 24px;">
         <a href="{{ $loginUrl ?? url('/login') }}" style="display: inline-block; background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); letter-spacing: 0.3px;">
-            🚀 Sign In to Gym Console &rarr;
+            🚀 Sign In to GymDeskHub &rarr;
         </a>
     </div>
 

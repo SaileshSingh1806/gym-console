@@ -101,7 +101,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Platform / App Name *</label>
-                            <input type="text" name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'Gym Console') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="text" name="app_name" value="{{ old('app_name', $settings['app_name'] ?? 'GymDeskHub') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                             <span class="text-[10px] text-slate-400 dark:text-slate-500 block mt-1">Displayed in browser title, header navbar, and invoices</span>
                         </div>
 
@@ -166,7 +166,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Support Email *</label>
-                            <input type="email" name="support_email" value="{{ old('support_email', $settings['support_email'] ?? 'support@gymconsole.com') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="email" name="support_email" value="{{ old('support_email', $settings['support_email'] ?? 'support@gymdeskhub.com') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
 
                         <div>
@@ -205,7 +205,7 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Footer Copyright Text</label>
-                        <input type="text" name="footer_copyright" value="{{ old('footer_copyright', $settings['footer_copyright'] ?? '© '.date('Y').' Gym Console SaaS. All rights reserved.') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                        <input type="text" name="footer_copyright" value="{{ old('footer_copyright', $settings['footer_copyright'] ?? '© '.date('Y').' GymDeskHub SaaS. All rights reserved.') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                     </div>
                 </div>
 
@@ -279,12 +279,12 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">From Email Address *</label>
-                            <input type="email" name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address'] ?? 'noreply@gymconsole.com') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="email" name="mail_from_address" value="{{ old('mail_from_address', $settings['mail_from_address'] ?? 'noreply@gymdeskhub.com') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">From Sender Name *</label>
-                            <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name'] ?? 'Gym Console Platform') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="text" name="mail_from_name" value="{{ old('mail_from_name', $settings['mail_from_name'] ?? 'GymDeskHub Platform') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
                     </div>
                 </div>
@@ -437,7 +437,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Global Meta Title *</label>
-                            <input type="text" name="meta_title" value="{{ old('meta_title', $settings['meta_title'] ?? 'Gym Console - Multi-Tenant Gym Management SaaS') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="text" name="meta_title" value="{{ old('meta_title', $settings['meta_title'] ?? 'GymDeskHub - Multi-Tenant Gym Management SaaS') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
 
                         <div>

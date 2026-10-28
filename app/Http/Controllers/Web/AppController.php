@@ -5180,7 +5180,7 @@ class AppController extends Controller
         $razorpayConfig = [
             'key' => $razorpayKeyId,
             'currency' => $tenant->currency ?? 'INR',
-            'name' => Setting::getGlobal('app_name', 'Gym Console'),
+            'name' => Setting::getGlobal('app_name', 'GymDeskHub'),
             'prefill' => [
                 'name' => $user?->name ?? 'Gym Owner',
                 'email' => $user?->email ?? '',

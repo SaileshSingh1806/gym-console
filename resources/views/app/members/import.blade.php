@@ -337,7 +337,7 @@
                                         <span class="text-xs font-bold text-white">Plan &amp; Member Code</span>
                                         <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 uppercase">Optional</span>
                                     </div>
-                                    <p class="text-[11px] text-slate-400 mt-0.5">If member code is empty, Gym Console assigns the next sequential code automatically.</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">If member code is empty, GymDeskHub assigns the next sequential code automatically.</p>
                                 </div>
                             </div>
                         </div>

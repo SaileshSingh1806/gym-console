@@ -1,6 +1,6 @@
 @extends('emails.layouts.master', [
     'subject' => 'Welcome to ' . ($tenant->name ?? 'our Gym') . ' - Your Member Access Card',
-    'brandName' => $tenant->name ?? config('app.name', 'Gym Console'),
+    'brandName' => $tenant->name ?? config('app.name', 'GymDeskHub'),
     'headerSubtitle' => 'Member Access & Fitness Protocol'
 ])
 

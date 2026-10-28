@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{ $subject ?? 'Gym Console Notification' }}</title>
+    <title>{{ $subject ?? 'GymDeskHub Notification' }}</title>
     <style>
         body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
@@ -31,9 +31,9 @@
                     <!-- Top Gradient Header Brand Bar -->
                     @php
                         $isPlatform = $isPlatformMail ?? false;
-                        $globalAppName = \App\Models\Setting::getGlobal('app_name', config('app.name', 'Gym Console'));
+                        $globalAppName = \App\Models\Setting::getGlobal('app_name', config('app.name', 'GymDeskHub'));
                         $globalLogo = \App\Models\Setting::getGlobal('logo_url');
-                        $globalSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymconsole.com');
+                        $globalSupportEmail = \App\Models\Setting::getGlobal('support_email', 'support@gymdeskhub.com');
                         $globalSupportPhone = \App\Models\Setting::getGlobal('support_phone', '+91 9974995179');
                         $globalFooterCopyright = $footerCopyright ?? \App\Models\Setting::getGlobal('footer_copyright', '© 2026 ' . $globalAppName . '. All rights reserved.');
 

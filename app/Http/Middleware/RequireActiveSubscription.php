@@ -44,7 +44,7 @@ class RequireActiveSubscription
                 return redirect()->route('auth.checkout')->with('warning', 'Please complete your subscription payment to access your gym dashboard.');
             }
 
-            return redirect()->route('app.subscription.index')->with('warning', 'Your SaaS Subscription has expired. Please renew or upgrade your plan to continue using Gym Console.');
+            return redirect()->route('app.subscription.index')->with('warning', 'Your SaaS Subscription has expired. Please renew or upgrade your plan to continue using GymDeskHub.');
         }
 
         return $next($request);

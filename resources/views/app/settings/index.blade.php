@@ -798,7 +798,7 @@
                         <div class="flex items-start gap-2.5">
                             <span class="w-5 h-5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">2</span>
                             <div>
-                                <strong class="text-slate-900 dark:text-white">Register Device in Gym Console:</strong> Click "+ Register Biometric Device" above and obtain the generated <em>Device Secret Token</em>.
+                                <strong class="text-slate-900 dark:text-white">Register Device in GymDeskHub:</strong> Click "+ Register Biometric Device" above and obtain the generated <em>Device Secret Token</em>.
                             </div>
                         </div>
                         <div class="flex items-start gap-2.5">
