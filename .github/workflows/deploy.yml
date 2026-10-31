@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: production-deploy
   cancel-in-progress: false
@@ -65,8 +68,10 @@ jobs:
           scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }}:/home/${{ secrets.HOSTINGER_USER || 'u644113968' }}/gym-console/public/
 
       - name: 🚀 Deploy Laravel Application on Hostinger
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }} << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }} "REPO_TOKEN='$REPO_TOKEN' bash -s" << 'EOF'
             set -e
 
             PHP_BIN="/opt/alt/php84/usr/bin/php"
@@ -76,9 +81,9 @@ jobs:
             echo "=== Step 1: Navigating to project directory ==="
             cd "$APP_DIR"
 
-            echo "=== Step 2: Safe Git Pull ==="
-            git fetch origin main
-            git reset --hard origin/main
+            echo "=== Step 2: Safe Git Pull with Temporary Token ==="
+            git fetch "https://x-access-token:${REPO_TOKEN}@github.com/SaileshSingh1806/gym-console.git" main
+            git reset --hard FETCH_HEAD
 
             echo "=== Step 3: Install/Update Composer Dependencies ==="
             $PHP_BIN "$(command -v composer)" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
@@ -104,7 +109,7 @@ jobs:
             fi
 
             echo "=== Deployment Completed Successfully on Hostinger! ==="
-          EOF
+EOF
 
       - name: 🌐 Verify Live Site Health
         run: |
