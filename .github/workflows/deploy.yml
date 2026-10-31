@@ -1,0 +1,104 @@
+name: Production Deployment to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build Assets & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Node dependencies & Build Frontend Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: 🔑 Configure SSH Key & Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: 🚚 Transfer Compiled Frontend Assets (Vite Build)
+        run: |
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/domains/gymdeskhub.com/public_html/
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/gym-console/public/
+
+      - name: 🚀 Deploy Laravel Application on Hostinger
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << 'EOF'
+            set -e
+
+            PHP_BIN="/opt/alt/php84/usr/bin/php"
+            APP_DIR="/home/u644113968/gym-console"
+            WEB_DIR="/home/u644113968/domains/gymdeskhub.com/public_html"
+
+            echo "=== Step 1: Navigating to project directory ==="
+            cd "$APP_DIR"
+
+            echo "=== Step 2: Safe Git Pull ==="
+            # Fetch latest commits without touching untracked .env or modified local files
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "=== Step 3: Install/Update Composer Dependencies ==="
+            $PHP_BIN "$(command -v composer)" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+            echo "=== Step 4: Run Safe Database Migrations ==="
+            $PHP_BIN artisan migrate --force
+
+            echo "=== Step 5: Ensure Storage Symlink Exists ==="
+            ln -sfn "$APP_DIR/storage/app/public" "$WEB_DIR/storage"
+            ln -sfn "$APP_DIR/storage/app/public" "$APP_DIR/public/storage"
+
+            echo "=== Step 6: Clear and Rebuild Laravel Caches ==="
+            $PHP_BIN artisan optimize:clear
+            $PHP_BIN artisan config:cache
+            $PHP_BIN artisan route:cache
+            $PHP_BIN artisan view:cache
+
+            echo "=== Step 7: Verify Custom index.php Integrity ==="
+            if ! grep -q "gym-console/bootstrap/app.php" "$WEB_DIR/index.php"; then
+              echo "WARNING: $WEB_DIR/index.php does not reference gym-console. Please check custom index.php!"
+            else
+              echo "Verified: $WEB_DIR/index.php is intact and correctly linked."
+            fi
+
+            echo "=== Deployment Completed Successfully on Hostinger! ==="
+          EOF
+
+      - name: 🌐 Verify Live Site Health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gymdeskhub.com)
+          echo "Live Site HTTP Status Code: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            echo "✅ Website is live and healthy (HTTP $STATUS)!"
+          else
+            echo "⚠️ Warning: Expected HTTP 200-399, got $STATUS"
+          fi
+
+      - name: 🧹 Cleanup SSH Keys
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+
