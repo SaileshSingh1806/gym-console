@@ -31,22 +31,42 @@ jobs:
           npm ci
           npm run build
 
-      - name: 🔑 Configure SSH Key
+      - name: 🔑 Configure & Validate SSH Key
         env:
           SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          python3 -c '
+          import os, sys
+          raw = os.environ.get("SSH_KEY", "").strip()
+          if not raw:
+              sys.exit("ERROR: HOSTINGER_SSH_KEY secret is empty!")
+          
+          # Remove existing headers/footers and sanitize any whitespace/CRLF
+          body = raw.replace("-----BEGIN OPENSSH PRIVATE KEY-----", "").replace("-----END OPENSSH PRIVATE KEY-----", "")
+          body = "".join(body.split())
+
+          # Reconstruct strict 70-char wrapped OpenSSH key
+          lines = [body[i:i+70] for i in range(0, len(body), 70)]
+          formatted_key = "-----BEGIN OPENSSH PRIVATE KEY-----\n" + "\n".join(lines) + "\n-----END OPENSSH PRIVATE KEY-----\n"
+          
+          key_path = os.path.expanduser("~/.ssh/deploy_key")
+          with open(key_path, "w", newline="\n") as f:
+              f.write(formatted_key)
+          '
           chmod 600 ~/.ssh/deploy_key
+          echo "Verifying SSH deploy key format with ssh-keygen:"
+          ssh-keygen -y -f ~/.ssh/deploy_key
+          echo "SSH key is valid and ready for authentication!"
 
       - name: 🚚 Transfer Compiled Frontend Assets (Vite Build)
         run: |
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/domains/gymdeskhub.com/public_html/
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/gym-console/public/
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }}:/home/${{ secrets.HOSTINGER_USER || 'u644113968' }}/domains/gymdeskhub.com/public_html/
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }}:/home/${{ secrets.HOSTINGER_USER || 'u644113968' }}/gym-console/public/
 
       - name: 🚀 Deploy Laravel Application on Hostinger
         run: |
-          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT || '65002' }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 ${{ secrets.HOSTINGER_USER || 'u644113968' }}@${{ secrets.HOSTINGER_HOST || '82.112.239.103' }} << 'EOF'
             set -e
 
             PHP_BIN="/opt/alt/php84/usr/bin/php"
