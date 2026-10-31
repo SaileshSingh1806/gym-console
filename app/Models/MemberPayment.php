@@ -101,6 +101,10 @@ class MemberPayment extends Model
 
         $publicUrl = $this->public_invoice_url;
 
+        $totalPkg = $membership && (float)$membership->final_amount > 0 ? (float)$membership->final_amount : (float)$this->amount;
+        $totalPaid = $membership && (float)$membership->paid_amount > 0 ? (float)$membership->paid_amount : (float)$this->amount;
+        $due = max(0, $totalPkg - $totalPaid);
+
         $msg = "🏋️ *{$gymName}*\n";
         if (!empty($gymAddress)) {
             $msg .= "📍 _{$gymAddress}_\n";
@@ -112,7 +116,13 @@ class MemberPayment extends Model
         $msg .= "Thank you for your payment! Here are your transaction details:\n\n";
         $msg .= "📄 *Invoice No:* {$invoiceNo}\n";
         $msg .= "📅 *Date:* {$date}\n";
-        $msg .= "💰 *Amount Paid:* {$currency}{$amount}\n";
+        if ($membership && $totalPkg > (float)$this->amount) {
+            $msg .= "📦 *Total Package Fee:* {$currency}" . number_format($totalPkg, 2) . "\n";
+            $msg .= "💰 *Amount Paid (This Receipt):* {$currency}{$amount}\n";
+            $msg .= "💵 *Total Paid to Date:* {$currency}" . number_format($totalPaid, 2) . "\n";
+        } else {
+            $msg .= "💰 *Amount Paid:* {$currency}{$amount}\n";
+        }
         $msg .= "💳 *Payment Mode:* {$method}\n";
 
         if (($this->payment_method === 'split' || str_contains($this->notes ?? '', 'Split Payment') || str_contains($this->notes ?? '', 'Split:')) && !empty($this->notes)) {
@@ -135,12 +145,10 @@ class MemberPayment extends Model
             $msg .= "⏳ *Tenure:* {$membership->start_date->format('d M Y')} to {$membership->end_date->format('d M Y')}\n";
         }
 
-        $due = 0;
-        if ($membership) {
-            $due = max(0, (float) $membership->final_amount - (float) $membership->paid_amount);
-        }
         if ($due > 0) {
             $msg .= "⚠️ *Remaining Balance Due:* {$currency}" . number_format($due, 2) . "\n";
+        } else {
+            $msg .= "✅ *Status:* Paid in Full\n";
         }
 
         $msg .= "\n🔗 *View & Download Official Invoice:*\n";

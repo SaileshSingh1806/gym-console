@@ -85,8 +85,37 @@
         }
         
         $invoiceDate = $payment->payment_date ? $payment->payment_date->format('d M Y') : $payment->created_at->format('d M Y');
-        $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
         $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
+
+        // Financial calculations based on Membership Package
+        $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
+        
+        if ($membership && (float)$membership->final_amount > 0) {
+            $totalPackageAmount = (float) $membership->final_amount;
+            $baseRate = (float) ($membership->price > 0 ? $membership->price : ($totalPackageAmount + $discountAmount));
+            $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
+        } elseif ($plan && (float)$plan->price > 0) {
+            $baseRate = (float) $plan->price;
+            $totalPackageAmount = max(0, $baseRate - $discountAmount);
+            $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
+        } else {
+            $baseRate = (float) $payment->amount;
+            $totalPackageAmount = (float) $payment->amount;
+            $totalPaidSoFar = (float) $payment->amount;
+        }
+
+        $balanceDue = max(0, $totalPackageAmount - $totalPaidSoFar);
+
+        // Status pill & badge styling
+        if ($balanceDue > 0) {
+            $statusText = 'PARTIAL PAYMENT (DUE: ' . $currency . number_format($balanceDue, 0) . ')';
+            $statusBadgeClass = 'border-amber-400 bg-amber-50 text-amber-800 font-extrabold';
+            $statusDotClass = 'bg-amber-500';
+        } else {
+            $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
+            $statusBadgeClass = 'border-emerald-400 bg-emerald-50 text-emerald-700';
+            $statusDotClass = 'bg-emerald-500';
+        }
 
         // Plan Duration calculation
         $durationFormatted = '12 Months';
@@ -253,8 +282,8 @@
 
                     <!-- Status Pill -->
                     <div class="mt-1.5">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-emerald-400 bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border {{ $statusBadgeClass }} text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $statusDotClass }}"></span>
                             {{ $statusText }}
                         </span>
                     </div>
@@ -375,8 +404,8 @@
                                 @endif
                             </td>
                             <td class="py-3 px-3 text-center font-medium text-slate-700 text-xs">{{ $durationFormatted }}</td>
-                            <td class="py-3 px-3 text-right font-medium text-slate-700 text-xs">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
-                            <td class="py-3 px-3 text-right font-bold text-slate-950 text-xs sm:text-sm">{{ $currency }}{{ number_format($payment->amount, 0) }}</td>
+                            <td class="py-3 px-3 text-right font-medium text-slate-700 text-xs">{{ $currency }}{{ number_format($baseRate, 0) }}</td>
+                            <td class="py-3 px-3 text-right font-bold text-slate-950 text-xs sm:text-sm">{{ $currency }}{{ number_format($totalPackageAmount, 0) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -395,10 +424,10 @@
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
                         <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase">
-                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
+                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment') || str_contains($payment->notes ?? '', 'Split:'))
                                 SPLIT PAYMENT
                             @else
-                                {{ $payment->payment_method ?? 'UPI' }}
+                                {{ $payment->payment_method ?? 'CASH' }}
                             @endif
                         </span>
                     </div>
@@ -418,9 +447,30 @@
                             <span>{{ $splitNote }}</span>
                         </div>
                     @endif
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+
+                    @php
+                        $allPayments = $membership ? $membership->payments()->orderBy('payment_date', 'asc')->orderBy('id', 'asc')->get() : collect([$payment]);
+                    @endphp
+
+                    @if($allPayments->count() > 1)
+                        <div class="pt-1.5 mt-1 border-t border-slate-200/80 space-y-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Payment Installments:</span>
+                            @foreach($allPayments as $idx => $pItem)
+                                <div class="flex items-center justify-between text-[11px] py-0.5">
+                                    <span class="text-slate-600 font-medium">
+                                        #{{ $idx + 1 }} • {{ strtoupper($pItem->payment_method) }} ({{ $pItem->payment_date ? $pItem->payment_date->format('d M Y') : $pItem->created_at->format('d M Y') }}):
+                                    </span>
+                                    <span class="font-bold text-slate-900">{{ $currency }}{{ number_format($pItem->amount, 0) }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-12 gap-1 text-xs pt-1">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Status:</span>
-                        <span class="font-bold text-emerald-600 col-span-6 sm:col-span-7">Completed</span>
+                        <span class="font-bold {{ $balanceDue > 0 ? 'text-amber-600' : 'text-emerald-600' }} col-span-6 sm:col-span-7">
+                            {{ $balanceDue > 0 ? 'Partially Paid' : 'Completed' }}
+                        </span>
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Verification:</span>
@@ -438,26 +488,39 @@
                 <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-slate-600 font-normal">Subtotal</span>
-                        <span class="font-medium text-slate-900">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
+                        <span class="font-medium text-slate-900">{{ $currency }}{{ number_format($baseRate, 0) }}</span>
                     </div>
+                    @if($discountAmount > 0)
+                        <div class="flex items-center justify-between text-xs text-rose-600 font-medium">
+                            <span>Discount</span>
+                            <span>-{{ $currency }}{{ number_format($discountAmount, 0) }}</span>
+                        </div>
+                    @endif
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-slate-500 font-normal">Taxes &amp; Gym Surcharge</span>
                         <span class="font-normal text-slate-600">{{ $currency }}0 (Inclusive)</span>
                     </div>
                     <div class="flex items-center justify-between pt-1 border-t border-slate-200">
                         <span class="text-xs sm:text-sm font-bold text-slate-950">Total Amount</span>
-                        <span class="text-xs sm:text-sm font-bold text-slate-950">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
+                        <span class="text-xs sm:text-sm font-black text-slate-950">{{ $currency }}{{ number_format($totalPackageAmount, 0) }}</span>
                     </div>
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-slate-600 font-normal">Amount Received</span>
-                        <span class="font-bold text-emerald-600">{{ $currency }}{{ number_format($payment->amount, 0) }}</span>
+                        <span class="font-bold text-emerald-600">{{ $currency }}{{ number_format($totalPaidSoFar, 0) }}</span>
                     </div>
                     
                     <!-- Balance Due Box -->
-                    <div class="mt-1 p-2 rounded-lg bg-emerald-50/80 border border-emerald-200/70 flex items-center justify-between text-emerald-950">
-                        <span class="font-bold text-xs uppercase tracking-wider text-emerald-950">Balance Due</span>
-                        <span class="font-black text-xs sm:text-sm text-emerald-600">{{ $currency }}0</span>
-                    </div>
+                    @if($balanceDue > 0)
+                        <div class="mt-1 p-2 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-between text-amber-950">
+                            <span class="font-bold text-xs uppercase tracking-wider text-amber-900">Balance Due</span>
+                            <span class="font-black text-xs sm:text-sm text-amber-600">{{ $currency }}{{ number_format($balanceDue, 0) }}</span>
+                        </div>
+                    @else
+                        <div class="mt-1 p-2 rounded-lg bg-emerald-50/80 border border-emerald-200/70 flex items-center justify-between text-emerald-950">
+                            <span class="font-bold text-xs uppercase tracking-wider text-emerald-950">Balance Due</span>
+                            <span class="font-black text-xs sm:text-sm text-emerald-600">{{ $currency }}0</span>
+                        </div>
+                    @endif
                 </div>
 
             </div>
