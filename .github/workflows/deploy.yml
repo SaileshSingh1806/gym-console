@@ -23,7 +23,7 @@ jobs:
       - name: ⚡ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: 📦 Install Node dependencies & Build Frontend Assets
@@ -31,22 +31,22 @@ jobs:
           npm ci
           npm run build
 
-      - name: 🔑 Configure SSH Key & Known Hosts
+      - name: 🔑 Configure SSH Key
+        env:
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
 
       - name: 🚚 Transfer Compiled Frontend Assets (Vite Build)
         run: |
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/domains/gymdeskhub.com/public_html/
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/gym-console/public/
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/domains/gymdeskhub.com/public_html/
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 -r public/build ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:/home/${{ secrets.HOSTINGER_USER }}/gym-console/public/
 
       - name: 🚀 Deploy Laravel Application on Hostinger
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << 'EOF'
+          ssh -T -i ~/.ssh/deploy_key -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30 ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} << 'EOF'
             set -e
 
             PHP_BIN="/opt/alt/php84/usr/bin/php"
@@ -57,7 +57,6 @@ jobs:
             cd "$APP_DIR"
 
             echo "=== Step 2: Safe Git Pull ==="
-            # Fetch latest commits without touching untracked .env or modified local files
             git fetch origin main
             git reset --hard origin/main
 
@@ -89,7 +88,7 @@ jobs:
 
       - name: 🌐 Verify Live Site Health
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://gymdeskhub.com)
+          STATUS=$(curl -s -k -o /dev/null -w "%{http_code}" https://gymdeskhub.com)
           echo "Live Site HTTP Status Code: $STATUS"
           if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
             echo "✅ Website is live and healthy (HTTP $STATUS)!"
@@ -101,4 +100,3 @@ jobs:
         if: always()
         run: |
           rm -f ~/.ssh/deploy_key
-
