@@ -1227,6 +1227,22 @@ class AppController extends Controller
         return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant'));
     }
 
+    public function showPublicInvoice(int $id, string $hash): View
+    {
+        $expectedHash = substr(hash_hmac('sha256', (string) $id, config('app.key') ?: 'gym-console-secret'), 0, 16);
+        if (! hash_equals($expectedHash, $hash)) {
+            abort(403, 'Invalid or expired invoice link.');
+        }
+
+        $payment = MemberPayment::with(['tenant', 'branch', 'member.branch', 'membership.plan', 'receivedBy'])->findOrFail($id);
+        $tenant = $payment->tenant ?? TenantContext::getTenant() ?? Tenant::find($payment->tenant_id) ?? Tenant::first();
+        $member = $payment->member;
+        $membership = $payment->membership ?? $member?->activeMembership ?? $member?->memberships()->latest()->first();
+        $plan = $membership?->plan;
+
+        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant'));
+    }
+
     public function toggleFreezeMember(int $id): RedirectResponse
     {
         $member = Member::findOrFail($id);
@@ -5829,10 +5845,16 @@ class AppController extends Controller
         $settings = $tenant->settings ?? [];
 
         if ($request->has('address')) {
-            $settings['address'] = trim($request->address ?? '');
-            if ($tenant->mainBranch) {
-                $tenant->mainBranch->update(['address' => trim($request->address ?? '')]);
+            $newAddress = trim($request->address ?? '');
+            $settings['address'] = $newAddress;
+            if (! isset($settings['invoice']) || ! is_array($settings['invoice'])) {
+                $settings['invoice'] = [];
             }
+            $settings['invoice']['address'] = $newAddress;
+            if ($tenant->mainBranch) {
+                $tenant->mainBranch->update(['address' => $newAddress]);
+            }
+            $tenant->branches()->update(['address' => $newAddress]);
         }
 
         if ($request->has('gst_number')) {
@@ -5938,12 +5960,21 @@ class AppController extends Controller
 
         if ($request->filled('name')) {
             $tenant->name = trim($request->name);
+            if (empty($settings['invoice']['gym_name'])) {
+                $settings['invoice']['gym_name'] = $tenant->name;
+            }
         }
         if ($request->has('email')) {
             $tenant->email = trim($request->email ?? '');
+            if (empty($settings['invoice']['email'])) {
+                $settings['invoice']['email'] = $tenant->email;
+            }
         }
         if ($request->has('phone')) {
             $tenant->phone = trim($request->phone ?? '');
+            if (empty($settings['invoice']['phone'])) {
+                $settings['invoice']['phone'] = $tenant->phone;
+            }
         }
         if ($request->filled('currency')) {
             $tenant->currency = trim($request->currency);

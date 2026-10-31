@@ -17,3 +17,4 @@ return new class extends Migration
         DB::statement("ALTER TABLE member_payments MODIFY payment_method ENUM('cash','card','pos','upi','bank_transfer','online') NOT NULL DEFAULT 'cash'");
     }
 };
+

@@ -15,6 +15,9 @@ Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::get('/storage/{path}', [PublicController::class, 'serveStorageFile'])->where('path', '.*')->name('storage.file');
 
+// Public Tax Invoice / Payment Receipt (Secured with unique hash)
+Route::get('/receipt/{id}/{hash}', [AppController::class, 'showPublicInvoice'])->name('app.invoices.public')->whereNumber('id');
+
 // Authentication & Onboarding Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

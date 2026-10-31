@@ -194,7 +194,7 @@
                         <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Address</label>
                         <textarea name="address" rows="2"
                                   placeholder="123 Fitness Street, Health City"
-                                  class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors font-mono">{{ old('address', $tenant->address ?? $tenant->mainBranch?->address) }}</textarea>
+                                  class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors font-mono">{{ old('address', $tenant->settings['address'] ?? $tenant->mainBranch?->address ?? $tenant->address) }}</textarea>
                     </div>
 
                     <!-- Business Logo Upload Section -->
@@ -1242,7 +1242,7 @@
                         <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Full Detailed Address (Printed on Invoice Header)</label>
                         <textarea name="invoice_address" rows="2"
                                   placeholder="e.g. 6th Floor, Shalin Square, Nr Hathijan Circle, Ahmedabad - 382445"
-                                  class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">{{ old('invoice_address', $inv['address'] ?? $tenant->address) }}</textarea>
+                                  class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">{{ old('invoice_address', $inv['address'] ?? $tenant->settings['address'] ?? $tenant->mainBranch?->address ?? $tenant->address) }}</textarea>
                     </div>
                 </div>
 
