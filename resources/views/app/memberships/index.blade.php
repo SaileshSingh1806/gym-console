@@ -367,22 +367,24 @@
                             </div>
 
                             <!-- Custom Capacity Input when Group or Family is selected -->
-                            <div x-show="newPlanType === 'group' || newPlanType === 'family'" x-transition class="mt-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                                <div class="flex items-center justify-between gap-3">
-                                    <div>
-                                        <label class="block text-xs font-bold text-amber-900 dark:text-amber-200">Total Persons / Members Included</label>
-                                        <p class="text-[10px] text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
-                                    </div>
-                                    <div class="w-24">
-                                        <input type="number" 
-                                               x-model="newMaxMembers" 
-                                               min="2" 
-                                               max="50" 
-                                               class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-500/40 text-slate-900 dark:text-white font-black text-center text-sm focus:border-amber-500 focus:outline-none shadow-sm">
+                            <template x-if="newPlanType === 'group' || newPlanType === 'family'">
+                                <div class="mt-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div>
+                                            <label class="block text-xs font-bold text-amber-900 dark:text-amber-200">Total Persons / Members Included</label>
+                                            <p class="text-[10px] text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
+                                        </div>
+                                        <div class="w-24">
+                                            <input type="number" 
+                                                   x-model="newMaxMembers" 
+                                                   min="2" 
+                                                   max="50" 
+                                                   class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-500/40 text-slate-900 dark:text-white font-black text-center text-sm focus:border-amber-500 focus:outline-none shadow-sm">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <input type="hidden" name="max_members" :value="newPlanType === 'single' ? 1 : (newPlanType === 'duo' ? 2 : newMaxMembers)">
+                            </template>
+                            <input type="hidden" name="max_members" :value="newPlanType === 'single' ? 1 : (newPlanType === 'duo' ? 2 : (newMaxMembers || 1))">
                         </div>
 
                         <!-- Plan Title -->
@@ -530,21 +532,23 @@
                                 </div>
 
                                 <!-- Custom Capacity Input for Edit -->
-                                <div x-show="editPlan.plan_type === 'group' || editPlan.plan_type === 'family'" x-transition class="mt-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div>
-                                            <label class="block text-xs font-bold text-amber-900 dark:text-amber-200">Total Persons / Members Included</label>
-                                            <p class="text-[10px] text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
-                                        </div>
-                                        <div class="w-24">
-                                            <input type="number" 
-                                                   x-model="editPlan.max_members" 
-                                                   min="2" 
-                                                   max="50" 
-                                                   class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-500/40 text-slate-900 dark:text-white font-black text-center text-sm focus:border-amber-500 focus:outline-none shadow-sm">
+                                <template x-if="editPlan.plan_type === 'group' || editPlan.plan_type === 'family'">
+                                    <div class="mt-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div>
+                                                <label class="block text-xs font-bold text-amber-900 dark:text-amber-200">Total Persons / Members Included</label>
+                                                <p class="text-[10px] text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
+                                            </div>
+                                            <div class="w-24">
+                                                <input type="number" 
+                                                       x-model="editPlan.max_members" 
+                                                       min="2" 
+                                                       max="50" 
+                                                       class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-500/40 text-slate-900 dark:text-white font-black text-center text-sm focus:border-amber-500 focus:outline-none shadow-sm">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </template>
                                 <input type="hidden" name="max_members" :value="editPlan.plan_type === 'single' ? 1 : (editPlan.plan_type === 'duo' ? 2 : (editPlan.max_members || 1))">
                             </div>
 
