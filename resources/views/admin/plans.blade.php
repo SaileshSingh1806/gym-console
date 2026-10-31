@@ -1,4 +1,4 @@
-<x-admin-layout header="SaaS Plans & Feature Access Control">
+<x-admin-layout header="Subscription Plans & Feature Access Control">
     <div class="space-y-6 sm:space-y-8" x-data="{ showNewPlanModal: false, showNewFeatureModal: false, editPlan: null }">
         <!-- Top Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -11,7 +11,7 @@
                     + Add New Feature Code
                 </button>
                 <button @click="showNewPlanModal = true" class="w-full sm:w-auto justify-center px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-red-600/20 transition-colors cursor-pointer text-center">
-                    + Create SaaS Plan
+                    + Create Subscription Plan
                 </button>
             </div>
         </div>
@@ -109,7 +109,7 @@
         <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="editPlan = null">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit SaaS Subscription Plan</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Edit Subscription Plan</h3>
                     <button @click="editPlan = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
@@ -198,7 +198,7 @@
         <div x-show="showNewPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showNewPlanModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New SaaS Plan</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New Subscription Plan</h3>
                     <button @click="showNewPlanModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 

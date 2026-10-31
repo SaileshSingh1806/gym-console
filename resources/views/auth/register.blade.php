@@ -12,7 +12,7 @@
         <!-- Header -->
         <div class="text-center mb-8 sm:mb-10 relative z-10">
             <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-3">
-                <span>⚡ Instant Account Setup &bull; Annual SaaS Plan</span>
+                <span>⚡ Instant Account Setup &bull; Annual Plan</span>
             </div>
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">Launch Your Gym Management Console</h1>
             <p class="text-xs sm:text-sm text-slate-400 mt-2 max-w-xl mx-auto px-2">Select your annual plan, set up your gym workspace, and start managing your fitness center seamlessly.</p>
@@ -24,10 +24,15 @@
                 <span class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-black">1</span>
                 <span>Select Plan &amp; Details</span>
             </div>
-            <div class="w-8 sm:w-12 h-0.5 bg-slate-800"></div>
+            <div class="w-6 sm:w-10 h-0.5 bg-slate-800"></div>
             <div class="flex items-center gap-2 text-slate-500">
                 <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-black">2</span>
-                <span>Payment &amp; Activation</span>
+                <span>Verify Email</span>
+            </div>
+            <div class="w-6 sm:w-10 h-0.5 bg-slate-800"></div>
+            <div class="flex items-center gap-2 text-slate-500">
+                <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-black">3</span>
+                <span>Activation</span>
             </div>
         </div>
 
@@ -55,7 +60,7 @@
             <div class="space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">1. Choose SaaS Subscription Plan</h2>
+                        <h2 class="text-xs sm:text-sm font-extrabold text-white uppercase tracking-wider">1. Choose Subscription Plan</h2>
                         <p class="text-xs text-slate-400 mt-0.5">All annual plans include biometric access control, member management, and diet planner</p>
                     </div>
 
@@ -146,7 +151,7 @@
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2">
                             Gym Business Name <span class="text-amber-400">*</span>
                         </label>
-                        <input type="text" name="gym_name" value="{{ old('gym_name') }}" placeholder="e.g. Titan Strength & Fitness" required 
+                        <input type="text" name="gym_name" value="{{ old('gym_name', $pending['gym_name'] ?? '') }}" placeholder="e.g. Titan Strength & Fitness" required 
                                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs sm:text-sm transition-all font-medium">
                     </div>
 
@@ -154,7 +159,7 @@
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2">
                             Primary Branch Name
                         </label>
-                        <input type="text" name="branch_name" value="{{ old('branch_name') }}" placeholder="e.g. Main Flagship Branch" 
+                        <input type="text" name="branch_name" value="{{ old('branch_name', $pending['branch_name'] ?? '') }}" placeholder="e.g. Main Flagship Branch" 
                                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs sm:text-sm transition-all font-medium">
                     </div>
 
@@ -162,7 +167,7 @@
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2">
                             Owner Full Name <span class="text-amber-400">*</span>
                         </label>
-                        <input type="text" name="owner_name" value="{{ old('owner_name') }}" placeholder="e.g. John Doe" required 
+                        <input type="text" name="owner_name" value="{{ old('owner_name', $pending['owner_name'] ?? '') }}" placeholder="e.g. John Doe" required 
                                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs sm:text-sm transition-all font-medium">
                     </div>
 
@@ -170,7 +175,7 @@
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2">
                             Owner Email Address <span class="text-amber-400">*</span>
                         </label>
-                        <input type="email" name="email" value="{{ old('email') }}" placeholder="owner@yourgym.com" required 
+                        <input type="email" name="email" value="{{ old('email', $pending['email'] ?? '') }}" placeholder="owner@yourgym.com" required 
                                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs sm:text-sm transition-all font-medium">
                     </div>
 
@@ -178,7 +183,7 @@
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 sm:mb-2">
                             Phone / WhatsApp Number
                         </label>
-                        <input type="text" name="phone" value="{{ old('phone') }}" placeholder="+91 98765 43210" 
+                        <input type="text" name="phone" value="{{ old('phone', $pending['phone'] ?? '') }}" placeholder="+91 98765 43210" 
                                class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-xs sm:text-sm transition-all font-medium">
                     </div>
 
@@ -216,7 +221,7 @@
                         By proceeding, you agree to our Terms of Service &amp; Privacy Policy.
                     </p>
                     <button type="submit" class="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
-                        <span>Proceed to Payment &amp; Checkout</span>
+                        <span>Verify Email &amp; Continue</span>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </button>
                 </div>

@@ -54,7 +54,7 @@
                 return String(1000 + {{ $memberCount }});
             }
             let p = (this.idPrefix || 'GYM').toUpperCase().trim();
-            return p + this.yearShort + this.formattedSeq;
+            return p + this.formattedSeq;
         },
         previewImage(event) {
             const file = event.target.files[0];
@@ -227,6 +227,9 @@
                                     <span>Select Image</span>
                                 </button>
                             </div>
+                            @error('logo')
+                                <p class="text-rose-500 font-bold text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
@@ -451,8 +454,8 @@
                                     </div>
                                     <div>
                                         <div class="text-sm font-extrabold text-slate-900 dark:text-white">Coded</div>
-                                        <div class="text-xs text-slate-500 dark:text-slate-400">Prefix + Year + Sequence</div>
-                                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">e.g. GYM{{ $currentYearShort }}0001</div>
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">Prefix + Sequence</div>
+                                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">e.g. GYM0001</div>
                                     </div>
                                 </div>
                                 <div class="w-5 h-5 rounded-full flex items-center justify-center"
@@ -518,7 +521,6 @@
                         <template x-if="idFormat === 'coded'">
                             <div class="flex items-center justify-center gap-2">
                                 <span class="px-2.5 py-1 rounded-md bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 text-xs font-bold font-mono" x-text="(idPrefix || 'GYM').toUpperCase()"></span>
-                                <span class="px-2.5 py-1 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 text-xs font-bold font-mono" x-text="yearShort"></span>
                                 <span class="px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 text-xs font-bold font-mono" x-text="formattedSeq"></span>
                             </div>
                         </template>
@@ -526,7 +528,6 @@
                         <template x-if="idFormat === 'coded'">
                             <div class="flex items-center justify-center gap-5 text-[10px] text-slate-500 dark:text-slate-400">
                                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-500"></span> Prefix</span>
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Year (auto)</span>
                                 <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Sequence</span>
                             </div>
                         </template>
@@ -536,7 +537,7 @@
                     <div class="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs flex items-start gap-3">
                         <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
                         <p class="leading-relaxed">
-                            <strong>How it works:</strong> Each new member gets an ID combining your prefix + current 2-digit year + an auto-incrementing sequence number. Changing the prefix starts a fresh sequence from 1. Existing members keep their original IDs regardless of format changes.
+                            <strong>How it works:</strong> Each new member gets an ID combining your prefix + an auto-incrementing sequence number. Changing the prefix starts a fresh sequence from 1. Existing members keep their original IDs regardless of format changes.
                         </p>
                     </div>
 

@@ -29,6 +29,7 @@
             return [(string) $m->id => [
                 'id' => $m->id,
                 'member_code' => (string) ($m->member_code ?? ''),
+                'join_date' => $m->join_date ? $m->join_date->format('Y-m-d') : '',
                 'first_name' => (string) ($m->first_name ?? ''),
                 'last_name' => (string) ($m->last_name ?? ''),
                 'phone' => (string) ($m->phone ?? ''),
@@ -51,6 +52,8 @@
                 'branch_id' => $m->branch_id ?? '',
                 'status' => (string) ($m->status ?? 'ACTIVE'),
                 'membership_plan_id' => $membership?->membership_plan_id ?? '',
+                'membership_start_date' => $membership?->start_date ? $membership->start_date->format('Y-m-d') : '',
+                'membership_end_date' => $membership?->end_date ? $membership->end_date->format('Y-m-d') : '',
                 'notes' => (string) ($m->notes ?? ''),
                 'photo_path' => (string) ($m->photo_path ?? ''),
                 'membership' => $membership ? [
@@ -144,6 +147,7 @@
             this.editMember = {
                 id: member.id || memberId,
                 member_code: member.member_code || '',
+                join_date: member.join_date || '',
                 first_name: member.first_name || '',
                 last_name: member.last_name || '',
                 phone: member.phone || '',
@@ -166,13 +170,42 @@
                 branch_id: member.branch_id || '',
                 status: member.status || 'ACTIVE',
                 membership_plan_id: member.membership_plan_id || '',
+                membership_start_date: member.membership_start_date || '',
+                membership_end_date: member.membership_end_date || '',
                 notes: member.notes || '',
                 photo_path: member.photo_path || ''
             };
-            this.editPhotoPreview = member.photo_path ? ('/storage/' + member.photo_path) : '';
+            this.editPhotoPreview = member.photo_path ? (member.photo_path.startsWith('http') ? member.photo_path : ('/storage/' + member.photo_path)) : '';
             this.editCapturedPhotoData = '';
             this.editRemovePhoto = false;
             this.showEditModal = true;
+        },
+        onEditPlanChange() {
+            if (!this.editMember.membership_plan_id) return;
+            const plans = window.__MEMBERSHIP_PLANS__ || {};
+            const plan = plans[this.editMember.membership_plan_id];
+            if (!plan) return;
+
+            if (!this.editMember.membership_start_date) {
+                this.editMember.membership_start_date = new Date().toISOString().split('T')[0];
+            }
+
+            const start = new Date(this.editMember.membership_start_date);
+            if (isNaN(start.getTime())) return;
+
+            const end = new Date(start);
+            const val = parseInt(plan.duration_value) || 1;
+            const type = (plan.duration_type || 'months').toLowerCase();
+
+            if (type === 'days') {
+                end.setDate(end.getDate() + val);
+            } else if (type === 'years') {
+                end.setFullYear(end.getFullYear() + val);
+            } else {
+                end.setMonth(end.getMonth() + val);
+            }
+
+            this.editMember.membership_end_date = end.toISOString().split('T')[0];
         },
         triggerEditFileInput() {
             this.$refs.editPhotoInput.click();
@@ -360,7 +393,7 @@
 
         <!-- Action Toolbar -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <form action="{{ route('app.members.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-grow max-w-3xl">
+            <form action="{{ route('app.members.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-grow max-w-4xl">
                 @if(request('status'))
                     <input type="hidden" name="status" value="{{ request('status') }}">
                 @endif
@@ -372,7 +405,15 @@
                     <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <!-- Sort Selection -->
+                    <select name="sort" onchange="this.form.submit()" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none shadow-sm cursor-pointer">
+                        <option value="member_id_desc" {{ request('sort', 'member_id_desc') === 'member_id_desc' ? 'selected' : '' }}>Member ID: Latest First</option>
+                        <option value="member_id_asc" {{ request('sort') === 'member_id_asc' ? 'selected' : '' }}>Member ID: Old First</option>
+                        <option value="join_date_desc" {{ request('sort') === 'join_date_desc' ? 'selected' : '' }}>Join Date: Newest First</option>
+                        <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
+                    </select>
+
                     <select name="status" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none shadow-sm">
                         <option value="">All Statuses</option>
                         <option value="ACTIVE" {{ request('status') === 'ACTIVE' ? 'selected' : '' }}>Active</option>
@@ -385,7 +426,7 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <span>Search</span>
                     </button>
-                    @if(request('status') || request('filter') || request('search'))
+                    @if(request('status') || request('filter') || request('search') || (request('sort') && request('sort') !== 'member_id_desc'))
                         <a href="{{ route('app.members.index') }}" class="text-xs text-rose-500 dark:text-rose-400 hover:underline shrink-0 ml-1">Clear</a>
                     @endif
                 </div>
@@ -675,6 +716,15 @@
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                                 <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
                                             </button>
+                                        @endif
+
+                                        @php
+                                            $firstPayment = $membership?->payments?->first();
+                                        @endphp
+                                        @if($firstPayment)
+                                            <a href="{{ route('app.invoices.show', $firstPayment->id) }}" target="_blank" title="View / Print Tax Invoice ({{ $firstPayment->receipt_number }})" class="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-50 text-slate-600 hover:text-amber-600 border border-slate-200 dark:bg-slate-800 dark:hover:bg-amber-500/20 dark:text-slate-400 dark:hover:text-amber-400 dark:border-slate-700/50 transition-colors shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </a>
                                         @endif
 
                                         <a href="{{ route('app.members.show', $member->id) }}" title="View Member Profile" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700/50 transition-colors shadow-sm">
@@ -985,6 +1035,29 @@
                             <span>Personal Information</span>
                         </div>
 
+                        <!-- Member ID & Join Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                            <div>
+                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Member ID / Code</label>
+                                <input type="text" 
+                                       name="member_code" 
+                                       x-model="editMember.member_code" 
+                                       placeholder="e.g. ARM0001" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-amber-600 dark:text-amber-400 font-mono font-bold placeholder-slate-400 dark:placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                    <span>Join Date</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">Click to pick date</span>
+                                </label>
+                                <input type="date" 
+                                       name="join_date" 
+                                       x-model="editMember.join_date" 
+                                       onclick="this.showPicker && this.showPicker()" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm cursor-pointer">
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">First Name <span class="text-rose-500">*</span></label>
@@ -1025,7 +1098,7 @@
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth</label>
-                                <input type="date" name="dob" x-model="editMember.dob" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <input type="date" name="dob" x-model="editMember.dob" onclick="this.showPicker && this.showPicker()" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer">
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Blood Group</label>
@@ -1142,7 +1215,7 @@
                             <span>Membership & Account Status</span>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Member Status <span class="text-rose-500">*</span></label>
                                 <select name="status" x-model="editMember.status" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none font-bold shadow-sm">
@@ -1161,15 +1234,53 @@
                                     @endforeach
                                 </select>
                             </div>
+                        </div>
 
-                            <div>
-                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Package Plan</label>
-                                <select name="membership_plan_id" x-model="editMember.membership_plan_id" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
-                                    <option value="">-- Keep Current Plan --</option>
-                                    @foreach($membershipPlans as $mp)
-                                        <option value="{{ $mp->id }}">{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 2) }})</option>
-                                    @endforeach
-                                </select>
+                        <!-- Membership Plan & Validity Setup -->
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Plan & Validity Period</span>
+                                </label>
+                                <span class="text-[10px] text-slate-400">Edit package or validity dates anytime</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Package Plan</label>
+                                    <select name="membership_plan_id" x-model="editMember.membership_plan_id" @change="onEditPlanChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs font-semibold">
+                                        <option value="">-- Keep Current Plan --</option>
+                                        @foreach($membershipPlans as $mp)
+                                            <option value="{{ $mp->id }}">{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 0) }}) - {{ $mp->duration_value }} {{ $mp->duration_type }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                        <span>Start Date</span>
+                                        <span class="text-[10px] text-slate-400 font-normal">Click to pick</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="membership_start_date" 
+                                           x-model="editMember.membership_start_date" 
+                                           @change="onEditPlanChange()" 
+                                           onclick="this.showPicker && this.showPicker()" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs cursor-pointer">
+                                </div>
+
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                        <span>End Date (Expiry)</span>
+                                        <span class="text-[10px] text-slate-400 font-normal">Click to pick</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="membership_end_date" 
+                                           x-model="editMember.membership_end_date" 
+                                           onclick="this.showPicker && this.showPicker()" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs cursor-pointer">
+                                </div>
                             </div>
                         </div>
 

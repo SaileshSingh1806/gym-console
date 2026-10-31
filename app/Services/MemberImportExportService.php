@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\ActivityLog;
 use App\Models\Branch;
 use App\Models\Member;
+use App\Models\MemberPayment;
 use App\Models\Membership;
 use App\Models\MembershipPlan;
 use App\Models\Tenant;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -282,9 +284,13 @@ class MemberImportExportService
             }
         }
 
-        // Existing phone numbers in this tenant to flag duplicates
+        // Existing members in this tenant to flag duplicates
         $existingPhones = Member::where('tenant_id', $tenant->id)
             ->pluck('phone', 'id')
+            ->toArray();
+
+        $existingCodes = Member::where('tenant_id', $tenant->id)
+            ->pluck('id', 'member_code')
             ->toArray();
 
         // Normalized phone lookup: ['+919974995179' => member_id, '9974995179' => member_id]
@@ -295,6 +301,11 @@ class MemberImportExportService
                 $existingPhoneMap[$norm] = $id;
                 $existingPhoneMap[substr($norm, -10)] = $id;
             }
+        }
+
+        $existingCodesMap = [];
+        foreach ($existingCodes as $code => $id) {
+            $existingCodesMap[strtoupper(trim((string) $code))] = $id;
         }
 
         $validRows = [];
@@ -332,14 +343,20 @@ class MemberImportExportService
             $emergName = self::extractCol($row, $headerMap, ['emergency_contact_name', 'emergencycontactname', 'emergency_name', 'emergency_contact', 'emergency_person']);
             $emergPhone = self::extractCol($row, $headerMap, ['emergency_contact_phone', 'emergencycontactphone', 'emergency_phone', 'emergency_mobile', 'emergency_number', 'emergency_no']);
             $emergRelation = self::extractCol($row, $headerMap, ['emergency_relation', 'emergencyrelation', 'relation', 'relationship']);
-            $joinDate = self::extractCol($row, $headerMap, ['join_date', 'joindate', 'joining_date', 'date_joined', 'admission_date', 'start_date', 'registered_at', 'registered_date']);
+            $joinDate = self::extractCol($row, $headerMap, ['joining_date', 'joiningdate', 'join_date', 'joindate', 'date_joined', 'admission_date', 'admissiondate', 'start_date', 'registered_at', 'registered_date']);
             $status = strtoupper(trim(self::extractCol($row, $headerMap, ['status', 'member_status', 'state']) ?? 'ACTIVE'));
             $branchName = self::extractCol($row, $headerMap, ['branch_name', 'branchname', 'branch']);
             $planName = self::extractCol($row, $headerMap, ['active_plan', 'activeplan', 'plan_name', 'planname', 'plan', 'membership_plan']);
             $planExpiryDate = self::extractCol($row, $headerMap, ['plan_expiry_date', 'planexpirydate', 'expiry_date', 'expirydate', 'end_date', 'enddate']);
             $remainingDue = self::extractCol($row, $headerMap, ['remaining_due', 'remainingdue', 'due', 'balance', 'pending_fee']);
+            $fee = self::extractCol($row, $headerMap, ['fee', 'final_amount', 'amount', 'price', 'total_amount']);
+            $paidAmount = self::extractCol($row, $headerMap, ['paid_amount', 'paidamount', 'paid']);
+            $photoUrl = self::extractCol($row, $headerMap, ['photo_url', 'photourl', 'photo', 'avatar', 'image_url']);
+            $paymentMode = self::extractCol($row, $headerMap, ['payment_mode', 'paymentmode', 'payment_type']);
+            $receivedBy = self::extractCol($row, $headerMap, ['received_by', 'receivedby', 'createdbyname', 'created_by_name']);
+            $dueDate = self::extractCol($row, $headerMap, ['due_date', 'duedate']);
             $notes = self::extractCol($row, $headerMap, ['notes', 'remarks', 'comment', 'description']);
-            $memberCode = self::extractCol($row, $headerMap, ['member_code', 'membercode', 'member_id_code', 'memberidcode', 'member_id', 'memberid', 'code', 'id_number', 'member_no', 'memberno']);
+            $memberCode = self::extractCol($row, $headerMap, ['member_code', 'membercode', 'member_id_code', 'memberidcode', 'member_id', 'memberid', 'id', 'code', 'id_number', 'member_no', 'memberno']);
 
             // Fallback for names: If first_name is empty but full_name is present, split it
             if (empty($firstName) && ! empty($fullName)) {
@@ -364,16 +381,20 @@ class MemberImportExportService
                 continue;
             }
 
-            // Validation: Phone required & formatted
+            // Validation: Phone required & formatted (fallback to 0000000000 if empty)
             $normalizedPhone = self::normalizePhone($rawPhone);
             if (! $normalizedPhone) {
-                $invalidRows[] = [
-                    'row' => $rowNum,
-                    'name' => trim("{$firstName} {$lastName}"),
-                    'phone' => $rawPhone,
-                    'reason' => 'Invalid phone number (must be a valid 10-digit mobile number).',
-                ];
-                continue;
+                if (empty(trim($rawPhone))) {
+                    $normalizedPhone = '0000000000';
+                } else {
+                    $invalidRows[] = [
+                        'row' => $rowNum,
+                        'name' => trim("{$firstName} {$lastName}"),
+                        'phone' => $rawPhone,
+                        'reason' => 'Invalid phone number (must be a valid 10-digit mobile number).',
+                    ];
+                    continue;
+                }
             }
 
             // Validation: Email format check if provided
@@ -387,9 +408,12 @@ class MemberImportExportService
                 continue;
             }
 
-            // Check Duplicate: in CSV
-            $tenDigit = substr($normalizedPhone, -10);
-            if (isset($seenInCsv[$tenDigit])) {
+            // Check Duplicate: in CSV (using member_code or phone + first_name to allow family members with shared phone)
+            $phoneKey = substr($normalizedPhone, -10);
+            $normFirst = strtolower(trim($firstName));
+            $dupKey = ! empty($memberCode) ? ('code_' . strtoupper(trim($memberCode))) : ('phone_' . $phoneKey . '_' . $normFirst);
+
+            if (isset($seenInCsv[$dupKey])) {
                 $duplicateRows[] = [
                     'row' => $rowNum,
                     'name' => trim("{$firstName} {$lastName}"),
@@ -403,15 +427,30 @@ class MemberImportExportService
                     'emergency_contact_name' => $emergName,
                     'emergency_contact_phone' => self::normalizePhone($emergPhone),
                     'notes' => $notes,
-                    'reason' => "Phone number is duplicated in row #{$seenInCsv[$tenDigit]} of this CSV.",
+                    'reason' => ! empty($memberCode)
+                        ? "Member Code '{$memberCode}' is duplicated in row #{$seenInCsv[$dupKey]} of this CSV."
+                        : "Member with phone '{$normalizedPhone}' is duplicated in row #{$seenInCsv[$dupKey]} of this CSV.",
                     'is_db_duplicate' => false,
                 ];
                 continue;
             }
-            $seenInCsv[$tenDigit] = $rowNum;
+            $seenInCsv[$dupKey] = $rowNum;
 
             // Check Duplicate: in Database
-            if (isset($existingPhoneMap[$tenDigit])) {
+            $dbDup = false;
+            $existingId = null;
+            $dupReason = '';
+            if (! empty($memberCode) && isset($existingCodesMap[strtoupper(trim($memberCode))])) {
+                $dbDup = true;
+                $existingId = $existingCodesMap[strtoupper(trim($memberCode))];
+                $dupReason = "Member with Code '{$memberCode}' already exists in your gym database.";
+            } elseif ($normalizedPhone !== '0000000000' && isset($existingPhoneMap[$phoneKey])) {
+                $dbDup = true;
+                $existingId = $existingPhoneMap[$phoneKey];
+                $dupReason = 'Member with this mobile number already exists in your gym database.';
+            }
+
+            if ($dbDup) {
                 $duplicateRows[] = [
                     'row' => $rowNum,
                     'name' => trim("{$firstName} {$lastName}"),
@@ -425,9 +464,9 @@ class MemberImportExportService
                     'emergency_contact_name' => $emergName,
                     'emergency_contact_phone' => self::normalizePhone($emergPhone),
                     'notes' => $notes,
-                    'reason' => 'Member with this mobile number already exists in your gym database.',
+                    'reason' => $dupReason,
                     'is_db_duplicate' => true,
-                    'existing_member_id' => $existingPhoneMap[$tenDigit],
+                    'existing_member_id' => $existingId,
                 ];
                 continue;
             }
@@ -447,6 +486,23 @@ class MemberImportExportService
             // Parse dates safely
             $parsedDob = self::parseDate($dob);
             $parsedJoinDate = self::parseDate($joinDate) ?? now()->toDateString();
+            $parsedExpiryDate = self::parseDate($planExpiryDate);
+
+            // Append extra payment/audit details to notes if available
+            $combinedNotes = $notes ?? '';
+            $noteAdditions = [];
+            if (! empty($paymentMode)) {
+                $noteAdditions[] = "Payment Mode: {$paymentMode}";
+            }
+            if (! empty($receivedBy)) {
+                $noteAdditions[] = "Received By: {$receivedBy}";
+            }
+            if (! empty($dueDate)) {
+                $noteAdditions[] = "Due Date: {$dueDate}";
+            }
+            if (! empty($noteAdditions)) {
+                $combinedNotes = trim($combinedNotes ? "{$combinedNotes} | " . implode(' | ', $noteAdditions) : implode(' | ', $noteAdditions));
+            }
 
             $validRows[] = [
                 'row' => $rowNum,
@@ -467,9 +523,15 @@ class MemberImportExportService
                 'status' => $status,
                 'branch_name' => $branchName,
                 'plan_name' => $planName,
-                'plan_expiry_date' => self::parseDate($planExpiryDate),
-                'remaining_due' => ! empty($remainingDue) ? (float) $remainingDue : null,
-                'notes' => $notes,
+                'plan_expiry_date' => $parsedExpiryDate,
+                'remaining_due' => ($remainingDue !== null && $remainingDue !== '') ? (float) $remainingDue : null,
+                'fee' => ($fee !== null && $fee !== '') ? (float) $fee : null,
+                'paid_amount' => ($paidAmount !== null && $paidAmount !== '') ? (float) $paidAmount : null,
+                'photo_url' => $photoUrl,
+                'payment_mode' => $paymentMode,
+                'received_by' => $receivedBy,
+                'due_date' => $dueDate,
+                'notes' => $combinedNotes ?: null,
                 'member_code' => ! empty($memberCode) ? trim($memberCode) : null,
                 'branch_id' => $defaultBranchId,
             ];
@@ -546,6 +608,13 @@ class MemberImportExportService
                     'city' => $row['city'] ?? null,
                     'alternate_phone' => $row['alternate_phone'] ?? null,
                     'emergency_relation' => $row['emergency_relation'] ?? null,
+                    'payment_mode' => $row['payment_mode'] ?? null,
+                    'received_by' => $row['received_by'] ?? null,
+                    'due_date' => $row['due_date'] ?? null,
+                    'fee' => $row['fee'] ?? null,
+                    'paid_amount' => $row['paid_amount'] ?? null,
+                    'remaining_due' => $row['remaining_due'] ?? null,
+                    'photo_url' => $row['photo_url'] ?? null,
                     'import_source' => 'csv_bulk',
                     'imported_at' => now()->toIso8601String(),
                 ];
@@ -560,6 +629,7 @@ class MemberImportExportService
                     'phone' => $row['phone'],
                     'gender' => $row['gender'] ?? 'male',
                     'dob' => $row['dob'] ?? null,
+                    'photo_path' => ! empty($row['photo_url']) ? trim((string) $row['photo_url']) : null,
                     'address' => $row['address'] ?? null,
                     'emergency_contact_name' => $row['emergency_contact_name'] ?? null,
                     'emergency_contact_phone' => $row['emergency_contact_phone'] ?? null,
@@ -570,20 +640,37 @@ class MemberImportExportService
                     'qr_code_token' => Str::random(32),
                 ]);
 
-                // Optional: Auto-link membership plan if plan_name was provided and exists
+                // Optional: Auto-link membership plan if plan_name was provided
                 if (! empty($row['plan_name'])) {
+                    $planQuery = trim((string) $row['plan_name']);
                     $matchedPlan = MembershipPlan::where('tenant_id', $tenant->id)
-                        ->where(function ($q) use ($row) {
-                            $q->where('name', trim($row['plan_name']))
-                              ->orWhere('name', 'like', '%' . trim($row['plan_name']) . '%');
+                        ->where(function ($q) use ($planQuery) {
+                            $q->where('name', $planQuery)
+                              ->orWhere('name', 'like', "%{$planQuery}%");
+                            if (is_numeric($planQuery)) {
+                                $q->orWhere('duration_value', (int) $planQuery);
+                            }
                         })
                         ->first();
+
+                    // If still not found and plan query is numeric (e.g. '12' for 12 months)
+                    if (! $matchedPlan && is_numeric($planQuery)) {
+                        $months = (int) $planQuery;
+                        $matchedPlan = MembershipPlan::create([
+                            'tenant_id' => $tenant->id,
+                            'name' => "{$months} Months Membership",
+                            'duration_value' => $months,
+                            'duration_type' => 'months',
+                            'price' => ! empty($row['fee']) ? (float) $row['fee'] : 8500,
+                            'is_active' => true,
+                        ]);
+                    }
 
                     if ($matchedPlan) {
                         try {
                             $membershipOptions = [
                                 'start_date' => $row['join_date'] ?? now()->toDateString(),
-                                'notes' => 'Imported via CSV member import',
+                                'notes' => null,
                             ];
                             $membership = app(MembershipService::class)->assignMembership($member, $matchedPlan, $membershipOptions);
 
@@ -591,11 +678,42 @@ class MemberImportExportService
                                 $membership->update(['end_date' => $row['plan_expiry_date']]);
                             }
 
-                            if (isset($row['remaining_due']) && is_numeric($row['remaining_due'])) {
+                            $finalAmt = isset($row['fee']) && is_numeric($row['fee']) ? (float) $row['fee'] : (float) $membership->final_amount;
+                            $membership->update(['final_amount' => $finalAmt]);
+
+                            $paid = 0;
+                            if (isset($row['paid_amount']) && is_numeric($row['paid_amount'])) {
+                                $paid = (float) $row['paid_amount'];
+                            } elseif (isset($row['remaining_due']) && is_numeric($row['remaining_due'])) {
                                 $due = (float) $row['remaining_due'];
-                                $finalAmt = (float) $membership->final_amount;
                                 $paid = max(0, $finalAmt - $due);
-                                $membership->update(['paid_amount' => $paid]);
+                            }
+                            $membership->update(['paid_amount' => $paid]);
+
+                            if ($paid > 0) {
+                                $rawMode = ! empty($row['payment_mode']) ? strtolower(trim((string) $row['payment_mode'])) : 'upi';
+                                $mode = match ($rawMode) {
+                                    'cash' => 'cash',
+                                    'card', 'debit card', 'credit card' => 'card',
+                                    'cheque' => 'cheque',
+                                    'netbanking', 'net banking', 'bank' => 'netbanking',
+                                    default => 'upi',
+                                };
+                                $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $tenant->id)->max('id') ?? 0) + 1;
+                                $adminUserId = User::where('tenant_id', $tenant->id)->value('id');
+
+                                MemberPayment::create([
+                                    'tenant_id' => $tenant->id,
+                                    'branch_id' => $member->branch_id,
+                                    'member_id' => $member->id,
+                                    'membership_id' => $membership->id,
+                                    'invoice_number' => 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT),
+                                    'amount' => $paid,
+                                    'payment_method' => $mode,
+                                    'payment_date' => $row['join_date'] ?? now()->toDateString(),
+                                    'received_by_user_id' => $adminUserId,
+                                    'notes' => null,
+                                ]);
                             }
                         } catch (\Exception $e) {
                             // If plan assignment fails (e.g. invalid date), continue member creation
@@ -684,10 +802,9 @@ class MemberImportExportService
 
         while (Member::where('tenant_id', $tenant->id)->where('member_code', $code)->exists()) {
             $prefix = strtoupper(trim($tenant->member_id_prefix ?: 'GYM'));
-            $year = now()->format('y');
             $padding = max(3, min(8, $tenant->member_id_padding ?: 4));
             $nextNum = $tenant->members()->count() + 1 + $counter;
-            $code = "{$prefix}{$year}" . str_pad((string) $nextNum, $padding, '0', STR_PAD_LEFT);
+            $code = "{$prefix}" . str_pad((string) $nextNum, $padding, '0', STR_PAD_LEFT);
             $counter++;
         }
 
@@ -701,6 +818,13 @@ class MemberImportExportService
     {
         if (empty($rawPhone)) {
             return null;
+        }
+
+        $rawPhone = trim($rawPhone);
+
+        // Handle scientific notation (e.g. 9.97499E+09 exported from Excel)
+        if (is_numeric($rawPhone) && stripos($rawPhone, 'e') !== false) {
+            $rawPhone = sprintf('%.0f', (float) $rawPhone);
         }
 
         $digits = preg_replace('/\D/', '', $rawPhone);
@@ -720,7 +844,7 @@ class MemberImportExportService
     }
 
     /**
-     * Parse date from various common CSV formats (Y-m-d, d-m-Y, d/m/Y).
+     * Parse date from various common CSV formats (Y-m-d, d-m-Y, d/m/Y, Excel serial, timestamps).
      */
     public static function parseDate(?string $rawDate): ?string
     {
@@ -729,12 +853,37 @@ class MemberImportExportService
         }
 
         $rawDate = trim($rawDate);
-        $formats = ['Y-m-d', 'd-m-Y', 'd/m/Y', 'm/d/Y', 'Y/m/d', 'j-n-Y', 'j/n/Y'];
+
+        // Handle Excel numeric serial dates (e.g. 45230)
+        if (is_numeric($rawDate) && (int) $rawDate > 20000 && (int) $rawDate < 70000) {
+            try {
+                return Carbon::createFromTimestampUTC(((int) $rawDate - 25569) * 86400)->format('Y-m-d');
+            } catch (\Exception) {
+                // fallback to regular parsing
+            }
+        }
+
+        // Strip time portion if present (e.g. "10/13/2026 0:00:00" -> "10/13/2026")
+        $dateOnly = trim(preg_split('/\s+/', $rawDate)[0]);
+
+        $formats = ['Y-m-d', 'm/d/Y', 'd-m-Y', 'd/m/Y', 'n/j/Y', 'm-d-Y', 'Y/m/d', 'j-n-Y', 'j/n/Y', 'd.m.Y', 'Y.m.d'];
 
         foreach ($formats as $fmt) {
             try {
-                $d = Carbon::createFromFormat($fmt, $rawDate);
+                $d = Carbon::createFromFormat('!' . $fmt, $dateOnly);
                 if ($d && $d->year > 1920 && $d->year < 2100) {
+                    $parts = preg_split('`[/\-\.]`', $dateOnly);
+                    if (count($parts) === 3) {
+                        $p1 = (int) $parts[0];
+                        $p2 = (int) $parts[1];
+                        if (str_starts_with($fmt, 'm') && ($d->month !== $p1 || $d->day !== $p2)) {
+                            continue;
+                        }
+                        if (str_starts_with($fmt, 'd') && ($d->day !== $p1 || $d->month !== $p2)) {
+                            continue;
+                        }
+                    }
+
                     return $d->format('Y-m-d');
                 }
             } catch (\Exception) {

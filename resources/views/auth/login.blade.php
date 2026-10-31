@@ -22,17 +22,11 @@
             <div class="p-7 sm:p-9 rounded-3xl bg-[#0c1220]/95 border border-slate-800/90 shadow-2xl shadow-black/80 backdrop-blur-xl space-y-6">
                 
                 <!-- Logo & Heading -->
-                <div class="text-center space-y-2">
+                <div class="text-center space-y-3">
                     <a href="{{ route('home') }}" class="inline-flex items-center justify-center mb-1 group focus:outline-none">
-                        @if(!empty($platformSettings['logo_url']))
-                            <img src="{{ $platformSettings['logo_url'] }}"
-                                 alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
-                                 class="h-14 sm:h-16 w-auto max-w-[200px] rounded-2xl object-contain border border-slate-800 bg-[#0f1624] p-2 shadow-lg group-hover:scale-105 transition-transform">
-                        @else
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            </div>
-                        @endif
+                        <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                             alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                             class="h-11 sm:h-12 w-auto max-w-[240px] object-contain group-hover:scale-105 transition-transform drop-shadow-md">
                     </a>
 
                     <div>

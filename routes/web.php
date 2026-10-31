@@ -13,6 +13,7 @@ Route::get('/features', [PublicController::class, 'features'])->name('features')
 Route::get('/pricing', [PublicController::class, 'pricing'])->name('pricing');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
+Route::get('/storage/{path}', [PublicController::class, 'serveStorageFile'])->where('path', '.*')->name('storage.file');
 
 // Authentication & Onboarding Routes
 Route::middleware('guest')->group(function () {
@@ -20,6 +21,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::get('/register/verify-otp', [AuthController::class, 'showVerifyOtp'])->name('register.verify-otp');
+    Route::post('/register/verify-otp', [AuthController::class, 'verifyOtp'])->name('register.verify-otp.post');
+    Route::post('/register/resend-otp', [AuthController::class, 'resendOtp'])->name('register.resend-otp');
 });
 
 Route::middleware('auth')->group(function () {

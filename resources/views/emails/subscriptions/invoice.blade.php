@@ -1,7 +1,7 @@
 @extends('emails.layouts.master', [
     'isPlatformMail' => true,
-    'subject' => '⚡ SaaS Subscription Active: ' . $plan->name . ' - ' . ($tenant->name ?? 'GymDeskHub'),
-    'headerSubtitle' => 'GymDeskHub SaaS Plan Invoice'
+    'subject' => '⚡ Subscription Active: ' . $plan->name . ' - ' . ($tenant->name ?? 'GymDeskHub'),
+    'headerSubtitle' => 'GymDeskHub Subscription Invoice'
 ])
 
 @section('content')
@@ -10,7 +10,7 @@
     </h1>
     
     <p style="margin: 0 0 24px 0; font-size: 14px; color: #cbd5e1; line-height: 22px;">
-        Your GymDeskHub SaaS subscription for <strong>{{ $tenant->name }}</strong> has been successfully updated and activated.
+        Your GymDeskHub subscription for <strong>{{ $tenant->name }}</strong> has been successfully updated and activated.
     </p>
 
     <!-- Subscription Invoice Box -->

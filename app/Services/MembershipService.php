@@ -23,7 +23,8 @@ class MembershipService
         $this->featureGateService->ensureWithinQuota($tenant, 'members');
 
         return DB::transaction(function () use ($tenant, $data) {
-            $memberCode = ! empty($data['member_code']) ? $data['member_code'] : $tenant->generateNextMemberCode();
+            $rawCode = trim((string) ($data['member_code'] ?? ''));
+            $memberCode = ! empty($rawCode) ? $rawCode : $tenant->generateNextMemberCode();
 
             $member = Member::create([
                 'tenant_id' => $tenant->id,

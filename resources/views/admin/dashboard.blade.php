@@ -1,4 +1,4 @@
-<x-admin-layout header="SaaS Global Platform Metrics & Control">
+<x-admin-layout header="Platform Metrics & Control">
     <div class="space-y-8" x-data="{ showNewGymModal: false, showNewPlanModal: false }">
         
         <!-- Quick Action & Command Header -->
@@ -147,7 +147,7 @@
         <!-- PLATFORM OPERATIONS & FINANCIAL HUB -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Left: Real-Time SaaS Financial Trail & Invoices (2 cols) -->
+            <!-- Left: Real-Time Financial Trail & Invoices (2 cols) -->
             <div class="lg:col-span-2 space-y-6">
                 
                 <!-- Recent Invoices Table -->
@@ -156,7 +156,7 @@
                         <div class="flex items-center gap-2.5">
                             <span class="text-lg">💳</span>
                             <div>
-                                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Recent SaaS Platform Invoices & Collections</h3>
+                                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Recent Subscription Invoices & Collections</h3>
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400">Live transaction trail of annual gym subscriptions and renewals</p>
                             </div>
                         </div>
@@ -185,7 +185,7 @@
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                                         <td class="py-3.5 px-4 font-mono font-bold text-red-600 dark:text-red-400">
-                                            {{ $inv->invoice_number }}
+                                             {{ $inv->invoice_number }}
                                         </td>
                                         <td class="py-3.5 px-4">
                                             <span class="font-bold text-slate-900 dark:text-white block text-xs">{{ $owner?->name ?? 'Gym Owner' }}</span>
@@ -196,7 +196,7 @@
                                         </td>
                                         <td class="py-3.5 px-4">
                                             <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-[10px]">
-                                                {{ $inv->subscription?->plan?->name ?? 'SaaS Plan' }}
+                                                {{ $inv->subscription?->plan?->name ?? 'Subscription Plan' }}
                                             </span>
                                             <span class="text-[10px] text-slate-400 block mt-0.5 font-medium">
                                                 {{ ucfirst($inv->subscription?->billing_cycle ?? 'yearly') }}
@@ -440,7 +440,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">SaaS Plan *</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscription Plan *</label>
                             <select name="plan_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
@@ -491,7 +491,7 @@
         <div x-show="showNewPlanModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl" @click.away="showNewPlanModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create SaaS Subscription Plan</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create Subscription Plan</h3>
                     <button @click="showNewPlanModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 
@@ -536,7 +536,7 @@
 
                     <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" @click="showNewPlanModal = false" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-semibold cursor-pointer">Cancel</button>
-                        <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Save SaaS Plan</button>
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20 cursor-pointer">Save Plan</button>
                     </div>
                 </form>
             </div>

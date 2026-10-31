@@ -320,8 +320,14 @@
                             <td class="py-3 px-3 text-center text-slate-500 font-medium text-xs">1</td>
                             <td class="py-3 px-3">
                                 <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
-                                @if($payment->notes)
-                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $payment->notes }}</span>
+                                @php
+                                    $customerNotes = $payment->notes;
+                                    if ($customerNotes && (stripos($customerNotes, 'imported via') !== false || stripos($customerNotes, 'csv') !== false)) {
+                                        $customerNotes = null;
+                                    }
+                                @endphp
+                                @if(!empty($customerNotes))
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $customerNotes }}</span>
                                 @endif
                             </td>
                             <td class="py-3 px-3 text-center font-medium text-slate-700 text-xs">{{ $durationFormatted }}</td>

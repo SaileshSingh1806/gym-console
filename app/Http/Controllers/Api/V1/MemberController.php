@@ -34,7 +34,18 @@ class MemberController extends Controller
             $query->where('status', $request->status);
         }
 
-        $members = $query->latest()->paginate($request->per_page ?? 15);
+        $sortBy = $request->get('sort', 'member_id_desc');
+        if ($sortBy === 'member_id_asc') {
+            $query->orderByRaw("CASE WHEN member_code REGEXP '[0-9]+' THEN CAST(REGEXP_REPLACE(member_code, '[^0-9]', '') AS UNSIGNED) ELSE 999999 END ASC, id ASC");
+        } elseif ($sortBy === 'name_asc') {
+            $query->orderBy('first_name', 'asc')->orderBy('last_name', 'asc');
+        } elseif ($sortBy === 'join_date_desc') {
+            $query->orderBy('join_date', 'desc')->orderBy('id', 'desc');
+        } else {
+            $query->orderByRaw("CASE WHEN member_code REGEXP '[0-9]+' THEN CAST(REGEXP_REPLACE(member_code, '[^0-9]', '') AS UNSIGNED) ELSE 0 END DESC, id DESC");
+        }
+
+        $members = $query->paginate($request->per_page ?? 15);
 
         return response()->json([
             'success' => true,

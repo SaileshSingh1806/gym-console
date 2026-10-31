@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationOtpMail;
 use App\Models\Member;
 use App\Models\Plan;
 use App\Models\Setting;
@@ -18,6 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -181,14 +184,16 @@ class AuthController extends Controller
             $plans = Plan::with('features')->where('is_active', true)->orderBy('sort_order')->get();
         }
         $selectedPlan = Plan::where('slug', $selectedPlanSlug)->first() ?? $plans->first();
+        $pending = session('pending_registration', []);
 
-        return view('auth.register', compact('plans', 'selectedPlan'));
+        return view('auth.register', compact('plans', 'selectedPlan', 'pending'));
     }
 
     public function register(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'gym_name' => 'required|string|max:150',
+            'branch_name' => 'nullable|string|max:150',
             'owner_name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:30',
@@ -197,6 +202,82 @@ class AuthController extends Controller
             'billing_cycle' => 'required|in:monthly,yearly',
         ]);
 
+        $otp = (string) random_int(100000, 999999);
+
+        session([
+            'pending_registration' => $validated,
+            'registration_otp' => $otp,
+            'registration_otp_expires_at' => now()->addMinutes(10)->timestamp,
+            'registration_otp_resend_after' => now()->addSeconds(60)->timestamp,
+            'registration_otp_attempts' => 0,
+        ]);
+
+        try {
+            Mail::to($validated['email'])->send(new RegistrationOtpMail($otp, $validated['owner_name'], $validated['gym_name']));
+        } catch (\Throwable $e) {
+            Log::error('Registration OTP mail error: '.$e->getMessage());
+        }
+
+        return redirect()->route('register.verify-otp')->with('success', "A 6-digit verification code has been sent to {$validated['email']}.");
+    }
+
+    public function showVerifyOtp(Request $request): View|RedirectResponse
+    {
+        if (! session()->has('pending_registration') || ! session()->has('registration_otp')) {
+            return redirect()->route('register')->with('warning', 'Please fill in your gym registration details first.');
+        }
+
+        $pending = session('pending_registration');
+        $email = $pending['email'];
+        $resendAfter = session('registration_otp_resend_after', 0);
+        $remainingSeconds = max(0, $resendAfter - now()->timestamp);
+
+        return view('auth.verify-otp', compact('email', 'pending', 'remainingSeconds'));
+    }
+
+    public function verifyOtp(Request $request): RedirectResponse
+    {
+        if (! session()->has('pending_registration') || ! session()->has('registration_otp')) {
+            return redirect()->route('register')->with('error', 'Registration session expired. Please fill in your details again.');
+        }
+
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ], [
+            'otp.required' => 'Please enter the 6-digit verification code.',
+            'otp.size' => 'The verification code must be exactly 6 digits.',
+        ]);
+
+        $attempts = session('registration_otp_attempts', 0) + 1;
+        session(['registration_otp_attempts' => $attempts]);
+
+        if ($attempts > 5) {
+            session()->forget(['registration_otp', 'registration_otp_expires_at']);
+
+            return back()->withErrors(['otp' => 'Too many failed verification attempts. Please click "Resend Code" to receive a new code.']);
+        }
+
+        $expiresAt = session('registration_otp_expires_at', 0);
+        if (now()->timestamp > $expiresAt) {
+            return back()->withErrors(['otp' => 'This verification code has expired. Please click "Resend Code" to receive a new code.']);
+        }
+
+        $storedOtp = (string) session('registration_otp');
+        $enteredOtp = trim((string) $request->input('otp'));
+
+        if ($enteredOtp !== $storedOtp) {
+            return back()->withErrors(['otp' => 'Incorrect verification code. Please check your email and try again.'])->onlyInput('otp');
+        }
+
+        $validated = session('pending_registration');
+
+        // Check email uniqueness again to avoid race conditions
+        if (User::where('email', $validated['email'])->exists()) {
+            session()->forget(['pending_registration', 'registration_otp', 'registration_otp_expires_at', 'registration_otp_resend_after', 'registration_otp_attempts']);
+
+            return redirect()->route('login')->withErrors(['email' => 'An account with this email already exists. Please log in.']);
+        }
+
         $plan = Plan::findOrFail($validated['plan_id']);
         $isFreePlan = ($plan->price_monthly <= 0 && $plan->price_yearly <= 0) || $plan->slug === 'free-forever';
         $initialStatus = $isFreePlan ? 'ACTIVE' : 'PENDING_PAYMENT';
@@ -204,6 +285,15 @@ class AuthController extends Controller
         $registration = $this->tenantService->registerGym($validated, $plan, $initialStatus, null, $validated['billing_cycle']);
         $owner = $registration['owner'];
         $tenant = $registration['tenant'];
+
+        // Clear OTP & registration session data
+        session()->forget([
+            'pending_registration',
+            'registration_otp',
+            'registration_otp_expires_at',
+            'registration_otp_resend_after',
+            'registration_otp_attempts',
+        ]);
 
         Auth::login($owner);
 
@@ -217,7 +307,39 @@ class AuthController extends Controller
             'checkout_billing_cycle' => $validated['billing_cycle'],
         ]);
 
-        return redirect()->route('auth.checkout');
+        return redirect()->route('auth.checkout')->with('success', 'Email verified successfully! Complete checkout to activate your gym console.');
+    }
+
+    public function resendOtp(Request $request): RedirectResponse
+    {
+        if (! session()->has('pending_registration')) {
+            return redirect()->route('register')->with('warning', 'Please fill in your gym registration details first.');
+        }
+
+        $resendAfter = session('registration_otp_resend_after', 0);
+        if (now()->timestamp < $resendAfter) {
+            $wait = $resendAfter - now()->timestamp;
+
+            return back()->with('warning', "Please wait {$wait} seconds before requesting a new code.");
+        }
+
+        $pending = session('pending_registration');
+        $otp = (string) random_int(100000, 999999);
+
+        session([
+            'registration_otp' => $otp,
+            'registration_otp_expires_at' => now()->addMinutes(10)->timestamp,
+            'registration_otp_resend_after' => now()->addSeconds(60)->timestamp,
+            'registration_otp_attempts' => 0,
+        ]);
+
+        try {
+            Mail::to($pending['email'])->send(new RegistrationOtpMail($otp, $pending['owner_name'], $pending['gym_name']));
+        } catch (\Throwable $e) {
+            Log::error('Resend registration OTP mail error: '.$e->getMessage());
+        }
+
+        return back()->with('success', "A new 6-digit verification code has been sent to {$pending['email']}.");
     }
 
     public function showCheckout(Request $request): View|RedirectResponse

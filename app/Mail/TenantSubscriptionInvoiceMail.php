@@ -25,7 +25,7 @@ class TenantSubscriptionInvoiceMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "⚡ SaaS Subscription Active: {$this->plan->name} - {$this->tenant->name}",
+            subject: "⚡ Subscription Active: {$this->plan->name} - {$this->tenant->name}",
         );
     }
 

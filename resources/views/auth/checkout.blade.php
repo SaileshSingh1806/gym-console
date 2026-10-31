@@ -71,7 +71,7 @@
             <div class="border-b border-slate-800 pb-4 flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-black text-white tracking-tight">Order Summary</h1>
-                    <p class="text-xs text-slate-400 mt-0.5">SaaS Platform Subscription Details</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Platform Subscription Details</p>
                 </div>
                 <span class="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-black uppercase tracking-wider">
                     {{ ucfirst($billingCycle) }}
@@ -421,7 +421,7 @@
                     amount: razorpayConfig.amount,
                     currency: razorpayConfig.currency || 'INR',
                     name: razorpayConfig.name || 'GymDeskHub',
-                    description: razorpayConfig.description || 'SaaS Subscription Plan',
+                    description: razorpayConfig.description || 'Platform Subscription Plan',
                     image: '{{ $platformSettings['logo_url'] ?? '' }}',
                     prefill: {
                         name: razorpayConfig.prefill?.name || 'Gym Owner',

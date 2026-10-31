@@ -327,8 +327,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? ($metrics['month_revenue'] + $metrics['all_dues_remaining']), 2) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">{{ $currency }}{{ number_format($metrics['total_billed_amount'] ?? $metrics['month_billed_total'], 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed ({{ $metrics['total_billed_count'] ?? $metrics['total_members'] }})</div>
                         </div>
                         <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -351,8 +351,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['month_revenue'], 2) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected</div>
+                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['total_collected_amount'] ?? $metrics['month_revenue'], 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected ({{ $metrics['total_payments_count'] ?? $metrics['total_members'] }})</div>
                         </div>
                         <a href="{{ route('app.payments.index') }}" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -363,8 +363,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 2) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending</div>
+                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending ({{ $metrics['due_members_count'] }} Due)</div>
                         </div>
                         <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>

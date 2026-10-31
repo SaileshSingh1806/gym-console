@@ -379,7 +379,7 @@ class AdminController extends Controller implements HasMiddleware
             $plan->features()->sync($featureSync);
         }
 
-        return back()->with('success', "SaaS Plan '{$plan->name}' created successfully!");
+        return back()->with('success', "Subscription Plan '{$plan->name}' created successfully!");
     }
 
     public function updatePlan(Request $request, int $id): RedirectResponse
@@ -912,9 +912,9 @@ class AdminController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'app_name' => 'required|string|max:100',
             'app_tagline' => 'nullable|string|max:200',
-            'logo' => 'nullable|image|max:5120',
+            'logo' => 'nullable|image|max:10240',
             'logo_url' => 'nullable|url|max:500',
-            'favicon' => 'nullable|mimes:ico,png,svg,jpg,jpeg|max:2048',
+            'favicon' => 'nullable|mimes:ico,png,svg,jpg,jpeg|max:5120',
             'favicon_url' => 'nullable|url|max:500',
             'support_email' => 'required|email|max:150',
             'support_phone' => 'nullable|string|max:50',

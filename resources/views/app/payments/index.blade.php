@@ -96,6 +96,32 @@
         txnReference: '',
         notes: '',
 
+        // Split Payment State
+        isSplitPayment: false,
+        splitCashAmount: '',
+        splitOnlineAmount: '',
+        splitOnlineMethod: 'upi',
+        splitOnlineRef: '',
+
+        toggleSplitPayment() {
+            this.isSplitPayment = !this.isSplitPayment;
+            if (this.isSplitPayment) {
+                const total = Number(this.collectedAmount || this.computedTotal || 0);
+                const half = Math.floor(total / 2);
+                this.splitCashAmount = half > 0 ? half : '';
+                this.splitOnlineAmount = (total - half) > 0 ? (total - half) : '';
+                this.updateSplitTotal();
+            } else {
+                this.collectedAmount = this.computedTotal;
+            }
+        },
+
+        updateSplitTotal() {
+            const cash = Number(this.splitCashAmount || 0);
+            const online = Number(this.splitOnlineAmount || 0);
+            this.collectedAmount = cash + online;
+        },
+
         get filteredMembers() {
             if (!this.memberSearchQuery) return this.allMembers.slice(0, 10);
             let q = this.memberSearchQuery.toLowerCase();
@@ -219,13 +245,13 @@
                     <select name="date_filter" 
                             onchange="this.form.submit()" 
                             class="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer shadow-sm">
-                        <option value="month_till_date" {{ request('date_filter', 'month_till_date') === 'month_till_date' ? 'selected' : '' }}>Month Till Date</option>
+                        <option value="all" {{ request('date_filter', 'all') === 'all' ? 'selected' : '' }}>All Time</option>
+                        <option value="month_till_date" {{ request('date_filter') === 'month_till_date' ? 'selected' : '' }}>Month Till Date</option>
                         <option value="today" {{ request('date_filter') === 'today' ? 'selected' : '' }}>Today</option>
                         <option value="yesterday" {{ request('date_filter') === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
                         <option value="this_week" {{ request('date_filter') === 'this_week' ? 'selected' : '' }}>This Week</option>
                         <option value="last_month" {{ request('date_filter') === 'last_month' ? 'selected' : '' }}>Last Month</option>
                         <option value="this_year" {{ request('date_filter') === 'this_year' ? 'selected' : '' }}>This Year</option>
-                        <option value="all" {{ request('date_filter') === 'all' ? 'selected' : '' }}>All Time</option>
                     </select>
                 </div>
 
@@ -1050,10 +1076,22 @@
                             </label>
                         </div>
 
-                        <!-- PAYMENT METHOD -->
-                        <div class="space-y-2">
-                            <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">PAYMENT METHOD</span>
-                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                        <!-- PAYMENT METHOD SECTION -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">PAYMENT BREAKDOWN</span>
+                                <button type="button" 
+                                        @click="toggleSplitPayment()" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border"
+                                        :class="isSplitPayment ? 'bg-amber-500 text-slate-950 border-amber-400 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700'">
+                                    <span x-text="isSplitPayment ? '✓ Split Mode (Cash + Online) Active' : '⚡ Split Payment (Cash + Online)'"></span>
+                                </button>
+                            </div>
+
+                            <input type="hidden" name="is_split_payment" :value="isSplitPayment ? '1' : '0'">
+
+                            <!-- Single Payment Mode -->
+                            <div x-show="!isSplitPayment" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
                                 <div class="sm:col-span-4">
                                     <select name="payment_method" 
                                             x-model="paymentMethod" 
@@ -1067,7 +1105,7 @@
                                     </select>
                                 </div>
 
-                                <div class="sm:col-span-3">
+                                <div class="sm:col-span-4">
                                     <input type="number" 
                                            step="0.01" 
                                            x-model="collectedAmount" 
@@ -1082,12 +1120,65 @@
                                            placeholder="Ref / Txn ID (Optional)" 
                                            class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs font-mono focus:border-indigo-500 focus:outline-none">
                                 </div>
+                            </div>
 
-                                <div class="sm:col-span-1">
-                                    <button type="button" 
-                                            class="w-full h-full py-2 px-2 rounded-xl border border-dashed border-indigo-400 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center cursor-pointer">
-                                        + Split
-                                    </button>
+                            <!-- Dual / Split Payment Mode -->
+                            <div x-show="isSplitPayment" class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-300 dark:border-amber-500/40 space-y-3">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider">⚡ Split: Cash + Online Combined</span>
+                                    <span class="font-bold text-slate-700 dark:text-slate-300">
+                                        Total: <strong class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">{{ $currency }}<span x-text="Number(collectedAmount || 0).toFixed(2)"></span></strong>
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <!-- 1. Cash Component -->
+                                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-black text-slate-900 dark:text-white flex items-center gap-1">💵 1. Cash Component</span>
+                                            <span class="text-[10px] text-slate-400">Cash in Hand</span>
+                                        </div>
+                                        <input type="number" 
+                                               name="split_cash_amount" 
+                                               x-model="splitCashAmount" 
+                                               @input="updateSplitTotal()" 
+                                               step="any" 
+                                               min="0" 
+                                               placeholder="Cash Amount (e.g. 4000)" 
+                                               class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
+                                    </div>
+
+                                    <!-- 2. Online Component -->
+                                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="font-black text-slate-900 dark:text-white flex items-center gap-1">📲 2. Online / Digital</span>
+                                            <span class="text-[10px] text-slate-400">Bank / UPI</span>
+                                        </div>
+                                        <div class="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2">
+                                            <input type="number" 
+                                                   name="split_online_amount" 
+                                                   x-model="splitOnlineAmount" 
+                                                   @input="updateSplitTotal()" 
+                                                   step="any" 
+                                                   min="0" 
+                                                   placeholder="Online Amount (e.g. 4000)" 
+                                                   class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
+
+                                            <select name="split_online_method" 
+                                                    x-model="splitOnlineMethod" 
+                                                    class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none">
+                                                <option value="upi">UPI / QR Code</option>
+                                                <option value="card">Card (POS)</option>
+                                                <option value="netbanking">Net Banking</option>
+                                                <option value="cheque">Cheque</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" 
+                                               name="split_online_reference" 
+                                               x-model="splitOnlineRef" 
+                                               placeholder="UPI Ref / Txn ID (Optional)" 
+                                               class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-amber-500 focus:outline-none">
+                                    </div>
                                 </div>
                             </div>
                         </div>

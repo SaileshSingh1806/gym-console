@@ -140,30 +140,10 @@
             <div class="flex items-center justify-between h-16 sm:h-20">
 
                 <!-- ── LOGO ── -->
-                <a href="{{ route('home') }}" class="flex items-center gap-3 shrink-0 focus:outline-none">
-                    @if(!empty($platformSettings['logo_url']))
-                        <img src="{{ $platformSettings['logo_url'] }}"
-                             alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
-                             class="h-9 sm:h-10 w-auto max-w-[150px] rounded-xl object-contain border border-slate-800 bg-[#0f1624] p-1 shadow-sm">
-                        <div class="flex flex-col">
-                            <span class="text-lg sm:text-xl font-bold tracking-tight text-white leading-none">
-                                {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}
-                            </span>
-                            <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">Management Platform</span>
-                        </div>
-                    @else
-                        <div class="w-9 h-9 sm:h-10 sm:w-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-sm shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-lg sm:text-xl font-extrabold tracking-tight leading-none text-white">
-                                Gym<span class="text-amber-400">Console</span>
-                            </span>
-                            <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wider mt-0.5">Operating System</span>
-                        </div>
-                    @endif
+                <a href="{{ route('home') }}" class="flex items-center shrink-0 focus:outline-none group">
+                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                         alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                         class="h-9 sm:h-10 w-auto object-contain transition-opacity group-hover:opacity-90">
                 </a>
 
                 <!-- ── DESKTOP NAV ── -->
@@ -277,15 +257,10 @@
 
                 <!-- Brand Column -->
                 <div class="lg:col-span-2 space-y-4">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2.5">
-                        @if(!empty($platformSettings['logo_url']))
-                            <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-9 w-auto max-w-[140px] rounded-lg object-contain bg-[#0f1624] p-1 border border-slate-800">
-                        @else
-                            <div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            </div>
-                        @endif
-                        <span class="text-lg font-bold text-white">{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}</span>
+                    <a href="{{ route('home') }}" class="inline-flex items-center group">
+                        <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                             alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                             class="h-9 w-auto object-contain transition-opacity group-hover:opacity-90">
                     </a>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm">
                         The all-in-one operating system for modern gyms and fitness clubs. Universal biometric access, automated fee collections, WhatsApp messaging, and multi-branch management.

@@ -1,4 +1,4 @@
-<x-admin-layout header="SaaS Global Platform Settings">
+<x-admin-layout header="Global Platform Settings">
     <div class="space-y-6" x-data="{ 
         activeTab: '{{ session('activeTab', request('tab', 'general')) }}',
         showSmtpPassword: false,
@@ -95,7 +95,7 @@
                 <div class="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs dark:shadow-xl space-y-6 transition-colors">
                     <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
                         <h3 class="text-base font-bold text-slate-900 dark:text-white">Platform Identity & Brand Assets</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Configure your SaaS platform name, tagline, logo and favicon</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Configure your platform name, tagline, logo and favicon</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -205,7 +205,7 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Footer Copyright Text</label>
-                        <input type="text" name="footer_copyright" value="{{ old('footer_copyright', $settings['footer_copyright'] ?? '© '.date('Y').' GymDeskHub SaaS. All rights reserved.') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                        <input type="text" name="footer_copyright" value="{{ old('footer_copyright', $settings['footer_copyright'] ?? '© '.date('Y').' GymDeskHub. All rights reserved.') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                     </div>
                 </div>
 
@@ -330,7 +330,7 @@
                             </div>
                             <div>
                                 <h3 class="text-base font-bold text-slate-900 dark:text-white">Razorpay Payment Gateway (India / UPI / Cards)</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Primary gateway for SaaS subscription plans & renewal invoices</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Primary gateway for subscription plans & renewal invoices</p>
                             </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
@@ -437,17 +437,17 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Global Meta Title *</label>
-                            <input type="text" name="meta_title" value="{{ old('meta_title', $settings['meta_title'] ?? 'GymDeskHub - Multi-Tenant Gym Management SaaS') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="text" name="meta_title" value="{{ old('meta_title', $settings['meta_title'] ?? 'GymDeskHub - Complete Gym Management Platform') }}" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Meta Description *</label>
-                            <textarea name="meta_description" rows="3" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">{{ old('meta_description', $settings['meta_description'] ?? 'Complete gym membership management, biometric access control with Hikvision, POS billing, and multi-tenant SaaS dashboard.') }}</textarea>
+                            <textarea name="meta_description" rows="3" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">{{ old('meta_description', $settings['meta_description'] ?? 'Complete gym membership management, biometric access control with Hikvision, POS billing, and multi-branch management console.') }}</textarea>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Meta Keywords</label>
-                            <input type="text" name="meta_keywords" value="{{ old('meta_keywords', $settings['meta_keywords'] ?? 'gym software, gym management saas, gym attendance system, biometric access control') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
+                            <input type="text" name="meta_keywords" value="{{ old('meta_keywords', $settings['meta_keywords'] ?? 'gym software, gym management platform, gym attendance system, biometric access control') }}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none shadow-xs">
                         </div>
 
                         <!-- OpenGraph Image -->
@@ -542,7 +542,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">AI Foundation Model *</label>
                             <select name="gemini_model" x-model="geminiModel" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-purple-500 focus:outline-none shadow-xs">
-                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Ultra Fast & Recommended for SaaS)</option>
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Ultra Fast & Recommended)</option>
                                 <option value="gemini-1.5-pro">Gemini 1.5 Pro (Complex Reasoning & Deep Diet Plans)</option>
                                 <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Experimental</option>
                                 <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>

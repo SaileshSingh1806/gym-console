@@ -113,22 +113,13 @@
            class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Logo -->
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
-                @if(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
-                    <div class="flex flex-col min-w-0">
-                        <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight leading-none truncate max-w-[135px]">{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}</span>
-                        <span class="text-[9px] text-red-500 font-bold uppercase tracking-widest mt-0.5">Super Admin</span>
-                    </div>
-                @else
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center text-white font-bold shadow-md shadow-red-500/20 shrink-0">
-                        ⚡
-                    </div>
-                    <div class="flex flex-col min-w-0">
-                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-none truncate max-w-[135px]">GYMDESK<span class="text-red-500">HUB</span></span>
-                        <span class="text-[9px] text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 font-bold">Super Admin</span>
-                    </div>
-                @endif
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center min-w-0 group focus:outline-none">
+                <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                     alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                     class="h-8 w-auto max-w-[170px] object-contain hidden dark:block transition-opacity group-hover:opacity-90">
+                <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}"
+                     alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
+                     class="h-8 w-auto max-w-[170px] object-contain block dark:hidden transition-opacity group-hover:opacity-90">
             </a>
             <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -149,11 +140,11 @@
                 Gyms & Tenants
             </a>
 
-            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">SaaS Billing & Plans</div>
+            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Billing & Plans</div>
 
             <a href="{{ route('admin.plans') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.plans*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
-                SaaS Plans & Features
+                Subscription Plans & Features
             </a>
 
             <a href="{{ route('admin.subscriptions') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.subscriptions*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
@@ -222,7 +213,7 @@
                 <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'SaaS Platform Control' }}</h1>
+                <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Platform Control' }}</h1>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <x-theme-customizer />

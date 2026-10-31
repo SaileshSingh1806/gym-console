@@ -1,4 +1,4 @@
-<x-app-layout header="SaaS Subscription & Billing Management">
+<x-app-layout header="Subscription & Billing Management">
     @php
         $currency = $tenant->currency_symbol ?? '₹';
         $isExpired = $tenant->isSubscriptionExpired();
@@ -210,14 +210,14 @@
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             </span>
                             <div>
-                                <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your Free Trial / SaaS Subscription Has Expired!</h2>
+                                <h2 class="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Your Free Trial / Subscription Has Expired!</h2>
                                 <p class="text-xs text-rose-600 dark:text-red-300 mt-0.5">
                                     Access to members enrollment, attendance, and gym operations is currently locked.
                                 </p>
                             </div>
                         </div>
                         <p class="text-xs text-slate-600 dark:text-slate-300 pl-1">
-                            Trial ended on: <span class="font-bold text-amber-600 dark:text-amber-400">{{ $subscription?->trial_ends_at ? $subscription->trial_ends_at->format('F d, Y (h:i A)') : 'Recently' }}</span>. Please select a SaaS plan below and click <strong>"Renew / Activate Plan"</strong> to instantly restore your dashboard.
+                            Trial ended on: <span class="font-bold text-amber-600 dark:text-amber-400">{{ $subscription?->trial_ends_at ? $subscription->trial_ends_at->format('F d, Y (h:i A)') : 'Recently' }}</span>. Please select a plan below and click <strong>"Renew / Activate Plan"</strong> to instantly restore your dashboard.
                         </p>
                     </div>
 
@@ -287,8 +287,8 @@
         <div id="available-plans" class="space-y-6 pt-2">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Select SaaS Plan &amp; {{ $isExpired ? 'Renew Access' : 'Upgrade' }}</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Choose the right tier for your gym capacity. Switch or renew instantly.</p>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Select Subscription Plan &amp; {{ $isExpired ? 'Renew Access' : 'Upgrade' }}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Choose the right tier for your gym capacity. Upgrade or renew seamlessly.</p>
                 </div>
 
                 <!-- Monthly / Annual Toggle -->
@@ -416,75 +416,80 @@
                             </div>
                         </div>
 
-                        <!-- Razorpay Upgrade / Renew Action Button -->
+                        <!-- Action Area -->
                         <div class="pt-2">
-                            <button type="button" 
-                                    @click="initiateUpgrade({{ $p->id }}, '{{ addslashes($p->name) }}', {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }})" 
-                                    :disabled="isProcessingPayment" 
-                                    class="w-full py-3.5 px-3 rounded-xl font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer {{ $isCurrentPlan && $isExpired ? 'bg-gradient-to-r from-red-500 via-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-red-500/20 animate-pulse' : ($isCurrentPlan ? 'bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-amber-500/20' : 'bg-slate-100 hover:bg-amber-500 hover:text-slate-950 text-slate-800 dark:bg-slate-800 dark:text-white dark:hover:bg-amber-500 dark:hover:text-slate-950') }}">
-                                <span x-show="isProcessingPayment" class="animate-spin text-sm" x-cloak>⏳</span>
-                                <template x-if="getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).hasDiscount">
-                                    <span x-text="'💳 Pay ' + '{{ $currency }}' + Number(getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).finalPrice).toLocaleString('en-IN') + ' with Razorpay'"></span>
-                                </template>
-                                <template x-if="!getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).hasDiscount">
-                                    <span>
-                                        @if((float)$p->price_monthly == 0 && (float)$p->price_yearly == 0)
-                                            Switch to {{ $p->name }} &rarr;
-                                        @elseif($isExpired)
-                                            ⚡ Pay &amp; Renew on {{ $p->name }}
-                                        @elseif($isCurrentPlan)
-                                            🔄 Pay &amp; Extend Plan
-                                        @else
-                                            💳 Pay &amp; Upgrade to {{ $p->name }} &rarr;
-                                        @endif
-                                    </span>
-                                </template>
-                            </button>
+                            @if($isCurrentPlan && !$isExpired)
+                                <div class="w-full py-3.5 px-3 rounded-xl font-bold text-xs bg-emerald-500/10 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Current Active Plan</span>
+                                </div>
+                            @else
+                                <button type="button" 
+                                        @click="initiateUpgrade({{ $p->id }}, '{{ addslashes($p->name) }}', {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }})" 
+                                        :disabled="isProcessingPayment" 
+                                        class="w-full py-3.5 px-3 rounded-xl font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer {{ $isCurrentPlan && $isExpired ? 'bg-gradient-to-r from-red-500 via-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-red-500/20 animate-pulse' : 'bg-slate-100 hover:bg-amber-500 hover:text-slate-950 text-slate-800 dark:bg-slate-800 dark:text-white dark:hover:bg-amber-500 dark:hover:text-slate-950' }}">
+                                    <span x-show="isProcessingPayment" class="animate-spin text-sm" x-cloak>⏳</span>
+                                    <template x-if="getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).hasDiscount">
+                                        <span x-text="'💳 Pay ' + '{{ $currency }}' + Number(getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).finalPrice).toLocaleString('en-IN') + ' with Razorpay'"></span>
+                                    </template>
+                                    <template x-if="!getPlanPricing({{ $p->id }}, {{ (float)$p->price_monthly }}, {{ (float)$p->price_yearly }}).hasDiscount">
+                                        <span>
+                                            @if($isExpired && $isCurrentPlan)
+                                                ⚡ Pay &amp; Renew {{ $p->name }}
+                                            @elseif((float)$p->price_monthly == 0 && (float)$p->price_yearly == 0)
+                                                Upgrade to {{ $p->name }} &rarr;
+                                            @else
+                                                💳 Upgrade to {{ $p->name }} &rarr;
+                                            @endif
+                                        </span>
+                                    </template>
+                                </button>
 
-                            @php
-                                $planPaymentUrl = null;
-                                if ($p->slug === 'starter' || str_contains(strtolower($p->name), 'starter')) {
-                                    $planPaymentUrl = 'https://rzp.io/rzp/seC7Xkmu';
-                                } elseif (str_contains(strtolower($p->name), 'enterprise') || $p->slug === 'pro') {
-                                    $planPaymentUrl = 'https://rzp.io/rzp/lisGNMno';
-                                }
-                            @endphp
+                                @php
+                                    $planPaymentUrl = null;
+                                    if ($p->slug === 'starter' || str_contains(strtolower($p->name), 'starter')) {
+                                        $planPaymentUrl = 'https://rzp.io/rzp/seC7Xkmu';
+                                    } elseif (str_contains(strtolower($p->name), 'enterprise') || $p->slug === 'pro') {
+                                        $planPaymentUrl = 'https://rzp.io/rzp/lisGNMno';
+                                    }
+                                @endphp
 
-                            @if($planPaymentUrl)
-                                <a href="{{ $planPaymentUrl }}" 
-                                   target="_blank" 
-                                   class="w-full mt-2.5 py-2.5 px-3 rounded-xl font-black text-xs bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:brightness-110 text-white shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
-                                    <span>Pay Now</span>
-                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                </a>
+                                @if($planPaymentUrl)
+                                    <a href="{{ $planPaymentUrl }}" 
+                                       target="_blank" 
+                                       class="w-full mt-2.5 py-2.5 px-3 rounded-xl font-black text-xs bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:brightness-110 text-white shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                        <span>Pay Now</span>
+                                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
 
-                                <!-- Activate after payment via link -->
-                                <div class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-1.5 text-left">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="text-amber-500 font-bold text-xs">⚡</span>
-                                        <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Paid? Activate here:</span>
+                                    <!-- Activate after payment via link -->
+                                    <div class="mt-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-1.5 text-left">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="text-amber-500 font-bold text-xs">⚡</span>
+                                            <span class="text-[11px] font-bold text-slate-800 dark:text-slate-200">Paid? Activate here:</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400">Paste your Payment ID (e.g. <span class="font-mono text-amber-500 font-bold">pay_...</span>) to activate immediately:</p>
+                                        <div class="flex gap-1.5 pt-1">
+                                            <input type="text" x-model="linkPaymentId" placeholder="e.g. pay_..." 
+                                                   class="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-amber-500">
+                                            <button type="button" @click="if(!linkPaymentId.trim()){ alert('Please enter your Payment ID.'); return; } submitPayment({{ $p->id }}, linkPaymentId.trim(), '', '')" 
+                                                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs cursor-pointer shadow-sm whitespace-nowrap">
+                                                Activate &rarr;
+                                            </button>
+                                        </div>
                                     </div>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Paste your Payment ID (e.g. <span class="font-mono text-amber-500 font-bold">pay_...</span>) to activate immediately:</p>
-                                    <div class="flex gap-1.5 pt-1">
-                                        <input type="text" x-model="linkPaymentId" placeholder="e.g. pay_..." 
-                                               class="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-amber-500">
-                                        <button type="button" @click="if(!linkPaymentId.trim()){ alert('Please enter your Payment ID.'); return; } submitPayment({{ $p->id }}, linkPaymentId.trim(), '', '')" 
-                                                class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs cursor-pointer shadow-sm whitespace-nowrap">
-                                            Activate &rarr;
+                                @endif
+
+                                <!-- Sandbox / Key fallback notice if payment fails -->
+                                <template x-if="paymentError">
+                                    <div class="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-700 dark:text-amber-300 space-y-1">
+                                        <p x-text="paymentError"></p>
+                                        <button type="button" @click="simulateTestPayment({{ $p->id }})" class="w-full py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition-all cursor-pointer">
+                                            ⚡ Complete Test Upgrade (Sandbox Simulator)
                                         </button>
                                     </div>
-                                </div>
+                                </template>
                             @endif
-
-                            <!-- Sandbox / Key fallback notice if payment fails -->
-                            <template x-if="paymentError">
-                                <div class="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-700 dark:text-amber-300 space-y-1">
-                                    <p x-text="paymentError"></p>
-                                    <button type="button" @click="simulateTestPayment({{ $p->id }})" class="w-full py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] transition-all cursor-pointer">
-                                        ⚡ Complete Test Upgrade (Sandbox Simulator)
-                                    </button>
-                                </div>
-                            </template>
                         </div>
                     </div>
                 @endforeach
@@ -521,10 +526,10 @@
             </div>
         </div>
 
-        <!-- SaaS Invoices & Receipts -->
+        <!-- Invoices & Receipts -->
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
             <div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40 flex items-center justify-between">
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">SaaS Platform Billing History &amp; Receipts</h3>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Billing History &amp; Invoices</h3>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                     {{ count($invoices) }} Receipts
                 </span>

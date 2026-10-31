@@ -188,7 +188,7 @@
                     </div>
 
                     <div>
-                        <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase block font-semibold">Active SaaS Plan</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase block font-semibold">Active Plan</span>
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 inline-block mt-0.5">
                             {{ $ticket->tenant->activeSubscription?->plan?->name ?? 'No Active Plan' }}
                         </span>

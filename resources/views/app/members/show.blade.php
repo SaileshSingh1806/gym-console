@@ -34,6 +34,36 @@
         showAddSubscriptionModal: false,
         showAddPtModal: false,
         showEditModal: {{ request()->boolean('edit') ? 'true' : 'false' }},
+        editPlanId: '{{ $activeMembership?->membership_plan_id ?? '' }}',
+        editStartDate: '{{ $activeMembership?->start_date ? $activeMembership->start_date->format('Y-m-d') : '' }}',
+        editEndDate: '{{ $activeMembership?->end_date ? $activeMembership->end_date->format('Y-m-d') : '' }}',
+        onEditPlanChange() {
+            if (!this.editPlanId) return;
+            const plans = window.__MEMBERSHIP_PLANS__ || {};
+            const plan = plans[this.editPlanId];
+            if (!plan) return;
+
+            if (!this.editStartDate) {
+                this.editStartDate = new Date().toISOString().split('T')[0];
+            }
+
+            const start = new Date(this.editStartDate);
+            if (isNaN(start.getTime())) return;
+
+            const end = new Date(start);
+            const val = parseInt(plan.duration_value) || 1;
+            const type = (plan.duration_type || 'months').toLowerCase();
+
+            if (type === 'days') {
+                end.setDate(end.getDate() + val);
+            } else if (type === 'years') {
+                end.setFullYear(end.getFullYear() + val);
+            } else {
+                end.setMonth(end.getMonth() + val);
+            }
+
+            this.editEndDate = end.toISOString().split('T')[0];
+        },
         showWhatsappMenu: false,
         showInvoiceModal: false,
         showAddMeasurementModal: false,
@@ -320,7 +350,7 @@
         },
 
         // Edit Member Photo & Webcam State
-        editPhotoPreview: '{{ $member->photo_path ? asset("storage/" . $member->photo_path) : "" }}',
+        editPhotoPreview: '{{ $member->avatar_url ?? "" }}',
         editCapturedPhotoData: '',
         editRemovePhoto: false,
         editShowCameraModal: false,
@@ -434,7 +464,31 @@
         paymentAmount: '{{ $remainingAmt > 0 ? $remainingAmt : $finalAmt }}',
         paymentMethod: 'cash',
         paymentRef: '',
-        paymentNotes: ''
+        paymentNotes: '',
+
+        // Split Payment State
+        isSplitPayment: false,
+        splitCashAmount: '',
+        splitOnlineAmount: '',
+        splitOnlineMethod: 'upi',
+        splitOnlineRef: '',
+
+        toggleSplitPayment() {
+            this.isSplitPayment = !this.isSplitPayment;
+            if (this.isSplitPayment) {
+                const total = Number(this.paymentAmount || 0);
+                const half = Math.floor(total / 2);
+                this.splitCashAmount = half > 0 ? half : '';
+                this.splitOnlineAmount = (total - half) > 0 ? (total - half) : '';
+                this.updateSplitTotal();
+            }
+        },
+
+        updateSplitTotal() {
+            const cash = Number(this.splitCashAmount || 0);
+            const online = Number(this.splitOnlineAmount || 0);
+            this.paymentAmount = cash + online;
+        }
     }" class="space-y-4 sm:space-y-6 pb-32 sm:pb-16 max-w-7xl mx-auto">
 
         <!-- Top Bar Navigation -->
@@ -556,6 +610,33 @@
                         <span>Edit</span>
                     </button>
 
+                    <!-- Actions: Tax Invoice Button -->
+                    @php
+                        $mainPayment = $activeMembership?->payments?->first() ?? $member->payments()->latest()->first();
+                    @endphp
+                    @if($mainPayment)
+                        <button type="button" 
+                                @click="openInvoice({
+                                    id: {{ $mainPayment->id }},
+                                    receipt_no: '{{ $mainPayment->receipt_number }}',
+                                    date: '{{ $mainPayment->payment_date ? $mainPayment->payment_date->format('d M Y') : $mainPayment->created_at->format('d M Y') }}',
+                                    amount: '{{ number_format($mainPayment->amount, 2) }}',
+                                    method: '{{ strtoupper($mainPayment->payment_method) }}',
+                                    ref: '{{ $mainPayment->transaction_reference ?? '' }}',
+                                    plan_name: '{{ $activeMembership?->plan?->name ?? 'Gym Membership' }}',
+                                    plan_duration: '{{ $activeMembership?->plan ? ($activeMembership->plan->duration_value . ' ' . $activeMembership->plan->duration_type) : '' }}',
+                                    start_date: '{{ $activeMembership?->start_date ? $activeMembership->start_date->format('d M Y') : '' }}',
+                                    end_date: '{{ $activeMembership?->end_date ? $activeMembership->end_date->format('d M Y') : '' }}',
+                                    total: '{{ number_format($activeMembership?->final_amount ?? $mainPayment->amount, 2) }}',
+                                    paid: '{{ number_format($mainPayment->amount, 2) }}'
+                                })"
+                                title="View & Print Tax Invoice"
+                                class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>Invoice</span>
+                        </button>
+                    @endif
+
                     <!-- Actions: WhatsApp Menu -->
                     <div class="relative w-full sm:w-auto" @click.away="showWhatsappMenu = false">
                         <button type="button" 
@@ -622,8 +703,8 @@
                 <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                     <!-- Photo Header -->
                     <div class="relative aspect-[4/3] bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
-                        @if($member->photo_path)
-                            <img src="/storage/{{ $member->photo_path }}" alt="{{ $member->full_name }}" class="w-full h-full object-cover">
+                        @if($member->avatar_url)
+                            <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full bg-slate-100 dark:bg-gradient-to-tr dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
                                 <div class="w-20 h-20 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center text-2xl font-black text-slate-800 dark:text-white shadow-inner mb-2">
@@ -2434,34 +2515,104 @@
 
                 <form action="{{ route('app.members.collect-fee', $member->id) }}" method="POST" class="space-y-4 text-xs">
                     @csrf
-                    <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Amount ({{ $currency }}) *</label>
-                        <input type="number" 
-                               name="amount" 
-                               x-model="paymentAmount" 
-                               step="0.01" 
-                               min="0.01" 
-                               required 
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-black text-sm focus:border-emerald-500 focus:outline-none">
+
+                    <!-- Split Mode Toggle -->
+                    <div class="flex items-center justify-between pb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">Payment Breakdown</span>
+                        <button type="button" 
+                                @click="toggleSplitPayment()" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border"
+                                :class="isSplitPayment ? 'bg-amber-500 text-slate-950 border-amber-400 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700'">
+                            <span x-text="isSplitPayment ? '✓ Split Mode Active' : '⚡ Split (Cash + Online)'"></span>
+                        </button>
                     </div>
 
-                    <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
-                        <select name="payment_method" x-model="paymentMethod" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none">
-                            <option value="cash">Cash</option>
-                            <option value="upi">UPI / QR Code</option>
-                            <option value="card">Card (POS)</option>
-                            <option value="netbanking">Net Banking</option>
-                            <option value="cheque">Cheque</option>
-                        </select>
+                    <input type="hidden" name="is_split_payment" :value="isSplitPayment ? '1' : '0'">
+
+                    <!-- Single Mode -->
+                    <div x-show="!isSplitPayment" class="space-y-3">
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Amount ({{ $currency }}) *</label>
+                            <input type="number" 
+                                   name="amount" 
+                                   x-model="paymentAmount" 
+                                   step="0.01" 
+                                   min="0.01" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-black text-sm focus:border-emerald-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
+                            <select name="payment_method" x-model="paymentMethod" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none">
+                                <option value="cash">Cash</option>
+                                <option value="upi">UPI / QR Code</option>
+                                <option value="card">Card (POS)</option>
+                                <option value="netbanking">Net Banking</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / Cheque No</label>
+                            <input type="text" 
+                                   name="transaction_reference" 
+                                   placeholder="e.g. UPI Ref / Txn ID" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-emerald-500 focus:outline-none">
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Transaction Ref / Cheque No</label>
-                        <input type="text" 
-                               name="transaction_reference" 
-                               placeholder="e.g. UPI Ref / Txn ID" 
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-emerald-500 focus:outline-none">
+                    <!-- Split Mode -->
+                    <div x-show="isSplitPayment" class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-300 dark:border-amber-500/40 space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider">⚡ Split Payment</span>
+                            <span class="font-bold text-slate-700 dark:text-slate-300">
+                                Total: <strong class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">{{ $currency }}<span x-text="Number(paymentAmount || 0).toFixed(2)"></span></strong>
+                            </span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <!-- 1. Cash Component -->
+                            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+                                <span class="font-black text-slate-900 dark:text-white text-xs flex items-center gap-1">💵 1. Cash Component</span>
+                                <input type="number" 
+                                       name="split_cash_amount" 
+                                       x-model="splitCashAmount" 
+                                       @input="updateSplitTotal()" 
+                                       step="any" 
+                                       min="0" 
+                                       placeholder="Cash Amount (e.g. 4000)" 
+                                       class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
+                            </div>
+
+                            <!-- 2. Online Component -->
+                            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs">
+                                <span class="font-black text-slate-900 dark:text-white text-xs flex items-center gap-1">📲 2. Online / Digital</span>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="number" 
+                                           name="split_online_amount" 
+                                           x-model="splitOnlineAmount" 
+                                           @input="updateSplitTotal()" 
+                                           step="any" 
+                                           min="0" 
+                                           placeholder="Online Amount (e.g. 4000)" 
+                                           class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
+
+                                    <select name="split_online_method" 
+                                            x-model="splitOnlineMethod" 
+                                            class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none">
+                                        <option value="upi">UPI / QR Code</option>
+                                        <option value="card">Card (POS)</option>
+                                        <option value="netbanking">Net Banking</option>
+                                        <option value="cheque">Cheque</option>
+                                    </select>
+                                </div>
+                                <input type="text" 
+                                       name="split_online_reference" 
+                                       x-model="splitOnlineRef" 
+                                       placeholder="UPI Ref / Txn ID (Optional)" 
+                                       class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-amber-500 focus:outline-none">
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -2647,6 +2798,29 @@
                             <span>Personal Information</span>
                         </div>
 
+                        <!-- Member ID & Join Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+                            <div>
+                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Member ID / Code</label>
+                                <input type="text" 
+                                       name="member_code" 
+                                       value="{{ old('member_code', $member->member_code) }}" 
+                                       placeholder="e.g. ARM0001" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-amber-600 dark:text-amber-400 font-mono font-bold placeholder-slate-400 dark:placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                    <span>Join Date</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">Click to pick date</span>
+                                </label>
+                                <input type="date" 
+                                       name="join_date" 
+                                       value="{{ old('join_date', $member->join_date ? $member->join_date->format('Y-m-d') : '') }}" 
+                                       onclick="this.showPicker && this.showPicker()" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm cursor-pointer">
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">First Name <span class="text-rose-500">*</span></label>
@@ -2688,7 +2862,7 @@
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth</label>
-                                <input type="date" name="dob" value="{{ $member->dob ? $member->dob->format('Y-m-d') : '' }}" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
+                                <input type="date" name="dob" value="{{ $member->dob ? $member->dob->format('Y-m-d') : '' }}" onclick="this.showPicker && this.showPicker()" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer">
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Blood Group</label>
@@ -2812,7 +2986,7 @@
                             <span>Membership & Account Status</span>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Member Status <span class="text-rose-500">*</span></label>
                                 <select name="status" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none font-bold shadow-sm">
@@ -2831,15 +3005,53 @@
                                     @endforeach
                                 </select>
                             </div>
+                        </div>
 
-                            <div>
-                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Package Plan</label>
-                                <select name="membership_plan_id" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm">
-                                    <option value="">-- Keep Current Plan --</option>
-                                    @foreach($membershipPlans as $mp)
-                                        <option value="{{ $mp->id }}" {{ $activeMembership?->membership_plan_id == $mp->id ? 'selected' : '' }}>{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 2) }})</option>
-                                    @endforeach
-                                </select>
+                        <!-- Membership Plan & Validity Setup -->
+                        <div class="p-4 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Plan & Validity Period</span>
+                                </label>
+                                <span class="text-[10px] text-slate-400">Edit package or validity dates anytime</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Package Plan</label>
+                                    <select name="membership_plan_id" x-model="editPlanId" @change="onEditPlanChange()" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs font-semibold">
+                                        <option value="">-- Keep Current Plan --</option>
+                                        @foreach($membershipPlans as $mp)
+                                            <option value="{{ $mp->id }}" {{ $activeMembership?->membership_plan_id == $mp->id ? 'selected' : '' }}>{{ $mp->name }} ({{ $currency }}{{ number_format($mp->price, 0) }}) - {{ $mp->duration_value }} {{ $mp->duration_type }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                        <span>Start Date</span>
+                                        <span class="text-[10px] text-slate-400 font-normal">Click to pick</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="membership_start_date" 
+                                           x-model="editStartDate" 
+                                           @change="onEditPlanChange()" 
+                                           onclick="this.showPicker && this.showPicker()" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs cursor-pointer">
+                                </div>
+
+                                <div>
+                                    <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center justify-between">
+                                        <span>End Date (Expiry)</span>
+                                        <span class="text-[10px] text-slate-400 font-normal">Click to pick</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="membership_end_date" 
+                                           x-model="editEndDate" 
+                                           onclick="this.showPicker && this.showPicker()" 
+                                           class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none shadow-sm text-xs cursor-pointer">
+                                </div>
                             </div>
                         </div>
 

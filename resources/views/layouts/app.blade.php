@@ -118,23 +118,24 @@
            class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Brand Header -->
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/50 backdrop-blur">
-            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
+            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0 group focus:outline-none">
                 @php
                     $tenant = auth()->user()->tenant ?? null;
                     $gymLogo = $tenant?->logo_url;
                     $gymName = $tenant?->name ?? ($platformSettings['app_name'] ?? 'GymDeskHub');
                 @endphp
                 @if(!empty($gymLogo))
-                    <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
-                    <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
-                @elseif(!empty($platformSettings['logo_url']))
-                    <img src="{{ $platformSettings['logo_url'] }}" alt="{{ $gymName }}" class="h-9 w-auto max-w-[140px] rounded-xl object-contain bg-slate-100 dark:bg-slate-950/60 p-1 border border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
-                    <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
+                    <img src="{{ $gymLogo }}"
+                         alt="{{ $gymName }}"
+                         class="h-8 w-auto max-w-[120px] rounded-lg object-contain">
+                    <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[130px]">{{ $gymName }}</span>
                 @else
-                    <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20 shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight truncate max-w-[140px]">{{ $gymName }}</span>
+                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                         alt="{{ $gymName }}"
+                         class="h-8 w-auto max-w-[170px] object-contain hidden dark:block transition-opacity group-hover:opacity-90">
+                    <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}"
+                         alt="{{ $gymName }}"
+                         class="h-8 w-auto max-w-[170px] object-contain block dark:hidden transition-opacity group-hover:opacity-90">
                 @endif
             </a>
             <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors">
@@ -602,12 +603,12 @@
             </div>
             @endif
 
-            <!-- SaaS Subscription -->
+            <!-- Subscription & Billing -->
             @if($user->isGymOwner() || $user->isSuperAdmin())
             <a href="{{ route('app.subscription.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.subscription.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
                 <div class="flex items-center gap-3">
                     <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-                    <span>SAAS SUBSCRIPTION</span>
+                    <span>SUBSCRIPTION & BILLING</span>
                 </div>
                 <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </a>
@@ -751,7 +752,7 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-200"></span>
                     </span>
-                    <span class="font-bold tracking-tight">⚠️ SaaS Trial / Plan Expired:</span>
+                    <span class="font-bold tracking-tight">⚠️ Subscription Expired:</span>
                     <span class="text-white/90 hidden md:inline">Your gym operations are locked. Please renew or select a plan to restore full access immediately.</span>
                 </div>
                 <a href="{{ route('app.subscription.index') }}" class="px-3.5 py-1 rounded-lg bg-white text-slate-950 font-bold hover:bg-amber-100 transition-all shadow-sm flex items-center gap-1.5 whitespace-nowrap">
@@ -1106,7 +1107,7 @@
 
                             @if(auth()->user()->tenant && auth()->user()->tenant->activeSubscription)
                                 <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                                    <span class="text-slate-500 dark:text-slate-400">SaaS Plan:</span>
+                                    <span class="text-slate-500 dark:text-slate-400">Current Plan:</span>
                                     <span class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                         {{ auth()->user()->tenant->activeSubscription->plan?->name ?? 'Standard' }}

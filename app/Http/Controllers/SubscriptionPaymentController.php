@@ -104,7 +104,7 @@ class SubscriptionPaymentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment verified successfully! Your SaaS yearly subscription is active until ' . $newExpiryDate->format('d M Y') . '.',
+                'message' => 'Payment verified successfully! Your yearly subscription is active until ' . $newExpiryDate->format('d M Y') . '.',
                 'payment_id' => $paymentId,
                 'expires_at' => $newExpiryDate->toFormattedDateString(),
             ]);

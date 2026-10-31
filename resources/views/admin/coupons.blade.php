@@ -1,4 +1,4 @@
-<x-admin-layout header="SaaS Promo Coupons & Discount Codes">
+<x-admin-layout header="Promo Coupons & Discount Codes">
     <div class="space-y-6" x-data="{
         showCreateModal: false,
         showEditModal: false,
@@ -141,7 +141,7 @@
                                         </span>
                                     @else
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                                            All SaaS Plans
+                                            All Plans
                                         </span>
                                     @endif
                                 </td>
@@ -214,8 +214,8 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showCreateModal = false">
                 <div class="flex justify-between items-center mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-800 pb-3">
                     <div>
-                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New SaaS Promo Coupon</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Add a discount code for Gym Owners when purchasing SaaS plans</p>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Create New Promo Coupon</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Add a discount code for Gym Owners when purchasing plans</p>
                     </div>
                     <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
@@ -250,9 +250,9 @@
                         </div>
 
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Applicable SaaS Plan</label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Applicable Plan</label>
                             <select name="plan_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">
-                                <option value="">All SaaS Plans</option>
+                                <option value="">All Plans</option>
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }} Only</option>
                                 @endforeach
@@ -347,9 +347,9 @@
                         </div>
 
                         <div>
-                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Applicable SaaS Plan</label>
+                            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Applicable Plan</label>
                             <select name="plan_id" x-model="editCoupon.plan_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-red-500 focus:outline-none">
-                                <option value="">All SaaS Plans</option>
+                                <option value="">All Plans</option>
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }} Only</option>
                                 @endforeach

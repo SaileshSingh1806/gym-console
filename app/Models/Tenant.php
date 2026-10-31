@@ -141,18 +141,69 @@ class Tenant extends Model
     public function generateNextMemberCode(): string
     {
         $format = $this->member_id_format;
-        $count = $this->members()->count() + 1;
 
         if ($format === 'numeric') {
-            return (string) (1000 + $count);
+            $existingNumeric = $this->members()
+                ->pluck('member_code')
+                ->map(fn ($c) => preg_replace('/\D/', '', (string) $c))
+                ->filter(fn ($c) => is_numeric($c) && (int) $c > 0)
+                ->map(fn ($c) => (int) $c);
+
+            $maxNum = $existingNumeric->isNotEmpty() ? $existingNumeric->max() : 1000;
+            $next = max($maxNum + 1, 1001);
+
+            while ($this->members()->where('member_code', (string) $next)->exists()) {
+                $next++;
+            }
+
+            return (string) $next;
         }
 
         $prefix = strtoupper(trim($this->member_id_prefix ?: 'GYM'));
-        $year = now()->format('y');
-        $padding = max(3, min(8, $this->member_id_padding ?: 4));
-        $sequence = str_pad((string) $count, $padding, '0', STR_PAD_LEFT);
 
-        return "{$prefix}{$year}{$sequence}";
+        // Look at existing codes with this prefix to find the highest number
+        $existingCodes = $this->members()
+            ->where('member_code', 'LIKE', "{$prefix}%")
+            ->pluck('member_code');
+
+        $maxNum = 0;
+        $detectedPadding = 0;
+
+        foreach ($existingCodes as $rawCode) {
+            $suffix = substr($rawCode, strlen($prefix));
+            if (is_numeric($suffix)) {
+                $num = (int) $suffix;
+                if ($num > $maxNum) {
+                    $maxNum = $num;
+                }
+                if ($detectedPadding === 0) {
+                    $detectedPadding = strlen($suffix);
+                }
+            }
+        }
+
+        $nextNum = max($maxNum + 1, $this->members()->count() + 1);
+
+        // Determine padding: prefer detected padding from existing members if available,
+        // otherwise configured setting or default 4
+        $configuredPadding = (int) ($this->settings['member_id_padding'] ?? 0);
+        $padding = $detectedPadding > 0 ? $detectedPadding : ($configuredPadding > 0 ? $configuredPadding : 4);
+        $padding = max($padding, strlen((string) $nextNum));
+
+        $sequence = str_pad((string) $nextNum, $padding, '0', STR_PAD_LEFT);
+        $code = "{$prefix}{$sequence}";
+
+        // Ensure no collision with both padded and unpadded variations
+        while (
+            $this->members()->where('member_code', $code)->exists() ||
+            $this->members()->where('member_code', $prefix . (int) $nextNum)->exists()
+        ) {
+            $nextNum++;
+            $sequence = str_pad((string) $nextNum, $padding, '0', STR_PAD_LEFT);
+            $code = "{$prefix}{$sequence}";
+        }
+
+        return $code;
     }
 
     public function isSubscriptionActive(): bool

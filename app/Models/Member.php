@@ -54,6 +54,19 @@ class Member extends Model
         return $this->full_name ?: ($this->phone ?? 'Member');
     }
 
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (empty($this->photo_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_path, 'http://') || str_starts_with($this->photo_path, 'https://')) {
+            return $this->photo_path;
+        }
+
+        return asset('storage/' . $this->photo_path);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

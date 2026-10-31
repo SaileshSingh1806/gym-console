@@ -36,4 +36,21 @@ class PublicController extends Controller
     {
         return view('public.contact');
     }
+
+    public function serveStorageFile(string $path)
+    {
+        $path = str_replace(['..', "\0"], '', $path);
+        $fullPath = storage_path('app/public/'.$path);
+
+        if (! file_exists($fullPath) || is_dir($fullPath)) {
+            abort(404);
+        }
+
+        $mimeType = mime_content_type($fullPath) ?: 'application/octet-stream';
+
+        return response()->file($fullPath, [
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'public, max-age=604800',
+        ]);
+    }
 }

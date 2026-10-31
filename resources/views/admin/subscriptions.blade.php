@@ -3,7 +3,7 @@
         <!-- Action Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tenant SaaS Subscriptions</h3>
+                <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Gym Subscriptions</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Manage plan terms, subscription state overrides, and offline bank transfer payments</p>
             </div>
             <button @click="showManualPayModal = true" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-red-600/20 transition-all cursor-pointer">
@@ -202,7 +202,7 @@
         <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs dark:shadow-xl transition-colors">
             <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Generated SaaS Platform Invoices (Gym Owner Subscriptions)</h3>
+                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Generated Subscription Invoices (Gym Owner Subscriptions)</h3>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400">Official platform billing receipts issued to gym owners for software licenses and subscriptions</p>
                 </div>
                 <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 w-fit">
@@ -242,7 +242,7 @@
                     </div>
                 @empty
                     <div class="py-6 text-center text-xs text-slate-400">
-                        No SaaS platform invoices logged.
+                        No platform invoices logged.
                     </div>
                 @endforelse
             </div>
@@ -254,7 +254,7 @@
                         <tr>
                             <th class="py-3.5 px-4 font-semibold">Invoice #</th>
                             <th class="py-3.5 px-4 font-semibold">Subscriber (Gym Owner & Gym)</th>
-                            <th class="py-3.5 px-4 font-semibold">Subscribed SaaS Plan</th>
+                            <th class="py-3.5 px-4 font-semibold">Subscribed Plan</th>
                             <th class="py-3.5 px-4 font-semibold">Payment Method & Ref</th>
                             <th class="py-3.5 px-4 font-semibold">Invoice Date</th>
                             <th class="py-3.5 px-4 font-semibold">Amount Paid</th>
@@ -325,7 +325,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="py-8 text-center text-slate-400 dark:text-slate-500">
-                                    No SaaS platform invoices logged.
+                                    No platform invoices logged.
                                 </td>
                             </tr>
                         @endforelse
@@ -403,7 +403,7 @@
         <div x-show="showManualPayModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl transition-colors" @click.away="showManualPayModal = false">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Record Offline SaaS Payment</h3>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Record Offline Payment</h3>
                     <button @click="showManualPayModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer p-1">✕</button>
                 </div>
 

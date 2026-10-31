@@ -289,7 +289,19 @@ class AppController extends Controller
             $query->where('created_at', '>=', now()->startOfMonth());
         }
 
-        $members = $query->latest()->paginate(15)->withQueryString();
+        $sortBy = $request->get('sort', 'member_id_desc');
+        if ($sortBy === 'member_id_asc') {
+            $query->orderByRaw("CASE WHEN member_code REGEXP '[0-9]+' THEN CAST(REGEXP_REPLACE(member_code, '[^0-9]', '') AS UNSIGNED) ELSE 999999 END ASC, id ASC");
+        } elseif ($sortBy === 'name_asc') {
+            $query->orderBy('first_name', 'asc')->orderBy('last_name', 'asc');
+        } elseif ($sortBy === 'join_date_desc') {
+            $query->orderBy('join_date', 'desc')->orderBy('id', 'desc');
+        } else {
+            // Default: Member ID latest to old (descending)
+            $query->orderByRaw("CASE WHEN member_code REGEXP '[0-9]+' THEN CAST(REGEXP_REPLACE(member_code, '[^0-9]', '') AS UNSIGNED) ELSE 0 END DESC, id DESC");
+        }
+
+        $members = $query->paginate(15)->withQueryString();
         $branches = Branch::all();
         $membershipPlans = MembershipPlan::where('is_active', true)->get();
 
@@ -303,8 +315,9 @@ class AppController extends Controller
         $membershipPlans = MembershipPlan::where('is_active', true)->get();
         $trainers = Trainer::where('status', 'ACTIVE')->get();
         $staff = User::where('tenant_id', $tenant->id)->get();
+        $nextMemberCode = $tenant->generateNextMemberCode();
 
-        return view('app.members.create', compact('branches', 'membershipPlans', 'trainers', 'staff'));
+        return view('app.members.create', compact('branches', 'membershipPlans', 'trainers', 'staff', 'nextMemberCode'));
     }
 
     public function lookupMemberPhone(Request $request): JsonResponse
@@ -400,7 +413,7 @@ class AppController extends Controller
         }
 
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
+            'csv_file' => ['required', 'file', 'max:20480', 'extensions:csv,txt'],
             'branch_id' => 'nullable|integer',
             'duplicate_strategy' => 'nullable|in:skip,update',
         ]);
@@ -496,6 +509,11 @@ class AppController extends Controller
                 'initial_payment_amount' => 'nullable|numeric|min:0',
                 'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
                 'transaction_reference' => 'nullable|string|max:100',
+                'is_split_payment' => 'nullable|boolean',
+                'split_cash_amount' => 'nullable|numeric|min:0',
+                'split_online_amount' => 'nullable|numeric|min:0',
+                'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+                'split_online_reference' => 'nullable|string|max:100',
                 'notes' => 'nullable|string|max:500',
             ]);
 
@@ -514,16 +532,45 @@ class AppController extends Controller
                     ];
                     $membership = $this->membershipService->assignMembership($member, $plan, $membershipOptions);
 
-                    $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
-                    if ($initialPay > 0) {
-                        $this->paymentService->recordPayment(
-                            $member,
-                            $initialPay,
-                            $validated['payment_method'] ?? 'cash',
-                            $membership,
-                            $validated['transaction_reference'] ?? null,
-                            $validated['notes'] ?? 'Initial enrollment fee payment'
-                        );
+                    $isSplit = $request->boolean('is_split_payment');
+                    $splitCash = (float) $request->input('split_cash_amount', 0);
+                    $splitOnline = (float) $request->input('split_online_amount', 0);
+                    $splitMethod = $request->input('split_online_method', 'upi');
+                    $splitRef = $request->input('split_online_reference');
+
+                    if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
+                        if ($splitCash > 0) {
+                            $this->paymentService->recordPayment(
+                                $member,
+                                $splitCash,
+                                'cash',
+                                $membership,
+                                null,
+                                trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: Cash)')
+                            );
+                        }
+                        if ($splitOnline > 0) {
+                            $this->paymentService->recordPayment(
+                                $member,
+                                $splitOnline,
+                                $splitMethod,
+                                $membership,
+                                $splitRef,
+                                trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: ' . strtoupper($splitMethod) . ')')
+                            );
+                        }
+                    } else {
+                        $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
+                        if ($initialPay > 0) {
+                            $this->paymentService->recordPayment(
+                                $member,
+                                $initialPay,
+                                $validated['payment_method'] ?? 'cash',
+                                $membership,
+                                $validated['transaction_reference'] ?? null,
+                                $validated['notes'] ?? 'Initial enrollment fee payment'
+                            );
+                        }
                     }
                 }
 
@@ -534,6 +581,7 @@ class AppController extends Controller
         }
 
         $validated = $request->validate([
+            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('members', 'member_code')->where('tenant_id', $tenant?->id)],
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'phone' => 'required|string|max:30',
@@ -568,8 +616,13 @@ class AppController extends Controller
             'initial_payment_amount' => 'nullable|numeric|min:0',
             'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
             'transaction_reference' => 'nullable|string|max:100',
+            'is_split_payment' => 'nullable|boolean',
+            'split_cash_amount' => 'nullable|numeric|min:0',
+            'split_online_amount' => 'nullable|numeric|min:0',
+            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+            'split_online_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
-            'photo' => 'nullable|image|max:5120',
+            'photo' => 'nullable|image|max:10240',
             'photo_data' => 'nullable|string',
         ]);
 
@@ -663,21 +716,50 @@ class AppController extends Controller
                 ];
                 $membership = $this->membershipService->assignMembership($member, $plan, $membershipOptions);
 
-                $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
-                if ($initialPay > 0) {
-                    $this->paymentService->recordPayment(
-                        $member,
-                        $initialPay,
-                        $validated['payment_method'] ?? 'cash',
-                        $membership,
-                        $validated['transaction_reference'] ?? null,
-                        $validated['notes'] ?? 'Initial enrollment fee payment'
-                    );
+                $isSplit = $request->boolean('is_split_payment');
+                $splitCash = (float) $request->input('split_cash_amount', 0);
+                $splitOnline = (float) $request->input('split_online_amount', 0);
+                $splitMethod = $request->input('split_online_method', 'upi');
+                $splitRef = $request->input('split_online_reference');
+
+                if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
+                    if ($splitCash > 0) {
+                        $this->paymentService->recordPayment(
+                            $member,
+                            $splitCash,
+                            'cash',
+                            $membership,
+                            null,
+                            trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: Cash)')
+                        );
+                    }
+                    if ($splitOnline > 0) {
+                        $this->paymentService->recordPayment(
+                            $member,
+                            $splitOnline,
+                            $splitMethod,
+                            $membership,
+                            $splitRef,
+                            trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: ' . strtoupper($splitMethod) . ')')
+                        );
+                    }
+                } else {
+                    $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
+                    if ($initialPay > 0) {
+                        $this->paymentService->recordPayment(
+                            $member,
+                            $initialPay,
+                            $validated['payment_method'] ?? 'cash',
+                            $membership,
+                            $validated['transaction_reference'] ?? null,
+                            $validated['notes'] ?? 'Initial enrollment fee payment'
+                        );
+                    }
                 }
 
-                // Handle Duo / Family group members enrollment
-                if (in_array($plan->plan_type, ['duo', 'family']) && is_array($request->input('group_members'))) {
-                    $maxAdditional = ($plan->plan_type === 'duo') ? 1 : ($plan->max_members > 1 ? $plan->max_members - 1 : 3);
+                // Handle Duo / Family / Group members enrollment
+                if (in_array($plan->plan_type, ['duo', 'family', 'group']) && is_array($request->input('group_members'))) {
+                    $maxAdditional = ($plan->plan_type === 'duo') ? 1 : ($plan->max_members > 1 ? $plan->max_members - 1 : 4);
                     $groupInputs = array_slice($request->input('group_members'), 0, $maxAdditional);
 
                     foreach ($groupInputs as $gIdx => $gData) {
@@ -691,7 +773,7 @@ class AppController extends Controller
                         $gEmail = trim($gData['email'] ?? '') ?: null;
                         $gGender = strtolower(trim($gData['gender'] ?? 'male'));
                         $gDob = ! empty($gData['dob']) ? $gData['dob'] : null;
-                        $gRelation = trim($gData['relation'] ?? ($plan->plan_type === 'duo' ? 'Duo Partner' : 'Family Member'));
+                        $gRelation = trim($gData['relation'] ?? ($plan->plan_type === 'duo' ? 'Duo Partner' : ($plan->plan_type === 'group' ? 'Group Member' : 'Family Member')));
 
                         $gMetadata = [
                             'relation' => $gRelation,
@@ -755,9 +837,10 @@ class AppController extends Controller
         $member = Member::with('activeMembership')->findOrFail($id);
 
         $validated = $request->validate([
+            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('members', 'member_code')->where('tenant_id', $tenant?->id ?? $member->tenant_id)->ignore($member->id)],
+            'join_date' => 'nullable|date',
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
-            'phone' => 'required|string|max:30',
             'phone' => ['required', 'string', 'max:30', Rule::unique('members', 'phone')->where('tenant_id', $tenant?->id ?? $member->tenant_id)->ignore($member->id)],
             'alternate_phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:150',
@@ -773,7 +856,9 @@ class AppController extends Controller
             'status' => 'required|in:ACTIVE,INACTIVE,SUSPENDED,EXPIRED',
             'notes' => 'nullable|string|max:1000',
             'membership_plan_id' => 'nullable|exists:membership_plans,id',
-            'photo' => 'nullable|image|max:5120',
+            'membership_start_date' => 'nullable|date',
+            'membership_end_date' => 'nullable|date',
+            'photo' => 'nullable|image|max:10240',
             'photo_data' => 'nullable|string',
             'remove_photo' => 'nullable|boolean',
             'weight' => 'nullable|numeric|min:0',
@@ -847,6 +932,8 @@ class AppController extends Controller
             }
 
             $member->update([
+                'member_code' => ! empty($validated['member_code']) ? $validated['member_code'] : $member->member_code,
+                'join_date' => ! empty($validated['join_date']) ? $validated['join_date'] : $member->join_date,
                 'first_name' => $validated['first_name'],
                 'last_name' => $validated['last_name'],
                 'phone' => $validated['phone'],
@@ -863,13 +950,88 @@ class AppController extends Controller
                 'metadata' => $metadata,
             ]);
 
+            $membership = $member->activeMembership ?? $member->memberships()->latest()->first();
+
             if (! empty($validated['membership_plan_id'])) {
                 $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
-                if (! $member->activeMembership || $member->activeMembership->membership_plan_id != $plan->id) {
-                    $this->membershipService->assignMembership($member, $plan, [
-                        'start_date' => now()->toDateString(),
-                    ]);
+
+                $startDate = ! empty($validated['membership_start_date'])
+                    ? Carbon::parse($validated['membership_start_date'])
+                    : ($membership?->start_date ?? Carbon::today());
+
+                if (! empty($validated['membership_end_date'])) {
+                    $endDate = Carbon::parse($validated['membership_end_date']);
+                } else {
+                    $endDate = match ($plan->duration_type) {
+                        'days' => $startDate->copy()->addDays($plan->duration_value),
+                        'months' => $startDate->copy()->addMonths($plan->duration_value),
+                        'years' => $startDate->copy()->addYears($plan->duration_value),
+                        default => $startDate->copy()->addMonth(),
+                    };
                 }
+
+                if ($membership) {
+                    $planChanged = $membership->membership_plan_id != $plan->id;
+                    $membershipData = [
+                        'membership_plan_id' => $plan->id,
+                        'start_date' => $startDate->toDateString(),
+                        'end_date' => $endDate->toDateString(),
+                    ];
+
+                    if ($planChanged) {
+                        $membershipData['price'] = (float) $plan->price;
+                        $discount = (float) ($membership->discount ?? 0);
+                        $taxRate = (float) $plan->tax_rate;
+                        $taxableAmount = max(0, (float) $plan->price - $discount);
+                        $tax = ($taxableAmount * $taxRate) / 100;
+                        $membershipData['tax'] = $tax;
+                        $membershipData['final_amount'] = $taxableAmount + $tax;
+                    }
+
+                    if ($endDate->isFuture() || $endDate->isToday()) {
+                        $membershipData['status'] = 'ACTIVE';
+                    }
+
+                    $membership->update($membershipData);
+
+                    ActivityLog::log('membership_updated', "Updated membership plan and validity for {$member->full_name} ({$plan->name}: {$startDate->format('d/m/Y')} to {$endDate->format('d/m/Y')})", $membership);
+                } else {
+                    $price = (float) $plan->price;
+                    $taxRate = (float) $plan->tax_rate;
+                    $tax = ($price * $taxRate) / 100;
+                    $finalAmount = $price + $tax;
+
+                    $newMembership = Membership::create([
+                        'tenant_id' => $member->tenant_id,
+                        'branch_id' => $member->branch_id,
+                        'member_id' => $member->id,
+                        'membership_plan_id' => $plan->id,
+                        'start_date' => $startDate->toDateString(),
+                        'end_date' => $endDate->toDateString(),
+                        'price' => $price,
+                        'discount' => 0.00,
+                        'tax' => $tax,
+                        'final_amount' => $finalAmount,
+                        'paid_amount' => 0.00,
+                        'status' => 'ACTIVE',
+                    ]);
+
+                    ActivityLog::log('membership_assigned', "Assigned plan '{$plan->name}' ({$startDate->format('d/m/Y')} to {$endDate->format('d/m/Y')}) to {$member->full_name}", $newMembership);
+                }
+            } elseif ($membership && (! empty($validated['membership_start_date']) || ! empty($validated['membership_end_date']))) {
+                $updateDates = [];
+                if (! empty($validated['membership_start_date'])) {
+                    $updateDates['start_date'] = $validated['membership_start_date'];
+                }
+                if (! empty($validated['membership_end_date'])) {
+                    $updateDates['end_date'] = $validated['membership_end_date'];
+                    $parsedEnd = Carbon::parse($validated['membership_end_date']);
+                    if ($parsedEnd->isFuture() || $parsedEnd->isToday()) {
+                        $updateDates['status'] = 'ACTIVE';
+                    }
+                }
+                $membership->update($updateDates);
+                ActivityLog::log('membership_updated', "Updated membership validity for {$member->full_name}", $membership);
             }
 
             ActivityLog::log('member_updated', "Updated details for member {$member->full_name} ({$member->member_code})", $member);
@@ -886,25 +1048,61 @@ class AppController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|string|in:cash,upi,card,netbanking,cheque',
+            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
             'transaction_reference' => 'nullable|string|max:100',
+            'is_split_payment' => 'nullable|boolean',
+            'split_cash_amount' => 'nullable|numeric|min:0',
+            'split_online_amount' => 'nullable|numeric|min:0',
+            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+            'split_online_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $membership = $member->activeMembership ?? $member->memberships()->latest()->first();
 
-        $this->paymentService->recordPayment(
-            $member,
-            (float) $validated['amount'],
-            $validated['payment_method'],
-            $membership,
-            $validated['transaction_reference'] ?? null,
-            $validated['notes'] ?? 'Remaining fee balance payment'
-        );
+        $isSplit = $request->boolean('is_split_payment');
+        $splitCash = (float) $request->input('split_cash_amount', 0);
+        $splitOnline = (float) $request->input('split_online_amount', 0);
+        $splitMethod = $request->input('split_online_method', 'upi');
+        $splitRef = $request->input('split_online_reference');
+
+        if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
+            $totalCollected = $splitCash + $splitOnline;
+            if ($splitCash > 0) {
+                $this->paymentService->recordPayment(
+                    $member,
+                    $splitCash,
+                    'cash',
+                    $membership,
+                    null,
+                    trim(($validated['notes'] ?? 'Fee payment') . ' (Split: Cash)')
+                );
+            }
+            if ($splitOnline > 0) {
+                $this->paymentService->recordPayment(
+                    $member,
+                    $splitOnline,
+                    $splitMethod,
+                    $membership,
+                    $splitRef,
+                    trim(($validated['notes'] ?? 'Fee payment') . ' (Split: ' . strtoupper($splitMethod) . ')')
+                );
+            }
+        } else {
+            $totalCollected = (float) $validated['amount'];
+            $this->paymentService->recordPayment(
+                $member,
+                $totalCollected,
+                $validated['payment_method'] ?? 'cash',
+                $membership,
+                $validated['transaction_reference'] ?? null,
+                $validated['notes'] ?? 'Remaining fee balance payment'
+            );
+        }
 
         $currency = auth()->user()->tenant?->currency_symbol ?? '₹';
 
-        return back()->with('success', "Payment of {$currency}".number_format($validated['amount'], 2)." collected successfully from {$member->full_name}!");
+        return back()->with('success', "Payment of {$currency}".number_format($totalCollected, 2)." collected successfully from {$member->full_name}!");
     }
 
     public function deleteMember(int $id): RedirectResponse
@@ -1279,8 +1477,8 @@ class AppController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
-            'plan_type' => 'required|in:single,duo,family',
-            'max_members' => 'nullable|integer|min:1|max:20',
+            'plan_type' => 'required|in:single,duo,family,group',
+            'max_members' => 'nullable|integer|min:1|max:50',
             'duration_type' => 'required|in:days,months,years',
             'duration_value' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
@@ -1288,12 +1486,15 @@ class AppController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $maxMembers = match ($validated['plan_type'] ?? 'single') {
+        $defaultCapacity = match ($validated['plan_type'] ?? 'single') {
             'duo' => 2,
             'family' => 4,
+            'group' => 5,
             default => 1,
         };
-        $validated['max_members'] = ! empty($validated['max_members']) ? (int) $validated['max_members'] : $maxMembers;
+        $validated['max_members'] = ($validated['plan_type'] === 'single') 
+            ? 1 
+            : (! empty($validated['max_members']) ? max(1, (int) $validated['max_members']) : $defaultCapacity);
         $validated['tenant_id'] = $tenant->id;
         $validated['is_active'] = $request->boolean('is_active', true);
 
@@ -1313,8 +1514,8 @@ class AppController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
-            'plan_type' => 'required|in:single,duo,family',
-            'max_members' => 'nullable|integer|min:1|max:20',
+            'plan_type' => 'required|in:single,duo,family,group',
+            'max_members' => 'nullable|integer|min:1|max:50',
             'duration_type' => 'required|in:days,months,years',
             'duration_value' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
@@ -1322,12 +1523,15 @@ class AppController extends Controller
             'is_active' => 'nullable|boolean',
         ]);
 
-        $maxMembers = match ($validated['plan_type'] ?? 'single') {
+        $defaultCapacity = match ($validated['plan_type'] ?? 'single') {
             'duo' => 2,
             'family' => 4,
+            'group' => 5,
             default => 1,
         };
-        $validated['max_members'] = ! empty($validated['max_members']) ? (int) $validated['max_members'] : $maxMembers;
+        $validated['max_members'] = ($validated['plan_type'] === 'single') 
+            ? 1 
+            : (! empty($validated['max_members']) ? max(1, (int) $validated['max_members']) : $defaultCapacity);
         $validated['is_active'] = $request->boolean('is_active');
 
         $plan->update($validated);
@@ -1443,7 +1647,7 @@ class AppController extends Controller
         }
 
         // Date range filter
-        $dateFilter = $request->get('date_filter', 'month_till_date');
+        $dateFilter = $request->get('date_filter', 'all');
         if ($dateFilter === 'today') {
             $query->whereDate('payment_date', now()->toDateString());
         } elseif ($dateFilter === 'yesterday') {
@@ -1469,18 +1673,20 @@ class AppController extends Controller
             if ($st === 'reversed') {
                 $query->where('notes', 'like', '%[REVERSED]%');
             } elseif ($st === 'partial') {
-                $query->where('notes', 'not like', '%[REVERSED]%')
-                    ->whereHas('membership', function ($mq) {
-                        $mq->whereColumn('paid_amount', '<', 'final_amount');
-                    });
+                $query->where(function ($q) {
+                    $q->whereNull('notes')->orWhere('notes', 'not like', '%[REVERSED]%');
+                })->whereHas('membership', function ($mq) {
+                    $mq->whereColumn('paid_amount', '<', 'final_amount');
+                });
             } elseif ($st === 'completed') {
-                $query->where('notes', 'not like', '%[REVERSED]%')
-                    ->where(function ($q) {
-                        $q->whereNull('membership_id')
-                            ->orWhereHas('membership', function ($mq) {
-                                $mq->whereColumn('paid_amount', '>=', 'final_amount');
-                            });
-                    });
+                $query->where(function ($q) {
+                    $q->whereNull('notes')->orWhere('notes', 'not like', '%[REVERSED]%');
+                })->where(function ($q) {
+                    $q->whereNull('membership_id')
+                        ->orWhereHas('membership', function ($mq) {
+                            $mq->whereColumn('paid_amount', '>=', 'final_amount');
+                        });
+                });
             }
         }
 
@@ -1503,7 +1709,9 @@ class AppController extends Controller
 
         // Clone for aggregates
         $aggQuery = clone $query;
-        $totalCollected = (float) (clone $aggQuery)->where('notes', 'not like', '%[REVERSED]%')->sum('amount');
+        $totalCollected = (float) (clone $aggQuery)->where(function ($q) {
+            $q->whereNull('notes')->orWhere('notes', 'not like', '%[REVERSED]%');
+        })->sum('amount');
 
         // Total Due calculation across filtered records
         $allPaymentsForDue = (clone $query)->with('membership')->get();
@@ -1554,8 +1762,13 @@ class AppController extends Controller
             'discount' => 'nullable|numeric|min:0',
             'tax' => 'nullable|numeric|min:0',
             'collected_amount' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
+            'payment_method' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
             'transaction_reference' => 'nullable|string|max:100',
+            'is_split_payment' => 'nullable|boolean',
+            'split_cash_amount' => 'nullable|numeric|min:0',
+            'split_online_amount' => 'nullable|numeric|min:0',
+            'split_online_method' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
+            'split_online_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'activate_now' => 'nullable|boolean',
         ]);
@@ -1659,6 +1872,66 @@ class AppController extends Controller
                 $itemLabel = ! empty($validated['custom_item_name']) ? $validated['custom_item_name'] : 'Fee Payment / General Item';
             }
 
+            $isSplit = $request->boolean('is_split_payment');
+            $splitCash = (float) $request->input('split_cash_amount', 0);
+            $splitOnline = (float) $request->input('split_online_amount', 0);
+            $splitMethod = $request->input('split_online_method', 'upi');
+            $splitRef = $request->input('split_online_reference');
+
+            if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
+                $totalSplit = $splitCash + $splitOnline;
+
+                if ($splitCash > 0) {
+                    $invoiceNumber1 = 'RCP'.date('Ymd').rand(1000, 9999);
+                    $payment1 = MemberPayment::create([
+                        'tenant_id' => $tenant->id,
+                        'branch_id' => $member->branch_id,
+                        'member_id' => $member->id,
+                        'membership_id' => $membership?->id,
+                        'invoice_number' => $invoiceNumber1,
+                        'amount' => $splitCash,
+                        'payment_method' => 'cash',
+                        'transaction_reference' => null,
+                        'payment_date' => $paymentDate,
+                        'received_by_user_id' => auth()->id(),
+                        'notes' => trim($itemLabel.' (Split: Cash)'.($notes ? " | {$notes}" : '')),
+                    ]);
+
+                    if ($membership) {
+                        $membership->update(['paid_amount' => (float) $membership->paid_amount + $splitCash]);
+                    }
+
+                    ActivityLog::log('member_payment_received', 'Recorded split payment of '.($tenant->currency_symbol ?? '₹').number_format($splitCash, 2)." via Cash from {$member->full_name} ({$invoiceNumber1})", $payment1);
+                }
+
+                if ($splitOnline > 0) {
+                    $invoiceNumber2 = 'RCP'.date('Ymd').rand(1000, 9999);
+                    $payment2 = MemberPayment::create([
+                        'tenant_id' => $tenant->id,
+                        'branch_id' => $member->branch_id,
+                        'member_id' => $member->id,
+                        'membership_id' => $membership?->id,
+                        'invoice_number' => $invoiceNumber2,
+                        'amount' => $splitOnline,
+                        'payment_method' => $splitMethod,
+                        'transaction_reference' => $splitRef,
+                        'payment_date' => $paymentDate,
+                        'received_by_user_id' => auth()->id(),
+                        'notes' => trim($itemLabel.' (Split: '.strtoupper($splitMethod).')'.($notes ? " | {$notes}" : '')),
+                    ]);
+
+                    if ($membership) {
+                        $membership->update(['paid_amount' => (float) $membership->paid_amount + $splitOnline]);
+                    }
+
+                    ActivityLog::log('member_payment_received', 'Recorded split payment of '.($tenant->currency_symbol ?? '₹').number_format($splitOnline, 2)." via {$splitMethod} from {$member->full_name} ({$invoiceNumber2})", $payment2);
+                }
+
+                $currency = $tenant->currency_symbol ?? '₹';
+
+                return back()->with('success', "Split payment of {$currency}".number_format($totalSplit, 2)." (Cash: {$currency}".number_format($splitCash, 2)." + Online: {$currency}".number_format($splitOnline, 2).") recorded successfully for {$member->full_name}!");
+            }
+
             if ($collectedAmount > 0) {
                 // Prevent concurrent double submission
                 $existingRecentPayment = MemberPayment::where('tenant_id', $tenant->id)
@@ -1682,7 +1955,7 @@ class AppController extends Controller
                     'membership_id' => $membership?->id,
                     'invoice_number' => $invoiceNumber,
                     'amount' => $collectedAmount,
-                    'payment_method' => $validated['payment_method'],
+                    'payment_method' => $validated['payment_method'] ?? 'cash',
                     'transaction_reference' => $validated['transaction_reference'] ?? null,
                     'payment_date' => $paymentDate,
                     'received_by_user_id' => auth()->id(),
@@ -5328,7 +5601,7 @@ class AppController extends Controller
         );
 
         $currency = $tenant->currency_symbol ?? '₹';
-        $msg = "Congratulations! Your {$plan->name} SaaS subscription has been activated successfully via ".($finalPrice > 0 ? 'Razorpay' : 'Free tier').'!';
+        $msg = "Congratulations! Your {$plan->name} subscription has been activated successfully via ".($finalPrice > 0 ? 'Razorpay' : 'Free tier').'!';
         if ($coupon && $discountAmount > 0) {
             $msg .= " (Coupon '{$coupon->code}' applied: saved {$currency}".number_format($discountAmount, 2).')';
         }
@@ -5567,7 +5840,7 @@ class AppController extends Controller
             'email' => 'nullable|email|max:150',
             'phone' => 'nullable|string|max:30',
             'address' => 'nullable|string|max:500',
-            'logo' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:10240',
             'logo_url' => 'nullable|string|max:500',
             'currency' => 'nullable|string|max:10',
             'timezone' => 'nullable|string|max:50',

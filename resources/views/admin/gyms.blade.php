@@ -15,7 +15,7 @@
 
             <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors">
                 <div>
-                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Contracted SaaS Value</span>
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Contracted Value</span>
                     <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 truncate">₹{{ number_format($gymStats['totalPlatformRevenue'] ?? 0, 2) }}</span>
                     <span class="text-xs text-slate-500 dark:text-slate-400 block mt-1">Active recurring subscriptions</span>
                 </div>
@@ -60,7 +60,7 @@
                         <tr>
                             <th class="py-3.5 px-4 font-semibold">Gym Business &amp; Tenant</th>
                             <th class="py-3.5 px-4 font-semibold">Owner &amp; Contact</th>
-                            <th class="py-3.5 px-4 font-semibold">SaaS Plan &amp; Inclusions</th>
+                            <th class="py-3.5 px-4 font-semibold">Subscription Plan &amp; Inclusions</th>
                             <th class="py-3.5 px-4 font-semibold">Status</th>
                             <th class="py-3.5 px-4 font-semibold">Subscription Validity</th>
                             <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
@@ -339,7 +339,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">SaaS Plan *</label>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Subscription Plan *</label>
                             <select name="plan_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-red-500 focus:outline-none cursor-pointer">
                                 @foreach($plans as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
