@@ -57,7 +57,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::delete('/members/{id}', [AppController::class, 'deleteMember'])->name('app.members.delete')->whereNumber('id')->middleware('permission:members.delete');
         Route::post('/members/{id}/collect-fee', [AppController::class, 'collectMemberFee'])->name('app.members.collect-fee')->middleware('permission:payments.record');
         Route::post('/members/{id}/freeze', [AppController::class, 'toggleFreezeMember'])->name('app.members.freeze')->middleware('permission:members.freeze');
-        Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription')->middleware('permission:memberships.create');
+        Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription')->middleware('permission:memberships.create,memberships.edit,plans.create,plans.edit,members.create,members.edit');
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package')->middleware('permission:pt.create');
         Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class')->middleware('permission:classes.book');
     });
@@ -67,10 +67,10 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
 
     // 2. Memberships & Billing
     Route::middleware(['feature:memberships_billing'])->group(function () {
-        Route::get('/memberships', [AppController::class, 'memberships'])->name('app.memberships.index')->middleware('permission:memberships.view,plans.view');
-        Route::post('/membership-plans', [AppController::class, 'storeMembershipPlan'])->name('app.membership-plans.store')->middleware('permission:plans.create');
-        Route::post('/membership-plans/{id}', [AppController::class, 'updateMembershipPlan'])->name('app.membership-plans.update')->middleware('permission:plans.edit');
-        Route::delete('/membership-plans/{id}', [AppController::class, 'deleteMembershipPlan'])->name('app.membership-plans.delete')->middleware('permission:plans.delete');
+        Route::get('/memberships', [AppController::class, 'memberships'])->name('app.memberships.index')->middleware('permission:memberships.view,plans.view,plans.create,plans.edit,memberships.create,memberships.edit');
+        Route::post('/membership-plans', [AppController::class, 'storeMembershipPlan'])->name('app.membership-plans.store')->middleware('permission:plans.create,memberships.create');
+        Route::post('/membership-plans/{id}', [AppController::class, 'updateMembershipPlan'])->name('app.membership-plans.update')->middleware('permission:plans.edit,memberships.edit');
+        Route::delete('/membership-plans/{id}', [AppController::class, 'deleteMembershipPlan'])->name('app.membership-plans.delete')->middleware('permission:plans.delete,memberships.delete');
     });
 
     // 3. Payments & POS

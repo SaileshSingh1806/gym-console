@@ -376,7 +376,8 @@
                                                 member_phone: '{{ $member->phone }}',
                                                 member_email: '{{ $member->email ?? '' }}',
                                                 total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                paid: '{{ number_format($p->amount, 2) }}'
+                                                paid: '{{ number_format($p->amount, 2) }}',
+                                                notes: '{{ addslashes($p->notes ?? '') }}'
                                             })"
                                             class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
                                         {{ $receiptNo }}
@@ -435,7 +436,8 @@
                                         member_phone: '{{ $member->phone }}',
                                         member_email: '{{ $member->email ?? '' }}',
                                         total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                        paid: '{{ number_format($p->amount, 2) }}'
+                                        paid: '{{ number_format($p->amount, 2) }}',
+                                        notes: '{{ addslashes($p->notes ?? '') }}'
                                     })"
                                     class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -546,7 +548,8 @@
                                                     member_phone: '{{ $member->phone }}',
                                                     member_email: '{{ $member->email ?? '' }}',
                                                     total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                    paid: '{{ number_format($p->amount, 2) }}'
+                                                    paid: '{{ number_format($p->amount, 2) }}',
+                                                    notes: '{{ addslashes($p->notes ?? '') }}'
                                                 })"
                                                 class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold cursor-pointer underline">
                                             {{ $receiptNo }}
@@ -580,9 +583,15 @@
 
                                 <!-- METHOD Column -->
                                 <td class="py-3.5 px-4">
-                                    <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold uppercase">
-                                        {{ $p->payment_method }}
-                                    </span>
+                                    @if($p->payment_method === 'split' || str_contains($p->notes ?? '', 'Split Payment'))
+                                        <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-bold uppercase" title="{{ $p->notes }}">
+                                            SPLIT
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold uppercase">
+                                            {{ $p->payment_method }}
+                                        </span>
+                                    @endif
                                 </td>
 
                                 <!-- DATE Column -->
@@ -628,7 +637,8 @@
                                                     member_phone: '{{ $member->phone }}',
                                                     member_email: '{{ $member->email ?? '' }}',
                                                     total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                    paid: '{{ number_format($p->amount, 2) }}'
+                                                    paid: '{{ number_format($p->amount, 2) }}',
+                                                    notes: '{{ addslashes($p->notes ?? '') }}'
                                                 })"
                                                 title="View / Print Tax Invoice Receipt" 
                                                 class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">
@@ -1473,8 +1483,14 @@
                                     </div>
                                     <div class="grid grid-cols-12 gap-1 text-xs">
                                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
-                                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase" x-text="selectedInvoice.method || 'UPI'"></span>
+                                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase" x-text="(selectedInvoice.method === 'SPLIT' || (selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment'))) ? 'SPLIT PAYMENT' : (selectedInvoice.method || 'UPI')"></span>
                                     </div>
+                                    <template x-if="selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment')">
+                                        <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
+                                            <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
+                                            <span x-text="selectedInvoice.notes.split(' | ').filter(n => n.includes('Split Payment')).join('') || selectedInvoice.notes"></span>
+                                        </div>
+                                    </template>
                                     <div class="grid grid-cols-12 gap-1 text-xs">
                                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Status:</span>
                                         <span class="font-bold text-emerald-600 col-span-6 sm:col-span-7">Completed</span>

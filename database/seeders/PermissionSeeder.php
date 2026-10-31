@@ -39,6 +39,7 @@ class PermissionSeeder extends Seeder
                 'permissions' => [
                     ['name' => 'memberships.view', 'display_name' => 'View Memberships', 'description' => 'Inspect active plans and member subscriptions'],
                     ['name' => 'memberships.create', 'display_name' => 'Assign Membership', 'description' => 'Assign/enroll members to membership plans'],
+                    ['name' => 'memberships.edit', 'display_name' => 'Edit Membership Subscription', 'description' => 'Modify member active subscription dates and plans'],
                     ['name' => 'memberships.delete', 'display_name' => 'Cancel Membership', 'description' => 'Terminate or remove member subscriptions'],
                     ['name' => 'plans.view', 'display_name' => 'View Plans Catalog', 'description' => 'Browse membership plan tiers and pricing'],
                     ['name' => 'plans.create', 'display_name' => 'Create Membership Plan', 'description' => 'Add new membership plans to catalog'],
@@ -194,6 +195,7 @@ class PermissionSeeder extends Seeder
             // Memberships & Plans
             'memberships.view' => 'memberships_billing',
             'memberships.create' => 'memberships_billing',
+            'memberships.edit' => 'memberships_billing',
             'memberships.delete' => 'memberships_billing',
             'plans.view' => 'memberships_billing',
             'plans.create' => 'memberships_billing',

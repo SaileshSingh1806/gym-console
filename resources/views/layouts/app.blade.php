@@ -222,8 +222,9 @@
 
             @php
                 $user = auth()->user();
-                $canGymOps = ($user->hasPermission('members.view') && $user->hasFeature('members_management'))
-                    || ($user->hasPermission('memberships.view') && $user->hasFeature('memberships_billing'))
+                $canGymOps = $user->isGymOwner()
+                    || ($user->hasPermission('members.view') && $user->hasFeature('members_management'))
+                    || (($user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
                     || ($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
                     || ($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'));
             @endphp
@@ -243,7 +244,7 @@
             @endif
 
             <!-- Memberships -->
-            @if($user->hasPermission('memberships.view') && $user->hasFeature('memberships_billing'))
+            @if(($user->isGymOwner() || $user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
             <a href="{{ route('app.memberships.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ (request()->routeIs('app.memberships.*') || request()->routeIs('app.membership-plans.*')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
                 <div class="flex items-center gap-3">
                     <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

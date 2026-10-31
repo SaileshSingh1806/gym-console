@@ -628,7 +628,8 @@
                                     start_date: '{{ $activeMembership?->start_date ? $activeMembership->start_date->format('d M Y') : '' }}',
                                     end_date: '{{ $activeMembership?->end_date ? $activeMembership->end_date->format('d M Y') : '' }}',
                                     total: '{{ number_format($activeMembership?->final_amount ?? $mainPayment->amount, 2) }}',
-                                    paid: '{{ number_format($mainPayment->amount, 2) }}'
+                                    paid: '{{ number_format($mainPayment->amount, 2) }}',
+                                    notes: '{{ addslashes($mainPayment->notes ?? '') }}'
                                 })"
                                 title="View & Print Tax Invoice"
                                 class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
@@ -1051,12 +1052,14 @@
                             <p class="text-xs text-slate-500 dark:text-slate-400">All current and previous gym membership packages</p>
                         </div>
 
+                        @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.edit') || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('plans.edit') || auth()->user()->hasPermission('members.edit') || auth()->user()->hasPermission('members.create'))
                         <button type="button" 
                                 @click="showAddSubscriptionModal = true" 
                                 class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Add Subscription</span>
                         </button>
+                        @endif
                     </div>
 
                     <!-- Subscription Table -->
@@ -3481,8 +3484,14 @@
                                         </div>
                                         <div class="grid grid-cols-12 gap-1 text-xs">
                                             <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
-                                            <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase" x-text="selectedInvoice.method || 'UPI'"></span>
+                                            <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase" x-text="(selectedInvoice.method === 'SPLIT' || (selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment'))) ? 'SPLIT PAYMENT' : (selectedInvoice.method || 'UPI')"></span>
                                         </div>
+                                        <template x-if="selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment')">
+                                            <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
+                                                <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
+                                                <span x-text="selectedInvoice.notes.split(' | ').filter(n => n.includes('Split Payment')).join('') || selectedInvoice.notes"></span>
+                                            </div>
+                                        </template>
                                         <div class="grid grid-cols-12 gap-1 text-xs">
                                             <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Status:</span>
                                             <span class="font-bold text-emerald-600 col-span-6 sm:col-span-7">Completed</span>

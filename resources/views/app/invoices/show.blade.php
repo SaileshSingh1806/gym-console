@@ -271,7 +271,13 @@
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
-                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8">{{ $payment->payment_method ?? 'UPI' }}</span>
+                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8">
+                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
+                                SPLIT (CASH + ONLINE)
+                            @else
+                                {{ $payment->payment_method ?? 'UPI' }}
+                            @endif
+                        </span>
                     </div>
                 </div>
 
@@ -350,8 +356,27 @@
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
-                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase">{{ $payment->payment_method ?? 'UPI' }}</span>
+                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase">
+                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
+                                SPLIT PAYMENT
+                            @else
+                                {{ $payment->payment_method ?? 'UPI' }}
+                            @endif
+                        </span>
                     </div>
+                    @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
+                        @php
+                            $splitNote = $payment->notes ?? '';
+                            if (str_contains($splitNote, 'Split Payment:')) {
+                                $parts = explode('Split Payment:', $splitNote);
+                                $splitNote = 'Split: ' . trim(end($parts));
+                            }
+                        @endphp
+                        <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
+                            <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
+                            <span>{{ $splitNote }}</span>
+                        </div>
+                    @endif
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Status:</span>
                         <span class="font-bold text-emerald-600 col-span-6 sm:col-span-7">Completed</span>

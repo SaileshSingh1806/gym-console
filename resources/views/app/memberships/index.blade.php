@@ -34,7 +34,7 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Configure packages for Single, Duo (2 Persons), Family, and Custom Groups (e.g. ₹35,000 for 5 People).</p>
                 </div>
             </div>
-            @if(auth()->user()->hasPermission('memberships.manage'))
+            @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.manage'))
                 <button @click="showNewModal = true; setNewPlanType('single'); newPrice = ''; newDurationValue = 1; newDurationType = 'months'" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-[1.02] cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Create Membership Plan</span>
@@ -112,7 +112,7 @@
                         </div>
                     </div>
 
-                    @if(auth()->user()->hasPermission('memberships.manage'))
+                    @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.edit') || auth()->user()->hasPermission('memberships.edit') || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('memberships.manage'))
                         <div class="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                             <button @click="editPlan = {{ json_encode([
                                 'id' => $plan->id,
@@ -128,6 +128,7 @@
                             ]) }}" class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 text-xs font-bold transition cursor-pointer text-center">
                                 Edit Plan
                             </button>
+                            @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.delete') || auth()->user()->hasPermission('memberships.delete') || auth()->user()->hasPermission('memberships.manage'))
                             <form action="{{ route('app.membership-plans.delete', $plan->id) }}" method="POST" 
                                   data-confirm="Are you sure you want to delete membership plan '{{ addslashes($plan->name) }}'? Existing active member subscriptions with this plan will remain valid." 
                                   data-confirm-title="Delete Membership Plan" 
@@ -140,6 +141,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
+                            @endif
                         </div>
                     @endif
                 </div>
@@ -277,7 +279,7 @@
             @endif
         </div>
 
-        @if(auth()->user()->hasPermission('memberships.manage'))
+        @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('plans.edit') || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.edit') || auth()->user()->hasPermission('memberships.manage'))
             <!-- Create Membership Plan Modal -->
             <div x-show="showNewModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl" @click.away="showNewModal = false">

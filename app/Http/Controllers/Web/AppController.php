@@ -539,26 +539,22 @@ class AppController extends Controller
                     $splitRef = $request->input('split_online_reference');
 
                     if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-                        if ($splitCash > 0) {
-                            $this->paymentService->recordPayment(
-                                $member,
-                                $splitCash,
-                                'cash',
-                                $membership,
-                                null,
-                                trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: Cash)')
-                            );
+                        $totalPaid = $splitCash + $splitOnline;
+                        $currency = $tenant?->currency_symbol ?? '₹';
+                        $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
+                        if (!empty($splitRef)) {
+                            $breakdown .= " (Ref: {$splitRef})";
                         }
-                        if ($splitOnline > 0) {
-                            $this->paymentService->recordPayment(
-                                $member,
-                                $splitOnline,
-                                $splitMethod,
-                                $membership,
-                                $splitRef,
-                                trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: ' . strtoupper($splitMethod) . ')')
-                            );
-                        }
+                        $notes = trim(($validated['notes'] ?? 'Initial enrollment fee') . " | {$breakdown}");
+
+                        $this->paymentService->recordPayment(
+                            $member,
+                            $totalPaid,
+                            'split',
+                            $membership,
+                            $splitRef ?: null,
+                            $notes
+                        );
                     } else {
                         $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
                         if ($initialPay > 0) {
@@ -723,26 +719,22 @@ class AppController extends Controller
                 $splitRef = $request->input('split_online_reference');
 
                 if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-                    if ($splitCash > 0) {
-                        $this->paymentService->recordPayment(
-                            $member,
-                            $splitCash,
-                            'cash',
-                            $membership,
-                            null,
-                            trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: Cash)')
-                        );
+                    $totalPaid = $splitCash + $splitOnline;
+                    $currency = $tenant?->currency_symbol ?? '₹';
+                    $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
+                    if (!empty($splitRef)) {
+                        $breakdown .= " (Ref: {$splitRef})";
                     }
-                    if ($splitOnline > 0) {
-                        $this->paymentService->recordPayment(
-                            $member,
-                            $splitOnline,
-                            $splitMethod,
-                            $membership,
-                            $splitRef,
-                            trim(($validated['notes'] ?? 'Initial enrollment fee') . ' (Split: ' . strtoupper($splitMethod) . ')')
-                        );
-                    }
+                    $notes = trim(($validated['notes'] ?? 'Initial enrollment fee') . " | {$breakdown}");
+
+                    $this->paymentService->recordPayment(
+                        $member,
+                        $totalPaid,
+                        'split',
+                        $membership,
+                        $splitRef ?: null,
+                        $notes
+                    );
                 } else {
                     $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
                     if ($initialPay > 0) {
@@ -1068,26 +1060,21 @@ class AppController extends Controller
 
         if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
             $totalCollected = $splitCash + $splitOnline;
-            if ($splitCash > 0) {
-                $this->paymentService->recordPayment(
-                    $member,
-                    $splitCash,
-                    'cash',
-                    $membership,
-                    null,
-                    trim(($validated['notes'] ?? 'Fee payment') . ' (Split: Cash)')
-                );
+            $currency = $member->tenant?->currency_symbol ?? '₹';
+            $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
+            if (!empty($splitRef)) {
+                $breakdown .= " (Ref: {$splitRef})";
             }
-            if ($splitOnline > 0) {
-                $this->paymentService->recordPayment(
-                    $member,
-                    $splitOnline,
-                    $splitMethod,
-                    $membership,
-                    $splitRef,
-                    trim(($validated['notes'] ?? 'Fee payment') . ' (Split: ' . strtoupper($splitMethod) . ')')
-                );
-            }
+            $notes = trim(($validated['notes'] ?? 'Fee balance payment') . " | {$breakdown}");
+
+            $this->paymentService->recordPayment(
+                $member,
+                $totalCollected,
+                'split',
+                $membership,
+                $splitRef ?: null,
+                $notes
+            );
         } else {
             $totalCollected = (float) $validated['amount'];
             $this->paymentService->recordPayment(
@@ -1468,8 +1455,9 @@ class AppController extends Controller
 
     public function storeMembershipPlan(Request $request): RedirectResponse
     {
-        if (! auth()->user()->hasPermission('memberships.manage')) {
-            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        $u = auth()->user();
+        if (! $u->isGymOwner() && ! $u->hasPermission('plans.create') && ! $u->hasPermission('memberships.create') && ! $u->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to create membership plans.');
         }
 
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -1505,8 +1493,9 @@ class AppController extends Controller
 
     public function updateMembershipPlan(Request $request, int $id): RedirectResponse
     {
-        if (! auth()->user()->hasPermission('memberships.manage')) {
-            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        $u = auth()->user();
+        if (! $u->isGymOwner() && ! $u->hasPermission('plans.edit') && ! $u->hasPermission('memberships.edit') && ! $u->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to edit membership plans.');
         }
 
         $plan = MembershipPlan::findOrFail($id);
@@ -1541,8 +1530,9 @@ class AppController extends Controller
 
     public function deleteMembershipPlan(int $id): RedirectResponse
     {
-        if (! auth()->user()->hasPermission('memberships.manage')) {
-            abort(403, 'Unauthorized. You do not have permission to manage membership plans.');
+        $u = auth()->user();
+        if (! $u->isGymOwner() && ! $u->hasPermission('plans.delete') && ! $u->hasPermission('memberships.delete') && ! $u->hasPermission('memberships.manage')) {
+            abort(403, 'Unauthorized. You do not have permission to delete membership plans.');
         }
 
         $plan = MembershipPlan::findOrFail($id);
@@ -1880,56 +1870,37 @@ class AppController extends Controller
 
             if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
                 $totalSplit = $splitCash + $splitOnline;
-
-                if ($splitCash > 0) {
-                    $invoiceNumber1 = 'RCP'.date('Ymd').rand(1000, 9999);
-                    $payment1 = MemberPayment::create([
-                        'tenant_id' => $tenant->id,
-                        'branch_id' => $member->branch_id,
-                        'member_id' => $member->id,
-                        'membership_id' => $membership?->id,
-                        'invoice_number' => $invoiceNumber1,
-                        'amount' => $splitCash,
-                        'payment_method' => 'cash',
-                        'transaction_reference' => null,
-                        'payment_date' => $paymentDate,
-                        'received_by_user_id' => auth()->id(),
-                        'notes' => trim($itemLabel.' (Split: Cash)'.($notes ? " | {$notes}" : '')),
-                    ]);
-
-                    if ($membership) {
-                        $membership->update(['paid_amount' => (float) $membership->paid_amount + $splitCash]);
-                    }
-
-                    ActivityLog::log('member_payment_received', 'Recorded split payment of '.($tenant->currency_symbol ?? '₹').number_format($splitCash, 2)." via Cash from {$member->full_name} ({$invoiceNumber1})", $payment1);
-                }
-
-                if ($splitOnline > 0) {
-                    $invoiceNumber2 = 'RCP'.date('Ymd').rand(1000, 9999);
-                    $payment2 = MemberPayment::create([
-                        'tenant_id' => $tenant->id,
-                        'branch_id' => $member->branch_id,
-                        'member_id' => $member->id,
-                        'membership_id' => $membership?->id,
-                        'invoice_number' => $invoiceNumber2,
-                        'amount' => $splitOnline,
-                        'payment_method' => $splitMethod,
-                        'transaction_reference' => $splitRef,
-                        'payment_date' => $paymentDate,
-                        'received_by_user_id' => auth()->id(),
-                        'notes' => trim($itemLabel.' (Split: '.strtoupper($splitMethod).')'.($notes ? " | {$notes}" : '')),
-                    ]);
-
-                    if ($membership) {
-                        $membership->update(['paid_amount' => (float) $membership->paid_amount + $splitOnline]);
-                    }
-
-                    ActivityLog::log('member_payment_received', 'Recorded split payment of '.($tenant->currency_symbol ?? '₹').number_format($splitOnline, 2)." via {$splitMethod} from {$member->full_name} ({$invoiceNumber2})", $payment2);
-                }
-
                 $currency = $tenant->currency_symbol ?? '₹';
+                $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
+                if (!empty($splitRef)) {
+                    $breakdown .= " (Ref: {$splitRef})";
+                }
+                $combinedNotes = trim($itemLabel . " | {$breakdown}" . ($notes ? " | {$notes}" : ''));
 
-                return back()->with('success', "Split payment of {$currency}".number_format($totalSplit, 2)." (Cash: {$currency}".number_format($splitCash, 2)." + Online: {$currency}".number_format($splitOnline, 2).") recorded successfully for {$member->full_name}!");
+                $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $tenant->id)->max('id') ?? 0) + 1;
+                $invoiceNumber = 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
+
+                $payment = MemberPayment::create([
+                    'tenant_id' => $tenant->id,
+                    'branch_id' => $member->branch_id,
+                    'member_id' => $member->id,
+                    'membership_id' => $membership?->id,
+                    'invoice_number' => $invoiceNumber,
+                    'amount' => $totalSplit,
+                    'payment_method' => 'split',
+                    'transaction_reference' => $splitRef ?: null,
+                    'payment_date' => $paymentDate,
+                    'received_by_user_id' => auth()->id(),
+                    'notes' => $combinedNotes,
+                ]);
+
+                if ($membership) {
+                    $membership->update(['paid_amount' => (float) $membership->paid_amount + $totalSplit]);
+                }
+
+                ActivityLog::log('member_payment_received', "Recorded split payment of {$currency}" . number_format($totalSplit, 2) . " ({$breakdown}) from {$member->full_name} ({$invoiceNumber})", $payment);
+
+                return back()->with('success', "Split Payment of {$currency}" . number_format($totalSplit, 2) . " recorded successfully with single Invoice ({$invoiceNumber})!");
             }
 
             if ($collectedAmount > 0) {
