@@ -92,9 +92,12 @@ jobs:
             echo "=== Step 4: Run Safe Database Migrations ==="
             $PHP_BIN artisan migrate --force
 
-            echo "=== Step 5: Ensure Storage Symlink Exists ==="
+            echo "=== Step 5: Ensure Storage Symlink & Static Images Sync ==="
             ln -sfn "$APP_DIR/storage/app/public" "$WEB_DIR/storage"
             ln -sfn "$APP_DIR/storage/app/public" "$APP_DIR/public/storage"
+            mkdir -p "$WEB_DIR/images"
+            cp -r "$APP_DIR/public/images/." "$WEB_DIR/images/"
+            cp -f "$APP_DIR/public/favicon.png" "$WEB_DIR/favicon.png"
 
             echo "=== Step 6: Clear and Rebuild Laravel Caches ==="
             $PHP_BIN artisan optimize:clear
