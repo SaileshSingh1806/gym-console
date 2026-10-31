@@ -115,8 +115,16 @@ class MemberPayment extends Model
         $msg .= "💰 *Amount Paid:* {$currency}{$amount}\n";
         $msg .= "💳 *Payment Mode:* {$method}\n";
 
-        if ($this->payment_method === 'split' && !empty($this->notes)) {
-            $msg .= "ℹ️ *Breakdown:* {$this->notes}\n";
+        if (($this->payment_method === 'split' || str_contains($this->notes ?? '', 'Split Payment') || str_contains($this->notes ?? '', 'Split:')) && !empty($this->notes)) {
+            $splitText = $this->notes;
+            if (str_contains($splitText, 'Split Payment:')) {
+                $parts = explode('Split Payment:', $splitText);
+                $splitText = 'Split: ' . trim(end($parts));
+            } elseif (str_contains($splitText, 'Split:')) {
+                $parts = explode('Split:', $splitText);
+                $splitText = 'Split: ' . trim(end($parts));
+            }
+            $msg .= "ℹ️ *Breakdown:* {$splitText}\n";
         }
 
         if (!empty($duration)) {

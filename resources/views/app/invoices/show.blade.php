@@ -342,13 +342,36 @@
                             <td class="py-3 px-3">
                                 <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
                                 @php
-                                    $customerNotes = $payment->notes;
-                                    if ($customerNotes && (stripos($customerNotes, 'imported via') !== false || stripos($customerNotes, 'csv') !== false)) {
-                                        $customerNotes = null;
+                                    $rawNotes = $payment->notes ?? '';
+                                    $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
+                                    $cleanNote = null;
+
+                                    if ($isSplit) {
+                                        // Extract strictly the split breakdown
+                                        if (str_contains($rawNotes, 'Split Payment:')) {
+                                            $parts = explode('Split Payment:', $rawNotes);
+                                            $cleanNote = 'Split: ' . trim(end($parts));
+                                        } elseif (str_contains($rawNotes, 'Split:')) {
+                                            $parts = explode('Split:', $rawNotes);
+                                            $cleanNote = 'Split: ' . trim(end($parts));
+                                        } else {
+                                            $cleanNote = $rawNotes;
+                                        }
+                                    } else {
+                                        // Filter out system boilerplates
+                                        $lower = strtolower($rawNotes);
+                                        $isBoilerplate = str_contains($lower, 'enrollment') || 
+                                                         str_contains($lower, 'imported') || 
+                                                         str_contains($lower, 'csv') || 
+                                                         str_contains($lower, 'fee balance') || 
+                                                         str_contains($lower, 'subscription payment');
+                                        if (! $isBoilerplate && ! empty($rawNotes)) {
+                                            $cleanNote = $rawNotes;
+                                        }
                                     }
                                 @endphp
-                                @if(!empty($customerNotes))
-                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $customerNotes }}</span>
+                                @if(!empty($cleanNote))
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $cleanNote }}</span>
                                 @endif
                             </td>
                             <td class="py-3 px-3 text-center font-medium text-slate-700 text-xs">{{ $durationFormatted }}</td>
@@ -379,11 +402,14 @@
                             @endif
                         </span>
                     </div>
-                    @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
+                    @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment') || str_contains($payment->notes ?? '', 'Split:'))
                         @php
                             $splitNote = $payment->notes ?? '';
                             if (str_contains($splitNote, 'Split Payment:')) {
                                 $parts = explode('Split Payment:', $splitNote);
+                                $splitNote = 'Split: ' . trim(end($parts));
+                            } elseif (str_contains($splitNote, 'Split:')) {
+                                $parts = explode('Split:', $splitNote);
                                 $splitNote = 'Split: ' . trim(end($parts));
                             }
                         @endphp

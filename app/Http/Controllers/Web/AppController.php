@@ -545,7 +545,9 @@ class AppController extends Controller
                         if (!empty($splitRef)) {
                             $breakdown .= " (Ref: {$splitRef})";
                         }
-                        $notes = trim(($validated['notes'] ?? 'Initial enrollment fee') . " | {$breakdown}");
+                        $notes = ! empty($validated['notes'])
+                            ? trim($validated['notes']) . " | {$breakdown}"
+                            : $breakdown;
 
                         $this->paymentService->recordPayment(
                             $member,
@@ -564,7 +566,7 @@ class AppController extends Controller
                                 $validated['payment_method'] ?? 'cash',
                                 $membership,
                                 $validated['transaction_reference'] ?? null,
-                                $validated['notes'] ?? 'Initial enrollment fee payment'
+                                ! empty($validated['notes']) ? trim($validated['notes']) : null
                             );
                         }
                     }
@@ -725,7 +727,9 @@ class AppController extends Controller
                     if (!empty($splitRef)) {
                         $breakdown .= " (Ref: {$splitRef})";
                     }
-                    $notes = trim(($validated['notes'] ?? 'Initial enrollment fee') . " | {$breakdown}");
+                    $notes = ! empty($validated['notes'])
+                        ? trim($validated['notes']) . " | {$breakdown}"
+                        : $breakdown;
 
                     $this->paymentService->recordPayment(
                         $member,
@@ -744,7 +748,7 @@ class AppController extends Controller
                             $validated['payment_method'] ?? 'cash',
                             $membership,
                             $validated['transaction_reference'] ?? null,
-                            $validated['notes'] ?? 'Initial enrollment fee payment'
+                            ! empty($validated['notes']) ? trim($validated['notes']) : null
                         );
                     }
                 }
@@ -1065,7 +1069,9 @@ class AppController extends Controller
             if (!empty($splitRef)) {
                 $breakdown .= " (Ref: {$splitRef})";
             }
-            $notes = trim(($validated['notes'] ?? 'Fee balance payment') . " | {$breakdown}");
+            $notes = ! empty($validated['notes'])
+                ? trim($validated['notes']) . " | {$breakdown}"
+                : $breakdown;
 
             $this->paymentService->recordPayment(
                 $member,
@@ -1083,7 +1089,7 @@ class AppController extends Controller
                 $validated['payment_method'] ?? 'cash',
                 $membership,
                 $validated['transaction_reference'] ?? null,
-                $validated['notes'] ?? 'Remaining fee balance payment'
+                ! empty($validated['notes']) ? trim($validated['notes']) : null
             );
         }
 
@@ -1288,7 +1294,7 @@ class AppController extends Controller
                     $validated['payment_method'] ?? 'cash',
                     $membership,
                     $validated['transaction_reference'] ?? null,
-                    $validated['notes'] ?? 'Subscription payment'
+                    ! empty($validated['notes']) ? trim($validated['notes']) : null
                 );
             }
 
