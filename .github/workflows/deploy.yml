@@ -86,7 +86,8 @@ jobs:
             git reset --hard FETCH_HEAD
 
             echo "=== Step 3: Install/Update Composer Dependencies ==="
-            $PHP_BIN "$(command -v composer)" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            $PHP_BIN "$(command -v composer)" install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+            $PHP_BIN artisan package:discover
 
             echo "=== Step 4: Run Safe Database Migrations ==="
             $PHP_BIN artisan migrate --force
