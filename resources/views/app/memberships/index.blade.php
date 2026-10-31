@@ -1,6 +1,6 @@
 <x-app-layout header="Gym Memberships & Plans">
     <div class="space-y-4" x-data="{ 
-        showNewModal: false, 
+        showNewModal: {{ $errors->any() ? 'true' : 'false' }}, 
         editPlan: null, 
         newPlanType: 'single', 
         newMaxMembers: 1, 
@@ -23,6 +23,20 @@
             else if (type === 'group' && (!this.editPlan.max_members || this.editPlan.max_members < 2)) this.editPlan.max_members = 5;
         }
     }">
+        @if($errors->any())
+            <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs space-y-1">
+                <div class="font-black flex items-center gap-2">
+                    <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span>Please fix the following errors to save the membership plan:</span>
+                </div>
+                <ul class="list-disc list-inside pl-6 space-y-0.5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Top Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
             <div class="flex items-center gap-3">
@@ -306,7 +320,7 @@
                                 <!-- 1. Single -->
                                 <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                        :class="newPlanType === 'single' ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                    <input type="radio" name="plan_type" value="single" @change="setNewPlanType('single')" class="sr-only">
+                                    <input type="radio" name="plan_type" value="single" x-model="newPlanType" :checked="newPlanType === 'single'" checked @change="setNewPlanType('single')" class="sr-only">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                          :class="newPlanType === 'single' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -318,7 +332,7 @@
                                 <!-- 2. Duo -->
                                 <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                        :class="newPlanType === 'duo' ? 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                    <input type="radio" name="plan_type" value="duo" @change="setNewPlanType('duo')" class="sr-only">
+                                    <input type="radio" name="plan_type" value="duo" x-model="newPlanType" :checked="newPlanType === 'duo'" @change="setNewPlanType('duo')" class="sr-only">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                          :class="newPlanType === 'duo' ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -330,7 +344,7 @@
                                 <!-- 3. Family -->
                                 <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                        :class="newPlanType === 'family' ? 'bg-purple-50 dark:bg-purple-500/15 border-purple-500 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                    <input type="radio" name="plan_type" value="family" @change="setNewPlanType('family')" class="sr-only">
+                                    <input type="radio" name="plan_type" value="family" x-model="newPlanType" :checked="newPlanType === 'family'" @change="setNewPlanType('family')" class="sr-only">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                          :class="newPlanType === 'family' ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -342,7 +356,7 @@
                                 <!-- 4. Group / Corporate (e.g. 5 people) -->
                                 <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                        :class="newPlanType === 'group' ? 'bg-amber-50 dark:bg-amber-500/15 border-amber-500 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                    <input type="radio" name="plan_type" value="group" @change="setNewPlanType('group')" class="sr-only">
+                                    <input type="radio" name="plan_type" value="group" x-model="newPlanType" :checked="newPlanType === 'group'" @change="setNewPlanType('group')" class="sr-only">
                                     <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                          :class="newPlanType === 'group' ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -361,7 +375,6 @@
                                     </div>
                                     <div class="w-24">
                                         <input type="number" 
-                                               name="max_members" 
                                                x-model="newMaxMembers" 
                                                min="2" 
                                                max="50" 
@@ -369,7 +382,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <input x-show="newPlanType === 'single' || newPlanType === 'duo'" type="hidden" name="max_members" :value="newPlanType === 'duo' ? 2 : 1">
+                            <input type="hidden" name="max_members" :value="newPlanType === 'single' ? 1 : (newPlanType === 'duo' ? 2 : newMaxMembers)">
                         </div>
 
                         <!-- Plan Title -->
@@ -476,7 +489,7 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                     <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                            :class="editPlan.plan_type === 'single' ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                        <input type="radio" name="plan_type" value="single" @change="setEditPlanType('single')" class="sr-only">
+                                        <input type="radio" name="plan_type" value="single" x-model="editPlan.plan_type" :checked="editPlan.plan_type === 'single'" @change="setEditPlanType('single')" class="sr-only">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                              :class="editPlan.plan_type === 'single' ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -486,7 +499,7 @@
                                     </label>
                                     <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                            :class="editPlan.plan_type === 'duo' ? 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                        <input type="radio" name="plan_type" value="duo" @change="setEditPlanType('duo')" class="sr-only">
+                                        <input type="radio" name="plan_type" value="duo" x-model="editPlan.plan_type" :checked="editPlan.plan_type === 'duo'" @change="setEditPlanType('duo')" class="sr-only">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                              :class="editPlan.plan_type === 'duo' ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -496,7 +509,7 @@
                                     </label>
                                     <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                            :class="editPlan.plan_type === 'family' ? 'bg-purple-50 dark:bg-purple-500/15 border-purple-500 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                        <input type="radio" name="plan_type" value="family" @change="setEditPlanType('family')" class="sr-only">
+                                        <input type="radio" name="plan_type" value="family" x-model="editPlan.plan_type" :checked="editPlan.plan_type === 'family'" @change="setEditPlanType('family')" class="sr-only">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                              :class="editPlan.plan_type === 'family' ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -506,7 +519,7 @@
                                     </label>
                                     <label class="p-3 rounded-xl border flex flex-col items-center text-center cursor-pointer transition-all group"
                                            :class="editPlan.plan_type === 'group' ? 'bg-amber-50 dark:bg-amber-500/15 border-amber-500 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500/30 font-bold' : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'">
-                                        <input type="radio" name="plan_type" value="group" @change="setEditPlanType('group')" class="sr-only">
+                                        <input type="radio" name="plan_type" value="group" x-model="editPlan.plan_type" :checked="editPlan.plan_type === 'group'" @change="setEditPlanType('group')" class="sr-only">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center mb-1 transition-colors"
                                              :class="editPlan.plan_type === 'group' ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400'">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -525,7 +538,6 @@
                                         </div>
                                         <div class="w-24">
                                             <input type="number" 
-                                                   name="max_members" 
                                                    x-model="editPlan.max_members" 
                                                    min="2" 
                                                    max="50" 
@@ -533,7 +545,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <input x-show="editPlan.plan_type === 'single' || editPlan.plan_type === 'duo'" type="hidden" name="max_members" :value="editPlan.plan_type === 'duo' ? 2 : 1">
+                                <input type="hidden" name="max_members" :value="editPlan.plan_type === 'single' ? 1 : (editPlan.plan_type === 'duo' ? 2 : (editPlan.max_members || 1))">
                             </div>
 
                             <div>

@@ -1266,7 +1266,7 @@ class AppController extends Controller
             'start_date' => 'nullable|date',
             'discount' => 'nullable|numeric|min:0',
             'initial_payment_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
+            'payment_method' => 'nullable|string|max:50',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
@@ -1478,6 +1478,19 @@ class AppController extends Controller
 
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
+        if (! $request->filled('plan_type')) {
+            $request->merge(['plan_type' => 'single']);
+        }
+        if (! $request->filled('duration_type')) {
+            $request->merge(['duration_type' => 'months']);
+        }
+        if (! $request->filled('duration_value')) {
+            $request->merge(['duration_value' => 1]);
+        }
+        if (! $request->filled('price')) {
+            $request->merge(['price' => 0]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
@@ -1510,11 +1523,21 @@ class AppController extends Controller
     public function updateMembershipPlan(Request $request, int $id): RedirectResponse
     {
         $u = auth()->user();
-        if (! $u->isGymOwner() && ! $u->hasPermission('plans.edit') && ! $u->hasPermission('memberships.edit') && ! $u->hasPermission('memberships.manage')) {
+        if (! $u->isGymOwner() && ! $u->hasPermission('plans.edit') && ! $u->hasPermission('memberships.edit') && ! $u->hasPermission('memberships.manage') && ! $u->hasPermission('plans.create')) {
             abort(403, 'Unauthorized. You do not have permission to edit membership plans.');
         }
 
         $plan = MembershipPlan::findOrFail($id);
+
+        if (! $request->filled('plan_type')) {
+            $request->merge(['plan_type' => 'single']);
+        }
+        if (! $request->filled('duration_type')) {
+            $request->merge(['duration_type' => 'months']);
+        }
+        if (! $request->filled('duration_value')) {
+            $request->merge(['duration_value' => 1]);
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:100',
