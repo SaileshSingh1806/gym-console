@@ -1221,8 +1221,8 @@ class AppController extends Controller
             }
         }
 
-        if (in_array($user->role, ['trainer', 'staff'])) {
-            // Unless staff user is admin/receptionist/accountant/manager/owner, deny invoice access
+        if (in_array($user->role, ['trainer', 'staff']) && ! $user->hasAnyPermission(['payments.invoice_view', 'payments.view'])) {
+            // Unless staff user is admin/receptionist/accountant/manager/owner or has payment permissions, deny invoice access
             abort(403, 'Unauthorized to view invoices.');
         }
 

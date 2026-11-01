@@ -361,27 +361,12 @@
                                 <div class="flex items-center gap-1.5 mt-0.5 text-[11px] font-mono text-slate-500 dark:text-slate-400">
                                     <span>{{ $member->member_code }}</span>
                                     <span>•</span>
-                                    <button type="button" 
-                                            @click="openInvoice({
-                                                id: {{ $p->id }},
-                                                receipt_no: '{{ $receiptNo }}',
-                                                date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
-                                                amount: '{{ number_format($p->amount, 2) }}',
-                                                method: '{{ strtoupper($p->payment_method) }}',
-                                                ref: '{{ $p->transaction_reference ?? '' }}',
-                                                plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
-                                                plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
-                                                member_name: '{{ addslashes($member->full_name) }}',
-                                                member_code: '{{ $member->member_code }}',
-                                                member_phone: '{{ $member->phone }}',
-                                                member_email: '{{ $member->email ?? '' }}',
-                                                total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                paid: '{{ number_format($p->amount, 2) }}',
-                                                notes: '{{ addslashes($p->notes ?? '') }}'
-                                            })"
-                                            class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                                    <a href="{{ route('app.invoices.show', $p->id) }}" 
+                                       target="_blank" 
+                                       title="View / Print Tax Invoice"
+                                       class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer">
                                         {{ $receiptNo }}
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
 
@@ -421,29 +406,13 @@
 
                         <!-- Action Bar -->
                         <div class="flex items-center gap-1.5 pt-1">
-                            <button type="button" 
-                                    @click="openInvoice({
-                                        id: {{ $p->id }},
-                                        receipt_no: '{{ $receiptNo }}',
-                                        date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
-                                        amount: '{{ number_format($p->amount, 2) }}',
-                                        method: '{{ strtoupper($p->payment_method) }}',
-                                        ref: '{{ $p->transaction_reference ?? '' }}',
-                                        plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
-                                        plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
-                                        member_name: '{{ addslashes($member->full_name) }}',
-                                        member_code: '{{ $member->member_code }}',
-                                        member_phone: '{{ $member->phone }}',
-                                        member_email: '{{ $member->email ?? '' }}',
-                                        total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                        paid: '{{ number_format($p->amount, 2) }}',
-                                        notes: '{{ addslashes($p->notes ?? '') }}',
-                                        whatsapp_url: '{{ $p->whatsapp_share_url }}'
-                                    })"
-                                    class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <a href="{{ route('app.invoices.show', $p->id) }}" 
+                               target="_blank" 
+                               title="View / Print Tax Invoice Receipt"
+                               class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold flex items-center justify-center gap-1 transition-colors">
+                                <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span>Receipt</span>
-                            </button>
+                            </a>
 
                             <a href="{{ $p->whatsapp_share_url }}" 
                                target="_blank" 
@@ -534,28 +503,12 @@
                                     <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
                                         <span>{{ $member->member_code }}</span>
                                         <span>•</span>
-                                        <button type="button" 
-                                                @click="openInvoice({
-                                                    id: {{ $p->id }},
-                                                    receipt_no: '{{ $receiptNo }}',
-                                                    date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
-                                                    amount: '{{ number_format($p->amount, 2) }}',
-                                                    method: '{{ strtoupper($p->payment_method) }}',
-                                                    ref: '{{ $p->transaction_reference ?? '' }}',
-                                                    plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
-                                                    plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
-                                                    member_name: '{{ addslashes($member->full_name) }}',
-                                                    member_code: '{{ $member->member_code }}',
-                                                    member_phone: '{{ $member->phone }}',
-                                                    member_email: '{{ $member->email ?? '' }}',
-                                                    total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                    paid: '{{ number_format($p->amount, 2) }}',
-                                                    notes: '{{ addslashes($p->notes ?? '') }}',
-                                                    whatsapp_url: '{{ $p->whatsapp_share_url }}'
-                                                })"
-                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold cursor-pointer underline">
+                                        <a href="{{ route('app.invoices.show', $p->id) }}" 
+                                           target="_blank" 
+                                           title="View / Print Tax Invoice"
+                                           class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold cursor-pointer underline">
                                             {{ $receiptNo }}
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
 
@@ -624,29 +577,12 @@
                                 <td class="py-3.5 px-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <!-- View / Print Receipt -->
-                                        <button type="button" 
-                                                @click="openInvoice({
-                                                    id: {{ $p->id }},
-                                                    receipt_no: '{{ $receiptNo }}',
-                                                    date: '{{ $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y') }}',
-                                                    amount: '{{ number_format($p->amount, 2) }}',
-                                                    method: '{{ strtoupper($p->payment_method) }}',
-                                                    ref: '{{ $p->transaction_reference ?? '' }}',
-                                                    plan_name: '{{ $membership?->plan?->name ?? ($p->notes ?? 'Gym Service') }}',
-                                                    plan_duration: '{{ $membership?->plan ? ($membership->plan->duration_value . ' ' . $membership->plan->duration_type) : '' }}',
-                                                    member_name: '{{ addslashes($member->full_name) }}',
-                                                    member_code: '{{ $member->member_code }}',
-                                                    member_phone: '{{ $member->phone }}',
-                                                    member_email: '{{ $member->email ?? '' }}',
-                                                    total: '{{ number_format($membership?->final_amount ?? $p->amount, 2) }}',
-                                                    paid: '{{ number_format($p->amount, 2) }}',
-                                                    notes: '{{ addslashes($p->notes ?? '') }}',
-                                                    whatsapp_url: '{{ $p->whatsapp_share_url }}'
-                                                })"
-                                                title="View / Print Tax Invoice Receipt" 
-                                                class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white transition-colors cursor-pointer">
+                                        <a href="{{ route('app.invoices.show', $p->id) }}" 
+                                           target="_blank" 
+                                           title="View / Print Tax Invoice Receipt ({{ $receiptNo }})" 
+                                           class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-indigo-600 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 transition-colors cursor-pointer shadow-xs">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                        </button>
+                                        </a>
 
                                         <!-- WhatsApp Share -->
                                         <a href="{{ $p->whatsapp_share_url }}" 
