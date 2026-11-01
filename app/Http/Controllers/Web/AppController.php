@@ -5238,7 +5238,7 @@ class AppController extends Controller
             ->get();
 
         $newMembers = (clone $membersQuery)
-            ->with(['activeMembership.plan'])
+            ->with(['activeMembership.plan', 'memberships.plan'])
             ->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59'])
             ->latest('created_at')
             ->get();

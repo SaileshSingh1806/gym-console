@@ -263,7 +263,7 @@
                         <tr>
                             <td class="py-1 px-3 border border-black font-bold text-black">{{ $nm->full_name }}</td>
                             <td class="py-1 px-3 border border-black font-mono text-slate-800">{{ $nm->phone }}</td>
-                            <td class="py-1 px-3 border border-black text-slate-800">{{ $nm->activeMembership?->plan?->name ?? 'No Plan' }}</td>
+                            <td class="py-1 px-3 border border-black text-slate-800">{{ $nm->activeMembership?->plan?->name ?? $nm->memberships->sortByDesc('id')->first()?->plan?->name ?? 'No Plan' }}</td>
                             <td class="py-1 px-3 border border-black text-slate-800">{{ $nm->created_at->format('d M Y') }}</td>
                         </tr>
                     @empty

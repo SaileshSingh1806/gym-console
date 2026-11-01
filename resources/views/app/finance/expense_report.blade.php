@@ -364,7 +364,7 @@
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                         <td class="py-3.5 px-5 font-bold text-slate-900 dark:text-white">{{ $m->full_name ?? ($m->name ?? 'N/A') }}</td>
                                         <td class="py-3.5 px-5 font-mono text-slate-500 dark:text-slate-400">{{ $m->phone }}</td>
-                                        <td class="py-3.5 px-5">{{ $m->activeMembership?->plan?->name ?? 'No Active Plan' }}</td>
+                                        <td class="py-3.5 px-5">{{ $m->activeMembership?->plan?->name ?? $m->memberships->sortByDesc('id')->first()?->plan?->name ?? 'No Active Plan' }}</td>
                                         <td class="py-3.5 px-5 text-right font-mono text-slate-500 dark:text-slate-400">{{ $m->created_at ? $m->created_at->format('d M Y') : '' }}</td>
                                     </tr>
                                 @endforeach
@@ -403,7 +403,7 @@
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                         <td class="py-3.5 px-5 font-bold text-slate-900 dark:text-white">{{ $m->full_name ?? ($m->name ?? 'N/A') }}</td>
                                         <td class="py-3.5 px-5 font-mono text-slate-500 dark:text-slate-400">{{ $m->phone }}</td>
-                                        <td class="py-3.5 px-5">{{ $m->activeMembership?->plan?->name ?? 'Active Plan' }}</td>
+                                        <td class="py-3.5 px-5">{{ $m->activeMembership?->plan?->name ?? $m->memberships->sortByDesc('id')->first()?->plan?->name ?? 'Active Plan' }}</td>
                                         <td class="py-3.5 px-5 text-right">
                                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $m->phone) }}?text=Hey%20{{ urlencode($m->first_name ?? $m->name) }},%20we%20miss%20you%20at%20{{ urlencode($tenant->name ?? 'the gym') }}!" target="_blank" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-all shadow-sm">
                                                 <span>WhatsApp Nudge</span>
