@@ -610,34 +610,7 @@
                         <span>Edit</span>
                     </button>
 
-                    <!-- Actions: Tax Invoice Button -->
-                    @php
-                        $mainPayment = $activeMembership?->payments?->first() ?? $member->payments()->latest()->first();
-                    @endphp
-                    @if($mainPayment)
-                        <button type="button" 
-                                @click="openInvoice({
-                                    id: {{ $mainPayment->id }},
-                                    receipt_no: '{{ $mainPayment->receipt_number }}',
-                                    date: '{{ $mainPayment->payment_date ? $mainPayment->payment_date->format('d M Y') : $mainPayment->created_at->format('d M Y') }}',
-                                    amount: '{{ number_format($mainPayment->amount, 2) }}',
-                                    method: '{{ strtoupper($mainPayment->payment_method) }}',
-                                    ref: '{{ $mainPayment->transaction_reference ?? '' }}',
-                                    plan_name: '{{ $activeMembership?->plan?->name ?? 'Gym Membership' }}',
-                                    plan_duration: '{{ $activeMembership?->plan ? ($activeMembership->plan->duration_value . ' ' . $activeMembership->plan->duration_type) : '' }}',
-                                    start_date: '{{ $activeMembership?->start_date ? $activeMembership->start_date->format('d M Y') : '' }}',
-                                    end_date: '{{ $activeMembership?->end_date ? $activeMembership->end_date->format('d M Y') : '' }}',
-                                    total: '{{ number_format($activeMembership?->final_amount ?? $mainPayment->amount, 2) }}',
-                                    paid: '{{ number_format($mainPayment->amount, 2) }}',
-                                    notes: '{{ addslashes($mainPayment->notes ?? '') }}',
-                                    whatsapp_url: '{{ $mainPayment->whatsapp_share_url }}'
-                                })"
-                                title="View & Print Tax Invoice"
-                                class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all cursor-pointer">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span>Invoice</span>
-                        </button>
-                    @endif
+
 
                     <!-- Actions: WhatsApp Menu -->
                     <div class="relative w-full sm:w-auto" @click.away="showWhatsappMenu = false">
