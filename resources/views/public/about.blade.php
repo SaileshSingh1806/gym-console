@@ -1,4 +1,8 @@
-<x-guest-layout title="About Us — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
+<x-guest-layout 
+    title="About GymDeskHub — Powering Fitness Entrepreneurs & Gyms Across India"
+    meta-description="Learn about GymDeskHub's mission to streamline gym operations, turnstile access control, and financial automation for fitness club owners and studios."
+    meta-keywords="about gymdeskhub, gym management system team, fitness software founders, gym automation platform india"
+>
 
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">

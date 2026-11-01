@@ -1,4 +1,7 @@
-<x-guest-layout title="Create Gym Account - {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
+<x-guest-layout 
+    title="Start Free Trial — Create Your Gym Account | GymDeskHub"
+    meta-description="Sign up for GymDeskHub's 14-day free trial. Setup your gym membership plans, staff permissions, and biometric turnstile integration in minutes."
+>
     <div class="py-8 sm:py-14 max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8 relative" x-data="{ 
         planId: '{{ $selectedPlan?->id ?? 1 }}', 
         showPassword: false,

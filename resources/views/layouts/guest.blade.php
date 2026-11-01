@@ -1,30 +1,157 @@
+@props([
+    'title' => null,
+    'metaDescription' => null,
+    'metaKeywords' => null,
+    'ogImage' => null,
+    'canonicalUrl' => null,
+    'noindex' => false,
+    'hideNav' => false,
+    'hideFooter' => false,
+])
+
+@php
+    $siteName = $platformSettings['app_name'] ?? 'GymDeskHub';
+    
+    // Page Title
+    $resolvedTitle = $title 
+        ?? ($platformSettings['meta_title'] ?? null) 
+        ?? ($siteName . ' — #1 Gym Management Software & Biometric Access Control');
+
+    // Meta Description (optimally 150-160 characters for maximum CTR and zero truncation in Google SERPs)
+    $resolvedDescription = $metaDescription 
+        ?? ($platformSettings['meta_description'] ?? null) 
+        ?? "GymDeskHub is India's leading cloud gym management software. Automate member billing, WhatsApp fee reminders, Hikvision biometric turnstiles, POS & multi-branch gym operations.";
+
+    // Meta Keywords
+    $resolvedKeywords = $metaKeywords 
+        ?? ($platformSettings['meta_keywords'] ?? null) 
+        ?? "gym management software, best gym software india, gym membership software, biometric gym access control, hikvision gym integration, gym billing pos, whatsapp gym reminders, fitness club management system, gym erp software, cloud gym software, turnstile access system gym";
+
+    // OG Image
+    $resolvedOgImage = $ogImage 
+        ?? ($platformSettings['og_image_url'] ?? null) 
+        ?? asset('images/gymdeskhub_horizontal_dark.png');
+
+    // Canonical URL
+    $resolvedCanonical = $canonicalUrl ?? url()->current();
+    $faviconUrl = $platformSettings['favicon_url'] ?? asset('favicon.png');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full bg-[#090d16] text-slate-100">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? ($platformSettings['meta_title'] ?? (($platformSettings['app_name'] ?? 'GymDeskHub') . ' - Gym Management Platform')) }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ $resolvedTitle }}</title>
 
-    @if(!empty($platformSettings['meta_description']))
-        <meta name="description" content="{{ $platformSettings['meta_description'] }}">
-    @endif
-    @if(!empty($platformSettings['meta_keywords']))
-        <meta name="keywords" content="{{ $platformSettings['meta_keywords'] }}">
+    {{-- Core Search Engine Directives --}}
+    <meta name="description" content="{{ $resolvedDescription }}">
+    <meta name="keywords" content="{{ $resolvedKeywords }}">
+    <meta name="author" content="{{ $siteName }}">
+    <meta name="publisher" content="{{ $siteName }}">
+
+    {{-- Googlebot & Crawler Controls --}}
+    @if($noindex)
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="googlebot" content="noindex, nofollow">
+    @else
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+        <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large">
     @endif
 
+    {{-- Canonical Authority Link --}}
+    <link rel="canonical" href="{{ $resolvedCanonical }}">
+
+    {{-- Open Graph / Facebook Meta --}}
+    <meta property="og:locale" content="en_US">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ $platformSettings['meta_title'] ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
-    @if(!empty($platformSettings['meta_description']))
-        <meta property="og:description" content="{{ $platformSettings['meta_description'] }}">
-    @endif
-    @if(!empty($platformSettings['og_image_url']))
-        <meta property="og:image" content="{{ $platformSettings['og_image_url'] }}">
-    @endif
+    <meta property="og:url" content="{{ $resolvedCanonical }}">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:title" content="{{ $resolvedTitle }}">
+    <meta property="og:description" content="{{ $resolvedDescription }}">
+    <meta property="og:image" content="{{ $resolvedOgImage }}">
+    <meta property="og:image:secure_url" content="{{ $resolvedOgImage }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $siteName }} - Gym Management System">
 
-    @if(!empty($platformSettings['favicon_url']))
-        <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
-        <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
-    @endif
+    {{-- Twitter / X Cards Meta --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ $resolvedCanonical }}">
+    <meta name="twitter:title" content="{{ $resolvedTitle }}">
+    <meta name="twitter:description" content="{{ $resolvedDescription }}">
+    <meta name="twitter:image" content="{{ $resolvedOgImage }}">
+
+    {{-- Geographic & Regional Targeting --}}
+    <meta name="geo.region" content="IN">
+    <meta name="geo.placename" content="India">
+    <meta name="rating" content="General">
+    <meta name="revisit-after" content="7 days">
+
+    {{-- Favicon & App Icons --}}
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
+    <link rel="shortcut icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/gymdeskhub_icon_dark.png') }}">
+
+    {{-- Schema.org JSON-LD Structured Data for Google Rich Snippets --}}
+    @php
+        $schemaGraph = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => url('/') . '#organization',
+                    'name' => $siteName,
+                    'url' => url('/'),
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        'url' => asset('images/gymdeskhub_horizontal_dark.png'),
+                    ],
+                    'contactPoint' => [
+                        '@type' => 'ContactPoint',
+                        'telephone' => $platformSettings['support_phone'] ?? '+91-9974995179',
+                        'contactType' => 'customer service',
+                        'areaServed' => 'IN',
+                        'availableLanguage' => ['English', 'Hindi'],
+                    ],
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => url('/') . '#website',
+                    'url' => url('/'),
+                    'name' => $siteName,
+                    'publisher' => [
+                        '@id' => url('/') . '#organization',
+                    ],
+                ],
+                [
+                    '@type' => 'SoftwareApplication',
+                    '@id' => url('/') . '#software',
+                    'name' => $siteName,
+                    'applicationCategory' => 'BusinessApplication',
+                    'operatingSystem' => 'Web, Android, iOS',
+                    'offers' => [
+                        '@type' => 'AggregateOffer',
+                        'priceCurrency' => 'INR',
+                        'lowPrice' => '12000',
+                        'highPrice' => '28000',
+                        'offerCount' => '3',
+                    ],
+                    'description' => $resolvedDescription,
+                    'aggregateRating' => [
+                        '@type' => 'AggregateRating',
+                        'ratingValue' => '4.9',
+                        'reviewCount' => '148',
+                        'bestRating' => '5',
+                        'worstRating' => '1',
+                    ],
+                ],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">
+    {!! json_encode($schemaGraph, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -1,4 +1,8 @@
-<x-guest-layout title="Platform Features — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
+<x-guest-layout 
+    title="Gym Management Software Features — Biometrics, POS & WhatsApp Billing | GymDeskHub"
+    meta-description="Explore GymDeskHub features: real-time Hikvision biometric turnstile integration, automated WhatsApp fee recovery, GST-compliant POS billing, PT management & member portal."
+    meta-keywords="gym software features, biometric turnstile gym, automated fee reminders, gym gst invoicing, gym member mobile app, gym pos software, gym class booking system"
+>
 
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">

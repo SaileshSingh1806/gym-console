@@ -1,2 +1,24 @@
 User-agent: *
-Disallow:
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /login
+Allow: /register
+
+# Internal app & admin routes
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /admin/
+Disallow: /members
+Disallow: /members/
+Disallow: /memberships
+Disallow: /memberships/
+Disallow: /payments
+Disallow: /payments/
+Disallow: /receipt/
+Disallow: /storage/temp/
+Disallow: /api/
+
+Sitemap: https://gymdeskhub.com/sitemap.xml

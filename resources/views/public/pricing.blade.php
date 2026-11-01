@@ -1,4 +1,8 @@
-<x-guest-layout title="Pricing Plans — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
+<x-guest-layout 
+    title="Gym Software Pricing Plans — Simple & Transparent | GymDeskHub"
+    meta-description="Transparent gym management software pricing with zero per-member charges. Annual plans with unlimited members, biometric access control sync, WhatsApp automation & 24/7 support."
+    meta-keywords="gym software pricing, gym management software cost, affordable gym software india, gym erp subscription, gym software price"
+>
     <div class="py-12 sm:py-16 lg:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {{-- Header --}}

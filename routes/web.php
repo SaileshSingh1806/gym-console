@@ -13,6 +13,7 @@ Route::get('/features', [PublicController::class, 'features'])->name('features')
 Route::get('/pricing', [PublicController::class, 'pricing'])->name('pricing');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
+Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap');
 Route::get('/storage/{path}', [PublicController::class, 'serveStorageFile'])->where('path', '.*')->name('storage.file');
 
 // Public Tax Invoice / Payment Receipt (Secured with unique hash)

@@ -1,4 +1,8 @@
-<x-guest-layout title="{{ ($platformSettings['app_name'] ?? 'GymDeskHub') }} — Modern Gym Management & Access Control Platform">
+<x-guest-layout 
+    title="GymDeskHub™ — #1 Gym Management Software & Biometric Access Control"
+    meta-description="GymDeskHub is India's most advanced cloud gym management software. Biometric Hikvision turnstiles, automated WhatsApp fee recovery, POS billing & multi-branch portal."
+    meta-keywords="gym management software, best gym software india, gym membership billing, biometric gym access control, hikvision gym turnstile, gym whatsapp automation, gym erp software, gym management app"
+>
 
     {{-- ══════════════════════════════════════════════════════════════
          HERO SECTION

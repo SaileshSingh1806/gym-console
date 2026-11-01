@@ -1,4 +1,8 @@
-<x-guest-layout title="Contact Us — {{ ($platformSettings['app_name'] ?? 'GymDeskHub') }}">
+<x-guest-layout 
+    title="Contact GymDeskHub — Schedule a Free Live Demo & Hardware Consultation"
+    meta-description="Book a personalized live demo of GymDeskHub or get expert support for biometric turnstile integration, WhatsApp automation, and data migration."
+    meta-keywords="contact gymdeskhub, book gym software demo, biometric hardware setup gym, gym management software support"
+>
     {{-- Hero Section --}}
     <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-20 lg:pt-24 lg:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

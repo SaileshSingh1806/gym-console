@@ -37,6 +37,35 @@ class PublicController extends Controller
         return view('public.contact');
     }
 
+    public function sitemap(): \Illuminate\Http\Response
+    {
+        $urls = [
+            ['loc' => url('/'), 'priority' => '1.0', 'changefreq' => 'daily', 'lastmod' => now()->toDateString()],
+            ['loc' => route('features'), 'priority' => '0.9', 'changefreq' => 'weekly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('pricing'), 'priority' => '0.9', 'changefreq' => 'weekly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('about'), 'priority' => '0.8', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('contact'), 'priority' => '0.8', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('login'), 'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('register'), 'priority' => '0.7', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+        ];
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($urls as $u) {
+            $xml .= "    <url>\n";
+            $xml .= "        <loc>" . htmlspecialchars($u['loc']) . "</loc>\n";
+            $xml .= "        <lastmod>{$u['lastmod']}</lastmod>\n";
+            $xml .= "        <changefreq>{$u['changefreq']}</changefreq>\n";
+            $xml .= "        <priority>{$u['priority']}</priority>\n";
+            $xml .= "    </url>\n";
+        }
+        $xml .= '</urlset>';
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml',
+        ]);
+    }
+
     public function serveStorageFile(string $path)
     {
         $path = str_replace(['..', "\0"], '', $path);
