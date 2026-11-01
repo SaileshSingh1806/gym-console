@@ -182,6 +182,8 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
 
         Route::get('/crm/enquiries', [AppController::class, 'crmEnquiries'])->name('app.crm.enquiries')->middleware('permission:crm.leads.view,crm.view');
         Route::post('/crm/enquiries', [AppController::class, 'storeEnquiry'])->name('app.crm.enquiries.store')->middleware('permission:crm.leads.create');
+        Route::get('/enquiries', [AppController::class, 'crmEnquiries'])->name('app.enquiries.index')->middleware('permission:crm.leads.view,crm.view');
+        Route::post('/enquiries', [AppController::class, 'storeEnquiry'])->name('app.enquiries.store')->middleware('permission:crm.leads.create');
         Route::get('/crm/conversions', [AppController::class, 'crmConversions'])->name('app.crm.conversions')->middleware('permission:crm.reports,crm.view');
         Route::get('/crm/reports', [AppController::class, 'crmReports'])->name('app.crm.reports')->middleware('permission:crm.reports,crm.view');
     });

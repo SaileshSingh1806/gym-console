@@ -226,11 +226,23 @@
                     || ($user->hasPermission('members.view') && $user->hasFeature('members_management'))
                     || (($user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
                     || ($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
-                    || ($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'));
+                    || ($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'))
+                    || ($user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']));
             @endphp
 
             @if($canGymOps)
             <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gym Operations</div>
+
+            <!-- Enquiries (Front Desk / Reception Walk-Ins) -->
+            @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']))
+            <a href="{{ route('app.crm.enquiries') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ (request()->routeIs('app.crm.enquiries') || request()->routeIs('app.enquiries.*')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                    <span>ENQUIRIES</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            @endif
 
             <!-- Members -->
             @if($user->hasPermission('members.view') && $user->hasFeature('members_management'))
@@ -395,11 +407,6 @@
                         <span>Leads</span>
                     </a>
 
-                    <!-- Enquiries -->
-                    <a href="{{ route('app.crm.enquiries') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.enquiries') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.enquiries') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Enquiries</span>
-                    </a>
 
                     <!-- Trial -->
                     <a href="{{ route('app.crm.trials') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.trials') || request()->routeIs('app.trials.*')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
