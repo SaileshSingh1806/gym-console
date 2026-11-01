@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
     <title>Tax Invoice - {{ $payment->receipt_number ?? ('ARM-' . $payment->id) }} - {{ $tenant->name ?? 'GymDeskHub' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +58,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen py-4 sm:py-6 px-3 sm:px-6 flex flex-col items-center antialiased">
+<body class="bg-slate-100 text-slate-900 min-h-screen py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center antialiased overflow-x-hidden">
 
     @php
         $tenantSettings = $tenant->settings ?? [];
@@ -160,54 +160,57 @@
     @endphp
 
     <!-- Top Action Toolbar -->
-    <div class="no-print w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="no-print w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 mb-3 sm:mb-4">
         @auth
             <a href="{{ route('app.members.show', $member->id) }}" 
-               class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center gap-2">
+               class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 <span>Back to Member</span>
             </a>
         @else
-            <div class="flex items-center gap-2">
-                <span class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white font-black text-xs shadow-sm">
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-black text-xs shadow-sm">
                     {{ $gymName }}
+                </span>
+                <span class="text-[11px] font-bold text-slate-500 sm:hidden">
+                    {{ $invoiceNo }}
                 </span>
             </div>
         @endauth
 
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-stretch sm:justify-end">
             <a href="{{ $payment->whatsapp_share_url }}" 
                target="_blank" 
-               class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                <span>Share on WhatsApp</span>
+               class="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                <span>WhatsApp</span>
             </a>
 
             <button type="button" 
                     onclick="window.print()" 
-                    class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-black/20 transition-all cursor-pointer">
-                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                <span>Print Invoice</span>
+                    class="px-3 sm:px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer">
+                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>Print</span>
             </button>
 
             <button type="button" 
                     onclick="window.print()" 
-                    class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <span>Download PDF</span>
+                    class="px-3 sm:px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <span>PDF</span>
             </button>
         </div>
     </div>
 
     <!-- ==================== INVOICE A4 SHEET ==================== -->
-    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-4 sm:p-6 lg:p-7 border border-slate-200 flex flex-col justify-between min-h-0 sm:min-h-[1040px] print:min-h-0 mx-auto">
+    <div class="invoice-card relative w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-xl p-3.5 sm:p-6 lg:p-7 border border-slate-200 flex flex-col justify-between min-h-0 sm:min-h-[1040px] print:min-h-0 mx-auto">
         
         <!-- Faded Center Background Watermark -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
             @if(!empty($logoUrl))
-                <img src="{{ $logoUrl }}" alt="" class="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] object-contain grayscale">
+                <img src="{{ $logoUrl }}" alt="" class="w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] object-contain grayscale">
             @else
-                <div class="text-center font-black tracking-widest text-6xl sm:text-8xl uppercase text-slate-900 rotate-[-12deg]">
+                <div class="text-center font-black tracking-widest text-5xl sm:text-8xl uppercase text-slate-900 rotate-[-12deg]">
                     {{ $gymName }}
                 </div>
             @endif
@@ -221,71 +224,73 @@
             <!-- ══════════════════════════════════════════
                  1. HEADER: BRAND & INVOICE META
             ══════════════════════════════════════════ -->
-            <div class="flex flex-col sm:flex-row items-start justify-between gap-4 pt-1 border-b border-slate-200/90 pb-3.5">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 pt-1 border-b border-slate-200/90 pb-3 sm:pb-3.5">
                 <!-- Gym Brand (Left) -->
-                <div class="flex items-start gap-3.5 max-w-lg min-w-0">
+                <div class="flex items-start gap-2.5 sm:gap-3.5 w-full sm:max-w-lg min-w-0">
                     @if(!empty($logoUrl))
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 p-1.5 border border-slate-800 shadow-md flex items-center justify-center shrink-0">
-                            <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="w-full h-full object-contain rounded-xl">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 p-1 sm:p-1.5 border border-slate-800 shadow-md flex items-center justify-center shrink-0">
+                            <img src="{{ $logoUrl }}" alt="{{ $gymName }}" class="w-full h-full object-contain rounded-lg sm:rounded-xl">
                         </div>
                     @else
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-md shrink-0 p-1 text-center border border-slate-800">
-                            <span class="text-amber-400 text-2xl">🏋️</span>
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 text-white flex flex-col items-center justify-center font-black text-xs tracking-tight shadow-md shrink-0 p-1 text-center border border-slate-800">
+                            <span class="text-amber-400 text-xl sm:text-2xl">🏋️</span>
                             <span class="text-[8px] sm:text-[9px] uppercase leading-none font-bold mt-1 text-slate-300">GYM</span>
                         </div>
                     @endif
-                    <div class="min-w-0">
-                        <h1 class="text-xl sm:text-2xl lg:text-[26px] font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h1>
-                        <p class="text-xs text-slate-600 mt-1 leading-snug font-medium line-clamp-2">{{ $gymAddress }}</p>
-                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600 mt-1.5 font-medium">
+                    <div class="min-w-0 flex-1">
+                        <h1 class="text-base sm:text-2xl lg:text-[26px] font-black text-slate-950 tracking-tight uppercase leading-tight">{{ $gymName }}</h1>
+                        <p class="text-[11px] sm:text-xs text-slate-600 mt-0.5 sm:mt-1 leading-snug font-medium line-clamp-2">{{ $gymAddress }}</p>
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10.5px] sm:text-xs text-slate-600 mt-1 font-medium">
                             <span class="inline-flex items-center gap-1">
                                 <span class="text-slate-400">Phone:</span>
                                 <strong class="text-slate-900 font-semibold">{{ $gymPhone }}</strong>
                             </span>
                             @if(!empty($gymEmail))
                                 <span class="text-slate-300">|</span>
-                                <span class="inline-flex items-center gap-1 truncate max-w-[220px]">
+                                <span class="inline-flex items-center gap-1 truncate max-w-[190px] sm:max-w-[220px]">
                                     <span class="text-slate-400">Email:</span>
                                     <strong class="text-slate-900 font-semibold truncate">{{ $gymEmail }}</strong>
                                 </span>
                             @endif
                         </div>
                         @if(!empty($gymWeb))
-                            <div class="text-[11px] text-slate-500 mt-0.5 font-medium">
+                            <div class="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 font-medium">
                                 <span>Website: <strong class="text-slate-800 font-semibold">{{ $gymWeb }}</strong></span>
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <!-- Invoice Meta (Right) -->
-                <div class="sm:text-right flex flex-col items-start sm:items-end shrink-0 w-full sm:w-auto self-start">
-                    <!-- Tax Invoice Badge -->
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 text-white shadow-xs">
-                        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                        <span class="font-black text-xs sm:text-sm tracking-wider uppercase">{{ $invoiceTitle }}</span>
+                <!-- Invoice Meta (Right on desktop, 2-column flex on mobile) -->
+                <div class="w-full sm:w-auto flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0 self-stretch sm:self-start">
+                    <div class="flex flex-col items-start sm:items-end gap-1">
+                        <!-- Tax Invoice Badge -->
+                        <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-950 text-white shadow-xs">
+                            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400"></span>
+                            <span class="font-black text-[10px] sm:text-xs tracking-wider uppercase">{{ $invoiceTitle }}</span>
+                        </div>
+                        <!-- Invoice Date -->
+                        <div class="flex items-center gap-1 sm:gap-2 text-[10.5px] sm:text-xs">
+                            <span class="text-slate-500 font-medium">Date:</span>
+                            <span class="font-bold text-slate-800">{{ $invoiceDate }}</span>
+                        </div>
                     </div>
 
-                    <!-- Clean Short Invoice Number -->
-                    <div class="mt-2.5 flex items-center gap-2 sm:justify-end">
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Invoice No:</span>
-                        <span class="px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-300 text-slate-950 font-black font-mono text-xs sm:text-sm tracking-wider shadow-xs">
-                            {{ $invoiceNo }}
-                        </span>
-                    </div>
-
-                    <!-- Invoice Date -->
-                    <div class="mt-1 flex items-center gap-2 sm:justify-end text-xs">
-                        <span class="text-slate-500 font-medium">Date:</span>
-                        <span class="font-bold text-slate-800">{{ $invoiceDate }}</span>
-                    </div>
-
-                    <!-- Status Pill -->
-                    <div class="mt-1.5">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border {{ $statusBadgeClass }} text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
-                            <span class="w-1.5 h-1.5 rounded-full {{ $statusDotClass }}"></span>
-                            {{ $statusText }}
-                        </span>
+                    <div class="flex flex-col items-end gap-1">
+                        <!-- Clean Short Invoice Number -->
+                        <div class="flex items-center gap-1 sm:gap-2">
+                            <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden xs:inline">No:</span>
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-300 text-slate-950 font-black font-mono text-xs sm:text-sm tracking-wider shadow-xs">
+                                {{ $invoiceNo }}
+                            </span>
+                        </div>
+                        <!-- Status Pill -->
+                        <div>
+                            <span class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 rounded-full border {{ $statusBadgeClass }} text-[9.5px] sm:text-xs font-black uppercase tracking-wider shadow-xs">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $statusDotClass }}"></span>
+                                {{ $statusText }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -293,27 +298,27 @@
             <!-- ══════════════════════════════════════════
                  2. TWO CARDS: MEMBER & PLAN DETAILS
             ══════════════════════════════════════════ -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                 
                 <!-- Card 1: MEMBER DETAILS (BILLED TO) -->
-                <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
-                    <div class="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
-                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
+                <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
+                    <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
                         <span>MEMBER DETAILS (BILLED TO)</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Full Name:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8 truncate">{{ $member->full_name }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Member ID:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $member->member_code }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Phone No:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $member->phone }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
                         <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8">
                             @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
@@ -326,24 +331,24 @@
                 </div>
 
                 <!-- Card 2: MEMBERSHIP & PLAN DETAILS -->
-                <div class="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
-                    <div class="flex items-center gap-1.5 text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
-                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
+                <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
+                    <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
+                        <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
                         <span>MEMBERSHIP &amp; PLAN DETAILS</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
-                        <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Package Duration:</span>
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
+                        <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Duration:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $durationFormatted }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Start Date:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $startDate }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Expiry Date:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $endDate }}</span>
                     </div>
-                    <div class="grid grid-cols-12 gap-1 text-xs">
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Status:</span>
                         <span class="font-bold text-emerald-600 col-span-7 sm:col-span-8">{{ $membershipStatus }}</span>
                     </div>
@@ -354,8 +359,68 @@
             <!-- ══════════════════════════════════════════
                  3. SERVICE / ITEM DESCRIPTION TABLE
             ══════════════════════════════════════════ -->
-            <div class="w-full overflow-x-auto">
-                <table class="w-full min-w-[340px] text-left border-collapse">
+            @php
+                $rawNotes = $payment->notes ?? '';
+                $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
+                $cleanNote = null;
+
+                if ($isSplit) {
+                    // Extract strictly the split breakdown
+                    if (str_contains($rawNotes, 'Split Payment:')) {
+                        $parts = explode('Split Payment:', $rawNotes);
+                        $cleanNote = 'Split: ' . trim(end($parts));
+                    } elseif (str_contains($rawNotes, 'Split:')) {
+                        $parts = explode('Split:', $rawNotes);
+                        $cleanNote = 'Split: ' . trim(end($parts));
+                    } else {
+                        $cleanNote = $rawNotes;
+                    }
+                } else {
+                    // Filter out system boilerplates
+                    $lower = strtolower($rawNotes);
+                    $isBoilerplate = str_contains($lower, 'enrollment') || 
+                                     str_contains($lower, 'imported') || 
+                                     str_contains($lower, 'csv') || 
+                                     str_contains($lower, 'fee balance') || 
+                                     str_contains($lower, 'subscription payment');
+                    if (! $isBoilerplate && ! empty($rawNotes)) {
+                        $cleanNote = $rawNotes;
+                    }
+                }
+            @endphp
+
+            <!-- Mobile Card View (< 640px, Hidden in Print) -->
+            <div class="block sm:hidden print:hidden rounded-xl bg-slate-950 text-white p-3 space-y-2 shadow-sm">
+                <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">#1</span>
+                            <span class="font-black text-xs text-white truncate block">{{ $plan->name ?? 'Gym Membership' }}</span>
+                        </div>
+                        @if(!empty($cleanNote))
+                            <span class="text-[10.5px] text-amber-300/90 block mt-1 leading-snug">{{ $cleanNote }}</span>
+                        @endif
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider shrink-0">
+                        {{ $durationFormatted }}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between text-xs pt-0.5">
+                    <div class="text-slate-400 text-[11px]">
+                        <span>Rate: </span>
+                        <span class="text-slate-200 font-semibold">{{ $currency }}{{ number_format($baseRate, 0) }}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9.5px] text-slate-400 uppercase tracking-wider block">Total Amount</span>
+                        <span class="text-sm font-black text-amber-400">{{ $currency }}{{ number_format($totalPackageAmount, 0) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop & Print Table View -->
+            <div class="hidden sm:block print:block w-full overflow-x-auto">
+                <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-950 text-white uppercase text-[11px] sm:text-xs font-black tracking-wider">
                             <th class="py-2.5 px-3 rounded-l-lg w-8 sm:w-10 text-center">#</th>
@@ -370,35 +435,6 @@
                             <td class="py-3 px-3 text-center text-slate-500 font-medium text-xs">1</td>
                             <td class="py-3 px-3">
                                 <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
-                                @php
-                                    $rawNotes = $payment->notes ?? '';
-                                    $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
-                                    $cleanNote = null;
-
-                                    if ($isSplit) {
-                                        // Extract strictly the split breakdown
-                                        if (str_contains($rawNotes, 'Split Payment:')) {
-                                            $parts = explode('Split Payment:', $rawNotes);
-                                            $cleanNote = 'Split: ' . trim(end($parts));
-                                        } elseif (str_contains($rawNotes, 'Split:')) {
-                                            $parts = explode('Split:', $rawNotes);
-                                            $cleanNote = 'Split: ' . trim(end($parts));
-                                        } else {
-                                            $cleanNote = $rawNotes;
-                                        }
-                                    } else {
-                                        // Filter out system boilerplates
-                                        $lower = strtolower($rawNotes);
-                                        $isBoilerplate = str_contains($lower, 'enrollment') || 
-                                                         str_contains($lower, 'imported') || 
-                                                         str_contains($lower, 'csv') || 
-                                                         str_contains($lower, 'fee balance') || 
-                                                         str_contains($lower, 'subscription payment');
-                                        if (! $isBoilerplate && ! empty($rawNotes)) {
-                                            $cleanNote = $rawNotes;
-                                        }
-                                    }
-                                @endphp
                                 @if(!empty($cleanNote))
                                     <span class="text-[11px] text-slate-500 block mt-0.5">{{ $cleanNote }}</span>
                                 @endif
@@ -548,9 +584,9 @@
                 <div class="pt-2.5 sm:pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3">
                     
                     <!-- Left: Thank you & Contacts -->
-                    <div class="text-left space-y-0.5 sm:space-y-1">
+                    <div class="text-center sm:text-left space-y-0.5 sm:space-y-1 w-full sm:w-auto">
                         <p class="font-bold text-xs sm:text-sm text-slate-950">{{ $thankYouText }}</p>
-                        <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-normal mt-0.5">
+                        <div class="text-[10px] sm:text-xs text-slate-600 flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-0.5 font-normal mt-0.5">
                             @if(!empty($helpline))<span>Official Helpline: <strong class="text-slate-800 font-medium">{{ $helpline }}</strong></span>@endif
                             @if(!empty($helpline) && !empty($footerEmail))<span>|</span>@endif
                             @if(!empty($footerEmail))<span>Email: <strong class="text-slate-800 font-medium">{{ $footerEmail }}</strong></span>@endif
