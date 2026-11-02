@@ -101,6 +101,7 @@
 </head>
 <body class="flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
+    @if(!auth()->user()->isMember())
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" 
          x-transition:enter="transition-opacity ease-linear duration-200"
@@ -747,6 +748,7 @@
             </div>
         </div>
     </aside>
+    @endif
 
     <!-- Main Content Shell -->
     <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
@@ -773,65 +775,83 @@
         <!-- Top Navbar -->
         <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-                <div class="flex items-center gap-2 min-w-0">
-                    <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Dashboard' }}</h1>
-                </div>
+                @if(!auth()->user()->isMember())
+                    <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Dashboard' }}</h1>
+                    </div>
+                @else
+                    @php
+                        $tenant = auth()->user()->tenant ?? null;
+                        $gymLogo = $tenant?->logo_url;
+                        $gymName = $tenant?->name ?? 'GymDeskHub';
+                    @endphp
+                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2.5 min-w-0 group">
+                        @if(!empty($gymLogo))
+                            <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[120px] rounded-lg object-contain">
+                        @endif
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight truncate">{{ $gymName }}</span>
+                            <span class="text-[10px] text-amber-500 font-bold uppercase tracking-wider -mt-0.5">Member App</span>
+                        </div>
+                    </a>
+                @endif
             </div>
 
             <!-- Right Telemetry & Widget Badges -->
             <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                 
-                <!-- Live Gym Footfall Widget -->
-                @php
-                    $todayInsideCount = \App\Models\Attendance::where('date', now()->toDateString())->whereNull('check_out')->count();
-                    $todayTotalAttendance = \App\Models\Attendance::where('date', now()->toDateString())->count();
-                @endphp
-                <div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-xs font-semibold">
-                    <span class="flex items-center gap-1 text-slate-700 dark:text-slate-300">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="text-slate-900 dark:text-white font-bold">{{ $todayInsideCount }}</span> In Gym
-                    </span>
-                    <span class="text-slate-300 dark:text-slate-600">|</span>
-                    <span class="text-slate-500 dark:text-slate-400">{{ $todayTotalAttendance }} Today</span>
-                </div>
+                <!-- Staff / Admin Backoffice Telemetry Widgets -->
+                @if(!auth()->user()->isMember())
+                    @php
+                        $todayInsideCount = \App\Models\Attendance::where('date', now()->toDateString())->whereNull('check_out')->count();
+                        $todayTotalAttendance = \App\Models\Attendance::where('date', now()->toDateString())->count();
+                    @endphp
+                    <div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-xs font-semibold">
+                        <span class="flex items-center gap-1 text-slate-700 dark:text-slate-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-slate-900 dark:text-white font-bold">{{ $todayInsideCount }}</span> In Gym
+                        </span>
+                        <span class="text-slate-300 dark:text-slate-600">|</span>
+                        <span class="text-slate-500 dark:text-slate-400">{{ $todayTotalAttendance }} Today</span>
+                    </div>
 
-                <!-- Live Date Pill -->
-                <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm">
-                    <svg class="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span>{{ now()->format('D, j M Y') }}</span>
-                </div>
+                    <!-- Live Date Pill -->
+                    <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>{{ now()->format('D, j M Y') }}</span>
+                    </div>
 
-                <!-- Live Digital Ticking Clock -->
-                <div x-data="{ 
-                        time: '',
-                        init() {
-                            const update = () => {
-                                const d = new Date();
-                                let h = d.getHours();
-                                const m = String(d.getMinutes()).padStart(2, '0');
-                                const s = String(d.getSeconds()).padStart(2, '0');
-                                const ampm = h >= 12 ? 'PM' : 'AM';
-                                h = h % 12 || 12;
-                                this.time = `${String(h).padStart(2, '0')} : ${m} : ${s} ${ampm}`;
-                            };
-                            update();
-                            setInterval(update, 1000);
-                        }
-                     }" 
-                     class="hidden lg:flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-amber-700 dark:text-amber-400 font-mono text-xs font-bold tracking-wider shadow-inner">
-                    <span x-text="time">--:--:-- --</span>
-                </div>
+                    <!-- Live Digital Ticking Clock -->
+                    <div x-data="{ 
+                            time: '',
+                            init() {
+                                const update = () => {
+                                    const d = new Date();
+                                    let h = d.getHours();
+                                    const m = String(d.getMinutes()).padStart(2, '0');
+                                    const s = String(d.getSeconds()).padStart(2, '0');
+                                    const ampm = h >= 12 ? 'PM' : 'AM';
+                                    h = h % 12 || 12;
+                                    this.time = `${String(h).padStart(2, '0')} : ${m} : ${s} ${ampm}`;
+                                };
+                                update();
+                                setInterval(update, 1000);
+                            }
+                         }" 
+                         class="hidden lg:flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-amber-700 dark:text-amber-400 font-mono text-xs font-bold tracking-wider shadow-inner">
+                        <span x-text="time">--:--:-- --</span>
+                    </div>
 
-                <x-theme-customizer />
+                    <x-theme-customizer />
 
-                @if(auth()->user()->isSuperAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">
-                        ⚙️ Super Admin
-                    </a>
-                @endif
+                    @if(auth()->user()->isSuperAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">
+                            ⚙️ Super Admin
+                        </a>
+                    @endif
 
                 <!-- Interactive Notification Center -->
                 <div x-data="notificationCenter()" x-init="init()" @click.outside="isOpen = false" @keydown.escape.window="isOpen = false" class="relative">
@@ -1042,6 +1062,7 @@
 
                     </div>
                 </div>
+                @endif
 
                 <!-- User Profile & Account Dropdown -->
                 <div class="relative flex items-center pl-0.5 sm:pl-1" 
@@ -1113,7 +1134,7 @@
                                 </div>
                             </div>
 
-                            @if(auth()->user()->tenant && auth()->user()->tenant->activeSubscription)
+                            @if(!auth()->user()->isMember() && auth()->user()->tenant && auth()->user()->tenant->activeSubscription)
                                 <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
                                     <span class="text-slate-500 dark:text-slate-400">Current Plan:</span>
                                     <span class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
@@ -1126,39 +1147,41 @@
 
                         <!-- Navigation Shortcuts -->
                         <div class="py-1.5 text-xs">
-                            @if(auth()->user()->isSuperAdmin())
-                                <a href="{{ route('admin.dashboard') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-medium">
-                                    <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    <span>Super Admin Portal</span>
+                            @if(!auth()->user()->isMember())
+                                @if(auth()->user()->isSuperAdmin())
+                                    <a href="{{ route('admin.dashboard') }}" 
+                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-medium">
+                                        <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        <span>Super Admin Portal</span>
+                                    </a>
+                                @endif
+
+                                @if(auth()->user()->isSuperAdmin() || auth()->user()->isGymOwner())
+                                    <a href="{{ route('app.settings.index') }}" 
+                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                        <span>Gym Settings</span>
+                                    </a>
+
+                                    <a href="{{ route('app.subscription.index') }}" 
+                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                        <span>Subscription & Billing</span>
+                                    </a>
+
+                                    <a href="{{ route('app.roles.index') }}" 
+                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        <span>Roles & Permissions</span>
+                                    </a>
+                                @endif
+
+                                <a href="{{ route('app.whatsapp.dashboard') }}" 
+                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors font-medium">
+                                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    <span>WhatsApp Marketing Hub</span>
                                 </a>
                             @endif
-
-                            @if(auth()->user()->isSuperAdmin() || auth()->user()->isGymOwner())
-                                <a href="{{ route('app.settings.index') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
-                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span>Gym Settings</span>
-                                </a>
-
-                                <a href="{{ route('app.subscription.index') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
-                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                                    <span>Subscription & Billing</span>
-                                </a>
-
-                                <a href="{{ route('app.roles.index') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
-                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                    <span>Roles & Permissions</span>
-                                </a>
-                            @endif
-
-                            <a href="{{ route('app.whatsapp.dashboard') }}" 
-                               class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors font-medium">
-                                <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                <span>WhatsApp Marketing Hub</span>
-                            </a>
 
                             <a href="{{ route('app.support.index') }}" 
                                class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
@@ -1345,50 +1368,66 @@
     <!-- Mobile Bottom Navigation Bar (Visible only on mobile/tablet) -->
     <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors">
         <div class="grid grid-cols-5 items-center gap-1 max-w-lg mx-auto">
-            @if(auth()->user()->role === 'member')
-                <!-- Member Navigation -->
+            @if(auth()->user()->isMember())
+                <!-- Member Fitness App Navigation -->
+                <!-- 1. Home -->
                 <a href="{{ route('app.portal') }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.portal') && !request()->has('tab') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ (request()->routeIs('app.portal') && !request()->has('tab')) ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         @if(request()->routeIs('app.portal') && !request()->has('tab'))
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         @endif
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Portal</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Home</span>
                 </a>
 
-                <a href="{{ route('app.portal', ['tab' => 'memberships']) }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'memberships' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        @if(request()->query('tab') === 'memberships')
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-                        @endif
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Plans</span>
-                </a>
-
+                <!-- 2. Workouts -->
                 <a href="{{ route('app.portal', ['tab' => 'workouts']) }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'workouts' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'workouts' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         @if(request()->query('tab') === 'workouts')
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         @endif
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Workout</span>
                 </a>
 
+                <!-- 3. Diet -->
+                <a href="{{ route('app.portal', ['tab' => 'diets']) }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'diets' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        @if(request()->query('tab') === 'diets')
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Diet</span>
+                </a>
+
+                <!-- 4. Visits / Attendance -->
                 <a href="{{ route('app.portal', ['tab' => 'attendance']) }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'attendance' ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'attendance' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         @if(request()->query('tab') === 'attendance')
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                         @endif
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Attendance</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Visits</span>
+                </a>
+
+                <!-- 5. Pass & Invoices -->
+                <a href="{{ route('app.portal', ['tab' => 'memberships']) }}" 
+                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->query('tab') === 'memberships' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        @if(request()->query('tab') === 'memberships')
+                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        @endif
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">My Pass</span>
                 </a>
             @else
                 <!-- Admin / Owner / Staff Navigation -->
@@ -1439,17 +1478,17 @@
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">WhatsApp</span>
                 </a>
-            @endif
 
-            <!-- 5. Menu / Drawer Toggle -->
-            <button type="button" 
-                    @click="sidebarOpen = true" 
-                    class="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer">
-                <div class="relative p-1">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </div>
-                <span class="text-[10px] tracking-tight mt-0.5 truncate">Menu</span>
-            </button>
+                <!-- 5. Menu / Drawer Toggle (Staff Only) -->
+                <button type="button" 
+                        @click="sidebarOpen = true" 
+                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Menu</span>
+                </button>
+            @endif
         </div>
     </nav>
 

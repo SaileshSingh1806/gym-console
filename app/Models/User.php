@@ -98,6 +98,11 @@ class User extends Authenticatable
         return $this->role === 'gym_owner';
     }
 
+    public function isMember(): bool
+    {
+        return $this->role === 'member';
+    }
+
     public function isManager(): bool
     {
         return in_array($this->role, ['gym_owner', 'gym_manager']);
