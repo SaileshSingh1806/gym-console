@@ -1776,7 +1776,7 @@ class AppController extends Controller
             return response()->json(['success' => false, 'message' => 'Your membership is inactive or expired. Please renew at the front desk.'], 403);
         }
 
-        $record = $this->attendanceService->checkIn($member, 'mobile_qr_scan');
+        $record = $this->attendanceService->checkIn($member, 'qr');
 
         return response()->json([
             'success' => true,

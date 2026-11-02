@@ -119,7 +119,7 @@ class PublicController extends Controller
                     $status = 'expired';
                     $message = "Membership Expired: Your membership at {$tenant->name} has expired. Please renew at the reception.";
                 } else {
-                    $attendance = $attendanceService->checkIn($member, 'qr_scan');
+                    $attendance = $attendanceService->checkIn($member, 'qr');
                     $status = 'success';
                     $message = "Welcome, {$member->full_name}! Check-in recorded at ".now()->format('h:i A').'.';
                 }
@@ -185,7 +185,7 @@ class PublicController extends Controller
             ]);
         }
 
-        $record = $attendanceService->checkIn($member, 'qr_scan');
+        $record = $attendanceService->checkIn($member, 'qr');
 
         return view('public.gym_checkin', [
             'tenant' => $tenant,

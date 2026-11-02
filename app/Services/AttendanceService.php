@@ -16,7 +16,10 @@ class AttendanceService
         $time = $time ?? now();
         $today = $time->toDateString();
 
-        return DB::transaction(function () use ($member, $method, $device, $time, $today) {
+        $validMethods = ['manual', 'qr', 'biometric', 'facial'];
+        $normalizedMethod = in_array(strtolower($method), $validMethods, true) ? strtolower($method) : (str_contains(strtolower($method), 'qr') ? 'qr' : 'manual');
+
+        return DB::transaction(function () use ($member, $normalizedMethod, $device, $time, $today) {
             $existing = Attendance::withoutGlobalScopes()
                 ->where('tenant_id', $member->tenant_id)
                 ->where('member_id', $member->id)
@@ -40,11 +43,11 @@ class AttendanceService
                 'device_id' => $device?->id,
                 'date' => $today,
                 'check_in' => $time,
-                'method' => $method,
+                'method' => $normalizedMethod,
                 'status' => 'PRESENT',
             ]);
 
-            ActivityLog::log('member_checkin', "Member {$member->full_name} checked in via {$method}", $attendance);
+            ActivityLog::log('member_checkin', "Member {$member->full_name} checked in via {$normalizedMethod}", $attendance);
 
             return $attendance;
         });
