@@ -326,6 +326,46 @@
             <!-- ══════════════════════════════════════════
                  2. TWO CARDS: MEMBER & PLAN DETAILS
             ══════════════════════════════════════════ -->
+            @php
+                $rawNotes = $payment->notes ?? '';
+                $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
+                
+                // Determine friendly payment mode text without the word "SPLIT"
+                $modeText = strtoupper($payment->payment_method ?? 'UPI');
+                $breakdownText = null;
+
+                if ($isSplit) {
+                    $breakdownText = $rawNotes;
+                    if (str_contains($breakdownText, 'Split Payment:')) {
+                        $parts = explode('Split Payment:', $breakdownText);
+                        $breakdownText = trim(end($parts));
+                    } elseif (str_contains($breakdownText, 'Split:')) {
+                        $parts = explode('Split:', $breakdownText);
+                        $breakdownText = trim(end($parts));
+                    }
+                    $breakdownText = preg_replace('/^Split[:\s-]*/i', '', trim($breakdownText));
+
+                    if (preg_match('/Cash.*?\\+\\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
+                        $modeText = 'CASH + ' . strtoupper($matches[1]);
+                    } else {
+                        $modeText = 'CASH + ONLINE';
+                    }
+                }
+
+                // Clean note for Service Description table - NEVER show split details under service
+                $cleanNote = null;
+                if (! $isSplit) {
+                    $lower = strtolower($rawNotes);
+                    $isBoilerplate = str_contains($lower, 'enrollment') || 
+                                     str_contains($lower, 'imported') || 
+                                     str_contains($lower, 'csv') || 
+                                     str_contains($lower, 'fee balance') || 
+                                     str_contains($lower, 'subscription payment');
+                    if (! $isBoilerplate && ! empty($rawNotes)) {
+                        $cleanNote = $rawNotes;
+                    }
+                }
+            @endphp
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
                 
                 <!-- Card 1: MEMBER DETAILS (BILLED TO) -->
@@ -349,11 +389,7 @@
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
                         <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8">
-                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment'))
-                                SPLIT (CASH + ONLINE)
-                            @else
-                                {{ $payment->payment_method ?? 'UPI' }}
-                            @endif
+                            {{ $modeText }}
                         </span>
                     </div>
                 </div>
@@ -387,35 +423,6 @@
             <!-- ══════════════════════════════════════════
                  3. SERVICE / ITEM DESCRIPTION TABLE
             ══════════════════════════════════════════ -->
-            @php
-                $rawNotes = $payment->notes ?? '';
-                $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
-                $cleanNote = null;
-
-                if ($isSplit) {
-                    // Extract strictly the split breakdown
-                    if (str_contains($rawNotes, 'Split Payment:')) {
-                        $parts = explode('Split Payment:', $rawNotes);
-                        $cleanNote = 'Split: ' . trim(end($parts));
-                    } elseif (str_contains($rawNotes, 'Split:')) {
-                        $parts = explode('Split:', $rawNotes);
-                        $cleanNote = 'Split: ' . trim(end($parts));
-                    } else {
-                        $cleanNote = $rawNotes;
-                    }
-                } else {
-                    // Filter out system boilerplates
-                    $lower = strtolower($rawNotes);
-                    $isBoilerplate = str_contains($lower, 'enrollment') || 
-                                     str_contains($lower, 'imported') || 
-                                     str_contains($lower, 'csv') || 
-                                     str_contains($lower, 'fee balance') || 
-                                     str_contains($lower, 'subscription payment');
-                    if (! $isBoilerplate && ! empty($rawNotes)) {
-                        $cleanNote = $rawNotes;
-                    }
-                }
-            @endphp
 
             <!-- Mobile Card View (< 640px, Hidden in Print) -->
             <div class="block sm:hidden print:hidden rounded-xl bg-slate-950 text-white p-3 space-y-2 shadow-sm">
@@ -488,27 +495,13 @@
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
                         <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase">
-                            @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment') || str_contains($payment->notes ?? '', 'Split:'))
-                                SPLIT PAYMENT
-                            @else
-                                {{ $payment->payment_method ?? 'CASH' }}
-                            @endif
+                            {{ $modeText }}
                         </span>
                     </div>
-                    @if($payment->payment_method === 'split' || str_contains($payment->notes ?? '', 'Split Payment') || str_contains($payment->notes ?? '', 'Split:'))
-                        @php
-                            $splitNote = $payment->notes ?? '';
-                            if (str_contains($splitNote, 'Split Payment:')) {
-                                $parts = explode('Split Payment:', $splitNote);
-                                $splitNote = 'Split: ' . trim(end($parts));
-                            } elseif (str_contains($splitNote, 'Split:')) {
-                                $parts = explode('Split:', $splitNote);
-                                $splitNote = 'Split: ' . trim(end($parts));
-                            }
-                        @endphp
+                    @if($isSplit && !empty($breakdownText))
                         <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
                             <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
-                            <span>{{ $splitNote }}</span>
+                            <span>{{ $breakdownText }}</span>
                         </div>
                     @endif
 
