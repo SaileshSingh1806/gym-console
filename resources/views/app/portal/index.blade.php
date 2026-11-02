@@ -15,12 +15,74 @@
                 || ($att->check_in && \Carbon\Carbon::parse($att->check_in)->isToday());
         });
 
-        // This month checkin count
-        $thisMonthCheckins = $member ? $member->attendance->filter(fn($a) => ($a->date && \Carbon\Carbon::parse($a->date)->isCurrentMonth()) || ($a->check_in && \Carbon\Carbon::parse($a->check_in)->isCurrentMonth()))->count() : 0;
-        
-        // Active PT Package
+        // Attendance stats for motivation system
+        $thisMonthCheckins = $member ? $member->attendance->filter(function($a) {
+            $d = $a->date ? \Carbon\Carbon::parse($a->date) : ($a->check_in ? \Carbon\Carbon::parse($a->check_in) : null);
+            return $d && $d->isCurrentMonth();
+        })->count() : 0;
+
+        $totalCheckins = $member ? $member->attendance->count() : 0;
+
+        // Gamified 20-Day Monthly Target
+        $monthlyGoal = 20;
+        $goalPercent = min(100, round(($thisMonthCheckins / $monthlyGoal) * 100));
+        $sessionsNeeded = max(0, $monthlyGoal - $thisMonthCheckins);
+
+        // Motivational Tier & Badge System
+        if ($thisMonthCheckins >= 20) {
+            $tierName = 'Diamond Legend';
+            $tierIcon = '👑';
+            $tierBadge = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+            $tierBarGrad = 'from-purple-500 via-pink-500 to-indigo-500';
+            $tierMessage = 'Elite Discipline! You are in the top 1% of gym athletes.';
+            $nextMilestone = 'Maximum Level Achieved! Keep dominating.';
+        } elseif ($thisMonthCheckins >= 12) {
+            $tierName = 'Gold Beast';
+            $tierIcon = '🥇';
+            $tierBadge = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+            $tierBarGrad = 'from-amber-500 via-orange-500 to-amber-400';
+            $tierMessage = 'Insane consistency! Your transformation is unstoppable.';
+            $nextMilestone = $sessionsNeeded . ' more visits to reach Diamond Legend 👑';
+        } elseif ($thisMonthCheckins >= 5) {
+            $tierName = 'Silver Warrior';
+            $tierIcon = '🥈';
+            $tierBadge = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+            $tierBarGrad = 'from-cyan-500 via-blue-500 to-indigo-500';
+            $tierMessage = 'Great momentum! You are building ironclad discipline.';
+            $nextMilestone = (12 - $thisMonthCheckins) . ' more visits to unlock Gold Beast 🥇';
+        } else {
+            $tierName = 'Bronze Starter';
+            $tierIcon = '🥉';
+            $tierBadge = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+            $tierBarGrad = 'from-emerald-500 to-teal-400';
+            $tierMessage = 'Every workout counts. Step up, show up, and crush it!';
+            $nextMilestone = (5 - $thisMonthCheckins) . ' more visits to unlock Silver Warrior 🥈';
+        }
+
+        // Current week (Mon to Sun) checkin timeline
+        $currentWeekDays = [];
+        $startOfWeek = now()->copy()->startOfWeek(); // Monday
+        $attendedDates = $member ? $member->attendance->map(function($a) {
+            $d = $a->date ? \Carbon\Carbon::parse($a->date) : ($a->check_in ? \Carbon\Carbon::parse($a->check_in) : null);
+            return $d ? $d->toDateString() : null;
+        })->filter()->all() : [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $dayDate = $startOfWeek->copy()->addDays($i);
+            $isAttended = in_array($dayDate->toDateString(), $attendedDates);
+            $isToday = $dayDate->isToday();
+            $isFuture = $dayDate->isFuture() && !$isToday;
+            $currentWeekDays[] = [
+                'day' => $dayDate->format('D'),
+                'date' => $dayDate->format('j'),
+                'attended' => $isAttended,
+                'isToday' => $isToday,
+                'isFuture' => $isFuture,
+            ];
+        }
+
+        // Active PT Package & Assigned Locker
         $activePt = $member?->memberPtPackages?->where('status', 'ACTIVE')->first();
-        // Assigned Locker
         $assignedLocker = $member?->serviceBookings?->where('status', 'ACTIVE')->whereNotNull('locker_number')->first();
     @endphp
 
@@ -32,20 +94,19 @@
         portalScanMsg: '',
         portalQrReader: null,
         showMeasurementModal: false,
-        measurementDate: '{{ now()->format('Y-m-d') }}',
-        measurementWeight: '{{ $latestMeasurement['weight'] ?? '' }}',
-        measurementChest: '{{ $latestMeasurement['chest'] ?? '' }}',
-        measurementShoulders: '{{ $latestMeasurement['shoulders'] ?? '' }}',
-        measurementWaist: '{{ $latestMeasurement['waist'] ?? '' }}',
-        measurementHips: '{{ $latestMeasurement['hips'] ?? '' }}',
-        measurementBicepLeft: '{{ $latestMeasurement['bicep_left'] ?? '' }}',
-        measurementBicepRight: '{{ $latestMeasurement['bicep_right'] ?? '' }}',
-        measurementThighLeft: '{{ $latestMeasurement['thigh_left'] ?? '' }}',
-        measurementThighRight: '{{ $latestMeasurement['thigh_right'] ?? '' }}',
-        measurementCalves: '{{ $latestMeasurement['calves'] ?? '' }}',
-        measurementNeck: '{{ $latestMeasurement['neck'] ?? '' }}',
-        measurementBodyFat: '{{ $latestMeasurement['body_fat'] ?? '' }}',
-        measurementNotes: '',
+        setPortalTab(name) {
+            this.tab = name;
+            window.dispatchEvent(new CustomEvent('portal-tab-changed', { detail: name }));
+            if (window.history && window.history.replaceState) {
+                const url = new URL(window.location);
+                if (name === 'overview') {
+                    url.searchParams.delete('tab');
+                } else {
+                    url.searchParams.set('tab', name);
+                }
+                window.history.replaceState(null, '', url.toString());
+            }
+        },
         startPortalScanner() {
             this.showPortalScanner = true;
             this.portalScanMsg = '';
@@ -101,7 +162,9 @@
                 alert('Check-in error: ' + err.message);
             });
         }
-    }" class="max-w-2xl mx-auto space-y-5 pb-20 sm:pb-10 pt-1">
+    }" 
+    @switch-portal-tab.window="tab = $event.detail"
+    class="max-w-xl md:max-w-2xl mx-auto space-y-5 pb-24 sm:pb-12 pt-1">
 
         @if(! $member)
             <!-- Unlinked Account Notice -->
@@ -110,7 +173,7 @@
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
                 <h2 class="text-xl font-black text-slate-900 dark:text-white">Welcome, {{ auth()->user()->name }}!</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">Your member account is active, but your mobile number has not yet been linked to an active gym profile. Please contact the front desk reception to verify your registration.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">Your member account is active, but your mobile number has not yet been linked to an active gym profile. Please contact the front desk reception to verify your registration.</p>
             </div>
         @else
 
@@ -208,39 +271,112 @@
                         <span>Not checked in yet today 🕒</span>
                     @endif
                 </div>
-                <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                    {{ $thisMonthCheckins }} visits this month
-                </span>
+                <button type="button" @click="setPortalTab('attendance')" class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition-colors">
+                    {{ $thisMonthCheckins }} visits this month &rarr;
+                </button>
+            </div>
+
+            <!-- MOTIVATIONAL ATTENDANCE & CONSISTENCY HERO WIDGET -->
+            <div class="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 p-5 shadow-lg space-y-4 text-white relative overflow-hidden">
+                <!-- Background Accent Glow -->
+                <div class="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                <!-- Top Row: Tier Badge & Monthly Progress -->
+                <div class="relative z-10 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-2xl">{{ $tierIcon }}</span>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-black text-white tracking-tight">{{ $tierName }}</h3>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider {{ $tierBadge }} border">
+                                    {{ $thisMonthCheckins }} Workouts
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">{{ $tierMessage }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="text-lg font-black text-amber-400 font-mono">{{ $goalPercent }}%</div>
+                        <div class="text-[10px] text-slate-400">Monthly Target</div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar toward Monthly Goal -->
+                <div class="relative z-10 space-y-1.5">
+                    <div class="w-full bg-slate-800/90 rounded-full h-3 p-0.5 overflow-hidden border border-slate-700/60 shadow-inner">
+                        <div class="h-full rounded-full bg-gradient-to-r {{ $tierBarGrad }} transition-all duration-500 shadow-sm" style="width: {{ $goalPercent }}%"></div>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-slate-400">
+                        <span>{{ $thisMonthCheckins }} of {{ $monthlyGoal }} Monthly Workouts</span>
+                        <span class="text-amber-400 font-bold">{{ $nextMilestone }}</span>
+                    </div>
+                </div>
+
+                <!-- Weekly Consistency Dots (Mon - Sun Streak) -->
+                <div class="relative z-10 pt-2 border-t border-slate-800/80">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                            <span>⚡ Weekly Streak</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400">
+                            {{ count(array_filter($currentWeekDays, fn($d) => $d['attended'])) }} / 7 Days Active
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center">
+                        @foreach($currentWeekDays as $day)
+                            <div class="py-2 px-1 rounded-2xl flex flex-col items-center justify-center gap-1 border transition-all {{ $day['attended'] ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-xs' : ($day['isToday'] ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 ring-1 ring-amber-500/30' : 'bg-slate-950/50 border-slate-800/80 text-slate-500') }}">
+                                <span class="text-[10px] font-bold uppercase">{{ $day['day'] }}</span>
+                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black {{ $day['attended'] ? 'bg-emerald-500 text-slate-950 shadow-sm' : ($day['isToday'] ? 'border-2 border-amber-400 text-amber-300' : 'bg-slate-800 text-slate-400') }}">
+                                    @if($day['attended'])
+                                        ✓
+                                    @else
+                                        {{ $day['date'] }}
+                                    @endif
+                                </div>
+                                <span class="text-[9px] font-bold uppercase tracking-tight">
+                                    @if($day['attended'])
+                                        Done
+                                    @elseif($day['isToday'])
+                                        Today
+                                    @else
+                                        —
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
             <!-- APP SEGMENTED TABS (HOME, WORKOUT, DIET, VISITS, PASS) -->
             <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border border-slate-300/60 dark:border-slate-800 text-xs font-bold">
                 <button type="button" 
-                        @click="tab = 'overview'" 
+                        @click="setPortalTab('overview')" 
                         :class="tab === 'overview' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
                         class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
                     Home
                 </button>
                 <button type="button" 
-                        @click="tab = 'workouts'" 
+                        @click="setPortalTab('workouts')" 
                         :class="tab === 'workouts' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
                         class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
                     Workout
                 </button>
                 <button type="button" 
-                        @click="tab = 'diets'" 
+                        @click="setPortalTab('diets')" 
                         :class="tab === 'diets' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
                         class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
                     Diet
                 </button>
                 <button type="button" 
-                        @click="tab = 'attendance'" 
+                        @click="setPortalTab('attendance')" 
                         :class="tab === 'attendance' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
                         class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
                     Visits
                 </button>
                 <button type="button" 
-                        @click="tab = 'memberships'" 
+                        @click="setPortalTab('memberships')" 
                         :class="tab === 'memberships' ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
                         class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
                     Pass
@@ -251,18 +387,18 @@
             <div x-show="tab === 'overview'" x-cloak class="space-y-4">
                 
                 <!-- Today's Workout Quick Card -->
-                <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
+                <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3.5">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-base shrink-0">
+                                🏋️
                             </div>
-                            <div>
-                                <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Workout Routine</h3>
-                                <p class="text-[11px] text-slate-400">{{ $activeWorkout ? $activeWorkout->title : 'No Routine Prescribed' }}</p>
+                            <div class="space-y-0.5">
+                                <h3 class="text-sm font-black text-slate-900 dark:text-white tracking-tight">Workout Routine</h3>
+                                <p class="text-[11px] font-medium text-slate-400">{{ $activeWorkout ? $activeWorkout->title : 'No Routine Prescribed' }}</p>
                             </div>
                         </div>
-                        <button type="button" @click="tab = 'workouts'" class="text-xs font-bold text-amber-500 hover:underline">View All &rarr;</button>
+                        <button type="button" @click="setPortalTab('workouts')" class="text-xs font-bold text-amber-500 hover:underline cursor-pointer">View All &rarr;</button>
                     </div>
 
                     @if($activeWorkout && $activeWorkout->exercises->isNotEmpty())
@@ -278,25 +414,28 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="py-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-950/50 rounded-2xl">
-                            No active workout prescribed yet. Contact your gym trainer to assign a routine.
+                        <div class="py-5 px-4 text-center rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-dashed border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <div class="text-xs font-bold text-slate-700 dark:text-slate-300">No workout routine assigned yet</div>
+                            <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
+                                Contact your gym trainer to assign a personalized routine suited to your fitness goals.
+                            </p>
                         </div>
                     @endif
                 </div>
 
                 <!-- Today's Nutrition / Diet Quick Card -->
-                <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
+                <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3.5">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-base shrink-0">
+                                🥗
                             </div>
-                            <div>
-                                <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Nutrition Target</h3>
-                                <p class="text-[11px] text-slate-400">{{ $activeDiet ? ($activeDiet->daily_calories . ' kcal goal') : 'Custom Nutrition' }}</p>
+                            <div class="space-y-0.5">
+                                <h3 class="text-sm font-black text-slate-900 dark:text-white tracking-tight">Nutrition Target</h3>
+                                <p class="text-[11px] font-medium text-slate-400">{{ $activeDiet ? ($activeDiet->daily_calories . ' kcal goal') : 'Custom Nutrition' }}</p>
                             </div>
                         </div>
-                        <button type="button" @click="tab = 'diets'" class="text-xs font-bold text-amber-500 hover:underline">Details &rarr;</button>
+                        <button type="button" @click="setPortalTab('diets')" class="text-xs font-bold text-amber-500 hover:underline cursor-pointer">Details &rarr;</button>
                     </div>
 
                     @if($activeDiet)
@@ -315,8 +454,11 @@
                             </div>
                         </div>
                     @else
-                        <div class="py-4 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-950/50 rounded-2xl">
-                            No custom diet plan assigned yet.
+                        <div class="py-5 px-4 text-center rounded-2xl bg-slate-50 dark:bg-slate-950/40 border border-dashed border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <div class="text-xs font-bold text-slate-700 dark:text-slate-300">No diet plan assigned yet</div>
+                            <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
+                                Ask your trainer or nutritionist to generate a personalized diet and meal timetable.
+                            </p>
                         </div>
                     @endif
                 </div>
@@ -352,7 +494,7 @@
                 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Recent Gym Visits</h3>
-                        <button type="button" @click="tab = 'attendance'" class="text-xs font-bold text-amber-500 hover:underline">Full Log &rarr;</button>
+                        <button type="button" @click="setPortalTab('attendance')" class="text-xs font-bold text-amber-500 hover:underline cursor-pointer">Full Log &rarr;</button>
                     </div>
 
                     @if($member->attendance->isNotEmpty())
@@ -383,7 +525,7 @@
                 <div class="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Latest Fee Receipt</h3>
-                        <button type="button" @click="tab = 'memberships'" class="text-xs font-bold text-amber-500 hover:underline">All Receipts &rarr;</button>
+                        <button type="button" @click="setPortalTab('memberships')" class="text-xs font-bold text-amber-500 hover:underline cursor-pointer">All Receipts &rarr;</button>
                     </div>
 
                     @if($member->payments->isNotEmpty())
@@ -472,7 +614,7 @@
                             🏋️
                         </div>
                         <h4 class="text-base font-bold text-slate-900 dark:text-white">No Workout Routine Assigned</h4>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Ask your gym trainer to prescribe a custom exercise routine suited to your fitness goals.</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">Ask your gym trainer to prescribe a custom exercise routine suited to your fitness goals.</p>
                     </div>
                 @endif
             </div>
@@ -548,7 +690,7 @@
                             🥗
                         </div>
                         <h4 class="text-base font-bold text-slate-900 dark:text-white">No Diet Plan Assigned</h4>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Contact your trainer to prescribe a meal timetable and nutritional plan.</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">Contact your trainer to prescribe a meal timetable and nutritional plan.</p>
                     </div>
                 @endif
             </div>
@@ -562,7 +704,7 @@
                             <p class="text-xs text-slate-400">Automated check-ins via QR / Biometric</p>
                         </div>
                         <span class="px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-black border border-emerald-500/20">
-                            {{ $member->attendance->count() }} Total Visits
+                            {{ $totalCheckins }} Total Visits
                         </span>
                     </div>
 
@@ -657,7 +799,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <span class="font-black text-emerald-500">{{ $currency }}{{ number_format($payment->amount, 2) }}</span>
-                                        <a href="{{ route('app.invoices.show', $payment->id) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-slate-950 font-bold text-xs transition-colors flex items-center gap-1">
+                                        <a href="{{ route('app.invoices.show', $payment->id) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-slate-950 font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             <span>View</span>
                                         </a>
