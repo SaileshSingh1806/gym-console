@@ -47,17 +47,26 @@ class AuthController extends Controller
             ])->onlyInput('email');
         }
 
+        $digitsOnly = preg_replace('/[^0-9]/', '', $loginInput);
+        $suffix10 = strlen($digitsOnly) >= 10 ? substr($digitsOnly, -10) : $digitsOnly;
+
         // 1. Check if direct User exists by email or phone
-        $user = User::where('email', $loginInput)
-            ->orWhere('phone', $loginInput)
-            ->first();
+        $userQuery = User::where('email', $loginInput);
+        if (! empty($digitsOnly)) {
+            $userQuery->orWhere('phone', $loginInput)
+                      ->orWhere('phone', 'like', "%{$suffix10}");
+        }
+        $user = $userQuery->first();
 
         // 2. If not found directly on User, search in Member records
         if (! $user) {
-            $member = Member::where('member_code', $loginInput)
-                ->orWhere('phone', $loginInput)
-                ->orWhere('email', $loginInput)
-                ->first();
+            $memberQuery = Member::where('member_code', $loginInput)
+                ->orWhere('email', $loginInput);
+            if (! empty($digitsOnly)) {
+                $memberQuery->orWhere('phone', $loginInput)
+                            ->orWhere('phone', 'like', "%{$suffix10}");
+            }
+            $member = $memberQuery->first();
 
             if ($member) {
                 if ($member->user_id && $member->user) {
@@ -88,20 +97,23 @@ class AuthController extends Controller
         if ($user) {
             $passwordMatches = Hash::check($password, $user->password);
 
-            // If initial fallback password for members (e.g. member phone, member code, or last 4 digits)
+            // If initial fallback password for members (e.g. member phone, member code, last 4 digits, or first login)
             if (! $passwordMatches && $user->role === 'member') {
                 $member = $user->memberProfile ?? Member::where('user_id', $user->id)->first();
                 if ($member) {
+                    $mPhoneDigits = preg_replace('/[^0-9]/', '', $member->phone ?? '');
+                    $mSuffix4 = strlen($mPhoneDigits) >= 4 ? substr($mPhoneDigits, -4) : '';
                     $validFallbacks = array_filter([
                         $member->phone,
+                        $mPhoneDigits,
                         $member->member_code,
-                        substr($member->phone ?? '', -4),
+                        $mSuffix4,
                         'password',
                         '123456',
                         '12345678',
                     ]);
 
-                    if (in_array($password, $validFallbacks, true)) {
+                    if (in_array($password, $validFallbacks, true) || $password === $mPhoneDigits || $password === $mSuffix4) {
                         $user->password = Hash::make($password);
                         $user->save();
                         $passwordMatches = true;

@@ -174,7 +174,12 @@ class AppController extends Controller
           ->where(function ($q) use ($user) {
               $q->where('user_id', $user->id);
               if (! empty($user->phone)) {
+                  $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+                  $suffix10 = strlen($cleanPhone) >= 10 ? substr($cleanPhone, -10) : $cleanPhone;
                   $q->orWhere('phone', $user->phone);
+                  if (! empty($suffix10)) {
+                      $q->orWhere('phone', 'like', "%{$suffix10}");
+                  }
               }
               if (! empty($user->email)) {
                   $q->orWhere('email', $user->email);
@@ -1658,6 +1663,131 @@ class AppController extends Controller
         $this->attendanceService->checkOutById($attendance);
 
         return back()->with('success', "Check-out recorded for {$attendance->member?->full_name}.");
+    }
+
+    public function attendanceStandee(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $checkinUrl = route('gym.checkin', ['slug' => $tenant->slug ?: $tenant->id]);
+
+        return view('app.attendance.standee', compact('tenant', 'checkinUrl'));
+    }
+
+    public function attendanceQrScan(Request $request): JsonResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $token = trim($request->input('qr_token', $request->input('code', '')));
+
+        if (empty($token)) {
+            return response()->json(['success' => false, 'message' => 'Please provide a valid QR Code or Member Code.'], 422);
+        }
+
+        $cleanDigits = preg_replace('/[^0-9]/', '', $token);
+        $suffix10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
+
+        $member = Member::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($token, $suffix10) {
+                $q->where('qr_code_token', $token)
+                  ->orWhere('member_code', $token)
+                  ->orWhere('email', $token);
+                if (! empty($suffix10)) {
+                    $q->orWhere('phone', $token)
+                      ->orWhere('phone', 'like', "%{$suffix10}");
+                }
+            })->first();
+
+        if (! $member) {
+            return response()->json(['success' => false, 'message' => "Member not found for '{$token}'."], 404);
+        }
+
+        if (! $member->isMembershipActive()) {
+            return response()->json([
+                'success' => false,
+                'message' => "Access Denied: {$member->full_name}'s membership has expired or is inactive.",
+                'member' => [
+                    'name' => $member->full_name,
+                    'code' => $member->member_code,
+                    'status' => $member->status,
+                ],
+            ], 403);
+        }
+
+        $action = $request->input('action', 'check_in');
+
+        if ($action === 'check_out') {
+            $record = $this->attendanceService->checkOut($member);
+            if (! $record) {
+                return response()->json(['success' => false, 'message' => "No active check-in record found today for {$member->full_name}."], 422);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Goodbye {$member->first_name}! Check-out recorded at " . now()->format('h:i A') . ".",
+                'action' => 'check_out',
+                'member' => [
+                    'id' => $member->id,
+                    'name' => $member->full_name,
+                    'code' => $member->member_code,
+                    'time' => now()->format('h:i A'),
+                ],
+            ]);
+        }
+
+        $record = $this->attendanceService->checkIn($member, 'qr_scan');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Welcome {$member->full_name}! Check-in recorded at " . now()->format('h:i A') . ".",
+            'action' => 'check_in',
+            'member' => [
+                'id' => $member->id,
+                'name' => $member->full_name,
+                'code' => $member->member_code,
+                'time' => now()->format('h:i A'),
+                'plan' => $member->activeMembership?->plan?->name ?? 'Standard',
+            ],
+        ]);
+    }
+
+    public function portalScanCheckin(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = $this->resolveTenant();
+
+        $member = Member::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('email', $user->email);
+                if (! empty($user->phone)) {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+                    $suffix10 = strlen($cleanPhone) >= 10 ? substr($cleanPhone, -10) : $cleanPhone;
+                    $q->orWhere('phone', $user->phone);
+                    if (! empty($suffix10)) {
+                        $q->orWhere('phone', 'like', "%{$suffix10}");
+                    }
+                }
+            })->first();
+
+        if (! $member) {
+            return response()->json(['success' => false, 'message' => 'Member profile not found.'], 404);
+        }
+
+        if (! $member->isMembershipActive()) {
+            return response()->json(['success' => false, 'message' => 'Your membership is inactive or expired. Please renew at the front desk.'], 403);
+        }
+
+        $record = $this->attendanceService->checkIn($member, 'mobile_qr_scan');
+
+        return response()->json([
+            'success' => true,
+            'message' => "Attendance recorded successfully! Welcome to {$tenant->name}.",
+            'time' => now()->format('h:i A'),
+            'member' => [
+                'name' => $member->full_name,
+                'code' => $member->member_code,
+                'plan' => $member->activeMembership?->plan?->name ?? 'Standard',
+            ],
+        ]);
     }
 
     public function payments(Request $request): View

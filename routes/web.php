@@ -19,6 +19,10 @@ Route::get('/storage/{path}', [PublicController::class, 'serveStorageFile'])->wh
 // Public Tax Invoice / Payment Receipt (Secured with unique hash)
 Route::get('/receipt/{id}/{hash}', [AppController::class, 'showPublicInvoice'])->name('app.invoices.public')->whereNumber('id');
 
+// Public Gym Entrance QR Check-in (Scan with Phone Camera)
+Route::get('/gym/{slug}/checkin', [PublicController::class, 'gymCheckin'])->name('gym.checkin');
+Route::post('/gym/{slug}/checkin', [PublicController::class, 'processGymCheckin'])->name('gym.checkin.process');
+
 // Authentication & Onboarding Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -43,6 +47,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->group(function () {
     Route::get('/dashboard', [AppController::class, 'dashboard'])->name('app.dashboard');
     Route::get('/portal', [AppController::class, 'memberPortal'])->name('app.portal');
+    Route::post('/portal/scan-checkin', [AppController::class, 'portalScanCheckin'])->name('app.portal.scan-checkin');
 
     // 1. Members Management
     Route::middleware(['feature:members_management'])->group(function () {
@@ -89,7 +94,9 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     // 4. Attendance
     Route::middleware('feature:attendance_checkin')->group(function () {
         Route::get('/attendance', [AppController::class, 'attendance'])->name('app.attendance.index')->middleware('permission:attendance.view');
+        Route::get('/attendance/standee', [AppController::class, 'attendanceStandee'])->name('app.attendance.standee')->middleware('permission:attendance.view');
         Route::post('/attendance', [AppController::class, 'storeCheckin'])->name('app.attendance.store')->middleware('permission:attendance.checkin');
+        Route::post('/attendance/qr-scan', [AppController::class, 'attendanceQrScan'])->name('app.attendance.qr-scan')->middleware('permission:attendance.checkin');
         Route::post('/attendance/{id}/checkout', [AppController::class, 'checkoutAttendance'])->name('app.attendance.checkout')->whereNumber('id')->middleware('permission:attendance.checkin');
     });
 
