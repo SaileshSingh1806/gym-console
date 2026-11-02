@@ -1,7 +1,18 @@
 <x-guest-layout title="Order Summary & Checkout - {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
     @php
         $isEnterprise = str_contains(strtolower($plan->name ?? ''), 'enterprise') || ($plan->slug ?? '') === 'pro';
-        $paymentPageUrl = $isEnterprise ? 'https://rzp.io/rzp/lisGNMno' : 'https://rzp.io/rzp/seC7Xkmu';
+        $basePaymentPageUrl = $isEnterprise ? 'https://rzp.io/rzp/lisGNMno' : 'https://rzp.io/rzp/seC7Xkmu';
+        
+        $userPhone = preg_replace('/[^0-9]/', '', $user?->phone ?? ($tenant?->phone ?? ''));
+        if (strlen($userPhone) > 10) {
+            $userPhone = substr($userPhone, -10);
+        }
+        $queryParams = array_filter([
+            'email' => $user?->email ?? ($tenant?->email ?? ''),
+            'phone' => $userPhone,
+            'contact' => $userPhone,
+        ]);
+        $paymentPageUrl = $basePaymentPageUrl . (!empty($queryParams) ? ('?' . http_build_query($queryParams)) : '');
     @endphp
     <div class="py-12 sm:py-16 max-w-xl mx-auto px-4 sm:px-6 relative" x-data="{ 
         processing: false,
@@ -10,41 +21,38 @@
         manualPaymentId: '',
         checkingPayment: false,
         checkPaymentMessage: '',
-        showIframeModal: false,
-        iframeLoading: true,
+        pollTimer: null,
+        pollCount: 0,
         hasClickedPayNow: Boolean(
             {{ (!empty($isComingFromRazorpay) || request()->has('payment_id') || request()->has('razorpay_payment_id') || request()->has('paid') || request()->has('redirect') || request()->has('redirected')) ? 'true' : 'false' }} ||
             localStorage.getItem('checkout_clicked_pay_now') === '1' ||
             sessionStorage.getItem('checkout_clicked_pay_now') === '1' ||
             (document.referrer && document.referrer.includes('razorpay'))
         ),
-        openPayModal() {
+        openPayPage() {
             this.hasClickedPayNow = true;
             localStorage.setItem('checkout_clicked_pay_now', '1');
             sessionStorage.setItem('checkout_clicked_pay_now', '1');
-
-            // On mobile devices, third-party iframes block UPI intent apps (Google Pay, PhonePe, Paytm).
-            // Therefore on mobile, navigate directly to official Razorpay payment page for native 1-tap UPI app launching.
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth < 768);
-            if (isMobile) {
-                window.location.href = '{{ $paymentPageUrl }}';
-            } else {
-                this.iframeLoading = true;
-                this.showIframeModal = true;
-            }
+            this.startPolling();
         },
-        closePayModal() {
-            this.showIframeModal = false;
-        },
-        verifyFromModal() {
-            this.showIframeModal = false;
-            checkRecentPayment();
+        startPolling() {
+            if (this.pollTimer) clearInterval(this.pollTimer);
+            this.pollCount = 0;
+            this.pollTimer = setInterval(() => {
+                this.pollCount++;
+                if (this.pollCount > 24) {
+                    clearInterval(this.pollTimer);
+                    return;
+                }
+                checkRecentPayment(true);
+            }, 5000);
         }
     }"
     x-init="
         window.addEventListener('focus', () => {
             if (localStorage.getItem('checkout_clicked_pay_now') === '1' || sessionStorage.getItem('checkout_clicked_pay_now') === '1') {
                 hasClickedPayNow = true;
+                checkRecentPayment();
             }
         });
     ">
@@ -154,56 +162,54 @@
                     </div>
                 </template>
 
-                <!-- Primary Action: Official Razorpay Instant Checkout -->
-                <button type="button" @click="handleRazorpayPayment()" :disabled="processing" 
-                        class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:brightness-110 active:scale-[0.99] text-white font-black text-sm shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer">
-                    <span x-show="processing" class="animate-spin text-base">⏳</span>
-                    <span x-show="!processing" class="flex items-center gap-2">
-                        <span>💳 Pay ₹{{ number_format($price, 2) }} with Razorpay</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </span>
-                </button>
+                <!-- Primary Action: Open Razorpay Payment Page -->
+                <a href="{{ $paymentPageUrl }}" target="_blank" rel="noopener noreferrer"
+                   @click="openPayPage()"
+                   class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:brightness-110 active:scale-[0.99] text-white font-black text-sm shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer text-center">
+                    <span>💳 Pay ₹{{ number_format($price, 2) }} on Razorpay Page</span>
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
 
-                <!-- Alternative: Direct Payment Page Link -->
-                <div class="pt-1 flex items-center justify-center">
-                    <a href="{{ $paymentPageUrl }}" target="_blank" rel="noopener noreferrer"
-                       @click="hasClickedPayNow = true"
-                       class="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center gap-1.5 transition-colors">
-                        <span>Prefer direct payment page? Pay via Razorpay Hosted Link</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    </a>
-                </div>
+                <!-- Step 2: Instant Activation & Verification -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3.5 mt-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-bold text-slate-200">Step 2: Activation</span>
+                        </div>
+                        <button type="button" @click="checkRecentPayment()" :disabled="checkingPayment"
+                                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 transition-all cursor-pointer border border-slate-700/80">
+                            <span x-show="checkingPayment" class="animate-spin text-xs">🔄</span>
+                            <span x-show="!checkingPayment">🔄</span>
+                            <span x-text="checkingPayment ? 'Checking Razorpay...' : 'Auto-Detect Payment'"></span>
+                        </button>
+                    </div>
 
-                <!-- Check Recent Payment Button (Visible once Pay Now is clicked or upon return) -->
-                <div x-show="hasClickedPayNow" x-cloak class="space-y-2 pt-2" x-transition>
-                    <button type="button" @click="checkRecentPayment()" :disabled="checkingPayment"
-                            class="w-full py-3.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-750 border border-slate-700/80 hover:border-emerald-500/50 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md">
-                        <span x-show="checkingPayment" class="animate-spin text-sm">🔄</span>
-                        <span x-show="!checkingPayment">🔄</span>
-                        <span x-text="checkingPayment ? 'Checking Razorpay for your payment...' : 'Already Paid? Click to Auto-Detect & Activate'"></span>
-                    </button>
                     <template x-if="checkPaymentMessage">
                         <div class="p-2.5 rounded-xl text-center text-xs" :class="checkPaymentMessage.startsWith('✅') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'" x-text="checkPaymentMessage"></div>
                     </template>
+
+                    <div class="pt-2 border-t border-slate-800/80">
+                        <label class="block text-[11px] text-slate-400 mb-1.5 leading-relaxed">
+                            Already paid on Razorpay? Paste your <strong>Payment ID</strong> to activate immediately:
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="manual_payment_input" x-model="manualPaymentId" @keydown.enter.prevent="submitManualPayment()" placeholder="e.g. pay_TvGujiH8gP3Rkp" 
+                                   class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono">
+                            <button type="button" @click="submitManualPayment()" 
+                                    class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 whitespace-nowrap">
+                                <span>Verify &amp; Activate</span> &rarr;
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Manual Payment ID verification -->
-                <div x-show="hasClickedPayNow" x-cloak class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5" x-transition>
-                    <div class="flex items-center gap-2">
-                        <span class="text-amber-400 font-bold text-sm">⚡</span>
-                        <h4 class="text-xs font-bold text-slate-200">Or Paste Payment ID Manually</h4>
-                    </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        Enter your <strong>Payment ID</strong> (e.g. <span class="font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">pay_TvGujiH8gP3Rkp</span>) from your payment screen or receipt:
-                    </p>
-                    <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                        <input type="text" id="manual_payment_input" x-model="manualPaymentId" @keydown.enter.prevent="submitManualPayment()" placeholder="Paste Payment ID here (e.g. pay_...)" 
-                               class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono">
-                        <button type="button" @click="submitManualPayment()" 
-                                class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/10 whitespace-nowrap">
-                            <span>Verify &amp; Activate</span> &rarr;
-                        </button>
-                    </div>
+                <!-- Secondary Option: In-Page Checkout Popup -->
+                <div class="text-center pt-1">
+                    <button type="button" @click="handleRazorpayPayment()" 
+                            class="text-[11px] text-slate-400 hover:text-amber-400 transition-colors cursor-pointer">
+                        <span>Or click here to open Razorpay In-Page Popup Checkout</span>
+                    </button>
                 </div>
             </form>
 
@@ -352,11 +358,13 @@
     <script>
         const razorpayConfig = {{ Js::from($razorpayConfig ?? []) }};
 
-        async function checkRecentPayment() {
+        async function checkRecentPayment(isBackground = false) {
             const alpineEl = document.querySelector('[x-data]');
             if (alpineEl && alpineEl._x_dataStack) {
-                alpineEl._x_dataStack[0].checkingPayment = true;
-                alpineEl._x_dataStack[0].checkPaymentMessage = 'Connecting to Razorpay & checking recent payment...';
+                if (!isBackground) {
+                    alpineEl._x_dataStack[0].checkingPayment = true;
+                    alpineEl._x_dataStack[0].checkPaymentMessage = 'Connecting to Razorpay & checking recent payment...';
+                }
             }
 
             try {
@@ -373,18 +381,21 @@
                 if (data.success && data.redirect) {
                     if (alpineEl && alpineEl._x_dataStack) {
                         alpineEl._x_dataStack[0].checkPaymentMessage = '✅ ' + data.message + ' Redirecting to Dashboard...';
+                        if (alpineEl._x_dataStack[0].pollTimer) {
+                            clearInterval(alpineEl._x_dataStack[0].pollTimer);
+                        }
                     }
                     setTimeout(() => {
                         window.location.href = data.redirect;
                     }, 800);
                 } else {
-                    if (alpineEl && alpineEl._x_dataStack) {
+                    if (alpineEl && alpineEl._x_dataStack && !isBackground) {
                         alpineEl._x_dataStack[0].checkingPayment = false;
-                        alpineEl._x_dataStack[0].checkPaymentMessage = data.message || 'Payment not detected yet.';
+                        alpineEl._x_dataStack[0].checkPaymentMessage = data.message || 'Payment not detected yet. If you completed payment, paste your Payment ID below.';
                     }
                 }
             } catch (e) {
-                if (alpineEl && alpineEl._x_dataStack) {
+                if (alpineEl && alpineEl._x_dataStack && !isBackground) {
                     alpineEl._x_dataStack[0].checkingPayment = false;
                     alpineEl._x_dataStack[0].checkPaymentMessage = 'Could not verify payment: ' + e.message;
                 }

@@ -539,9 +539,15 @@ class AuthController extends Controller
 
                 $pEmail = strtolower($payment['email'] ?? '');
                 $pContact = preg_replace('/[^0-9]/', '', $payment['contact'] ?? '');
+                $notes = $payment['notes'] ?? [];
+                $noteEmail = strtolower($notes['email'] ?? '');
+                $notePhone = preg_replace('/[^0-9]/', '', $notes['phone'] ?? ($notes['contact'] ?? ''));
 
-                $emailMatches = ! empty($pEmail) && ($pEmail === $userEmail || $pEmail === $tenantEmail);
-                $phoneMatches = ! empty($userPhoneSuffix) && (str_ends_with($pContact, $userPhoneSuffix) || str_ends_with($userPhone, $pContact));
+                $emailMatches = (! empty($pEmail) && ($pEmail === $userEmail || $pEmail === $tenantEmail))
+                    || (! empty($noteEmail) && ($noteEmail === $userEmail || $noteEmail === $tenantEmail));
+
+                $phoneMatches = (! empty($userPhoneSuffix) && (str_ends_with($pContact, $userPhoneSuffix) || str_ends_with($userPhone, $pContact)))
+                    || (! empty($userPhoneSuffix) && ! empty($notePhone) && (str_ends_with($notePhone, $userPhoneSuffix) || str_ends_with($userPhone, $notePhone)));
 
                 $pAmount = (int) ($payment['amount'] ?? 0);
                 // Verify amount (within ₹2 tolerance in paise, or any captured payment matching user's phone/email)
