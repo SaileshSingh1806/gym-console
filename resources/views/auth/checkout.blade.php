@@ -142,60 +142,59 @@
                 <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
                 <input type="hidden" name="razorpay_signature" id="razorpay_signature">
 
-                <!-- Sandbox Notice if invalid API key in test environment -->
+                <!-- Error / Failure Alert -->
                 <template x-if="paymentFailed">
                     <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs text-slate-300 space-y-2">
                         <div class="font-bold text-amber-400 flex items-center gap-2">
-                            <span>⚠️ Sandbox Testing Notice:</span>
+                            <span>⚠️ Payment Notice:</span>
                         </div>
                         <p class="text-[11px] text-slate-400">
-                            <span x-text="failureMsg || 'Razorpay sandbox key verification.'"></span><br>
-                            To process live UPI/Cards, configure your Razorpay Key ID in <strong>Super Admin &rarr; Settings &rarr; Payment Gateways</strong>.
+                            <span x-text="failureMsg || 'Razorpay payment was not completed.'"></span>
                         </p>
-                        <button type="button" @click="simulateTestPayment()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all cursor-pointer">
-                            ⚡ Complete Test Payment (Sandbox Simulator)
-                        </button>
                     </div>
                 </template>
 
-                {{-- Popup payment button hidden as requested --}}
-                {{--
+                <!-- Primary Action: Official Razorpay Instant Checkout -->
                 <button type="button" @click="handleRazorpayPayment()" :disabled="processing" 
-                        class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-slate-950 font-black text-sm shadow-xl shadow-orange-500/20 hover:shadow-orange-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
-                    <span x-show="processing" class="animate-spin text-base">⏳</span>
-                    <span x-show="!processing">💳 Pay ₹{{ number_format($price, 2) }} with Razorpay &rarr;</span>
-                </button>
-                --}}
-
-                <!-- Primary Action: Direct Payment Page (Opens in-page modal on same page) -->
-                <button type="button" 
-                        @click="openPayModal()"
                         class="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:brightness-110 active:scale-[0.99] text-white font-black text-sm shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer">
-                    <span>Pay Now</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    <span x-show="processing" class="animate-spin text-base">⏳</span>
+                    <span x-show="!processing" class="flex items-center gap-2">
+                        <span>💳 Pay ₹{{ number_format($price, 2) }} with Razorpay</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
                 </button>
 
-                <!-- Check Recent Payment Button (Hidden initially, visible once Pay Now is clicked or upon return) -->
-                <div x-show="hasClickedPayNow" x-cloak class="space-y-2 pt-1" x-transition>
+                <!-- Alternative: Direct Payment Page Link -->
+                <div class="pt-1 flex items-center justify-center">
+                    <a href="{{ $paymentPageUrl }}" target="_blank" rel="noopener noreferrer"
+                       @click="hasClickedPayNow = true"
+                       class="text-[11px] text-slate-400 hover:text-emerald-400 flex items-center gap-1.5 transition-colors">
+                        <span>Prefer direct payment page? Pay via Razorpay Hosted Link</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                </div>
+
+                <!-- Check Recent Payment Button (Visible once Pay Now is clicked or upon return) -->
+                <div x-show="hasClickedPayNow" x-cloak class="space-y-2 pt-2" x-transition>
                     <button type="button" @click="checkRecentPayment()" :disabled="checkingPayment"
                             class="w-full py-3.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-750 border border-slate-700/80 hover:border-emerald-500/50 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md">
                         <span x-show="checkingPayment" class="animate-spin text-sm">🔄</span>
                         <span x-show="!checkingPayment">🔄</span>
-                        <span x-text="checkingPayment ? 'Checking Razorpay for your payment...' : 'Paid? Click to Auto-Detect & Activate'"></span>
+                        <span x-text="checkingPayment ? 'Checking Razorpay for your payment...' : 'Already Paid? Click to Auto-Detect & Activate'"></span>
                     </button>
                     <template x-if="checkPaymentMessage">
                         <div class="p-2.5 rounded-xl text-center text-xs" :class="checkPaymentMessage.startsWith('✅') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'" x-text="checkPaymentMessage"></div>
                     </template>
                 </div>
 
-                <!-- Manual Payment ID verification for Direct Link payments (Visible after clicking Pay Now or upon return) -->
+                <!-- Manual Payment ID verification -->
                 <div x-show="hasClickedPayNow" x-cloak class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5" x-transition>
                     <div class="flex items-center gap-2">
                         <span class="text-amber-400 font-bold text-sm">⚡</span>
                         <h4 class="text-xs font-bold text-slate-200">Or Paste Payment ID Manually</h4>
                     </div>
                     <p class="text-[11px] text-slate-400 leading-relaxed">
-                        Enter your <strong>Payment ID</strong> (e.g. <span class="font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">pay_TqF6Y9COLl1XS0</span>) from your payment screen or receipt:
+                        Enter your <strong>Payment ID</strong> (e.g. <span class="font-mono text-amber-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">pay_TvGujiH8gP3Rkp</span>) from your payment screen or receipt:
                     </p>
                     <div class="flex flex-col sm:flex-row gap-2 pt-1">
                         <input type="text" id="manual_payment_input" x-model="manualPaymentId" @keydown.enter.prevent="submitManualPayment()" placeholder="Paste Payment ID here (e.g. pay_...)" 
@@ -393,6 +392,10 @@
         }
 
         function simulateTestPayment() {
+            if (razorpayConfig.key && razorpayConfig.key.startsWith('rzp_live_')) {
+                alert('Test simulation is disabled in Live Production mode. Please complete the live Razorpay payment.');
+                return;
+            }
             const form = document.getElementById('checkout-form');
             document.getElementById('razorpay_payment_id').value = 'pay_sim_' + Math.random().toString(36).substring(2, 15);
             document.getElementById('razorpay_order_id').value = 'order_sim_' + Math.random().toString(36).substring(2, 15);
@@ -404,7 +407,7 @@
             const input = document.getElementById('manual_payment_input');
             const manualId = (input ? input.value : '').trim();
             if (!manualId) {
-                alert('Please enter your Razorpay Payment ID (e.g. TqEX328BZu2kKu).');
+                alert('Please enter your Razorpay Payment ID (e.g. pay_TvGujiH8gP3Rkp).');
                 return;
             }
             const form = document.getElementById('checkout-form');
@@ -414,8 +417,14 @@
 
         function handleRazorpayPayment() {
             const form = document.getElementById('checkout-form');
+            const alpineEl = document.querySelector('[x-data]');
 
             if (typeof Razorpay !== 'undefined' && razorpayConfig.key) {
+                if (alpineEl && alpineEl._x_dataStack) {
+                    alpineEl._x_dataStack[0].processing = true;
+                    alpineEl._x_dataStack[0].paymentFailed = false;
+                }
+
                 const options = {
                     key: razorpayConfig.key,
                     amount: razorpayConfig.amount,
@@ -429,9 +438,12 @@
                         contact: razorpayConfig.prefill?.contact || ''
                     },
                     theme: {
-                        color: '#f59e0b'
+                        color: '#059669'
                     },
                     handler: function (response) {
+                        if (alpineEl && alpineEl._x_dataStack) {
+                            alpineEl._x_dataStack[0].processing = true;
+                        }
                         document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id || '';
                         document.getElementById('razorpay_order_id').value = response.razorpay_order_id || '';
                         document.getElementById('razorpay_signature').value = response.razorpay_signature || '';
@@ -439,7 +451,10 @@
                     },
                     modal: {
                         ondismiss: function() {
-                            // User closed modal
+                            if (alpineEl && alpineEl._x_dataStack) {
+                                alpineEl._x_dataStack[0].processing = false;
+                                alpineEl._x_dataStack[0].hasClickedPayNow = true;
+                            }
                         }
                     }
                 };
@@ -447,18 +462,28 @@
                 try {
                     const rzp = new Razorpay(options);
                     rzp.on('payment.failed', function (response){
-                        const alpineEl = document.querySelector('[x-data]');
                         if (alpineEl && alpineEl._x_dataStack) {
+                            alpineEl._x_dataStack[0].processing = false;
                             alpineEl._x_dataStack[0].paymentFailed = true;
+                            alpineEl._x_dataStack[0].hasClickedPayNow = true;
                             alpineEl._x_dataStack[0].failureMsg = response.error ? (response.error.description || response.error.reason) : 'Payment failed.';
                         }
                     });
                     rzp.open();
                 } catch(e) {
-                    simulateTestPayment();
+                    if (alpineEl && alpineEl._x_dataStack) {
+                        alpineEl._x_dataStack[0].processing = false;
+                        alpineEl._x_dataStack[0].paymentFailed = true;
+                        alpineEl._x_dataStack[0].hasClickedPayNow = true;
+                        alpineEl._x_dataStack[0].failureMsg = 'Could not open Razorpay checkout: ' + e.message;
+                    }
                 }
             } else {
-                simulateTestPayment();
+                if (alpineEl && alpineEl._x_dataStack) {
+                    alpineEl._x_dataStack[0].paymentFailed = true;
+                    alpineEl._x_dataStack[0].hasClickedPayNow = true;
+                    alpineEl._x_dataStack[0].failureMsg = 'Razorpay Key is not configured. Please contact support.';
+                }
             }
         }
     </script>

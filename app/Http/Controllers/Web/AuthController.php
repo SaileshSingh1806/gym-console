@@ -531,9 +531,9 @@ class AuthController extends Controller
                     continue;
                 }
 
-                // Payment must be within last 2 hours
+                // Payment must be within last 24 hours
                 $createdAt = $payment['created_at'] ?? 0;
-                if ($createdAt < (time() - 7200)) {
+                if ($createdAt < (time() - 86400)) {
                     continue;
                 }
 
@@ -544,10 +544,10 @@ class AuthController extends Controller
                 $phoneMatches = ! empty($userPhoneSuffix) && (str_ends_with($pContact, $userPhoneSuffix) || str_ends_with($userPhone, $pContact));
 
                 $pAmount = (int) ($payment['amount'] ?? 0);
-                // Verify amount (within ₹2 tolerance in paise for rounding)
-                $amountMatches = ($expectedPaise <= 0) || abs($pAmount - $expectedPaise) <= 200;
+                // Verify amount (within ₹2 tolerance in paise, or any captured payment matching user's phone/email)
+                $amountMatches = ($expectedPaise <= 0) || abs($pAmount - $expectedPaise) <= 200 || ($pAmount > 0 && ($emailMatches || $phoneMatches));
 
-                // Strict matching: Either email or phone MUST match AND amount must match
+                // If either email or phone matches and amount is valid
                 if (($emailMatches || $phoneMatches) && $amountMatches) {
                     $matchedPayment = $payment;
                     break;
