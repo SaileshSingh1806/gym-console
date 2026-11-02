@@ -13,6 +13,7 @@ use App\Services\SubscriptionService;
 use App\Services\TenantContext;
 use App\Services\TenantService;
 use Database\Seeders\PlanSeeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,30 +97,6 @@ class AuthController extends Controller
         // 3. Authenticate User if found
         if ($user) {
             $passwordMatches = Hash::check($password, $user->password);
-
-            // If initial fallback password for members (e.g. member phone, member code, last 4 digits, or first login)
-            if (! $passwordMatches && $user->role === 'member') {
-                $member = $user->memberProfile ?? Member::where('user_id', $user->id)->first();
-                if ($member) {
-                    $mPhoneDigits = preg_replace('/[^0-9]/', '', $member->phone ?? '');
-                    $mSuffix4 = strlen($mPhoneDigits) >= 4 ? substr($mPhoneDigits, -4) : '';
-                    $validFallbacks = array_filter([
-                        $member->phone,
-                        $mPhoneDigits,
-                        $member->member_code,
-                        $mSuffix4,
-                        'password',
-                        '123456',
-                        '12345678',
-                    ]);
-
-                    if (in_array($password, $validFallbacks, true) || $password === $mPhoneDigits || $password === $mSuffix4) {
-                        $user->password = Hash::make($password);
-                        $user->save();
-                        $passwordMatches = true;
-                    }
-                }
-            }
 
             if ($passwordMatches) {
                 if ($user->status !== 'ACTIVE') {
@@ -620,5 +597,159 @@ class AuthController extends Controller
         TenantContext::reset();
 
         return redirect()->route('login');
+    }
+
+    public function showMemberPasswordSetup(string $token): View|RedirectResponse
+    {
+        $hashedToken = hash('sha256', $token);
+        $member = Member::where('metadata->portal_setup_token', $hashedToken)->first();
+
+        if (! $member) {
+            $member = Member::all()->first(function ($m) use ($hashedToken) {
+                $meta = is_array($m->metadata) ? $m->metadata : json_decode($m->metadata ?? '', true);
+
+                return ($meta['portal_setup_token'] ?? null) === $hashedToken;
+            });
+        }
+
+        if (! $member) {
+            return redirect()->route('login')->withErrors(['email' => 'This password setup link is invalid or has already been used. Please request a new link.']);
+        }
+
+        $meta = is_array($member->metadata) ? $member->metadata : json_decode($member->metadata ?? '', true);
+        $expiresAt = isset($meta['portal_setup_expires_at']) ? Carbon::parse($meta['portal_setup_expires_at']) : null;
+        if ($expiresAt && $expiresAt->isPast()) {
+            return redirect()->route('login')->withErrors(['email' => 'This password setup link has expired. Please request a new link.']);
+        }
+
+        $tenant = $member->tenant;
+
+        return view('auth.member_setup_password', compact('member', 'tenant', 'token'));
+    }
+
+    public function saveMemberPasswordSetup(string $token, Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'password.confirmed' => 'Passwords do not match.',
+            'password.min' => 'Password must be at least 6 characters long.',
+        ]);
+
+        $hashedToken = hash('sha256', $token);
+        $member = Member::where('metadata->portal_setup_token', $hashedToken)->first();
+
+        if (! $member) {
+            $member = Member::all()->first(function ($m) use ($hashedToken) {
+                $meta = is_array($m->metadata) ? $m->metadata : json_decode($m->metadata ?? '', true);
+
+                return ($meta['portal_setup_token'] ?? null) === $hashedToken;
+            });
+        }
+
+        if (! $member) {
+            return redirect()->route('login')->withErrors(['email' => 'This setup link is invalid or expired.']);
+        }
+
+        $meta = is_array($member->metadata) ? $member->metadata : (json_decode($member->metadata ?? '', true) ?? []);
+        $expiresAt = isset($meta['portal_setup_expires_at']) ? Carbon::parse($meta['portal_setup_expires_at']) : null;
+        if ($expiresAt && $expiresAt->isPast()) {
+            return redirect()->route('login')->withErrors(['email' => 'This setup link has expired.']);
+        }
+
+        $user = $member->user;
+        if (! $user) {
+            $memberEmail = ! empty($member->email) ? $member->email : ('member_'.($member->phone ?: $member->id).'@gym.portal');
+            $user = User::where('email', $memberEmail)->first();
+            if (! $user) {
+                $user = User::create([
+                    'tenant_id' => $member->tenant_id,
+                    'name' => $member->full_name ?: ($member->phone ?? 'Member '.$member->member_code),
+                    'email' => $memberEmail,
+                    'phone' => $member->phone,
+                    'role' => 'member',
+                    'status' => 'ACTIVE',
+                    'password' => Hash::make($request->password),
+                ]);
+            } else {
+                $user->password = Hash::make($request->password);
+                $user->role = 'member';
+                $user->status = 'ACTIVE';
+                $user->save();
+            }
+            $member->update(['user_id' => $user->id]);
+        } else {
+            $user->password = Hash::make($request->password);
+            $user->status = 'ACTIVE';
+            $user->save();
+        }
+
+        unset($meta['portal_setup_token'], $meta['portal_setup_expires_at']);
+        $member->metadata = $meta;
+        $member->save();
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        return redirect()->route('app.portal')->with('success', 'Your password has been set successfully! Welcome to your Member Portal.');
+    }
+
+    public function requestMemberSetupLink(Request $request): JsonResponse|RedirectResponse
+    {
+        $input = trim($request->input('identifier', $request->input('phone', '')));
+        if (empty($input)) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Please enter your Mobile Number or Member ID.'], 422);
+            }
+
+            return back()->withErrors(['email' => 'Please enter your Mobile Number or Member ID.']);
+        }
+
+        $cleanDigits = preg_replace('/[^0-9]/', '', $input);
+        $suffix10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
+
+        $member = Member::where(function ($q) use ($input, $suffix10) {
+            $q->where('member_code', $input)
+                ->orWhere('email', $input);
+            if (! empty($suffix10)) {
+                $q->orWhere('phone', $input)
+                    ->orWhere('phone', 'like', "%{$suffix10}");
+            }
+        })->first();
+
+        if (! $member) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'No active member profile found with this Mobile Number or Member ID. Please contact gym reception.'], 404);
+            }
+
+            return back()->withErrors(['email' => 'No active member profile found with this Mobile Number or Member ID. Please contact gym reception.']);
+        }
+
+        $token = Str::random(40);
+        $meta = is_array($member->metadata) ? $member->metadata : (json_decode($member->metadata ?? '', true) ?? []);
+        $meta['portal_setup_token'] = hash('sha256', $token);
+        $meta['portal_setup_expires_at'] = now()->addDays(7)->toIso8601String();
+        $member->metadata = $meta;
+        $member->save();
+
+        $setupUrl = route('portal.setup', ['token' => $token]);
+        $gymName = $member->tenant?->name ?? 'GymDeskHub';
+        $cleanPhone = preg_replace('/[^0-9]/', '', $member->phone ?? '');
+        $waPhone = strlen($cleanPhone) === 10 ? ('91'.$cleanPhone) : $cleanPhone;
+        $waMessage = "Hello {$member->first_name},\n\nHere is your secure link to set your password for your {$gymName} Member Portal:\n\n{$setupUrl}\n\nThis link is confidential and valid for 7 days.";
+        $waUrl = 'https://wa.me/'.$waPhone.'?text='.urlencode($waMessage);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Password setup link generated for {$member->full_name}.",
+                'setup_url' => $setupUrl,
+                'whatsapp_url' => $waUrl,
+                'member_phone' => $member->phone,
+                'member_name' => $member->full_name,
+            ]);
+        }
+
+        return redirect($waUrl);
     }
 }

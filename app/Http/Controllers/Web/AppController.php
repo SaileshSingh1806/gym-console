@@ -7648,4 +7648,31 @@ class AppController extends Controller
 
         return back()->with('success', 'Your password has been changed successfully!');
     }
+
+    public function generateMemberPortalLink(int $id): JsonResponse
+    {
+        $member = Member::findOrFail($id);
+        $token = Str::random(40);
+        $meta = is_array($member->metadata) ? $member->metadata : (json_decode($member->metadata ?? '', true) ?? []);
+        $meta['portal_setup_token'] = hash('sha256', $token);
+        $meta['portal_setup_expires_at'] = now()->addDays(7)->toIso8601String();
+        $member->metadata = $meta;
+        $member->save();
+
+        $setupUrl = route('portal.setup', ['token' => $token]);
+        $gymName = $member->tenant?->name ?? 'GymDeskHub';
+        $cleanPhone = preg_replace('/[^0-9]/', '', $member->phone ?? '');
+        $waPhone = strlen($cleanPhone) === 10 ? ('91'.$cleanPhone) : $cleanPhone;
+        $waMessage = "Hello {$member->first_name},\n\nWelcome to {$gymName}! 🎉\n\nClick the link below to set your personal password and access your Member Portal (view plan validity, attendance, invoices, diet & workout):\n\n{$setupUrl}\n\nThis link is confidential and valid for 7 days.";
+        $waUrl = 'https://wa.me/'.$waPhone.'?text='.urlencode($waMessage);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Portal setup link generated successfully.',
+            'setup_url' => $setupUrl,
+            'whatsapp_url' => $waUrl,
+            'member_name' => $member->full_name,
+            'phone' => $member->phone,
+        ]);
+    }
 }

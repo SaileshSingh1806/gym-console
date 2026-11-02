@@ -21,7 +21,45 @@
         <main class="w-full max-w-[420px] my-auto py-6 relative z-10" x-data="{ 
             roleType: '{{ (request()->has('member') || request()->query('role') === 'member') ? 'member' : 'owner' }}',
             showPassword: false, 
-            submitting: false 
+            submitting: false,
+            showResetModal: false,
+            resetIdentifier: '',
+            resetLoading: false,
+            resetMessage: '',
+            resetSuccess: false,
+            resetWaUrl: '',
+            async sendResetLink() {
+                if (!this.resetIdentifier) return;
+                this.resetLoading = true;
+                this.resetMessage = '';
+                this.resetSuccess = false;
+                try {
+                    const res = await fetch('{{ route('portal.request-link') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ identifier: this.resetIdentifier })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.resetSuccess = true;
+                        this.resetMessage = data.message;
+                        this.resetWaUrl = data.whatsapp_url;
+                        window.open(data.whatsapp_url, '_blank');
+                    } else {
+                        this.resetSuccess = false;
+                        this.resetMessage = data.message || 'Member not found. Please contact gym reception.';
+                    }
+                } catch (e) {
+                    this.resetSuccess = false;
+                    this.resetMessage = 'An error occurred. Please contact reception.';
+                } finally {
+                    this.resetLoading = false;
+                }
+            }
         }">
             <div class="p-7 sm:p-9 rounded-3xl bg-[#0c1220]/95 border border-slate-800/90 shadow-2xl shadow-black/80 backdrop-blur-xl space-y-6">
                 
@@ -99,9 +137,10 @@
                             <label for="password" class="block text-xs font-semibold text-slate-300">
                                 Password
                             </label>
-                            <a href="{{ route('contact') }}" class="text-[11px] font-medium text-slate-400 hover:text-amber-400 transition-colors">
-                                Forgot password?
-                            </a>
+                            <button type="button" @click="showResetModal = true" class="text-[11px] font-medium text-emerald-400 hover:underline transition-colors cursor-pointer">
+                                <span x-show="roleType === 'member'">Set password / Forgot?</span>
+                                <span x-show="roleType !== 'member'">Forgot password?</span>
+                            </button>
                         </div>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -111,7 +150,7 @@
                                    id="password"
                                    name="password" 
                                    required 
-                                   :placeholder="roleType === 'member' ? 'Default: your mobile number' : 'Enter your password'" 
+                                   placeholder="Enter your password" 
                                    class="w-full pl-10 pr-10 py-3 rounded-xl bg-[#080d17] border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium">
                             <button type="button" 
                                     @click="showPassword = !showPassword" 
@@ -122,11 +161,7 @@
                             </button>
                         </div>
 
-                        <!-- Member Helper Tip -->
-                        <p x-show="roleType === 'member'" x-cloak class="text-[11px] text-emerald-400/90 pt-1 flex items-center gap-1.5">
-                            <span>💡</span>
-                            <span>Default member password is your <strong>10-digit mobile number</strong> or last 4 digits.</span>
-                        </p>
+
                     </div>
 
                     <!-- Remember Me -->
@@ -160,6 +195,66 @@
                             Start free trial &rarr;
                         </a>
                     </p>
+                </div>
+            </div>
+
+            <!-- Password Setup / Reset Modal -->
+            <div x-show="showResetModal" 
+                 x-cloak 
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+                 @keydown.escape.window="showResetModal = false">
+                <div class="w-full max-w-sm rounded-3xl bg-[#0d1424] border border-slate-800 p-6 shadow-2xl space-y-5 text-left relative"
+                     @click.away="showResetModal = false">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-sm font-bold">📲</span>
+                            <div>
+                                <h3 class="text-sm font-black text-white">Set / Reset Password</h3>
+                                <p class="text-[11px] text-slate-400">Receive private link on WhatsApp</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="showResetModal = false" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">&times;</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Enter your registered <strong>Mobile Number</strong> or <strong>Member ID</strong>. We will create a confidential setup link for your number.
+                        </p>
+
+                        <div class="space-y-1">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number or Member ID</label>
+                            <input type="text" 
+                                   x-model="resetIdentifier" 
+                                   placeholder="e.g. 8980986524 or ARM184" 
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#080c14] border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 font-mono">
+                        </div>
+
+                        <!-- Result message -->
+                        <div x-show="resetMessage" x-cloak class="p-3 rounded-xl text-xs" :class="resetSuccess ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'">
+                            <span x-text="resetMessage"></span>
+                        </div>
+
+                        <div x-show="resetSuccess && resetWaUrl" x-cloak class="pt-1">
+                            <a :href="resetWaUrl" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                                <span>💬 Open in WhatsApp</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                        <button type="button" @click="showResetModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white cursor-pointer">
+                            Cancel
+                        </button>
+                        <button type="button" 
+                                @click="sendResetLink()" 
+                                :disabled="resetLoading || !resetIdentifier" 
+                                class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
+                            <span x-show="resetLoading">⏳ Sending...</span>
+                            <span x-show="!resetLoading">Get Setup Link &rarr;</span>
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </main>

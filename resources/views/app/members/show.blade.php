@@ -488,6 +488,33 @@
             const cash = Number(this.splitCashAmount || 0);
             const online = Number(this.splitOnlineAmount || 0);
             this.paymentAmount = cash + online;
+        },
+
+        portalLinkLoading: false,
+        generatePortalLink() {
+            this.portalLinkLoading = true;
+            fetch('{{ route('app.members.generate-portal-link', $member->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.portalLinkLoading = false;
+                if (data.success && data.whatsapp_url) {
+                    navigator.clipboard.writeText(data.setup_url).catch(() => {});
+                    window.open(data.whatsapp_url, '_blank');
+                } else {
+                    alert(data.message || 'Error generating link');
+                }
+            })
+            .catch(() => {
+                this.portalLinkLoading = false;
+                alert('Network error generating link');
+            });
         }
     }" class="space-y-4 sm:space-y-6 pb-32 sm:pb-16 max-w-7xl mx-auto">
 
@@ -645,8 +672,26 @@
                                     <span>Send Fee Due Notice</span>
                                 </a>
                             @endif
+
+                            <button type="button" 
+                                    @click="generatePortalLink()" 
+                                    class="w-full text-left px-4 py-2.5 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10 flex items-center gap-2 transition-colors cursor-pointer border-t border-slate-100 dark:border-slate-800 font-bold">
+                                <span>📲</span>
+                                <span x-show="!portalLinkLoading">Send Portal Setup Link</span>
+                                <span x-show="portalLinkLoading">Generating Link...</span>
+                            </button>
                         </div>
                     </div>
+
+                    <!-- Actions: Send Portal Invite Button -->
+                    <button type="button" 
+                            @click="generatePortalLink()" 
+                            title="Send secure setup link to member on WhatsApp so they can set their password"
+                            class="w-full sm:w-auto px-3 py-2 sm:py-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span x-show="!portalLinkLoading">Send Portal Link</span>
+                        <span x-show="portalLinkLoading">Sending...</span>
+                    </button>
 
                     <!-- Actions: Delete -->
                     <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 

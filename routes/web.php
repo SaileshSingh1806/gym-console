@@ -24,6 +24,10 @@ Route::get('/gym/{slug}/checkin', [PublicController::class, 'gymCheckin'])->name
 Route::post('/gym/{slug}/checkin', [PublicController::class, 'processGymCheckin'])->name('gym.checkin.process');
 
 // Authentication & Onboarding Routes
+Route::get('/portal/setup/{token}', [AuthController::class, 'showMemberPasswordSetup'])->name('portal.setup');
+Route::post('/portal/setup/{token}', [AuthController::class, 'saveMemberPasswordSetup'])->name('portal.setup.save');
+Route::post('/portal/request-link', [AuthController::class, 'requestMemberSetupLink'])->name('portal.request-link');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -69,6 +73,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription')->middleware('permission:memberships.create,memberships.edit,plans.create,plans.edit,members.create,members.edit');
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package')->middleware('permission:pt.create');
         Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class')->middleware('permission:classes.book');
+        Route::post('/members/{id}/generate-portal-link', [AppController::class, 'generateMemberPortalLink'])->name('app.members.generate-portal-link')->middleware('permission:members.edit,members.view');
     });
 
     // Member Measurements (Available to Trainers, Staff, and Members)
