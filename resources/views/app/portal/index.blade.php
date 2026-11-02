@@ -163,7 +163,7 @@
             });
         }
     }" 
-    @switch-portal-tab.window="tab = $event.detail"
+    x-on:switch-portal-tab.window="tab = $event.detail"
     class="max-w-xl md:max-w-2xl mx-auto space-y-5 pb-24 sm:pb-12 pt-1">
 
         @if(! $member)
