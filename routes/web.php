@@ -13,6 +13,10 @@ Route::get('/features', [PublicController::class, 'features'])->name('features')
 Route::get('/pricing', [PublicController::class, 'pricing'])->name('pricing');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
+Route::get('/terms', [PublicController::class, 'terms'])->name('terms');
+Route::get('/privacy', [PublicController::class, 'privacy'])->name('privacy');
+Route::get('/refund-policy', [PublicController::class, 'refundPolicy'])->name('refund-policy');
+Route::get('/shipping-policy', [PublicController::class, 'shippingPolicy'])->name('shipping-policy');
 Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap');
 Route::get('/storage/{path}', [PublicController::class, 'serveStorageFile'])->where('path', '.*')->name('storage.file');
 

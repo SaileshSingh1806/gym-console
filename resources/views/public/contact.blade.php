@@ -87,6 +87,23 @@
                             <div class="text-xs text-slate-400 mt-0.5">Network, cloud sync, and turnstile gate wiring assistance</div>
                         </div>
                     </div>
+
+                    {{-- Channel 4: Registered Office & Grievance --}}
+                    <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-purple-400 uppercase tracking-wider">Registered Office &amp; Grievance</div>
+                            <div class="text-sm font-bold text-white mt-0.5">GymDeskHub Technologies</div>
+                            <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                                Ahmedabad, Gujarat 380015, India<br>
+                                Grievance Officer: <a href="mailto:grievance@gymdeskhub.com" class="text-amber-400 hover:underline">grievance@gymdeskhub.com</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Right: Inquiry Form (7 Cols) --}}

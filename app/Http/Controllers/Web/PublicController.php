@@ -42,6 +42,26 @@ class PublicController extends Controller
         return view('public.contact');
     }
 
+    public function terms(): View
+    {
+        return view('public.terms');
+    }
+
+    public function privacy(): View
+    {
+        return view('public.privacy');
+    }
+
+    public function refundPolicy(): View
+    {
+        return view('public.refund-policy');
+    }
+
+    public function shippingPolicy(): View
+    {
+        return view('public.shipping-policy');
+    }
+
     public function sitemap(): \Illuminate\Http\Response
     {
         $urls = [
@@ -50,6 +70,10 @@ class PublicController extends Controller
             ['loc' => route('pricing'), 'priority' => '0.9', 'changefreq' => 'weekly', 'lastmod' => now()->toDateString()],
             ['loc' => route('about'), 'priority' => '0.8', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
             ['loc' => route('contact'), 'priority' => '0.8', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('terms'), 'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('privacy'), 'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('refund-policy'), 'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
+            ['loc' => route('shipping-policy'), 'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
             ['loc' => route('login'), 'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
             ['loc' => route('register'), 'priority' => '0.7', 'changefreq' => 'monthly', 'lastmod' => now()->toDateString()],
         ];

@@ -89,9 +89,11 @@
     <meta name="revisit-after" content="7 days">
 
     {{-- Favicon & App Icons --}}
-    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
-    <link rel="shortcut icon" href="{{ $faviconUrl }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/gymdeskhub_icon_dark.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('favicon.ico') }}?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=3">
+    <link rel="shortcut icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('favicon.ico') }}?v=3">
 
     {{-- Schema.org JSON-LD Structured Data for Google Rich Snippets --}}
     @php
@@ -380,10 +382,10 @@
     ═══════════════════════════════════════════════════ -->
     <footer class="bg-[#070a10] border-t border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-8">
 
-                <!-- Brand Column -->
-                <div class="lg:col-span-2 space-y-4">
+                <!-- Brand Column (2 cols) -->
+                <div class="col-span-2 space-y-4">
                     <a href="{{ route('home') }}" class="inline-flex items-center group">
                         <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
                              alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
@@ -401,11 +403,12 @@
                             $cleanGuestPhone = '91' . $cleanGuestPhone;
                         }
                     @endphp
-                    <div class="pt-2 flex items-center gap-3">
+                    <div class="pt-2 flex flex-wrap items-center gap-3">
                         <a href="https://wa.me/{{ $cleanGuestPhone }}?text={{ urlencode('Hi, I need assistance with GymDeskHub') }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/></svg>
                             <span>WhatsApp Support</span>
                         </a>
+                        <span class="text-[11px] text-slate-500">Ahmedabad, Gujarat, India</span>
                     </div>
                 </div>
 
@@ -420,18 +423,30 @@
                     </ul>
                 </div>
 
-                <!-- Resources Links -->
+                <!-- Company Links -->
                 <div>
                     <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">Company</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
                         <li><a href="{{ route('about') }}" class="text-slate-400 hover:text-white transition-colors">About Us</a></li>
                         <li><a href="{{ route('pricing') }}" class="text-slate-400 hover:text-white transition-colors">Plans & Pricing</a></li>
-                        <li><a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">Hardware Consultation</a></li>
-                        <li><a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">Contact Sales</a></li>
+                        <li><a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">Contact & Support</a></li>
+                        <li><a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">Hardware Help</a></li>
                     </ul>
                 </div>
 
-                <!-- Account Links -->
+                <!-- Legal & Compliance Links (Payment Gateway KYC Mandatory) -->
+                <div>
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-3.5">Legal &amp; Policy</h4>
+                    <ul class="space-y-2 text-xs sm:text-sm">
+                        <li><a href="{{ route('terms') }}" class="text-slate-400 hover:text-white transition-colors">Terms &amp; Conditions</a></li>
+                        <li><a href="{{ route('privacy') }}" class="text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{{ route('refund-policy') }}" class="text-slate-400 hover:text-white transition-colors">Refund &amp; Cancellation</a></li>
+                        <li><a href="{{ route('shipping-policy') }}" class="text-slate-400 hover:text-white transition-colors">Shipping &amp; Delivery</a></li>
+                        <li><a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">Grievance Redressal</a></li>
+                    </ul>
+                </div>
+
+                <!-- Access Links -->
                 <div>
                     <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">Access</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
@@ -441,6 +456,28 @@
                     </ul>
                 </div>
             </div>
+        </div>
+
+        <!-- Payment Security & Compliance Strip -->
+        <div class="border-t border-slate-800/80 bg-[#06090f]/70 py-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-semibold text-slate-300">Accepted Payment Methods:</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono">UPI</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">Credit / Debit Cards</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">NetBanking</span>
+                    <span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono">RuPay</span>
+                </div>
+                <div class="flex items-center gap-3 text-slate-400">
+                    <span class="inline-flex items-center gap-1.5 text-emerald-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>256-Bit SSL Encrypted Checkout</span>
+                    </span>
+                    <span class="text-slate-600">•</span>
+                    <span>PCI-DSS Compliant Gateways</span>
+                </div>
+            </div>
+        </div>
         </div>
 
         <!-- Footer Bottom -->
