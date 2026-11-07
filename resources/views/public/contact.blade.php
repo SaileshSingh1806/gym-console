@@ -1,42 +1,49 @@
 <x-guest-layout 
     title="Contact GymDeskHub — Schedule a Free Live Demo & Hardware Consultation"
-    meta-description="Book a personalized live demo of GymDeskHub or get expert support for biometric turnstile integration, WhatsApp automation, and data migration."
+    meta-description="Book a personalized live demo of GymDeskHub or get expert support for biometric access control, WhatsApp automation, and member data migration."
     meta-keywords="contact gymdeskhub, book gym software demo, biometric hardware setup gym, gym management software support"
 >
-    {{-- Hero Section --}}
-    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-20 lg:pt-24 lg:pb-24">
+
+    {{-- ══════════════════════════════════════════════════════════════
+         HERO SECTION (MATTE DARK - POPPINS)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 bg-[#090d16] border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-slate-300 text-xs sm:text-sm font-medium mb-6">
-                <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>Direct Support & Consultation</span>
+            
+            {{-- Category Pill Badge (Matches Home Page Style & Responsive) --}}
+            <div class="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium mb-6 sm:mb-8 max-w-full flex-wrap sm:flex-nowrap justify-center text-center">
+                <span class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shrink-0">SUPPORT</span>
+                <span class="text-slate-300 font-medium">Direct Assistance &bull; Free Live Demo &bull; Active 7 Days</span>
             </div>
 
-            <h1 class="text-4xl sm:text-5xl font-bold text-white tracking-tight leading-tight max-w-4xl mx-auto mb-4">
-                We're here to help your gym grow
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.14] max-w-4xl mx-auto mb-6">
+                Talk to Our Gym Software <br class="hidden sm:inline">
+                <span class="text-amber-400">Deployment Specialists</span>
             </h1>
 
-            <p class="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Have questions about pricing, multi-branch scaling, or biometric machine integration (eSSL, Hikvision, Realtime, ZKTeco)? Our specialist team is ready to assist you.
+            <p class="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+                Whether you need help selecting biometric access devices, migrating thousands of existing members from Excel, or getting a 1-on-1 walkthrough — our team is ready to assist you.
             </p>
         </div>
     </section>
 
-    {{-- Contact Info & Form Section --}}
-    <section class="py-6 pb-24">
+    {{-- ══════════════════════════════════════════════════════════════
+         CONTACT INFO & INQUIRY FORM SECTION
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-16 sm:py-20 lg:py-24 bg-[#070b14]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
 
                 {{-- Left: Contact Channels (5 Cols) --}}
                 <div class="lg:col-span-5 space-y-4">
                     <div>
                         <span class="text-xs uppercase font-bold tracking-wider text-amber-400">Get In Touch</span>
-                        <h2 class="mt-1 text-2xl font-extrabold text-white">Talk to Our Team</h2>
-                        <p class="mt-2 text-sm text-slate-400 leading-relaxed">
-                            Whether you're opening your first gym branch or upgrading a chain with 20+ locations, our team is here to assist.
+                        <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold text-white">We're Available 7 Days a Week</h2>
+                        <p class="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                            No automated runarounds. Speak directly with a software specialist who understands gym operations and hardware setup.
                         </p>
                     </div>
 
-                    {{-- Channel 1: WhatsApp --}}
                     @php
                         $contactPhone = $platformSettings['support_phone'] ?? '+91 99749 95179';
                         $cleanContactPhone = preg_replace('/[^0-9]/', '', (string)$contactPhone);
@@ -46,148 +53,170 @@
                             $cleanContactPhone = '91' . $cleanContactPhone;
                         }
                     @endphp
-                    <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I am interested in GymDeskHub') }}" target="_blank"
-                       class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-[#0e1627] transition-all flex items-start gap-4 block group">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:scale-105 transition-transform">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/>
-                            </svg>
+
+                    {{-- Channel 1: WhatsApp (Fastest) --}}
+                    <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi GymDeskHub, I want to discuss gym software for my fitness center') }}" 
+                       target="_blank"
+                       class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 hover:border-emerald-500/50 transition-colors flex items-start gap-4 block group">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 text-xl">
+                            💬
                         </div>
-                        <div>
-                            <div class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Fastest Response</div>
-                            <div class="text-sm font-bold text-white mt-0.5 group-hover:text-emerald-300 transition-colors">WhatsApp Direct Support</div>
-                            <div class="text-xs text-slate-400 mt-0.5">+91 99749 95179 (Mon–Sat, 9AM–8PM IST)</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">Fastest Response</span>
+                                <span class="text-[11px] text-slate-500 font-mono">Instant</span>
+                            </div>
+                            <div class="text-base font-bold text-white mt-1 group-hover:text-emerald-300 transition-colors">WhatsApp Direct Chat</div>
+                            <div class="text-xs text-slate-400 mt-0.5">+91 99749 95179 (Active Daily 9 AM – 9 PM IST)</div>
                         </div>
                     </a>
 
-                    {{-- Channel 2: Email --}}
-                    <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
+                    {{-- Channel 2: Phone Calling --}}
+                    <a href="tel:{{ $contactPhone }}"
+                       class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 hover:border-amber-500/50 transition-colors flex items-start gap-4 block group">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20 text-xl">
+                            📞
                         </div>
-                        <div>
-                            <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Email Inquiry</div>
-                            <div class="text-sm font-bold text-white mt-0.5">sales@gymdeskhub.in</div>
-                            <div class="text-xs text-slate-400 mt-0.5">support@gymdeskhub.in for technical tickets</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 inline-block">Direct Call</div>
+                            <div class="text-base font-bold text-white mt-1 group-hover:text-amber-300 transition-colors">Call Support Team</div>
+                            <div class="text-xs text-slate-400 mt-0.5">{{ $contactPhone }} &bull; Mon–Sat 10 AM – 7 PM</div>
+                        </div>
+                    </a>
+
+                    {{-- Channel 3: Email Inquiries --}}
+                    <div class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20 text-xl">
+                            ✉️
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 inline-block">Official Email</div>
+                            <div class="text-base font-bold text-white mt-1">sales@gymdeskhub.in</div>
+                            <div class="text-xs text-slate-400 mt-0.5">Technical: support@gymdeskhub.in</div>
                         </div>
                     </div>
 
-                    {{-- Channel 3: Hardware Consultation --}}
-                    <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
-                            </svg>
+                    {{-- Channel 4: Biometric Consultation --}}
+                    <div class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/20 text-xl">
+                            🔒
                         </div>
-                        <div>
-                            <div class="text-[11px] font-bold text-blue-400 uppercase tracking-wider">Hardware Setup Consultation</div>
-                            <div class="text-sm font-bold text-white mt-0.5">Hikvision, eSSL &amp; ZKTeco</div>
-                            <div class="text-xs text-slate-400 mt-0.5">Network, cloud sync, and turnstile gate wiring assistance</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 inline-block">Hardware Team</div>
+                            <div class="text-base font-bold text-white mt-1">Biometric Integration Assistance</div>
+                            <div class="text-xs text-slate-400 mt-0.5">Face terminals, fingerprint scanners &amp; turnstile gates</div>
                         </div>
                     </div>
 
-                    {{-- Channel 4: Registered Office & Grievance --}}
-                    <div class="p-5 rounded-2xl bg-[#0c121e]/90 border border-slate-800/80 flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/20">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
+                    {{-- Channel 5: Office Location --}}
+                    <div class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-300 flex items-center justify-center shrink-0 border border-slate-700 text-xl">
+                            📍
                         </div>
-                        <div>
-                            <div class="text-[11px] font-bold text-purple-400 uppercase tracking-wider">Registered Office &amp; Grievance</div>
-                            <div class="text-sm font-bold text-white mt-0.5">GymDeskHub Technologies</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 border border-slate-700 inline-block">Headquarters</div>
+                            <div class="text-base font-bold text-white mt-1">GymDeskHub Technologies</div>
                             <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">
                                 Ahmedabad, Gujarat 380015, India<br>
-                                Grievance Officer: <a href="mailto:grievance@gymdeskhub.com" class="text-amber-400 hover:underline">grievance@gymdeskhub.com</a>
+                                Grievance: <a href="mailto:grievance@gymdeskhub.in" class="text-amber-400 hover:underline">grievance@gymdeskhub.in</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Right: Inquiry Form (7 Cols) --}}
+                {{-- Right: Inquiry & Demo Form (7 Cols) --}}
                 <div class="lg:col-span-7">
-                    <div class="p-6 sm:p-8 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl" x-data="{ submitted: false }">
+                    <div class="p-7 sm:p-9 rounded-3xl bg-[#0c121e] border border-slate-800 shadow-xl" x-data="{ submitted: false }">
                         <div x-show="!submitted">
-                            <h3 class="text-xl font-bold text-white mb-1">Send an Inquiry</h3>
-                            <p class="text-xs text-slate-400 mb-6">Fill in your details and our team will get back to you within 2 business hours.</p>
+                            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                                <div>
+                                    <h3 class="text-xl sm:text-2xl font-bold text-white">Book a Demo or Ask a Question</h3>
+                                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Fill out the details below. Our team responds within 2 business hours.</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/20 hidden sm:inline-block">Free Consultation</span>
+                            </div>
 
                             <form @submit.prevent="submitted = true" class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Your Name *</label>
-                                        <input type="text" required placeholder="e.g. Amit Verma"
-                                               class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Your Full Name *</label>
+                                        <input type="text" required placeholder="e.g. Vikram Rathore"
+                                               class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none text-sm transition-colors">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Gym / Business Name *</label>
-                                        <input type="text" required placeholder="e.g. Iron Core Fitness"
-                                               class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Gym / Fitness Center Name *</label>
+                                        <input type="text" required placeholder="e.g. Apex Fitness Studio"
+                                               class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none text-sm transition-colors">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Business Email *</label>
-                                        <input type="email" required placeholder="amit@gym.com"
-                                               class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Phone / WhatsApp Number *</label>
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">WhatsApp / Phone Number *</label>
                                         <input type="tel" required placeholder="+91 98765 43210"
-                                               class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors">
+                                               class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none text-sm transition-colors">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Email Address *</label>
+                                        <input type="email" required placeholder="vikram@apexfitness.in"
+                                               class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none text-sm transition-colors">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Number of Branches</label>
-                                        <select class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors cursor-pointer">
-                                            <option value="1">1 Branch (Single Location)</option>
-                                            <option value="2-3">2 - 3 Branches</option>
-                                            <option value="4-10">4 - 10 Branches</option>
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Number of Gym Branches</label>
+                                        <select class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white focus:border-amber-500 focus:outline-none text-sm transition-colors cursor-pointer">
+                                            <option value="1">1 Branch (Standalone Gym)</option>
+                                            <option value="2-3">2 – 3 Branches</option>
+                                            <option value="4-10">4 – 10 Branches</option>
                                             <option value="10+">10+ Branches (Enterprise Chain)</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Inquiry Type</label>
-                                        <select class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors cursor-pointer">
-                                            <option value="pricing">Custom Pricing & Plans</option>
-                                            <option value="biometrics">Biometric & Turnstile Integration</option>
-                                            <option value="demo">Live Platform Demo</option>
-                                            <option value="migration">Data Migration from Old Software</option>
-                                            <option value="other">General Support</option>
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">How Can We Help You?</label>
+                                        <select class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white focus:border-amber-500 focus:outline-none text-sm transition-colors cursor-pointer">
+                                            <option value="demo">Book a 1-on-1 Live Demo</option>
+                                            <option value="biometric">Biometric &amp; Turnstile Integration</option>
+                                            <option value="migration">Migrate Data from Excel or Old Software</option>
+                                            <option value="pricing">Custom Annual Pricing for Multi-Branch</option>
+                                            <option value="general">General Support Question</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Message / Requirements</label>
-                                    <textarea rows="4" placeholder="Tell us about your gym setup, current member count, or specific requirements..."
-                                              class="w-full px-4 py-2.5 rounded-xl bg-[#080d17] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 focus:outline-none text-sm transition-colors resize-none"></textarea>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Your Requirements / Message (Optional)</label>
+                                    <textarea rows="4" placeholder="Tell us about your current member count, hardware in use, or any specific questions..."
+                                              class="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none text-sm transition-colors resize-none"></textarea>
                                 </div>
 
                                 <button type="submit"
-                                        class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-all cursor-pointer shadow-lg shadow-amber-500/20">
-                                    Send Inquiry
+                                        class="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base transition-colors cursor-pointer shadow-md">
+                                    Send Inquiry &amp; Request Demo &rarr;
                                 </button>
                             </form>
+
+                            <div class="mt-6 pt-5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+                                <span class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> Free Assisted Data Migration</span>
+                                <span class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> Zero Credit Card Required</span>
+                                <span class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> Response Within 2 Hours</span>
+                            </div>
                         </div>
 
-                        {{-- Success State --}}
-                        <div x-show="submitted" x-cloak class="py-12 text-center space-y-4">
-                            <div class="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto text-xl font-bold border border-emerald-500/20">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        {{-- Success Feedback State --}}
+                        <div x-show="submitted" x-cloak class="py-16 text-center space-y-4">
+                            <div class="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-500/20">
+                                ✓
                             </div>
-                            <h3 class="text-xl font-bold text-white">Thank You!</h3>
-                            <p class="text-xs text-slate-400 max-w-md mx-auto">
-                                Your inquiry has been received. One of our specialists will reach out via WhatsApp and Email within 2 business hours.
+                            <h3 class="text-2xl font-bold text-white">Inquiry Received!</h3>
+                            <p class="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                                Thank you for reaching out. One of our gym deployment specialists will contact you directly on WhatsApp and Email within 2 business hours.
                             </p>
-                            <div class="pt-2">
+                            <div class="pt-4">
                                 <a href="https://wa.me/{{ $cleanContactPhone }}?text={{ urlencode('Hi, I just submitted an inquiry on GymDeskHub.') }}" target="_blank"
-                                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors">
-                                    Chat Now on WhatsApp
+                                   class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-colors">
+                                    <span>Chat Immediately on WhatsApp &rarr;</span>
                                 </a>
                             </div>
                         </div>
@@ -197,4 +226,38 @@
             </div>
         </div>
     </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
+         QUICK QUESTIONS STRIP
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-16 sm:py-20 bg-[#090d16] border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Need Quick Answers?</span>
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">Common Questions From Gym Owners</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-2">
+                    <h4 class="text-base font-bold text-white">How quickly can my gym go live?</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        In less than 24 hours. Once you share your member Excel list, our team migrates all active records so you can start recording check-ins and payments immediately.
+                    </p>
+                </div>
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-2">
+                    <h4 class="text-base font-bold text-white">Do you assist with hardware wiring?</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        Yes. Our team provides step-by-step guidance for connecting your face recognition machines, fingerprint scanners, and turnstile relays over your local gym network.
+                    </p>
+                </div>
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-2">
+                    <h4 class="text-base font-bold text-white">Can I schedule a weekend demo?</h4>
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        Yes! Our team works 7 days a week. Pick any convenient morning or evening time slot that fits your gym's non-peak hours.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </x-guest-layout>

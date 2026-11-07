@@ -32,7 +32,7 @@
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">2. SaaS Description & Platform Services</h2>
                     <p>
-                        GymDeskHub provides a Software-as-a-Service (SaaS) cloud operating platform for fitness centers, gym operators, sports clubs, and personal trainers. Features include member onboarding, automated membership expiration tracking, biometric access control synchronization (Hikvision, eSSL, ZKTeco, Realtime), WhatsApp messaging automations, Point-of-Sale (POS) and GST-compliant invoicing, trainer scheduling, workout routines, and member self-service portals.
+                        GymDeskHub provides a Software-as-a-Service (SaaS) cloud operating platform for fitness centers, gym operators, sports clubs, and personal trainers. Features include member onboarding, automated membership expiration tracking, biometric access control synchronization, WhatsApp messaging automations, Point-of-Sale (POS) and GST-compliant invoicing, trainer scheduling, workout routines, and member self-service portals.
                     </p>
                 </div>
 

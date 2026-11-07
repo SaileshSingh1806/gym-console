@@ -20,12 +20,12 @@
     // Meta Description (optimally 150-160 characters for maximum CTR and zero truncation in Google SERPs)
     $resolvedDescription = $metaDescription 
         ?? ($platformSettings['meta_description'] ?? null) 
-        ?? "GymDeskHub is India's leading cloud gym management software. Automate member billing, WhatsApp fee reminders, Hikvision biometric turnstiles, POS & multi-branch gym operations.";
+        ?? "GymDeskHub is India's leading gym management software. Automate member billing, WhatsApp fee reminders, biometric integration, POS & multi-branch gym operations.";
 
     // Meta Keywords
     $resolvedKeywords = $metaKeywords 
         ?? ($platformSettings['meta_keywords'] ?? null) 
-        ?? "gym management software, best gym software india, gym membership software, biometric gym access control, hikvision gym integration, gym billing pos, whatsapp gym reminders, fitness club management system, gym erp software, cloud gym software, turnstile access system gym";
+        ?? "gym management software, best gym software india, gym membership software, biometric gym access control, biometric integration, gym billing pos, whatsapp gym reminders, fitness club management system, gym erp software, cloud gym software, turnstile access system gym";
 
     // OG Image
     $resolvedOgImage = $ogImage 
@@ -157,7 +157,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -165,7 +165,7 @@
         html, body {
             background-color: #090d16 !important;
             color: #f1f5f9 !important;
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
         [x-cloak] { display: none !important; }
@@ -255,7 +255,7 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex flex-col min-h-screen antialiased bg-[#090d16] selection:bg-amber-500/25 selection:text-amber-200">
+<body class="flex flex-col min-h-screen antialiased bg-[#090d16] selection:bg-amber-500/25 selection:text-amber-200 overflow-x-hidden">
 
     @if(!($hideNav ?? false))
     <!-- ═══════════════════════════════════════════════════
@@ -341,10 +341,11 @@
 
         <!-- ── MOBILE MENU DRAWER ── -->
         <div x-show="mobileMenuOpen" x-cloak
+             @click.outside="mobileMenuOpen = false"
              x-transition:enter="transition ease-out duration-150"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="md:hidden border-t border-slate-800/80 bg-[#090d16] px-4 py-4 space-y-3">
+             class="md:hidden border-t border-slate-800/80 bg-[#090d16] px-4 py-5 space-y-4 shadow-2xl">
             <nav class="flex flex-col gap-1">
                 @foreach($navLinks ?? [['route'=>'home','label'=>'Overview'],['route'=>'features','label'=>'Features'],['route'=>'pricing','label'=>'Pricing'],['route'=>'about','label'=>'About'],['route'=>'contact','label'=>'Contact']] as $link)
                     <a href="{{ route($link['route']) }}"
@@ -392,7 +393,7 @@
                              class="h-9 w-auto object-contain transition-opacity group-hover:opacity-90">
                     </a>
                     <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-sm">
-                        The all-in-one operating system for modern gyms and fitness clubs. Universal biometric access, automated fee collections, WhatsApp messaging, and multi-branch management.
+                        GymDeskHub helps gym and fitness center owners manage members, collect fees on time, and track attendance seamlessly without manual registers.
                     </p>
                     @php
                         $guestPhone = $platformSettings['support_phone'] ?? '+91 9974995179';
@@ -416,10 +417,11 @@
                 <div>
                     <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">Platform</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
-                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">Biometric Turnstiles</a></li>
-                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">Multi-Branch Setup</a></li>
-                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">GST & POS Billing</a></li>
-                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">WhatsApp Automation</a></li>
+                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">Biometric Integration</a></li>
+                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">WhatsApp Fee Recovery</a></li>
+                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">Trainer Mobile App</a></li>
+                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">Member Digital Pass</a></li>
+                        <li><a href="{{ route('features') }}" class="text-slate-400 hover:text-white transition-colors">GST &amp; POS Billing</a></li>
                     </ul>
                 </div>
 

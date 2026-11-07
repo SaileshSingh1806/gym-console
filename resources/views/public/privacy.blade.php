@@ -32,7 +32,7 @@
                     <ul class="list-disc pl-5 mt-2 space-y-2 text-slate-400">
                         <li><strong>Gym Account Details:</strong> Business name, gym owner name, business email, contact phone number, billing address, and GSTIN (if applicable).</li>
                         <li><strong>Gym Member Information:</strong> Entered by gym operators, including member name, mobile phone number, membership plan, admission date, payment receipts, emergency contact, and profile photos.</li>
-                        <li><strong>Access & Attendance Data:</strong> Timestamped entry/exit logs recorded via biometric devices (Hikvision, eSSL, ZKTeco), QR scanners, or manual check-ins. We do not store raw physical fingerprint images; only anonymized machine user-IDs and alphanumeric tokens are synced.</li>
+                        <li><strong>Access & Attendance Data:</strong> Timestamped entry/exit logs recorded via biometric devices (face recognition, fingerprint scanners), QR scanners, or manual check-ins. We do not store raw physical fingerprint images; only anonymized machine user-IDs and alphanumeric tokens are synced.</li>
                         <li><strong>Technical & Usage Data:</strong> IP address, browser type, operating system, session cookies, and login timestamps to ensure account security and fraud prevention.</li>
                     </ul>
                 </div>

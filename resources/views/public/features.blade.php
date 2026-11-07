@@ -1,336 +1,540 @@
 <x-guest-layout 
-    title="Gym Management Software Features — Biometrics, POS & WhatsApp Billing | GymDeskHub"
-    meta-description="Explore GymDeskHub features: real-time Hikvision biometric turnstile integration, automated WhatsApp fee recovery, GST-compliant POS billing, PT management & member portal."
-    meta-keywords="gym software features, biometric turnstile gym, automated fee reminders, gym gst invoicing, gym member mobile app, gym pos software, gym class booking system"
+    title="Gym Management Software Features — Biometric Integration, WhatsApp Billing & Mobile App | GymDeskHub"
+    meta-description="Explore GymDeskHub features: biometric attendance integration, automated WhatsApp fee recovery, GST-compliant POS billing, trainer workout builder & member portal."
+    meta-keywords="gym software features, biometric integration gym, automated fee reminders, gym gst invoicing, gym member mobile app, gym pos software, gym workout builder, multi branch gym software"
 >
 
-    {{-- Hero Section --}}
-    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
+    {{-- ══════════════════════════════════════════════════════════════
+         HERO SECTION (100% MATTE - POPPINS - HUMAN COPY)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 bg-[#090d16] border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-slate-300 text-xs sm:text-sm font-medium mb-6">
-                <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>The Complete Gym Operating System</span>
+            
+            {{-- Category Pill Badge (Matches Home Page Style & Responsive) --}}
+            <div class="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium mb-6 sm:mb-8 max-w-full flex-wrap sm:flex-nowrap justify-center text-center">
+                <span class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shrink-0">ALL-IN-ONE</span>
+                <span class="text-slate-300 font-medium">Complete Gym OS &bull; Biometric Sync &bull; Cloud PWA</span>
             </div>
 
-            <h1 class="text-4xl sm:text-6xl font-bold text-white tracking-tight leading-[1.15] max-w-4xl mx-auto mb-6">
-                Engineered for speed, reliability, and scale
+            {{-- Main Title --}}
+            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.14] max-w-4xl mx-auto mb-6">
+                Every Tool You Need to Run a <br class="hidden sm:inline">
+                <span class="text-amber-400">Profitable &amp; Organized Gym</span>
             </h1>
 
-            <p class="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed">
-                Explore every tool built into GymDeskHub — from sub-second biometric turnstile synchronization to automated WhatsApp UPI fee collections and branded mobile apps.
+            {{-- Honest, Human Subtitle --}}
+            <p class="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8 font-normal">
+                From front-desk check-ins and biometric gate integration to automated WhatsApp fee collections and trainer workout routines — GymDeskHub brings your entire gym under one reliable platform.
             </p>
+
+            {{-- Quick Category Jump Pills (Matte) --}}
+            <div class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 max-w-3xl mx-auto">
+                <a href="#three-in-one" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    🏛️ 3-in-1 Architecture
+                </a>
+                <a href="#biometric-access" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    🔒 Biometric Integration
+                </a>
+                <a href="#whatsapp-recovery" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    💬 WhatsApp Fee Recovery
+                </a>
+                <a href="#trainer-member" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    📱 Trainer &amp; Member Apps
+                </a>
+                <a href="#pos-billing" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    🧾 POS Counter &amp; GST
+                </a>
+                <a href="#multi-branch" class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 text-slate-300 hover:text-white text-xs font-medium transition-colors">
+                    🏢 Multi-Branch Control
+                </a>
+            </div>
         </div>
     </section>
 
-    {{-- Comprehensive Features Deep Dive --}}
-    <section class="py-12 pb-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20 lg:space-y-28">
+    {{-- ══════════════════════════════════════════════════════════════
+         THE 3-IN-1 ECOSYSTEM (ONE PLATFORM, THREE PURPOSE-BUILT EXPERIENCES)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section id="three-in-one" class="py-20 lg:py-24 bg-[#070b14] border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">One Unified System</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mt-2 mb-4">
+                    Three Dedicated Apps for Your Whole Gym
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+                    Instead of messy WhatsApp groups and paper registers, everyone in your gym gets a dedicated screen designed specifically for their role.
+                </p>
+            </div>
 
-            {{-- 1. Biometrics & Hardware Access Control --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider mb-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+                
+                {{-- 1. Owner Console --}}
+                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xl mb-6">
+                            🖥️
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-bold text-[10px] uppercase tracking-wider border border-amber-500/20">
+                            For Owners &amp; Receptionists
+                        </span>
+                        <h3 class="text-xl font-bold text-white mt-3 mb-2">Owner Master Console</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+                            Complete command over membership renewals, cash &amp; UPI collections, biometric access permissions, staff payroll, and live attendance logs.
+                        </p>
+
+                        <div class="space-y-2.5 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>30-second new member admission</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>1-click split Cash / UPI counter checkout</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>Automatic gate lock on expired fees</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>Detailed revenue &amp; GST tax breakdown</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 2. Dedicated Trainer App --}}
+                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xl mb-6">
+                            🏋️
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-bold text-[10px] uppercase tracking-wider border border-blue-500/20">
+                            For Fitness Coaches &amp; PTs
+                        </span>
+                        <h3 class="text-xl font-bold text-white mt-3 mb-2">Dedicated Trainer App</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+                            Empower your fitness trainers to assign custom workout routines, share Indian diet charts, track client transformations, and view their monthly commission ledger.
+                        </p>
+
+                        <div class="space-y-2.5 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                <span>600+ exercise database with animated form</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                <span>Personalized daily macronutrient calculator</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                <span>Client PT attendance and session counter</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                <span>Transparent commission &amp; payout records</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 3. Member Self-Service Pass --}}
+                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl mb-6">
+                            📱
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px] uppercase tracking-wider border border-emerald-500/20">
+                            For Gym Members
+                        </span>
+                        <h3 class="text-xl font-bold text-white mt-3 mb-2">Member Digital Pass (PWA)</h3>
+                        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+                            Lightweight mobile app that requires zero heavy downloads. Members can check in with a digital QR code, view workouts, track attendance streaks, and renew fees via UPI.
+                        </p>
+
+                        <div class="space-y-2.5 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Instant QR check-in &amp; digital entry pass</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Daily workout routine &amp; diet plan viewer</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Workout streak badges &amp; attendance calendar</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Direct 1-tap UPI fee renewal from phone</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
+         DETAILED FEATURE SHOWCASES (MATTE SPLIT CARDS)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-20 lg:py-28 bg-[#090d16]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24 lg:space-y-32">
+
+            {{-- 1. Biometric Integration --}}
+            <div id="biometric-access" class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 text-xs font-bold uppercase tracking-wider">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                        <span>Access & Attendance</span>
+                        <span>Biometric Integration &amp; Access Control</span>
                     </div>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
-                        Biometric Attendance and Access Control
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Stop Tailgating and Unpaid Walk-ins at the Gate
                     </h2>
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6">
-                        Eliminate proxy attendance, member card sharing, and unpaid walk-ins. GymDeskHub connects directly with Hikvision facial terminals, eSSL fingerprint readers, and automated turnstile gates for sub-second, tamper-proof access.
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Say goodbye to proxy attendance and card sharing. GymDeskHub connects directly with standard face recognition terminals, fingerprint scanners, and access turnstiles.
                     </p>
 
-                    <div class="space-y-4 text-sm text-slate-300">
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Multi-Device Compatibility:</strong> Sub-second face recognition (Hikvision MinMoe), fingerprint scanners (eSSL/ZKTeco), RFID smart cards, and digital QR codes.</p>
+                    <div class="space-y-4 pt-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Universal Machine Compatibility:</strong> Works with standard facial recognition readers, fingerprint machines, RFID smart cards, and QR scanners.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Instant Expiry Gating:</strong> The turnstile gate locks instantly if a member's plan has expired or fees are pending — zero manual confrontation needed.</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Instant Expiry Auto-Lock:</strong> The turnstile locks automatically the second a member’s plan expires or payments are pending. No front-desk confrontation needed.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Anti-Passback Security:</strong> Prevents multiple people from entering on a single member's credentials without an exit punch.</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Anti-Passback Protection:</strong> Ensures a member cannot scan their face or pass a card back to a friend without an exit record.</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Live Biometric Visual Card --}}
-                <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition-all">
-                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-4">
-                        <div class="flex items-center gap-2.5 text-xs font-bold text-white uppercase tracking-wider">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span>Live Turnstile & Face Log</span>
-                        </div>
-                        <span class="text-xs text-amber-400 font-mono px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">0.2s Sync</span>
-                    </div>
-
-                    <div class="space-y-3 font-mono text-xs">
-                        <div class="p-3.5 rounded-xl bg-[#080d17] border border-slate-800/80 flex items-center justify-between hover:border-slate-700 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold text-[11px]">ACCESS GRANTED</span>
-                                <div>
-                                    <span class="text-white font-sans font-semibold block text-sm">Rohit Sharma</span>
-                                    <span class="text-slate-500 text-[11px]">Gold Annual &bull; MEM-089</span>
-                                </div>
+                {{-- Biometric Mockup Card --}}
+                <div class="lg:col-span-6">
+                    <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-4 shadow-xl">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                            <div class="flex items-center gap-2.5 text-xs font-bold text-white uppercase tracking-wider">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <span>Live Biometric Gate Stream</span>
                             </div>
-                            <span class="text-slate-400 font-sans text-xs">Turnstile Gate 1</span>
+                            <span class="text-xs text-amber-400 font-mono px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">Sub-Second Sync</span>
                         </div>
 
-                        <div class="p-3.5 rounded-xl bg-rose-950/20 border border-rose-500/30 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold text-[11px]">ACCESS DENIED</span>
-                                <div>
-                                    <span class="text-white font-sans font-semibold block text-sm">Ananya Sen</span>
-                                    <span class="text-rose-400 text-[11px]">Plan Expired &bull; Locked</span>
+                        <div class="space-y-3 font-sans text-xs">
+                            <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-bold text-[10px] border border-emerald-500/20">GRANTED</span>
+                                    <div>
+                                        <div class="text-white font-bold text-sm">Rohit Sharma</div>
+                                        <div class="text-slate-400 text-[11px]">Gold Annual &bull; Member #108</div>
+                                    </div>
                                 </div>
+                                <span class="text-slate-400 text-xs font-mono">06:42 AM</span>
                             </div>
-                            <span class="text-rose-400 font-sans text-xs font-semibold">Turnstile Locked</span>
+
+                            <div class="p-3.5 rounded-2xl bg-rose-950/20 border border-rose-500/30 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 font-bold text-[10px] border border-rose-500/30">DENIED</span>
+                                    <div>
+                                        <div class="text-white font-bold text-sm">Ananya Sen</div>
+                                        <div class="text-rose-400 text-[11px]">Plan Expired &bull; Gate Auto-Locked</div>
+                                    </div>
+                                </div>
+                                <span class="text-rose-400 text-xs font-semibold">Locked</span>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-bold text-[10px] border border-emerald-500/20">GRANTED</span>
+                                    <div>
+                                        <div class="text-white font-bold text-sm">Karan Gill</div>
+                                        <div class="text-slate-400 text-[11px]">Personal Training &bull; Member #142</div>
+                                    </div>
+                                </div>
+                                <span class="text-slate-400 text-xs font-mono">06:45 AM</span>
+                            </div>
                         </div>
 
-                        <div class="p-3.5 rounded-xl bg-[#080d17] border border-slate-800/80 flex items-center justify-between hover:border-slate-700 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-bold text-[11px]">ACCESS GRANTED</span>
-                                <div>
-                                    <span class="text-white font-sans font-semibold block text-sm">Karan Gill</span>
-                                    <span class="text-slate-500 text-[11px]">Personal Training &bull; MEM-104</span>
-                                </div>
-                            </div>
-                            <span class="text-slate-400 font-sans text-xs">Hikvision Face 1</span>
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                            <span>Today's Total Check-ins: <strong class="text-white">248 entries</strong></span>
+                            <span class="text-emerald-400 font-semibold">0 Offline Incidents</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- 2. Multi-Branch Enterprise Consolidation --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-4">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                        <span>Chain Operations</span>
+            {{-- 2. WhatsApp Retention & Fee Recovery --}}
+            <div id="whatsapp-recovery" class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <div class="lg:col-span-6 lg:order-2 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                        <span>💬</span> WhatsApp Fee Automation
                     </div>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
-                        Multi-Branch Control from One Master Dashboard
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Recover Overdue Fees Without Awkward Calling
                     </h2>
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6">
-                        Expand your fitness brand across cities without losing visibility. Control 1, 5, or 20+ branches with consolidated financial statements, member roaming, and strict role permissions for receptionists and floor managers.
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Chasing members for renewals over the phone is stressful for staff and annoying for members. GymDeskHub automates gentle reminders with direct UPI payment links so members pay in seconds.
                     </p>
 
-                    <div class="space-y-4 text-sm text-slate-300">
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Consolidated Analytics:</strong> Compare branch-by-branch revenues, membership counts, and daily attendance logs side-by-side.</p>
+                    <div class="space-y-4 pt-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Direct UPI Payment Links:</strong> Members tap the link inside WhatsApp to pay instantly via Google Pay, PhonePe, or Paytm with zero payment gateway deduction.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Multi-Location Roaming:</strong> Enable VIP members to work out at any branch while revenue automatically credits to their home branch.</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Polite 3-Stage Schedule:</strong> Automatic friendly heads-up 3 days before expiry, on expiry day, and 2 days overdue.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Isolated Staff Permissions:</strong> Front desk receptionists and trainers only see members and finances of their specific assigned facility.</p>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Multi-Branch Visual Card --}}
-                <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl lg:order-1 relative group hover:border-blue-500/30 transition-all">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-5">
-                        <div class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            <span>Branch Performance Monitor</span>
-                        </div>
-                        <span class="text-xs text-slate-400 font-medium">All Branches Live</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div class="p-4 rounded-2xl bg-[#080d17] border border-slate-800/80">
-                            <div class="flex items-center justify-between text-xs text-slate-400">
-                                <span>Downtown Branch</span>
-                                <span class="text-emerald-400 font-semibold">+18% MoM</span>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white mt-1.5">₹4,85,000</div>
-                            <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                <span>420 Active Members</span>
-                            </div>
-                        </div>
-
-                        <div class="p-4 rounded-2xl bg-[#080d17] border border-slate-800/80">
-                            <div class="flex items-center justify-between text-xs text-slate-400">
-                                <span>Westside Studio</span>
-                                <span class="text-emerald-400 font-semibold">+12% MoM</span>
-                            </div>
-                            <div class="text-2xl font-extrabold text-white mt-1.5">₹3,20,000</div>
-                            <div class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                <span>290 Active Members</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/60 flex items-center justify-between text-xs">
-                        <span class="text-slate-400">Consolidated Monthly Collection</span>
-                        <span class="text-amber-400 font-extrabold text-sm font-mono">₹8,05,000</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- 3. WhatsApp Automation & GST Billing --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <span>Fee Automation & Billing</span>
-                    </div>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
-                        Automated WhatsApp Reminders &amp; GST Invoicing
-                    </h2>
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6">
-                        Never chase fee renewals manually again. Automatically deliver branded WhatsApp payment alerts with direct UPI pay links 7 days, 3 days, and on expiry day. Payments settle straight to your gym's account.
-                    </p>
-
-                    <div class="space-y-4 text-sm text-slate-300">
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">1-Click UPI Payment Links:</strong> Members tap the link inside WhatsApp, open GPay/PhonePe/Paytm, and pay immediately without front-desk friction.</p>
-                        </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">GST-Compliant Tax Invoices:</strong> Automated PDF invoices generated with SAC codes, gym GSTIN, tax breakdown, and instant WhatsApp delivery.</p>
-                        </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">POS & Expense Tracker:</strong> Log supplement shop inventory, personal training add-ons, and daily operational expenses in 1 dashboard.</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Instant GST Tax Receipts:</strong> A clean PDF invoice is delivered right on the member’s WhatsApp as soon as the fee is recorded.</p>
                         </div>
                     </div>
                 </div>
 
                 {{-- WhatsApp Simulation Card --}}
-                <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl relative group hover:border-emerald-500/30 transition-all">
-                    <div class="flex items-center justify-between pb-4 border-b border-slate-800/80 mb-5">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.824z"/></svg>
+                <div class="lg:col-span-6 lg:order-1">
+                    <div class="w-full max-w-md mx-auto rounded-3xl bg-[#0b141a] border border-slate-800 p-5 space-y-4 shadow-xl font-sans">
+                        <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
+                            <div class="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center font-bold text-white text-sm">
+                                AG
                             </div>
-                            <div>
-                                <div class="text-sm font-bold text-white">WhatsApp Automated Reminder</div>
-                                <div class="text-[11px] text-emerald-400 font-semibold">Delivered &bull; Active Notification</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <span class="truncate">Armour 24/7 Gym</span>
+                                    <span class="text-emerald-400 text-xs shrink-0">✓</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400">Official Gym Notification</div>
                             </div>
                         </div>
-                        <span class="text-xs text-slate-500">10:30 AM</span>
-                    </div>
 
-                    {{-- Chat bubble --}}
-                    <div class="p-4 rounded-2xl bg-[#080d17] border border-slate-800/80 mb-4 text-xs leading-relaxed">
-                        <p class="text-slate-200">
-                            "Hello <strong class="text-white">Sameer</strong>, your Gold Annual Membership at <strong class="text-amber-400">GymDeskHub</strong> expires in 3 days (21 Oct).
-                        </p>
-                        <p class="text-slate-300 mt-2">
-                            To ensure continuous turnstile biometric access, click below to renew with 1-click UPI:
-                        </p>
-                        <div class="mt-3.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between">
-                            <span class="text-emerald-400 font-bold font-mono">₹14,999 (Inclusive GST)</span>
-                            <span class="text-xs font-bold text-emerald-300 underline">Pay with UPI &rarr;</span>
+                        <div class="p-4 rounded-2xl bg-[#1f2c34] text-slate-100 text-xs space-y-3">
+                            <p class="font-normal text-slate-200 leading-relaxed">
+                                Hi <strong>Rohit Sharma</strong>! 👋<br>
+                                Your Gym Membership at <strong>Armour 24/7 Gym</strong> expires in <strong>3 days</strong> (12 Dec 2026).
+                            </p>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">
+                                Renew now to keep your gate access active and continue your <strong>18-Day Workout Streak 🔥</strong>!
+                            </p>
+                            <div class="p-3 rounded-xl bg-[#111b21] border border-slate-700/60 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 uppercase tracking-wider">Renewal Amount</div>
+                                    <div class="text-sm font-bold text-amber-400">₹6,000 / year</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium text-[10px] border border-emerald-500/20">Zero Extra Fee</span>
+                            </div>
+                            <div class="pt-1">
+                                <div class="w-full py-2.5 rounded-xl bg-[#00a884] hover:bg-[#029071] text-white font-semibold text-center text-xs transition-colors cursor-pointer">
+                                    ⚡ Tap to Pay via UPI (PhonePe / GPay)
+                                </div>
+                            </div>
+                            <div class="flex justify-end items-center gap-1 text-[10px] text-slate-400 pt-0.5">
+                                <span>10:32 AM</span>
+                                <span class="text-cyan-400">✓✓</span>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="p-3.5 rounded-xl bg-[#080d17] border border-slate-800/80 flex items-center justify-between">
-                        <div>
-                            <div class="text-xs font-bold text-white">Invoice #INV-2026-0891</div>
-                            <div class="text-[11px] text-slate-400">Instant GST Tax Receipt Attached</div>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-md bg-emerald-500/15 text-emerald-400 text-xs font-bold border border-emerald-500/30">Auto Paid</span>
                     </div>
                 </div>
             </div>
 
-            {{-- 4. Mobile Apps, Workout & Diet Builder --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4">
-                        <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
-                        <span>Member Experience</span>
+            {{-- 3. Trainer App & 600+ Workout Library --}}
+            <div id="trainer-member" class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-blue-400 text-xs font-bold uppercase tracking-wider">
+                        <span>🏋️</span> Workout &amp; Nutrition System
                     </div>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
-                        Mobile Member App &amp; 600+ Exercise Library
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Built-in Exercise Library &amp; Indian Diet Planner
                     </h2>
-                    <p class="text-slate-400 text-sm sm:text-base leading-relaxed mb-6">
-                        Provide members with a modern Android and iOS portal. Let them track workout splits with animated form videos, log calorie and macro targets, and view attendance history right on their smartphone.
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Help your personal trainers provide a premium coaching experience without wasting hours handwriting diet charts on WhatsApp.
                     </p>
 
-                    <div class="space-y-4 text-sm text-slate-300">
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">600+ Exercise Library:</strong> Step-by-step form guides, targeted muscle groups, set counters, and rest interval timers.</p>
+                    <div class="space-y-4 pt-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">600+ Exercise Database:</strong> Complete with muscle group targets, animated execution guides, sets, reps, and rest timers.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Personalized Diet & Macros:</strong> Calculate BMR/TDEE and assign customized daily macronutrient splits (Protein, Carbs, Fats).</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Indian Food &amp; Macro Calculator:</strong> Plan realistic vegetarian and non-vegetarian diet charts with exact Protein, Carb, and Fat breakdowns.</p>
                         </div>
-                        <div class="flex items-start gap-3.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                            <div class="w-6 h-6 rounded-lg bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <p><strong class="text-white">Digital QR Check-in:</strong> In facilities without hardware turnstiles, members scan dynamic QR codes to verify entrance.</p>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Body Measurement Logs:</strong> Track weight, chest, waist, and biceps over time with photographic comparison charts.</p>
                         </div>
                     </div>
                 </div>
 
-                {{-- Member App Preview Card --}}
-                <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl lg:order-1 relative group hover:border-orange-500/30 transition-all">
-                    <div class="p-4 rounded-2xl bg-[#080d17] border border-slate-800/80 mb-4">
-                        <div class="flex items-center justify-between text-xs mb-1">
-                            <span class="text-amber-400 font-bold uppercase tracking-wider">Today's Assigned Workout</span>
-                            <span class="text-slate-400">Day 1 &bull; 45 Mins</span>
+                {{-- Workout & Diet Mockup Card --}}
+                <div class="lg:col-span-6">
+                    <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-4 shadow-xl font-sans">
+                        <div class="p-4 rounded-2xl bg-[#090d16] border border-slate-800">
+                            <div class="flex items-center justify-between text-xs mb-1">
+                                <span class="text-amber-400 font-bold uppercase tracking-wider">Today's Assigned Workout</span>
+                                <span class="text-slate-400">Day 1 &bull; 45 Mins</span>
+                            </div>
+                            <div class="text-base font-bold text-white mt-1">Chest &amp; Triceps Hypertrophy</div>
+                            <div class="text-xs text-slate-400 mt-1">Flat Bench Press &bull; Incline Dumbbell &bull; Dips</div>
                         </div>
-                        <div class="text-base font-bold text-white mt-1">Chest &amp; Triceps Hypertrophy</div>
-                        <div class="text-xs text-slate-400 mt-1">Bench Press &bull; Incline DB Press &bull; Dips</div>
-                    </div>
 
-                    <div class="grid grid-cols-3 gap-2.5 text-center text-xs mb-4">
-                        <div class="p-3 rounded-xl bg-[#080d17] border border-slate-800/80">
-                            <div class="text-slate-400 text-[11px] font-medium">Protein</div>
-                            <div class="font-bold text-white text-base mt-1">165g</div>
-                            <div class="text-[10px] text-emerald-400 mt-0.5">Target Met</div>
+                        <div class="grid grid-cols-3 gap-3 text-center text-xs">
+                            <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+                                <div class="text-slate-400 text-[11px] font-medium">Protein</div>
+                                <div class="font-bold text-white text-base mt-1">160g</div>
+                                <div class="text-[10px] text-emerald-400 mt-0.5">Target Met</div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+                                <div class="text-slate-400 text-[11px] font-medium">Carbs</div>
+                                <div class="font-bold text-white text-base mt-1">210g</div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">70% Met</div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-[#090d16] border border-slate-800">
+                                <div class="text-slate-400 text-[11px] font-medium">Fats</div>
+                                <div class="font-bold text-white text-base mt-1">55g</div>
+                                <div class="text-[10px] text-amber-400 mt-0.5">Balanced</div>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-xl bg-[#080d17] border border-slate-800/80">
-                            <div class="text-slate-400 text-[11px] font-medium">Carbs</div>
-                            <div class="font-bold text-white text-base mt-1">220g</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">75% Done</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-[#080d17] border border-slate-800/80">
-                            <div class="text-slate-400 text-[11px] font-medium">Fats</div>
-                            <div class="font-bold text-white text-base mt-1">55g</div>
-                            <div class="text-[10px] text-amber-400 mt-0.5">Within Limit</div>
+
+                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                            <span class="text-slate-300 font-medium">Monthly Attendance Streak</span>
+                            <span class="text-emerald-400 font-bold font-mono">22 / 26 Days (85%)</span>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60 flex items-center justify-between text-xs">
-                        <span class="text-slate-300 font-medium">Monthly Attendance</span>
-                        <span class="text-emerald-400 font-bold font-mono">22 / 26 Days (84%)</span>
+            {{-- 4. Front Desk POS & GST Invoicing --}}
+            <div id="pos-billing" class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <div class="lg:col-span-6 lg:order-2 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                        <span>🧾</span> POS Billing &amp; Operations
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Counter Billing and Inventory Done in Seconds
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Handle busy morning and evening front-desk rush effortlessly. Collect membership fees, sell supplement drinks, and record split payments on a single screen.
+                    </p>
+
+                    <div class="space-y-4 pt-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Split Payments (Cash + UPI):</strong> Let members pay ₹3,000 via Google Pay and ₹3,000 in cash within the same invoice.</p>
+                        </div>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">GST-Ready Invoices:</strong> Automatic calculation of CGST, SGST, SAC code classification, and instant printable PDF bills.</p>
+                        </div>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Expense &amp; Cash Reconciliation:</strong> Track gym expenses (rent, electricity, repairs) and verify counter cash balance at closing time.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- POS Counter Mockup Card --}}
+                <div class="lg:col-span-6 lg:order-1">
+                    <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-4 shadow-xl font-sans">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <div class="text-xs font-bold text-white uppercase tracking-wider">Quick Front-Desk Counter</div>
+                            <span class="text-emerald-400 text-xs font-semibold">Active Shift</span>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-[#090d16] border border-slate-800 space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400">Package:</span>
+                                <span class="text-white font-bold">12-Month Annual Fitness</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400">Payment Breakdown:</span>
+                                <span class="text-amber-400 font-mono">₹4,000 UPI + ₹2,000 Cash</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs border-t border-slate-800 pt-2">
+                                <span class="text-slate-300 font-semibold">Total Paid:</span>
+                                <span class="text-white font-extrabold text-sm">₹6,000</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                                <div class="text-slate-400 text-[11px]">Today's Counter Cash</div>
+                                <div class="text-white font-bold text-sm mt-0.5">₹14,500</div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                                <div class="text-slate-400 text-[11px]">Today's UPI Revenue</div>
+                                <div class="text-emerald-400 font-bold text-sm mt-0.5">₹38,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 5. Multi-Branch Enterprise Control --}}
+            <div id="multi-branch" class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-blue-400 text-xs font-bold uppercase tracking-wider">
+                        <span>🏢</span> Multi-Branch Control
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Manage 1, 3, or 10 Branches from One Master Screen
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        Scale your fitness chain across town or multiple cities without losing track of collections, member footfall, or staff accountability.
+                    </p>
+
+                    <div class="space-y-4 pt-2 text-xs sm:text-sm text-slate-300">
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Consolidated Revenue Overview:</strong> Compare branch-by-branch daily revenue, active membership count, and expenses side-by-side.</p>
+                        </div>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Cross-Branch Member Roaming:</strong> Allow premium members to check in at any branch while payments credit cleanly to their home gym.</p>
+                        </div>
+                        <div class="flex items-start gap-3.5 p-3.5 rounded-2xl bg-[#0c121e] border border-slate-800">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</div>
+                            <p><strong class="text-white">Role-Based Staff Access:</strong> Receptionists and trainers only see their assigned branch data, keeping business finances private.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Multi-Branch Mockup Card --}}
+                <div class="lg:col-span-6">
+                    <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-4 shadow-xl font-sans">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <div class="text-xs font-bold text-white uppercase tracking-wider">Multi-Branch Live Summary</div>
+                            <span class="text-slate-400 text-xs">All Facilities Connected</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div class="p-4 rounded-2xl bg-[#090d16] border border-slate-800">
+                                <div class="flex items-center justify-between text-xs text-slate-400">
+                                    <span>Branch 1 (Indira Nagar)</span>
+                                    <span class="text-emerald-400 font-semibold">+14%</span>
+                                </div>
+                                <div class="text-xl font-extrabold text-white mt-1.5">₹4,85,000</div>
+                                <div class="text-[11px] text-slate-400 mt-2">420 Active Members</div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-[#090d16] border border-slate-800">
+                                <div class="flex items-center justify-between text-xs text-slate-400">
+                                    <span>Branch 2 (Whitefield)</span>
+                                    <span class="text-emerald-400 font-semibold">+18%</span>
+                                </div>
+                                <div class="text-xl font-extrabold text-white mt-1.5">₹3,20,000</div>
+                                <div class="text-[11px] text-slate-400 mt-2">290 Active Members</div>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs">
+                            <span class="text-slate-300">Total Monthly Chain Revenue:</span>
+                            <span class="text-amber-400 font-bold text-sm font-mono">₹8,05,000</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -338,21 +542,133 @@
         </div>
     </section>
 
-    {{-- Bottom CTA --}}
-    <section class="py-16 sm:py-20 bg-slate-900/40 border-t border-slate-800">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-4">Experience GymDeskHub in Action</h2>
-            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-                Start with our Free Forever tier or buy a high-performance license with full hardware support.
+    {{-- ══════════════════════════════════════════════════════════════
+         FULL CAPABILITIES CHECKLIST (ORGANIZED & COMPREHENSIVE)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-20 lg:py-24 bg-[#070b14] border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Feature Matrix</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2 mb-4">
+                    Everything Included in GymDeskHub
+                </h2>
+                <p class="text-slate-400 text-sm sm:text-base">
+                    Every tool is included out of the box with zero hidden upgrade fees.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                {{-- Module 1 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>👤</span> Member Administration
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 30-Second Quick Onboarding</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Member Photo &amp; ID Proof Capture</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Membership Freeze / Hold Support</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 1-Click Excel / CSV Import &amp; Export</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Medical History &amp; Injury Logs</li>
+                    </ul>
+                </div>
+
+                {{-- Module 2 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>🔒</span> Attendance &amp; Hardware
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Universal Biometric Integration</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Face Recognition &amp; Fingerprint Sync</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Auto-Lock Gate on Expiry</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Anti-Passback Gate Security</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Backup Mobile QR Scan Check-in</li>
+                    </ul>
+                </div>
+
+                {{-- Module 3 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>💬</span> WhatsApp &amp; Collections
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Automated Expiry WhatsApp Alerts</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 1-Click UPI Payment (GPay, PhonePe)</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Instant GST PDF Invoice on Chat</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Zero Commission Gateway Fees</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Custom Festive &amp; Renewal Offers</li>
+                    </ul>
+                </div>
+
+                {{-- Module 4 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>🏋️</span> Workout &amp; Nutrition
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> 600+ Exercise Video Library</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Daily Workout Routine Creator</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Indian Food &amp; Macro Calculator</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Body Measurement &amp; Transformation Log</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Personal Trainer Client Allocations</li>
+                    </ul>
+                </div>
+
+                {{-- Module 5 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>🧾</span> POS, Expenses &amp; GST
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Split Cash + Online Payment Counter</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Supplement &amp; Drink Inventory POS</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> GST Tax Compliant Invoicing (SAC Codes)</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Operational Expense Ledger (Rent, Bills)</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Daily Shift Cash Drawer Balance</li>
+                    </ul>
+                </div>
+
+                {{-- Module 6 --}}
+                <div class="p-6 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-3">
+                    <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                        <span>🏢</span> Security &amp; Chains
+                    </div>
+                    <ul class="space-y-2 text-xs text-slate-300">
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Multi-Branch Single Owner Dashboard</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Cross-Branch Member Access</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Role-Based Staff Restrictions</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Complete Financial Audit Log</li>
+                        <li class="flex items-center gap-2"><span class="text-emerald-400 font-bold">✓</span> Daily Automated Cloud Backups</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
+         FINAL CLOSING CTA (MATTE DARK - ANNUAL BILLING FOCUS)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-20 lg:py-24 bg-[#090d16] border-t border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+                Ready to Upgrade Your Gym?
+            </h2>
+            <p class="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
+                Start managing members, attendance, and fees with complete clarity. Set up your account in under 2 minutes.
             </p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="{{ route('register') }}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-base hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20">
-                    Start Free Forever
+                <a href="{{ route('register') }}"
+                   class="w-full sm:w-auto px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-colors">
+                    Start Free Forever &rarr;
                 </a>
-                <a href="{{ route('pricing') }}" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-base hover:bg-slate-700 transition-all">
-                    Explore Pricing Plans
+                <a href="{{ route('pricing') }}"
+                   class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-semibold text-base hover:bg-slate-800 hover:text-white transition-colors">
+                    View Transparent Pricing
                 </a>
             </div>
         </div>
     </section>
+
 </x-guest-layout>

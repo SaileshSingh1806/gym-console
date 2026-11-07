@@ -44,7 +44,7 @@
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">3. Hardware Consultation &amp; On-Site Turnstiles</h2>
                     <p>
-                        If your gym requests physical biometric hardware (such as Hikvision or eSSL facial recognition readers, tripod turnstiles, or RFID cards), hardware is sourced and delivered through authorized local hardware partners and distributors across India. Delivery schedules, tracking numbers, and on-site technician installation timelines (typically 3 to 7 business days) will be provided separately by the hardware fulfillment partner.
+                        If your gym requests physical biometric hardware (such as facial recognition readers, tripod turnstiles, or RFID cards), hardware is sourced and delivered through authorized local hardware partners and distributors across India. Delivery schedules, tracking numbers, and on-site technician installation timelines (typically 3 to 7 business days) will be provided separately by the hardware fulfillment partner.
                     </p>
                 </div>
 
