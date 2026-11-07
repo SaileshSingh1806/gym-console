@@ -11,12 +11,13 @@
             showBirthdayModal: false,
             trendPeriod: '30d' 
          }" 
-         class="space-y-7 pb-12">
+         class="dashboard-overview space-y-8 pb-12">
 
         <!-- Gym Brand Header & Greeting -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-                <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex flex-wrap items-center gap-2">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Gym overview</p>
+                <h1 class="text-2xl sm:text-3xl font-semibold text-slate-900 dark:text-white tracking-tight flex flex-wrap items-center gap-2">
                     <span>{{ $tenantName }}</span>
                     @if(auth()->user()->tenant?->isSubscriptionExpired())
                         <span class="px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider">EXPIRED</span>
@@ -24,7 +25,7 @@
                         <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 text-[10px] sm:text-xs font-bold uppercase tracking-wider">ACTIVE</span>
                     @endif
                 </h1>
-                <p class="text-xs font-medium text-slate-600 dark:text-slate-400 mt-1">
+                <p class="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
                     {{ $greeting }}, <span class="text-slate-900 dark:text-slate-200 font-bold">{{ auth()->user()->name }}</span>
                 </p>
             </div>
@@ -39,10 +40,10 @@
         </div>
 
         <!-- Quick Action Shortcut Buttons Bar -->
-        <div class="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto pb-1 text-xs font-bold no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div class="dashboard-actions flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-1 text-xs font-bold no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
             <!-- 1. Add Member -->
             @if(auth()->user()->hasPermission('members.create') || auth()->user()->isGymOwner())
-            <a href="{{ route('app.members.create') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-400 dark:border-emerald-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.members.create') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white border border-transparent flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 <span>Add Member</span>
             </a>
@@ -50,7 +51,7 @@
 
             <!-- 2. Mark Attendance -->
             @if(auth()->user()->hasPermission('attendance.checkin') || auth()->user()->hasPermission('attendance.view') || auth()->user()->isGymOwner())
-            <a href="{{ route('app.attendance.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 dark:bg-blue-500/15 dark:hover:bg-blue-500/25 dark:text-blue-400 dark:border-blue-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.attendance.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                 <span>Mark Attendance</span>
             </a>
@@ -58,7 +59,7 @@
 
             <!-- 3. Record Payment -->
             @if(auth()->user()->hasPermission('payments.record') || auth()->user()->isGymOwner())
-            <a href="{{ route('app.payments.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 dark:bg-purple-500/15 dark:hover:bg-purple-500/25 dark:text-purple-400 dark:border-purple-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.payments.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                 <span>Record Payment</span>
             </a>
@@ -66,7 +67,7 @@
 
             <!-- 4. Add Lead -->
             @if(auth()->user()->hasFeature('crm_leads') && (auth()->user()->hasPermission('crm.leads.create') || auth()->user()->hasPermission('crm.view') || auth()->user()->isGymOwner()))
-            <a href="{{ route('app.leads.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 dark:text-amber-400 dark:border-amber-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.leads.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                 <span>Add Lead</span>
             </a>
@@ -74,7 +75,7 @@
 
             <!-- 5. Product Sale -->
             @if(auth()->user()->hasFeature('inventory_stock') && (auth()->user()->hasPermission('inventory.create') || auth()->user()->hasPermission('inventory.view') || auth()->user()->isGymOwner()))
-            <a href="{{ route('app.inventory.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 dark:text-rose-400 dark:border-rose-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.inventory.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 <span>Product Sale</span>
             </a>
@@ -82,7 +83,7 @@
 
             <!-- 6. Reports -->
             @if(auth()->user()->hasFeature('reports_finance') && (auth()->user()->hasPermission('reports.balance_sheet') || auth()->user()->hasPermission('expenses.view') || auth()->user()->isGymOwner()))
-            <a href="{{ route('app.expenses.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-300 dark:bg-indigo-500/15 dark:hover:bg-indigo-500/25 dark:text-indigo-400 dark:border-indigo-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.expenses.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span>Reports</span>
             </a>
@@ -90,14 +91,14 @@
 
             <!-- 7. Biometric & IoT Devices -->
             @if(auth()->user()->hasFeature('hikvision_iot') && (auth()->user()->hasPermission('devices.view') || auth()->user()->isGymOwner()))
-            <a href="{{ route('app.settings.index', ['tab' => 'devices']) }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 dark:bg-teal-500/15 dark:hover:bg-teal-500/25 dark:text-teal-400 dark:border-teal-500/30 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.settings.index', ['tab' => 'devices']) }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                 <span>Biometric Devices</span>
             </a>
             @endif
 
             <!-- 8. Tutorials -->
-            <a href="{{ route('app.settings.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700/60 flex items-center gap-2 whitespace-nowrap transition-all shadow-xs shrink-0">
+            <a href="{{ route('app.settings.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
                 <span>Tutorials</span>
             </a>
@@ -105,7 +106,7 @@
 
         <!-- ROW 1: MEMBER HEALTH & RETENTION METRICS (Clickable Filter Cards) -->
         @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->isGymOwner())
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div class="dashboard-metrics grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-3 sm:gap-4">
 
             <!-- 1. Active Members (Links to /app/members?status=ACTIVE) -->
             <a href="{{ route('app.members.index', ['status' => 'ACTIVE']) }}" 

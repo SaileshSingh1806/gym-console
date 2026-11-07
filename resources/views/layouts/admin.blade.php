@@ -21,11 +21,11 @@
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
     @else
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=3">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=3">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=3">
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=4">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=4">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=4">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,8 +99,9 @@
     @if(!empty($platformSettings['custom_header_scripts']))
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
+    <x-workspace-ui-styles />
 </head>
-<body class="flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-red-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-red-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" 
@@ -133,7 +134,7 @@
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="flex-grow px-3 py-4 space-y-1 text-xs font-semibold overflow-y-auto">
+        <nav class="flex-grow px-3 py-4 space-y-1.5 text-xs font-semibold overflow-y-auto">
             <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Main Core</div>
 
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
@@ -254,7 +255,7 @@
             </div>
         @endif
 
-        <main class="flex-1 p-3.5 sm:p-5 md:p-6 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-8 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
             {{ $slot ?? '' }}
             @yield('content')
         </main>

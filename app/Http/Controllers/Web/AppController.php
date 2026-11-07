@@ -1733,7 +1733,7 @@ class AppController extends Controller
             ]);
         }
 
-        $record = $this->attendanceService->checkIn($member, 'qr_scan');
+        $record = $this->attendanceService->checkIn($member, 'qr');
 
         return response()->json([
             'success' => true,

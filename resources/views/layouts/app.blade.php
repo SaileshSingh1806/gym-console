@@ -22,11 +22,11 @@
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
     @else
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=3">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=3">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=3">
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=4">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=4">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=4">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,8 +104,9 @@
     @if(!empty($platformSettings['custom_header_scripts']))
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
+    <x-workspace-ui-styles />
 </head>
-<body class="flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     @if(!auth()->user()->isMember())
     <!-- Mobile Sidebar Backdrop -->
@@ -151,7 +152,7 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-grow px-3 py-3 space-y-1 overflow-y-auto text-xs font-semibold">
+        <nav class="flex-grow px-3 py-3 space-y-1.5 overflow-y-auto text-xs font-semibold">
             @if(auth()->user()->role === 'member')
             <!-- Member Self-Service Portal Navigation -->
             <a href="{{ route('app.portal') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ (request()->routeIs('app.portal') && !request()->has('tab')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
@@ -683,7 +684,7 @@
 
                 <!-- Popover Dropdown (Opens upward above the button) -->
                 <div x-show="branchDropdownOpen" @click.away="branchDropdownOpen = false" x-cloak 
-                     class="absolute bottom-full left-0 mb-2 w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-50 space-y-1 text-xs max-h-64 overflow-y-auto">
+                     class="absolute bottom-full left-0 mb-2 w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-50 space-y-1.5 text-xs max-h-64 overflow-y-auto">
                     <div class="px-2.5 py-1.5 text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-1.5">
                         <span>Select Branch</span>
                         <span class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">{{ count($allowedBranchIds) }}/{{ $tenantBranches->count() }} Available</span>
@@ -1366,7 +1367,7 @@
         @endif
 
         <!-- Page View Body -->
-        <main class="flex-1 p-3.5 sm:p-5 md:p-6 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-8 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
             {{ $slot }}
         </main>
     </div>

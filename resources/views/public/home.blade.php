@@ -336,34 +336,21 @@
     </section>
 
     {{-- ══════════════════════════════════════════════════════════════
-         PRICING PREVIEW (WITH ANNUAL / MONTHLY TOGGLE)
+         PRICING PREVIEW (ANNUAL ONLY)
     ══════════════════════════════════════════════════════════════ --}}
-    <section id="plans" class="py-20 lg:py-28 bg-[#070b14] border-t border-slate-800/80" x-data="{ billingCycle: 'yearly' }">
+    <section id="plans" class="py-20 lg:py-28 bg-[#070b14] border-t border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-12">
+            <div class="text-center max-w-3xl mx-auto mb-14">
                 <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Transparent Pricing</span>
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mt-2 mb-4">
                     Fair, transparent plans for every gym size
                 </h2>
-                <p class="text-slate-400 text-base sm:text-lg mb-8">
-                    Start on our Free Forever plan or unlock automated turnstile access control. No per-member penalties.
+                <p class="text-slate-400 text-base sm:text-lg mb-6">
+                    Start on our Free Forever plan or unlock automated turnstile access control. Annual billing with no per-member penalties.
                 </p>
-
-                {{-- Billing Switcher --}}
-                <div class="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800">
-                    <button type="button"
-                            @click="billingCycle = 'monthly'"
-                            :class="billingCycle === 'monthly' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
-                            class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all">
-                        Monthly Billing
-                    </button>
-                    <button type="button"
-                            @click="billingCycle = 'yearly'"
-                            :class="billingCycle === 'yearly' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
-                            class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5">
-                        <span>Annual Billing</span>
-                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold tracking-wide">SAVE 33%</span>
-                    </button>
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Annual Billing &bull; Zero Monthly Surcharges &bull; Free Assisted Setup</span>
                 </div>
             </div>
 
@@ -401,11 +388,12 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider">Starter</span>
-                            <span class="text-xs text-amber-400 font-semibold" x-show="billingCycle === 'yearly'">Save ₹3,000/yr</span>
+                            <span class="text-xs text-amber-400 font-semibold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">Annual Plan &bull; Save ₹3,000</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white" x-text="billingCycle === 'yearly' ? '₹6,000' : '₹749'">₹6,000</span>
-                            <span class="text-xs text-slate-400" x-text="billingCycle === 'yearly' ? '/year' : '/month'">/year</span>
+                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹6,000</span>
+                            <span class="text-xs text-slate-400 line-through">₹9,000</span>
+                            <span class="text-xs text-slate-400">/year</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Single branch &bull; <strong>Unlimited Members</strong></div>
                         <p class="text-xs text-slate-400 mt-3 pb-6 border-b border-slate-800 leading-relaxed">
@@ -430,11 +418,12 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-wider">Pro Chain</span>
-                            <span class="text-xs text-amber-400 font-semibold" x-show="billingCycle === 'yearly'">Save ₹6,000/yr</span>
+                            <span class="text-xs text-amber-400 font-semibold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">Annual Plan &bull; Save ₹6,000</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white" x-text="billingCycle === 'yearly' ? '₹12,000' : '₹1,499'">₹12,000</span>
-                            <span class="text-xs text-slate-400" x-text="billingCycle === 'yearly' ? '/year' : '/month'">/year</span>
+                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹12,000</span>
+                            <span class="text-xs text-slate-400 line-through">₹18,000</span>
+                            <span class="text-xs text-slate-400">/year</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Multi-branch chains &bull; <strong>Multi-Location Command</strong></div>
                         <p class="text-xs text-slate-400 mt-3 pb-6 border-b border-slate-800 leading-relaxed">
@@ -448,6 +437,11 @@
                             <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Dedicated WhatsApp technical onboarding engineer</li>
                         </ul>
                     </div>
+                    <a href="{{ route('register', ['plan' => 'pro']) }}"
+                       class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm text-center transition-colors">
+                        Choose Pro Chain
+                    </a>
+                </div>
                     <a href="{{ route('register', ['plan' => 'pro']) }}"
                        class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm text-center transition-colors">
                         Choose Pro Chain
