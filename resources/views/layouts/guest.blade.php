@@ -295,7 +295,7 @@
                 </nav>
 
                 <!-- ── DESKTOP ACTIONS ── -->
-                <div class="hidden md:flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-5">
                     @auth
                         @if(auth()->user()->isSuperAdmin())
                             <a href="{{ route('admin.dashboard') }}"
@@ -316,13 +316,13 @@
                         @endif
                     @else
                         <a href="{{ route('login') }}"
-                           class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors">
-                            Sign In
+                           class="text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                            Login
                         </a>
                         <a href="{{ route('register') }}"
-                           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold shadow-sm transition-all">
+                           class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
                             <span>Get Started</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @endauth
                 </div>
@@ -364,8 +364,8 @@
                         <a href="{{ route('auth.checkout') }}" class="text-center font-bold px-4 py-2.5 rounded-lg bg-amber-500 text-slate-950 text-sm">Activate Plan</a>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="text-center font-medium px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-sm">Sign In</a>
-                    <a href="{{ route('register') }}" class="text-center font-bold px-4 py-2.5 rounded-lg bg-amber-500 text-slate-950 text-sm shadow-sm">Get Started Free</a>
+                    <a href="{{ route('login') }}" class="text-center font-medium px-4 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-white text-sm hover:bg-slate-800 transition-colors">Login</a>
+                    <a href="{{ route('register') }}" class="text-center font-semibold px-4 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm shadow-sm transition-colors">Get Started Free &rarr;</a>
                 @endauth
             </div>
         </div>
@@ -452,7 +452,7 @@
                 <div>
                     <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3.5">Access</h4>
                     <ul class="space-y-2 text-xs sm:text-sm">
-                        <li><a href="{{ route('login') }}" class="text-slate-400 hover:text-white transition-colors">Member & Staff Login</a></li>
+                        <li><a href="{{ route('login') }}" class="text-slate-400 hover:text-white transition-colors">Sign In</a></li>
                         <li><a href="{{ route('register') }}" class="text-slate-400 hover:text-white transition-colors">Register New Gym</a></li>
                         <li><a href="{{ route('register', ['plan'=>'free_forever']) }}" class="text-slate-400 hover:text-white transition-colors">Free Forever Tier</a></li>
                     </ul>

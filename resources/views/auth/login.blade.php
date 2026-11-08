@@ -1,120 +1,65 @@
 <x-guest-layout :hide-nav="true" :hide-footer="true" title="Sign In — {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
-    <div class="min-h-screen flex flex-col justify-between items-center py-6 sm:py-10 px-4 relative overflow-hidden bg-[#080c14] text-slate-100 selection:bg-amber-500/25 selection:text-amber-200">
-        
-        <!-- Ambient Background Glow & Subtle Grid -->
-        <div class="absolute inset-0 bg-subtle-grid opacity-20 pointer-events-none"></div>
-        <div class="absolute w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-3xl -top-32 left-1/2 -translate-x-1/2 pointer-events-none"></div>
+    <div class="min-h-screen flex flex-col justify-between items-center py-6 sm:py-10 px-4 relative bg-[#090d16] text-slate-100 selection:bg-amber-500/25 selection:text-amber-200">
 
         <!-- Top Header Navigation -->
-        <header class="w-full max-w-md flex items-center justify-between relative z-10 text-xs">
-            <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors font-medium">
+        <header class="w-full max-w-[420px] flex items-center justify-between text-xs py-2">
+            <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 <span>Back to website</span>
             </a>
-
-            <a href="{{ route('register') }}" class="text-slate-400 hover:text-amber-400 transition-colors font-medium">
-                Need an account? <span class="font-bold text-amber-400 hover:underline">Register &rarr;</span>
+            <a href="{{ route('contact') }}" class="text-slate-400 hover:text-white transition-colors">
+                Need help?
             </a>
         </header>
 
-        <!-- Centered Card -->
-        <main class="w-full max-w-[420px] my-auto py-6 relative z-10" x-data="{ 
-            roleType: '{{ (request()->has('member') || request()->query('role') === 'member') ? 'member' : 'owner' }}',
+        <!-- Centered Login Card -->
+        <main class="w-full max-w-[420px] my-auto py-6" x-data="{ 
             showPassword: false, 
-            submitting: false,
-            showResetModal: false,
-            resetIdentifier: '',
-            resetLoading: false,
-            resetMessage: '',
-            resetSuccess: false,
-            resetWaUrl: '',
-            async sendResetLink() {
-                if (!this.resetIdentifier) return;
-                this.resetLoading = true;
-                this.resetMessage = '';
-                this.resetSuccess = false;
-                try {
-                    const res = await fetch('{{ route('portal.request-link') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({ identifier: this.resetIdentifier })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        this.resetSuccess = true;
-                        this.resetMessage = data.message;
-                        this.resetWaUrl = data.whatsapp_url;
-                        window.open(data.whatsapp_url, '_blank');
-                    } else {
-                        this.resetSuccess = false;
-                        this.resetMessage = data.message || 'Member not found. Please contact gym reception.';
-                    }
-                } catch (e) {
-                    this.resetSuccess = false;
-                    this.resetMessage = 'An error occurred. Please contact reception.';
-                } finally {
-                    this.resetLoading = false;
-                }
-            }
+            submitting: false
         }">
-            <div class="p-7 sm:p-9 rounded-3xl bg-[#0c1220]/95 border border-slate-800/90 shadow-2xl shadow-black/80 backdrop-blur-xl space-y-6">
+            <div class="p-7 sm:p-8 rounded-2xl bg-[#0c121e] border border-slate-800 shadow-xl space-y-6">
                 
                 <!-- Logo & Heading -->
-                <div class="text-center space-y-3">
+                <div class="text-center space-y-2">
                     <a href="{{ route('home') }}" class="inline-flex items-center justify-center mb-1 group focus:outline-none">
                         <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
                              alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
-                             class="h-11 sm:h-12 w-auto max-w-[240px] object-contain group-hover:scale-105 transition-transform drop-shadow-md">
+                             class="h-9 sm:h-10 w-auto object-contain transition-opacity group-hover:opacity-90">
                     </a>
 
                     <div>
-                        <h1 class="text-2xl font-black text-white tracking-tight">
-                            Sign in to your account
+                        <h1 class="text-2xl font-bold text-white tracking-tight">
+                            Sign In
                         </h1>
-                        <p class="text-xs text-slate-400 mt-1" x-text="roleType === 'member' ? 'Access your gym membership, workouts & attendance' : 'Enter your credentials to access your gym console'">
-                            Enter your credentials to access your console
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                            Enter your credentials to access your account
                         </p>
-                    </div>
-
-                    <!-- Role Switcher Pill -->
-                    <div class="p-1 rounded-2xl bg-[#080d17] border border-slate-800 flex items-center text-xs font-bold text-center mt-2">
-                        <button type="button" @click="roleType = 'owner'" :class="roleType === 'owner' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl transition-all cursor-pointer">
-                            Gym Staff / Owner
-                        </button>
-                        <button type="button" @click="roleType = 'member'" :class="roleType === 'member' ? 'bg-emerald-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 rounded-xl transition-all cursor-pointer">
-                            🏋️ Gym Member
-                        </button>
                     </div>
                 </div>
 
                 <!-- Error Alert -->
                 @if ($errors->any())
-                    <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5">
+                    <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2.5">
                         <svg class="w-4 h-4 shrink-0 mt-0.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         <span class="font-medium leading-relaxed">{{ $errors->first() }}</span>
                     </div>
                 @endif
 
                 @if (session('status'))
-                    <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-start gap-2.5">
+                    <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-start gap-2.5">
                         <svg class="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span class="font-medium leading-relaxed">{{ session('status') }}</span>
                     </div>
                 @endif
 
                 <!-- Credentials Form -->
-                <form action="{{ route('login.post') }}" method="POST" @submit="submitting = true" class="space-y-4 pt-1">
+                <form action="{{ route('login.post') }}" method="POST" @submit="submitting = true" class="space-y-4">
                     @csrf
 
                     <!-- Identifier Input -->
                     <div class="space-y-1.5">
-                        <label for="email" class="block text-xs font-semibold text-slate-300">
-                            <span x-show="roleType === 'member'">Mobile Number or Member ID (e.g. ARM184)</span>
-                            <span x-show="roleType === 'owner'">Email, Mobile Number, or Username</span>
+                        <label for="email" class="block text-xs font-medium text-slate-300">
+                            Email, Mobile or Member ID
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -126,21 +71,20 @@
                                    value="{{ old('email') }}" 
                                    required 
                                    autofocus 
-                                   :placeholder="roleType === 'member' ? 'e.g. 8980986524 or ARM184' : 'name@example.com or phone'" 
-                                   class="w-full pl-10 pr-4 py-3 rounded-xl bg-[#080d17] border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium">
+                                   placeholder="name@example.com or mobile number" 
+                                   class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition-colors">
                         </div>
                     </div>
 
                     <!-- Password Input -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <label for="password" class="block text-xs font-semibold text-slate-300">
+                            <label for="password" class="block text-xs font-medium text-slate-300">
                                 Password
                             </label>
-                            <button type="button" @click="showResetModal = true" class="text-[11px] font-medium text-emerald-400 hover:underline transition-colors cursor-pointer">
-                                <span x-show="roleType === 'member'">Set password / Forgot?</span>
-                                <span x-show="roleType !== 'member'">Forgot password?</span>
-                            </button>
+                            <a href="{{ route('contact') }}" class="text-xs text-amber-400 hover:underline transition-colors">
+                                Forgot password?
+                            </a>
                         </div>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -151,7 +95,7 @@
                                    name="password" 
                                    required 
                                    placeholder="Enter your password" 
-                                   class="w-full pl-10 pr-10 py-3 rounded-xl bg-[#080d17] border border-slate-700/80 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 transition-all font-medium">
+                                   class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#090d16] border border-slate-800 text-white placeholder-slate-500 text-xs sm:text-sm focus:outline-none focus:border-amber-500 transition-colors">
                             <button type="button" 
                                     @click="showPassword = !showPassword" 
                                     class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
@@ -160,15 +104,13 @@
                                 <svg x-show="showPassword" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                             </button>
                         </div>
-
-
                     </div>
 
                     <!-- Remember Me -->
                     <div class="flex items-center justify-between pt-0.5">
                         <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
                             <input type="checkbox" name="remember" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-0 cursor-pointer">
-                            <span>Remember me</span>
+                            <span>Keep me signed in</span>
                         </label>
                     </div>
 
@@ -176,98 +118,28 @@
                     <div class="pt-2">
                         <button type="submit" 
                                 :disabled="submitting"
-                                :class="roleType === 'member' ? 'from-emerald-500 to-teal-600 shadow-emerald-500/20' : 'from-amber-500 to-amber-600 shadow-amber-500/20'"
-                                class="w-full py-3.5 rounded-xl bg-gradient-to-r hover:brightness-110 active:scale-[0.99] text-slate-950 font-black text-xs shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2">
+                                class="w-full py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2">
                             <span x-show="submitting" class="animate-spin text-sm">⏳</span>
-                            <span x-show="!submitting" class="flex items-center gap-2">
-                                <span x-text="roleType === 'member' ? 'Sign In to Member Portal' : 'Sign In to Console'">Sign In to Console</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                            </span>
+                            <span x-show="!submitting">Sign In</span>
                         </button>
                     </div>
                 </form>
 
-                <!-- Help / Trial Notice -->
-                <div class="pt-4 border-t border-slate-800/80 text-center">
+                <!-- Help / Registration Notice -->
+                <div class="pt-4 border-t border-slate-800 text-center">
                     <p class="text-xs text-slate-400">
-                        Don't have a gym workspace yet? 
-                        <a href="{{ route('register') }}" class="text-amber-400 font-bold hover:underline ml-1">
-                            Start free trial &rarr;
+                        Don't have an account yet? 
+                        <a href="{{ route('register') }}" class="text-amber-400 font-semibold hover:underline ml-1">
+                            Get started free &rarr;
                         </a>
                     </p>
-                </div>
-            </div>
-
-            <!-- Password Setup / Reset Modal -->
-            <div x-show="showResetModal" 
-                 x-cloak 
-                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
-                 @keydown.escape.window="showResetModal = false">
-                <div class="w-full max-w-sm rounded-3xl bg-[#0d1424] border border-slate-800 p-6 shadow-2xl space-y-5 text-left relative"
-                     @click.away="showResetModal = false">
-                    
-                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-sm font-bold">📲</span>
-                            <div>
-                                <h3 class="text-sm font-black text-white">Set / Reset Password</h3>
-                                <p class="text-[11px] text-slate-400">Receive private link on WhatsApp</p>
-                            </div>
-                        </div>
-                        <button type="button" @click="showResetModal = false" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">&times;</button>
-                    </div>
-
-                    <div class="space-y-3">
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Enter your registered <strong>Mobile Number</strong> or <strong>Member ID</strong>. We will create a confidential setup link for your number.
-                        </p>
-
-                        <div class="space-y-1">
-                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mobile Number or Member ID</label>
-                            <input type="text" 
-                                   x-model="resetIdentifier" 
-                                   placeholder="e.g. 8980986524 or ARM184" 
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#080c14] border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 font-mono">
-                        </div>
-
-                        <!-- Result message -->
-                        <div x-show="resetMessage" x-cloak class="p-3 rounded-xl text-xs" :class="resetSuccess ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border border-rose-500/30 text-rose-300'">
-                            <span x-text="resetMessage"></span>
-                        </div>
-
-                        <div x-show="resetSuccess && resetWaUrl" x-cloak class="pt-1">
-                            <a :href="resetWaUrl" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all">
-                                <span>💬 Open in WhatsApp</span> &rarr;
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                        <button type="button" @click="showResetModal = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white cursor-pointer">
-                            Cancel
-                        </button>
-                        <button type="button" 
-                                @click="sendResetLink()" 
-                                :disabled="resetLoading || !resetIdentifier" 
-                                class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
-                            <span x-show="resetLoading">⏳ Sending...</span>
-                            <span x-show="!resetLoading">Get Setup Link &rarr;</span>
-                        </button>
-                    </div>
-
                 </div>
             </div>
         </main>
 
         <!-- Minimal Footer -->
-        <footer class="w-full max-w-md flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 relative z-10 pt-2">
+        <footer class="w-full max-w-[420px] text-center text-[11px] text-slate-500 py-3">
             <span>{{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'GymDeskHub')) }}</span>
-            <div class="flex items-center gap-3">
-                <span class="flex items-center gap-1">🔒 SSL Secured</span>
-                <span>•</span>
-                <a href="{{ route('contact') }}" class="hover:text-slate-400 transition-colors">Support</a>
-            </div>
         </footer>
-
     </div>
 </x-guest-layout>

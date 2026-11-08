@@ -32,6 +32,8 @@ Route::get('/portal/setup/{token}', [AuthController::class, 'showMemberPasswordS
 Route::post('/portal/setup/{token}', [AuthController::class, 'saveMemberPasswordSetup'])->name('portal.setup.save');
 Route::post('/portal/request-link', [AuthController::class, 'requestMemberSetupLink'])->name('portal.request-link');
 
+Route::redirect('/member/login', '/login');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
