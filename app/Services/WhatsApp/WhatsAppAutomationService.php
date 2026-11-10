@@ -200,7 +200,7 @@ class WhatsAppAutomationService
                 'entity_id' => $member->id,
                 'variables' => [
                     $member->full_name,
-                    $automation->tenant->name ?? 'ARMOUR 24-7 GYM',
+                    $automation->tenant?->name ?? 'Gym',
                 ],
             ];
         }
@@ -369,7 +369,7 @@ class WhatsAppAutomationService
                 'entity_id' => $member->id,
                 'variables' => [
                     $member->full_name,
-                    $automation->tenant->name ?? 'ARMOUR 24-7 GYM',
+                    $automation->tenant?->name ?? 'Gym',
                 ],
             ];
         }
@@ -404,7 +404,7 @@ class WhatsAppAutomationService
                 'entity_id' => $lead->id,
                 'variables' => [
                     $lead->name ?: 'Fitness Enthusiast',
-                    $automation->tenant->name ?? 'ARMOUR 24-7 GYM',
+                    $automation->tenant?->name ?? 'Gym',
                 ],
             ];
         }

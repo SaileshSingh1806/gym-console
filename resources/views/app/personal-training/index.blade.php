@@ -232,6 +232,199 @@
                 branch_id: plan.branch_id || ''
             };
             this.showPlanModal = true;
+        },
+
+        // PT Session QR Confirmation State & Methods
+        showLogQrModal: false,
+        qrStep: 'form',
+        qrSubmitting: false,
+        qrPollingInterval: null,
+        qrErrorMessage: '',
+        qrForm: {
+            member_id: '',
+            member_pt_package_id: '',
+            trainer_id: '',
+            duration_minutes: 60,
+            focus_area: 'PT Workout Session',
+            notes: ''
+        },
+        qrSession: {
+            id: null,
+            token: '',
+            confirmUrl: '',
+            otpCode: '',
+            memberName: '',
+            trainerName: '',
+            packageName: '',
+            remainingSessions: 0,
+            duration: 60,
+            status: 'PENDING',
+            expiresAt: null
+        },
+        openLogQrModal(memberId = null, packageId = null, memberName = '', packageName = '', remaining = 0, trainerId = '') {
+            this.qrStep = 'form';
+            this.qrErrorMessage = '';
+            this.stopQrPolling();
+            this.qrForm = {
+                member_id: memberId ? String(memberId) : '',
+                member_pt_package_id: packageId ? String(packageId) : '',
+                trainer_id: trainerId ? String(trainerId) : '{{ auth()->user()->trainerProfile?->id ?? '' }}',
+                duration_minutes: 60,
+                focus_area: 'PT Workout Session',
+                notes: ''
+            };
+            if (memberId && !packageId) {
+                this.onQrMemberChange();
+            }
+            this.showLogQrModal = true;
+        },
+        onQrMemberChange() {
+            const pkgs = this.activePackagesData.filter(p => String(p.member_id) === String(this.qrForm.member_id) && (p.total_sessions - p.used_sessions) > 0);
+            if (pkgs.length > 0) {
+                this.qrForm.member_pt_package_id = String(pkgs[0].id);
+                if (pkgs[0].trainer_id && !this.qrForm.trainer_id) {
+                    this.qrForm.trainer_id = String(pkgs[0].trainer_id);
+                }
+            } else {
+                this.qrForm.member_pt_package_id = '';
+            }
+        },
+        async submitLogWithQr() {
+            if (!this.qrForm.member_id || !this.qrForm.member_pt_package_id) {
+                this.qrErrorMessage = 'Please select an assigned member with an active PT package.';
+                return;
+            }
+            this.qrSubmitting = true;
+            this.qrErrorMessage = '';
+            try {
+                const res = await fetch('{{ route('app.pt-sessions.log-with-qr') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.qrForm)
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    this.qrSession = {
+                        id: data.session_id,
+                        token: data.token,
+                        confirmUrl: data.confirm_url,
+                        otpCode: data.otp_code,
+                        memberName: data.member_name,
+                        trainerName: data.trainer_name,
+                        packageName: data.package_name,
+                        remainingSessions: data.remaining_sessions,
+                        duration: data.duration_minutes,
+                        status: 'PENDING',
+                        expiresAt: data.expires_at
+                    };
+                    this.qrStep = 'qr';
+                    this.startQrPolling(data.session_id);
+                } else {
+                    this.qrErrorMessage = data.message || 'Failed to generate session QR.';
+                }
+            } catch (err) {
+                this.qrErrorMessage = 'Network error while generating QR code.';
+            } finally {
+                this.qrSubmitting = false;
+            }
+        },
+        showExistingQr(sessionId, token, confirmUrl, memberName, trainerName, packageName, duration, otpCode, status = 'PENDING') {
+            this.qrSession = {
+                id: sessionId,
+                token: token,
+                confirmUrl: confirmUrl,
+                otpCode: otpCode,
+                memberName: memberName,
+                trainerName: trainerName,
+                packageName: packageName,
+                duration: duration,
+                status: status,
+                expiresAt: null
+            };
+            this.qrStep = 'qr';
+            this.showLogQrModal = true;
+            if (status === 'PENDING') {
+                this.startQrPolling(sessionId);
+            }
+        },
+        startQrPolling(sessionId) {
+            this.stopQrPolling();
+            this.qrPollingInterval = setInterval(async () => {
+                if (!this.showLogQrModal || this.qrStep !== 'qr') {
+                    this.stopQrPolling();
+                    return;
+                }
+                try {
+                    const res = await fetch(`/app/pt-sessions/${sessionId}/qr-status`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (data && (data.is_confirmed || data.is_issue_reported)) {
+                        this.qrSession.status = data.status;
+                        if (data.is_confirmed) {
+                            this.stopQrPolling();
+                        } else if (data.is_issue_reported) {
+                            this.stopQrPolling();
+                        }
+                    }
+                } catch (e) {}
+            }, 2500);
+        },
+        stopQrPolling() {
+            if (this.qrPollingInterval) {
+                clearInterval(this.qrPollingInterval);
+                this.qrPollingInterval = null;
+            }
+        },
+        async refreshQr() {
+            if (!this.qrSession.id) return;
+            this.qrSubmitting = true;
+            try {
+                const res = await fetch(`/app/pt-sessions/${this.qrSession.id}/refresh-qr`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    this.qrSession.token = data.token;
+                    this.qrSession.confirmUrl = data.confirm_url;
+                    this.qrSession.otpCode = data.otp_code;
+                    this.qrSession.status = 'PENDING';
+                    this.startQrPolling(this.qrSession.id);
+                }
+            } catch (e) {
+            } finally {
+                this.qrSubmitting = false;
+            }
+        },
+        async cancelQrSession() {
+            if (!this.qrSession.id) return;
+            if (!confirm('Are you sure you want to cancel this pending session?')) return;
+            try {
+                await fetch(`/app/pt-sessions/${this.qrSession.id}/cancel-pending`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                this.stopQrPolling();
+                this.showLogQrModal = false;
+                window.location.reload();
+            } catch (e) {}
+        },
+        copyQrLink() {
+            if (this.qrSession.confirmUrl) {
+                navigator.clipboard.writeText(this.qrSession.confirmUrl);
+                alert('Confirmation link copied to clipboard!');
+            }
         }
     }">
 
@@ -284,10 +477,16 @@
                 </template>
 
                 <template x-if="activeTab === 'sessions'">
-                    <button @click="showScheduleModal = true" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span>Schedule Session</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button @click="openLogQrModal()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            <span>Log Session (QR)</span>
+                        </button>
+                        <button @click="showScheduleModal = true" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Schedule</span>
+                        </button>
+                    </div>
                 </template>
 
                 <template x-if="activeTab === 'plans'">
@@ -307,7 +506,7 @@
         </div>
 
         <!-- ==================== TAB 1: PT PACKAGES ==================== -->
-        <div x-show="activeTab === 'packages'" class="space-y-4">
+        <div x-show="activeTab === 'packages'" x-cloak class="space-y-4">
             <!-- 3 KPI Metric Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <!-- ACTIVE -->
@@ -432,7 +631,36 @@
                                     $daysLeft = $pkg->days_remaining;
                                     $isExpired = $pkg->end_date < now()->toDateString();
                                 @endphp
-                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                <tr x-data="{
+                                    used: {{ (int) $pkg->used_sessions }},
+                                    total: {{ (int) $pkg->total_sessions }},
+                                    status: '{{ $pkg->status }}',
+                                    logging: false,
+                                    async logOne() {
+                                        if (this.logging || this.status !== 'ACTIVE' || this.used >= this.total) return;
+                                        this.logging = true;
+                                        try {
+                                            const res = await fetch('{{ route('app.pt-packages.log-session', $pkg->id) }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({ count: 1 })
+                                            });
+                                            const data = await res.json();
+                                            if (data && data.success) {
+                                                this.used = data.used_sessions;
+                                                this.status = data.status;
+                                            }
+                                        } catch (e) {
+                                            this.$refs.fallbackLogForm?.submit();
+                                        } finally {
+                                            this.logging = false;
+                                        }
+                                    }
+                                }" class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <!-- Member -->
                                     <td class="py-2.5 px-3">
                                         <div class="flex items-center gap-2.5">
@@ -484,11 +712,13 @@
                                     <!-- Used Progress Bar -->
                                     <td class="py-2.5 px-3 min-w-[120px]">
                                         <div class="flex items-center justify-between text-[10px] font-bold mb-1">
-                                            <span class="text-slate-900 dark:text-white">{{ $pkg->used_sessions }}/{{ $pkg->total_sessions }}</span>
-                                            <span class="text-slate-500 dark:text-slate-400">{{ $pkg->remaining_sessions }} left</span>
+                                            <span class="text-slate-900 dark:text-white" x-text="used + '/' + total">{{ $pkg->used_sessions }}/{{ $pkg->total_sessions }}</span>
+                                            <span class="text-slate-500 dark:text-slate-400" x-text="(Math.max(0, total - used)) + ' left'">{{ $pkg->remaining_sessions }} left</span>
                                         </div>
                                         <div class="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-950 overflow-hidden border border-slate-200 dark:border-slate-800">
-                                            <div class="h-full rounded-full transition-all duration-300 {{ $percentUsed >= 100 ? 'bg-indigo-500' : 'bg-emerald-500' }}" style="width: {{ $percentUsed }}%"></div>
+                                            <div class="h-full rounded-full transition-all duration-300"
+                                                 :class="(used / total) >= 1 ? 'bg-indigo-500' : 'bg-emerald-500'"
+                                                 :style="'width: ' + Math.min(100, Math.round((used / total) * 100)) + '%'"></div>
                                         </div>
                                     </td>
 
@@ -522,32 +752,49 @@
 
                                     <!-- Status -->
                                     <td class="py-2.5 px-3">
-                                        @if($pkg->status === 'ACTIVE')
-                                            @if($isExpired)
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">Expired</span>
-                                            @elseif($daysLeft <= 7)
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">Expiring</span>
-                                            @else
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">Active</span>
-                                            @endif
-                                        @elseif($pkg->status === 'COMPLETED')
+                                        <template x-if="status === 'COMPLETED' || used >= total">
                                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20">Completed</span>
-                                        @elseif($pkg->status === 'CANCELLED')
+                                        </template>
+                                        <template x-if="status === 'ACTIVE' && used < total">
+                                            <span>
+                                                @if($isExpired)
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">Expired</span>
+                                                @elseif($daysLeft <= 7)
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">Expiring</span>
+                                                @else
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">Active</span>
+                                                @endif
+                                            </span>
+                                        </template>
+                                        <template x-if="status === 'CANCELLED'">
                                             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">Cancelled</span>
-                                        @else
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400">{{ $pkg->status }}</span>
-                                        @endif
+                                        </template>
                                     </td>
 
                                     <!-- Actions -->
                                     <td class="py-2.5 px-3 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
-                                            @if($pkg->status === 'ACTIVE' && !$isExpired && $pkg->remaining_sessions > 0)
-                                                <form action="{{ route('app.pt-packages.log-session', $pkg->id) }}" method="POST" class="inline">
+                                            @if(!$isExpired)
+                                                <!-- Log with QR Button -->
+                                                <button type="button" 
+                                                        @click="openLogQrModal({{ $pkg->member_id }}, {{ $pkg->id }}, '{{ addslashes($pkg->member?->full_name ?? '') }}', '{{ addslashes($pkg->package_name) }}', {{ $pkg->remaining_sessions }}, '{{ $pkg->trainer_id ?? '' }}')" 
+                                                        title="Log session with Member QR scan" 
+                                                        class="px-2 py-1 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 text-[10px] font-black border border-amber-500/30 flex items-center gap-1 transition-all cursor-pointer"
+                                                        x-show="status === 'ACTIVE' && used < total">
+                                                    <svg class="w-3 h-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                                    <span>QR Log</span>
+                                                </button>
+
+                                                <form x-ref="fallbackLogForm" action="{{ route('app.pt-packages.log-session', $pkg->id) }}" method="POST" class="inline" x-show="status === 'ACTIVE' && used < total">
                                                     @csrf
-                                                    <button type="submit" title="Log 1 session completed" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-400 text-[10px] font-bold dark:border-emerald-500/30 flex items-center gap-1 transition-all">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                        <span>Log</span>
+                                                    <button type="button" @click="logOne()" :disabled="logging || used >= total" title="Log 1 session completed" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-400 text-[10px] font-bold dark:border-emerald-500/30 flex items-center gap-1 transition-all disabled:opacity-50 cursor-pointer">
+                                                        <template x-if="!logging">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                        </template>
+                                                        <template x-if="logging">
+                                                            <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                                        </template>
+                                                        <span x-text="logging ? 'Logging...' : 'Log'">Log</span>
                                                     </button>
                                                 </form>
                                             @endif
@@ -595,7 +842,7 @@
         </div>
 
         <!-- ==================== TAB 2: PT SESSIONS ==================== -->
-        <div x-show="activeTab === 'sessions'" class="space-y-4">
+        <div x-show="activeTab === 'sessions'" x-cloak class="space-y-4">
             <!-- Header with Sub-tabs (Dashboard, Scheduled, Calendar, Session Log) -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -624,25 +871,40 @@
             <div x-show="sessionsSubTab === 'dashboard'" class="space-y-4">
                 <!-- 5 Session KPI Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/20 shadow-sm">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">ACTIVE PACKAGES</div>
-                        <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $activePackagesCount }}</div>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">ACTIVE PACKAGES</div>
+                        <div class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ $activePackagesCount }}</div>
                     </div>
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-blue-500/20 shadow-sm">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">TODAY SCHEDULED</div>
-                        <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $todayScheduledCount }}</div>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-500/30 shadow-sm bg-gradient-to-br from-amber-500/5 to-transparent">
+                        <div class="text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center justify-between">
+                            <span>PENDING QR CONFIRM</span>
+                            @if($pendingConfirmationCount > 0)
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                            @endif
+                        </div>
+                        <div class="text-xl font-black text-amber-500 dark:text-amber-400 mt-1 flex items-center gap-1.5">
+                            <span>{{ $pendingConfirmationCount }}</span>
+                            @if($pendingConfirmationCount > 0)
+                                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400">Action Req.</span>
+                            @endif
+                        </div>
                     </div>
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-purple-500/20 shadow-sm">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">TODAY COMPLETED</div>
-                        <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $todayCompletedCount }}</div>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/30 shadow-sm">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CONFIRMED TODAY</div>
+                        <div class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{{ $todayCompletedCount }}</div>
                     </div>
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-amber-500/20 shadow-sm">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">THIS MONTH</div>
-                        <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $thisMonthSessionsCount }}</div>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/20 shadow-sm">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">THIS MONTH</div>
+                        <div class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ $thisMonthSessionsCount }}</div>
                     </div>
-                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-rose-500/20 shadow-sm col-span-2 sm:col-span-1 lg:col-span-1">
-                        <div class="text-[9px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">NO-SHOWS (MONTH)</div>
-                        <div class="text-xl font-bold text-slate-900 dark:text-white mt-1">{{ $noShowsMonthCount }}</div>
+                    <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-rose-500/30 shadow-sm col-span-2 sm:col-span-1 lg:col-span-1 {{ $issuesReportedCount > 0 ? 'border-rose-500/40 bg-rose-500/5' : '' }}">
+                        <div class="text-[9px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 flex items-center justify-between">
+                            <span>ISSUES REPORTED</span>
+                            @if($issuesReportedCount > 0)
+                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                            @endif
+                        </div>
+                        <div class="text-xl font-black text-rose-600 dark:text-rose-400 mt-1">{{ $issuesReportedCount }}</div>
                     </div>
                 </div>
 
@@ -824,10 +1086,45 @@
                     </div>
                 </div>
 
-                <!-- Session Log Filter Toolbar -->
-                <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <form action="{{ route('app.pt.index') }}" method="GET" class="flex flex-wrap items-center gap-2.5">
+                <!-- Session Log Filter Toolbar with Status Pills -->
+                <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5">
+                    
+                    <!-- Quick Status Pills -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Filter:</span>
+                        <a href="{{ route('app.pt.index', ['tab' => 'sessions', 'session_status' => 'all']) }}" 
+                           class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 {{ !request('session_status') || request('session_status') === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200' }}">
+                            All
+                        </a>
+                        <a href="{{ route('app.pt.index', ['tab' => 'sessions', 'session_status' => 'PENDING']) }}" 
+                           class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 flex items-center gap-1 {{ request('session_status') === 'PENDING' ? 'bg-amber-500 text-slate-950 font-black shadow-sm' : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20' }}">
+                            <span>⏳ Pending</span>
+                            @if($pendingConfirmationCount > 0)
+                                <span class="px-1 py-0.2 rounded-full text-[9px] bg-amber-500/30 text-amber-400 font-black">{{ $pendingConfirmationCount }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('app.pt.index', ['tab' => 'sessions', 'session_status' => 'COMPLETED']) }}" 
+                           class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 flex items-center gap-1 {{ in_array(request('session_status'), ['COMPLETED', 'CONFIRMED']) ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' }}">
+                            <span>✓ Confirmed</span>
+                        </a>
+                        <a href="{{ route('app.pt.index', ['tab' => 'sessions', 'session_status' => 'ISSUE_REPORTED']) }}" 
+                           class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 flex items-center gap-1 {{ request('session_status') === 'ISSUE_REPORTED' ? 'bg-rose-600 text-white shadow-sm' : 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20' }}">
+                            <span>⚠️ Issue Reported</span>
+                            @if($issuesReportedCount > 0)
+                                <span class="px-1 py-0.2 rounded-full text-[9px] bg-rose-500/30 text-rose-400 font-black">{{ $issuesReportedCount }}</span>
+                            @endif
+                        </a>
+                        <a href="{{ route('app.pt.index', ['tab' => 'sessions', 'session_status' => 'SCHEDULED']) }}" 
+                           class="px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all shrink-0 {{ request('session_status') === 'SCHEDULED' ? 'bg-blue-600 text-white shadow-sm' : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20' }}">
+                            📅 Scheduled
+                        </a>
+                    </div>
+
+                    <form action="{{ route('app.pt.index') }}" method="GET" class="flex flex-wrap items-center gap-2.5 pt-1 border-t border-slate-100 dark:border-slate-800">
                         <input type="hidden" name="tab" value="sessions">
+                        @if(request('session_status'))
+                            <input type="hidden" name="session_status" value="{{ request('session_status') }}">
+                        @endif
 
                         <div class="w-32">
                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">From</label>
@@ -842,19 +1139,10 @@
                         <div class="w-36">
                             <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Trainer</label>
                             <select name="trainer_id" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
-                                <option value="all">All</option>
+                                <option value="all">All Trainers</option>
                                 @foreach($trainers as $tr)
                                     <option value="{{ $tr->id }}" {{ request('trainer_id') == $tr->id ? 'selected' : '' }}>{{ $tr->full_name }}</option>
                                 @endforeach
-                            </select>
-                        </div>
-
-                        <div class="w-28">
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Source</label>
-                            <select name="source" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
-                                <option value="all">All</option>
-                                <option value="manual">Manual</option>
-                                <option value="qr">QR / App</option>
                             </select>
                         </div>
 
@@ -864,14 +1152,14 @@
                         </div>
 
                         <div class="pt-4">
-                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition-all">
-                                Apply
+                            <button type="submit" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow transition-all cursor-pointer">
+                                Apply Filter
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Session Log Table -->
+                <!-- Session Log Table in Amber & Navy Theme -->
                 <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs">
@@ -880,12 +1168,10 @@
                                     <th class="py-2.5 px-3">Date / Time</th>
                                     <th class="py-2.5 px-3">Member</th>
                                     <th class="py-2.5 px-3">Trainer</th>
-                                    <th class="py-2.5 px-3">Package</th>
-                                    <th class="py-2.5 px-3">Remaining</th>
-                                    <th class="py-2.5 px-3">Source</th>
-                                    <th class="py-2.5 px-3">Commission</th>
-                                    <th class="py-2.5 px-3">Note</th>
-                                    <th class="py-2.5 px-3 text-right">Logged By</th>
+                                    <th class="py-2.5 px-3">Package &amp; Balance</th>
+                                    <th class="py-2.5 px-3">Status</th>
+                                    <th class="py-2.5 px-3">Audit Details</th>
+                                    <th class="py-2.5 px-3 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium text-slate-700 dark:text-slate-300">
@@ -894,61 +1180,124 @@
                                         <!-- DATE / TIME -->
                                         <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
                                             <div>{{ $sess->session_date->format('M d, Y') }}</div>
-                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($sess->start_time)->format('g:i A') }}</div>
+                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                {{ \Carbon\Carbon::parse($sess->start_time)->format('g:i A') }} &bull; {{ $sess->duration_minutes }}m
+                                            </div>
                                         </td>
 
                                         <!-- MEMBER -->
                                         <td class="py-2.5 px-3">
-                                            <div class="font-bold text-slate-900 dark:text-white">{{ $sess->member?->full_name }}</div>
-                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">
-                                                {{ $sess->member?->member_code ? $sess->member->member_code . ' - ' : '' }}{{ $sess->member?->phone }}
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold text-[10px] flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30 shrink-0">
+                                                    {{ substr($sess->member?->first_name ?? 'M', 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <div class="font-bold text-slate-900 dark:text-white">{{ $sess->member?->full_name }}</div>
+                                                    <div class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                        {{ $sess->member?->phone }}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
 
                                         <!-- TRAINER -->
-                                        <td class="py-2.5 px-3 text-slate-800 dark:text-slate-200">
+                                        <td class="py-2.5 px-3 text-slate-800 dark:text-slate-200 font-medium">
                                             {{ $sess->trainer?->full_name ?? 'Unassigned' }}
                                         </td>
 
-                                        <!-- PACKAGE -->
+                                        <!-- PACKAGE & BALANCE -->
                                         <td class="py-2.5 px-3">
-                                            <span class="text-indigo-600 dark:text-indigo-400 font-semibold">{{ $sess->memberPtPackage?->package_name ?? '1 Month' }}</span>
+                                            <div class="font-bold text-slate-900 dark:text-white">{{ $sess->memberPtPackage?->package_name ?? 'PT Package' }}</div>
+                                            <div class="text-[10px] text-slate-500 dark:text-slate-400">
+                                                @if($sess->memberPtPackage)
+                                                    <span>{{ $sess->memberPtPackage->remaining_sessions }} left / {{ $sess->memberPtPackage->total_sessions }}</span>
+                                                @else
+                                                    <span>-</span>
+                                                @endif
+                                            </div>
                                         </td>
 
-                                        <!-- REMAINING -->
-                                        <td class="py-2.5 px-3 text-slate-800 dark:text-slate-300 font-bold">
-                                            @if($sess->memberPtPackage)
-                                                {{ $sess->memberPtPackage->remaining_sessions }} / {{ $sess->memberPtPackage->total_sessions }}
+                                        <!-- STATUS BADGE -->
+                                        <td class="py-2.5 px-3">
+                                            @if($sess->status === 'PENDING')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/30">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                                    <span>Pending Member QR</span>
+                                                </span>
+                                            @elseif(in_array($sess->status, ['CONFIRMED', 'COMPLETED']))
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                                    <span>✓</span>
+                                                    <span>Confirmed</span>
+                                                </span>
+                                            @elseif($sess->status === 'ISSUE_REPORTED')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30" title="{{ $sess->issue_notes }}">
+                                                    <span>⚠️</span>
+                                                    <span>Issue Reported</span>
+                                                </span>
+                                            @elseif($sess->status === 'SCHEDULED')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
+                                                    Scheduled
+                                                </span>
+                                            @elseif($sess->status === 'CANCELLED')
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-500/15 text-slate-500 border border-slate-500/30">
+                                                    Cancelled
+                                                </span>
                                             @else
-                                                -
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                    {{ $sess->status }}
+                                                </span>
                                             @endif
                                         </td>
 
-                                        <!-- SOURCE -->
-                                        <td class="py-2.5 px-3">
-                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 dark:bg-slate-950 text-indigo-700 dark:text-indigo-300 border border-slate-200 dark:border-slate-800">manual</span>
-                                        </td>
-
-                                        <!-- COMMISSION -->
-                                        <td class="py-2.5 px-3 text-slate-700 dark:text-slate-300">
-                                            @if($sess->memberPtPackage && $sess->memberPtPackage->ptPlan?->trainer_commission_percent)
-                                                @php
-                                                    $commPerSess = ($sess->memberPtPackage->final_amount * ($sess->memberPtPackage->ptPlan->trainer_commission_percent / 100)) / max(1, $sess->memberPtPackage->total_sessions);
-                                                @endphp
-                                                <span class="text-amber-600 dark:text-amber-400 font-bold">{{ $currency }}{{ number_format($commPerSess, 2) }}</span>
+                                        <!-- AUDIT DETAILS -->
+                                        <td class="py-2.5 px-3 text-[11px] text-slate-600 dark:text-slate-400">
+                                            @if($sess->status === 'PENDING')
+                                                <div>Logged by <strong class="text-slate-800 dark:text-slate-200">{{ $sess->loggedByUser?->name ?? 'Staff' }}</strong></div>
+                                                <div class="text-[10px] text-slate-500">{{ $sess->created_at?->diffForHumans() }}</div>
+                                            @elseif(in_array($sess->status, ['CONFIRMED', 'COMPLETED']))
+                                                <div>Confirmed at <strong class="text-emerald-600 dark:text-emerald-400">{{ $sess->confirmed_at?->format('h:i A, d M') ?? $sess->completed_at?->format('h:i A, d M') }}</strong></div>
+                                                <div class="text-[10px] text-slate-500">Logged by {{ $sess->loggedByUser?->name ?? 'Staff' }}</div>
+                                            @elseif($sess->status === 'ISSUE_REPORTED')
+                                                <div class="text-rose-500 dark:text-rose-400 font-semibold line-clamp-1" title="{{ $sess->issue_notes }}">
+                                                    &ldquo;{{ $sess->issue_notes }}&rdquo;
+                                                </div>
+                                                <div class="text-[10px] text-slate-500">Reported {{ $sess->issue_reported_at?->diffForHumans() }}</div>
                                             @else
-                                                <span class="text-slate-400 dark:text-slate-500">-</span>
+                                                <div>Logged by {{ $sess->loggedByUser?->name ?? 'Staff' }}</div>
                                             @endif
                                         </td>
 
-                                        <!-- NOTE -->
-                                        <td class="py-2.5 px-3 text-slate-500 dark:text-slate-400">
-                                            {{ strtolower($sess->status) }}
-                                        </td>
+                                        <!-- ACTIONS -->
+                                        <td class="py-2.5 px-3 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                @if($sess->status === 'PENDING')
+                                                    <button type="button" 
+                                                            @click="showExistingQr({{ $sess->id }}, '{{ $sess->confirmation_token }}', '{{ route('pt-session.confirm', ['token' => $sess->confirmation_token]) }}', '{{ addslashes($sess->member?->full_name ?? '') }}', '{{ addslashes($sess->trainer?->full_name ?? '') }}', '{{ addslashes($sess->memberPtPackage?->package_name ?? '') }}', {{ $sess->duration_minutes }}, '{{ $sess->otp_code }}', 'PENDING')"
+                                                            title="Display QR on Screen for Member to Scan" 
+                                                            class="px-2 py-1 rounded bg-amber-500 text-slate-950 font-black text-[10px] shadow-sm hover:bg-amber-400 transition-all flex items-center gap-1 cursor-pointer">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                                        <span>Show QR</span>
+                                                    </button>
 
-                                        <!-- LOGGED BY -->
-                                        <td class="py-2.5 px-3 text-right text-slate-500 dark:text-slate-400">
-                                            {{ auth()->user()->name ?? 'Admin' }}
+                                                    <form action="{{ route('app.pt-sessions.cancel-pending', $sess->id) }}" method="POST" class="inline" onsubmit="return confirm('Cancel this pending session?');">
+                                                        @csrf
+                                                        <button type="submit" title="Cancel pending session" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </form>
+                                                @elseif($sess->status === 'SCHEDULED')
+                                                    <form action="{{ route('app.pt-sessions.complete', $sess->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" title="Mark Done" class="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-400 text-[10px] font-bold dark:border-emerald-500/30 transition-all">
+                                                            Complete
+                                                        </button>
+                                                    </form>
+                                                @elseif($sess->status === 'ISSUE_REPORTED')
+                                                    <button type="button" @click="alert('Member Issue Note:\n\n{{ addslashes($sess->issue_notes) }}')" class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold hover:bg-rose-500/20">
+                                                        View Note
+                                                    </button>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -966,7 +1315,7 @@
         </div>
 
         <!-- ==================== TAB 3: PT PLAN CATALOG ==================== -->
-        <div x-show="activeTab === 'plans'" class="space-y-4">
+        <div x-show="activeTab === 'plans'" x-cloak class="space-y-4">
             <!-- Header -->
             <div>
                 <h3 class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">PT Plan Catalog</h3>
@@ -1131,7 +1480,7 @@
         </div>
 
         <!-- ==================== TAB 4: COACHES & TRAINERS ==================== -->
-        <div x-show="activeTab === 'trainers'" class="space-y-4">
+        <div x-show="activeTab === 'trainers'" x-cloak class="space-y-4">
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -1917,6 +2266,203 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- ==================== LOG PT SESSION WITH QR MODAL ==================== -->
+        <div x-show="showLogQrModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-[#0c1220] border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl space-y-4" @click.away="showLogQrModal = false; stopQrPolling()">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center border border-amber-500/30">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white" x-text="qrStep === 'form' ? 'Log PT Session with QR' : 'Member QR Confirmation'">Log PT Session</h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Simple 3-step verification: Log &rarr; Member scans QR &rarr; 1 session deducted</p>
+                        </div>
+                    </div>
+                    <button @click="showLogQrModal = false; stopQrPolling()" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Error Alert in Modal -->
+                <template x-if="qrErrorMessage">
+                    <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span x-text="qrErrorMessage"></span>
+                    </div>
+                </template>
+
+                <!-- STEP 1: LOG DETAILS FORM -->
+                <div x-show="qrStep === 'form'" class="space-y-4">
+                    <!-- Member Select -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Select Member <span class="text-rose-500">*</span>
+                        </label>
+                        <select x-model="qrForm.member_id" @change="onQrMemberChange()" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none">
+                            <option value="">-- Choose Member with PT Package --</option>
+                            @foreach($members as $m)
+                                @php
+                                    $pkgs = $activeMemberPackages->where('member_id', $m->id)->filter(fn($p) => $p->remaining_sessions > 0);
+                                @endphp
+                                @if($pkgs->isNotEmpty())
+                                    <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone }}) &bull; {{ $pkgs->first()->package_name }} ({{ $pkgs->first()->remaining_sessions }} left)</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- PT Package Select -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Active PT Package <span class="text-rose-500">*</span>
+                        </label>
+                        <select x-model="qrForm.member_pt_package_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none">
+                            <option value="">-- Select Active Package --</option>
+                            @foreach($activeMemberPackages as $pkg)
+                                @if($pkg->remaining_sessions > 0)
+                                    <option value="{{ $pkg->id }}" x-show="!qrForm.member_id || qrForm.member_id == '{{ $pkg->member_id }}'">
+                                        {{ $pkg->package_name }} &bull; {{ $pkg->member?->full_name }} ({{ $pkg->remaining_sessions }} / {{ $pkg->total_sessions }} sessions left)
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Trainer Select -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Trainer Conducting Session
+                        </label>
+                        <select x-model="qrForm.trainer_id" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none">
+                            <option value="">-- Auto-detect / Assigned Trainer --</option>
+                            @foreach($trainers as $tr)
+                                <option value="{{ $tr->id }}">{{ $tr->full_name }} ({{ $tr->specialization ?? 'Coach' }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Duration Quick Select Pills -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Session Duration
+                        </label>
+                        <div class="grid grid-cols-4 gap-2 text-xs">
+                            <button type="button" @click="qrForm.duration_minutes = 30" :class="qrForm.duration_minutes == 30 ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" class="py-2 rounded-xl font-bold transition-all border border-slate-200 dark:border-slate-700 cursor-pointer">30 min</button>
+                            <button type="button" @click="qrForm.duration_minutes = 45" :class="qrForm.duration_minutes == 45 ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" class="py-2 rounded-xl font-bold transition-all border border-slate-200 dark:border-slate-700 cursor-pointer">45 min</button>
+                            <button type="button" @click="qrForm.duration_minutes = 60" :class="qrForm.duration_minutes == 60 ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" class="py-2 rounded-xl font-bold transition-all border border-slate-200 dark:border-slate-700 cursor-pointer">60 min</button>
+                            <button type="button" @click="qrForm.duration_minutes = 90" :class="qrForm.duration_minutes == 90 ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" class="py-2 rounded-xl font-bold transition-all border border-slate-200 dark:border-slate-700 cursor-pointer">90 min</button>
+                        </div>
+                    </div>
+
+                    <!-- Workout Focus Area -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                            Workout Focus
+                        </label>
+                        <input type="text" x-model="qrForm.focus_area" placeholder="e.g. Chest & Triceps, Hypertrophy, Cardio" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" @click="showLogQrModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold transition-all cursor-pointer">Cancel</button>
+                        <button type="button" @click="submitLogWithQr()" :disabled="qrSubmitting || !qrForm.member_id || !qrForm.member_pt_package_id" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50">
+                            <template x-if="!qrSubmitting">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            </template>
+                            <template x-if="qrSubmitting">
+                                <svg class="w-4 h-4 animate-spin text-slate-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                            </template>
+                            <span>Save &amp; Show QR</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: LARGE QR CODE SCREEN WITH LIVE STATUS -->
+                <div x-show="qrStep === 'qr'" class="space-y-4 text-center">
+                    
+                    <!-- Member Header -->
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-500">Ask Member to Scan with Phone Camera</span>
+                        <h2 class="text-xl font-black text-slate-900 dark:text-white" x-text="qrSession.memberName"></h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            <span x-text="qrSession.duration + ' mins'"></span> &bull; 
+                            <span class="text-amber-500 font-semibold" x-text="qrSession.packageName"></span> &bull; 
+                            Trainer: <span class="font-medium text-slate-700 dark:text-slate-300" x-text="qrSession.trainerName"></span>
+                        </p>
+                    </div>
+
+                    <!-- IF CONFIRMED: VIBRANT SUCCESS SCREEN -->
+                    <template x-if="qrSession.status === 'CONFIRMED' || qrSession.status === 'COMPLETED'">
+                        <div class="p-6 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/50 space-y-3">
+                            <div class="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto text-3xl font-black shadow-lg shadow-emerald-500/30 animate-bounce">
+                                ✓
+                            </div>
+                            <h3 class="text-lg font-black text-emerald-500 dark:text-emerald-400">Session Confirmed!</h3>
+                            <p class="text-xs text-slate-600 dark:text-slate-300">
+                                Member confirmed on their phone. <strong>1 session deducted</strong> successfully from package balance.
+                            </p>
+                            <button type="button" @click="showLogQrModal = false; window.location.reload()" class="mt-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition-all cursor-pointer">
+                                Done &amp; Refresh List
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- IF ISSUE REPORTED -->
+                    <template x-if="qrSession.status === 'ISSUE_REPORTED'">
+                        <div class="p-6 rounded-2xl bg-rose-500/15 border border-rose-500/40 space-y-2">
+                            <div class="text-2xl">⚠️</div>
+                            <h3 class="text-base font-black text-rose-500">Member Reported an Issue</h3>
+                            <p class="text-xs text-slate-400">The session has been flagged for manager review. Package balance was not deducted.</p>
+                            <button type="button" @click="showLogQrModal = false; window.location.reload()" class="mt-2 px-4 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold cursor-pointer">Close</button>
+                        </div>
+                    </template>
+
+                    <!-- IF PENDING: SHOW LARGE QR CODE -->
+                    <template x-if="qrSession.status === 'PENDING'">
+                        <div class="space-y-4">
+                            <!-- QR Code Box -->
+                            <div class="relative inline-block mx-auto p-4 rounded-3xl bg-white shadow-2xl border-4 border-amber-500/40">
+                                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=' + encodeURIComponent(qrSession.confirmUrl)" 
+                                     alt="PT Confirmation QR Code" 
+                                     class="w-52 h-52 sm:w-60 sm:h-60 mx-auto object-contain">
+                                
+                                <div class="mt-2 pt-2 border-t border-slate-100 text-center">
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Session PIN</span>
+                                    <div class="text-lg font-mono font-black text-slate-900 tracking-widest mt-0.5" x-text="qrSession.otpCode"></div>
+                                </div>
+                            </div>
+
+                            <!-- Live Polling Pulse Status -->
+                            <div class="flex items-center justify-center gap-2 text-xs font-bold text-amber-500 dark:text-amber-400">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                                <span>Waiting for member to scan &amp; tap confirm...</span>
+                            </div>
+
+                            <!-- Actions Row -->
+                            <div class="flex items-center justify-center gap-2 pt-2">
+                                <button type="button" @click="refreshQr()" :disabled="qrSubmitting" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Refresh QR</span>
+                                </button>
+                                
+                                <button type="button" @click="copyQrLink()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                    <span>Copy Link</span>
+                                </button>
+
+                                <button type="button" @click="cancelQrSession()" class="px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all border border-rose-200 dark:border-rose-500/20 cursor-pointer">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 

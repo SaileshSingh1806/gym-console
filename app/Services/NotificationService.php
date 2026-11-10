@@ -167,7 +167,8 @@ class NotificationService
 
                 foreach ($todayBirthdays as $bMember) {
                     $cleanPhone = preg_replace('/[^0-9]/', '', (string) $bMember->phone);
-                    $wishText = urlencode("Happy Birthday {$bMember->first_name}! Wishing you strength, health, and a great fitness journey from the ARMOUR 24-7 GYM team! 🎂💪🎉");
+                    $gymSender = $tenant->name ?? 'Gym';
+                    $wishText = urlencode("Happy Birthday {$bMember->first_name}! Wishing you strength, health, and a great fitness journey from the {$gymSender} team! 🎂💪🎉");
                     $wishUrl = ! empty($cleanPhone) ? "https://wa.me/{$cleanPhone}?text={$wishText}" : route('app.members.show', $bMember->id);
 
                     $items[] = [

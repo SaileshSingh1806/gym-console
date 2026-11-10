@@ -87,6 +87,19 @@ class ReportService
                 'active_pt' => 0,
                 'expired_pt' => 0,
                 'exhausted_pt' => 0,
+                'pt_financials' => [
+                    'month_collected' => 0.0,
+                    'month_billed' => 0.0,
+                    'pending_dues' => 0.0,
+                    'total_trainer_commission' => 0.0,
+                    'total_gym_profit' => 0.0,
+                    'gym_share_percent' => 60.0,
+                    'trainer_share_percent' => 40.0,
+                    'total_sessions_conducted' => 0,
+                    'total_sessions_remaining' => 0,
+                    'trainers' => [],
+                    'active_packages_count' => 0,
+                ],
             ];
         }
 
@@ -415,6 +428,144 @@ class ReportService
             $trendAttendance[] = $dayAtt;
         }
 
+        // ----------------------------------------------------
+        // Monthly Personal Training (PT) Financial Overview
+        // ----------------------------------------------------
+        $selectedPtMonth = request('pt_month');
+        if ($selectedPtMonth && preg_match('/^\d{4}-\d{2}$/', $selectedPtMonth)) {
+            $monthCarbon = \Carbon\Carbon::createFromFormat('Y-m', $selectedPtMonth)->startOfMonth();
+            $monthStart = $monthCarbon->copy()->startOfMonth()->toDateString();
+            $monthEnd = $monthCarbon->copy()->endOfMonth()->toDateString();
+            $isCurrentMonth = $monthCarbon->isCurrentMonth();
+        } else {
+            $monthCarbon = now()->startOfMonth();
+            $monthStart = $monthCarbon->copy()->startOfMonth()->toDateString();
+            $monthEnd = $monthCarbon->copy()->endOfMonth()->toDateString();
+            $isCurrentMonth = true;
+        }
+
+        $availableMonths = [];
+        for ($i = 0; $i < 12; $i++) {
+            $c = now()->subMonths($i);
+            $key = $c->format('Y-m');
+            $label = $i === 0 ? 'This Month (' . $c->format('M Y') . ')' : ($i === 1 ? 'Last Month (' . $c->format('M Y') . ')' : $c->format('M Y'));
+            $availableMonths[$key] = $label;
+        }
+
+        $monthPtPaymentsQuery = (clone $paymentsQuery)
+            ->whereBetween('payment_date', [$monthStart, $monthEnd])
+            ->where('notes', 'like', '%PT Package%');
+
+        $monthPtCollectedFromPayments = (float) (clone $monthPtPaymentsQuery)->sum('amount');
+
+        $allActiveOrRecentPtQuery = (clone $ptPackagesQuery)
+            ->with(['trainer', 'ptPlan', 'member']);
+
+        if ($isCurrentMonth) {
+            $allActiveOrRecentPtQuery->where(function ($q) use ($monthStart, $monthEnd) {
+                $q->whereBetween('created_at', [$monthStart . ' 00:00:00', $monthEnd . ' 23:59:59'])
+                  ->orWhere('status', 'ACTIVE');
+            });
+        } else {
+            $allActiveOrRecentPtQuery->where(function ($q) use ($monthStart, $monthEnd) {
+                $q->whereBetween('created_at', [$monthStart . ' 00:00:00', $monthEnd . ' 23:59:59'])
+                  ->orWhereBetween('start_date', [$monthStart, $monthEnd]);
+            });
+        }
+
+        $allActiveOrRecentPt = $allActiveOrRecentPtQuery->get();
+
+        $selectedMonthPackages = $allActiveOrRecentPt->filter(function ($pkg) use ($monthStart, $monthEnd, $isCurrentMonth) {
+            $created = $pkg->created_at ? $pkg->created_at->toDateString() : null;
+            if ($created && $created >= $monthStart && $created <= $monthEnd) {
+                return true;
+            }
+            if ($pkg->start_date && $pkg->start_date >= $monthStart && $pkg->start_date <= $monthEnd) {
+                return true;
+            }
+            return $isCurrentMonth && $pkg->status === 'ACTIVE';
+        });
+
+        $monthPtCollectedFromPackages = (float) $selectedMonthPackages->sum('paid_amount');
+        $monthPtTotalCollected = max($monthPtCollectedFromPackages, $monthPtCollectedFromPayments);
+        $monthPtTotalBilled = (float) $selectedMonthPackages->sum('final_amount');
+        $monthPtPendingDues = max(0, $monthPtTotalBilled - $monthPtTotalCollected);
+
+        $trainersPtBreakdown = [];
+        $totalTrainerCommission = 0.0;
+        $totalGymPtProfit = 0.0;
+        $totalSessionsConducted = 0;
+        $totalSessionsRemaining = 0;
+
+        foreach ($selectedMonthPackages as $pkg) {
+            $trainer = $pkg->trainer;
+            $trainerId = $trainer ? $trainer->id : 0;
+            $trainerName = $trainer ? $trainer->full_name : 'Unassigned Trainer';
+            $trainerSpecialization = $trainer?->specialization ?? 'Personal Trainer';
+
+            $commPercent = (float) ($pkg->ptPlan?->trainer_commission_percent ?? 40.0);
+            $paidAmt = (float) $pkg->paid_amount;
+
+            $trainerCommission = round(($paidAmt * $commPercent) / 100, 2);
+            $gymProfit = round($paidAmt - $trainerCommission, 2);
+
+            $sessionsDone = (int) $pkg->used_sessions;
+            $sessionsLeft = max(0, (int) ($pkg->total_sessions - $pkg->used_sessions));
+
+            $totalTrainerCommission += $trainerCommission;
+            $totalGymPtProfit += $gymProfit;
+            $totalSessionsConducted += $sessionsDone;
+            $totalSessionsRemaining += $sessionsLeft;
+
+            if (!isset($trainersPtBreakdown[$trainerId])) {
+                $trainersPtBreakdown[$trainerId] = [
+                    'id' => $trainerId,
+                    'name' => $trainerName,
+                    'specialization' => $trainerSpecialization,
+                    'photo_path' => $trainer?->photo_path,
+                    'active_clients' => 0,
+                    'total_collected' => 0.0,
+                    'trainer_commission' => 0.0,
+                    'gym_profit' => 0.0,
+                    'commission_percent' => $commPercent,
+                    'sessions_conducted' => 0,
+                    'sessions_remaining' => 0,
+                ];
+            }
+
+            if ($pkg->status === 'ACTIVE') {
+                $trainersPtBreakdown[$trainerId]['active_clients']++;
+            }
+            $trainersPtBreakdown[$trainerId]['total_collected'] += $paidAmt;
+            $trainersPtBreakdown[$trainerId]['trainer_commission'] += $trainerCommission;
+            $trainersPtBreakdown[$trainerId]['gym_profit'] += $gymProfit;
+            $trainersPtBreakdown[$trainerId]['sessions_conducted'] += $sessionsDone;
+            $trainersPtBreakdown[$trainerId]['sessions_remaining'] += $sessionsLeft;
+        }
+
+        uasort($trainersPtBreakdown, fn($a, $b) => $b['total_collected'] <=> $a['total_collected']);
+
+        $gymSharePercent = $monthPtTotalCollected > 0 ? round(($totalGymPtProfit / max(1, $monthPtTotalCollected)) * 100, 1) : 60.0;
+        $trainerSharePercent = round(100.0 - $gymSharePercent, 1);
+
+        $ptFinancials = [
+            'month_collected' => $monthPtTotalCollected,
+            'month_billed' => $monthPtTotalBilled,
+            'pending_dues' => $monthPtPendingDues,
+            'total_trainer_commission' => $totalTrainerCommission,
+            'total_gym_profit' => $totalGymPtProfit,
+            'gym_share_percent' => $gymSharePercent,
+            'trainer_share_percent' => $trainerSharePercent,
+            'total_sessions_conducted' => $totalSessionsConducted,
+            'total_sessions_remaining' => $totalSessionsRemaining,
+            'trainers' => array_values($trainersPtBreakdown),
+            'active_packages_count' => $selectedMonthPackages->count(),
+            'selected_month' => $monthCarbon->format('Y-m'),
+            'selected_month_label' => $monthCarbon->format('M Y'),
+            'available_months' => $availableMonths,
+            'is_current_month' => $isCurrentMonth,
+        ];
+
         return [
             'total_members' => $totalMembers,
             'active_members' => $activeMembers,
@@ -428,6 +579,7 @@ class ReportService
             'active_pt' => $activePt,
             'expired_pt' => $expiredPt,
             'exhausted_pt' => $exhaustedPt,
+            'pt_financials' => $ptFinancials,
             'active_leads' => $activeLeads,
             'today_enquiries' => $todayEnquiries,
             'today_followups' => $todayFollowups,

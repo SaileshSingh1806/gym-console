@@ -103,6 +103,11 @@ class User extends Authenticatable
         return $this->role === 'member';
     }
 
+    public function isTrainer(): bool
+    {
+        return $this->role === 'trainer' || $this->trainerProfile()->exists();
+    }
+
     public function isManager(): bool
     {
         return in_array($this->role, ['gym_owner', 'gym_manager']);

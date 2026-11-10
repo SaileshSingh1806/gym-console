@@ -19,6 +19,7 @@ class PermissionSeeder extends Seeder
                 'permissions' => [
                     ['name' => 'dashboard.view', 'display_name' => 'View Dashboard', 'description' => 'Access the main gym operations dashboard'],
                     ['name' => 'dashboard.financials', 'display_name' => 'View Financial & Revenue Stats', 'description' => 'See collections, billed amounts, dues balance & financial comparison charts on dashboard'],
+                    ['name' => 'dashboard.pt_financials', 'display_name' => 'View PT Financials & Payouts', 'description' => 'See PT collections, trainer commissions & gym net profit on dashboard'],
                     ['name' => 'dashboard.member_stats', 'display_name' => 'View Member Stats & Alerts', 'description' => 'See active, expired, churn risk, expiring soon & dormant counts'],
                     ['name' => 'dashboard.attendance_stats', 'display_name' => 'View Attendance & Occupancy', 'description' => 'See live check-ins count, today attendance & peak time charts'],
                 ],
@@ -181,6 +182,7 @@ class PermissionSeeder extends Seeder
             // Dashboard
             'dashboard.view' => null,
             'dashboard.financials' => 'reports_finance',
+            'dashboard.pt_financials' => 'personal_training',
             'dashboard.member_stats' => 'members_management',
             'dashboard.attendance_stats' => 'attendance_checkin',
 
@@ -297,7 +299,7 @@ class PermissionSeeder extends Seeder
     {
         return [
             'gym_manager' => [
-                'dashboard.view', 'dashboard.financials', 'dashboard.member_stats', 'dashboard.attendance_stats',
+                'dashboard.view', 'dashboard.financials', 'dashboard.pt_financials', 'dashboard.member_stats', 'dashboard.attendance_stats',
                 'members.view', 'members.create', 'members.edit', 'members.freeze', 'members.measurements',
                 'memberships.view', 'memberships.create', 'plans.view', 'plans.create', 'plans.edit',
                 'payments.view', 'payments.record', 'payments.invoice_view',
@@ -329,16 +331,15 @@ class PermissionSeeder extends Seeder
                 'inventory.view',
             ],
             'trainer' => [
-                'dashboard.view', 'dashboard.member_stats', 'dashboard.attendance_stats',
-                'members.view', 'members.measurements',
-                'classes.view', 'trainers.view',
                 'pt.view', 'pt.sessions_manage',
                 'workouts.view', 'workouts.create', 'workouts.edit',
                 'diets.view', 'diets.create', 'diets.edit',
+                'classes.view', 'trainers.view',
+                'members.measurements',
                 'attendance.view',
             ],
             'accountant' => [
-                'dashboard.view', 'dashboard.financials',
+                'dashboard.view', 'dashboard.financials', 'dashboard.pt_financials',
                 'members.view',
                 'memberships.view', 'plans.view',
                 'payments.view', 'payments.record', 'payments.refund', 'payments.invoice_view',

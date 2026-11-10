@@ -1249,11 +1249,11 @@
                 @php
                     $tenantSettings = $tenant->settings ?? [];
                     $invSettings = $tenantSettings['invoice'] ?? [];
-                    $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant->name ?? 'ARMOUR 24-7 GYM');
-                    $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($tenant->mainBranch?->address ?? ($tenant->address ?? 'C-601/602 Shalin Square, Above Croma Store Hathijan Circle Ahmedabad - 382445')));
-                    $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenant->phone ?? '+91 83065 30583');
-                    $gymEmail = !empty($invSettings['email']) ? $invSettings['email'] : ($tenant->email ?? 'management@armour247gym.com');
-                    $gymWeb = !empty($invSettings['website']) ? $invSettings['website'] : 'www.armour247gym.com';
+                    $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant->name ?? 'Gym');
+                    $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($tenant->mainBranch?->address ?? ($tenant->address ?? '')));
+                    $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenant->phone ?? '');
+                    $gymEmail = !empty($invSettings['email']) ? $invSettings['email'] : ($tenant->email ?? '');
+                    $gymWeb = !empty($invSettings['website']) ? $invSettings['website'] : ($tenant->website ?? '');
                     $invoiceTitle = !empty($invSettings['title']) ? $invSettings['title'] : 'TAX INVOICE';
                     $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
                     $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
@@ -1279,7 +1279,7 @@
                     $helpline = !empty($invSettings['helpline']) ? $invSettings['helpline'] : $gymPhone;
                     $footerEmail = !empty($invSettings['footer_email']) ? $invSettings['footer_email'] : $gymEmail;
                     $footerWeb = !empty($invSettings['footer_web']) ? $invSettings['footer_web'] : $gymWeb;
-                    $tagline = !empty(trim($invSettings['tagline'] ?? '')) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
+                    $tagline = !empty(trim($invSettings['tagline'] ?? '')) ? $invSettings['tagline'] : '';
                     $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
                     $sealUrl = $invSettings['seal_url'] ?? null;
                     $signatureUrl = $invSettings['signature_url'] ?? null;
@@ -1540,9 +1540,11 @@
                             </div>
 
                             <!-- 7. Tagline -->
+                            @if(!empty(trim($tagline)))
                             <div class="pt-2 sm:pt-2.5 border-t border-slate-200 text-center">
-                                <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ !empty(trim($tagline)) ? $tagline : 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU' }}</p>
+                                <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
                             </div>
+                            @endif
                         </div>
 
                     </div>

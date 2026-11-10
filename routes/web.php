@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\AppController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\PublicController;
+use App\Http\Controllers\Web\TrainerController;
 use App\Http\Controllers\Web\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,12 +28,18 @@ Route::get('/receipt/{id}/{hash}', [AppController::class, 'showPublicInvoice'])-
 Route::get('/gym/{slug}/checkin', [PublicController::class, 'gymCheckin'])->name('gym.checkin');
 Route::post('/gym/{slug}/checkin', [PublicController::class, 'processGymCheckin'])->name('gym.checkin.process');
 
+// PT Session Member QR Confirmation (Scan with Phone Camera)
+Route::get('/pt-session/confirm/{token}', [AppController::class, 'showPtSessionConfirm'])->name('pt-session.confirm');
+Route::post('/pt-session/confirm/{token}', [AppController::class, 'submitPtSessionConfirm'])->name('pt-session.confirm.submit');
+Route::post('/pt-session/confirm/{token}/issue', [AppController::class, 'submitPtSessionIssue'])->name('pt-session.confirm.issue');
+
 // Authentication & Onboarding Routes
 Route::get('/portal/setup/{token}', [AuthController::class, 'showMemberPasswordSetup'])->name('portal.setup');
 Route::post('/portal/setup/{token}', [AuthController::class, 'saveMemberPasswordSetup'])->name('portal.setup.save');
 Route::post('/portal/request-link', [AuthController::class, 'requestMemberSetupLink'])->name('portal.request-link');
 
 Route::redirect('/member/login', '/login');
+Route::redirect('/trainer', '/app/trainer');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -58,6 +65,18 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::get('/dashboard', [AppController::class, 'dashboard'])->name('app.dashboard');
     Route::get('/portal', [AppController::class, 'memberPortal'])->name('app.portal');
     Route::post('/portal/scan-checkin', [AppController::class, 'portalScanCheckin'])->name('app.portal.scan-checkin');
+    Route::get('/portal/pending-pt-sessions', [AppController::class, 'portalPendingPtSessions'])->name('app.portal.pending-pt-sessions');
+    Route::post('/portal/confirm-pt-session', [AppController::class, 'portalConfirmPtSession'])->name('app.portal.confirm-pt-session');
+
+    // Trainer Workspace (Mobile-First)
+    Route::get('/trainer', [TrainerController::class, 'workspace'])->name('trainer.workspace');
+    Route::post('/trainer/profile/update-password', [TrainerController::class, 'updatePassword'])->name('trainer.profile.update-password');
+    Route::post('/trainer/members/{id}/measurements', [TrainerController::class, 'storeMeasurement'])->name('trainer.members.store-measurement')->whereNumber('id');
+    Route::delete('/trainer/members/{id}/measurements/{measurementId}', [TrainerController::class, 'deleteMeasurement'])->name('trainer.members.delete-measurement')->whereNumber('id');
+    Route::post('/trainer/members/{id}/assign-workout', [TrainerController::class, 'assignWorkout'])->name('trainer.members.assign-workout')->whereNumber('id');
+    Route::post('/trainer/members/{id}/assign-diet', [TrainerController::class, 'assignDiet'])->name('trainer.members.assign-diet')->whereNumber('id');
+    Route::delete('/trainer/members/{id}/workout-plan', [TrainerController::class, 'removeWorkoutPlan'])->name('trainer.members.remove-workout')->whereNumber('id');
+    Route::delete('/trainer/members/{id}/diet-plan', [TrainerController::class, 'removeDietPlan'])->name('trainer.members.remove-diet')->whereNumber('id');
 
     // 1. Members Management
     Route::middleware(['feature:members_management'])->group(function () {
@@ -122,6 +141,10 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/pt-packages/{id}/log-session', [AppController::class, 'logPtSession'])->name('app.pt-packages.log-session')->middleware('permission:pt.sessions_manage');
         Route::post('/pt-packages/{id}/cancel', [AppController::class, 'cancelPtPackage'])->name('app.pt-packages.cancel')->middleware('permission:pt.delete');
         Route::post('/pt-sessions', [AppController::class, 'storePtSession'])->name('app.pt-sessions.store')->middleware('permission:pt.sessions_manage');
+        Route::post('/pt-sessions/log-with-qr', [AppController::class, 'logPtSessionWithQr'])->name('app.pt-sessions.log-with-qr')->middleware('permission:pt.sessions_manage');
+        Route::get('/pt-sessions/{id}/qr-status', [AppController::class, 'getPtSessionQrStatus'])->name('app.pt-sessions.qr-status')->whereNumber('id')->middleware('permission:pt.sessions_manage');
+        Route::post('/pt-sessions/{id}/refresh-qr', [AppController::class, 'refreshPtSessionQr'])->name('app.pt-sessions.refresh-qr')->whereNumber('id')->middleware('permission:pt.sessions_manage');
+        Route::post('/pt-sessions/{id}/cancel-pending', [AppController::class, 'cancelPendingPtSession'])->name('app.pt-sessions.cancel-pending')->whereNumber('id')->middleware('permission:pt.sessions_manage');
         Route::post('/pt-sessions/{id}/complete', [AppController::class, 'completePtSession'])->name('app.pt-sessions.complete')->middleware('permission:pt.sessions_manage');
         Route::post('/pt-sessions/{id}/status', [AppController::class, 'updatePtSessionStatus'])->name('app.pt-sessions.status')->middleware('permission:pt.sessions_manage');
     });
@@ -327,12 +350,18 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::post('/subscription/verify-payment', [\App\Http\Controllers\SubscriptionPaymentController::class, 'verifyPayment'])->name('app.subscription.verify-payment');
     Route::post('/coupon/validate', [AppController::class, 'validateCoupon'])->name('app.coupon.validate');
 
-    // Help & Support Tickets
+    // Help & Support Tickets (Platform Support)
     Route::get('/support', [AppController::class, 'supportTickets'])->name('app.support.index');
     Route::post('/support', [AppController::class, 'storeSupportTicket'])->name('app.support.store');
     Route::get('/support/{id}', [AppController::class, 'showSupportTicket'])->name('app.support.show')->whereNumber('id');
     Route::post('/support/{id}/reply', [AppController::class, 'replySupportTicket'])->name('app.support.reply')->whereNumber('id');
     Route::post('/support/{id}/close', [AppController::class, 'closeSupportTicket'])->name('app.support.close')->whereNumber('id');
+
+    // Gym Member Feedback & Suggestions Desk (Member to Gym Owner)
+    Route::get('/feedback', [AppController::class, 'memberFeedback'])->name('app.feedback.index');
+    Route::post('/feedback', [AppController::class, 'storeMemberFeedback'])->name('app.feedback.store');
+    Route::post('/feedback/{id}/status', [AppController::class, 'updateMemberFeedbackStatus'])->name('app.feedback.status')->whereNumber('id');
+    Route::delete('/feedback/{id}', [AppController::class, 'deleteMemberFeedback'])->name('app.feedback.delete')->whereNumber('id');
 
     // In-App Notification Center
     Route::get('/notifications/feed', [AppController::class, 'notificationFeed'])->name('app.notifications.feed');

@@ -69,9 +69,22 @@
     }" class="space-y-6 w-full">
 
         <!-- ==================== TOP HORIZONTAL NAVIGATION TABS ==================== -->
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-1 border-b border-slate-200 dark:border-slate-800 text-xs font-bold">
+        <style>
+            .no-scrollbar::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none !important;
+                scrollbar-width: none !important;
+            }
+        </style>
+        <div @wheel.prevent="$el.scrollLeft += $event.deltaY * 1.5"
+             class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap pb-1 border-b border-slate-200 dark:border-slate-800 text-xs font-bold"
+             style="scrollbar-width: none !important; -ms-overflow-style: none !important;">
             <!-- 1. Business Info -->
-            <button type="button" @click="tab = 'business_info'"
+            <button type="button" @click="tab = 'business_info'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'business_info' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -79,7 +92,7 @@
             </button>
 
             <!-- 2. Operating Hours -->
-            <button type="button" @click="tab = 'operating_hours'"
+            <button type="button" @click="tab = 'operating_hours'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'operating_hours' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -87,7 +100,7 @@
             </button>
 
             <!-- 3. General & GST -->
-            <button type="button" @click="tab = 'general_gst'"
+            <button type="button" @click="tab = 'general_gst'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'general_gst' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -95,7 +108,7 @@
             </button>
 
             <!-- 4. Member App -->
-            <button type="button" @click="tab = 'member_app'"
+            <button type="button" @click="tab = 'member_app'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'member_app' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
@@ -103,7 +116,7 @@
             </button>
 
             <!-- 5. Member ID -->
-            <button type="button" @click="tab = 'member_id'"
+            <button type="button" @click="tab = 'member_id'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'member_id' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
@@ -111,7 +124,7 @@
             </button>
 
             <!-- 6. Branches & Locations -->
-            <button type="button" @click="tab = 'branches'"
+            <button type="button" @click="tab = 'branches'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'branches' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -120,7 +133,7 @@
             </button>
 
             <!-- 7. Biometric & IoT Devices -->
-            <button type="button" @click="tab = 'devices'"
+            <button type="button" @click="tab = 'devices'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'devices' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
@@ -129,7 +142,7 @@
             </button>
 
             <!-- 8. Email & SMTP Settings -->
-            <button type="button" @click="tab = 'email_smtp'"
+            <button type="button" @click="tab = 'email_smtp'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'email_smtp' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -140,7 +153,7 @@
             </button>
 
             <!-- 9. Invoice & Receipt Template -->
-            <button type="button" @click="tab = 'invoice_settings'"
+            <button type="button" @click="tab = 'invoice_settings'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
                     :class="tab === 'invoice_settings' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25' : 'bg-white dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'"
                     class="px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -1192,9 +1205,12 @@
                         </div>
 
                         <div>
+                            @php
+                                $gymCodePrefix = '#' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $tenant->name) ?: 'INV', 0, 3)) . '-';
+                            @endphp
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Invoice No. Prefix</label>
-                            <input type="text" name="invoice_prefix" value="{{ old('invoice_prefix', $inv['prefix'] ?? '#ARM-') }}"
-                                   placeholder="e.g. #ARM- or #GYM-"
+                            <input type="text" name="invoice_prefix" value="{{ old('invoice_prefix', $inv['prefix'] ?? $gymCodePrefix) }}"
+                                   placeholder="e.g. {{ $gymCodePrefix }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none">
                         </div>
 
@@ -1210,14 +1226,14 @@
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Gym Display Name on Invoice</label>
                             <input type="text" name="invoice_gym_name" value="{{ old('invoice_gym_name', $inv['gym_name'] ?? $tenant->name) }}"
-                                   placeholder="e.g. ARMOUR 24-7 GYM"
+                                   placeholder="e.g. {{ $tenant->name }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold uppercase focus:border-indigo-500 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Website URL</label>
-                            <input type="text" name="invoice_website" value="{{ old('invoice_website', $inv['website'] ?? 'www.armour247gym.com') }}"
-                                   placeholder="e.g. www.armour247gym.com"
+                            <input type="text" name="invoice_website" value="{{ old('invoice_website', $inv['website'] ?? ($tenant->website ?? '')) }}"
+                                   placeholder="e.g. www.yourgym.com"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
                     </div>
@@ -1226,14 +1242,14 @@
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Phone / Helpline</label>
                             <input type="text" name="invoice_phone" value="{{ old('invoice_phone', $inv['phone'] ?? $tenant->phone) }}"
-                                   placeholder="e.g. +91 83065 30583"
+                                   placeholder="e.g. {{ $tenant->phone ?? '+91 98765 43210' }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Official Email Address</label>
                             <input type="email" name="invoice_email" value="{{ old('invoice_email', $inv['email'] ?? $tenant->email) }}"
-                                   placeholder="e.g. management@armour247gym.com"
+                                   placeholder="e.g. {{ $tenant->email ?? 'contact@yourgym.com' }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
                     </div>
@@ -1241,7 +1257,7 @@
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Full Detailed Address (Printed on Invoice Header)</label>
                         <textarea name="invoice_address" rows="2"
-                                  placeholder="e.g. 6th Floor, Shalin Square, Nr Hathijan Circle, Ahmedabad - 382445"
+                                  placeholder="Enter complete gym facility address to be printed on invoices..."
                                   class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">{{ old('invoice_address', $inv['address'] ?? $tenant->settings['address'] ?? $tenant->mainBranch?->address ?? $tenant->address) }}</textarea>
                     </div>
                 </div>
@@ -1289,7 +1305,7 @@
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Thank You Heading Text</label>
                             <input type="text" name="invoice_thank_you" value="{{ old('invoice_thank_you', $inv['thank_you'] ?? ('Thank you for training with ' . $tenant->name . '!')) }}"
-                                   placeholder="e.g. Thank you for training with Armour 24-7 Gym!"
+                                   placeholder="e.g. Thank you for training with {{ $tenant->name }}!"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-indigo-500 focus:outline-none">
                         </div>
 
@@ -1305,21 +1321,21 @@
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Helpline</label>
                             <input type="text" name="invoice_helpline" value="{{ old('invoice_helpline', $inv['helpline'] ?? $tenant->phone) }}"
-                                   placeholder="e.g. +91 83065 30583"
+                                   placeholder="e.g. {{ $tenant->phone ?? '+91 98765 43210' }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Email</label>
                             <input type="email" name="invoice_footer_email" value="{{ old('invoice_footer_email', $inv['footer_email'] ?? $tenant->email) }}"
-                                   placeholder="e.g. management@armour247gym.com"
+                                   placeholder="e.g. {{ $tenant->email ?? 'contact@yourgym.com' }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Footer Website</label>
-                            <input type="text" name="invoice_footer_web" value="{{ old('invoice_footer_web', $inv['footer_web'] ?? 'www.armour247gym.com') }}"
-                                   placeholder="e.g. www.armour247gym.com"
+                            <input type="text" name="invoice_footer_web" value="{{ old('invoice_footer_web', $inv['footer_web'] ?? ($tenant->website ?? '')) }}"
+                                   placeholder="e.g. www.yourgym.com"
                                    class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
                     </div>
@@ -1392,8 +1408,8 @@
                     <!-- Bottom Tagline Banner -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">Bottom Tagline Motto Banner</label>
-                        <input type="text" name="invoice_tagline" value="{{ old('invoice_tagline', $inv['tagline'] ?? 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU') }}"
-                               placeholder="e.g. BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU"
+                        <input type="text" name="invoice_tagline" value="{{ old('invoice_tagline', $inv['tagline'] ?? '') }}"
+                               placeholder="e.g. SWEAT TODAY, SHINE TOMORROW"
                                class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black tracking-wider uppercase focus:border-indigo-500 focus:outline-none">
                     </div>
                 </div>

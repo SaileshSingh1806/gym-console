@@ -20,6 +20,13 @@
         $remainingAmt = max(0, $finalAmt - $paidAmt);
 
         $measurementsList = $member->metadata['measurements'] ?? [];
+        if (is_array($measurementsList)) {
+            usort($measurementsList, function ($a, $b) {
+                return strcmp($b['date'] ?? '', $a['date'] ?? '');
+            });
+        } else {
+            $measurementsList = [];
+        }
         $latestMeasurement = !empty($measurementsList) ? $measurementsList[0] : null;
         $logoUrl = auth()->user()->tenant?->logo_url ?? ($platformSettings['logo_url'] ?? null);
     @endphp
@@ -220,13 +227,13 @@
         dietGuidelines: '',
         dietTrainerId: '{{ $assignedTrainer?->id ?? '' }}',
         dietMeals: [
-            { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450 },
-            { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650 },
-            { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300 },
-            { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500 }
+            { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450, protein_grams: 30, carbs_grams: 45, fat_grams: 15 },
+            { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650, protein_grams: 45, carbs_grams: 70, fat_grams: 18 },
+            { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300, protein_grams: 28, carbs_grams: 30, fat_grams: 8 },
+            { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500, protein_grams: 25, carbs_grams: 65, fat_grams: 12 }
         ],
         addDietMeal() {
-            this.dietMeals.push({ meal_type: 'lunch', recommended_time: '13:00', meal_name: 'Meal', items_description: '', calories: 500 });
+            this.dietMeals.push({ meal_type: 'lunch', recommended_time: '13:00', meal_name: 'Meal', items_description: '', calories: 500, protein_grams: 30, carbs_grams: 55, fat_grams: 15 });
         },
         removeDietMeal(idx) {
             this.dietMeals.splice(idx, 1);
@@ -242,10 +249,10 @@
             this.dietGuidelines = 'Drink at least 3-4 liters of water daily. Avoid refined sugars and processed junk food.';
             this.dietTrainerId = '{{ $assignedTrainer?->id ?? '' }}';
             this.dietMeals = [
-                { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450 },
-                { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650 },
-                { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300 },
-                { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500 }
+                { meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Power Breakfast', items_description: '3 Whole Eggs / Tofu Scramble + 2 Multigrain Toast + 1 Banana', calories: 450, protein_grams: 30, carbs_grams: 45, fat_grams: 15 },
+                { meal_type: 'lunch', recommended_time: '13:30', meal_name: 'High Protein Lunch', items_description: '150g Grilled Chicken / Paneer + Brown Rice + Green Salad', calories: 650, protein_grams: 45, carbs_grams: 70, fat_grams: 18 },
+                { meal_type: 'evening_snack', recommended_time: '17:30', meal_name: 'Pre-Workout Fuel', items_description: '1 Scoop Whey Protein + 1 Apple + Handful of Almonds', calories: 300, protein_grams: 28, carbs_grams: 30, fat_grams: 8 },
+                { meal_type: 'dinner', recommended_time: '20:30', meal_name: 'Clean Dinner', items_description: 'Steamed Veggies + Yellow Dal + 2 Chapatis', calories: 500, protein_grams: 25, carbs_grams: 65, fat_grams: 12 }
             ];
             this.showAddDietModal = true;
         },
@@ -265,10 +272,13 @@
                     recommended_time: m.recommended_time ? m.recommended_time.substring(0, 5) : '',
                     meal_name: m.meal_name,
                     items_description: m.items_description || '',
-                    calories: m.calories || 0
+                    calories: m.calories || 0,
+                    protein_grams: m.protein_grams || 0,
+                    carbs_grams: m.carbs_grams || 0,
+                    fat_grams: m.fat_grams || 0
                 }));
             } else {
-                this.dietMeals = [{ meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Breakfast', items_description: '', calories: 400 }];
+                this.dietMeals = [{ meal_type: 'breakfast', recommended_time: '08:00', meal_name: 'Breakfast', items_description: '', calories: 400, protein_grams: 25, carbs_grams: 40, fat_grams: 12 }];
             }
             this.showAddDietModal = true;
         },
@@ -990,76 +1000,146 @@
             <!-- ========================================================================= -->
             <div class="lg:col-span-8 space-y-4 sm:space-y-6 min-w-0">
 
-                <!-- Scrollable Tab Header Bar -->
-                <div class="flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold no-scrollbar shadow-sm -mx-3 px-3 sm:mx-0 sm:px-1.5">
+                <style>
+                    .no-scrollbar::-webkit-scrollbar {
+                        display: none !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                    }
+                    .no-scrollbar {
+                        -ms-overflow-style: none !important;
+                        scrollbar-width: none !important;
+                    }
+                </style>
+
+                <!-- Scrollable Tab Header Bar with Clean Arrows & Wheel Navigation -->
+                <div class="p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-1.5 -mx-3 px-3 sm:mx-0 sm:px-1.5"
+                     x-data="{
+                         canScrollLeft: false,
+                         canScrollRight: false,
+                         checkScroll() {
+                             const el = this.$refs.tabContainer;
+                             if (!el) return;
+                             this.canScrollLeft = el.scrollLeft > 6;
+                             this.canScrollRight = el.scrollLeft + el.clientWidth < el.scrollWidth - 6;
+                         },
+                         scrollNav(dir) {
+                             const el = this.$refs.tabContainer;
+                             if (!el) return;
+                             el.scrollBy({ left: dir * 260, behavior: 'smooth' });
+                             setTimeout(() => this.checkScroll(), 300);
+                         },
+                         scrollWheel(e) {
+                             const el = this.$refs.tabContainer;
+                             if (!el) return;
+                             const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+                             if (delta !== 0) {
+                                 el.scrollLeft += delta * 1.2;
+                                 this.checkScroll();
+                             }
+                         }
+                     }"
+                     x-init="
+                         $nextTick(() => { checkScroll(); });
+                         window.addEventListener('resize', () => checkScroll());
+                     ">
+
+                    <!-- Left Navigation Arrow -->
                     <button type="button" 
-                            @click="activeTab = 'subscriptions'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'subscriptions' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Subscriptions
+                            x-show="canScrollLeft" 
+                            x-cloak
+                            @click="scrollNav(-1)"
+                            class="shrink-0 w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all cursor-pointer shadow-xs"
+                            title="Scroll left">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                     </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'pt_packages'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'pt_packages' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        PT Packages
-                    </button>
+                    <!-- Tabs Container -->
+                    <div x-ref="tabContainer"
+                         @scroll.passive="checkScroll()"
+                         @wheel.prevent="scrollWheel($event)"
+                         class="flex items-center gap-1.5 overflow-x-auto text-xs font-bold no-scrollbar flex-1 min-w-0"
+                         style="scrollbar-width: none !important; -ms-overflow-style: none !important;">
 
-                    <button type="button" 
-                            @click="activeTab = 'services'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'services' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Services
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'subscriptions'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'subscriptions' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Subscriptions
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'invoices'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'invoices' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Invoices
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'pt_packages'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'pt_packages' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            PT Packages
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'workouts'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Workout Plans
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'services'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'services' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Services
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'diets'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'diets' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Diet Plans
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'invoices'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'invoices' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Invoices &amp; Receipts
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'classes'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'classes' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Classes
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'workouts'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Workout Plans
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'attendance'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'attendance' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Attendance
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'diets'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'diets' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Diet Plans
+                        </button>
 
-                    <button type="button" 
-                            @click="activeTab = 'measurements'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'measurements' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Measurements
-                    </button>
+                        <button type="button" 
+                                @click="activeTab = 'classes'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'classes' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Classes
+                        </button>
 
+                        <button type="button" 
+                                @click="activeTab = 'attendance'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'attendance' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Attendance
+                        </button>
+
+                        <button type="button" 
+                                @click="activeTab = 'measurements'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'measurements' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Measurements
+                        </button>
+
+                        <button type="button" 
+                                @click="activeTab = 'audit_trail'; $el.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });"
+                                class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
+                                :class="activeTab === 'audit_trail' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
+                            Audit Trail <span class="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] ml-1">{{ $auditLogs->count() }}</span>
+                        </button>
+                    </div>
+
+                    <!-- Right Navigation Arrow -->
                     <button type="button" 
-                            @click="activeTab = 'audit_trail'"
-                            class="shrink-0 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all whitespace-nowrap cursor-pointer"
-                            :class="activeTab === 'audit_trail' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'">
-                        Audit Trail <span class="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] ml-1">{{ $auditLogs->count() }}</span>
+                            x-show="canScrollRight" 
+                            x-cloak
+                            @click="scrollNav(1)"
+                            class="shrink-0 w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all cursor-pointer shadow-xs"
+                            title="Scroll right">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                     </button>
                 </div>
 
@@ -1082,8 +1162,8 @@
                     </div>
 
                     <!-- Subscription Table -->
-                    <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-                        <table class="w-full text-left text-xs min-w-[620px]">
+                    <div class="overflow-x-auto no-scrollbar -mx-4 sm:mx-0 px-4 sm:px-0">
+                        <table class="w-full text-left text-xs min-w-[560px] sm:min-w-full">
                             <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
                                 <tr>
                                     <th class="py-3 px-3 font-semibold">Plan</th>
@@ -1095,105 +1175,172 @@
                                     <th class="py-3 px-3 font-semibold text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                                 @forelse($member->memberships()->latest()->get() as $sub)
                                     @php
                                         $subDaysLeft = (int) now()->startOfDay()->diffInDays($sub->end_date->startOfDay(), false);
-                                        $firstPayment = $sub->payments->first();
+                                        $subDue = max(0, (float)$sub->final_amount - (float)$sub->paid_amount);
+                                        $subPayments = $sub->payments()->latest()->get();
                                     @endphp
-                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <!-- Plan -->
-                                        <td class="py-3.5 px-3 font-bold text-slate-900 dark:text-white">
-                                            {{ $sub->plan->name ?? 'Custom Plan' }}
-                                        </td>
+                                    <tbody x-data="{ showPayments: false }" class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                                            <!-- Plan -->
+                                            <td class="py-3.5 px-3 font-bold text-slate-900 dark:text-white">
+                                                <span>{{ $sub->plan->name ?? 'Custom Plan' }}</span>
+                                            </td>
 
-                                        <!-- Period -->
-                                        <td class="py-3.5 px-3">
-                                            <div class="font-medium text-slate-800 dark:text-slate-200">
-                                                {{ $sub->start_date->format('d/m/Y') }} - {{ $sub->end_date->format('d/m/Y') }}
-                                            </div>
-                                            <div class="text-[10px] mt-0.5 {{ $sub->isExpired() ? 'text-slate-400 dark:text-slate-500' : ($subDaysLeft <= 7 ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-semibold') }}">
-                                                @if($sub->isExpired())
-                                                    Expired
-                                                @elseif($subDaysLeft == 0)
-                                                    Expires today
+                                            <!-- Period -->
+                                            <td class="py-3.5 px-3">
+                                                <div class="font-medium text-slate-800 dark:text-slate-200">
+                                                    {{ $sub->start_date->format('d/m/Y') }} - {{ $sub->end_date->format('d/m/Y') }}
+                                                </div>
+                                                <div class="text-[10px] mt-0.5 {{ $sub->isExpired() ? 'text-slate-400 dark:text-slate-500' : ($subDaysLeft <= 7 ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-emerald-600 dark:text-emerald-400 font-semibold') }}">
+                                                    @if($sub->isExpired())
+                                                        Expired
+                                                    @elseif($subDaysLeft == 0)
+                                                        Expires today
+                                                    @else
+                                                        {{ $subDaysLeft }} days left
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                            <!-- Total -->
+                                            <td class="py-3.5 px-3 font-bold text-slate-900 dark:text-white">
+                                                {{ $currency }}{{ number_format($sub->final_amount, 2) }}
+                                            </td>
+
+                                            <!-- Discount -->
+                                            <td class="py-3.5 px-3 text-slate-500 dark:text-slate-400">
+                                                {{ $sub->discount_amount > 0 ? $currency . number_format($sub->discount_amount, 2) : '—' }}
+                                            </td>
+
+                                            <!-- Paid -->
+                                            <td class="py-3.5 px-3 font-bold text-emerald-600 dark:text-emerald-400">
+                                                {{ $currency }}{{ number_format($sub->paid_amount, 2) }}
+                                            </td>
+
+                                            <!-- Status -->
+                                            <td class="py-3.5 px-3">
+                                                @if($sub->status === 'ACTIVE' && !$sub->isExpired())
+                                                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-black text-[10px]">
+                                                        Active
+                                                    </span>
                                                 @else
-                                                    {{ $subDaysLeft }} days left
+                                                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px]">
+                                                        Expired
+                                                    </span>
                                                 @endif
-                                            </div>
-                                        </td>
+                                            </td>
 
-                                        <!-- Total -->
-                                        <td class="py-3.5 px-3 font-bold text-slate-900 dark:text-white">
-                                            {{ $currency }}{{ number_format($sub->final_amount, 2) }}
-                                        </td>
+                                            <!-- Actions -->
+                                            <td class="py-3.5 px-3 text-right">
+                                                <div class="flex items-center justify-end gap-2">
+                                                    @if($subPayments->count() > 0)
+                                                        <button type="button" 
+                                                                @click="showPayments = !showPayments"
+                                                                title="Toggle Payment Installments"
+                                                                class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 text-xs font-semibold transition-colors shadow-sm cursor-pointer flex items-center gap-1">
+                                                            <span x-text="showPayments ? 'Hide' : 'Payments ({{ $subPayments->count() }})'"></span>
+                                                            <svg class="w-3.5 h-3.5 transition-transform" :class="showPayments ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                                        </button>
+                                                    @endif
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Subscription: ' . ($sub->plan->name ?? '') . ' | Period: ' . $sub->start_date->format('d/m/Y') . ' - ' . $sub->end_date->format('d/m/Y') . ' | Total: ' . $currency . number_format($sub->final_amount, 2)) }}" 
+                                                       target="_blank" 
+                                                       title="Send via WhatsApp" 
+                                                       class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 transition-colors shadow-sm">
+                                                        💬
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
 
-                                        <!-- Discount -->
-                                        <td class="py-3.5 px-3 text-slate-500 dark:text-slate-400">
-                                            {{ $sub->discount_amount > 0 ? $currency . number_format($sub->discount_amount, 2) : '—' }}
-                                        </td>
+                                        <!-- Expandable Payments Timeline Row -->
+                                        @if($subPayments->count() > 0)
+                                            <tr x-show="showPayments" x-cloak class="bg-slate-50/70 dark:bg-slate-950/70">
+                                                <td colspan="7" class="p-3 sm:p-4">
+                                                    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 sm:p-4 space-y-3">
+                                                        <div class="flex items-center justify-between flex-wrap gap-2 text-xs border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="font-bold text-slate-900 dark:text-white">Fee Installments / Receipts for {{ $sub->plan->name ?? 'Package' }}</span>
+                                                                <span class="text-slate-400">• Total Package: {{ $currency }}{{ number_format($sub->final_amount, 2) }}</span>
+                                                                <span class="text-emerald-600 dark:text-emerald-400 font-bold">• Received: {{ $currency }}{{ number_format($sub->paid_amount, 2) }}</span>
+                                                            </div>
+                                                            @if($subDue > 0)
+                                                                <button type="button" 
+                                                                        @click="showAddPaymentModal = true" 
+                                                                        class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 shadow-sm cursor-pointer">
+                                                                    <span>+ Collect Remaining Fee</span>
+                                                                    <span>({{ $currency }}{{ number_format($subDue, 2) }})</span>
+                                                                </button>
+                                                            @else
+                                                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">
+                                                                    Package Fully Paid
+                                                                </span>
+                                                            @endif
+                                                        </div>
 
-                                        <!-- Paid -->
-                                        <td class="py-3.5 px-3 font-bold text-emerald-600 dark:text-emerald-400">
-                                            {{ $currency }}{{ number_format($sub->paid_amount, 2) }}
-                                        </td>
-
-                                        <!-- Status -->
-                                        <td class="py-3.5 px-3">
-                                            @if($sub->status === 'ACTIVE' && !$sub->isExpired())
-                                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-black text-[10px]">
-                                                    Active
-                                                </span>
-                                            @else
-                                                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px]">
-                                                    Expired
-                                                </span>
-                                            @endif
-                                        </td>
-
-                                        <!-- Actions -->
-                                        <td class="py-3.5 px-3 text-right">
-                                            <div class="flex items-center justify-end gap-2">
-                                                @if($firstPayment)
-                                                    <button type="button" 
-                                                            @click="openInvoice({
-                                                                id: {{ $firstPayment->id }},
-                                                                receipt_no: '{{ $firstPayment->receipt_number ?? ('INV-' . str_pad($firstPayment->id, 4, '0', STR_PAD_LEFT)) }}',
-                                                                date: '{{ $firstPayment->payment_date ? $firstPayment->payment_date->format('d M Y') : $firstPayment->created_at->format('d M Y') }}',
-                                                                amount: '{{ number_format($firstPayment->amount, 2) }}',
-                                                                method: '{{ strtoupper($firstPayment->payment_method) }}',
-                                                                ref: '{{ $firstPayment->transaction_reference ?? '' }}',
-                                                                plan_name: '{{ $sub->plan->name ?? 'Gym Membership' }}',
-                                                                plan_duration: '{{ $sub->plan ? ($sub->plan->duration_value . ' ' . $sub->plan->duration_type) : '' }}',
-                                                                start_date: '{{ $sub->start_date->format('d M Y') }}',
-                                                                end_date: '{{ $sub->end_date->format('d M Y') }}',
-                                                                total: '{{ number_format($sub->final_amount, 2) }}',
-                                                                paid: '{{ number_format($firstPayment->amount, 2) }}',
-                                                                notes: '{{ addslashes($firstPayment->notes ?? '') }}',
-                                                                whatsapp_url: '{{ $firstPayment->whatsapp_share_url }}'
-                                                            })"
-                                                            title="View / Print Tax Invoice Receipt" 
-                                                            class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 transition-colors shadow-sm">
-                                                        📄
-                                                    </button>
-                                                @endif
-                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Subscription: ' . ($sub->plan->name ?? '') . ' | Period: ' . $sub->start_date->format('d/m/Y') . ' - ' . $sub->end_date->format('d/m/Y') . ' | Total: ' . $currency . number_format($sub->final_amount, 2)) }}" 
-                                                   target="_blank" 
-                                                   title="Send via WhatsApp" 
-                                                   class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-emerald-600 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-emerald-400 dark:border-slate-700 transition-colors shadow-sm">
-                                                    💬
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                        <div class="space-y-1.5">
+                                                            @foreach($subPayments as $p)
+                                                                @php
+                                                                    $pReceipt = $p->receipt_number ?? ('INV-' . str_pad($p->id, 4, '0', STR_PAD_LEFT));
+                                                                    $pDate = $p->payment_date ? $p->payment_date->format('d M Y') : $p->created_at->format('d M Y');
+                                                                @endphp
+                                                                <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs">
+                                                                    <div class="flex items-center gap-2.5 flex-wrap">
+                                                                        <span class="font-mono font-bold text-amber-600 dark:text-amber-400 text-[11px]">{{ $pReceipt }}</span>
+                                                                        <span class="text-slate-400">•</span>
+                                                                        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $pDate }}</span>
+                                                                        <span class="text-slate-400">•</span>
+                                                                        <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300">{{ $p->payment_method }}</span>
+                                                                        @if(!empty($p->notes))
+                                                                            <span class="text-slate-400">•</span>
+                                                                            <span class="text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]">{{ $p->notes }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="flex items-center gap-2">
+                                                                        <span class="font-black text-emerald-600 dark:text-emerald-400 font-mono text-sm">{{ $currency }}{{ number_format($p->amount, 2) }}</span>
+                                                                        <button type="button" 
+                                                                                @click="openInvoice({
+                                                                                    id: {{ $p->id }},
+                                                                                    receipt_no: '{{ $pReceipt }}',
+                                                                                    date: '{{ $pDate }}',
+                                                                                    amount: '{{ number_format($p->amount, 2) }}',
+                                                                                    method: '{{ strtoupper($p->payment_method) }}',
+                                                                                    ref: '{{ $p->transaction_reference ?? '' }}',
+                                                                                    plan_name: '{{ $sub->plan->name ?? 'Gym Membership' }}',
+                                                                                    plan_duration: '{{ $sub->plan ? ($sub->plan->duration_value . ' ' . $sub->plan->duration_type) : '' }}',
+                                                                                    start_date: '{{ $sub->start_date->format('d M Y') }}',
+                                                                                    end_date: '{{ $sub->end_date->format('d M Y') }}',
+                                                                                    total: '{{ number_format($sub->final_amount, 2) }}',
+                                                                                    paid: '{{ number_format($p->amount, 2) }}',
+                                                                                    notes: '{{ addslashes($p->notes ?? '') }}',
+                                                                                    whatsapp_url: '{{ $p->whatsapp_share_url }}'
+                                                                                })"
+                                                                                title="View Receipt"
+                                                                                class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-white hover:bg-slate-700 transition-colors shadow-sm cursor-pointer">
+                                                                            👁️
+                                                                        </button>
+                                                                        <a href="{{ $p->whatsapp_share_url }}" target="_blank" title="Share Receipt on WhatsApp" class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 transition-colors shadow-sm">
+                                                                            💬
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    </tbody>
                                 @empty
-                                    <tr>
-                                        <td colspan="7" class="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
-                                            No subscriptions found for this member. Click "+ Add Subscription" to assign one.
-                                        </td>
-                                    </tr>
+                                    <tbody class="text-slate-700 dark:text-slate-300">
+                                        <tr>
+                                            <td colspan="7" class="py-8 text-center text-slate-500 dark:text-slate-400 text-xs">
+                                                No subscriptions found for this member. Click "+ Add Subscription" to assign one.
+                                            </td>
+                                        </tr>
+                                    </tbody>
                                 @endforelse
-                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -1558,12 +1705,12 @@
                                     <table class="w-full text-left text-xs min-w-[580px]">
                                         <thead class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-100/50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800/80">
                                             <tr>
-                                                <th class="py-2.5 px-4 font-semibold">Receipt ID</th>
+                                                <th class="py-2.5 px-4 font-semibold">Receipt No</th>
                                                 <th class="py-2.5 px-4 font-semibold">Date</th>
-                                                <th class="py-2.5 px-4 font-semibold">Type</th>
+                                                <th class="py-2.5 px-4 font-semibold">Payment Type</th>
                                                 <th class="py-2.5 px-4 font-semibold">Method</th>
                                                 <th class="py-2.5 px-4 font-semibold">Amount</th>
-                                                <th class="py-2.5 px-4 font-semibold text-right">Invoice & Share</th>
+                                                <th class="py-2.5 px-4 font-semibold text-right">Receipt &amp; Share</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
@@ -1606,7 +1753,7 @@
                                                     <!-- Type -->
                                                     <td class="py-3 px-4">
                                                         <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">
-                                                            Payment
+                                                            Fee Installment
                                                         </span>
                                                     </td>
 
@@ -1642,14 +1789,14 @@
                                                                         notes: '{{ addslashes($p->notes ?? '') }}',
                                                                         whatsapp_url: '{{ $p->whatsapp_share_url }}'
                                                                     })"
-                                                                    title="View Tax Invoice" 
+                                                                    title="View Payment Receipt" 
                                                                     class="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 transition-colors cursor-pointer shadow-sm">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                             </button>
 
                                                             <a href="{{ route('app.invoices.show', $p->id) }}" 
                                                                target="_blank" 
-                                                               title="Open Printable Invoice Page" 
+                                                               title="Open Printable Receipt Page" 
                                                                class="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 border border-slate-200 dark:border-slate-700 transition-colors shadow-sm">
                                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                                             </a>
@@ -2314,7 +2461,28 @@
                 </div>
 
                 <!-- TAB 9: MEASUREMENTS -->
-                <div x-show="activeTab === 'measurements'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
+                <div x-show="activeTab === 'measurements'" 
+                     x-data="{
+                         measurements: {{ Js::from(array_values($measurementsList)) }},
+                         selectedIndex: 0,
+                         get current() {
+                             return this.measurements[this.selectedIndex] || {};
+                         },
+                         formatDate(dateStr) {
+                             if (!dateStr) return '—';
+                             try {
+                                 const parts = dateStr.split('-');
+                                 if (parts.length === 3) {
+                                     const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                                     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                                 }
+                                 return dateStr;
+                             } catch(e) {
+                                 return dateStr;
+                             }
+                         }
+                     }"
+                     class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                         <div>
                             <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -2349,86 +2517,145 @@
                             </button>
                         </div>
                     @else
-                        <!-- Latest Measurements Grid -->
+                        <!-- Measurements Metric Display -->
                         <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-xs font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider">Latest Recorded Metrics</h4>
-                                @if(!empty($latestMeasurement['date']))
-                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">As of {{ date('d M Y', strtotime($latestMeasurement['date'])) }}</span>
-                                @endif
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                                        <span x-text="selectedIndex === 0 ? 'Latest Recorded Metrics' : 'Historical Metrics'">Latest Recorded Metrics</span>
+                                    </h4>
+                                    <span x-show="selectedIndex === 0" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                                        Latest Record
+                                    </span>
+                                    <span x-show="selectedIndex > 0" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-300 dark:border-amber-800" x-cloak>
+                                        Past Record
+                                    </span>
+                                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                        As of <span class="font-bold text-slate-800 dark:text-slate-200" x-text="formatDate(current.date)">{{ !empty($latestMeasurement['date']) ? date('d M Y', strtotime($latestMeasurement['date'])) : '—' }}</span>
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center gap-2 self-start sm:self-auto">
+                                    <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Select Date:</label>
+                                    <select x-model.number="selectedIndex" 
+                                            class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none cursor-pointer">
+                                        <template x-for="(m, idx) in measurements" :key="idx">
+                                            <option :value="idx" x-text="formatDate(m.date) + (idx === 0 ? ' (Latest)' : '')"></option>
+                                        </template>
+                                    </select>
+                                    <button type="button" 
+                                            x-show="selectedIndex > 0" 
+                                            @click="selectedIndex = 0" 
+                                            class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline px-1 cursor-pointer"
+                                            x-cloak>
+                                        Reset to Latest
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                 <!-- Metric 1: Weight -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">WEIGHT</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['weight'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">kg</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.weight || '—'">{{ $latestMeasurement['weight'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">kg</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 2: Body Fat -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">BODY FAT</span>
-                                    <p class="text-base sm:text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1">{{ $latestMeasurement['body_fat'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">%</span></p>
+                                    <p class="text-base sm:text-lg font-black text-indigo-600 dark:text-indigo-400 mt-1">
+                                        <span x-text="current.body_fat || '—'">{{ $latestMeasurement['body_fat'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">%</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 3: Chest -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">CHEST</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['chest'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.chest || '—'">{{ $latestMeasurement['chest'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 4: Shoulders -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">SHOULDERS</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['shoulders'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.shoulders || '—'">{{ $latestMeasurement['shoulders'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 5: Waist -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">WAIST</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['waist'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.waist || '—'">{{ $latestMeasurement['waist'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 6: Hips -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">HIPS</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['hips'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.hips || '—'">{{ $latestMeasurement['hips'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 7: Left Bicep -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">LEFT BICEP</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.bicep_left || '—'">{{ $latestMeasurement['bicep_left'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 8: Right Bicep -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">RIGHT BICEP</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['bicep_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.bicep_right || '—'">{{ $latestMeasurement['bicep_right'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 9: Left Thigh -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">LEFT THIGH</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_left'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.thigh_left || '—'">{{ $latestMeasurement['thigh_left'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 10: Right Thigh -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">RIGHT THIGH</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['thigh_right'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.thigh_right || '—'">{{ $latestMeasurement['thigh_right'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 11: Calves -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">CALVES</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['calves'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.calves || '—'">{{ $latestMeasurement['calves'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
                                 </div>
 
                                 <!-- Metric 12: Neck -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center shadow-sm">
                                     <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">NECK</span>
-                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">{{ $latestMeasurement['neck'] ?? '—' }} <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span></p>
+                                    <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-1">
+                                        <span x-text="current.neck || '—'">{{ $latestMeasurement['neck'] ?? '—' }}</span> <span class="text-xs font-normal text-slate-500 dark:text-slate-400">in</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div x-show="current.notes" class="mt-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300" x-cloak>
+                                <span class="text-base">📝</span>
+                                <div>
+                                    <span class="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Trainer Remarks & Notes</span>
+                                    <p class="mt-0.5 text-slate-900 dark:text-slate-100 font-medium" x-text="current.notes"></p>
                                 </div>
                             </div>
                         </div>
@@ -2436,7 +2663,10 @@
 
                     <!-- Measurement History Table -->
                     <div class="space-y-3 pt-2">
-                        <h4 class="text-xs font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider">Measurement History</h4>
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-black text-slate-800 dark:text-slate-300 uppercase tracking-wider">Measurement History</h4>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">Click any row to inspect full body metrics</span>
+                        </div>
                         
                         <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                             <table class="w-full text-left text-xs min-w-[550px]">
@@ -2449,22 +2679,40 @@
                                         <th class="py-2.5 px-3 font-semibold">Arms (L/R)</th>
                                         <th class="py-2.5 px-3 font-semibold">Body Fat</th>
                                         <th class="py-2.5 px-3 font-semibold">Logged By</th>
+                                        <th class="py-2.5 px-3 font-semibold text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
-                                    @forelse($measurementsList as $m)
-                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-950/50 transition-colors">
-                                            <td class="py-3 px-3 font-bold text-slate-900 dark:text-white">{{ date('d M Y', strtotime($m['date'])) }}</td>
+                                    @forelse($measurementsList as $idx => $m)
+                                        <tr @click="selectedIndex = {{ $idx }}" 
+                                            class="cursor-pointer transition-colors"
+                                            :class="selectedIndex === {{ $idx }} ? 'bg-indigo-50/80 dark:bg-indigo-950/40 ring-1 ring-inset ring-indigo-500/40 font-medium' : 'hover:bg-slate-50 dark:hover:bg-slate-950/50'">
+                                            <td class="py-3 px-3 font-bold text-slate-900 dark:text-white">
+                                                <div class="flex items-center gap-2">
+                                                    <span>{{ date('d M Y', strtotime($m['date'])) }}</span>
+                                                    @if($loop->first)
+                                                        <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">Latest</span>
+                                                    @endif
+                                                </div>
+                                            </td>
                                             <td class="py-3 px-3 font-semibold">{{ $m['weight'] ? $m['weight'] . ' kg' : '—' }}</td>
                                             <td class="py-3 px-3">{{ $m['chest'] ? $m['chest'] . '"' : '—' }}</td>
                                             <td class="py-3 px-3">{{ $m['waist'] ? $m['waist'] . '"' : '—' }}</td>
                                             <td class="py-3 px-3">{{ ($m['bicep_left'] ?? '—') . '" / ' . ($m['bicep_right'] ?? '—') . '"' }}</td>
                                             <td class="py-3 px-3 text-indigo-600 dark:text-indigo-400 font-bold">{{ $m['body_fat'] ? $m['body_fat'] . '%' : '—' }}</td>
                                             <td class="py-3 px-3 text-slate-500 dark:text-slate-400 text-[11px]">{{ $m['logged_by'] ?? 'Staff' }}</td>
+                                            <td class="py-3 px-3 text-right">
+                                                <button type="button" 
+                                                        @click.stop="selectedIndex = {{ $idx }}"
+                                                        class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                                                        :class="selectedIndex === {{ $idx }} ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'">
+                                                    <span x-text="selectedIndex === {{ $idx }} ? 'Viewing' : 'Inspect'"></span>
+                                                </button>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="py-6 text-center text-slate-500 dark:text-slate-400 text-xs">
+                                            <td colspan="8" class="py-6 text-center text-slate-500 dark:text-slate-400 text-xs">
                                                 No measurement logs recorded yet. Click "+ Log New Measurement" to start tracking.
                                             </td>
                                         </tr>
@@ -2477,48 +2725,76 @@
 
                 <!-- TAB 10: AUDIT TRAIL -->
                 <div x-show="activeTab === 'audit_trail'" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6 space-y-4 sm:space-y-6">
-                    <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
-                        <h3 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>🕒</span>
-                            <span>Transaction Audit Trail</span>
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete log of payments, renewals, freezes and status updates for this member</p>
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>Transaction Audit Trail</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete log of payments, renewals, freezes and status updates for this member</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            {{ $auditLogs->count() }} Records
+                        </span>
                     </div>
 
-                    <!-- Audit Trail Timeline / List -->
-                    <div class="space-y-3">
+                    <!-- Audit Trail List -->
+                    <div class="space-y-2.5">
                         @forelse($auditLogs as $log)
-                            <div class="p-3.5 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 sm:gap-4 shadow-sm">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-sm">
-                                        @if(str_contains($log->action, 'payment') || str_contains($log->action, 'fee'))
-                                            💳
-                                        @elseif(str_contains($log->action, 'member_created') || str_contains($log->action, 'enrolled'))
-                                            👤
-                                        @elseif(str_contains($log->action, 'subscription') || str_contains($log->action, 'membership'))
-                                            🏋️
-                                        @elseif(str_contains($log->action, 'freeze'))
-                                            ❄️
+                            @php
+                                $isPayment = str_contains($log->action, 'payment') || str_contains($log->action, 'fee');
+                                $isMember = str_contains($log->action, 'member') || str_contains($log->action, 'enrolled');
+                                $isSub = str_contains($log->action, 'subscription') || str_contains($log->action, 'membership');
+                                $isFreeze = str_contains($log->action, 'freeze');
+                            @endphp
+                            <div class="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex items-start justify-between gap-3 sm:gap-4 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
+                                <div class="flex items-start gap-3 min-w-0">
+                                    <!-- Simple Category Icon Box -->
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border
+                                        {{ $isPayment ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : ($isSub ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : ($isFreeze ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500')) }}">
+                                        @if($isPayment)
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                        @elseif($isSub)
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                                        @elseif($isFreeze)
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                         @else
-                                            📝
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         @endif
                                     </div>
+
+                                    <!-- Content -->
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-2 flex-wrap">
-                                            <span class="font-bold text-slate-900 dark:text-white text-xs">{{ ucwords(str_replace('_', ' ', $log->action)) }}</span>
-                                            <span class="text-[10px] font-medium text-slate-500 dark:text-slate-400">• By {{ $log->user->name ?? 'System' }}</span>
+                                            <span class="font-bold text-slate-900 dark:text-white text-xs">
+                                                @if($isPayment)
+                                                    Payment Collected
+                                                @elseif($isSub)
+                                                    Subscription Update
+                                                @elseif($isFreeze)
+                                                    Membership Freeze
+                                                @else
+                                                    Member Updated
+                                                @endif
+                                            </span>
+                                            <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                                                • By {{ $log->user->name ?? 'System' }}
+                                            </span>
                                         </div>
-                                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">{{ $log->description }}</p>
+                                        <p class="text-xs text-slate-700 dark:text-slate-300 mt-1 leading-relaxed">
+                                            {{ $log->description }}
+                                        </p>
                                     </div>
                                 </div>
 
+                                <!-- Date & Time -->
                                 <div class="text-right shrink-0">
-                                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">{{ $log->created_at->format('d M Y') }}</span>
-                                    <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 block">{{ $log->created_at->format('h:i A') }}</span>
+                                    <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 block">{{ $log->created_at->format('d M Y') }}</span>
+                                    <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500 block mt-0.5">{{ $log->created_at->format('h:i A') }}</span>
                                 </div>
                             </div>
                         @empty
-                            <div class="p-6 sm:p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
+                            <div class="p-6 sm:p-8 text-center bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs">
                                 No audit log records recorded yet for this member.
                             </div>
                         @endforelse
@@ -2889,8 +3165,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth</label>
-                                <input type="date" name="dob" value="{{ $member->dob ? $member->dob->format('Y-m-d') : '' }}" onclick="this.showPicker && this.showPicker()" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer">
+                                <x-dob-picker name="dob" :value="$member->dob ? $member->dob->format('Y-m-d') : ''" />
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">Blood Group</label>
@@ -3310,11 +3585,11 @@
                         $tenantObj = auth()->user()->tenant ?? ($tenant ?? null);
                         $tenantSettings = $tenantObj->settings ?? [];
                         $invSettings = $tenantSettings['invoice'] ?? [];
-                        $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenantObj->name ?? 'ARMOUR 24-7 GYM');
-                        $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($member->branch->address ?? ($tenantObj->mainBranch?->address ?? ($tenantObj->address ?? 'C-601/602 Shalin Square, Above Croma Store Hathijan Circle Ahmedabad - 382445'))));
-                        $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenantObj->phone ?? '+91 83065 30583');
-                        $gymEmail = !empty($invSettings['email']) ? $invSettings['email'] : ($tenantObj->email ?? 'management@armour247gym.com');
-                        $gymWeb = !empty($invSettings['website']) ? $invSettings['website'] : 'www.armour247gym.com';
+                        $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenantObj->name ?? 'Gym');
+                        $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($member->branch->address ?? ($tenantObj->mainBranch?->address ?? ($tenantObj->address ?? ''))));
+                        $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenantObj->phone ?? '');
+                        $gymEmail = !empty($invSettings['email']) ? $invSettings['email'] : ($tenantObj->email ?? '');
+                        $gymWeb = !empty($invSettings['website']) ? $invSettings['website'] : ($tenantObj->website ?? '');
                         $invoiceTitle = !empty($invSettings['title']) ? $invSettings['title'] : 'TAX INVOICE';
                         $statusText = !empty($invSettings['status_text']) ? $invSettings['status_text'] : 'PAID IN FULL';
                         $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
@@ -3340,7 +3615,7 @@
                         $helpline = !empty($invSettings['helpline']) ? $invSettings['helpline'] : $gymPhone;
                         $footerEmail = !empty($invSettings['footer_email']) ? $invSettings['footer_email'] : $gymEmail;
                         $footerWeb = !empty($invSettings['footer_web']) ? $invSettings['footer_web'] : $gymWeb;
-                        $tagline = !empty(trim($invSettings['tagline'] ?? '')) ? $invSettings['tagline'] : "BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU";
+                        $tagline = !empty(trim($invSettings['tagline'] ?? '')) ? $invSettings['tagline'] : '';
                         $sealText = !empty($invSettings['seal_text']) ? $invSettings['seal_text'] : "Authorized Signature / Seal";
                         $sealUrl = $invSettings['seal_url'] ?? null;
                         $signatureUrl = $invSettings['signature_url'] ?? null;
@@ -3627,9 +3902,11 @@
                                 </div>
 
                                 <!-- 7. Tagline -->
+                                @if(!empty(trim($tagline)))
                                 <div class="pt-2 sm:pt-2.5 border-t border-slate-200 text-center">
-                                    <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ !empty(trim($tagline)) ? $tagline : 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU' }}</p>
+                                    <p class="text-[11px] sm:text-xs font-black tracking-widest text-slate-950 uppercase">{{ $tagline }}</p>
                                 </div>
+                                @endif
                             </div>
 
                         </div>
@@ -4531,20 +4808,47 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
-                                        <div class="sm:col-span-9">
+                                    <div class="space-y-2">
+                                        <div>
                                             <input type="text" 
                                                    :name="'meals[' + idx + '][items_description]'" 
                                                    x-model="meal.items_description" 
-                                                   placeholder="Food items & quantities (e.g. 3 Boiled Eggs + 2 Brown Bread + 1 Apple)" 
+                                                   placeholder="Food items & quantities (e.g. 3 Boiled Eggs, 2 Toast, 1 Glass Milk, 1 Apple)" 
                                                    class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500">
                                         </div>
-                                        <div class="sm:col-span-3">
-                                            <input type="number" 
-                                                   :name="'meals[' + idx + '][calories]'" 
-                                                   x-model="meal.calories" 
-                                                   placeholder="Calories (kcal)" 
-                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none focus:border-indigo-500">
+                                        <div class="grid grid-cols-4 gap-1.5">
+                                            <div>
+                                                <input type="number" 
+                                                       :name="'meals[' + idx + '][calories]'" 
+                                                       x-model="meal.calories" 
+                                                       placeholder="Kcal (450)" 
+                                                       class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none focus:border-indigo-500 text-center" title="Calories">
+                                                <span class="text-[8px] text-slate-400 block text-center mt-0.5 font-bold">Kcal</span>
+                                            </div>
+                                            <div>
+                                                <input type="number" 
+                                                       :name="'meals[' + idx + '][protein_grams]'" 
+                                                       x-model="meal.protein_grams" 
+                                                       placeholder="Prot (30)" 
+                                                       class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-sky-600 dark:text-sky-400 focus:outline-none focus:border-indigo-500 text-center" title="Protein">
+                                                <span class="text-[8px] text-sky-500 block text-center mt-0.5 font-bold">Protein (g)</span>
+                                            </div>
+                                            <div>
+                                                <input type="number" 
+                                                       :name="'meals[' + idx + '][carbs_grams]'" 
+                                                       x-model="meal.carbs_grams" 
+                                                       placeholder="Carb (45)" 
+                                                       class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 focus:outline-none focus:border-indigo-500 text-center" title="Carbs">
+                                                <span class="text-[8px] text-amber-500 block text-center mt-0.5 font-bold">Carbs (g)</span>
+                                            </div>
+                                            <div>
+                                                <input type="number" 
+                                                       :name="'meals[' + idx + '][fat_grams]'" 
+                                                       x-model="meal.fat_grams" 
+                                                       placeholder="Fat (12)" 
+                                                       class="w-full px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono font-bold text-rose-600 dark:text-rose-400 focus:outline-none focus:border-indigo-500 text-center" title="Fat">
+                                                <span class="text-[8px] text-rose-500 block text-center mt-0.5 font-bold">Fat (g)</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

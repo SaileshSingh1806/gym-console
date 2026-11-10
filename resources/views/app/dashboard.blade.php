@@ -465,6 +465,181 @@
         </div>
         @endif
 
+        <!-- PERSONAL TRAINING (PT) OVERVIEW -->
+        @php
+            $canSeePtFinancials = auth()->user()->isGymOwner() 
+                || auth()->user()->hasPermission('dashboard.pt_financials');
+        @endphp
+        @if($canSeePtFinancials)
+            @php
+                $ptFin = $metrics['pt_financials'] ?? [
+                    'month_collected' => 0,
+                    'month_billed' => 0,
+                    'pending_dues' => 0,
+                    'total_trainer_commission' => 0,
+                    'total_gym_profit' => 0,
+                    'gym_share_percent' => 60,
+                    'trainer_share_percent' => 40,
+                    'total_sessions_conducted' => 0,
+                    'total_sessions_remaining' => 0,
+                    'trainers' => [],
+                    'active_packages_count' => 0,
+                ];
+            @endphp
+            <div id="pt-financial-section" class="p-3.5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 sm:space-y-4">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200 dark:border-slate-800/80 pb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">Personal Training (PT)</h3>
+                    </div>
+
+                    <div class="flex items-center gap-2.5 self-start sm:self-auto">
+                        <!-- Quick Month Filter Dropdown -->
+                        <form method="GET" action="{{ route('app.dashboard') }}#pt-financial-section" class="flex items-center">
+                            @if(request('branch_id'))
+                                <input type="hidden" name="branch_id" value="{{ request('branch_id') }}">
+                            @endif
+                            <select name="pt_month" 
+                                    onchange="this.form.submit()" 
+                                    class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                                @foreach($ptFin['available_months'] ?? [] as $mVal => $mLabel)
+                                    <option value="{{ $mVal }}" {{ ($ptFin['selected_month'] ?? now()->format('Y-m')) === $mVal ? 'selected' : '' }}>
+                                        {{ $mLabel }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+
+                        <a href="{{ route('app.trainers.index') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
+                            Manage Trainers →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+                    <!-- 1. Total PT Collected -->
+                    <div class="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div class="min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">
+                                {{ $currency }}{{ number_format($ptFin['month_collected'], 0) }}
+                            </div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">
+                                PT Collection
+                            </div>
+                        </div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400 font-bold mt-2.5">
+                            {{ $ptFin['active_packages_count'] }} Active {{ $ptFin['active_packages_count'] === 1 ? 'Package' : 'Packages' }}
+                        </div>
+                    </div>
+
+                    <!-- 2. Gym Net Profit -->
+                    <div class="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div class="min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 flex items-center justify-center mb-2">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            </div>
+                            <div class="text-base sm:text-xl font-black text-indigo-600 dark:text-indigo-400 leading-tight truncate">
+                                {{ $currency }}{{ number_format($ptFin['total_gym_profit'], 0) }}
+                            </div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">
+                                Gym Net Profit
+                            </div>
+                        </div>
+                        <div class="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold mt-2.5">
+                            {{ $ptFin['gym_share_percent'] }}% Gym Share
+                        </div>
+                    </div>
+
+                    <!-- 3. Trainer Commissions (Payouts) -->
+                    <div class="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div class="min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center mb-2">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            </div>
+                            <div class="text-base sm:text-xl font-black text-purple-600 dark:text-purple-400 leading-tight truncate">
+                                {{ $currency }}{{ number_format($ptFin['total_trainer_commission'], 0) }}
+                            </div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">
+                                Trainer Payouts
+                            </div>
+                        </div>
+                        <div class="text-[10px] text-purple-600 dark:text-purple-400 font-bold mt-2.5">
+                            {{ $ptFin['trainer_share_percent'] }}% Trainer Share
+                        </div>
+                    </div>
+
+                    <!-- 4. PT Pending Dues -->
+                    <div class="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div class="min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center mb-2">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">
+                                {{ $currency }}{{ number_format($ptFin['pending_dues'], 0) }}
+                            </div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">
+                                Pending Dues
+                            </div>
+                        </div>
+                        <div class="text-[10px] {{ $ptFin['pending_dues'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400' }} font-bold mt-2.5">
+                            {{ $ptFin['pending_dues'] > 0 ? 'To Collect' : 'Cleared' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer Payouts (Compact scrollable list - capped at max-h-48 so 10+ trainers never bloat dashboard) -->
+                @if(!empty($ptFin['trainers']))
+                <div class="pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+                    <div class="max-h-44 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <table class="w-full text-left text-xs">
+                            <thead class="sticky top-0 bg-slate-50 dark:bg-slate-950 text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                                <tr>
+                                    <th class="px-3 py-2">Trainer</th>
+                                    <th class="px-3 py-2 text-center">Clients</th>
+                                    <th class="px-3 py-2 text-right">Collection</th>
+                                    <th class="px-3 py-2 text-right">Payout</th>
+                                    <th class="px-3 py-2 text-right">Gym Profit</th>
+                                    <th class="px-3 py-2 text-center">Sessions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900/60">
+                                @foreach($ptFin['trainers'] as $tr)
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                        <td class="px-3 py-2 font-bold text-slate-900 dark:text-white">
+                                            {{ $tr['name'] }}
+                                        </td>
+                                        <td class="px-3 py-2 text-center text-slate-600 dark:text-slate-400">
+                                            {{ $tr['active_clients'] }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right font-semibold text-slate-900 dark:text-white">
+                                            {{ $currency }}{{ number_format($tr['total_collected'], 0) }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right font-bold text-purple-600 dark:text-purple-400">
+                                            {{ $currency }}{{ number_format($tr['trainer_commission'], 0) }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right font-bold text-indigo-600 dark:text-indigo-400">
+                                            {{ $currency }}{{ number_format($tr['gym_profit'], 0) }}
+                                        </td>
+                                        <td class="px-3 py-2 text-center text-[11px] text-slate-500 dark:text-slate-400">
+                                            {{ $tr['sessions_conducted'] }} / {{ $tr['sessions_conducted'] + $tr['sessions_remaining'] }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @endif
+            </div>
+        @endif
+
         <!-- ROW 5: TRENDS & INSIGHTS (NEW) 4 ANALYTICS CHARTS -->
         @php
             $canSeeRevTrends = auth()->user()->hasPermission('dashboard.financials') || auth()->user()->isGymOwner();

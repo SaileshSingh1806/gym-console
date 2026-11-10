@@ -116,6 +116,10 @@ class AuthController extends Controller
                     return redirect()->intended(route('app.portal'));
                 }
 
+                if ($user->role === 'trainer') {
+                    return redirect()->intended(route('trainer.workspace'));
+                }
+
                 $tenant = $user->tenant;
                 if ($tenant && ! $tenant->isSubscriptionActive()) {
                     session([
@@ -153,6 +157,10 @@ class AuthController extends Controller
 
                 if ($user->role === 'member') {
                     return redirect()->intended(route('app.portal'));
+                }
+
+                if ($user->role === 'trainer') {
+                    return redirect()->intended(route('trainer.workspace'));
                 }
 
                 return redirect()->intended(route('app.dashboard'));

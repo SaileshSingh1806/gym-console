@@ -18,13 +18,29 @@ class DietMeal extends Model
         'meal_name',
         'items_description',
         'calories',
+        'protein_grams',
+        'carbs_grams',
+        'fat_grams',
         'sort_order',
     ];
 
     protected $casts = [
         'calories' => 'integer',
+        'protein_grams' => 'integer',
+        'carbs_grams' => 'integer',
+        'fat_grams' => 'integer',
         'sort_order' => 'integer',
     ];
+
+    public function getItemsAttribute(): ?string
+    {
+        return $this->items_description;
+    }
+
+    public function getMealTimeAttribute(): ?string
+    {
+        return $this->recommended_time ? substr((string) $this->recommended_time, 0, 5) : null;
+    }
 
     public function plan(): BelongsTo
     {

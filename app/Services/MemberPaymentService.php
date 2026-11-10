@@ -21,8 +21,7 @@ class MemberPaymentService
         ?string $notes = null
     ): MemberPayment {
         return DB::transaction(function () use ($member, $amount, $paymentMethod, $membership, $reference, $notes) {
-            $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $member->tenant_id)->max('id') ?? 0) + 1;
-            $invoiceNumber = 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
+            $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $member->tenant_id);
 
             $payment = MemberPayment::create([
                 'tenant_id' => $member->tenant_id,
@@ -43,7 +42,16 @@ class MemberPaymentService
                 $membership->update(['paid_amount' => $newPaid]);
             }
 
-            ActivityLog::log('member_payment_received', "Received payment of \${$amount} via {$paymentMethod} from {$member->full_name}", $payment);
+            $currency = $member->tenant?->currency_symbol ?? '₹';
+            $payMethodFormatted = strtoupper($paymentMethod);
+            $receiptLabel = $payment->receipt_number ?? $invoiceNumber;
+
+            ActivityLog::log(
+                'member_payment_received',
+                "Collected payment of {$currency}" . number_format($amount, 2) . " via {$payMethodFormatted} ({$receiptLabel}) from {$member->full_name}",
+                $payment,
+                ['payment_id' => $payment->id, 'member_id' => $member->id, 'amount' => $amount, 'method' => $paymentMethod]
+            );
 
             if (! empty($member->email)) {
                 $tenant = $member->tenant;

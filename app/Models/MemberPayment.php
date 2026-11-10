@@ -7,6 +7,7 @@ use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class MemberPayment extends Model
 {
@@ -31,6 +32,61 @@ class MemberPayment extends Model
         'payment_date' => 'date',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (MemberPayment $payment) {
+            if (empty($payment->invoice_number)) {
+                $tenantId = $payment->tenant_id ?? auth()->user()?->tenant_id;
+                $payment->invoice_number = self::generateInvoiceNumber($tenantId ? (int) $tenantId : null);
+            }
+            if (empty($payment->received_by_user_id) && auth()->check()) {
+                $payment->received_by_user_id = auth()->id();
+            }
+            if (empty($payment->payment_date)) {
+                $payment->payment_date = now()->toDateString();
+            }
+        });
+    }
+
+    /**
+     * Generate a collision-safe invoice/receipt number scoped to a tenant.
+     */
+    public static function generateInvoiceNumber(?int $tenantId = null): string
+    {
+        $tenantId = $tenantId ?? auth()->user()?->tenant_id;
+        $tenant = $tenantId ? Tenant::find($tenantId) : null;
+        $invSettings = $tenant?->settings['invoice'] ?? [];
+        $rawPrefix = !empty($invSettings['invoice_prefix']) ? $invSettings['invoice_prefix'] : 'INV-';
+
+        // Clean prefix (e.g. "#ARM-" -> "ARM-", "#FIT-" -> "FIT-", "INV-" -> "INV-")
+        $prefix = ltrim(trim($rawPrefix), '#');
+        if (!str_ends_with($prefix, '-') && !str_ends_with($prefix, '/')) {
+            $prefix .= '-';
+        }
+
+        $baseQuery = static::withoutGlobalScopes();
+        if ($tenantId) {
+            $baseQuery->where('tenant_id', $tenantId);
+        }
+        $count = $baseQuery->count();
+        $seq = $count + 1;
+
+        do {
+            $candidate = $prefix . str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+            $existsQuery = static::withoutGlobalScopes();
+            if ($tenantId) {
+                $existsQuery->where('tenant_id', $tenantId);
+            }
+            $exists = $existsQuery->where('invoice_number', $candidate)->exists();
+            if (!$exists) {
+                return $candidate;
+            }
+            $seq++;
+        } while ($seq < $count + 10000);
+
+        return $prefix . strtoupper(Str::random(6));
+    }
+
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class)->withTrashed();
@@ -48,7 +104,7 @@ class MemberPayment extends Model
 
     public function getReceiptNumberAttribute(): string
     {
-        if (!empty($this->invoice_number) && !str_starts_with($this->invoice_number, 'RCP-') && !str_starts_with($this->invoice_number, 'ARM')) {
+        if (!empty($this->invoice_number)) {
             return $this->invoice_number;
         }
 
@@ -75,7 +131,7 @@ class MemberPayment extends Model
         $invSettings = $tenant?->settings['invoice'] ?? [];
         $tenantSettings = $tenant?->settings ?? [];
 
-        $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant?->name ?? 'Armour 24-7 Gym');
+        $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant?->name ?? 'Gym');
         $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($this->branch?->address ?? ($tenant?->mainBranch?->address ?? '')));
         $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenant?->phone ?? '');
 

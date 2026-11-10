@@ -499,14 +499,7 @@
                     </div>
 
                     <!-- Date of Birth -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth</label>
-                        <input type="date" 
-                               name="dob" 
-                               value="{{ old('dob') }}" 
-                               onclick="this.showPicker && this.showPicker()"
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-sm cursor-pointer">
-                    </div>
+                    <x-dob-picker name="dob" :value="old('dob')" />
 
                     <!-- Blood Group -->
                     <div>
@@ -893,13 +886,7 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date of Birth</label>
-                        <input type="date" 
-                               name="group_members[0][dob]" 
-                               onclick="this.showPicker && this.showPicker()"
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer">
-                    </div>
+                    <x-dob-picker name="group_members[0][dob]" />
 
                     <div class="sm:col-span-2 lg:col-span-3">
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Relationship with Primary Member</label>
@@ -990,11 +977,7 @@
                                            class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-purple-500 focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Date of Birth</label>
-                                    <input type="date" 
-                                           name="group_members[{{ $slot['idx'] }}][dob]" 
-                                           onclick="this.showPicker && this.showPicker()"
-                                           class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-purple-500 focus:outline-none cursor-pointer">
+                                    <x-dob-picker name="group_members[{{ $slot['idx'] }}][dob]" />
                                 </div>
                                 <div class="sm:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>

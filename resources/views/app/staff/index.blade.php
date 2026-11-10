@@ -881,11 +881,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Date of Birth</label>
-                                <input type="date" 
-                                       name="dob" 
-                                       x-model="staffForm.dob" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                <x-dob-picker name="dob" model="staffForm.dob" />
                             </div>
 
                             <div>

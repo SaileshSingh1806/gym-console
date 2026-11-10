@@ -699,7 +699,7 @@ class MemberImportExportService
                                     'netbanking', 'net banking', 'bank' => 'netbanking',
                                     default => 'upi',
                                 };
-                                $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $tenant->id)->max('id') ?? 0) + 1;
+                                $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $tenant->id);
                                 $adminUserId = User::where('tenant_id', $tenant->id)->value('id');
 
                                 MemberPayment::create([
@@ -707,7 +707,7 @@ class MemberImportExportService
                                     'branch_id' => $member->branch_id,
                                     'member_id' => $member->id,
                                     'membership_id' => $membership->id,
-                                    'invoice_number' => 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT),
+                                    'invoice_number' => $invoiceNumber,
                                     'amount' => $paid,
                                     'payment_method' => $mode,
                                     'payment_date' => $row['join_date'] ?? now()->toDateString(),

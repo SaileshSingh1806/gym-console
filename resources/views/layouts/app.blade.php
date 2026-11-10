@@ -46,6 +46,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -108,7 +109,12 @@
 </head>
 <body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
-    @if(!auth()->user()->isMember())
+    @php
+        $authUser = auth()->user();
+        $isPureTrainer = $authUser && ($authUser->role === 'trainer' || ($authUser->isTrainer() && !$authUser->isGymOwner() && !$authUser->isSuperAdmin()));
+    @endphp
+
+    @if(!$authUser?->isMember() && !$isPureTrainer)
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" 
          x-transition:enter="transition-opacity ease-linear duration-200"
@@ -372,6 +378,24 @@
                     <span>SERVICES</span>
                 </div>
                 <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+            @endif
+
+            <!-- Member Feedback Desk -->
+            @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.view', 'members.view']))
+            @php
+                $pendingFeedbacksCount = \App\Models\CrmFeedback::where('tenant_id', $user->tenant_id)->whereIn('status', ['new', 'pending', 'open'])->count();
+            @endphp
+            <a href="{{ route('app.feedback.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.feedback.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                    <span>MEMBER FEEDBACK</span>
+                </div>
+                @if($pendingFeedbacksCount > 0)
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 font-mono">{{ $pendingFeedbacksCount }}</span>
+                @else
+                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                @endif
             </a>
             @endif
             @endif
@@ -780,9 +804,37 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shrink-0">
+        <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-200 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                @if(!auth()->user()->isMember())
+                @if(request()->routeIs('trainer.*') || $isPureTrainer)
+                    @php
+                        $trainerTenant = auth()->user()->tenant ?? null;
+                        $tGymLogo = $trainerTenant?->logo_url;
+                        $resolvedTrainerLogo = $tGymLogo ? (\Illuminate\Support\Str::startsWith($tGymLogo, ['http://', 'https://', '/']) ? $tGymLogo : asset('storage/' . $tGymLogo)) : null;
+                        $tGymName = $trainerTenant?->name ?? 'GymDeskHub';
+                    @endphp
+                    @if(! $isPureTrainer)
+                        <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </button>
+                    @endif
+                    <a href="{{ route('trainer.workspace') }}" class="flex items-center gap-2.5 min-w-0 group">
+                        @if(!empty($resolvedTrainerLogo))
+                            <img src="{{ $resolvedTrainerLogo }}" alt="{{ $tGymName }}" class="h-8 sm:h-9 w-auto max-w-[130px] rounded-lg object-contain">
+                        @else
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0">
+                                {{ strtoupper(substr($tGymName, 0, 2)) }}
+                            </div>
+                        @endif
+                        <div class="flex flex-col min-w-0">
+                            <span class="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight truncate">{{ $tGymName }}</span>
+                            <span class="text-[9px] sm:text-[10px] text-amber-500 font-black uppercase tracking-wider -mt-0.5 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                <span>Trainer App</span>
+                            </span>
+                        </div>
+                    </a>
+                @elseif(!auth()->user()->isMember())
                     <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
                         <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
@@ -791,17 +843,25 @@
                     </div>
                 @else
                     @php
-                        $tenant = auth()->user()->tenant ?? null;
-                        $gymLogo = $tenant?->logo_url;
-                        $gymName = $tenant?->name ?? 'GymDeskHub';
+                        $memberTenant = $tenant ?? (auth()->user()->tenant ?? \App\Services\TenantContext::getTenant());
+                        $gymLogoRaw = $memberTenant?->logo_url;
+                        $resolvedMemberGymLogo = $gymLogoRaw ? (\Illuminate\Support\Str::startsWith($gymLogoRaw, ['http://', 'https://', '/']) ? $gymLogoRaw : asset('storage/' . $gymLogoRaw)) : null;
+                        $gymName = $memberTenant?->name ?? 'GymDeskHub';
                     @endphp
-                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2.5 min-w-0 group">
-                        @if(!empty($gymLogo))
-                            <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[120px] rounded-lg object-contain">
+                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group">
+                        @if(!empty($resolvedMemberGymLogo))
+                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-8 sm:h-9 w-auto max-w-[120px] sm:max-w-[140px] rounded-lg object-contain shrink-0">
+                        @else
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0">
+                                {{ strtoupper(substr($gymName, 0, 2)) }}
+                            </div>
                         @endif
                         <div class="flex flex-col min-w-0">
-                            <span class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight truncate">{{ $gymName }}</span>
-                            <span class="text-[10px] text-amber-500 font-bold uppercase tracking-wider -mt-0.5">Member App</span>
+                            <span class="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight truncate">{{ $gymName }}</span>
+                            <span class="text-[9px] sm:text-[10px] text-emerald-500 dark:text-emerald-400 font-black uppercase tracking-wider -mt-0.5 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Member App</span>
+                            </span>
                         </div>
                     </a>
                 @endif
@@ -811,7 +871,7 @@
             <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                 
                 <!-- Staff / Admin Backoffice Telemetry Widgets -->
-                @if(!auth()->user()->isMember())
+                @if(!$authUser?->isMember() && !$isPureTrainer)
                     @php
                         $todayInsideCount = \App\Models\Attendance::where('date', now()->toDateString())->whereNull('check_out')->count();
                         $todayTotalAttendance = \App\Models\Attendance::where('date', now()->toDateString())->count();
@@ -1102,7 +1162,7 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                         
                         <!-- Account Summary Header -->
                         <div class="p-4 bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20">
@@ -1154,7 +1214,7 @@
 
                         <!-- Navigation Shortcuts -->
                         <div class="py-1.5 text-xs">
-                            @if(!auth()->user()->isMember())
+                            @if(!$authUser?->isMember() && !$isPureTrainer)
                                 @if(auth()->user()->isSuperAdmin())
                                     <a href="{{ route('admin.dashboard') }}" 
                                        class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-medium">
@@ -1190,11 +1250,36 @@
                                 </a>
                             @endif
 
-                            <a href="{{ route('app.support.index') }}" 
-                               class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
-                                <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                                <span>Help & Support</span>
-                            </a>
+                            @if(auth()->user()->isMember())
+                                <a href="{{ route('app.feedback.index') }}" 
+                                   class="flex items-center justify-between px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-colors font-medium">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        <span>Gym Feedback &amp; Suggestions</span>
+                                    </div>
+                                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">To Owner</span>
+                                </a>
+                            @else
+                                <a href="{{ route('app.feedback.index') }}" 
+                                   class="flex items-center justify-between px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                    <div class="flex items-center gap-2.5">
+                                        <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        <span>Member Feedbacks</span>
+                                    </div>
+                                    @php
+                                        $newFeedbackCount = \App\Models\CrmFeedback::where('tenant_id', auth()->user()->tenant_id)->whereIn('status', ['new', 'pending', 'open'])->count();
+                                    @endphp
+                                    @if($newFeedbackCount > 0)
+                                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 font-mono">{{ $newFeedbackCount }}</span>
+                                    @endif
+                                </a>
+
+                                <a href="{{ route('app.support.index') }}" 
+                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                    <span>Platform Support</span>
+                                </a>
+                            @endif
                         </div>
 
                         <!-- Account Actions (Change Password & Logout) -->
@@ -1375,6 +1460,7 @@
     <!-- Mobile Bottom Navigation Bar (Visible only on mobile/tablet) -->
     <nav x-data="{
             activeTab: '{{ request()->query('tab', 'overview') }}',
+            trainerTab: '{{ request()->query('tab', 'today') }}',
             navigate(tabName, url) {
                 this.activeTab = tabName;
                 if (window.location.pathname.includes('/portal')) {
@@ -1391,11 +1477,29 @@
                 } else {
                     window.location.href = url;
                 }
+            },
+            navigateTrainer(tabName, url) {
+                this.trainerTab = tabName;
+                if (window.location.pathname.includes('/app/trainer')) {
+                    window.dispatchEvent(new CustomEvent('trainer-tab-changed', { detail: tabName }));
+                    if (window.history && window.history.replaceState) {
+                        const newUrl = new URL(window.location);
+                        if (tabName === 'today') {
+                            newUrl.searchParams.delete('tab');
+                        } else {
+                            newUrl.searchParams.set('tab', tabName);
+                        }
+                        window.history.replaceState(null, '', newUrl.toString());
+                    }
+                } else {
+                    window.location.href = url;
+                }
             }
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
+         x-on:trainer-tab-changed.window="trainerTab = $event.detail"
          class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors">
-        <div class="grid grid-cols-5 items-center gap-1 max-w-lg mx-auto">
+        <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
                 <!-- Member Fitness App Navigation (Soft Tab Switching) -->
                 <!-- 1. Home -->
@@ -1456,6 +1560,55 @@
                         <span x-show="activeTab === 'memberships'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">My Pass</span>
+                </button>
+            @elseif($isPureTrainer)
+                <!-- Trainer App Mobile Navigation (4 Dedicated Screens) -->
+                <!-- 1. Today -->
+                <button type="button" 
+                        @click="navigateTrainer('today', '{{ route('trainer.workspace', ['tab' => 'today']) }}')"
+                        :class="trainerTab === 'today' ? 'text-amber-500 font-black' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span x-show="trainerTab === 'today'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Today</span>
+                </button>
+
+                <!-- 2. Members -->
+                <button type="button" 
+                        @click="navigateTrainer('members', '{{ route('trainer.workspace', ['tab' => 'members']) }}')"
+                        :class="trainerTab === 'members' ? 'text-amber-500 font-black' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <span x-show="trainerTab === 'members'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Members</span>
+                </button>
+
+                <!-- 3. PT Sessions -->
+                <button type="button" 
+                        @click="navigateTrainer('sessions', '{{ route('trainer.workspace', ['tab' => 'sessions']) }}')"
+                        :class="trainerTab === 'sessions' ? 'text-amber-500 font-black' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        <span x-show="trainerTab === 'sessions'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Sessions</span>
+                </button>
+
+                <!-- 4. Profile -->
+                <button type="button" 
+                        @click="navigateTrainer('profile', '{{ route('trainer.workspace', ['tab' => 'profile']) }}')"
+                        :class="trainerTab === 'profile' ? 'text-amber-500 font-black' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                    <div class="relative p-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        <span x-show="trainerTab === 'profile'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    </div>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Profile</span>
                 </button>
             @else
                 <!-- Admin / Owner / Staff Navigation -->

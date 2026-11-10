@@ -11,6 +11,7 @@ use App\Models\Branch;
 use App\Models\ClassBooking;
 use App\Models\ClassSchedule;
 use App\Models\Coupon;
+use App\Models\CrmFeedback;
 use App\Models\Device;
 use App\Models\DietMeal;
 use App\Models\DietPlan;
@@ -63,6 +64,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -109,6 +111,10 @@ class AppController extends Controller
 
         if ($user && $user->role === 'member') {
             return redirect()->route('app.portal');
+        }
+
+        if ($user && ($user->role === 'trainer' || ($user->isTrainer() && !$user->isGymOwner() && !$user->isSuperAdmin()))) {
+            return redirect()->route('trainer.workspace');
         }
 
         $tenant = $this->resolveTenant();
@@ -232,6 +238,22 @@ class AppController extends Controller
             ->with(['gymClass.instructor', 'trainer'])
             ->get();
 
+        $pendingPtSessions = $member ? PtSession::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('status', 'PENDING')
+            ->with(['trainer', 'memberPtPackage'])
+            ->latest()
+            ->get() : collect();
+
+        $ptSessionsHistory = $member ? PtSession::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->with(['trainer', 'memberPtPackage'])
+            ->orderByDesc('session_date')
+            ->orderByDesc('confirmed_at')
+            ->orderByDesc('id')
+            ->get() : collect();
+
         return view('app.portal.index', compact(
             'tenant',
             'user',
@@ -240,12 +262,18 @@ class AppController extends Controller
             'activeMembership',
             'daysLeft',
             'measurements',
-            'availableClassSchedules'
+            'availableClassSchedules',
+            'pendingPtSessions',
+            'ptSessionsHistory'
         ));
     }
 
-    public function members(Request $request): View
+    public function members(Request $request): View|RedirectResponse
     {
+        $user = auth()->user();
+        if ($user && ($user->role === 'trainer' || ($user->isTrainer() && !$user->isGymOwner() && !$user->isSuperAdmin()))) {
+            return redirect()->route('trainer.workspace', ['tab' => 'members']);
+        }
         $query = Member::with(['branch', 'activeMembership.plan', 'activeMembership.payments', 'memberships.plan']);
 
         if ($request->search) {
@@ -1122,6 +1150,28 @@ class AppController extends Controller
     public function showMember(int $id): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        if ($user && ($user->role === 'trainer' || ($user->isTrainer() && !$user->isGymOwner() && !$user->isSuperAdmin()))) {
+            $trainerProfile = $user->trainerProfile ?? Trainer::where('tenant_id', $tenant->id)->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+                if (!empty($user->phone)) $q->orWhere('phone', $user->phone);
+                if (!empty($user->email)) $q->orWhere('email', $user->email);
+            })->first();
+
+            $isAssigned = Member::where('tenant_id', $tenant->id)
+                ->where('id', $id)
+                ->where(function ($q) use ($trainerProfile) {
+                    $q->where('trainer_id', $trainerProfile->id)
+                      ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainerProfile->id));
+                })
+                ->exists();
+
+            if (!$trainerProfile || !$isAssigned) {
+                abort(403, 'Unauthorized access: You are only allowed to view your assigned PT clients.');
+            }
+        }
+
         $member = Member::with([
             'branch',
             'activeMembership.plan',
@@ -1158,12 +1208,31 @@ class AppController extends Controller
 
         $lastAttendance = $member->attendance()->latest()->first();
 
-        $auditLogs = ActivityLog::where('subject_type', Member::class)
-            ->where('subject_id', $member->id)
-            ->with('user')
-            ->latest()
-            ->take(20)
-            ->get();
+        $paymentIds = $member->payments()->pluck('id')->toArray();
+        $membershipIds = $member->memberships()->pluck('id')->toArray();
+
+        $auditLogs = ActivityLog::where(function ($q) use ($member, $paymentIds, $membershipIds) {
+            $q->where(function ($sub) use ($member) {
+                $sub->where('subject_type', Member::class)
+                    ->where('subject_id', $member->id);
+            });
+            if (! empty($paymentIds)) {
+                $q->orWhere(function ($sub) use ($paymentIds) {
+                    $sub->where('subject_type', MemberPayment::class)
+                        ->whereIn('subject_id', $paymentIds);
+                });
+            }
+            if (! empty($membershipIds)) {
+                $q->orWhere(function ($sub) use ($membershipIds) {
+                    $sub->where('subject_type', Membership::class)
+                        ->whereIn('subject_id', $membershipIds);
+                });
+            }
+        })
+        ->with('user')
+        ->latest()
+        ->take(50)
+        ->get();
 
         $availableClassSchedules = ClassSchedule::where('tenant_id', $tenant->id)
             ->where('is_active', true)
@@ -1387,18 +1456,24 @@ class AppController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
+            if ($trainer && empty($member->trainer_id)) {
+                $member->update(['trainer_id' => $trainer->id]);
+            }
+
             if ($collected > 0) {
+                $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $tenant->id);
+
                 MemberPayment::create([
                     'tenant_id' => $tenant->id,
                     'branch_id' => $member->branch_id,
                     'member_id' => $member->id,
                     'membership_id' => null,
+                    'invoice_number' => $invoiceNumber,
                     'amount' => $collected,
                     'payment_date' => now()->toDateString(),
                     'payment_method' => $validated['payment_method'] ?? 'cash',
                     'transaction_reference' => $validated['transaction_reference'] ?? null,
-                    'receipt_number' => 'RCP'.date('Ymd').rand(100, 999),
-                    'received_by' => auth()->id(),
+                    'received_by_user_id' => auth()->id(),
                     'notes' => "PT Package: {$validated['pt_package_name']} (".($trainer ? $trainer->full_name : 'Trainer').')',
                 ]);
             }
@@ -1790,6 +1865,196 @@ class AppController extends Controller
         ]);
     }
 
+    public function portalPendingPtSessions(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return response()->json(['pending' => []]);
+        }
+
+        $member = Member::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('email', $user->email);
+                if (! empty($user->phone)) {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+                    $suffix10 = strlen($cleanPhone) >= 10 ? substr($cleanPhone, -10) : $cleanPhone;
+                    $q->orWhere('phone', $user->phone);
+                    if (! empty($suffix10)) {
+                        $q->orWhere('phone', 'like', "%{$suffix10}");
+                    }
+                }
+            })->first();
+
+        if (! $member && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+            $member = Member::where('tenant_id', $tenant->id)->latest()->first();
+        }
+
+        if (! $member) {
+            return response()->json(['pending' => []]);
+        }
+
+        $sessions = PtSession::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('status', 'PENDING')
+            ->where(function ($q) {
+                $q->whereNull('token_expires_at')
+                  ->orWhere('token_expires_at', '>', now());
+            })
+            ->with(['trainer', 'memberPtPackage'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'pending' => $sessions->map(fn ($s) => [
+                'id' => $s->id,
+                'token' => $s->confirmation_token,
+                'otp_code' => $s->otp_code,
+                'trainer_name' => $s->trainer?->full_name ?? 'Trainer',
+                'package_name' => $s->memberPtPackage?->package_name ?? 'Personal Training',
+                'remaining_sessions' => $s->memberPtPackage?->remaining_sessions ?? 0,
+                'duration_minutes' => $s->duration_minutes ?? 60,
+                'focus_area' => $s->focus_area ?? 'Strength Training',
+                'created_at' => $s->created_at?->diffForHumans() ?? 'Just now',
+                'confirm_url' => route('pt-session.confirm', $s->confirmation_token),
+            ]),
+        ]);
+    }
+
+    public function portalConfirmPtSession(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return response()->json(['success' => false, 'message' => 'Gym session expired. Please refresh.'], 404);
+        }
+
+        $member = Member::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('email', $user->email);
+                if (! empty($user->phone)) {
+                    $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+                    $suffix10 = strlen($cleanPhone) >= 10 ? substr($cleanPhone, -10) : $cleanPhone;
+                    $q->orWhere('phone', $user->phone);
+                    if (! empty($suffix10)) {
+                        $q->orWhere('phone', 'like', "%{$suffix10}");
+                    }
+                }
+            })->first();
+
+        if (! $member && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+            $member = Member::where('tenant_id', $tenant->id)->latest()->first();
+        }
+
+        $token = trim((string) $request->input('token', ''));
+        $otpCode = trim((string) $request->input('otp_code', ''));
+        $sessionId = $request->input('session_id');
+
+        // Extract token if full confirm URL was scanned
+        if (str_contains($token, '/pt-session/confirm/')) {
+            $parts = explode('/pt-session/confirm/', $token);
+            $token = trim(end($parts));
+        }
+
+        $query = PtSession::with(['tenant', 'member.user', 'trainer', 'memberPtPackage'])
+            ->where('tenant_id', $tenant->id);
+
+        if (! empty($sessionId)) {
+            $query->where('id', $sessionId);
+        } elseif (! empty($token)) {
+            $query->where('confirmation_token', $token);
+        } elseif (! empty($otpCode)) {
+            $query->where('otp_code', $otpCode);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Please provide a valid session QR code, token, or 6-digit backup code.'], 422);
+        }
+
+        $session = $query->latest()->first();
+
+        if (! $session) {
+            return response()->json(['success' => false, 'message' => 'No active pending session found for code ' . ($otpCode ?: $token) . '. Please ask your trainer to refresh the QR.'], 404);
+        }
+
+        // Security check: If authenticated user is a regular member, verify this session belongs to them
+        if ($member && ! in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+            if ((int) $session->member_id !== (int) $member->id) {
+                return response()->json(['success' => false, 'message' => 'Access Denied: This PT session was logged for another member.'], 403);
+            }
+        }
+
+        $package = $session->memberPtPackage;
+        $remainingCount = $package ? max(0, (int) $package->total_sessions - (int) $package->used_sessions) : 0;
+
+        if (in_array($session->status, ['CONFIRMED', 'COMPLETED'])) {
+            return response()->json([
+                'success' => true,
+                'already_confirmed' => true,
+                'message' => 'This PT session is already confirmed!',
+                'remaining_sessions' => $remainingCount,
+            ]);
+        }
+
+        if ($session->token_expires_at && $session->token_expires_at->isPast() && $session->status === 'PENDING') {
+            return response()->json(['success' => false, 'message' => 'This session confirmation QR code has expired. Please ask your trainer to refresh the QR code.'], 422);
+        }
+
+        if ($session->status !== 'PENDING') {
+            return response()->json(['success' => false, 'message' => "This session cannot be confirmed because status is {$session->status}."], 422);
+        }
+
+        $ratingInput = $request->input('rating', 5);
+        $rating = is_numeric($ratingInput) ? max(1, min(5, (int) $ratingInput)) : 5;
+        $feedbackInput = substr(trim((string) $request->input('feedback', '')), 0, 255) ?: null;
+
+        // Atomic transaction with row locking
+        DB::transaction(function () use ($session, $rating, $feedbackInput, &$remainingCount) {
+            $lockedSession = PtSession::where('id', $session->id)->lockForUpdate()->first();
+            if (! $lockedSession || $lockedSession->status !== 'PENDING') {
+                return;
+            }
+
+            if ($lockedSession->member_pt_package_id) {
+                $lockedPackage = MemberPtPackage::where('id', $lockedSession->member_pt_package_id)->lockForUpdate()->first();
+                if ($lockedPackage && $lockedPackage->status === 'ACTIVE') {
+                    $newUsed = min((int) $lockedPackage->total_sessions, (int) $lockedPackage->used_sessions + 1);
+                    $update = ['used_sessions' => $newUsed];
+                    if ($newUsed >= (int) $lockedPackage->total_sessions) {
+                        $update['status'] = 'COMPLETED';
+                    }
+                    $lockedPackage->update($update);
+                    $remainingCount = max(0, (int) $lockedPackage->total_sessions - $newUsed);
+                }
+            }
+
+            $lockedSession->update([
+                'status' => 'CONFIRMED',
+                'completed_at' => now(),
+                'confirmed_at' => now(),
+                'confirmed_by_member_id' => $lockedSession->member_id,
+                'rating' => $rating,
+                'member_feedback' => $feedbackInput,
+            ]);
+
+            ActivityLog::log('pt_session_confirmed', "Member {$session->member?->full_name} confirmed PT session with {$session->trainer?->full_name} via Member App", $lockedSession);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Workout session confirmed successfully! Great job!',
+            'remaining_sessions' => $remainingCount,
+            'session' => [
+                'id' => $session->id,
+                'trainer_name' => $session->trainer?->full_name ?? 'Trainer',
+                'package_name' => $package?->package_name ?? 'Personal Training',
+                'remaining_sessions' => $remainingCount,
+                'duration_minutes' => $session->duration_minutes,
+                'rating' => $rating,
+            ],
+        ]);
+    }
+
     public function payments(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
@@ -2052,8 +2317,7 @@ class AppController extends Controller
                 }
                 $combinedNotes = trim($itemLabel . " | {$breakdown}" . ($notes ? " | {$notes}" : ''));
 
-                $nextSeq = (MemberPayment::withoutGlobalScopes()->where('tenant_id', $tenant->id)->max('id') ?? 0) + 1;
-                $invoiceNumber = 'INV-' . str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT);
+                $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $tenant->id);
 
                 $payment = MemberPayment::create([
                     'tenant_id' => $tenant->id,
@@ -2226,50 +2490,91 @@ class AppController extends Controller
 
         $packages = $packagesQuery->paginate(15, ['*'], 'packages_page')->withQueryString();
 
-        // PT Sessions KPI & Data (Matching Image 3)
+        $user = auth()->user();
+        $isTrainer = $user->role === 'trainer' || $user->trainerProfile !== null;
+        $trainerProfile = $user->trainerProfile;
+
+        // PT Sessions KPI & Data (Pending, Confirmed, Issue Reported, Scheduled)
+        $pendingConfirmationCount = PtSession::where('tenant_id', $tenant->id)
+            ->where('status', 'PENDING')
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
+            ->count();
+
+        $issuesReportedCount = PtSession::where('tenant_id', $tenant->id)
+            ->where('status', 'ISSUE_REPORTED')
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
+            ->count();
+
         $todayScheduledCount = PtSession::where('tenant_id', $tenant->id)
             ->whereDate('session_date', now()->toDateString())
             ->where('status', 'SCHEDULED')
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->count();
 
         $todayCompletedCount = PtSession::where('tenant_id', $tenant->id)
             ->whereDate('session_date', now()->toDateString())
-            ->where('status', 'COMPLETED')
+            ->whereIn('status', ['COMPLETED', 'CONFIRMED'])
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->count();
 
         $thisMonthSessionsCount = PtSession::where('tenant_id', $tenant->id)
             ->whereBetween('session_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
-            ->where('status', 'COMPLETED')
+            ->whereIn('status', ['COMPLETED', 'CONFIRMED'])
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->count();
 
         $noShowsMonthCount = PtSession::where('tenant_id', $tenant->id)
             ->whereBetween('session_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
             ->where('status', 'NO_SHOW')
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->count();
 
         $upcomingSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
             ->where('tenant_id', $tenant->id)
             ->where('status', 'SCHEDULED')
             ->whereDate('session_date', '>=', now()->toDateString())
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->orderBy('session_date')
             ->orderBy('start_time')
             ->take(10)
             ->get();
 
-        $recentCompletedSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+        $recentCompletedSessions = PtSession::with(['member', 'trainer', 'memberPtPackage', 'loggedByUser', 'confirmedByMember'])
             ->where('tenant_id', $tenant->id)
-            ->where('status', 'COMPLETED')
+            ->whereIn('status', ['COMPLETED', 'CONFIRMED'])
+            ->when($isTrainer && $trainerProfile, fn ($q) => $q->where('trainer_id', $trainerProfile->id))
             ->orderByDesc('completed_at')
             ->orderByDesc('session_date')
             ->take(10)
             ->get();
 
-        $allSessions = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+        $sessionsQuery = PtSession::with(['member.branch', 'trainer', 'memberPtPackage', 'loggedByUser', 'confirmedByMember'])
             ->where('tenant_id', $tenant->id)
             ->latest('session_date')
-            ->latest('start_time')
-            ->paginate(15, ['*'], 'sessions_page')
-            ->withQueryString();
+            ->latest('start_time');
+
+        // Scoping by user role
+        if ($user->isMember() && $user->memberProfile) {
+            $sessionsQuery->where('member_id', $user->memberProfile->id);
+        } elseif ($isTrainer && $trainerProfile) {
+            $sessionsQuery->where(function ($q) use ($trainerProfile, $user) {
+                $q->where('trainer_id', $trainerProfile->id)
+                    ->orWhere('logged_by_user_id', $user->id);
+            });
+        } elseif ($user->role === 'gym_manager' && $user->branch_id) {
+            $sessionsQuery->where('branch_id', $user->branch_id);
+        }
+
+        if ($request->filled('session_status') && $request->session_status !== 'all') {
+            $statusVal = strtoupper($request->session_status);
+            if ($statusVal === 'COMPLETED') {
+                $sessionsQuery->whereIn('status', ['COMPLETED', 'CONFIRMED']);
+            } else {
+                $sessionsQuery->where('status', $statusVal);
+            }
+        }
+
+        $allSessions = $sessionsQuery->paginate(15, ['*'], 'sessions_page')->withQueryString();
 
         // Plans Query
         $plans = PtPlan::where('tenant_id', $tenant->id)
@@ -2312,6 +2617,8 @@ class AppController extends Controller
             'revenueMtd',
             'todayScheduledCount',
             'todayCompletedCount',
+            'pendingConfirmationCount',
+            'issuesReportedCount',
             'thisMonthSessionsCount',
             'noShowsMonthCount',
             'upcomingSessions',
@@ -2499,7 +2806,7 @@ class AppController extends Controller
         return redirect()->route('app.pt.index', ['tab' => 'packages'])->with('success', "Personal Training package '{$package->package_name}' assigned to {$member->full_name} successfully!");
     }
 
-    public function logPtSession(Request $request, int $id): RedirectResponse
+    public function logPtSession(Request $request, int $id): JsonResponse|RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $package = MemberPtPackage::where('tenant_id', $tenant->id)->with('member')->findOrFail($id);
@@ -2532,6 +2839,18 @@ class AppController extends Controller
         ActivityLog::log('pt_session_logged', "Logged {$sessionsToLog} PT session(s) for {$package->member?->full_name} on package '{$package->package_name}' (Used: {$newUsed}/{$package->total_sessions})", $package);
 
         $statusMsg = $newUsed >= $package->total_sessions ? ' All sessions completed!' : " ({$package->remaining_sessions} remaining)";
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Session logged for {$package->member?->full_name}!{$statusMsg}",
+                'used_sessions' => $newUsed,
+                'total_sessions' => $package->total_sessions,
+                'remaining_sessions' => $package->remaining_sessions,
+                'percent' => round(($newUsed / max(1, $package->total_sessions)) * 100, 1),
+                'status' => $package->status,
+            ]);
+        }
 
         return back()->with('success', "Session logged for {$package->member?->full_name}!{$statusMsg}");
     }
@@ -2624,6 +2943,405 @@ class AppController extends Controller
         ]);
 
         return back()->with('success', "PT Session status updated to {$validated['status']}.");
+    }
+
+    public function logPtSessionWithQr(Request $request): JsonResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+
+        $validated = $request->validate([
+            'member_id' => 'required|exists:members,id',
+            'member_pt_package_id' => 'required|exists:member_pt_packages,id',
+            'trainer_id' => 'nullable|exists:trainers,id',
+            'duration_minutes' => 'nullable|integer|min:15|max:180',
+            'focus_area' => 'nullable|string|max:150',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($validated['member_id']);
+        $package = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('status', 'ACTIVE')
+            ->findOrFail($validated['member_pt_package_id']);
+
+        if ($package->remaining_sessions <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This PT package has 0 sessions remaining.',
+            ], 422);
+        }
+
+        $trainerId = $validated['trainer_id'] ?? $package->trainer_id ?? auth()->user()->trainerProfile?->id ?? $member->trainer_id;
+
+        $token = Str::random(48);
+        do {
+            $otpCode = (string) random_int(100000, 999999);
+        } while (PtSession::where('tenant_id', $tenant->id)->where('status', 'PENDING')->where('otp_code', $otpCode)->exists());
+
+        $session = PtSession::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $package->branch_id ?? $member->branch_id,
+            'member_id' => $member->id,
+            'trainer_id' => $trainerId,
+            'member_pt_package_id' => $package->id,
+            'session_date' => now()->toDateString(),
+            'start_time' => now()->toTimeString(),
+            'duration_minutes' => (int) ($validated['duration_minutes'] ?? 60),
+            'status' => 'PENDING',
+            'focus_area' => $validated['focus_area'] ?? 'PT Workout Session',
+            'notes' => $validated['notes'] ?? null,
+            'confirmation_token' => $token,
+            'token_expires_at' => now()->addMinutes(30),
+            'logged_by_user_id' => auth()->id(),
+            'otp_code' => $otpCode,
+        ]);
+
+        $session->load(['member', 'trainer', 'memberPtPackage']);
+
+        $confirmUrl = route('pt-session.confirm', ['token' => $token]);
+
+        ActivityLog::log(
+            'pt_session_qr_generated',
+            "Generated PT session QR for {$member->full_name} ({$package->package_name}) - {$session->duration_minutes}m",
+            $session
+        );
+
+        return response()->json([
+            'success' => true,
+            'session_id' => $session->id,
+            'token' => $token,
+            'confirm_url' => $confirmUrl,
+            'otp_code' => $otpCode,
+            'expires_at' => $session->token_expires_at->toIso8601String(),
+            'expires_in_minutes' => 30,
+            'member_name' => $member->full_name,
+            'member_phone' => $member->phone,
+            'package_name' => $package->package_name,
+            'total_sessions' => $package->total_sessions,
+            'used_sessions' => $package->used_sessions,
+            'remaining_sessions' => $package->remaining_sessions,
+            'trainer_name' => $session->trainer?->full_name ?? 'Assigned Trainer',
+            'duration_minutes' => $session->duration_minutes,
+            'focus_area' => $session->focus_area,
+            'status' => 'PENDING',
+        ]);
+    }
+
+    public function getPtSessionQrStatus(int $id): JsonResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $session = PtSession::where('tenant_id', $tenant->id)
+            ->with(['member', 'trainer', 'memberPtPackage', 'loggedByUser'])
+            ->findOrFail($id);
+
+        $isExpired = $session->token_expires_at && $session->token_expires_at->isPast() && $session->status === 'PENDING';
+
+        return response()->json([
+            'id' => $session->id,
+            'status' => $session->status,
+            'is_pending' => $session->status === 'PENDING',
+            'is_confirmed' => in_array($session->status, ['CONFIRMED', 'COMPLETED']),
+            'is_issue_reported' => $session->status === 'ISSUE_REPORTED',
+            'is_expired' => $isExpired,
+            'confirmed_at' => $session->confirmed_at?->format('h:i A, d M Y'),
+            'issue_reported_at' => $session->issue_reported_at?->format('h:i A, d M Y'),
+            'issue_notes' => $session->issue_notes,
+            'remaining_sessions' => $session->memberPtPackage?->remaining_sessions ?? 0,
+            'used_sessions' => $session->memberPtPackage?->used_sessions ?? 0,
+            'total_sessions' => $session->memberPtPackage?->total_sessions ?? 0,
+            'member_name' => $session->member?->full_name,
+            'trainer_name' => $session->trainer?->full_name,
+        ]);
+    }
+
+    public function refreshPtSessionQr(int $id): JsonResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $session = PtSession::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($session->status !== 'PENDING') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only pending sessions can have their QR refreshed.',
+            ], 422);
+        }
+
+        $token = Str::random(48);
+        do {
+            $otpCode = (string) random_int(100000, 999999);
+        } while (PtSession::where('tenant_id', $tenant->id)->where('status', 'PENDING')->where('id', '!=', $session->id)->where('otp_code', $otpCode)->exists());
+
+        $session->update([
+            'confirmation_token' => $token,
+            'token_expires_at' => now()->addMinutes(30),
+            'otp_code' => $otpCode,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'confirm_url' => route('pt-session.confirm', ['token' => $token]),
+            'otp_code' => $otpCode,
+            'expires_at' => $session->token_expires_at->toIso8601String(),
+            'message' => 'New QR code generated successfully!',
+        ]);
+    }
+
+    public function cancelPendingPtSession(int $id): JsonResponse|RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $session = PtSession::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($session->status !== 'PENDING') {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Only pending sessions can be cancelled.'], 422);
+            }
+            return back()->with('error', 'Only pending sessions can be cancelled.');
+        }
+
+        $session->update([
+            'status' => 'CANCELLED',
+        ]);
+
+        ActivityLog::log('pt_session_cancelled', "Cancelled pending PT session for member {$session->member_id}", $session);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Pending session cancelled.']);
+        }
+
+        return back()->with('success', 'Pending session cancelled.');
+    }
+
+    public function showPtSessionConfirm(string $token): View|RedirectResponse
+    {
+        $session = PtSession::with(['tenant', 'branch', 'member.user', 'trainer', 'memberPtPackage', 'loggedByUser'])
+            ->where('confirmation_token', $token)
+            ->firstOrFail();
+
+        $tenant = $session->tenant;
+        $member = $session->member;
+        $trainer = $session->trainer;
+        $package = $session->memberPtPackage;
+        $isExpired = $session->token_expires_at && $session->token_expires_at->isPast() && $session->status === 'PENDING';
+
+        $currentUser = auth()->user();
+        $isAssignedMember = false;
+        $wrongUserLoggedIn = false;
+
+        if ($currentUser) {
+            $isSameUser = $member->user_id && $currentUser->id === $member->user_id;
+            $cleanUserPhone = preg_replace('/[^0-9]/', '', (string) $currentUser->phone);
+            $cleanMemberPhone = preg_replace('/[^0-9]/', '', (string) $member->phone);
+            $isSamePhone = ! empty($cleanUserPhone) && ! empty($cleanMemberPhone) && substr($cleanUserPhone, -10) === substr($cleanMemberPhone, -10);
+
+            if ($isSameUser || $isSamePhone || $currentUser->isGymOwner() || $currentUser->isSuperAdmin()) {
+                $isAssignedMember = true;
+            } else {
+                $wrongUserLoggedIn = true;
+            }
+        }
+
+        return view('public.pt_session_confirm', compact(
+            'session',
+            'tenant',
+            'member',
+            'trainer',
+            'package',
+            'isExpired',
+            'currentUser',
+            'isAssignedMember',
+            'wrongUserLoggedIn'
+        ));
+    }
+
+    public function submitPtSessionConfirm(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $session = PtSession::with(['tenant', 'member.user', 'trainer', 'memberPtPackage'])
+            ->where('confirmation_token', $token)
+            ->firstOrFail();
+
+        // Expired check
+        if ($session->token_expires_at && $session->token_expires_at->isPast() && $session->status === 'PENDING') {
+            $errorMsg = 'This session confirmation QR code has expired. Please ask your trainer to refresh the QR code.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMsg], 422);
+            }
+
+            return back()->with('error', $errorMsg);
+        }
+
+        // Already confirmed check (idempotent / prevents duplicate deduction)
+        if (in_array($session->status, ['CONFIRMED', 'COMPLETED'])) {
+            $msg = 'This session was already confirmed on '.($session->confirmed_at?->format('d M Y, h:i A') ?? 'an earlier time').'!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'already_confirmed' => true,
+                    'message' => $msg,
+                    'remaining_sessions' => $session->memberPtPackage?->remaining_sessions ?? 0,
+                ]);
+            }
+
+            return back()->with('info', $msg);
+        }
+
+        if ($session->status === 'ISSUE_REPORTED') {
+            $msg = 'An issue was already reported for this session.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        if ($session->status !== 'PENDING') {
+            $msg = "This session cannot be confirmed because its status is {$session->status}.";
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        // Security / Verification: Only assigned member or authorized owner/manager
+        $currentUser = auth()->user();
+        $member = $session->member;
+
+        if ($currentUser) {
+            $isSameUser = $member->user_id && $currentUser->id === $member->user_id;
+            $cleanUserPhone = preg_replace('/[^0-9]/', '', (string) $currentUser->phone);
+            $cleanMemberPhone = preg_replace('/[^0-9]/', '', (string) $member->phone);
+            $isSamePhone = ! empty($cleanUserPhone) && ! empty($cleanMemberPhone) && substr($cleanUserPhone, -10) === substr($cleanMemberPhone, -10);
+
+            if (! $isSameUser && ! $isSamePhone && ! in_array($currentUser->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+                $err = "Access Denied: You are logged in as {$currentUser->name}, but this session is assigned to {$member->full_name}.";
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => $err], 403);
+                }
+
+                return back()->with('error', $err);
+            }
+        } else {
+            $phoneInput = trim((string) $request->input('phone_verification', ''));
+            $otpInput = trim((string) $request->input('otp_code', ''));
+
+            if (! empty($phoneInput)) {
+                $cleanInput = preg_replace('/[^0-9]/', '', $phoneInput);
+                $cleanMemberPhone = preg_replace('/[^0-9]/', '', (string) $member->phone);
+                if (substr($cleanInput, -10) !== substr($cleanMemberPhone, -10)) {
+                    $err = 'The phone number entered does not match the member registered for this session.';
+                    if ($request->expectsJson()) {
+                        return response()->json(['success' => false, 'message' => $err], 422);
+                    }
+
+                    return back()->with('error', $err);
+                }
+            } elseif (! empty($otpInput)) {
+                if ($session->otp_code && $otpInput !== $session->otp_code) {
+                    $err = 'Invalid 6-digit confirmation code.';
+                    if ($request->expectsJson()) {
+                        return response()->json(['success' => false, 'message' => $err], 422);
+                    }
+
+                    return back()->with('error', $err);
+                }
+            }
+        }
+
+        // Atomic transaction with row locking
+        DB::transaction(function () use ($session) {
+            $lockedSession = PtSession::where('id', $session->id)->lockForUpdate()->first();
+            if ($lockedSession->status !== 'PENDING') {
+                return;
+            }
+
+            $lockedPackage = MemberPtPackage::where('id', $lockedSession->member_pt_package_id)->lockForUpdate()->first();
+            if ($lockedPackage && $lockedPackage->status === 'ACTIVE') {
+                $newUsed = min($lockedPackage->total_sessions, $lockedPackage->used_sessions + 1);
+                $update = ['used_sessions' => $newUsed];
+                if ($newUsed >= $lockedPackage->total_sessions) {
+                    $update['status'] = 'COMPLETED';
+                }
+                $lockedPackage->update($update);
+            }
+
+            $ratingInput = $request->input('rating');
+            $rating = is_numeric($ratingInput) ? max(1, min(5, (int) $ratingInput)) : null;
+            $feedbackInput = substr(trim((string) $request->input('member_feedback', '')), 0, 255) ?: null;
+
+            $lockedSession->update([
+                'status' => 'CONFIRMED',
+                'completed_at' => now(),
+                'confirmed_at' => now(),
+                'confirmed_by_member_id' => $lockedSession->member_id,
+                'rating' => $rating,
+                'member_feedback' => $feedbackInput,
+            ]);
+
+            ActivityLog::log(
+                'pt_session_confirmed',
+                "PT Session confirmed by member {$lockedSession->member?->full_name} with trainer {$lockedSession->trainer?->full_name} via QR scan",
+                $lockedSession
+            );
+        });
+
+        $session->refresh()->load('memberPtPackage');
+        $remaining = $session->memberPtPackage?->remaining_sessions ?? 0;
+
+        $successMsg = "Session confirmed successfully! 1 session deducted. You have {$remaining} sessions remaining.";
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'status' => 'CONFIRMED',
+                'confirmed_at' => $session->confirmed_at?->format('h:i A, d M Y'),
+                'remaining_sessions' => $remaining,
+                'used_sessions' => $session->memberPtPackage?->used_sessions ?? 0,
+                'total_sessions' => $session->memberPtPackage?->total_sessions ?? 0,
+            ]);
+        }
+
+        return back()->with('success', $successMsg);
+    }
+
+    public function submitPtSessionIssue(Request $request, string $token): JsonResponse|RedirectResponse
+    {
+        $session = PtSession::with(['member', 'trainer', 'memberPtPackage'])
+            ->where('confirmation_token', $token)
+            ->firstOrFail();
+
+        if (in_array($session->status, ['CONFIRMED', 'COMPLETED'])) {
+            return back()->with('error', 'This session has already been confirmed.');
+        }
+
+        $validated = $request->validate([
+            'notes' => 'required|string|min:4|max:500',
+        ]);
+
+        $session->update([
+            'status' => 'ISSUE_REPORTED',
+            'issue_reported_at' => now(),
+            'issue_notes' => $validated['notes'],
+        ]);
+
+        ActivityLog::log(
+            'pt_session_issue_reported',
+            "Issue reported by member {$session->member?->full_name} for PT session on {$session->session_date->format('d M Y')}: {$validated['notes']}",
+            $session
+        );
+
+        $msg = 'Your issue has been reported to the gym manager. Your package balance was NOT deducted.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'status' => 'ISSUE_REPORTED',
+            ]);
+        }
+
+        return back()->with('warning', $msg);
     }
 
     public function trainers(Request $request): View
@@ -3427,6 +4145,9 @@ class AppController extends Controller
             'meals.*.meal_name' => 'nullable|string|max:255',
             'meals.*.items_description' => 'nullable|string',
             'meals.*.calories' => 'nullable|integer|min:0',
+            'meals.*.protein_grams' => 'nullable|integer|min:0',
+            'meals.*.carbs_grams' => 'nullable|integer|min:0',
+            'meals.*.fat_grams' => 'nullable|integer|min:0',
         ]);
 
         $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
@@ -3457,6 +4178,9 @@ class AppController extends Controller
                         'meal_name' => $mealData['meal_name'] ?? 'Meal',
                         'items_description' => $mealData['items_description'] ?? null,
                         'calories' => $mealData['calories'] ?? null,
+                        'protein_grams' => $mealData['protein_grams'] ?? null,
+                        'carbs_grams' => $mealData['carbs_grams'] ?? null,
+                        'fat_grams' => $mealData['fat_grams'] ?? null,
                         'sort_order' => $order++,
                     ]);
                 }
@@ -3491,6 +4215,9 @@ class AppController extends Controller
             'meals.*.meal_name' => 'nullable|string|max:255',
             'meals.*.items_description' => 'nullable|string',
             'meals.*.calories' => 'nullable|integer|min:0',
+            'meals.*.protein_grams' => 'nullable|integer|min:0',
+            'meals.*.carbs_grams' => 'nullable|integer|min:0',
+            'meals.*.fat_grams' => 'nullable|integer|min:0',
         ]);
 
         $isTemplate = $request->boolean('is_template') || empty($validated['member_id']);
@@ -3522,6 +4249,9 @@ class AppController extends Controller
                         'meal_name' => $mealData['meal_name'] ?? 'Meal',
                         'items_description' => $mealData['items_description'] ?? null,
                         'calories' => $mealData['calories'] ?? null,
+                        'protein_grams' => $mealData['protein_grams'] ?? null,
+                        'carbs_grams' => $mealData['carbs_grams'] ?? null,
+                        'fat_grams' => $mealData['fat_grams'] ?? null,
                         'sort_order' => $order++,
                     ]);
                 }
@@ -6065,23 +6795,24 @@ class AppController extends Controller
         // Handle Gym Invoice & Receipt Template Settings
         if ($request->has('invoice') || $request->input('active_tab') === 'invoice_settings') {
             $existingInvoice = $settings['invoice'] ?? [];
+            $defaultPrefix = '#' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $tenant->name) ?: 'INV', 0, 3)) . '-';
             $invoiceData = [
                 'title' => trim($request->input('invoice_title', 'TAX INVOICE')),
-                'prefix' => trim($request->input('invoice_prefix', '#ARM-')),
-                'gym_name' => trim($request->input('invoice_gym_name', '')),
+                'prefix' => trim($request->input('invoice_prefix', $defaultPrefix)),
+                'gym_name' => trim($request->input('invoice_gym_name', $tenant->name)),
                 'address' => trim($request->input('invoice_address', '')),
-                'phone' => trim($request->input('invoice_phone', '')),
-                'email' => trim($request->input('invoice_email', '')),
-                'website' => trim($request->input('invoice_website', '')),
+                'phone' => trim($request->input('invoice_phone', $tenant->phone ?? '')),
+                'email' => trim($request->input('invoice_email', $tenant->email ?? '')),
+                'website' => trim($request->input('invoice_website', $tenant->website ?? '')),
                 'gstin' => trim($request->input('invoice_gstin', '')),
                 'status_text' => trim($request->input('invoice_status_text', 'PAID IN FULL')),
                 'verification_text' => trim($request->input('invoice_verification_text', 'Verified & Recorded')),
                 'terms' => trim($request->input('invoice_terms', '')),
-                'thank_you' => trim($request->input('invoice_thank_you', '')),
-                'helpline' => trim($request->input('invoice_helpline', '')),
-                'footer_email' => trim($request->input('invoice_footer_email', '')),
-                'footer_web' => trim($request->input('invoice_footer_web', '')),
-                'tagline' => trim($request->input('invoice_tagline', 'BIGGER SPACE | BIGGER FACILITIES | STRONGER YOU')),
+                'thank_you' => trim($request->input('invoice_thank_you', 'Thank you for training with ' . $tenant->name . '!')),
+                'helpline' => trim($request->input('invoice_helpline', $tenant->phone ?? '')),
+                'footer_email' => trim($request->input('invoice_footer_email', $tenant->email ?? '')),
+                'footer_web' => trim($request->input('invoice_footer_web', $tenant->website ?? '')),
+                'tagline' => trim($request->input('invoice_tagline', '')),
                 'seal_text' => trim($request->input('invoice_seal_text', 'Authorized Signature / Seal')),
                 'signatory_name' => trim($request->input('invoice_signatory_name', '')),
                 'seal_url' => $request->boolean('remove_invoice_seal') ? null : ($existingInvoice['seal_url'] ?? null),
@@ -7674,5 +8405,157 @@ class AppController extends Controller
             'member_name' => $member->full_name,
             'phone' => $member->phone,
         ]);
+    }
+
+    /**
+     * Display member feedbacks / suggestions (Gym Member view or Owner Management view).
+     */
+    public function memberFeedback(Request $request): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        if ($user->isMember()) {
+            $member = Member::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                    if (! empty($user->phone)) {
+                        $q->orWhere('phone', $user->phone);
+                    }
+                })->first();
+
+            $myFeedbacks = CrmFeedback::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user, $member) {
+                    $q->where('user_id', $user->id);
+                    if ($member) {
+                        $q->orWhere('member_id', $member->id);
+                    }
+                })
+                ->latest()
+                ->paginate(15);
+
+            return view('app.feedback.member', compact('tenant', 'user', 'member', 'myFeedbacks'));
+        }
+
+        // Gym Owner / Staff Feedback Management Desk
+        $query = CrmFeedback::where('tenant_id', $tenant->id)->with(['member', 'user']);
+
+        if ($category = $request->get('category')) {
+            if ($category !== 'all') {
+                $query->where('category', $category);
+            }
+        }
+
+        if ($status = $request->get('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('member_name', 'like', "%{$search}%")
+                    ->orWhere('member_phone', 'like', "%{$search}%")
+                    ->orWhere('comments', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+
+        $feedbacks = $query->latest()->paginate(20)->withQueryString();
+
+        $counts = [
+            'total' => CrmFeedback::where('tenant_id', $tenant->id)->count(),
+            'pending' => CrmFeedback::where('tenant_id', $tenant->id)->whereIn('status', ['new', 'pending', 'open'])->count(),
+            'reviewed' => CrmFeedback::where('tenant_id', $tenant->id)->where('status', 'under_review')->count(),
+            'resolved' => CrmFeedback::where('tenant_id', $tenant->id)->whereIn('status', ['resolved', 'action_taken', 'closed'])->count(),
+            'avg_rating' => round((float) CrmFeedback::where('tenant_id', $tenant->id)->whereNotNull('rating')->avg('rating'), 1) ?: 5.0,
+        ];
+
+        return view('app.feedback.index', compact('tenant', 'user', 'feedbacks', 'counts'));
+    }
+
+    /**
+     * Submit member feedback / suggestion to gym owner.
+     */
+    public function storeMemberFeedback(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        $validated = $request->validate([
+            'category' => 'required|string|max:50',
+            'rating' => 'nullable|integer|min:1|max:5',
+            'comments' => 'required|string|max:2000',
+            'is_anonymous' => 'nullable|boolean',
+        ]);
+
+        $member = Member::where('tenant_id', $tenant->id)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+                if (! empty($user->phone)) {
+                    $q->orWhere('phone', $user->phone);
+                }
+            })->first();
+
+        $isAnon = $request->boolean('is_anonymous');
+
+        $feedback = CrmFeedback::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $member?->branch_id ?? TenantContext::branchId(),
+            'member_id' => $isAnon ? null : $member?->id,
+            'user_id' => $isAnon ? null : $user->id,
+            'member_name' => $isAnon ? 'Anonymous Member' : ($member?->full_name ?? $user->name),
+            'member_phone' => $isAnon ? null : ($member?->phone ?? $user->phone),
+            'rating' => $validated['rating'] ?? 5,
+            'category' => $validated['category'],
+            'comments' => $validated['comments'],
+            'is_anonymous' => $isAnon,
+            'status' => 'new',
+        ]);
+
+        ActivityLog::log('member_feedback_submitted', "Member feedback submitted: {$validated['category']}", $feedback);
+
+        return back()->with('success', 'Thank you! Your feedback has been shared directly with gym management.');
+    }
+
+    /**
+     * Update status and owner notes on a member feedback.
+     */
+    public function updateMemberFeedbackStatus(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $feedback = CrmFeedback::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:new,under_review,action_taken,resolved,closed',
+            'admin_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $updateData = [
+            'status' => $validated['status'],
+        ];
+        if ($request->has('admin_notes')) {
+            $updateData['admin_notes'] = $validated['admin_notes'];
+        }
+
+        if (in_array($validated['status'], ['resolved', 'action_taken', 'closed'])) {
+            $updateData['resolved_at'] = now();
+        }
+
+        $feedback->update($updateData);
+
+        return back()->with('success', 'Feedback status updated successfully.');
+    }
+
+    /**
+     * Delete a feedback entry.
+     */
+    public function deleteMemberFeedback(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $feedback = CrmFeedback::where('tenant_id', $tenant->id)->findOrFail($id);
+        $feedback->delete();
+
+        return back()->with('success', 'Feedback entry removed.');
     }
 }

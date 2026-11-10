@@ -87,6 +87,11 @@ class Member extends Model
         return $this->hasMany(MemberPtPackage::class);
     }
 
+    public function ptSessions(): HasMany
+    {
+        return $this->hasMany(PtSession::class);
+    }
+
     public function activeMembership(): HasOne
     {
         return $this->hasOne(Membership::class)
