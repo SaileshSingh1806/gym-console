@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 @php
+    $isMemberUser = auth()->check() && auth()->user()->isMember();
     $serverThemeMode = 'dark';
     if (!empty($savedThemeSettings)) {
         $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
-        if (!empty($st['mode']) && $st['mode'] === 'light') {
+        if (!empty($st['mode']) && $st['mode'] === 'light' && !$isMemberUser) {
             $serverThemeMode = 'light';
         }
     }
+    $resolvedThemeKey = $themeStorageKey ?? ($isMemberUser ? 'member_portal' : 'admin');
+    $effectiveSavedTheme = $isMemberUser ? ['mode' => 'dark', 'accent' => 'luxury-studio', 'isCustom' => true, 'customHex' => '#C5A880'] : ($savedThemeSettings ?? null);
 @endphp
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $serverThemeMode }} h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $isMemberUser ? 'dark' : $serverThemeMode }} h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <x-theme-head-styles :saved-theme="$savedThemeSettings ?? null" :storage-key="$themeStorageKey ?? 'admin'" />
+    <x-theme-head-styles :saved-theme="$effectiveSavedTheme" :storage-key="$resolvedThemeKey" />
 
     <title>{{ $title ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}</title>
 
@@ -107,7 +110,7 @@
     @endif
     <x-workspace-ui-styles />
 </head>
-<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isMemberUser ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115]' : 'bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }} selection:bg-[#C5A880]/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     @php
         $authUser = auth()->user();
@@ -804,7 +807,7 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 bg-white/95 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-200 shrink-0">
+        <header class="h-16 {{ $isMemberUser ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4]' : 'bg-white/95 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800' }} backdrop-blur-md px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-200 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @if(request()->routeIs('trainer.*') || $isPureTrainer)
                     @php
@@ -848,20 +851,17 @@
                         $resolvedMemberGymLogo = $gymLogoRaw ? (\Illuminate\Support\Str::startsWith($gymLogoRaw, ['http://', 'https://', '/']) ? $gymLogoRaw : asset('storage/' . $gymLogoRaw)) : null;
                         $gymName = $memberTenant?->name ?? 'GymDeskHub';
                     @endphp
-                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group">
+                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2.5 sm:gap-3 min-w-0 group">
                         @if(!empty($resolvedMemberGymLogo))
-                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-8 sm:h-9 w-auto max-w-[120px] sm:max-w-[140px] rounded-lg object-contain shrink-0">
+                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-9 sm:h-10 w-auto max-w-[130px] sm:max-w-[160px] rounded-lg object-contain shrink-0">
                         @else
-                            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/20 shrink-0">
+                            <div class="w-10 h-10 rounded-xl bg-[#171A22] border border-[#C5A880]/35 text-[#C5A880] font-black text-sm flex items-center justify-center shadow-sm shrink-0">
                                 {{ strtoupper(substr($gymName, 0, 2)) }}
                             </div>
                         @endif
-                        <div class="flex flex-col min-w-0">
-                            <span class="font-extrabold text-slate-900 dark:text-white text-xs sm:text-sm tracking-tight truncate">{{ $gymName }}</span>
-                            <span class="text-[9px] sm:text-[10px] text-emerald-500 dark:text-emerald-400 font-black uppercase tracking-wider -mt-0.5 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span>Member App</span>
-                            </span>
+                        <div class="flex flex-col min-w-0 justify-center">
+                            <span class="font-extrabold text-white text-base sm:text-lg tracking-tight truncate leading-tight">{{ $gymName }}</span>
+                            <span class="text-[11px] text-neutral-400 font-medium tracking-wide truncate hidden xs:block">{{ $memberTenant?->city ?? 'Club Member' }}</span>
                         </div>
                     </a>
                 @endif
@@ -1132,7 +1132,7 @@
                 @endif
 
                 <!-- User Profile & Account Dropdown -->
-                <div class="relative flex items-center pl-0.5 sm:pl-1" 
+                <div class="relative flex items-center pl-0.5 sm:pl-1 z-50" 
                      x-data="{ 
                          userMenuOpen: false, 
                          showPasswordModal: {{ ($errors->has('current_password') || $errors->has('password')) ? 'true' : 'false' }},
@@ -1140,16 +1140,36 @@
                          showNewPass: false,
                          showConfirmPass: false
                      }">
-                    <!-- Trigger Avatar Button -->
-                    <button @click="userMenuOpen = !userMenuOpen" 
-                            type="button" 
-                            class="group relative flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
-                            title="Account Profile & Settings">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform border border-white/20">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
-                    </button>
+                    @if($isMemberUser)
+                        <!-- Member Profile Pill Button -->
+                        <button @click="userMenuOpen = !userMenuOpen" 
+                                type="button" 
+                                class="group relative flex items-center gap-2 sm:gap-2.5 p-1 sm:pl-3 sm:pr-2.5 sm:py-1 rounded-full bg-[#171A22] hover:bg-neutral-800/90 border border-neutral-800 hover:border-[#C5A880]/40 transition-all cursor-pointer focus:outline-none"
+                                title="Account Profile & Settings">
+                            <div class="hidden sm:flex flex-col items-end text-right leading-tight">
+                                <span class="text-xs font-bold text-white group-hover:text-[#C5A880] transition-colors truncate max-w-[120px]">{{ auth()->user()->name }}</span>
+                                <span class="text-[9px] font-semibold text-[#C5A880] tracking-wider uppercase">Active Member</span>
+                            </div>
+                            <div class="relative shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black text-xs flex items-center justify-center shadow-md shadow-[#C5A880]/20 group-hover:scale-105 transition-transform">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#171A22]"></span>
+                            </div>
+                            <svg class="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#C5A880] transition-transform duration-200 hidden sm:block" :class="{ 'rotate-180': userMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    @else
+                        <!-- Staff/Admin Profile Button -->
+                        <button @click="userMenuOpen = !userMenuOpen" 
+                                type="button" 
+                                class="group relative flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
+                                title="Account Profile & Settings">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white border border-white/20 shadow-md shadow-indigo-500/20 font-black text-xs flex items-center justify-center group-hover:scale-105 transition-transform">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
+                        </button>
+                    @endif
 
                     <!-- Dropdown Menu -->
                     <div x-show="userMenuOpen"
@@ -1162,12 +1182,12 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-[100] overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl {{ $isMemberUser ? 'bg-[#171A22] border border-neutral-800 text-[#F4EDE4] divide-neutral-800' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 divide-slate-100 dark:divide-slate-800' }} shadow-2xl z-[9999] overflow-hidden divide-y">
                         
                         <!-- Account Summary Header -->
-                        <div class="p-4 bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20">
+                        <div class="p-4 {{ $isMemberUser ? 'bg-[#0F1115]/80' : 'bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20' }}">
                             <div class="flex items-start gap-3">
-                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white font-black text-base flex items-center justify-center shadow-lg shadow-indigo-500/25 border border-white/20 shrink-0">
+                                <div class="w-11 h-11 rounded-2xl {{ $isMemberUser ? 'bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black shadow-lg shadow-[#C5A880]/25' : 'bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-white/20' }} font-black text-base flex items-center justify-center shrink-0">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0 flex-1">
@@ -1184,7 +1204,7 @@
                                                 'gym_owner'   => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
                                                 'trainer'     => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
                                                 'staff'       => 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-                                                default       => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                                default       => ($isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border-[#C5A880]/30 font-bold' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'),
                                             };
                                         @endphp
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border capitalize {{ $roleBadgeClass }}">
@@ -1252,12 +1272,11 @@
 
                             @if(auth()->user()->isMember())
                                 <a href="{{ route('app.feedback.index') }}" 
-                                   class="flex items-center justify-between px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-colors font-medium">
+                                   class="flex items-center justify-between px-4 py-2.5 text-neutral-300 hover:text-white hover:bg-neutral-800/60 transition-colors font-medium">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        <svg class="w-4 h-4 text-[#C5A880] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                         <span>Gym Feedback &amp; Suggestions</span>
                                     </div>
-                                    <span class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">To Owner</span>
                                 </a>
                             @else
                                 <a href="{{ route('app.feedback.index') }}" 
@@ -1286,7 +1305,7 @@
                         <div class="p-2 space-y-1 text-xs">
                             <button @click="userMenuOpen = false; showPasswordModal = true"
                                     type="button"
-                                    class="w-full flex items-center gap-2.5 px-3 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 rounded-xl transition-colors font-medium text-left cursor-pointer">
+                                    class="w-full flex items-center gap-2.5 px-3 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-[#C5A880] hover:bg-slate-100 dark:hover:bg-slate-800/70 rounded-xl transition-colors font-medium text-left cursor-pointer">
                                 <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                 <span>Change Password</span>
                             </button>
@@ -1294,7 +1313,7 @@
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" 
-                                        class="w-full flex items-center gap-2.5 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors font-semibold text-left cursor-pointer">
+                                        class="w-full flex items-center gap-2.5 px-3 py-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors font-semibold text-left cursor-pointer">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                     <span>Sign Out</span>
                                 </button>
@@ -1315,7 +1334,7 @@
                          x-transition:leave-end="opacity-0">
                         
                         <div @click.away="showPasswordModal = false"
-                             class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden relative"
+                             class="w-full max-w-md {{ $isMemberUser ? 'bg-[#171A22] text-[#F4EDE4] border-neutral-800' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800' }} rounded-3xl border shadow-2xl overflow-hidden relative"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -1324,9 +1343,9 @@
                              x-transition:leave-end="opacity-0 scale-95">
                             
                             <!-- Modal Header -->
-                            <div class="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between">
+                            <div class="px-6 pt-6 pb-4 border-b {{ $isMemberUser ? 'border-neutral-800' : 'border-slate-100 dark:border-slate-800' }} flex items-start justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                                    <div class="w-10 h-10 rounded-2xl {{ $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' }} flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     </div>
                                     <div>
@@ -1498,18 +1517,19 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800/90 px-1 pt-1.5 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.35)] transition-colors">
+         class="fixed bottom-0 inset-x-0 z-[9999] {{ $isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-white/95 dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800/90' }} backdrop-blur-lg px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all"
+         style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 9999 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
-                <!-- Member Fitness App Navigation (Soft Tab Switching) -->
+                <!-- Member Fitness App Navigation (Option 2 Luxury Studio) -->
                 <!-- 1. Home -->
                 <button type="button" 
                         @click="navigate('overview', '{{ route('app.portal') }}')"
-                        :class="activeTab === 'overview' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        :class="activeTab === 'overview' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
                         class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span x-show="activeTab === 'overview'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span x-show="activeTab === 'overview'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Home</span>
                 </button>
@@ -1517,11 +1537,11 @@
                 <!-- 2. Workouts -->
                 <button type="button" 
                         @click="navigate('workouts', '{{ route('app.portal', ['tab' => 'workouts']) }}')"
-                        :class="activeTab === 'workouts' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        :class="activeTab === 'workouts' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
                         class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <span x-show="activeTab === 'workouts'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span x-show="activeTab === 'workouts'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Workout</span>
                 </button>
@@ -1529,37 +1549,37 @@
                 <!-- 3. Diet -->
                 <button type="button" 
                         @click="navigate('diets', '{{ route('app.portal', ['tab' => 'diets']) }}')"
-                        :class="activeTab === 'diets' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        :class="activeTab === 'diets' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
                         class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        <span x-show="activeTab === 'diets'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span x-show="activeTab === 'diets'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Diet</span>
                 </button>
 
-                <!-- 4. Visits / Attendance -->
+                <!-- 4. PT / Coach (Personal Training) -->
                 <button type="button" 
-                        @click="navigate('attendance', '{{ route('app.portal', ['tab' => 'attendance']) }}')"
-                        :class="activeTab === 'attendance' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        @click="navigate('pt', '{{ route('app.portal', ['tab' => 'pt']) }}')"
+                        :class="activeTab === 'pt' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
                         class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span x-show="activeTab === 'attendance'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m-9-9h2m14 0h2"/></svg>
+                        <span x-show="activeTab === 'pt'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Visits</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Coach PT</span>
                 </button>
 
-                <!-- 5. Pass & Invoices -->
+                <!-- 5. Pass & Visits -->
                 <button type="button" 
                         @click="navigate('memberships', '{{ route('app.portal', ['tab' => 'memberships']) }}')"
-                        :class="activeTab === 'memberships' ? 'text-amber-500 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                        :class="activeTab === 'memberships' || activeTab === 'attendance' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
                         class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span x-show="activeTab === 'memberships'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span x-show="activeTab === 'memberships' || activeTab === 'attendance'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">My Pass</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Pass</span>
                 </button>
             @elseif($isPureTrainer)
                 <!-- Trainer App Mobile Navigation (4 Dedicated Screens) -->

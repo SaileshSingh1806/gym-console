@@ -161,7 +161,8 @@
             const serverTheme = window.__SAVED_THEME__;
             const storageKey = 'gym_console_theme_' + window.__THEME_STORAGE_KEY__;
             let theme = serverTheme;
-            const local = localStorage.getItem(storageKey) || localStorage.getItem('gym_console_theme_settings');
+            const isMember = (window.__THEME_STORAGE_KEY__ === 'member_portal');
+            const local = isMember ? localStorage.getItem(storageKey) : (localStorage.getItem(storageKey) || localStorage.getItem('gym_console_theme_settings'));
             if (local) {
                 try {
                     const parsed = JSON.parse(local);

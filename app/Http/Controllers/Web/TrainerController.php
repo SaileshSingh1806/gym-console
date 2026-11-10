@@ -30,42 +30,32 @@ class TrainerController extends Controller
         }
 
         // Resolve Trainer Profile
-        $trainer = $user->trainerProfile;
-        if (! $trainer) {
-            $trainer = Trainer::where('tenant_id', $tenant->id)
-                ->where(function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                    if (! empty($user->phone)) {
-                        $q->orWhere('phone', $user->phone);
-                    }
-                    if (! empty($user->email)) {
-                        $q->orWhere('email', $user->email);
-                    }
-                })->first();
-        }
-
-        // Gym Owner / Manager inspecting trainer workspace
-        if (! $trainer && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
-            $trainerId = $request->query('trainer_id');
-            if ($trainerId) {
-                $trainer = Trainer::where('tenant_id', $tenant->id)->find($trainerId);
-            }
-            if (! $trainer) {
-                $trainer = Trainer::where('tenant_id', $tenant->id)->first();
-            }
-        }
+        $trainer = $this->resolveTrainer($user, $request);
 
         $activeTab = $request->query('tab', 'today');
         if (! in_array($activeTab, ['today', 'members', 'sessions', 'profile'])) {
             $activeTab = 'today';
         }
 
-        // Server-side Scoping: ONLY assigned members in trainer's authorized branch
-        // (Assigned directly on member profile OR having an active PT package assigned to this trainer)
+        // Server-side Scoping: Assigned members OR members in trainer's branch
         $assignedMembers = $trainer ? Member::where('tenant_id', $tenant->id)
-            ->where(function ($q) use ($trainer) {
-                $q->where('trainer_id', $trainer->id)
-                    ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer->id));
+            ->where(function ($q) use ($trainer, $user) {
+                if (in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+                    if ($trainer->branch_id) {
+                        $q->where('branch_id', $trainer->branch_id);
+                    }
+                } else {
+                    $q->where('trainer_id', $trainer->id)
+                        ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer->id));
+                    if ($trainer->branch_id) {
+                        $q->orWhere(function ($branchQ) use ($trainer) {
+                            $branchQ->where('branch_id', $trainer->branch_id)
+                                ->where(function ($tQ) use ($trainer) {
+                                    $tQ->whereNull('trainer_id')->orWhere('trainer_id', $trainer->id);
+                                });
+                        });
+                    }
+                }
             })
             ->when($trainer->branch_id, fn ($q) => $q->where('branch_id', $trainer->branch_id))
             ->with([
@@ -177,7 +167,9 @@ class TrainerController extends Controller
 
         // Active eligible packages for the 3-step logger
         $eligiblePackages = $assignedMembers->flatMap(function ($member) {
-            return $member->memberPtPackages->filter(fn ($pkg) => $pkg->remaining_sessions > 0);
+            return $member->memberPtPackages->filter(fn ($pkg) => $pkg->remaining_sessions > 0)->each(function ($pkg) use ($member) {
+                $pkg->setRelation('member', $member);
+            });
         })->values();
 
         return view('trainer.workspace', compact(
@@ -208,16 +200,56 @@ class TrainerController extends Controller
         ));
     }
 
-    protected function authorizeTrainerMember(User $user, int $memberId): Member
+    protected function resolveTrainer(User $user, ?Request $request = null): ?Trainer
     {
         $tenant = TenantContext::getTenant() ?? $user->tenant;
-        $trainer = $user->trainerProfile ?? Trainer::where('tenant_id', $tenant->id)->where('user_id', $user->id)->first();
+        if (! $tenant) {
+            return null;
+        }
+
+        $trainer = $user->trainerProfile;
+        if (! $trainer) {
+            $trainer = Trainer::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                    if (! empty($user->phone)) {
+                        $q->orWhere('phone', $user->phone);
+                    }
+                    if (! empty($user->email)) {
+                        $q->orWhere('email', $user->email);
+                    }
+                })->first();
+        }
+
+        // Gym Owner / Manager inspecting trainer workspace
+        if (! $trainer && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
+            $trainerId = $request?->query('trainer_id') ?? $request?->input('trainer_id');
+            if ($trainerId) {
+                $trainer = Trainer::where('tenant_id', $tenant->id)->find($trainerId);
+            }
+            if (! $trainer) {
+                $trainer = Trainer::where('tenant_id', $tenant->id)->first();
+            }
+        }
+
+        return $trainer;
+    }
+
+    protected function authorizeTrainerMember(User $user, int $memberId, ?Request $request = null): Member
+    {
+        $tenant = TenantContext::getTenant() ?? $user->tenant;
+        $trainer = $this->resolveTrainer($user, $request);
 
         $memberQuery = Member::where('tenant_id', $tenant->id)->where('id', $memberId);
         if (! in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
             $memberQuery->where(function ($q) use ($trainer) {
-                $q->where('trainer_id', $trainer?->id)
-                    ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer?->id));
+                if ($trainer) {
+                    $q->where('trainer_id', $trainer->id)
+                        ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer->id));
+                    if ($trainer->branch_id) {
+                        $q->orWhere('branch_id', $trainer->branch_id);
+                    }
+                }
             });
         }
 
@@ -227,7 +259,7 @@ class TrainerController extends Controller
     public function storeMeasurement(Request $request, int $id): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
 
         $validated = $request->validate([
             'date' => 'nullable|date',
@@ -310,7 +342,7 @@ class TrainerController extends Controller
     public function deleteMeasurement(Request $request, int $id, string $measurementId): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
 
         $meta = $member->metadata ?? [];
         $measurements = $meta['measurements'] ?? [];
@@ -337,9 +369,9 @@ class TrainerController extends Controller
     public function assignWorkout(Request $request, int $id): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
         $tenant = TenantContext::getTenant() ?? $user->tenant;
-        $trainer = $user->trainerProfile;
+        $trainer = $this->resolveTrainer($user, $request);
 
         $presetId = $request->input('preset_id');
         $templateId = $request->input('template_id');
@@ -445,9 +477,9 @@ class TrainerController extends Controller
     public function assignDiet(Request $request, int $id): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
         $tenant = TenantContext::getTenant() ?? $user->tenant;
-        $trainer = $user->trainerProfile;
+        $trainer = $this->resolveTrainer($user, $request);
 
         $presetId = $request->input('preset_id');
         $templateId = $request->input('template_id');
@@ -578,10 +610,10 @@ class TrainerController extends Controller
         ]);
     }
 
-    public function removeWorkoutPlan(int $id): JsonResponse
+    public function removeWorkoutPlan(Request $request, int $id): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
 
         WorkoutPlan::where('tenant_id', $member->tenant_id)
             ->where('member_id', $member->id)
@@ -594,10 +626,10 @@ class TrainerController extends Controller
         ]);
     }
 
-    public function removeDietPlan(int $id): JsonResponse
+    public function removeDietPlan(Request $request, int $id): JsonResponse
     {
         $user = auth()->user();
-        $member = $this->authorizeTrainerMember($user, $id);
+        $member = $this->authorizeTrainerMember($user, $id, $request);
 
         DietPlan::where('tenant_id', $member->tenant_id)
             ->where('member_id', $member->id)

@@ -217,14 +217,12 @@
             this.stopPolling();
             this.showMemberSheet = false;
             
-            this.loggerForm = {
-                member_id: memberId ? String(memberId) : '',
-                member_pt_package_id: packageId ? String(packageId) : '',
-                trainer_id: '{{ $trainer?->id ?? '' }}',
-                duration_minutes: 60,
-                focus_area: 'Strength Training',
-                notes: ''
-            };
+            this.loggerForm.member_id = memberId ? String(memberId) : '';
+            this.loggerForm.member_pt_package_id = packageId ? String(packageId) : '';
+            this.loggerForm.trainer_id = '{{ $trainer?->id ?? '' }}';
+            this.loggerForm.duration_minutes = 60;
+            this.loggerForm.focus_area = 'Strength Training';
+            this.loggerForm.notes = '';
 
             if (memberId && !packageId) {
                 this.onMemberSelect();
@@ -322,7 +320,8 @@
                     return;
                 }
                 try {
-                    const res = await fetch(`/app/pt-sessions/${sessionId}/qr-status`, {
+                    const url = '{{ route('app.pt-sessions.qr-status', ['id' => '__ID__']) }}'.replace('__ID__', sessionId);
+                    const res = await fetch(url, {
                         headers: { 'Accept': 'application/json' }
                     });
                     const data = await res.json();
@@ -345,7 +344,8 @@
             if (!this.loggerSession.id) return;
             this.loggerSubmitting = true;
             try {
-                const res = await fetch(`/app/pt-sessions/${this.loggerSession.id}/refresh-qr`, {
+                const url = '{{ route('app.pt-sessions.refresh-qr', ['id' => '__ID__']) }}'.replace('__ID__', this.loggerSession.id);
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -369,7 +369,8 @@
         async cancelSession(sessionId) {
             if (!confirm('Cancel this pending session?')) return;
             try {
-                await fetch(`/app/pt-sessions/${sessionId}/cancel-pending`, {
+                const url = '{{ route('app.pt-sessions.cancel-pending', ['id' => '__ID__']) }}'.replace('__ID__', sessionId);
+                await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -421,7 +422,8 @@
             if (!this.selectedMember) return;
             this.measurementSubmitting = true;
             try {
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/measurements`, {
+                const url = '{{ route('trainer.members.store-measurement', ['id' => '__MEMBER_ID__']) }}'.replace('__MEMBER_ID__', this.selectedMember.id);
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -472,7 +474,10 @@
             if (!this.selectedMember || !measId) return;
             if (!confirm('Are you sure you want to delete this measurement entry?')) return;
             try {
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/measurements/${measId}`, {
+                const url = '{{ route('trainer.members.delete-measurement', ['id' => '__MEMBER_ID__', 'measurementId' => '__MEAS_ID__']) }}'
+                    .replace('__MEMBER_ID__', this.selectedMember.id)
+                    .replace('__MEAS_ID__', measId);
+                const res = await fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -747,11 +752,26 @@
         },
 
         async submitAssignWorkout() {
-            if (!this.selectedMember) return;
+            if (!this.selectedMember) {
+                alert('Please select a member first.');
+                return;
+            }
+
+            // Auto-commit any exercise currently typed in inputs
+            if (this.workoutBuilder.newName && this.workoutBuilder.newName.trim()) {
+                this.addExerciseToBuilder();
+            }
+
             if (!this.workoutBuilder.title.trim()) {
                 alert('Please enter a workout plan title.');
                 return;
             }
+
+            if (this.workoutBuilder.preset_id === 'custom' && (!this.workoutBuilder.exercises || this.workoutBuilder.exercises.length === 0)) {
+                alert('Please add at least one exercise to the routine.');
+                return;
+            }
+
             this.planSubmitting = true;
             try {
                 const payload = {
@@ -762,7 +782,9 @@
                     exercises: this.workoutBuilder.exercises
                 };
 
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/assign-workout`, {
+                const url = '{{ route('trainer.members.assign-workout', ['id' => '__MEMBER_ID__']) }}'.replace('__MEMBER_ID__', this.selectedMember.id);
+
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -771,30 +793,54 @@
                     },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
-                if (data && data.success) {
+
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (parseErr) {
+                    console.error('Non-JSON response:', parseErr);
+                }
+
+                if (res.ok && data && data.success) {
                     this.selectedMember.active_workout = data.plan;
                     // Also update in assignedMembersList
                     const found = this.assignedMembersList.find(m => String(m.id) === String(this.selectedMember.id));
                     if (found) found.active_workout = data.plan;
                     this.showAssignModal = false;
-                    alert(data.message);
+                    alert(data.message || 'Workout plan assigned successfully!');
                 } else {
-                    alert(data.message || 'Failed to assign workout.');
+                    const errorMsg = data?.message || `Server error (${res.status}): Failed to assign workout.`;
+                    alert(errorMsg);
                 }
             } catch (e) {
-                alert('Error assigning workout.');
+                console.error('submitAssignWorkout error:', e);
+                alert('Network error while assigning workout: ' + (e.message || 'Please check connection.'));
             } finally {
                 this.planSubmitting = false;
             }
         },
 
         async submitAssignDiet() {
-            if (!this.selectedMember) return;
+            if (!this.selectedMember) {
+                alert('Please select a member first.');
+                return;
+            }
+
+            // Auto-commit any meal currently typed in inputs
+            if (this.dietBuilder.newDesc && this.dietBuilder.newDesc.trim()) {
+                this.saveMealToBuilder();
+            }
+
             if (!this.dietBuilder.title.trim()) {
                 alert('Please enter a diet plan title.');
                 return;
             }
+
+            if (this.dietBuilder.preset_id === 'custom' && (!this.dietBuilder.meals || this.dietBuilder.meals.length === 0)) {
+                alert('Please add at least one meal to the diet plan.');
+                return;
+            }
+
             this.planSubmitting = true;
             try {
                 const payload = {
@@ -807,7 +853,9 @@
                     meals: this.dietBuilder.meals
                 };
 
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/assign-diet`, {
+                const url = '{{ route('trainer.members.assign-diet', ['id' => '__MEMBER_ID__']) }}'.replace('__MEMBER_ID__', this.selectedMember.id);
+
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -816,19 +864,28 @@
                     },
                     body: JSON.stringify(payload)
                 });
-                const data = await res.json();
-                if (data && data.success) {
+
+                let data = null;
+                try {
+                    data = await res.json();
+                } catch (parseErr) {
+                    console.error('Non-JSON response:', parseErr);
+                }
+
+                if (res.ok && data && data.success) {
                     this.selectedMember.active_diet = data.plan;
                     // Also update in assignedMembersList
                     const found = this.assignedMembersList.find(m => String(m.id) === String(this.selectedMember.id));
                     if (found) found.active_diet = data.plan;
                     this.showAssignModal = false;
-                    alert(data.message);
+                    alert(data.message || 'Diet plan assigned successfully!');
                 } else {
-                    alert(data.message || 'Failed to assign diet.');
+                    const errorMsg = data?.message || `Server error (${res.status}): Failed to assign diet.`;
+                    alert(errorMsg);
                 }
             } catch (e) {
-                alert('Error assigning diet.');
+                console.error('submitAssignDiet error:', e);
+                alert('Network error while assigning diet: ' + (e.message || 'Please check connection.'));
             } finally {
                 this.planSubmitting = false;
             }
@@ -841,25 +898,28 @@
             }
             this.planSubmitting = true;
             try {
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/workout-plan`, {
+                const url = '{{ route('trainer.members.remove-workout', ['id' => '__MEMBER_ID__']) }}'.replace('__MEMBER_ID__', this.selectedMember.id);
+                const res = await fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     }
                 });
-                const data = await res.json();
-                if (data && data.success) {
+                let data = null;
+                try { data = await res.json(); } catch (_) {}
+                if (res.ok && data && data.success) {
                     this.selectedMember.active_workout = null;
                     const found = this.assignedMembersList.find(m => String(m.id) === String(this.selectedMember.id));
                     if (found) found.active_workout = null;
                     this.showWorkoutDetails = false;
                     this.showAssignModal = false;
-                    alert(data.message);
+                    alert(data.message || 'Workout plan removed.');
                 } else {
-                    alert(data.message || 'Failed to remove workout plan.');
+                    alert(data?.message || `Server error (${res.status}): Failed to remove workout.`);
                 }
             } catch (e) {
+                console.error(e);
                 alert('Error removing workout plan.');
             } finally {
                 this.planSubmitting = false;
@@ -873,25 +933,28 @@
             }
             this.planSubmitting = true;
             try {
-                const res = await fetch(`/app/trainer/members/${this.selectedMember.id}/diet-plan`, {
+                const url = '{{ route('trainer.members.remove-diet', ['id' => '__MEMBER_ID__']) }}'.replace('__MEMBER_ID__', this.selectedMember.id);
+                const res = await fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     }
                 });
-                const data = await res.json();
-                if (data && data.success) {
+                let data = null;
+                try { data = await res.json(); } catch (_) {}
+                if (res.ok && data && data.success) {
                     this.selectedMember.active_diet = null;
                     const found = this.assignedMembersList.find(m => String(m.id) === String(this.selectedMember.id));
                     if (found) found.active_diet = null;
                     this.showDietDetails = false;
                     this.showAssignModal = false;
-                    alert(data.message);
+                    alert(data.message || 'Diet plan removed.');
                 } else {
-                    alert(data.message || 'Failed to remove diet plan.');
+                    alert(data?.message || `Server error (${res.status}): Failed to remove diet.`);
                 }
             } catch (e) {
+                console.error(e);
                 alert('Error removing diet plan.');
             } finally {
                 this.planSubmitting = false;
@@ -1617,8 +1680,8 @@
         <!-- ========================================================= -->
         <!-- MEMBER DETAIL SHEET (Slide-Up Drawer)                     -->
         <!-- ========================================================= -->
-        <div x-show="showMemberSheet" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[88vh] overflow-y-auto p-4 sm:p-5 shadow-xl space-y-4" @click.away="showMemberSheet = false">
+        <div x-show="showMemberSheet" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[88vh] overflow-y-auto p-4 sm:p-5 pb-24 sm:pb-5 shadow-xl space-y-4" @click.away="showMemberSheet = false">
                 
                 <!-- Drawer Top Handle on Mobile -->
                 <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
@@ -2022,8 +2085,8 @@
         <!-- ========================================================= -->
         <!-- TWO-SCREEN PT SESSION LOGGER (Compact Sheet & QR View)    -->
         <!-- ========================================================= -->
-        <div x-show="showLoggerModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl space-y-4" @click.away="showLoggerModal = false; stopPolling()">
+        <div x-show="showLoggerModal" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4" @click.away="showLoggerModal = false; stopPolling()">
                 
                 <!-- Drag handle on mobile -->
                 <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
@@ -2059,12 +2122,11 @@
                             @foreach($assignedMembers as $m)
                                 @php
                                     $pkg = $m->memberPtPackages->first();
+                                    $rem = $pkg ? $pkg->remaining_sessions : 0;
                                 @endphp
-                                @if($pkg && $pkg->remaining_sessions > 0)
-                                    <option value="{{ $m->id }}">
-                                        {{ $m->full_name }} ({{ $pkg->remaining_sessions }} sessions left)
-                                    </option>
-                                @endif
+                                <option value="{{ $m->id }}">
+                                    {{ $m->full_name }} @if($rem > 0)({{ $rem }} sessions left)@else(General Member)@endif
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -2077,8 +2139,8 @@
                         <select x-model="loggerForm.member_pt_package_id" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-amber-500 focus:outline-none">
                             <option value="">Select package</option>
                             @foreach($eligiblePackages as $pkg)
-                                <option value="{{ $pkg->id }}" x-show="!loggerForm.member_id || loggerForm.member_id == '{{ $pkg->member_id }}'">
-                                    {{ $pkg->package_name }} &bull; {{ $pkg->remaining_sessions }} remaining
+                                <option value="{{ $pkg->id }}">
+                                    {{ $pkg->package_name }} &bull; {{ $pkg->remaining_sessions }} left ({{ $pkg->member?->full_name }})
                                 </option>
                             @endforeach
                         </select>
@@ -2230,8 +2292,8 @@
         <!-- ========================================================= -->
         <!-- MODAL 1: QUICK MEASUREMENTS LOGGING                       -->
         <!-- ========================================================= -->
-        <div x-show="showMeasurementModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl space-y-4" @click.away="showMeasurementModal = false">
+        <div x-show="showMeasurementModal" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4" @click.away="showMeasurementModal = false">
                 <!-- Mobile drag bar -->
                 <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
 
@@ -2359,8 +2421,8 @@
         <!-- ========================================================= -->
         <!-- MODAL 2: ASSIGN WORKOUT OR DIET PLAN                      -->
         <!-- ========================================================= -->
-        <div x-show="showAssignModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-xl space-y-4" @click.away="showAssignModal = false">
+        <div x-show="showAssignModal" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div class="bg-white dark:bg-[#0d1320] border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4" @click.away="showAssignModal = false">
                 <!-- Mobile drag bar -->
                 <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
 
