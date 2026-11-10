@@ -30,6 +30,7 @@ class MemberPtPackage extends Model
         'discount',
         'final_amount',
         'paid_amount',
+        'trainer_commission_percent',
         'status',
         'notes',
     ];
@@ -41,6 +42,7 @@ class MemberPtPackage extends Model
         'discount' => 'decimal:2',
         'final_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
+        'trainer_commission_percent' => 'decimal:2',
     ];
 
     public function member(): BelongsTo

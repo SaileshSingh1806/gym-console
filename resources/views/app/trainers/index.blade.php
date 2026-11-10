@@ -37,6 +37,7 @@
             certification: '',
             salary: 0,
             salary_type: 'Fixed Monthly',
+            commission_percent: 40,
             salary_pay_day: '1st of every month',
             joining_date: '',
             status: 'ACTIVE',
@@ -139,6 +140,7 @@
                 certification: trainer.certification || '',
                 salary: trainer.salary ? parseFloat(trainer.salary) : 0,
                 salary_type: trainer.salary_type || 'Fixed Monthly',
+                commission_percent: (trainer.commission_percent !== null && trainer.commission_percent !== undefined) ? parseFloat(trainer.commission_percent) : 40,
                 salary_pay_day: trainer.salary_pay_day || '1st of every month',
                 joining_date: trainer.joining_date ? trainer.joining_date.substring(0, 10) : '',
                 status: trainer.status || 'ACTIVE',
@@ -322,6 +324,9 @@
                                             ★ Featured
                                         </span>
                                     @endif
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" title="Trainer's Personal Training Commission">
+                                        {{ number_format($trainer->commission_percent ?? 40, 0) }}% PT Comm
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -434,7 +439,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary ({{ $currency }})</label>
                             <input type="number" step="0.01" name="salary" placeholder="0.00" value="0.00" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
@@ -447,6 +452,13 @@
                                 <option value="Commission Based">Commission Based</option>
                                 <option value="Hourly">Hourly</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
+                            <div class="relative">
+                                <input type="number" step="0.5" min="0" max="100" name="commission_percent" placeholder="40" value="40" class="w-full pl-3 pr-7 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:border-amber-500 focus:outline-none">
+                                <span class="absolute right-2.5 top-2.5 text-xs font-bold text-slate-400">%</span>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
@@ -569,7 +581,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary ({{ $currency }})</label>
                                 <input type="number" step="0.01" name="salary" x-model="trainerForm.salary" placeholder="0.00" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
@@ -582,6 +594,13 @@
                                     <option value="Commission Based">Commission Based</option>
                                     <option value="Hourly">Hourly</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
+                                <div class="relative">
+                                    <input type="number" step="0.5" min="0" max="100" name="commission_percent" x-model="trainerForm.commission_percent" placeholder="40" class="w-full pl-3 pr-7 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:border-amber-500 focus:outline-none">
+                                    <span class="absolute right-2.5 top-2.5 text-xs font-bold text-slate-400">%</span>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>

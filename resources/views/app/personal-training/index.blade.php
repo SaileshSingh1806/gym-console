@@ -44,6 +44,7 @@
             price: 5000,
             discount: 0,
             paid_amount: 5000,
+            trainer_commission_percent: '',
             payment_method: 'upi',
             transaction_reference: '',
             notes: ''
@@ -69,6 +70,7 @@
             certification: '',
             salary: 0,
             salary_type: 'Fixed Monthly',
+            commission_percent: 40,
             salary_pay_day: '1st of every month',
             joining_date: '',
             status: 'ACTIVE',
@@ -81,6 +83,7 @@
         trainerMemberSearch: '',
         membersList: {{ Js::from($members) }},
         plansData: {{ Js::from($plans) }},
+        trainersData: {{ Js::from($trainers) }},
         activePackagesData: {{ Js::from($activeMemberPackages) }},
 
         get assignedCount() {
@@ -151,6 +154,7 @@
                 certification: trainer.certification || '',
                 salary: trainer.salary ? parseFloat(trainer.salary) : 0,
                 salary_type: trainer.salary_type || 'Fixed Monthly',
+                commission_percent: (trainer.commission_percent !== null && trainer.commission_percent !== undefined) ? parseFloat(trainer.commission_percent) : 40,
                 salary_pay_day: trainer.salary_pay_day || '1st of every month',
                 joining_date: trainer.joining_date ? trainer.joining_date.substring(0, 10) : '',
                 status: trainer.status || 'ACTIVE',
@@ -178,6 +182,15 @@
                 this.assignForm.validity_days = selected.validity_days;
                 this.assignForm.price = parseFloat(selected.default_price);
                 this.assignForm.paid_amount = parseFloat(selected.default_price);
+                if (selected.trainer_commission_percent !== null && selected.trainer_commission_percent !== undefined && selected.trainer_commission_percent !== '') {
+                    this.assignForm.trainer_commission_percent = parseFloat(selected.trainer_commission_percent);
+                }
+            }
+        },
+        onTrainerSelect() {
+            const selected = this.trainersData.find(t => t.id == this.assignForm.trainer_id);
+            if (selected && selected.commission_percent !== null && selected.commission_percent !== undefined) {
+                this.assignForm.trainer_commission_percent = parseFloat(selected.commission_percent);
             }
         },
         onMemberSelectForSession() {
@@ -738,15 +751,27 @@
                                         </div>
                                     </td>
 
-                                    <!-- Price -->
+                                    <!-- Price & Commission -->
                                     <td class="py-2.5 px-3">
                                         <div class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($pkg->final_amount, 2) }}</div>
-                                        <div class="text-[10px]">
+                                        <div class="text-[10px] flex items-center gap-1.5 flex-wrap">
                                             @if($pkg->paid_amount >= $pkg->final_amount)
                                                 <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Paid</span>
                                             @else
                                                 <span class="text-amber-600 dark:text-amber-400 font-semibold">Due: {{ $currency }}{{ number_format($pkg->final_amount - $pkg->paid_amount, 2) }}</span>
                                             @endif
+
+                                            @php
+                                                $effComm = (float) (
+                                                    $pkg->trainer_commission_percent
+                                                    ?? $pkg->trainer?->commission_percent
+                                                    ?? $pkg->ptPlan?->trainer_commission_percent
+                                                    ?? 40.0
+                                                );
+                                            @endphp
+                                            <span class="px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[9px] border border-amber-500/20" title="Trainer's Commission Split">
+                                                {{ number_format($effComm, 0) }}% Comm
+                                            </span>
                                         </div>
                                     </td>
 
@@ -1760,10 +1785,10 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Trainer / Coach</label>
-                            <select name="trainer_id" x-model="assignForm.trainer_id" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <select name="trainer_id" x-model="assignForm.trainer_id" @change="onTrainerSelect()" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                 <option value="">-- Select Coach --</option>
                                 @foreach($trainers as $tr)
-                                    <option value="{{ $tr->id }}">{{ $tr->full_name }} ({{ $tr->specialization ?? 'Coach' }})</option>
+                                    <option value="{{ $tr->id }}">{{ $tr->full_name }} ({{ $tr->specialization ?? 'Coach' }} • {{ number_format($tr->commission_percent ?? 40, 0) }}%)</option>
                                 @endforeach
                             </select>
                         </div>
@@ -1794,7 +1819,7 @@
                     <!-- Pricing & Payment -->
                     <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2.5">
                         <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Pricing & Collection</div>
-                        <div class="grid grid-cols-3 gap-2.5">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                             <div>
                                 <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Price ({{ $currency }}) *</label>
                                 <input type="number" step="0.01" name="price" x-model="assignForm.price" required min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
@@ -1806,6 +1831,16 @@
                             <div>
                                 <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Paid Now ({{ $currency }})</label>
                                 <input type="number" step="0.01" name="paid_amount" x-model="assignForm.paid_amount" min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-amber-600 dark:text-amber-400 mb-1 flex items-center justify-between">
+                                    <span>PT Comm (%)</span>
+                                    <span class="text-[9px] text-slate-400 font-normal">Coach split</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="number" step="0.5" min="0" max="100" name="trainer_commission_percent" x-model="assignForm.trainer_commission_percent" placeholder="e.g. 40" class="w-full pl-2.5 pr-6 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-amber-500 focus:outline-none">
+                                    <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1973,7 +2008,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Salary ({{ $currency }})</label>
                             <input type="number" step="0.01" name="salary" placeholder="0.00" value="0.00" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
@@ -1986,6 +2021,13 @@
                                 <option value="Commission Based">Commission Based</option>
                                 <option value="Hourly">Hourly</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
+                            <div class="relative">
+                                <input type="number" step="0.5" min="0" max="100" name="commission_percent" placeholder="40" value="40" class="w-full pl-2.5 pr-6 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:border-amber-500 focus:outline-none">
+                                <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
@@ -2120,7 +2162,7 @@
                         </div>
 
                         <!-- Row 3: Salary, Salary Type, Salary Pay Day, Date of Joining -->
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Salary ({{ $currency }})</label>
                                 <input type="number" step="0.01" name="salary" x-model="trainerForm.salary" placeholder="0.00" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
@@ -2133,6 +2175,13 @@
                                     <option value="Commission Based">Commission Based</option>
                                     <option value="Hourly">Hourly</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
+                                <div class="relative">
+                                    <input type="number" step="0.5" min="0" max="100" name="commission_percent" x-model="trainerForm.commission_percent" placeholder="40" class="w-full pl-2.5 pr-6 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs focus:border-amber-500 focus:outline-none">
+                                    <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>

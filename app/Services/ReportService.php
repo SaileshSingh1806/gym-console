@@ -503,7 +503,12 @@ class ReportService
             $trainerName = $trainer ? $trainer->full_name : 'Unassigned Trainer';
             $trainerSpecialization = $trainer?->specialization ?? 'Personal Trainer';
 
-            $commPercent = (float) ($pkg->ptPlan?->trainer_commission_percent ?? 40.0);
+            $commPercent = (float) (
+                $pkg->trainer_commission_percent
+                ?? $trainer?->commission_percent
+                ?? $pkg->ptPlan?->trainer_commission_percent
+                ?? 40.0
+            );
             $paidAmt = (float) $pkg->paid_amount;
 
             $trainerCommission = round(($paidAmt * $commPercent) / 100, 2);

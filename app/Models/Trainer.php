@@ -27,6 +27,7 @@ class Trainer extends Model
         'hourly_rate',
         'salary',
         'salary_type',
+        'commission_percent',
         'salary_pay_day',
         'joining_date',
         'status',
@@ -38,6 +39,7 @@ class Trainer extends Model
     protected $casts = [
         'hourly_rate' => 'decimal:2',
         'salary' => 'decimal:2',
+        'commission_percent' => 'decimal:2',
         'is_featured' => 'boolean',
         'joining_date' => 'date',
     ];

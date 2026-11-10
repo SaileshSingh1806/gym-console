@@ -1452,6 +1452,7 @@ class AppController extends Controller
                 'discount' => (float) ($validated['discount'] ?? 0),
                 'final_amount' => $totalAmount,
                 'paid_amount' => $collected,
+                'trainer_commission_percent' => $trainer?->commission_percent ?? 40.0,
                 'status' => 'ACTIVE',
                 'notes' => $validated['notes'] ?? null,
             ]);
@@ -2746,6 +2747,7 @@ class AppController extends Controller
             'price' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'paid_amount' => 'nullable|numeric|min:0',
+            'trainer_commission_percent' => 'nullable|numeric|min:0|max:100',
             'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
@@ -2760,6 +2762,12 @@ class AppController extends Controller
         $discount = (float) ($validated['discount'] ?? 0);
         $finalAmount = max(0, $price - $discount);
         $paidAmount = (float) ($validated['paid_amount'] ?? 0);
+
+        $trainer = ! empty($validated['trainer_id']) ? Trainer::find($validated['trainer_id']) : null;
+        $ptPlan = ! empty($validated['pt_plan_id']) ? PtPlan::find($validated['pt_plan_id']) : null;
+        $commPercent = $request->filled('trainer_commission_percent')
+            ? (float) $request->input('trainer_commission_percent')
+            : ($trainer?->commission_percent ?? $ptPlan?->trainer_commission_percent ?? 40.0);
 
         $package = MemberPtPackage::create([
             'tenant_id' => $tenant->id,
@@ -2776,6 +2784,7 @@ class AppController extends Controller
             'discount' => $discount,
             'final_amount' => $finalAmount,
             'paid_amount' => $paidAmount,
+            'trainer_commission_percent' => $commPercent,
             'status' => 'ACTIVE',
             'notes' => $validated['notes'] ?? null,
         ]);
@@ -3412,6 +3421,7 @@ class AppController extends Controller
             'hourly_rate' => 'nullable|numeric|min:0',
             'salary' => 'nullable|numeric|min:0',
             'salary_type' => 'nullable|string|max:50',
+            'commission_percent' => 'nullable|numeric|min:0|max:100',
             'salary_pay_day' => 'nullable|string|max:50',
             'joining_date' => 'nullable|date',
             'status' => 'nullable|in:ACTIVE,INACTIVE,SUSPENDED',
@@ -3425,6 +3435,7 @@ class AppController extends Controller
         $validated['status'] = $validated['status'] ?? 'ACTIVE';
         $validated['salary'] = $validated['salary'] ?? 0.00;
         $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
+        $validated['commission_percent'] = $request->filled('commission_percent') ? (float) $request->input('commission_percent') : 40.0;
         $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
         $validated['is_featured'] = $request->has('is_featured');
 
@@ -3515,6 +3526,7 @@ class AppController extends Controller
             'hourly_rate' => 'nullable|numeric|min:0',
             'salary' => 'nullable|numeric|min:0',
             'salary_type' => 'nullable|string|max:50',
+            'commission_percent' => 'nullable|numeric|min:0|max:100',
             'salary_pay_day' => 'nullable|string|max:50',
             'joining_date' => 'nullable|date',
             'status' => 'nullable|in:ACTIVE,INACTIVE,SUSPENDED',
@@ -3528,6 +3540,9 @@ class AppController extends Controller
         $validated['status'] = $validated['status'] ?? 'ACTIVE';
         $validated['salary'] = $validated['salary'] ?? 0.00;
         $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
+        if ($request->has('commission_percent')) {
+            $validated['commission_percent'] = $request->filled('commission_percent') ? (float) $request->input('commission_percent') : null;
+        }
         $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
         $validated['is_featured'] = $request->has('is_featured');
 
