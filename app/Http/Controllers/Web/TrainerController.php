@@ -15,6 +15,7 @@ use App\Services\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
@@ -78,6 +79,17 @@ class TrainerController extends Controller
             ->orderBy('start_time')
             ->get() : collect();
 
+        // Upcoming Scheduled Slots (Today & Future)
+        $upcomingScheduledSessions = $trainer ? PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->where('status', 'SCHEDULED')
+            ->whereDate('session_date', '>=', now()->toDateString())
+            ->with(['member.branch', 'memberPtPackage'])
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->take(20)
+            ->get() : collect();
+
         // 2. Pending Confirmations (Awaiting member scan/confirm)
         $pendingSessions = $trainer ? PtSession::where('tenant_id', $tenant->id)
             ->where(function ($q) use ($trainer, $user) {
@@ -139,13 +151,15 @@ class TrainerController extends Controller
         // Workout and Diet Templates for quick assigning
         $workoutTemplates = WorkoutPlan::where('tenant_id', $tenant->id)
             ->where('is_template', true)
-            ->select(['id', 'title', 'goal', 'level'])
-            ->get();
+            ->with(['exercises' => fn ($q) => $q->orderBy('sort_order')])
+            ->latest()
+            ->get(['id', 'title', 'goal', 'level', 'notes']);
 
         $dietTemplates = DietPlan::where('tenant_id', $tenant->id)
             ->where('is_template', true)
-            ->select(['id', 'title', 'daily_calories', 'protein_grams', 'carbs_grams', 'fat_grams'])
-            ->get();
+            ->with(['meals' => fn ($q) => $q->orderBy('sort_order')])
+            ->latest()
+            ->get(['id', 'title', 'daily_calories', 'protein_grams', 'carbs_grams', 'fat_grams', 'guidelines']);
 
         $workoutPresets = array_values($this->getWorkoutPresets());
         $dietPresets = array_values($this->getDietPresets());
@@ -165,6 +179,51 @@ class TrainerController extends Controller
             ->where('status', 'ISSUE_REPORTED')
             ->count() : 0;
 
+        // Monthly Performance & Recent Client Feedback
+        $monthStart = now()->startOfMonth()->toDateString();
+        $monthEnd = now()->endOfMonth()->toDateString();
+        $lastMonthStart = now()->subMonthNoOverflow()->startOfMonth()->toDateString();
+        $lastMonthEnd = now()->subMonthNoOverflow()->endOfMonth()->toDateString();
+
+        $thisMonthCompletedCount = $trainer ? PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->whereBetween('session_date', [$monthStart, $monthEnd])
+            ->count() : 0;
+
+        $lastMonthCompletedCount = $trainer ? PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->whereBetween('session_date', [$lastMonthStart, $lastMonthEnd])
+            ->count() : 0;
+
+        $thisMonthHours = $trainer ? round((float) PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->whereBetween('session_date', [$monthStart, $monthEnd])
+            ->sum('duration_minutes') / 60, 1) : 0.0;
+
+        $totalCoachingHours = $trainer ? round((float) PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->sum('duration_minutes') / 60, 1) : 0.0;
+
+        $recentFeedbackSessions = $trainer ? PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->whereIn('status', ['CONFIRMED', 'COMPLETED'])
+            ->where(function ($q) {
+                $q->whereNotNull('rating')
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('member_feedback')
+                            ->where('member_feedback', '!=', '');
+                    });
+            })
+            ->with(['member:id,first_name,last_name,member_code'])
+            ->latest('confirmed_at')
+            ->latest('session_date')
+            ->limit(5)
+            ->get() : collect();
+
         // Active eligible packages for the 3-step logger
         $eligiblePackages = $assignedMembers->flatMap(function ($member) {
             return $member->memberPtPackages->filter(fn ($pkg) => $pkg->remaining_sessions > 0)->each(function ($pkg) use ($member) {
@@ -179,6 +238,7 @@ class TrainerController extends Controller
             'activeTab',
             'assignedMembers',
             'todaySessions',
+            'upcomingScheduledSessions',
             'pendingSessions',
             'allSessions',
             'todayCount',
@@ -188,6 +248,11 @@ class TrainerController extends Controller
             'assignedCount',
             'completedTotalCount',
             'issueReportedCount',
+            'thisMonthCompletedCount',
+            'lastMonthCompletedCount',
+            'thisMonthHours',
+            'totalCoachingHours',
+            'recentFeedbackSessions',
             'eligiblePackages',
             'sessionStatus',
             'renewalAlerts',
@@ -577,6 +642,9 @@ class TrainerController extends Controller
                         'meal_name' => $meal->meal_name,
                         'items_description' => $meal->items_description,
                         'calories' => $meal->calories,
+                        'protein_grams' => $meal->protein_grams,
+                        'carbs_grams' => $meal->carbs_grams,
+                        'fat_grams' => $meal->fat_grams,
                         'sort_order' => $meal->sort_order,
                     ]);
                 }
@@ -801,6 +869,387 @@ class TrainerController extends Controller
                 ],
             ],
         ];
+    }
+
+    /**
+     * Schedule an upcoming PT session slot for an assigned client.
+     */
+    public function scheduleSession(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = TenantContext::getTenant() ?? $user->tenant;
+        $trainer = $this->resolveTrainer($user, $request);
+
+        if (! $tenant || ! $trainer) {
+            return response()->json(['success' => false, 'message' => 'Trainer profile not found.'], 403);
+        }
+
+        $validated = $request->validate([
+            'member_id' => 'required|integer|exists:members,id',
+            'member_pt_package_id' => 'required|integer|exists:member_pt_packages,id',
+            'session_date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required|string|max:20',
+            'duration_minutes' => 'required|integer|min:15|max:180',
+            'focus_area' => 'nullable|string|max:150',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $member = Member::where('tenant_id', $tenant->id)->find($validated['member_id']);
+        if (! $member) {
+            return response()->json(['success' => false, 'message' => 'Member not found in your branch.'], 404);
+        }
+
+        $package = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('status', 'ACTIVE')
+            ->find($validated['member_pt_package_id']);
+
+        if (! $package || $package->remaining_sessions <= 0) {
+            return response()->json(['success' => false, 'message' => 'Selected PT package has no remaining sessions.'], 422);
+        }
+
+        $session = PtSession::create([
+            'tenant_id' => $tenant->id,
+            'branch_id' => $member->branch_id ?? $trainer->branch_id,
+            'member_id' => $member->id,
+            'trainer_id' => $trainer->id,
+            'member_pt_package_id' => $package->id,
+            'session_date' => $validated['session_date'],
+            'start_time' => $validated['start_time'],
+            'duration_minutes' => (int) $validated['duration_minutes'],
+            'status' => 'SCHEDULED',
+            'focus_area' => $validated['focus_area'] ?: 'Strength Training',
+            'notes' => $validated['notes'] ?? null,
+            'logged_by_user_id' => $user->id,
+        ]);
+
+        ActivityLog::log(
+            'pt_session_scheduled',
+            "Trainer scheduled PT slot for {$member->full_name} on {$session->session_date->format('d M Y')} at {$session->start_time}",
+            $session
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Slot booked for {$member->full_name} on {$session->session_date->format('d M, Y')}!",
+            'session' => $session,
+        ]);
+    }
+
+    /**
+     * Cancel a future or pending scheduled PT session slot.
+     */
+    public function cancelScheduledSession(Request $request, int $id): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = TenantContext::getTenant() ?? $user->tenant;
+        $trainer = $this->resolveTrainer($user, $request);
+
+        if (! $tenant || ! $trainer) {
+            return response()->json(['success' => false, 'message' => 'Trainer profile not found.'], 403);
+        }
+
+        $session = PtSession::where('tenant_id', $tenant->id)
+            ->where('trainer_id', $trainer->id)
+            ->where('status', 'SCHEDULED')
+            ->find($id);
+
+        if (! $session) {
+            return response()->json(['success' => false, 'message' => 'Scheduled session not found.'], 404);
+        }
+
+        $session->update(['status' => 'CANCELLED']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Scheduled slot cancelled.',
+        ]);
+    }
+
+    /**
+     * Clone an existing workout or diet plan from one member (or template) directly to another assigned member.
+     */
+    public function clonePlan(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = TenantContext::getTenant() ?? $user->tenant;
+        $trainer = $this->resolveTrainer($user, $request);
+
+        if (! $tenant) {
+            return response()->json(['success' => false, 'message' => 'Tenant context not found.'], 403);
+        }
+
+        $validated = $request->validate([
+            'plan_type' => 'required|in:workout,diet',
+            'source_plan_id' => 'required|integer',
+            'target_member_id' => 'required|integer',
+            'title' => 'nullable|string|max:120',
+        ]);
+
+        $targetMember = $this->authorizeTrainerMember($user, (int) $validated['target_member_id'], $request);
+        $planType = $validated['plan_type'];
+        $sourcePlanId = (int) $validated['source_plan_id'];
+        $customTitle = trim((string) ($validated['title'] ?? ''));
+
+        if ($planType === 'workout') {
+            $sourcePlan = WorkoutPlan::where('tenant_id', $tenant->id)
+                ->with('exercises')
+                ->findOrFail($sourcePlanId);
+
+            if ($sourcePlan->member_id) {
+                $this->authorizeTrainerMember($user, (int) $sourcePlan->member_id, $request);
+            }
+
+            $clonedPlan = DB::transaction(function () use ($tenant, $trainer, $targetMember, $sourcePlan, $customTitle) {
+                $targetMember->workoutPlans()->where('is_template', false)->delete();
+
+                $newPlan = WorkoutPlan::create([
+                    'tenant_id' => $tenant->id,
+                    'member_id' => $targetMember->id,
+                    'trainer_id' => $trainer?->id,
+                    'title' => $customTitle !== '' ? $customTitle : $sourcePlan->title,
+                    'goal' => $sourcePlan->goal ?? 'general_fitness',
+                    'level' => $sourcePlan->level ?? 'intermediate',
+                    'start_date' => now()->toDateString(),
+                    'end_date' => now()->addMonths(3)->toDateString(),
+                    'is_template' => false,
+                    'notes' => $sourcePlan->notes,
+                ]);
+
+                foreach ($sourcePlan->exercises as $ex) {
+                    $newPlan->exercises()->create([
+                        'day' => $ex->day,
+                        'exercise_name' => $ex->exercise_name,
+                        'sets' => $ex->sets,
+                        'reps' => $ex->reps,
+                        'weight' => $ex->weight,
+                        'rest_seconds' => $ex->rest_seconds,
+                        'notes' => $ex->notes,
+                        'sort_order' => $ex->sort_order,
+                    ]);
+                }
+
+                return $newPlan->load('exercises');
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Workout plan cloned to {$targetMember->full_name}!",
+                'target_member_id' => $targetMember->id,
+                'plan' => [
+                    'id' => $clonedPlan->id,
+                    'title' => $clonedPlan->title,
+                    'goal' => $clonedPlan->goal,
+                    'level' => $clonedPlan->level,
+                    'exercises_count' => $clonedPlan->exercises->count(),
+                    'exercises' => $clonedPlan->exercises->map(fn ($e) => [
+                        'day' => $e->day,
+                        'name' => $e->exercise_name,
+                        'sets' => $e->sets,
+                        'reps' => $e->reps,
+                        'rest' => $e->rest_seconds,
+                        'notes' => $e->notes,
+                    ]),
+                ],
+            ]);
+        }
+
+        $sourcePlan = DietPlan::where('tenant_id', $tenant->id)
+            ->with('meals')
+            ->findOrFail($sourcePlanId);
+
+        if ($sourcePlan->member_id) {
+            $this->authorizeTrainerMember($user, (int) $sourcePlan->member_id, $request);
+        }
+
+        $clonedPlan = DB::transaction(function () use ($tenant, $trainer, $targetMember, $sourcePlan, $customTitle) {
+            $targetMember->dietPlans()->where('is_template', false)->delete();
+
+            $newPlan = DietPlan::create([
+                'tenant_id' => $tenant->id,
+                'member_id' => $targetMember->id,
+                'trainer_id' => $trainer?->id,
+                'title' => $customTitle !== '' ? $customTitle : $sourcePlan->title,
+                'daily_calories' => $sourcePlan->daily_calories,
+                'protein_grams' => $sourcePlan->protein_grams,
+                'carbs_grams' => $sourcePlan->carbs_grams,
+                'fat_grams' => $sourcePlan->fat_grams,
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addMonths(3)->toDateString(),
+                'is_template' => false,
+                'guidelines' => $sourcePlan->guidelines,
+            ]);
+
+            foreach ($sourcePlan->meals as $meal) {
+                $newPlan->meals()->create([
+                    'meal_type' => $meal->meal_type,
+                    'recommended_time' => $meal->recommended_time,
+                    'meal_name' => $meal->meal_name,
+                    'items_description' => $meal->items_description,
+                    'calories' => $meal->calories,
+                    'protein_grams' => $meal->protein_grams,
+                    'carbs_grams' => $meal->carbs_grams,
+                    'fat_grams' => $meal->fat_grams,
+                    'sort_order' => $meal->sort_order,
+                ]);
+            }
+
+            return $newPlan->load('meals');
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "Diet plan cloned to {$targetMember->full_name}!",
+            'target_member_id' => $targetMember->id,
+            'plan' => [
+                'id' => $clonedPlan->id,
+                'title' => $clonedPlan->title,
+                'calories' => $clonedPlan->daily_calories,
+                'protein' => $clonedPlan->protein_grams,
+                'carbs' => $clonedPlan->carbs_grams,
+                'fat' => $clonedPlan->fat_grams,
+                'meals_count' => $clonedPlan->meals->count(),
+                'meals' => $clonedPlan->meals->map(fn ($m) => [
+                    'type' => $m->meal_type,
+                    'time' => $m->recommended_time ? substr((string) $m->recommended_time, 0, 5) : '',
+                    'name' => $m->meal_name,
+                    'description' => $m->items_description,
+                    'calories' => $m->calories,
+                    'protein' => $m->protein_grams,
+                    'carbs' => $m->carbs_grams,
+                    'fat' => $m->fat_grams,
+                ]),
+            ],
+        ]);
+    }
+
+    /**
+     * Save a client's active workout or diet plan as a reusable template for future assignments.
+     */
+    public function saveAsTemplate(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        $tenant = TenantContext::getTenant() ?? $user->tenant;
+        $trainer = $this->resolveTrainer($user, $request);
+
+        if (! $tenant) {
+            return response()->json(['success' => false, 'message' => 'Tenant context not found.'], 403);
+        }
+
+        $validated = $request->validate([
+            'plan_type' => 'required|in:workout,diet',
+            'source_plan_id' => 'required|integer',
+            'title' => 'required|string|max:120',
+        ]);
+
+        $planType = $validated['plan_type'];
+        $sourcePlanId = (int) $validated['source_plan_id'];
+        $templateTitle = trim($validated['title']);
+
+        if ($planType === 'workout') {
+            $sourcePlan = WorkoutPlan::where('tenant_id', $tenant->id)
+                ->with('exercises')
+                ->findOrFail($sourcePlanId);
+
+            if ($sourcePlan->member_id) {
+                $this->authorizeTrainerMember($user, (int) $sourcePlan->member_id, $request);
+            }
+
+            $template = DB::transaction(function () use ($tenant, $trainer, $sourcePlan, $templateTitle) {
+                $newTemplate = WorkoutPlan::create([
+                    'tenant_id' => $tenant->id,
+                    'member_id' => null,
+                    'trainer_id' => $trainer?->id,
+                    'title' => $templateTitle,
+                    'goal' => $sourcePlan->goal ?? 'general_fitness',
+                    'level' => $sourcePlan->level ?? 'intermediate',
+                    'is_template' => true,
+                    'notes' => $sourcePlan->notes,
+                ]);
+
+                foreach ($sourcePlan->exercises as $ex) {
+                    $newTemplate->exercises()->create([
+                        'day' => $ex->day,
+                        'exercise_name' => $ex->exercise_name,
+                        'sets' => $ex->sets,
+                        'reps' => $ex->reps,
+                        'weight' => $ex->weight,
+                        'rest_seconds' => $ex->rest_seconds,
+                        'notes' => $ex->notes,
+                        'sort_order' => $ex->sort_order,
+                    ]);
+                }
+
+                return $newTemplate->load(['exercises' => fn ($q) => $q->orderBy('sort_order')]);
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => "Saved '{$template->title}' to My Workout Templates!",
+                'template' => [
+                    'id' => $template->id,
+                    'title' => $template->title,
+                    'goal' => $template->goal,
+                    'level' => $template->level,
+                    'notes' => $template->notes,
+                    'exercises' => $template->exercises,
+                ],
+            ]);
+        }
+
+        $sourcePlan = DietPlan::where('tenant_id', $tenant->id)
+            ->with('meals')
+            ->findOrFail($sourcePlanId);
+
+        if ($sourcePlan->member_id) {
+            $this->authorizeTrainerMember($user, (int) $sourcePlan->member_id, $request);
+        }
+
+        $template = DB::transaction(function () use ($tenant, $trainer, $sourcePlan, $templateTitle) {
+            $newTemplate = DietPlan::create([
+                'tenant_id' => $tenant->id,
+                'member_id' => null,
+                'trainer_id' => $trainer?->id,
+                'title' => $templateTitle,
+                'daily_calories' => $sourcePlan->daily_calories,
+                'protein_grams' => $sourcePlan->protein_grams,
+                'carbs_grams' => $sourcePlan->carbs_grams,
+                'fat_grams' => $sourcePlan->fat_grams,
+                'is_template' => true,
+                'guidelines' => $sourcePlan->guidelines,
+            ]);
+
+            foreach ($sourcePlan->meals as $meal) {
+                $newTemplate->meals()->create([
+                    'meal_type' => $meal->meal_type,
+                    'recommended_time' => $meal->recommended_time,
+                    'meal_name' => $meal->meal_name,
+                    'items_description' => $meal->items_description,
+                    'calories' => $meal->calories,
+                    'protein_grams' => $meal->protein_grams,
+                    'carbs_grams' => $meal->carbs_grams,
+                    'fat_grams' => $meal->fat_grams,
+                    'sort_order' => $meal->sort_order,
+                ]);
+            }
+
+            return $newTemplate->load(['meals' => fn ($q) => $q->orderBy('sort_order')]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "Saved '{$template->title}' to My Diet Templates!",
+            'template' => [
+                'id' => $template->id,
+                'title' => $template->title,
+                'daily_calories' => $template->daily_calories,
+                'protein_grams' => $template->protein_grams,
+                'carbs_grams' => $template->carbs_grams,
+                'fat_grams' => $template->fat_grams,
+                'guidelines' => $template->guidelines,
+                'meals' => $template->meals,
+            ],
+        ]);
     }
 
     public function updatePassword(Request $request): RedirectResponse

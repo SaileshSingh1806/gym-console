@@ -77,6 +77,10 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
     Route::post('/trainer/members/{id}/assign-diet', [TrainerController::class, 'assignDiet'])->name('trainer.members.assign-diet')->whereNumber('id');
     Route::delete('/trainer/members/{id}/workout-plan', [TrainerController::class, 'removeWorkoutPlan'])->name('trainer.members.remove-workout')->whereNumber('id');
     Route::delete('/trainer/members/{id}/diet-plan', [TrainerController::class, 'removeDietPlan'])->name('trainer.members.remove-diet')->whereNumber('id');
+    Route::post('/trainer/plans/clone', [TrainerController::class, 'clonePlan'])->name('trainer.plans.clone');
+    Route::post('/trainer/plans/save-template', [TrainerController::class, 'saveAsTemplate'])->name('trainer.plans.save-template');
+    Route::post('/trainer/sessions/schedule', [TrainerController::class, 'scheduleSession'])->name('trainer.sessions.schedule');
+    Route::delete('/trainer/sessions/{id}/cancel-scheduled', [TrainerController::class, 'cancelScheduledSession'])->name('trainer.sessions.cancel-scheduled')->whereNumber('id');
 
     // 1. Members Management
     Route::middleware(['feature:members_management'])->group(function () {

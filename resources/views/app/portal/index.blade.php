@@ -1564,6 +1564,51 @@
                         </div>
                     </div>
 
+                    <!-- Upcoming Scheduled PT Sessions (Booked by Coach) -->
+                    @if(isset($upcomingPtSessions) && $upcomingPtSessions->isNotEmpty())
+                        <div class="rounded-3xl bg-[#171A22] border border-[#C5A880]/30 p-5 sm:p-6 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 rounded-2xl bg-[#C5A880]/15 text-[#C5A880] flex items-center justify-center text-lg font-black shrink-0 border border-[#C5A880]/30">
+                                        📅
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-black text-white">Upcoming Scheduled Sessions</h4>
+                                        <p class="text-xs text-slate-400 mt-0.5">PT training slots booked by your coach</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30">
+                                    {{ $upcomingPtSessions->count() }} Upcoming
+                                </span>
+                            </div>
+
+                            <div class="space-y-2.5">
+                                @foreach($upcomingPtSessions as $upSess)
+                                    <div class="p-3.5 rounded-2xl bg-[#0F1115]/80 border border-neutral-800 flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <div class="w-11 h-11 rounded-xl bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 flex flex-col items-center justify-center shrink-0">
+                                                <span class="text-[9px] font-black uppercase leading-none">{{ $upSess->session_date->format('M') }}</span>
+                                                <span class="text-sm font-black leading-none mt-0.5">{{ $upSess->session_date->format('d') }}</span>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-xs font-black text-white truncate">
+                                                        {{ $upSess->session_date->isToday() ? 'Today' : ($upSess->session_date->isTomorrow() ? 'Tomorrow' : $upSess->session_date->format('l, d M')) }}
+                                                    </span>
+                                                    <span class="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[9px] font-bold uppercase">Booked</span>
+                                                </div>
+                                                <p class="text-[11px] text-slate-400 mt-0.5 truncate">
+                                                    {{ \Carbon\Carbon::parse($upSess->start_time)->format('h:i A') }} &bull; {{ $upSess->duration_minutes ?? 60 }} mins &bull; {{ $upSess->focus_area ?? 'PT Workout' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-[#C5A880] shrink-0">{{ $upSess->trainer?->full_name ?? 'Coach' }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Verified PT Sessions Timeline -->
                     <div class="rounded-3xl bg-[#171A22] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="flex items-center justify-between border-b border-neutral-800 pb-3.5">

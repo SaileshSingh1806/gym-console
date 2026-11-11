@@ -254,6 +254,15 @@ class AppController extends Controller
             ->orderByDesc('id')
             ->get() : collect();
 
+        $upcomingPtSessions = $member ? PtSession::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('status', 'SCHEDULED')
+            ->whereDate('session_date', '>=', now()->toDateString())
+            ->with(['trainer', 'memberPtPackage'])
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->get() : collect();
+
         return view('app.portal.index', compact(
             'tenant',
             'user',
@@ -264,7 +273,8 @@ class AppController extends Controller
             'measurements',
             'availableClassSchedules',
             'pendingPtSessions',
-            'ptSessionsHistory'
+            'ptSessionsHistory',
+            'upcomingPtSessions'
         ));
     }
 
