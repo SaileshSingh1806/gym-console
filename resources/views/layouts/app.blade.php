@@ -52,7 +52,7 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -828,10 +828,10 @@
                             </div>
                         @endif
                         <div class="flex flex-col min-w-0">
-                            <span class="font-extrabold text-white text-xs sm:text-sm tracking-tight truncate">{{ $tGymName }}</span>
-                            <span class="text-[9px] sm:text-[10px] text-[#C5A880] font-black uppercase tracking-wider -mt-0.5 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-pulse"></span>
-                                <span>Trainer App</span>
+                            <span class="font-extrabold text-white text-sm sm:text-base md:text-lg tracking-tight truncate leading-tight">{{ $tGymName }}</span>
+                            <span class="text-[11px] sm:text-xs text-[#C5A880] font-bold uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-pulse shrink-0"></span>
+                                <span class="truncate">Trainer App</span>
                             </span>
                         </div>
                     </a>

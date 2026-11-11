@@ -4083,9 +4083,13 @@ class AppController extends Controller
             'exercises.*.exercise_name' => 'required_with:exercises|string|max:255',
             'exercises.*.day' => 'nullable|string',
             'exercises.*.sets' => 'nullable|integer|min:1',
+            'exercises.*.tracking_type' => 'nullable|in:reps,time',
+            'exercises.*.duration_value' => 'nullable|numeric|min:1|max:86400',
+            'exercises.*.duration_unit' => 'nullable|in:seconds,minutes',
+            'exercises.*.duration_seconds' => 'nullable|integer|min:1|max:86400',
             'exercises.*.reps' => 'nullable|string',
             'exercises.*.weight' => 'nullable|string',
-            'exercises.*.rest_seconds' => 'nullable|integer',
+            'exercises.*.rest_seconds' => 'nullable|integer|min:0',
             'exercises.*.notes' => 'nullable|string',
             'exercises.*.video_url' => 'nullable|string|max:500',
         ]);
@@ -4123,15 +4127,39 @@ class AppController extends Controller
                     $dayInput = strtolower(str_replace(' ', '_', (string) ($ex['day'] ?? 'day_1')));
                     $day = in_array($dayInput, $validDays) ? $dayInput : 'day_1';
 
+                    $trackingType = ($ex['tracking_type'] ?? 'reps') === 'time' ? 'time' : 'reps';
+                    $durationSeconds = null;
+                    $repsValue = trim((string) ($ex['reps'] ?? ''));
+
+                    if ($trackingType === 'time') {
+                        if (! empty($ex['duration_seconds'])) {
+                            $durationSeconds = max(1, (int) $ex['duration_seconds']);
+                        } elseif (! empty($ex['duration_value'])) {
+                            $unitMultiplier = ($ex['duration_unit'] ?? 'minutes') === 'seconds' ? 1 : 60;
+                            $durationSeconds = max(1, (int) round(((float) $ex['duration_value']) * $unitMultiplier));
+                        } else {
+                            $durationSeconds = 900;
+                        }
+
+                        $repsValue = ($durationSeconds >= 60 && $durationSeconds % 60 === 0)
+                            ? ($durationSeconds / 60) . ' min'
+                            : $durationSeconds . ' sec';
+                    } elseif ($repsValue === '') {
+                        $repsValue = '10-12';
+                    }
+
                     WorkoutExercise::create([
                         'workout_plan_id' => $workout->id,
-                        'day' => $ex['day'] ?? 'Day 1',
                         'day' => $day,
                         'exercise_name' => $ex['exercise_name'],
-                        'sets' => $ex['sets'] ?? 3,
-                        'reps' => $ex['reps'] ?? '10-12',
+                        'sets' => max(1, (int) ($ex['sets'] ?? ($trackingType === 'time' ? 1 : 3))),
+                        'tracking_type' => $trackingType,
+                        'duration_seconds' => $durationSeconds,
+                        'reps' => $repsValue,
                         'weight' => $ex['weight'] ?? null,
-                        'rest_seconds' => $ex['rest_seconds'] ?? 60,
+                        'rest_seconds' => isset($ex['rest_seconds']) && $ex['rest_seconds'] !== ''
+                            ? max(0, (int) $ex['rest_seconds'])
+                            : ($trackingType === 'time' ? 0 : 60),
                         'notes' => $ex['notes'] ?? null,
                         'video_url' => $ex['video_url'] ?? null,
                         'sort_order' => $order++,
@@ -4162,13 +4190,16 @@ class AppController extends Controller
     public function diets(): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $plans = DietPlan::with(['member', 'trainer', 'meals'])->latest()->paginate(15);
+        $plans = DietPlan::with(['member', 'trainer', 'meals'])
+            ->where('is_template', true)
+            ->latest()
+            ->paginate(15);
         $members = Member::where('status', 'ACTIVE')->orderBy('first_name')->get();
         $trainers = Trainer::where('status', 'ACTIVE')->orderBy('first_name')->get();
 
-        $totalPlans = DietPlan::count();
-        $memberPlansCount = DietPlan::whereNotNull('member_id')->where('is_template', false)->count();
         $templatePlansCount = DietPlan::where('is_template', true)->count();
+        $totalPlans = $templatePlansCount;
+        $memberPlansCount = 0;
         $indianFoods = \App\Services\IndianFoodDatabase::all();
         $foodCategories = \App\Services\IndianFoodDatabase::categories();
 

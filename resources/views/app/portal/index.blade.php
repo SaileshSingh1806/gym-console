@@ -1297,6 +1297,14 @@
                                     isDone(id) {
                                         return !!this.doneMap[id];
                                     },
+                                    completeAllDayDone() {
+                                        const meta = this.dayMeta[this.workoutDay];
+                                        if (!meta) return;
+                                        const next = Object.assign({}, this.doneMap);
+                                        (meta.ids || []).forEach((id) => { next[id] = true; });
+                                        this.doneMap = next;
+                                        this.saveDone();
+                                    },
                                     clearDayDone() {
                                         const meta = this.dayMeta[this.workoutDay];
                                         if (!meta) return;
@@ -1305,12 +1313,16 @@
                                         this.doneMap = next;
                                         this.saveDone();
                                     },
+                                    dayDoneCount(dayKey) {
+                                        const meta = this.dayMeta[dayKey];
+                                        if (!meta || !meta.ids) return 0;
+                                        return meta.ids.filter((id) => !!this.doneMap[id]).length;
+                                    },
                                     get activeDayMeta() {
                                         return this.dayMeta[this.workoutDay] || { label: 'Workout', count: 0, sets: 0, estMinutes: 0, ids: [] };
                                     },
                                     get activeDayDoneCount() {
-                                        const ids = this.activeDayMeta.ids || [];
-                                        return ids.filter((id) => !!this.doneMap[id]).length;
+                                        return this.dayDoneCount(this.workoutDay);
                                     },
                                     get activeDayProgressPct() {
                                         const total = this.activeDayMeta.count || 0;
@@ -1409,17 +1421,28 @@
 
                                 <!-- Live Daily Workout Progress Bar -->
                                 @if(count($workoutDays))
-                                    <div class="relative rounded-2xl bg-[#0F1115]/75 border border-neutral-800 p-3.5 space-y-2">
-                                        <div class="flex items-center justify-between gap-2 text-xs">
+                                    <div class="relative rounded-2xl bg-[#0F1115]/75 border border-neutral-800 p-3.5 sm:p-4 space-y-2.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-slate-300" x-text="activeDayMeta.label + ' Progress'"></span>
+                                                <span class="font-bold text-slate-200" x-text="activeDayMeta.label + ' Progress'"></span>
+                                                <span class="font-black text-[#C5A880] tabular-nums" x-text="activeDayDoneCount + ' / ' + activeDayMeta.count + ' (' + activeDayProgressPct + '%)'"></span>
                                                 <span x-show="activeDayProgressPct === 100" x-cloak class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black">
-                                                    ✓ Completed!
+                                                    ✓ All Done!
                                                 </span>
                                             </div>
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="font-black text-[#C5A880] tabular-nums" x-text="activeDayDoneCount + ' / ' + activeDayMeta.count + ' (' + activeDayProgressPct + '%)'"></span>
-                                                <button type="button" x-show="activeDayDoneCount > 0" x-cloak @click="clearDayDone()" class="text-[10px] font-bold text-slate-400 hover:text-white underline cursor-pointer">
+                                            <div class="flex items-center gap-2">
+                                                <button type="button"
+                                                        x-show="activeDayMeta.count > 0 && activeDayDoneCount < activeDayMeta.count"
+                                                        x-cloak
+                                                        @click="completeAllDayDone()"
+                                                        class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500 text-emerald-300 hover:text-neutral-950 border border-emerald-500/30 text-[11px] font-black transition-colors cursor-pointer">
+                                                    ✓ Complete All
+                                                </button>
+                                                <button type="button"
+                                                        x-show="activeDayDoneCount > 0"
+                                                        x-cloak
+                                                        @click="clearDayDone()"
+                                                        class="px-2 py-1 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-[11px] font-bold text-slate-300 hover:text-white cursor-pointer transition-colors">
                                                     Reset
                                                 </button>
                                             </div>
@@ -1484,8 +1507,9 @@
                                                           class="inline-block px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-1">Today</span>
                                                 @endif
                                                 <span class="block text-xs font-black uppercase tracking-wider">{{ strlen($day) <= 9 ? substr(ucfirst(str_replace('_', ' ', $day)), 0, 3) : ucwords(str_replace('_', ' ', $day)) }}</span>
-                                                <span :class="workoutDay === '{{ $day }}' ? 'text-neutral-900/80' : 'text-slate-400'"
-                                                      class="mt-0.5 block text-[10px] font-semibold">{{ $workoutGroups[$day]->count() }} ex</span>
+                                                <span :class="workoutDay === '{{ $day }}' ? 'text-neutral-900/85 font-bold' : (dayDoneCount('{{ $day }}') === {{ $workoutGroups[$day]->count() }} && {{ $workoutGroups[$day]->count() }} > 0 ? 'text-emerald-400 font-bold' : 'text-slate-400')"
+                                                      class="mt-0.5 block text-[10px] tabular-nums"
+                                                      x-text="(dayDoneCount('{{ $day }}') === {{ $workoutGroups[$day]->count() }} && {{ $workoutGroups[$day]->count() }} > 0 ? '✓ ' : '') + dayDoneCount('{{ $day }}') + '/{{ $workoutGroups[$day]->count() }}'"></span>
                                             </button>
                                         @endforeach
                                     </div>
@@ -1595,27 +1619,33 @@
                                                     </dl>
 
                                                     <!-- Balanced Action Buttons Row -->
-                                                    @if(($ex->rest_seconds ?? 0) > 0 || $videoPayload)
-                                                        <div class="flex flex-wrap items-center gap-2">
-                                                            @if(($ex->rest_seconds ?? 0) > 0)
-                                                                <button type="button"
-                                                                        @click="startRest({{ (int) $ex->rest_seconds }}, {{ Js::from($ex->exercise_name) }})"
-                                                                        class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-[#0F1115] hover:bg-neutral-900 border border-[#C5A880]/30 text-xs font-bold text-[#C5A880] flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                                                                    <span>⏱</span>
-                                                                    <span>Start {{ $ex->rest_seconds }}s Rest</span>
-                                                                </button>
-                                                            @endif
+                                                    <div class="flex flex-wrap items-center gap-2">
+                                                        @if(($ex->rest_seconds ?? 0) > 0)
+                                                            <button type="button"
+                                                                    @click="startRest({{ (int) $ex->rest_seconds }}, {{ Js::from($ex->exercise_name) }})"
+                                                                    class="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl bg-[#0F1115] hover:bg-neutral-900 border border-[#C5A880]/30 text-xs font-bold text-[#C5A880] flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                <span>⏱</span>
+                                                                <span>Start {{ $ex->rest_seconds }}s Rest</span>
+                                                            </button>
+                                                        @endif
 
-                                                            @if($videoPayload)
-                                                                <button type="button"
-                                                                        @click="openExerciseVideo({{ Js::from($videoPayload) }})"
-                                                                        class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black shadow-md shadow-[#C5A880]/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                                                                    <span>▶</span>
-                                                                    <span>Watch Form Video</span>
-                                                                </button>
-                                                            @endif
-                                                        </div>
-                                                    @endif
+                                                        @if($videoPayload)
+                                                            <button type="button"
+                                                                    @click="openExerciseVideo({{ Js::from($videoPayload) }})"
+                                                                    class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black shadow-md shadow-[#C5A880]/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                <span>▶</span>
+                                                                <span>Watch Form Video</span>
+                                                            </button>
+                                                        @endif
+
+                                                        <button type="button"
+                                                                @click="toggleDone({{ $exId }})"
+                                                                :aria-pressed="isDone({{ $exId }})"
+                                                                :class="isDone({{ $exId }}) ? 'bg-emerald-500 text-neutral-950 border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-[#0F1115] hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/35'"
+                                                                class="w-full sm:w-auto sm:min-w-[130px] py-2.5 px-3.5 rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                            <span x-text="isDone({{ $exId }}) ? '✓ Completed' : '○ Mark Complete'"></span>
+                                                        </button>
+                                                    </div>
                                                 </article>
                                             @endforeach
                                         </div>
@@ -1824,9 +1854,11 @@
 
                                                 $rawItems = $meal->items_description ?: ($meal->items ?: '');
                                                 if (str_contains($rawItems, "\n")) {
-                                                    $foodItems = array_filter(array_map('trim', explode("\n", $rawItems)));
+                                                    $foodItems = array_values(array_filter(array_map(fn ($line) => trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($line))), explode("\n", str_replace("\r\n", "\n", $rawItems)))));
                                                 } else {
-                                                    $foodItems = array_filter(array_map('trim', explode(',', $rawItems)));
+                                                    $foodItems = preg_match('/kcal|\bg\s*[PCF]\b|^\s*[•\-\*]/ui', $rawItems)
+                                                        ? [trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($rawItems)))]
+                                                        : array_values(array_filter(array_map(fn ($part) => trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($part))), explode(',', $rawItems))));
                                                 }
                                             @endphp
 

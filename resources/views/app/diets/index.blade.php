@@ -1,5 +1,17 @@
 <x-app-layout header="">
-    <div class="space-y-6">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .diet-ui-scope {
+            font-family: 'Inter', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+        .diet-ui-scope .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+
+    <div class="diet-ui-scope space-y-6">
         <!-- Success / Error Notifications -->
         @if(session('success'))
             <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between shadow-sm">
@@ -9,7 +21,7 @@
                     </div>
                     <span class="text-xs font-semibold">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
             </div>
         @endif
 
@@ -21,7 +33,7 @@
                     </div>
                     <span class="text-xs font-semibold">{{ session('error') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
             </div>
         @endif
 
@@ -39,93 +51,56 @@
         <!-- ==================== TOP HEADER & ACTIONS ==================== -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-                    <span>Diet &amp; Nutrition Plans</span>
+                <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
+                    Diet &amp; Nutrition Plans
                 </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Create personalized daily meal regimes for members, set calories &amp; macros, and dispatch via WhatsApp.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Build custom meal plans, set macro targets, and share with members.</p>
             </div>
 
             <!-- Primary Actions Group -->
             <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <!-- Secondary: Browse Indian Foods -->
                 <button type="button" onclick="openFoodLibraryModal()" 
                         class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                    <span class="text-sm">🍲</span>
-                    <span>Indian Food Library</span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-mono font-bold">{{ count($indianFoods ?? []) }}</span>
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    <span>Food Library</span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-semibold tabular-nums">{{ count($indianFoods ?? []) }}</span>
                 </button>
 
-                <!-- Secondary: AI Diet Assistant -->
                 <button type="button" onclick="openAiDietModal()" 
                         class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                    <span class="text-sm">✨</span>
-                    <span>AI Diet Generator</span>
+                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span>Quick Plan Generator</span>
                 </button>
 
-                <!-- Starter Presets -->
                 <form action="{{ route('app.diets.seed') }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" 
-                            class="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-medium border border-slate-200 dark:border-slate-800 shadow-sm transition-all cursor-pointer"
-                            title="Load pre-built Indian templates">
-                        <span>📋 Presets</span>
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm transition-all cursor-pointer"
+                            title="Load starter templates">
+                        Starter Templates
                     </button>
                 </form>
 
-                <!-- Prominent Primary Action: Assign Diet to Member -->
                 <button type="button" onclick="openDietModal()" 
-                        class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>+ Assign Diet to Member</span>
+                        class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/25 flex items-center gap-2 transition-all cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
+                    <span>Create Diet Plan</span>
                 </button>
             </div>
         </div>
 
-        <!-- ==================== QUICK MEMBER DIET BAR ==================== -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/60 flex items-center justify-center font-bold text-lg shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Quick Member Diet Plan Builder</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Select any gym member to immediately assign or edit their customized nutrition regime.</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <select id="quickMemberSelect" class="px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white font-medium focus:border-indigo-500 min-w-[220px]">
-                    <option value="">-- Select Member to Assign --</option>
-                    @foreach($members as $m)
-                        <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No phone' }})</option>
-                    @endforeach
-                </select>
-                <button type="button" onclick="openDietModalForSelectedMember()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-all whitespace-nowrap cursor-pointer">
-                    Build Plan &rarr;
-                </button>
-            </div>
-        </div>
-
-        <!-- ==================== FILTER TABS & SEARCH BAR ==================== -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                <button type="button" onclick="filterPlans('all')" id="btnFilterAll" 
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm shrink-0">
-                    All Plans ({{ $totalPlans }})
-                </button>
-                <button type="button" onclick="filterPlans('member')" id="btnFilterMember" 
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
-                    Member Assigned ({{ $memberPlansCount }})
-                </button>
-                <button type="button" onclick="filterPlans('template')" id="btnFilterTemplate" 
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
-                    Templates ({{ $templatePlansCount }})
-                </button>
+        <!-- ==================== PLANS TOOLBAR & SEARCH BAR ==================== -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center gap-2.5 px-1">
+                <span class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-sm">
+                    Diet Plans ({{ $templatePlansCount }})
+                </span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">Saved custom diets &amp; reusable meal plans</span>
             </div>
 
             <div class="relative w-full sm:w-72">
                 <input type="text" id="dietSearchInput" oninput="searchDietPlans()" 
-                       placeholder="Search member, phone or plan..." 
+                       placeholder="Search plan title..." 
                        class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
                 <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
@@ -149,6 +124,8 @@
                         'fat_grams' => $plan->fat_grams,
                         'start_date' => $plan->start_date ? $plan->start_date->format('d M Y') : '',
                         'end_date' => $plan->end_date ? $plan->end_date->format('d M Y') : '',
+                        'start_date_iso' => $plan->start_date ? $plan->start_date->format('Y-m-d') : '',
+                        'end_date_iso' => $plan->end_date ? $plan->end_date->format('Y-m-d') : '',
                         'guidelines' => $plan->guidelines,
                         'is_template' => $plan->is_template,
                         'member_id' => $plan->member_id,
@@ -159,6 +136,9 @@
                                 'recommended_time' => $m->recommended_time ? substr($m->recommended_time, 0, 5) : '',
                                 'meal_name' => $m->meal_name,
                                 'calories' => $m->calories,
+                                'protein_grams' => $m->protein_grams,
+                                'carbs_grams' => $m->carbs_grams,
+                                'fat_grams' => $m->fat_grams,
                                 'items_description' => $m->items_description,
                             ];
                         })->toArray(),
@@ -190,13 +170,13 @@
                                         <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ $plan->member->phone ?? 'No phone' }}</p>
                                     </div>
                                 @else
-                                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50 flex items-center justify-center font-bold text-base shrink-0">
-                                        📋
+                                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50 flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5">
-                                            <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">Master Template</h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50">Reusable</span>
+                                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Template Plan</h4>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50">Reusable</span>
                                         </div>
                                         <p class="text-xs text-slate-500 dark:text-slate-400">Can be assigned to any member</p>
                                     </div>
@@ -341,16 +321,16 @@
                     <div class="w-16 h-16 rounded-3xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">No Member Diet Plans Created Yet</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">Assign a custom daily nutrition program to any gym member or use our pre-built Indian templates.</p>
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-1">No Diet Plans Yet</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">Create a custom daily meal plan for a member or load starter templates.</p>
                     <div class="flex items-center justify-center gap-3 flex-wrap">
-                        <button type="button" onclick="openDietModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
-                            + Create Member Diet Plan
+                        <button type="button" onclick="openDietModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                            Create Diet Plan
                         </button>
                         <form action="{{ route('app.diets.seed') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
-                                📋 Load Indian Starter Templates
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
+                                Load Starter Templates
                             </button>
                         </form>
                     </div>
@@ -369,17 +349,17 @@
     <div id="foodLibraryModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
             <!-- Modal Header -->
-            <div class="p-4 sm:p-5 bg-gradient-to-r from-amber-50 via-slate-50 to-white dark:from-amber-950/40 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl shrink-0">
-                        🍲
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-black text-slate-900 dark:text-white">Indian Gym Food &amp; Macro Database</h3>
-                            <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20">{{ count($indianFoods ?? []) }}+ Verified Foods</span>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Food &amp; Macro Library</h3>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-medium border border-amber-500/20 tabular-nums">{{ count($indianFoods ?? []) }} Items</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Accurate Calories, Protein, Carbs, Fats &amp; Fiber measured for Indian bodybuilding &amp; fat loss.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Calories, protein, carbs, fats, and fiber per serving.</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeFoodLibraryModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
@@ -390,20 +370,20 @@
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <div class="relative flex-1">
                         <input type="text" id="foodLibrarySearch" oninput="filterFoodLibrary()" 
-                               placeholder="Search e.g. chicken, paneer, eggs, soya, oats, roti, rice, whey, banana..."
+                               placeholder="Search chicken, paneer, eggs, oats, roti, rice, whey..."
                                class="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500">
                         <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
 
                     <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
-                        <button type="button" onclick="setFoodCategoryFilter('all')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 shadow-sm shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
-                        <button type="button" onclick="setFoodCategoryFilter('non_veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">🍗 Non-Veg &amp; Eggs</button>
-                        <button type="button" onclick="setFoodCategoryFilter('veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="veg_protein">🧀 Veg Protein</button>
-                        <button type="button" onclick="setFoodCategoryFilter('carbs')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="carbs">🍚 Clean Carbs</button>
-                        <button type="button" onclick="setFoodCategoryFilter('fats')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fats">🥜 Healthy Fats</button>
-                        <button type="button" onclick="setFoodCategoryFilter('fruits')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fruits">🍌 Gym Fruits</button>
-                        <button type="button" onclick="setFoodCategoryFilter('salads')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="salads">🥗 Fiber &amp; Sabzi</button>
-                        <button type="button" onclick="setFoodCategoryFilter('gym_meals')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="gym_meals">🍱 Ready Meals &amp; Shakes</button>
+                        <button type="button" onclick="setFoodCategoryFilter('all')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shadow-sm shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
+                        <button type="button" onclick="setFoodCategoryFilter('non_veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">Non-Veg &amp; Eggs</button>
+                        <button type="button" onclick="setFoodCategoryFilter('veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="veg_protein">Veg Protein</button>
+                        <button type="button" onclick="setFoodCategoryFilter('carbs')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="carbs">Carbs</button>
+                        <button type="button" onclick="setFoodCategoryFilter('fats')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fats">Fats</button>
+                        <button type="button" onclick="setFoodCategoryFilter('fruits')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fruits">Fruits</button>
+                        <button type="button" onclick="setFoodCategoryFilter('salads')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
+                        <button type="button" onclick="setFoodCategoryFilter('gym_meals')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
                     </div>
                 </div>
             </div>
@@ -467,8 +447,8 @@
                             </div>
 
                             <div class="pt-2.5 mt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
-                                <span class="text-[9px] px-2 py-0.5 rounded-full {{ $food['gym_purpose'] === 'weight_loss' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ($food['gym_purpose'] === 'muscle_gain' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400') }} font-bold uppercase tracking-wider">
-                                    {{ $food['gym_purpose'] === 'weight_loss' ? '🔥 Weight Loss' : ($food['gym_purpose'] === 'muscle_gain' ? '💪 Muscle Gain' : '⚡ All Goals') }}
+                                <span class="text-[10px] px-2 py-0.5 rounded-full {{ $food['gym_purpose'] === 'weight_loss' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ($food['gym_purpose'] === 'muscle_gain' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300') }} font-medium">
+                                    {{ $food['gym_purpose'] === 'weight_loss' ? 'Weight Loss' : ($food['gym_purpose'] === 'muscle_gain' ? 'Muscle Gain' : 'All Goals') }}
                                 </span>
 
                                 <button type="button" 
@@ -528,7 +508,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                            <span>💬 Live WhatsApp Message Preview</span>
+                            <span>Live WhatsApp Message Preview</span>
                             <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">Formatted Preview</span>
                         </label>
                         <button type="button" onclick="copyModalWaText()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-bold flex items-center gap-1 cursor-pointer">
@@ -565,202 +545,189 @@
     </div>
 
     <!-- ==================== 3. CREATE / EDIT DIET PLAN MODAL ==================== -->
-    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
+    <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/75 backdrop-blur-sm p-3 sm:p-5 overflow-y-auto">
+        <div class="diet-ui-scope bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-100">
             <form id="dietPlanForm" method="POST" action="{{ route('app.diets.store') }}" class="flex flex-col max-h-[92vh]">
                 @csrf
                 <input type="hidden" name="_method" id="dietFormMethod" value="POST">
 
                 <!-- Modal Header -->
-                <div class="p-4 sm:p-5 bg-gradient-to-r from-indigo-50 via-slate-50 to-white dark:from-indigo-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 flex items-center justify-center">
+                <div class="px-5 sm:px-7 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-black text-slate-900 dark:text-white" id="dietModalTitle">Create New Diet Plan</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Configure calories, macro targets, and pick from pre-defined Indian Gym foods.</p>
+                            <h3 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white tracking-tight" id="dietModalTitle">Create Diet Plan</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Set daily targets and build meals using custom items or the food library.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
+                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Close">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
 
                 <!-- Modal Form Body (Scrollable) -->
-                <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
-                    <!-- Step 1: Plan Target (Member vs Master Template) -->
-                    <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-200/80 dark:border-indigo-800/40 space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="p-5 sm:p-7 overflow-y-auto flex-1 space-y-6">
+                    <!-- Section 1: Plan Details & Schedule -->
+                    <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Step 1</span>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Who is this diet plan for?</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Assign directly to a gym member or save as a reusable master template.</p>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Plan Details</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Saved in Diet Plans so coaches can assign it to any member from Trainer or Member views.</p>
                             </div>
 
-                            <input type="hidden" name="is_template" id="dietInputIsTemplate" value="0">
-
-                            <!-- Segmented Switcher -->
-                            <div class="inline-flex p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl shrink-0">
-                                <button type="button" id="btnModeMember" onclick="setPlanTypeMode(0)"
-                                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer">
-                                    <span>👤 Assign to Member</span>
-                                </button>
-                                <button type="button" id="btnModeTemplate" onclick="setPlanTypeMode(1)"
-                                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer">
-                                    <span>📋 Reusable Template</span>
-                                </button>
-                            </div>
+                            <input type="hidden" name="is_template" id="dietInputIsTemplate" value="1">
                         </div>
 
-                        <!-- Member Selection Box (Shown in Member Mode) -->
-                        <div id="memberSelectGroup" class="space-y-1.5 pt-1">
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                                Select Member <span class="text-rose-500">*</span>
-                            </label>
-                            <select name="member_id" id="dietInputMemberId" onchange="handleModalMemberChange()"
-                                    class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-indigo-500 shadow-sm">
-                                <option value="">-- Choose Member from Active Gym Members --</option>
-                                @foreach($members as $m)
-                                    <option value="{{ $m->id }}" data-name="{{ $m->full_name }}">{{ $m->full_name }} ({{ $m->phone ?? 'No Phone' }})</option>
-                                @endforeach
-                            </select>
-                            <p class="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
-                                <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span>Assigned plan will appear on the member's profile &amp; can be sent to their WhatsApp with 1 click.</span>
-                            </p>
-                        </div>
-
-                        <!-- Template Explanatory Note (Shown only in Template Mode) -->
-                        <div id="templateNoteGroup" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-700 dark:text-amber-300 font-medium">
-                            📋 <strong>Master Template:</strong> This diet won't belong to a specific member. It will be saved as a reusable template that you can clone for any member later.
-                        </div>
-
-                        <!-- Plan Title -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">
                                 Plan Title <span class="text-rose-500">*</span>
                             </label>
-                            <input type="text" name="title" id="dietInputTitle" required placeholder="e.g. Muscle Building &amp; Leaning Plan (2,200 kcal)"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:outline-none focus:border-indigo-500">
+                            <input type="text" name="title" id="dietInputTitle" required placeholder="e.g. Lean Muscle Plan (2,200 kcal)"
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:border-indigo-500">
+                        </div>
+
+                        <!-- Coach & Dates -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Assigned Coach</label>
+                                <select name="trainer_id" id="dietInputTrainerId"
+                                        class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                    <option value="">No specific coach</option>
+                                    @foreach($trainers as $t)
+                                        <option value="{{ $t->id }}">{{ $t->full_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Start Date</label>
+                                <input type="date" name="start_date" id="dietInputStartDate"
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">End Date</label>
+                                <input type="date" name="end_date" id="dietInputEndDate"
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Macro Target Box with Quick Preset Calculators -->
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <!-- Section 2: Daily Targets -->
+                    <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Daily Calorie &amp; Macro Targets</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Set total daily calorie budget and macronutrient distribution.</p>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Daily Calorie &amp; Macro Targets</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Adjust manually or pick a macro split.</p>
                             </div>
 
                             <!-- Macro Presets Quick Buttons -->
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold">Auto Split:</span>
-                                <button type="button" onclick="autoCalculateMacros('muscle_gain')" class="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-[10px] font-bold hover:bg-indigo-500/20 transition-colors">
-                                    💪 Muscle Gain (High Prot)
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="autoCalculateMacros('muscle_gain')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                                    High Protein
                                 </button>
-                                <button type="button" onclick="autoCalculateMacros('fat_loss')" class="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-bold hover:bg-emerald-500/20 transition-colors">
-                                    🔥 Fat Loss (Cutting)
+                                <button type="button" onclick="autoCalculateMacros('fat_loss')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
+                                    Fat Loss
                                 </button>
-                                <button type="button" onclick="autoCalculateMacros('maintenance')" class="px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
-                                    ⚖️ Balanced
+                                <button type="button" onclick="autoCalculateMacros('maintenance')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer">
+                                    Balanced
                                 </button>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase mb-1">Target Calories (kcal) *</label>
-                                <input type="number" name="daily_calories" id="dietInputCalories" required value="2000" min="500" max="10000"
-                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black font-mono focus:outline-none focus:border-amber-500">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    <span>Calories (kcal) <span class="text-rose-500">*</span></span>
+                                </label>
+                                <input type="number" name="daily_calories" id="dietInputCalories" required value="2000" min="0" max="15000"
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase mb-1">Protein (Grams)</label>
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    <span>Protein (g)</span>
+                                </label>
                                 <input type="number" name="protein_grams" id="dietInputProtein" value="150" min="0" max="1000"
-                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black font-mono focus:outline-none focus:border-rose-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase mb-1">Carbohydrates (Grams)</label>
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span>Carbs (g)</span>
+                                </label>
                                 <input type="number" name="carbs_grams" id="dietInputCarbs" value="200" min="0" max="1500"
-                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black font-mono focus:outline-none focus:border-amber-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase mb-1">Fats (Grams)</label>
-                                <input type="number" name="fat_grams" id="dietInputFats" value="55" min="0" max="500"
-                                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-black font-mono focus:outline-none focus:border-cyan-500">
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                    <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                                    <span>Fats (g)</span>
+                                </label>
+                                <input type="number" name="fat_grams" id="dietInputFats" value="55" min="0" max="1000"
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
                             </div>
+                        </div>
+
+                        <!-- Live Planned vs Target Bar -->
+                        <div class="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                            <div class="text-slate-600 dark:text-slate-400">
+                                Meal Sum:
+                                <span id="planMealsTotalSummary" class="font-semibold text-slate-900 dark:text-white tabular-nums ml-1">0 kcal · 0g P · 0g C · 0g F</span>
+                            </div>
+                            <button type="button" onclick="syncTargetsFromMeals()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline self-start sm:self-auto cursor-pointer">
+                                Match targets to meal sum
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Dates & Coach Info -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Assigned Trainer / Coach</label>
-                            <select name="trainer_id" id="dietInputTrainerId"
-                                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                                <option value="">-- No Specific Trainer --</option>
-                                @foreach($trainers as $t)
-                                    <option value="{{ $t->id }}">{{ $t->full_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Start Date</label>
-                            <input type="date" name="start_date" id="dietInputStartDate"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">End Date</label>
-                            <input type="date" name="end_date" id="dietInputEndDate"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500">
-                        </div>
-                    </div>
-
-                    <!-- Scheduled Meals Builder with Integrated Indian Food Library Picker -->
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <!-- Section 3: Daily Meals Builder -->
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
                             <div>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                                    <span>🍽️ Scheduled Meals Builder</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">Indian Food Integrated</span>
-                                </h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Add meal timings, pick from pre-defined Indian gym foods, or type custom items.</p>
+                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Daily Meals</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Add custom foods, pick from the library, or enter meal items directly.</p>
                             </div>
 
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="loadStandardMealsPreset()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 text-[11px] font-bold border border-amber-500/20 transition-colors">
-                                    ⚡ Insert 5-Meal Indian Day
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <button type="button" onclick="startBlankCustomPlan()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
+                                    Start Blank
                                 </button>
-                                <button type="button" onclick="addMealRow()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold shadow transition-colors cursor-pointer">
+                                <button type="button" onclick="loadStandardMealsPreset()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
+                                    Load 5-Meal Sample
+                                </button>
+                                <button type="button" onclick="addMealRow()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer">
                                     + Add Meal
                                 </button>
                             </div>
                         </div>
 
-                        <div id="mealsContainer" class="space-y-3.5">
+                        <div id="mealsContainer" class="space-y-4">
                             <!-- Dynamic meal rows will be inserted here -->
                         </div>
                     </div>
 
                     <!-- General Guidelines / Advice -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Dietary Guidelines &amp; Hydration Advice</label>
-                        <textarea name="guidelines" id="dietInputGuidelines" rows="3" placeholder="e.g. Drink 3.5 - 4 liters of water daily. Avoid refined sugars, deep fried foods, and sodas. Sleep 7-8 hours for optimal protein synthesis."
-                                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Guidelines &amp; Hydration Notes</label>
+                        <textarea name="guidelines" id="dietInputGuidelines" rows="3" placeholder="Optional water intake, cooking oil notes, or supplement reminders..."
+                                  class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
+                <div class="px-5 sm:px-7 py-4 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
                         Cancel
                     </button>
 
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span id="dietSubmitBtnText">Save Diet Plan</span>
                     </button>
@@ -769,47 +736,93 @@
         </div>
     </div>
 
-    <!-- ==================== 4. QUICK FOOD PICKER POPUP FOR MEAL BUILDER ==================== -->
-    <div id="mealFoodPickerModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[88vh] flex flex-col text-slate-900 dark:text-slate-200">
-            <div class="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-lg">🍲</span>
+    <!-- ==================== 4. FOOD PICKER & CUSTOM FOOD MODAL ==================== -->
+    <div id="mealFoodPickerModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/75 backdrop-blur-sm p-3 sm:p-5 overflow-y-auto">
+        <div class="diet-ui-scope bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[88vh] flex flex-col text-slate-900 dark:text-slate-100">
+            <div class="px-5 py-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 gap-3">
+                <div>
+                    <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Add Food to Meal</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="pickerTargetMealName">Adding items to meal</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="togglePickerCustomForm()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                        + Custom Food
+                    </button>
+                    <button type="button" onclick="closeMealFoodPicker()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-xs font-bold cursor-pointer">✕</button>
+                </div>
+            </div>
+
+            <!-- Inline Custom Food Form inside Picker (shown on demand or when food missing) -->
+            <div id="pickerCustomFoodBox" class="hidden p-4 sm:p-5 bg-indigo-50/40 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-900 dark:text-white">New Custom Food Item</span>
+                    <button type="button" onclick="togglePickerCustomForm(false)" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Close</button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div class="sm:col-span-1">
+                        <input type="text" id="pickerCustomName" placeholder="Food name (e.g. Ragi Malt)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
                     <div>
-                        <h4 class="text-sm font-black text-slate-900 dark:text-white">Select Indian Food for Meal</h4>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400" id="pickerTargetMealName">Adding items to meal</p>
+                        <input type="text" id="pickerCustomServing" placeholder="Serving (e.g. 1 glass / 150g)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <select id="pickerCustomDietType" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            <option value="veg">Veg</option>
+                            <option value="eggetarian">Eggetarian</option>
+                            <option value="non_veg">Non-Veg</option>
+                        </select>
                     </div>
                 </div>
-                <button type="button" onclick="closeMealFoodPicker()" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs font-bold">✕</button>
-            </div>
-
-            <div class="p-3 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-2">
-                <input type="text" id="pickerSearchInput" oninput="filterMealPickerList()" 
-                       placeholder="Type food name e.g. eggs, chicken, paneer, soya, oats, rice, roti, whey..."
-                       class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500">
-                <div class="flex items-center gap-1.5 overflow-x-auto text-[11px] pb-1">
-                    <button type="button" onclick="setPickerCategory('all')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950 shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
-                    <button type="button" onclick="setPickerCategory('non_veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">🍗 Non-Veg</button>
-                    <button type="button" onclick="setPickerCategory('veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="veg_protein">🧀 Veg Protein</button>
-                    <button type="button" onclick="setPickerCategory('carbs')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="carbs">🍚 Carbs</button>
-                    <button type="button" onclick="setPickerCategory('fats')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="fats">🥜 Fats</button>
-                    <button type="button" onclick="setPickerCategory('fruits')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="fruits">🍌 Fruits</button>
-                    <button type="button" onclick="setPickerCategory('salads')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="salads">🥗 Fiber &amp; Sabzi</button>
-                    <button type="button" onclick="setPickerCategory('gym_meals')" class="picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800 shrink-0" data-cat="gym_meals">🍱 Meals &amp; Shakes</button>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end">
+                    <div>
+                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Calories</label>
+                        <input type="number" id="pickerCustomCalories" min="0" placeholder="250" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Protein (g)</label>
+                        <input type="number" id="pickerCustomProtein" min="0" step="0.5" placeholder="12" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Carbs (g)</label>
+                        <input type="number" id="pickerCustomCarbs" min="0" step="0.5" placeholder="30" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Fats (g)</label>
+                        <input type="number" id="pickerCustomFats" min="0" step="0.5" placeholder="6" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <button type="button" onclick="submitPickerCustomFood()" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                        Add Item
+                    </button>
                 </div>
             </div>
 
-            <div class="p-3 sm:p-4 overflow-y-auto flex-1 space-y-2" id="pickerFoodListContainer">
+            <div class="p-3.5 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-2.5">
+                <input type="text" id="pickerSearchInput" oninput="filterMealPickerList()" 
+                       placeholder="Search food library (eggs, chicken, paneer, soya, oats, rice, roti, whey)..."
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+                <div class="flex items-center gap-1.5 overflow-x-auto text-xs pb-1">
+                    <button type="button" onclick="setPickerCategory('all')" class="picker-cat-btn px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
+                    <button type="button" onclick="setPickerCategory('non_veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">Non-Veg</button>
+                    <button type="button" onclick="setPickerCategory('veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="veg_protein">Veg Protein</button>
+                    <button type="button" onclick="setPickerCategory('carbs')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="carbs">Carbs</button>
+                    <button type="button" onclick="setPickerCategory('fats')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fats">Fats</button>
+                    <button type="button" onclick="setPickerCategory('fruits')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fruits">Fruits</button>
+                    <button type="button" onclick="setPickerCategory('salads')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
+                    <button type="button" onclick="setPickerCategory('gym_meals')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
+                </div>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-1 space-y-2" id="pickerFoodListContainer">
                 <!-- Dynamically populated from JS -->
             </div>
 
             <!-- Sticky Bottom Toolbar -->
-            <div class="p-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                <div class="text-xs font-bold text-slate-700 dark:text-slate-300" id="pickerActiveMealSummary">
-                    <span>Click <strong>+ Add</strong> on any foods above</span>
+            <div class="px-5 py-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div class="text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums" id="pickerActiveMealSummary">
+                    <span>Click <strong>+ Add</strong> on any item or add a custom food.</span>
                 </div>
-                <button type="button" onclick="closeMealFoodPicker()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black shadow-md transition-all cursor-pointer">
-                    Done &rarr;
+                <button type="button" onclick="closeMealFoodPicker()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                    Done
                 </button>
             </div>
         </div>
@@ -831,24 +844,19 @@
             @endphp
             <div class="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 text-white flex items-center justify-center text-lg shadow-lg shadow-purple-600/30 shrink-0">
-                        ✨
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">AI Personalized Diet Planner</h3>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white tracking-tight">Quick Plan Generator</h3>
                             @if($hasGeminiConfigured)
-                                <span class="px-2.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 dark:border-purple-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 animate-pulse"></span>
-                                    <span>Powered by Google Gemini AI ({{ $globalGeminiModel }})</span>
-                                </span>
-                            @else
-                                <span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[10px] font-mono font-bold flex items-center gap-1">
-                                    <span>⚡ Smart Multi-Factor Diet Engine</span>
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 text-[11px] font-medium">
+                                    {{ $globalGeminiModel }}
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Generates precision calories, macros, pre/post workout timing, and practical Indian meals based on age, goals &amp; health factors.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Calculate BMR, daily calories, macros, and meal timings from member stats.</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
@@ -861,10 +869,10 @@
                 <div id="aiDietFormView" class="space-y-6">
                     <form id="aiDietForm" onsubmit="submitAiDietGeneration(event)" class="space-y-5">
                         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">👤 Select Member (Optional):</span>
+                            <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Member (Optional)</span>
                             <div class="w-full sm:w-72">
                                 <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                                    <option value="">-- Manual Entry / Custom Member --</option>
+                                    <option value="">Manual entry</option>
                                     @foreach($members as $m)
                                         <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No Phone' }})</option>
                                     @endforeach
@@ -947,9 +955,8 @@
                             <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-600/30 flex items-center gap-2 transition-all cursor-pointer">
-                                <span>✨ Generate AI Diet Plan</span>
-                                <span>&rarr;</span>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                                Generate Plan
                             </button>
                         </div>
                     </form>
@@ -957,15 +964,10 @@
 
                 <!-- LOADING VIEW -->
                 <div id="aiDietLoadingView" class="hidden py-16 flex flex-col items-center justify-center text-center space-y-4">
-                    <div class="relative w-16 h-16">
-                        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-600 animate-spin opacity-75 blur-sm"></div>
-                        <div class="relative w-16 h-16 rounded-full bg-white dark:bg-slate-900 border border-purple-500/40 flex items-center justify-center text-2xl">
-                            ✨
-                        </div>
-                    </div>
+                    <div class="w-12 h-12 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
                     <div class="space-y-1">
-                        <h4 class="text-sm font-extrabold text-slate-900 dark:text-white">Synthesizing Personalized Indian Diet Plan...</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Calculating BMR, optimizing macronutrient ratios & structuring timed Indian meals.</p>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Generating Diet Plan...</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Calculating BMR, macro split, and meal schedule.</p>
                     </div>
                 </div>
 
@@ -974,7 +976,7 @@
                     <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-indigo-50 to-white dark:from-purple-950/40 dark:via-indigo-950/40 dark:to-slate-900 border border-purple-200 dark:border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30 text-[10px] font-black uppercase tracking-wider">AI Generated</span>
+                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold uppercase tracking-wider">Generated Plan</span>
                                 <h3 id="aiResPlanTitle" class="text-base font-black text-slate-900 dark:text-white tracking-tight"></h3>
                             </div>
                             <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -1024,7 +1026,7 @@
                     </div>
 
                     <div class="space-y-3">
-                        <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">🍽️ Scheduled Indian Meals</h4>
+                        <h4 class="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Scheduled Meals</h4>
                         <div id="aiResMealsList" class="space-y-3"></div>
                     </div>
 
@@ -1070,59 +1072,57 @@
             return (h < 10 ? '0' + h : h) + ':' + m + ' ' + ampm;
         }
 
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function buildWhatsAppMessage(plan, recipientName, gymName) {
-            let text = "🥗 *DIET & NUTRITION PLAN* 🥗\n";
-            text += "━━━━━━━━━━━━━━━━━━━━\n";
-            text += "🏋️ *Gym:* " + (gymName || 'GymDeskHub') + "\n";
+            let text = "*DIET PLAN*\n";
+            text += "--------------------\n";
+            text += "*Gym:* " + (gymName || 'GymDeskHub') + "\n";
             if (recipientName && recipientName !== 'Template Plan') {
-                text += "👤 *Member:* " + recipientName + "\n";
+                text += "*Member:* " + recipientName + "\n";
             }
-            text += "📋 *Plan:* " + plan.title + "\n";
+            text += "*Plan:* " + plan.title + "\n";
             if (plan.daily_calories) {
-                text += "🔥 *Daily Target:* " + plan.daily_calories + " kcal\n";
+                text += "*Daily Target:* " + plan.daily_calories + " kcal\n";
             }
             if (plan.protein_grams || plan.carbs_grams || plan.fat_grams) {
-                text += "📊 *Macros:* Protein: " + (plan.protein_grams || 0) + "g | Carbs: " + (plan.carbs_grams || 0) + "g | Fats: " + (plan.fat_grams || 0) + "g\n";
+                text += "*Macros:* P " + (plan.protein_grams || 0) + "g | C " + (plan.carbs_grams || 0) + "g | F " + (plan.fat_grams || 0) + "g\n";
             }
             if (plan.start_date) {
-                text += "📅 *Duration:* " + plan.start_date + (plan.end_date ? " to " + plan.end_date : "") + "\n";
+                text += "*Dates:* " + plan.start_date + (plan.end_date ? " to " + plan.end_date : "") + "\n";
             }
-            text += "━━━━━━━━━━━━━━━━━━━━\n\n";
+            text += "--------------------\n\n";
 
             if (plan.meals && plan.meals.length > 0) {
-                text += "🍽️ *DAILY MEAL SCHEDULE:*\n\n";
-                const icons = {
-                    'breakfast': '🍳',
-                    'morning_snack': '🍎',
-                    'lunch': '🥗',
-                    'evening_snack': '🥤',
-                    'dinner': '🍲',
-                    'post_workout': '🥛'
-                };
+                text += "*DAILY MEALS:*\n\n";
                 plan.meals.forEach((m, idx) => {
-                    const icon = icons[m.meal_type] || '🍽️';
                     const typeName = (m.meal_type || 'meal').replace('_', ' ').toUpperCase();
                     const timeStr = m.recommended_time ? " (" + formatTime(m.recommended_time) + ")" : "";
                     const calStr = m.calories ? " [" + m.calories + " kcal]" : "";
 
-                    text += icon + " *" + (idx + 1) + ". " + typeName + "*" + timeStr + "\n";
-                    text += "• *Meal:* " + m.meal_name + calStr + "\n";
+                    text += "*" + (idx + 1) + ". " + (m.meal_name || typeName) + "*" + timeStr + calStr + "\n";
                     if (m.items_description) {
-                        text += "• *Menu:* " + m.items_description.trim() + "\n";
+                        text += m.items_description.trim() + "\n";
                     }
                     text += "\n";
                 });
             }
 
             if (plan.guidelines) {
-                text += "━━━━━━━━━━━━━━━━━━━━\n";
-                text += "💧 *Coach Guidelines:*\n";
+                text += "--------------------\n";
+                text += "*Guidelines:*\n";
                 text += plan.guidelines.trim() + "\n";
-                text += "━━━━━━━━━━━━━━━━━━━━\n\n";
+                text += "--------------------\n\n";
             }
 
-            text += "💪 *Stay consistent & achieve your goals!*\n";
-            text += "— *" + (gymName || 'GymDeskHub') + " Nutrition Team*";
+            text += "Sent by " + (gymName || 'GymDeskHub');
             return text;
         }
 
@@ -1178,26 +1178,6 @@
             window.open(waUrl, '_blank');
         }
 
-        // Client-side Filtering
-        function filterPlans(type) {
-            const activeClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm shrink-0';
-            const inactiveClass = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0';
-
-            document.getElementById('btnFilterAll').className = type === 'all' ? activeClass : inactiveClass;
-            document.getElementById('btnFilterMember').className = type === 'member' ? activeClass : inactiveClass;
-            document.getElementById('btnFilterTemplate').className = type === 'template' ? activeClass : inactiveClass;
-
-            const cards = document.querySelectorAll('.diet-plan-card');
-            cards.forEach(card => {
-                const planType = card.getAttribute('data-plan-type');
-                if (type === 'all' || planType === type) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
         function searchDietPlans() {
             const query = document.getElementById('dietSearchInput').value.toLowerCase().trim();
             const cards = document.querySelectorAll('.diet-plan-card');
@@ -1212,79 +1192,31 @@
             });
         }
 
-        // Create / Edit Modal Mode Toggle
-        function setPlanTypeMode(isTemplate) {
-            const templateVal = isTemplate ? '1' : '0';
-            document.getElementById('dietInputIsTemplate').value = templateVal;
-
-            const btnMember = document.getElementById('btnModeMember');
-            const btnTemplate = document.getElementById('btnModeTemplate');
-            const memberGroup = document.getElementById('memberSelectGroup');
-            const templateNote = document.getElementById('templateNoteGroup');
-            const memberSelect = document.getElementById('dietInputMemberId');
-
-            if (isTemplate) {
-                btnTemplate.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
-                btnMember.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
-                memberGroup.classList.add('hidden');
-                templateNote.classList.remove('hidden');
-                memberSelect.removeAttribute('required');
-                memberSelect.value = '';
-            } else {
-                btnMember.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-1.5 cursor-pointer';
-                btnTemplate.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer';
-                memberGroup.classList.remove('hidden');
-                templateNote.classList.add('hidden');
-                memberSelect.setAttribute('required', 'required');
-            }
-        }
-
-        function handleModalMemberChange() {
-            const memberSelect = document.getElementById('dietInputMemberId');
-            const titleInput = document.getElementById('dietInputTitle');
-            const selectedOpt = memberSelect.options[memberSelect.selectedIndex];
-            if (selectedOpt && selectedOpt.value) {
-                const memberName = selectedOpt.getAttribute('data-name') || selectedOpt.text.split('(')[0].trim();
-                if (!titleInput.value || titleInput.value.startsWith('Diet Plan')) {
-                    titleInput.value = `Diet Plan - ${memberName} (2,000 kcal)`;
-                }
-            }
-        }
-
-        function openDietModal(memberId = null) {
+        function openDietModal() {
             document.getElementById('dietPlanForm').reset();
             document.getElementById('dietPlanForm').action = "{{ route('app.diets.store') }}";
             document.getElementById('dietFormMethod').value = 'POST';
             document.getElementById('dietModalTitle').innerText = 'Create Diet Plan';
             document.getElementById('dietSubmitBtnText').innerText = 'Save Diet Plan';
+            document.getElementById('dietInputIsTemplate').value = '1';
             document.getElementById('mealsContainer').innerHTML = '';
             mealCounter = 0;
             for (let k in mealRowFoods) delete mealRowFoods[k];
 
-            // Default to Member Mode
-            setPlanTypeMode(0);
-
-            if (memberId) {
-                const memberSelect = document.getElementById('dietInputMemberId');
-                memberSelect.value = memberId;
-                handleModalMemberChange();
-            }
-
-            // Pre-load standard 5-meal Indian day by default for quick customization
-            loadStandardMealsPreset();
+            // Start with 1 clean customizable meal row (user can build custom or click Load 5-Meal Sample)
+            addMealRow();
 
             document.getElementById('dietPlanModal').classList.remove('hidden');
         }
 
-        function openDietModalForSelectedMember() {
-            const selectEl = document.getElementById('quickMemberSelect');
-            const selectedId = selectEl.value;
-            if (!selectedId) {
-                selectEl.focus();
-                openDietModal();
-                return;
-            }
-            openDietModal(selectedId);
+        function startBlankCustomPlan() {
+            const container = document.getElementById('mealsContainer');
+            container.innerHTML = '';
+            mealCounter = 0;
+            for (let k in mealRowFoods) delete mealRowFoods[k];
+            const firstRowId = addMealRow();
+            toggleCustomFoodComposer(firstRowId, true);
+            showToast('Started blank custom meal builder');
         }
 
         function closeDietModal() {
@@ -1331,78 +1263,138 @@
             mealRowFoods[rowId] = [];
 
             const mealType = meal ? meal.meal_type : (mealCounter === 1 ? 'breakfast' : (mealCounter === 2 ? 'morning_snack' : (mealCounter === 3 ? 'lunch' : (mealCounter === 4 ? 'evening_snack' : 'dinner'))));
-            const mealName = meal ? meal.meal_name : (mealCounter === 1 ? 'Breakfast' : (mealCounter === 2 ? 'Mid-Morning Snack' : (mealCounter === 3 ? 'Lunch' : (mealCounter === 4 ? 'Pre/Post Workout' : 'Dinner'))));
-            const recommendedTime = meal ? meal.recommended_time : (mealCounter === 1 ? '08:30' : (mealCounter === 2 ? '11:30' : (mealCounter === 3 ? '13:30' : (mealCounter === 4 ? '17:30' : '20:30'))));
-            const calories = meal ? (meal.calories || '') : '';
+            const mealName = meal ? (meal.meal_name || 'Meal') : (mealCounter === 1 ? 'Breakfast' : (mealCounter === 2 ? 'Mid-Morning Snack' : (mealCounter === 3 ? 'Lunch' : (mealCounter === 4 ? 'Pre/Post Workout' : 'Dinner'))));
+            const recommendedTime = meal ? (meal.recommended_time || '') : (mealCounter === 1 ? '08:30' : (mealCounter === 2 ? '11:30' : (mealCounter === 3 ? '13:30' : (mealCounter === 4 ? '17:30' : '20:30'))));
+            const calories = meal && meal.calories != null ? meal.calories : '';
+            const protein = meal && meal.protein_grams != null ? meal.protein_grams : '';
+            const carbs = meal && meal.carbs_grams != null ? meal.carbs_grams : '';
+            const fat = meal && meal.fat_grams != null ? meal.fat_grams : '';
             const items = meal ? (meal.items_description || '') : '';
+            const safeMealName = escapeHtml(mealName);
 
             const html = `
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 relative group transition-colors space-y-3" id="${rowId}">
-                    <div class="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
-                        <div class="flex items-center gap-2">
-                            <span class="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs flex items-center justify-center font-mono font-bold">${container.children.length + 1}</span>
-                            <span class="text-xs font-bold text-slate-800 dark:text-slate-200" id="${rowId}_header_title">${mealName}</span>
-                            <span id="${rowId}_macro_pill" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">0 kcal</span>
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/90 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 relative group transition-colors space-y-4" id="${rowId}">
+                    <div class="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs flex items-center justify-center font-semibold tabular-nums shrink-0">${container.children.length + 1}</span>
+                            <span class="text-sm font-semibold text-slate-900 dark:text-white truncate" id="${rowId}_header_title">${safeMealName}</span>
+                            <span id="${rowId}_macro_pill" class="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300 tabular-nums shrink-0">0 kcal</span>
                         </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="openMealFoodPicker('${rowId}')" 
-                                    class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 text-[11px] font-bold border border-amber-500/30 flex items-center gap-1.5 transition-colors cursor-pointer">
-                                <span>🍲 + Pick Indian Food</span>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="toggleCustomFoodComposer('${rowId}')"
+                                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                                + Custom Food
                             </button>
-                            <button type="button" onclick="removeMealRow('${rowId}')" 
-                                    class="text-xs text-rose-500 hover:text-rose-600 font-semibold p-1 cursor-pointer">✕ Remove</button>
+                            <button type="button" onclick="openMealFoodPicker('${rowId}')"
+                                    class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-500/30 transition-colors cursor-pointer">
+                                Food Library
+                            </button>
+                            <button type="button" onclick="removeMealRow('${rowId}')"
+                                    class="px-2 py-1.5 rounded-lg text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 font-medium transition-colors cursor-pointer">Remove</button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Meal Type</label>
-                            <select name="meals[${mealCounter}][meal_type]" onchange="onMealTypeChange('${rowId}', this.value)" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                                <option value="breakfast" ${mealType === 'breakfast' ? 'selected' : ''}>🍳 Breakfast</option>
-                                <option value="morning_snack" ${mealType === 'morning_snack' ? 'selected' : ''}>🍎 Morning Snack</option>
-                                <option value="lunch" ${mealType === 'lunch' ? 'selected' : ''}>🥗 Lunch</option>
-                                <option value="evening_snack" ${mealType === 'evening_snack' ? 'selected' : ''}>🥤 Evening Snack</option>
-                                <option value="dinner" ${mealType === 'dinner' ? 'selected' : ''}>🍲 Dinner</option>
-                                <option value="post_workout" ${mealType === 'post_workout' ? 'selected' : ''}>🥛 Post Workout</option>
+                    <div class="grid grid-cols-1 sm:grid-cols-6 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Meal Type</label>
+                            <select name="meals[${mealCounter}][meal_type]" onchange="onMealTypeChange('${rowId}', this.value)" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                <option value="breakfast" ${mealType === 'breakfast' ? 'selected' : ''}>Breakfast</option>
+                                <option value="morning_snack" ${mealType === 'morning_snack' ? 'selected' : ''}>Morning Snack</option>
+                                <option value="lunch" ${mealType === 'lunch' ? 'selected' : ''}>Lunch</option>
+                                <option value="evening_snack" ${mealType === 'evening_snack' ? 'selected' : ''}>Evening Snack</option>
+                                <option value="dinner" ${mealType === 'dinner' ? 'selected' : ''}>Dinner</option>
+                                <option value="post_workout" ${mealType === 'post_workout' ? 'selected' : ''}>Post Workout</option>
                             </select>
                         </div>
 
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Meal Title *</label>
-                            <input type="text" name="meals[${mealCounter}][meal_name]" id="${rowId}_title" value="${mealName}" required oninput="document.getElementById('${rowId}_header_title').innerText = this.value || 'Meal'" placeholder="e.g. Power Breakfast" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <div class="sm:col-span-3">
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Meal Title *</label>
+                            <input type="text" name="meals[${mealCounter}][meal_name]" id="${rowId}_title" value="${safeMealName}" required oninput="document.getElementById('${rowId}_header_title').innerText = this.value || 'Meal'" placeholder="e.g. Pre-Workout Meal or Power Breakfast" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Recommended Time</label>
-                            <input type="time" name="meals[${mealCounter}][recommended_time]" value="${recommendedTime}" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Calories (kcal)</label>
-                            <input type="number" name="meals[${mealCounter}][calories]" id="${rowId}_cals" value="${calories}" placeholder="0" min="0" oninput="updatePlanTotalCalories()" class="w-full px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white font-mono font-bold focus:outline-none focus:border-indigo-500">
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Time</label>
+                            <input type="time" name="meals[${mealCounter}][recommended_time]" value="${escapeHtml(recommendedTime)}" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white tabular-nums focus:outline-none focus:border-indigo-500">
                         </div>
                     </div>
 
-                    <!-- Selected Food Items Interactive Container -->
-                    <div class="space-y-1.5">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Calories (kcal)</label>
+                            <input type="number" name="meals[${mealCounter}][calories]" id="${rowId}_cals" value="${calories}" placeholder="0" min="0" oninput="onManualMealMacroInput('${rowId}')" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-rose-600 dark:text-rose-400 mb-1.5">Protein (g)</label>
+                            <input type="number" name="meals[${mealCounter}][protein_grams]" id="${rowId}_protein" value="${protein}" placeholder="0" min="0" oninput="onManualMealMacroInput('${rowId}')" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-amber-600 dark:text-amber-400 mb-1.5">Carbs (g)</label>
+                            <input type="number" name="meals[${mealCounter}][carbs_grams]" id="${rowId}_carbs" value="${carbs}" placeholder="0" min="0" oninput="onManualMealMacroInput('${rowId}')" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-cyan-600 dark:text-cyan-400 mb-1.5">Fats (g)</label>
+                            <input type="number" name="meals[${mealCounter}][fat_grams]" id="${rowId}_fat" value="${fat}" placeholder="0" min="0" oninput="onManualMealMacroInput('${rowId}')" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Inline Custom Food Composer -->
+                    <div id="${rowId}_custom_composer" class="hidden p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-500/40 space-y-3">
                         <div class="flex items-center justify-between">
-                            <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Selected Food Items &amp; Portions</label>
-                            <span class="text-[10px] text-slate-400 font-medium">Automatic macro calculation</span>
+                            <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Add Custom Food Item to Meal</span>
+                            <button type="button" onclick="toggleCustomFoodComposer('${rowId}', false)" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Close</button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                            <input type="text" id="${rowId}_cf_name" placeholder="Food name (e.g. Grilled Tofu)" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            <input type="text" id="${rowId}_cf_serving" placeholder="Serving (e.g. 150g / 1 bowl)" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            <select id="${rowId}_cf_diet" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                <option value="veg">Veg</option>
+                                <option value="eggetarian">Eggetarian</option>
+                                <option value="non_veg">Non-Veg</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end">
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-500 mb-1">Calories</label>
+                                <input type="number" id="${rowId}_cf_cals" min="0" placeholder="220" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-rose-500 mb-1">Protein (g)</label>
+                                <input type="number" id="${rowId}_cf_p" min="0" step="0.5" placeholder="18" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-amber-500 mb-1">Carbs (g)</label>
+                                <input type="number" id="${rowId}_cf_c" min="0" step="0.5" placeholder="12" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-cyan-500 mb-1">Fats (g)</label>
+                                <input type="number" id="${rowId}_cf_f" min="0" step="0.5" placeholder="8" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <button type="button" onclick="addCustomFoodToMeal('${rowId}')" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selected Food Items & Free-Text Meal Entry -->
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400">Food Items &amp; Portions</label>
+                            <span class="text-[11px] text-slate-400">Add custom foods, pick from library, or write your own menu below</span>
                         </div>
 
-                        <div id="${rowId}_foods_container" class="space-y-1.5">
+                        <div id="${rowId}_foods_container" class="space-y-2">
                             <!-- Populated by renderMealFoods -->
                         </div>
 
-                        <!-- Optional custom notes input -->
                         <div class="pt-1">
-                            <input type="text" id="${rowId}_custom_notes" oninput="syncMealDescription('${rowId}')" placeholder="+ Custom notes or instructions (e.g. cooked in 1 tsp olive oil, with green chutney)..." 
-                                   class="w-full px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Custom Meal Items / Prep Notes (Free Text)</label>
+                            <textarea id="${rowId}_custom_notes" rows="2" oninput="syncMealDescription('${rowId}')" placeholder="Write any custom meal directly (e.g. 150g grilled paneer + 2 multigrain rotis + mint chutney) or prep instructions..."
+                                      class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
                         </div>
 
                         <!-- Synced items description for form submit & WhatsApp -->
-                        <textarea name="meals[${mealCounter}][items_description]" id="${rowId}_items" class="hidden">${items}</textarea>
+                        <textarea name="meals[${mealCounter}][items_description]" id="${rowId}_items" class="hidden"></textarea>
                     </div>
                 </div>
             `;
@@ -1421,7 +1413,8 @@
                             protein: f.protein,
                             carbs: f.carbs,
                             fat: f.fat,
-                            diet_type: f.diet_type
+                            diet_type: f.diet_type,
+                            isCustom: false
                         });
                     }
                 });
@@ -1432,6 +1425,70 @@
             } else {
                 renderMealFoods(rowId);
             }
+
+            return rowId;
+        }
+
+        function toggleCustomFoodComposer(rowId, forceState = null) {
+            const box = document.getElementById(rowId + '_custom_composer');
+            if (!box) return;
+            const show = forceState !== null ? forceState : box.classList.contains('hidden');
+            box.classList.toggle('hidden', !show);
+            if (show) {
+                document.getElementById(rowId + '_cf_name')?.focus();
+            }
+        }
+
+        function addCustomFoodToMeal(rowId) {
+            const nameEl = document.getElementById(rowId + '_cf_name');
+            const servingEl = document.getElementById(rowId + '_cf_serving');
+            const dietEl = document.getElementById(rowId + '_cf_diet');
+            const calsEl = document.getElementById(rowId + '_cf_cals');
+            const pEl = document.getElementById(rowId + '_cf_p');
+            const cEl = document.getElementById(rowId + '_cf_c');
+            const fEl = document.getElementById(rowId + '_cf_f');
+
+            const name = (nameEl?.value || '').trim();
+            if (!name) {
+                alert('Please enter a food name.');
+                nameEl?.focus();
+                return;
+            }
+
+            const serving = (servingEl?.value || '').trim() || '1 serving';
+            const calories = parseFloat(calsEl?.value) || 0;
+            const protein = parseFloat(pEl?.value) || 0;
+            const carbs = parseFloat(cEl?.value) || 0;
+            const fat = parseFloat(fEl?.value) || 0;
+            const dietType = dietEl?.value || 'veg';
+
+            if (!mealRowFoods[rowId]) {
+                mealRowFoods[rowId] = [];
+            }
+
+            mealRowFoods[rowId].push({
+                foodId: 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+                name,
+                serving,
+                qty: 1,
+                calories,
+                protein,
+                carbs,
+                fat,
+                diet_type: dietType,
+                isCustom: true
+            });
+
+            if (nameEl) nameEl.value = '';
+            if (servingEl) servingEl.value = '';
+            if (calsEl) calsEl.value = '';
+            if (pEl) pEl.value = '';
+            if (cEl) cEl.value = '';
+            if (fEl) fEl.value = '';
+
+            toggleCustomFoodComposer(rowId, false);
+            renderMealFoods(rowId);
+            showToast('Custom food added to meal.');
         }
 
         function removeMealRow(rowId) {
@@ -1443,16 +1500,16 @@
 
         function onMealTypeChange(rowId, type) {
             const typeNames = {
-                'breakfast': '🍳 Breakfast',
-                'morning_snack': '🍎 Mid-Morning Snack',
-                'lunch': '🥗 Lunch',
-                'evening_snack': '🥤 Evening Snack',
-                'dinner': '🍲 Dinner',
-                'post_workout': '🥛 Post Workout'
+                'breakfast': 'Breakfast',
+                'morning_snack': 'Mid-Morning Snack',
+                'lunch': 'Lunch',
+                'evening_snack': 'Evening Snack',
+                'dinner': 'Dinner',
+                'post_workout': 'Post Workout'
             };
             const titleInput = document.getElementById(rowId + '_title');
-            if (titleInput && (!titleInput.value || Object.values(typeNames).some(t => t.includes(titleInput.value)))) {
-                titleInput.value = (typeNames[type] || 'Meal').replace(/^[^\w\s]+/, '').trim();
+            if (titleInput && (!titleInput.value || Object.values(typeNames).includes(titleInput.value.trim()))) {
+                titleInput.value = typeNames[type] || 'Meal';
                 document.getElementById(rowId + '_header_title').innerText = titleInput.value;
             }
         }
@@ -1465,11 +1522,16 @@
 
             if (items.length === 0) {
                 container.innerHTML = `
-                    <div class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/50 dark:bg-slate-900/40 text-center flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                        <span>No food items selected yet.</span>
-                        <button type="button" onclick="openMealFoodPicker('${rowId}')" class="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer">
-                            + Pick from 140+ Indian Foods
-                        </button>
+                    <div class="p-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/40 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                        <span>No food items added yet — add your own or type freely below.</span>
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="toggleCustomFoodComposer('${rowId}', true)" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer">
+                                + Add Custom Food
+                            </button>
+                            <button type="button" onclick="openMealFoodPicker('${rowId}')" class="text-amber-600 dark:text-amber-400 font-semibold hover:underline cursor-pointer">
+                                Pick from Food Library
+                            </button>
+                        </div>
                     </div>
                 `;
                 syncMealDescription(rowId);
@@ -1484,18 +1546,22 @@
                 const totF = Math.round(item.qty * item.fat * 10) / 10;
 
                 const dotColor = item.diet_type === 'non_veg' ? 'bg-rose-600' : (item.diet_type === 'eggetarian' ? 'bg-amber-500' : 'bg-emerald-600');
+                const safeName = escapeHtml(item.name);
+                const safeServing = escapeHtml(item.serving);
+                const safeFoodId = escapeHtml(item.foodId);
 
                 html += `
-                    <div class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 gap-2.5 shadow-xs">
-                        <div class="flex items-center gap-2 min-w-0">
+                    <div class="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 gap-3 shadow-xs">
+                        <div class="flex items-center gap-2.5 min-w-0">
                             <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="text-xs font-bold text-slate-900 dark:text-white truncate">${item.name}</span>
-                                    <span class="text-[11px] text-slate-400">(${item.serving})</span>
+                                    <span class="text-xs font-semibold text-slate-900 dark:text-white truncate">${safeName}</span>
+                                    <span class="text-[11px] text-slate-400">(${safeServing})</span>
+                                    ${item.isCustom ? '<span class="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-medium">Custom</span>' : ''}
                                 </div>
-                                <div class="flex items-center gap-2 text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                                    <span class="text-amber-600 dark:text-amber-400 font-bold">${totCals} kcal</span>
+                                <div class="flex items-center gap-2.5 text-[11px] tabular-nums text-slate-500 dark:text-slate-400 mt-0.5">
+                                    <span class="text-amber-600 dark:text-amber-400 font-semibold">${totCals} kcal</span>
                                     <span>P: <strong class="text-rose-500 dark:text-rose-400">${totP}g</strong></span>
                                     <span>C: <strong class="text-amber-500 dark:text-amber-400">${totC}g</strong></span>
                                     <span>F: <strong class="text-cyan-500 dark:text-cyan-400">${totF}g</strong></span>
@@ -1504,12 +1570,12 @@
                         </div>
 
                         <div class="flex items-center gap-1.5 shrink-0">
-                            <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs font-bold">
-                                <button type="button" onclick="changeMealFoodQty('${rowId}', '${item.foodId}', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">-</button>
-                                <span class="px-2 py-1 font-mono text-slate-900 dark:text-white">${item.qty}x</span>
-                                <button type="button" onclick="changeMealFoodQty('${rowId}', '${item.foodId}', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">+</button>
+                            <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
+                                <button type="button" onclick="changeMealFoodQty('${rowId}', '${safeFoodId}', -1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">-</button>
+                                <span class="px-2 py-1 tabular-nums text-slate-900 dark:text-white">${item.qty}x</span>
+                                <button type="button" onclick="changeMealFoodQty('${rowId}', '${safeFoodId}', 1)" class="px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer">+</button>
                             </div>
-                            <button type="button" onclick="removeMealFood('${rowId}', '${item.foodId}')" class="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer" title="Remove item">✕</button>
+                            <button type="button" onclick="removeMealFood('${rowId}', '${safeFoodId}')" class="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white text-xs font-medium transition-colors cursor-pointer" title="Remove item">Remove</button>
                         </div>
                     </div>
                 `;
@@ -1558,11 +1624,15 @@
                 totalF += f;
 
                 const qtyPrefix = item.qty > 1 ? `${item.qty}x ` : '';
-                formattedLines.push(`• ${qtyPrefix}${item.name} (${item.serving}) - ${cals} kcal, ${p}g P`);
+                formattedLines.push(`${qtyPrefix}${item.name} (${item.serving}) — ${cals} kcal · ${p}g P`);
             });
 
             if (customNotes) {
-                formattedLines.push(`• Note: ${customNotes}`);
+                if (list.length > 0) {
+                    formattedLines.push(`• Note: ${customNotes}`);
+                } else {
+                    formattedLines.push(customNotes);
+                }
             }
 
             const descriptionText = formattedLines.join('\n');
@@ -1572,66 +1642,110 @@
             }
 
             const calsInput = document.getElementById(rowId + '_cals');
-            if (calsInput && list.length > 0) {
-                calsInput.value = totalCals;
+            const pInput = document.getElementById(rowId + '_protein');
+            const cInput = document.getElementById(rowId + '_carbs');
+            const fInput = document.getElementById(rowId + '_fat');
+
+            if (list.length > 0) {
+                if (calsInput) calsInput.value = totalCals;
+                if (pInput) pInput.value = Math.round(totalP);
+                if (cInput) cInput.value = Math.round(totalC);
+                if (fInput) fInput.value = Math.round(totalF);
             }
+
+            onManualMealMacroInput(rowId);
+        }
+
+        function onManualMealMacroInput(rowId) {
+            const cals = parseInt(document.getElementById(rowId + '_cals')?.value) || 0;
+            const p = parseInt(document.getElementById(rowId + '_protein')?.value) || 0;
+            const c = parseInt(document.getElementById(rowId + '_carbs')?.value) || 0;
+            const f = parseInt(document.getElementById(rowId + '_fat')?.value) || 0;
 
             const pill = document.getElementById(rowId + '_macro_pill');
             if (pill) {
-                const displayCals = list.length > 0 ? totalCals : (parseInt(calsInput?.value) || 0);
-                pill.innerHTML = `${displayCals} kcal • ${Math.round(totalP)}g P`;
+                pill.textContent = `${cals} kcal · ${p}g P · ${c}g C · ${f}g F`;
             }
 
             updatePlanTotalCalories();
         }
 
+        function getPlanMealTotals() {
+            let totalCals = 0;
+            let totalP = 0;
+            let totalC = 0;
+            let totalF = 0;
+
+            document.querySelectorAll('input[id$="_cals"]').forEach(inp => { totalCals += parseInt(inp.value) || 0; });
+            document.querySelectorAll('input[id$="_protein"]').forEach(inp => { totalP += parseInt(inp.value) || 0; });
+            document.querySelectorAll('input[id$="_carbs"]').forEach(inp => { totalC += parseInt(inp.value) || 0; });
+            document.querySelectorAll('input[id$="_fat"]').forEach(inp => { totalF += parseInt(inp.value) || 0; });
+
+            return { totalCals, totalP, totalC, totalF };
+        }
+
         function updatePlanTotalCalories() {
-            let sum = 0;
-            document.querySelectorAll('input[id$="_cals"]').forEach(inp => {
-                sum += parseInt(inp.value) || 0;
-            });
+            const { totalCals, totalP, totalC, totalF } = getPlanMealTotals();
+            const summaryEl = document.getElementById('planMealsTotalSummary');
+            if (summaryEl) {
+                summaryEl.textContent = `${totalCals} kcal · ${totalP}g P · ${totalC}g C · ${totalF}g F`;
+            }
+        }
+
+        function syncTargetsFromMeals() {
+            const { totalCals, totalP, totalC, totalF } = getPlanMealTotals();
+            if (totalCals === 0 && totalP === 0 && totalC === 0 && totalF === 0) {
+                showToast('Add meal macros first before syncing targets.');
+                return;
+            }
+            document.getElementById('dietInputCalories').value = totalCals;
+            document.getElementById('dietInputProtein').value = totalP;
+            document.getElementById('dietInputCarbs').value = totalC;
+            document.getElementById('dietInputFats').value = totalF;
+            showToast('Daily targets matched to meal sum.');
         }
 
         function loadStandardMealsPreset() {
             const container = document.getElementById('mealsContainer');
             container.innerHTML = '';
             mealCounter = 0;
+            for (let k in mealRowFoods) delete mealRowFoods[k];
 
             const presetMeals = [
-                { 
-                    meal_type: 'breakfast', 
-                    recommended_time: '08:30', 
-                    meal_name: 'High Protein Oats & Eggs', 
-                    food_ids: ['food_egg_white_4', 'food_rolled_oats_dry', 'food_almonds'] 
+                {
+                    meal_type: 'breakfast',
+                    recommended_time: '08:30',
+                    meal_name: 'High Protein Oats & Eggs',
+                    food_ids: ['food_egg_white_4', 'food_rolled_oats_dry', 'food_almonds']
                 },
-                { 
-                    meal_type: 'morning_snack', 
-                    recommended_time: '11:30', 
-                    meal_name: 'Mid-Morning Fruit & Antioxidants', 
-                    food_ids: ['food_apple_medium', 'food_green_tea'] 
+                {
+                    meal_type: 'morning_snack',
+                    recommended_time: '11:30',
+                    meal_name: 'Mid-Morning Fruit & Tea',
+                    food_ids: ['food_apple_medium', 'food_green_tea']
                 },
-                { 
-                    meal_type: 'lunch', 
-                    recommended_time: '13:30', 
-                    meal_name: 'Lean Protein & Brown Rice Bowl', 
-                    food_ids: ['food_chicken_breast_boiled', 'food_brown_rice_boiled', 'food_green_salad_bowl'] 
+                {
+                    meal_type: 'lunch',
+                    recommended_time: '13:30',
+                    meal_name: 'Lean Protein & Brown Rice Bowl',
+                    food_ids: ['food_chicken_breast_boiled', 'food_brown_rice_boiled', 'food_green_salad_bowl']
                 },
-                { 
-                    meal_type: 'evening_snack', 
-                    recommended_time: '17:30', 
-                    meal_name: 'Pre-Workout Fuel & Energy', 
-                    food_ids: ['food_banana_medium', 'food_peanut_butter_1tbsp', 'food_black_coffee'] 
+                {
+                    meal_type: 'evening_snack',
+                    recommended_time: '17:30',
+                    meal_name: 'Pre-Workout Fuel',
+                    food_ids: ['food_banana_medium', 'food_peanut_butter_1tbsp', 'food_black_coffee']
                 },
-                { 
-                    meal_type: 'dinner', 
-                    recommended_time: '20:30', 
-                    meal_name: 'Clean Recovery Dinner', 
-                    food_ids: ['food_low_fat_paneer', 'food_roti_wheat', 'food_moong_dal_cooked', 'food_cucumber_kheera'] 
+                {
+                    meal_type: 'dinner',
+                    recommended_time: '20:30',
+                    meal_name: 'Clean Recovery Dinner',
+                    food_ids: ['food_low_fat_paneer', 'food_roti_wheat', 'food_moong_dal_cooked', 'food_cucumber_kheera']
                 },
             ];
 
             presetMeals.forEach(m => addMealRow(m, m.food_ids));
-            showToast('5-Meal Indian Gym Day loaded into builder!');
+            showToast('Loaded 5-meal sample day.');
         }
 
         function editDietPlan(plan) {
@@ -1642,20 +1756,15 @@
             document.getElementById('dietSubmitBtnText').innerText = 'Update Diet Plan';
 
             document.getElementById('dietInputTitle').value = plan.title || '';
-            if (plan.is_template) {
-                setPlanTypeMode(1);
-            } else {
-                setPlanTypeMode(0);
-                document.getElementById('dietInputMemberId').value = plan.member_id || '';
-            }
+            document.getElementById('dietInputIsTemplate').value = '1';
 
             document.getElementById('dietInputTrainerId').value = plan.trainer_id || '';
             document.getElementById('dietInputCalories').value = plan.daily_calories || '';
             document.getElementById('dietInputProtein').value = plan.protein_grams || '';
             document.getElementById('dietInputCarbs').value = plan.carbs_grams || '';
             document.getElementById('dietInputFats').value = plan.fat_grams || '';
-            document.getElementById('dietInputStartDate').value = plan.start_date || '';
-            document.getElementById('dietInputEndDate').value = plan.end_date || '';
+            document.getElementById('dietInputStartDate').value = plan.start_date_iso || plan.start_date || '';
+            document.getElementById('dietInputEndDate').value = plan.end_date_iso || plan.end_date || '';
             document.getElementById('dietInputGuidelines').value = plan.guidelines || '';
 
             const container = document.getElementById('mealsContainer');
@@ -1669,6 +1778,7 @@
                 addMealRow();
             }
 
+            updatePlanTotalCalories();
             document.getElementById('dietPlanModal').classList.remove('hidden');
         }
 
@@ -1677,27 +1787,95 @@
 
         function openMealFoodPicker(rowId) {
             activeMealRowIdForPicker = rowId;
-            const rowEl = document.getElementById(rowId);
-            const mealName = rowEl.querySelector('input[type="text"]')?.value || 'Current Meal';
+            const mealName = document.getElementById(rowId + '_title')?.value || 'Current Meal';
             document.getElementById('pickerTargetMealName').innerText = 'Adding items to: ' + mealName;
             document.getElementById('pickerSearchInput').value = '';
-            pickerCurrentCategory = 'all';
-            renderMealPickerList();
+            togglePickerCustomForm(false);
+            setPickerCategory('all');
             document.getElementById('mealFoodPickerModal').classList.remove('hidden');
         }
 
         function closeMealFoodPicker() {
             document.getElementById('mealFoodPickerModal').classList.add('hidden');
+            togglePickerCustomForm(false);
             activeMealRowIdForPicker = null;
+        }
+
+        function togglePickerCustomForm(forceState = null, prefillName = '') {
+            const box = document.getElementById('pickerCustomFoodBox');
+            if (!box) return;
+            const show = forceState !== null ? forceState : box.classList.contains('hidden');
+            box.classList.toggle('hidden', !show);
+            if (show) {
+                const nameInput = document.getElementById('pickerCustomName');
+                if (nameInput && prefillName) {
+                    nameInput.value = prefillName;
+                }
+                nameInput?.focus();
+            }
+        }
+
+        function submitPickerCustomFood() {
+            if (!activeMealRowIdForPicker) return;
+            const nameEl = document.getElementById('pickerCustomName');
+            const servingEl = document.getElementById('pickerCustomServing');
+            const dietEl = document.getElementById('pickerCustomDietType');
+            const calsEl = document.getElementById('pickerCustomCalories');
+            const pEl = document.getElementById('pickerCustomProtein');
+            const cEl = document.getElementById('pickerCustomCarbs');
+            const fEl = document.getElementById('pickerCustomFats');
+
+            const name = (nameEl?.value || '').trim();
+            if (!name) {
+                alert('Please enter a food name.');
+                nameEl?.focus();
+                return;
+            }
+
+            const serving = (servingEl?.value || '').trim() || '1 serving';
+            const calories = parseFloat(calsEl?.value) || 0;
+            const protein = parseFloat(pEl?.value) || 0;
+            const carbs = parseFloat(cEl?.value) || 0;
+            const fat = parseFloat(fEl?.value) || 0;
+            const dietType = dietEl?.value || 'veg';
+
+            if (!mealRowFoods[activeMealRowIdForPicker]) {
+                mealRowFoods[activeMealRowIdForPicker] = [];
+            }
+
+            mealRowFoods[activeMealRowIdForPicker].push({
+                foodId: 'custom_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+                name,
+                serving,
+                qty: 1,
+                calories,
+                protein,
+                carbs,
+                fat,
+                diet_type: dietType,
+                isCustom: true
+            });
+
+            if (nameEl) nameEl.value = '';
+            if (servingEl) servingEl.value = '';
+            if (calsEl) calsEl.value = '';
+            if (pEl) pEl.value = '';
+            if (cEl) cEl.value = '';
+            if (fEl) fEl.value = '';
+
+            togglePickerCustomForm(false);
+            renderMealFoods(activeMealRowIdForPicker);
+            renderMealPickerList();
+            showToast('Custom food added to meal.');
         }
 
         function setPickerCategory(cat) {
             pickerCurrentCategory = cat;
             document.querySelectorAll('.picker-cat-btn').forEach(btn => {
                 if (btn.getAttribute('data-cat') === cat) {
-                    btn.className = 'picker-cat-btn px-2.5 py-1 rounded-md font-bold bg-amber-500 text-slate-950';
+                    btn.className = 'picker-cat-btn px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 shrink-0';
                 } else {
-                    btn.className = 'picker-cat-btn px-2.5 py-1 rounded-md font-bold text-slate-400 hover:bg-slate-800';
+                    btn.className = 'picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0';
                 }
             });
             renderMealPickerList();
@@ -1709,7 +1887,21 @@
 
         function renderMealPickerList() {
             const container = document.getElementById('pickerFoodListContainer');
-            const q = (document.getElementById('pickerSearchInput').value || '').toLowerCase().trim();
+            const rawQuery = (document.getElementById('pickerSearchInput').value || '').trim();
+            const q = rawQuery.toLowerCase();
+
+            const currentMealFoods = (activeMealRowIdForPicker && mealRowFoods[activeMealRowIdForPicker]) ? mealRowFoods[activeMealRowIdForPicker] : [];
+            const summaryEl = document.getElementById('pickerActiveMealSummary');
+            if (summaryEl) {
+                const totalItems = currentMealFoods.reduce((s, it) => s + it.qty, 0);
+                const totalCals = Math.round(currentMealFoods.reduce((s, it) => s + (it.qty * it.calories), 0));
+                const totalP = Math.round(currentMealFoods.reduce((s, it) => s + (it.qty * it.protein), 0));
+                if (totalItems > 0) {
+                    summaryEl.innerHTML = `<strong class="text-slate-900 dark:text-white">${totalItems} items</strong> in meal · <strong class="text-slate-900 dark:text-white">${totalCals} kcal</strong> · <strong class="text-slate-900 dark:text-white">${totalP}g Protein</strong>`;
+                } else {
+                    summaryEl.innerHTML = `Select from list or click <strong>+ Custom Food</strong> above`;
+                }
+            }
 
             let filtered = indianFoodsData.filter(item => {
                 const matchesCat = pickerCurrentCategory === 'all' || item.category === pickerCurrentCategory;
@@ -1718,11 +1910,17 @@
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-xs text-slate-500">No matching food found for "${q}".</div>`;
+                container.innerHTML = `
+                    <div class="p-8 text-center space-y-3">
+                        <div class="text-xs text-slate-500 dark:text-slate-400">No library food matched "${escapeHtml(rawQuery)}".</div>
+                        <button type="button" onclick="togglePickerCustomForm(true, document.getElementById('pickerSearchInput').value.trim())"
+                                class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                            + Add "${escapeHtml(rawQuery || 'Custom Item')}" as Custom Food
+                        </button>
+                    </div>
+                `;
                 return;
             }
-
-            const currentMealFoods = (activeMealRowIdForPicker && mealRowFoods[activeMealRowIdForPicker]) ? mealRowFoods[activeMealRowIdForPicker] : [];
 
             let html = '';
             filtered.forEach(food => {
@@ -1739,29 +1937,29 @@
                                 <span class="w-3 h-3 border-2 ${borderDot} p-0.5 flex items-center justify-center shrink-0">
                                     <span class="w-1 h-1 rounded-full ${dotColor}"></span>
                                 </span>
-                                <span class="text-xs font-bold text-slate-900 dark:text-white truncate">${food.name}</span>
-                                <span class="text-[10px] text-slate-400 font-mono">(${food.serving})</span>
+                                <span class="text-xs font-semibold text-slate-900 dark:text-white truncate">${escapeHtml(food.name)}</span>
+                                <span class="text-[11px] text-slate-400">(${escapeHtml(food.serving)})</span>
                             </div>
-                            <div class="flex items-center gap-3 text-[10px] font-mono mt-1 text-slate-500 dark:text-slate-400 pl-5">
-                                <span class="text-amber-500 font-bold">${food.calories} kcal</span>
-                                <span>P: <strong class="text-rose-400">${food.protein}g</strong></span>
-                                <span>C: <strong class="text-amber-400">${food.carbs}g</strong></span>
-                                <span>F: <strong class="text-cyan-400">${food.fat}g</strong></span>
+                            <div class="flex items-center gap-3 text-[11px] tabular-nums mt-1 text-slate-500 dark:text-slate-400 pl-5">
+                                <span class="text-amber-600 dark:text-amber-400 font-semibold">${food.calories} kcal</span>
+                                <span>P: <strong class="text-rose-500 dark:text-rose-400">${food.protein}g</strong></span>
+                                <span>C: <strong class="text-amber-500 dark:text-amber-400">${food.carbs}g</strong></span>
+                                <span>F: <strong class="text-cyan-500 dark:text-cyan-400">${food.fat}g</strong></span>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-1.5 shrink-0">
                             ${isAdded ? `
                                 <div class="flex items-center gap-1">
-                                    <span class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/30">
-                                        ✓ Added (${existing.qty}x)
+                                    <span class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-500/30 tabular-nums">
+                                        Added (${existing.qty}x)
                                     </span>
-                                    <button type="button" onclick="addFoodItemToActiveMeal('${food.id}')" class="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center justify-center cursor-pointer shadow-sm" title="Add another serving">+</button>
+                                    <button type="button" onclick="addFoodItemToActiveMeal('${food.id}')" class="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center cursor-pointer shadow-xs" title="Add another serving">+</button>
                                 </div>
                             ` : `
-                                <button type="button" 
+                                <button type="button"
                                         onclick="addFoodItemToActiveMeal('${food.id}')"
-                                        class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all cursor-pointer shadow-sm">
+                                        class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold transition-all cursor-pointer shadow-xs">
                                     + Add
                                 </button>
                             `}
@@ -1771,19 +1969,6 @@
             });
 
             container.innerHTML = html;
-
-            // Update bottom summary bar in the picker
-            const summaryEl = document.getElementById('pickerActiveMealSummary');
-            if (summaryEl) {
-                const totalItems = currentMealFoods.reduce((s, it) => s + it.qty, 0);
-                const totalCals = currentMealFoods.reduce((s, it) => s + (it.qty * it.calories), 0);
-                const totalP = Math.round(currentMealFoods.reduce((s, it) => s + (it.qty * it.protein), 0));
-                if (totalItems > 0) {
-                    summaryEl.innerHTML = `🥘 <strong>${totalItems} items</strong> in meal • <strong>${totalCals} kcal</strong> • <strong>${totalP}g Protein</strong>`;
-                } else {
-                    summaryEl.innerHTML = `Click <strong>+ Add</strong> on any foods above`;
-                }
-            }
         }
 
         function addFoodItemToActiveMeal(foodId) {
@@ -1808,7 +1993,8 @@
                     protein: food.protein,
                     carbs: food.carbs,
                     fat: food.fat,
-                    diet_type: food.diet_type
+                    diet_type: food.diet_type,
+                    isCustom: false
                 });
             }
 
@@ -1862,9 +2048,9 @@
         }
 
         function copyFoodDetails(food) {
-            const text = `🥗 *${food.name}* (${food.hindi_name || ''})\n• Serving: ${food.serving}\n• Calories: ${food.calories} kcal\n• Protein: ${food.protein}g | Carbs: ${food.carbs}g | Fat: ${food.fat}g | Fiber: ${food.fiber}g\n• Purpose: ${food.gym_purpose}\n• Info: ${food.description}`;
+            const text = `*${food.name}*${food.hindi_name ? ' (' + food.hindi_name + ')' : ''}\n• Serving: ${food.serving}\n• Calories: ${food.calories} kcal\n• Protein: ${food.protein}g | Carbs: ${food.carbs}g | Fat: ${food.fat}g | Fiber: ${food.fiber}g\n• Purpose: ${food.gym_purpose}\n• Info: ${food.description}`;
             navigator.clipboard.writeText(text).then(() => {
-                showToast(`Copied ${food.name} macro details!`);
+                showToast(`Copied ${food.name} nutrition details.`);
             });
         }
 
@@ -1971,7 +2157,7 @@
         }
 
         function renderAiDietResult(data) {
-            document.getElementById('aiResPlanTitle').innerText = data.plan_title || 'Personalized AI Diet Plan';
+            document.getElementById('aiResPlanTitle').innerText = data.plan_title || 'Generated Diet Plan';
             document.getElementById('aiResCalories').innerText = data.daily_totals.calories + ' kcal';
             document.getElementById('aiResProtein').innerText = data.daily_totals.protein_grams + 'g';
             document.getElementById('aiResCarbs').innerText = data.daily_totals.carbs_grams + 'g';
@@ -1990,20 +2176,18 @@
                     <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
                         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-2">
                             <div class="flex items-center gap-2">
-                                <span class="w-5 h-5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-mono text-[10px] font-bold flex items-center justify-center">${idx + 1}</span>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white">${meal.meal_name}</h4>
-                                <span class="text-[10px] text-slate-500 font-mono">⏰ ${meal.recommended_time}</span>
+                                <span class="w-5 h-5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 tabular-nums text-[10px] font-semibold flex items-center justify-center">${idx + 1}</span>
+                                <h4 class="text-xs font-semibold text-slate-900 dark:text-white">${escapeHtml(meal.meal_name)}</h4>
+                                <span class="text-[11px] text-slate-500 tabular-nums">${escapeHtml(meal.recommended_time)}</span>
                             </div>
-                            <div class="flex items-center gap-1.5 text-[10px] font-mono font-bold">
-                                <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-500">${meal.target_macros.calories} kcal</span>
+                            <div class="flex items-center gap-1.5 text-[11px] tabular-nums font-medium">
+                                <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">${meal.target_macros.calories} kcal</span>
                                 <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-500">P: ${meal.target_macros.protein_g}g</span>
                                 <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-500">C: ${meal.target_macros.carbs_g}g</span>
                                 <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-500">F: ${meal.target_macros.fat_g}g</span>
                             </div>
                         </div>
-                        <div class="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed pl-2 border-l-2 border-indigo-500/40">
-                            ${meal.items_description}
-                        </div>
+                        <div class="text-xs text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed pl-2 border-l-2 border-indigo-500/40">${escapeHtml(meal.items_description)}</div>
                     </div>
                 `;
                 mealsContainer.insertAdjacentHTML('beforeend', mealHtml);
@@ -2033,7 +2217,7 @@
                 const resData = await response.json();
 
                 if (resData.success) {
-                    btn.innerHTML = `<span>✓ Plan Saved! Reloading...</span>`;
+                    btn.innerHTML = `<span>Saved. Reloading...</span>`;
                     setTimeout(() => {
                         window.location.reload();
                     }, 800);
@@ -2053,20 +2237,20 @@
         function copyAiDietWhatsAppText() {
             if (!currentAiDietResult) return;
             const d = currentAiDietResult;
-            let text = `🥗 *${d.plan_title}*\n`;
-            text += `━━━━━━━━━━━━━━━━━━━━━\n`;
-            text += `🔥 *Daily Calorie Target:* ${d.daily_totals.calories} kcal\n`;
-            text += `💪 *Protein:* ${d.daily_totals.protein_grams}g | 🍚 *Carbs:* ${d.daily_totals.carbs_grams}g | 🥑 *Fats:* ${d.daily_totals.fat_grams}g\n`;
-            text += `💧 *Hydration Goal:* ${d.daily_totals.water_liters} L / day\n\n`;
-            text += `📋 *DAILY MEAL REGIME:*\n`;
-            
+            let text = `*${d.plan_title}*\n`;
+            text += `------------------------\n`;
+            text += `*Daily Target:* ${d.daily_totals.calories} kcal\n`;
+            text += `*Protein:* ${d.daily_totals.protein_grams}g | *Carbs:* ${d.daily_totals.carbs_grams}g | *Fats:* ${d.daily_totals.fat_grams}g\n`;
+            text += `*Hydration Goal:* ${d.daily_totals.water_liters} L / day\n\n`;
+            text += `*Daily Meal Plan:*\n`;
+
             d.meals.forEach((m, idx) => {
-                text += `\n*${idx + 1}. ${m.meal_name}* (⏰ ${m.recommended_time}) [${m.target_macros.calories} kcal]\n`;
+                text += `\n*${idx + 1}. ${m.meal_name}* (${m.recommended_time}) — ${m.target_macros.calories} kcal\n`;
                 text += `${m.items_description}\n`;
             });
 
             navigator.clipboard.writeText(text).then(() => {
-                showToast('AI Diet WhatsApp text copied to clipboard!');
+                showToast('Diet plan copied to clipboard.');
             });
         }
     </script>

@@ -649,7 +649,25 @@
                                     total: {{ (int) $pkg->total_sessions }},
                                     status: '{{ $pkg->status }}',
                                     logging: false,
-                                    async logOne() {
+                                    memberName: {{ Js::from($pkg->member?->full_name ?? 'this member') }},
+                                    packageName: {{ Js::from($pkg->package_name ?? 'PT Package') }},
+                                    logOne() {
+                                        if (this.logging || this.status !== 'ACTIVE' || this.used >= this.total) return;
+                                        const nextLeft = Math.max(0, this.total - (this.used + 1));
+                                        if (typeof window.openUiConfirmModal === 'function') {
+                                            window.openUiConfirmModal({
+                                                title: 'Confirm PT Session Log',
+                                                message: 'Log 1 completed session for ' + this.memberName + ' (' + this.packageName + ')? ' + nextLeft + ' sessions will remain.',
+                                                confirmText: 'Yes, Log Session',
+                                                cancelText: 'Cancel',
+                                                type: 'primary',
+                                                onConfirm: () => this.executeLogOne()
+                                            });
+                                            return;
+                                        }
+                                        this.executeLogOne();
+                                    },
+                                    async executeLogOne() {
                                         if (this.logging || this.status !== 'ACTIVE' || this.used >= this.total) return;
                                         this.logging = true;
                                         try {
@@ -668,7 +686,10 @@
                                                 this.status = data.status;
                                             }
                                         } catch (e) {
-                                            this.$refs.fallbackLogForm?.submit();
+                                            if (this.$refs.fallbackLogForm) {
+                                                this.$refs.fallbackLogForm.dataset.confirmed = 'true';
+                                                this.$refs.fallbackLogForm.submit();
+                                            }
                                         } finally {
                                             this.logging = false;
                                         }

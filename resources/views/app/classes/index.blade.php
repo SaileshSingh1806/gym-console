@@ -339,7 +339,7 @@
         </div>
 
         <!-- ==================== TAB 2: TIMETABLE ==================== -->
-        <div x-show="activeTab === 'timetable'" class="space-y-4">
+        <div x-show="activeTab === 'timetable'" x-cloak class="space-y-4">
             <div class="rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[900px]">
@@ -406,7 +406,7 @@
         </div>
 
         <!-- ==================== TAB 3: REQUESTS ==================== -->
-        <div x-show="activeTab === 'requests'" class="space-y-4">
+        <div x-show="activeTab === 'requests'" x-cloak class="space-y-4">
             <div class="p-6 rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
                 <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Member Class Bookings & Requests</h3>
@@ -491,7 +491,7 @@
         </div>
 
         <!-- ==================== TAB 4: MY CLASSES (DIRECTORY LIST) ==================== -->
-        <div x-show="activeTab === 'my_classes'" class="space-y-4">
+        <div x-show="activeTab === 'my_classes'" x-cloak class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 @forelse($classes as $c)
                     <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-sm">
@@ -556,7 +556,7 @@
         </div>
 
         <!-- ==================== TAB 5: TEMPLATES ==================== -->
-        <div x-show="activeTab === 'templates'" class="space-y-4">
+        <div x-show="activeTab === 'templates'" x-cloak class="space-y-4">
             <div class="p-8 rounded-3xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
                 <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Popular Class Templates</h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400">Quickly spin up popular class templates with predefined duration, capacity, and settings.</p>
