@@ -263,6 +263,32 @@ class AppController extends Controller
             ->orderBy('start_time')
             ->get() : collect();
 
+        $exerciseVideoMatches = [];
+        if ($member) {
+            $memberExercises = $member->workoutPlans
+                ->flatMap(static fn ($plan) => $plan->exercises);
+            if ($member->activeWorkoutPlan) {
+                $memberExercises = $memberExercises->merge($member->activeWorkoutPlan->exercises);
+            }
+
+            foreach ($memberExercises as $exercise) {
+                if (isset($exerciseVideoMatches[$exercise->id])) {
+                    continue;
+                }
+
+                $matched = \App\Services\ExerciseDatabase::matchByName($exercise->exercise_name);
+                if ($matched) {
+                    $exerciseVideoMatches[$exercise->id] = [
+                        'title' => $matched['title'] ?? $exercise->exercise_name,
+                        'category' => $matched['category'] ?? 'Strength',
+                        'equipment' => $matched['equipment'] ?? 'Gym',
+                        'video_url' => $matched['video_url'] ?? null,
+                        'notes' => $matched['notes'] ?? null,
+                    ];
+                }
+            }
+        }
+
         return view('app.portal.index', compact(
             'tenant',
             'user',
@@ -274,7 +300,8 @@ class AppController extends Controller
             'availableClassSchedules',
             'pendingPtSessions',
             'ptSessionsHistory',
-            'upcomingPtSessions'
+            'upcomingPtSessions',
+            'exerciseVideoMatches'
         ));
     }
 

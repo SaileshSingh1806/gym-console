@@ -124,6 +124,44 @@
         ptConfirmSuccess: false,
         ptSuccessMsg: '',
 
+        // Workout Video Modal State
+        activeVideo: null,
+
+        openExerciseVideo(payload) {
+            if (!payload || !payload.url || !/^(\/|https?:\/\/)/i.test(payload.url)) {
+                return;
+            }
+            this.activeVideo = payload;
+        },
+
+        closeExerciseVideo() {
+            const vid = document.getElementById('portal-exercise-video-player');
+            if (vid) {
+                try { vid.pause(); } catch (e) {}
+            }
+            this.activeVideo = null;
+        },
+
+        resolveVideoKind(url) {
+            if (!url) return 'none';
+            if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url)) return 'mp4';
+            if (/(youtube\.com\/(watch|shorts|embed)|youtu\.be\/|vimeo\.com\/)/i.test(url)) return 'embed';
+            return 'link';
+        },
+
+        resolveEmbedUrl(url) {
+            if (!url) return '';
+            let match = url.match(/(?:youtube\.com\/(?:watch\?.*v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+            if (match && match[1]) {
+                return 'https://www.youtube.com/embed/' + match[1] + '?rel=0&playsinline=1&autoplay=1';
+            }
+            match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+            if (match && match[1]) {
+                return 'https://player.vimeo.com/video/' + match[1] + '?autoplay=1';
+            }
+            return url;
+        },
+
         init() {
             // Live background polling for pending PT sessions every 6 seconds
             setInterval(() => {
@@ -149,6 +187,9 @@
 
         setPortalTab(name) {
             this.tab = name;
+            if (name !== 'workouts' && this.activeVideo) {
+                this.closeExerciseVideo();
+            }
             window.dispatchEvent(new CustomEvent('portal-tab-changed', { detail: name }));
             if (window.history && window.history.replaceState) {
                 const url = new URL(window.location);
@@ -719,6 +760,22 @@
                 <!-- TODAY'S ROUTINE: WORKOUT & NUTRITION (BALANCED 2-COL GRID) -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Today's Workout Quick Card -->
+                    @php
+                        $homeWorkoutDayLabels = [
+                            'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday',
+                            'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday',
+                            'day_1' => 'Day 1', 'day_2' => 'Day 2', 'day_3' => 'Day 3',
+                            'day_4' => 'Day 4', 'day_5' => 'Day 5', 'day_6' => 'Day 6', 'day_7' => 'Day 7',
+                        ];
+                        $homeDayKey = null;
+                        $homeDayExercises = collect();
+                        if ($activeWorkout && $activeWorkout->exercises->isNotEmpty()) {
+                            $groupedHomeEx = $activeWorkout->exercises->sortBy('sort_order')->groupBy('day');
+                            $todayWeekdayKey = strtolower(now()->format('l'));
+                            $homeDayKey = $groupedHomeEx->has($todayWeekdayKey) ? $todayWeekdayKey : $groupedHomeEx->keys()->first();
+                            $homeDayExercises = $groupedHomeEx->get($homeDayKey, collect());
+                        }
+                    @endphp
                     <div class="rounded-3xl bg-[#171A22] border border-neutral-800 p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
                         <div class="space-y-3.5">
                             <div class="flex items-center justify-between">
@@ -726,26 +783,68 @@
                                     <div class="w-9 h-9 rounded-2xl bg-[#C5A880]/15 text-[#C5A880] flex items-center justify-center font-bold text-base shrink-0 border border-[#C5A880]/30">
                                         🏋️
                                     </div>
-                                    <div class="space-y-0.5">
-                                        <h3 class="text-sm font-black text-white tracking-tight">Workout Routine</h3>
-                                        <p class="text-[11px] font-medium text-slate-400">{{ $activeWorkout ? $activeWorkout->title : 'No Routine Prescribed' }}</p>
+                                    <div class="min-w-0 space-y-0.5">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <h3 class="text-sm font-black text-white tracking-tight truncate">Workout Routine</h3>
+                                            @if($homeDayKey)
+                                                <span class="px-1.5 py-0.5 rounded-md bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/25 text-[9px] font-black uppercase tracking-wider shrink-0">
+                                                    {{ $homeWorkoutDayLabels[$homeDayKey] ?? ucfirst(str_replace('_', ' ', $homeDayKey)) }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[11px] font-medium text-slate-400 truncate">{{ $activeWorkout ? $activeWorkout->title : 'No Routine Prescribed' }}</p>
                                     </div>
                                 </div>
-                                <button type="button" @click="setPortalTab('workouts')" class="text-xs font-bold text-[#C5A880] hover:underline cursor-pointer">View All &rarr;</button>
+                                <button type="button" @click="setPortalTab('workouts')" class="px-2.5 py-1.5 rounded-xl bg-[#C5A880]/10 hover:bg-[#C5A880] text-[#C5A880] hover:text-neutral-950 border border-[#C5A880]/25 text-[11px] font-bold transition-all cursor-pointer shrink-0">Start &rarr;</button>
                             </div>
 
-                            @if($activeWorkout && $activeWorkout->exercises->isNotEmpty())
+                            @php
+                                $quickExercises = $homeDayExercises->isNotEmpty() ? $homeDayExercises : ($activeWorkout?->exercises ?? collect());
+                            @endphp
+                            @if($activeWorkout && $quickExercises->isNotEmpty())
                                 <div class="grid grid-cols-2 gap-2 pt-1">
-                                    @foreach($activeWorkout->exercises->take(4) as $ex)
-                                        <div class="p-3 rounded-2xl bg-[#0F1115]/70 border border-neutral-800 flex items-center justify-between">
+                                    @foreach($quickExercises->take(4) as $ex)
+                                        @php
+                                            $qMatch = $exerciseVideoMatches[$ex->id] ?? null;
+                                            $qVideoUrl = $ex->video_url ?: ($qMatch['video_url'] ?? null);
+                                            $qDur = (int) ($ex->duration_seconds ?? 0);
+                                            $qTarget = $ex->tracking_type === 'time'
+                                                ? ($ex->sets . '×' . (($qDur >= 60 && $qDur % 60 === 0) ? ($qDur / 60) . 'm' : $qDur . 's'))
+                                                : ($ex->sets . '×' . $ex->reps);
+                                            $qSub = $qMatch['category'] ?? ($ex->weight ? 'Load: ' . $ex->weight : (($ex->rest_seconds ?? 0) > 0 ? 'Rest ' . $ex->rest_seconds . 's' : 'Workout'));
+                                        @endphp
+                                        <div class="p-3 rounded-2xl bg-[#0F1115]/70 border border-neutral-800/90 hover:border-[#C5A880]/30 transition-colors flex items-center justify-between gap-2">
                                             <div class="min-w-0 pr-1">
                                                 <div class="text-xs font-black text-white truncate">{{ $ex->exercise_name }}</div>
-                                                <div class="text-[10px] text-slate-400">{{ $ex->target_muscle ?? 'General' }}</div>
+                                                <div class="flex items-center gap-1.5 mt-0.5">
+                                                    <span class="text-[10px] text-slate-400 truncate">{{ $qSub }}</span>
+                                                    @if($qVideoUrl)
+                                                        <button type="button"
+                                                                @click.stop="openExerciseVideo({{ Js::from([
+                                                                    'title' => $ex->exercise_name,
+                                                                    'url' => $qVideoUrl,
+                                                                    'category' => $qMatch['category'] ?? 'Assigned Exercise',
+                                                                    'equipment' => $qMatch['equipment'] ?? 'Form Guide',
+                                                                    'notes' => $ex->notes ?: ($qMatch['notes'] ?? ''),
+                                                                    'setsReps' => $qTarget,
+                                                                    'source' => $ex->video_url ? 'Assigned Video' : 'Video Library',
+                                                                ]) }})"
+                                                                title="Watch Form Video"
+                                                                class="w-4 h-4 rounded-full bg-[#C5A880]/20 text-[#C5A880] hover:bg-[#C5A880] hover:text-neutral-950 flex items-center justify-center text-[8px] shrink-0 transition-colors cursor-pointer">
+                                                            ▶
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <span class="text-xs font-black text-[#C5A880] font-mono shrink-0">{{ $ex->sets }}×{{ $ex->reps }}</span>
+                                            <span class="text-xs font-black text-[#C5A880] font-mono shrink-0">{{ $qTarget }}</span>
                                         </div>
                                     @endforeach
                                 </div>
+                                @if($quickExercises->count() > 4)
+                                    <button type="button" @click="setPortalTab('workouts')" class="w-full py-1.5 rounded-xl bg-[#0F1115]/50 hover:bg-[#0F1115] border border-neutral-800/80 text-[11px] font-bold text-[#C5A880] transition-colors cursor-pointer">
+                                        +{{ $quickExercises->count() - 4 }} more exercises in today's split &rarr;
+                                    </button>
+                                @endif
                             @else
                                 <div class="py-5 px-4 text-center rounded-2xl bg-[#0F1115]/50 border border-dashed border-neutral-800 space-y-1.5">
                                     <div class="text-xs font-bold text-slate-300">No workout routine assigned yet</div>
@@ -1113,62 +1212,421 @@
 
             </div>
 
-            <!-- TAB 2: WORKOUT PLANS (ATHLETIC STEALTH) -->
-            <div x-show="tab === 'workouts'" x-cloak class="space-y-4">
+            <!-- TAB 2: WORKOUT PLANS (CHAMPAGNE STEALTH) -->
+            <div x-show="tab === 'workouts'" x-cloak class="space-y-5">
                 @if($member->workoutPlans->isNotEmpty())
                     @foreach($member->workoutPlans as $plan)
-                        <div class="rounded-3xl bg-[#171A22] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
-                            <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
-                                <div>
-                                    <h3 class="text-lg font-black text-white">{{ $plan->title }}</h3>
-                                    @if($plan->goal)
-                                        <p class="text-xs text-slate-400 mt-0.5">Goal: <span class="font-bold text-slate-200">{{ $plan->goal }}</span></p>
-                                    @endif
+                        @php
+                            $weekdayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                            $workoutGroups = $plan->exercises->sortBy('sort_order')->groupBy(function ($exercise) use ($weekdayNames) {
+                                $rawDay = trim((string) ($exercise->day ?? ''));
+                                if ($rawDay === '') {
+                                    return 'monday';
+                                }
+                                if (preg_match('/^day_([1-7])$/i', $rawDay, $matches)) {
+                                    return $weekdayNames[(int) $matches[1] - 1];
+                                }
+                                return strtolower($rawDay);
+                            });
+                            $orderedWeekdays = array_values(array_filter($weekdayNames, static fn ($day) => $workoutGroups->has($day)));
+                            $customDays = array_values(array_diff($workoutGroups->keys()->all(), $orderedWeekdays));
+                            $workoutDays = array_values(array_merge($orderedWeekdays, $customDays));
+                            $today = strtolower(now()->format('l'));
+                            $firstDay = in_array($today, $workoutDays, true) ? $today : ($workoutDays[0] ?? 'monday');
+
+                            $dayMeta = [];
+                            foreach ($workoutDays as $dKey) {
+                                $dList = $workoutGroups->get($dKey, collect());
+                                $dSets = (int) $dList->sum('sets');
+                                $dSeconds = 0;
+                                foreach ($dList as $dEx) {
+                                    $sets = max(1, (int) ($dEx->sets ?? 3));
+                                    $workPerSet = $dEx->tracking_type === 'time' ? max(20, (int) ($dEx->duration_seconds ?? 45)) : 45;
+                                    $restPerSet = max(15, (int) ($dEx->rest_seconds ?? 45));
+                                    $dSeconds += $sets * ($workPerSet + $restPerSet);
+                                }
+                                $dayMeta[$dKey] = [
+                                    'label' => ucwords(str_replace('_', ' ', $dKey)),
+                                    'count' => $dList->count(),
+                                    'sets' => $dSets,
+                                    'estMinutes' => max(5, (int) ceil($dSeconds / 60)),
+                                    'ids' => $dList->pluck('id')->map(static fn ($id) => (int) $id)->values()->all(),
+                                ];
+                            }
+                            $storageKey = 'gym_workout_done_' . ($member->id ?? 0) . '_p' . $plan->id . '_' . now()->format('Y-m-d');
+                        @endphp
+
+                        <section x-data="{
+                                    workoutDay: {{ Js::from($firstDay) }},
+                                    todayKey: {{ Js::from($today) }},
+                                    search: '',
+                                    storageKey: {{ Js::from($storageKey) }},
+                                    dayMeta: {{ Js::from($dayMeta) }},
+                                    doneMap: {},
+                                    restLeft: 0,
+                                    restTotal: 0,
+                                    restEnd: 0,
+                                    restExerciseName: '',
+                                    restInterval: null,
+                                    init() {
+                                        try {
+                                            const saved = localStorage.getItem(this.storageKey);
+                                            if (saved) {
+                                                const parsed = JSON.parse(saved);
+                                                if (parsed && typeof parsed === 'object') {
+                                                    this.doneMap = parsed;
+                                                }
+                                            }
+                                        } catch (e) {}
+                                    },
+                                    saveDone() {
+                                        try {
+                                            localStorage.setItem(this.storageKey, JSON.stringify(this.doneMap));
+                                        } catch (e) {}
+                                    },
+                                    toggleDone(id) {
+                                        const next = Object.assign({}, this.doneMap);
+                                        if (next[id]) {
+                                            delete next[id];
+                                        } else {
+                                            next[id] = true;
+                                        }
+                                        this.doneMap = next;
+                                        this.saveDone();
+                                    },
+                                    isDone(id) {
+                                        return !!this.doneMap[id];
+                                    },
+                                    clearDayDone() {
+                                        const meta = this.dayMeta[this.workoutDay];
+                                        if (!meta) return;
+                                        const next = Object.assign({}, this.doneMap);
+                                        (meta.ids || []).forEach((id) => { delete next[id]; });
+                                        this.doneMap = next;
+                                        this.saveDone();
+                                    },
+                                    get activeDayMeta() {
+                                        return this.dayMeta[this.workoutDay] || { label: 'Workout', count: 0, sets: 0, estMinutes: 0, ids: [] };
+                                    },
+                                    get activeDayDoneCount() {
+                                        const ids = this.activeDayMeta.ids || [];
+                                        return ids.filter((id) => !!this.doneMap[id]).length;
+                                    },
+                                    get activeDayProgressPct() {
+                                        const total = this.activeDayMeta.count || 0;
+                                        return total > 0 ? Math.round((this.activeDayDoneCount / total) * 100) : 0;
+                                    },
+                                    startRest(seconds, exerciseTitle) {
+                                        const sec = Number(seconds) || 0;
+                                        if (sec <= 0) return;
+                                        this.stopRest();
+                                        this.restLeft = sec;
+                                        this.restTotal = sec;
+                                        this.restExerciseName = exerciseTitle || 'Rest Period';
+                                        this.restEnd = Date.now() + sec * 1000;
+                                        this.restInterval = setInterval(() => {
+                                            this.restLeft = Math.max(0, Math.ceil((this.restEnd - Date.now()) / 1000));
+                                            if (!this.restLeft) {
+                                                if (navigator.vibrate) {
+                                                    try { navigator.vibrate([120, 60, 120]); } catch (e) {}
+                                                }
+                                                this.stopRest();
+                                            }
+                                        }, 250);
+                                    },
+                                    adjustRest(delta) {
+                                        if (this.restLeft <= 0) return;
+                                        this.restEnd += delta * 1000;
+                                        this.restTotal = Math.max(1, this.restTotal + delta);
+                                        this.restLeft = Math.max(0, Math.ceil((this.restEnd - Date.now()) / 1000));
+                                        if (!this.restLeft) this.stopRest();
+                                    },
+                                    stopRest() {
+                                        if (this.restInterval) clearInterval(this.restInterval);
+                                        this.restInterval = null;
+                                        this.restLeft = 0;
+                                        this.restTotal = 0;
+                                        this.restExerciseName = '';
+                                    },
+                                    destroy() { this.stopRest(); }
+                                }"
+                                 x-effect="if (tab !== 'workouts') stopRest()"
+                                 class="rounded-3xl bg-[#171A22] border border-neutral-800 shadow-xl overflow-hidden">
+
+                            <!-- Luxury Champagne Stealth Hero Header -->
+                            <header class="relative overflow-hidden border-b border-neutral-800 border-t-2 border-t-[#C5A880] bg-gradient-to-br from-[#1B1F2A] via-[#171A22] to-[#111319] p-5 sm:p-6 space-y-5">
+                                <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#C5A880]/10 blur-3xl"></div>
+
+                                <div class="relative flex flex-wrap items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 text-[10px] font-black uppercase tracking-widest">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Active Training Plan
+                                    </span>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        @if($plan->trainer)
+                                            <span class="px-2.5 py-1 rounded-xl bg-[#0F1115]/80 border border-neutral-800 text-[10px] font-bold text-slate-300">
+                                                Coach: <span class="text-white">{{ $plan->trainer->full_name ?? $plan->trainer->name }}</span>
+                                            </span>
+                                        @endif
+                                        <span class="px-2.5 py-1 rounded-xl bg-[#0F1115]/80 border border-neutral-700 text-[10px] font-black uppercase tracking-wider text-[#C5A880]">
+                                            {{ ucfirst($plan->level ?? 'Custom') }}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span class="px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30">
-                                    {{ $plan->level ?? 'Custom' }}
-                                </span>
-                            </div>
 
-                            @if(!empty($plan->notes))
-                                <div class="p-3.5 rounded-2xl bg-[#C5A880]/5 border border-[#C5A880]/20 text-xs text-slate-300 leading-relaxed">
-                                    <span class="font-black uppercase tracking-wider block text-[10px] text-[#C5A880] mb-0.5">Coach's Instructions:</span>
-                                    {{ $plan->notes }}
+                                <div class="relative space-y-1.5">
+                                    <h3 class="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight break-words">{{ $plan->title }}</h3>
+                                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                                        <span class="inline-flex items-center gap-1 text-slate-300 font-semibold">
+                                            🎯 {{ ucwords(str_replace('_', ' ', $plan->goal ?? 'Strength & Conditioning')) }}
+                                        </span>
+                                        @if($plan->start_date)
+                                            <span class="text-neutral-600">&bull;</span>
+                                            <span>Started {{ \Carbon\Carbon::parse($plan->start_date)->format('d M Y') }}</span>
+                                        @endif
+                                    </div>
                                 </div>
-                            @endif
 
-                            <div class="space-y-2.5">
-                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-400">Assigned Exercises</h4>
-                                @if($plan->exercises->isNotEmpty())
-                                    <div class="space-y-2">
-                                        @foreach($plan->exercises as $idx => $ex)
-                                            <div class="p-3.5 rounded-2xl bg-[#0F1115]/70 border border-neutral-800 flex items-center justify-between gap-3">
-                                                <div class="flex items-center gap-3 min-w-0">
-                                                    <span class="w-6 h-6 rounded-lg bg-[#C5A880]/15 text-[#C5A880] font-black text-xs flex items-center justify-center shrink-0 border border-[#C5A880]/25">
-                                                        {{ $idx + 1 }}
-                                                    </span>
-                                                    <div class="min-w-0">
-                                                        <div class="text-sm font-extrabold text-white truncate">{{ $ex->exercise_name }}</div>
-                                                        <div class="text-[11px] text-slate-400">{{ $ex->target_muscle ?? 'General' }}</div>
-                                                    </div>
-                                                </div>
+                                <!-- 4-Tile Athletic KPI Strip -->
+                                <div class="relative grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    <div class="rounded-2xl bg-[#0F1115]/85 border border-neutral-800/90 p-3">
+                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Days / Wk</div>
+                                        <div class="mt-0.5 text-xl font-black text-white tabular-nums">{{ count($workoutDays) }}</div>
+                                    </div>
+                                    <div class="rounded-2xl bg-[#0F1115]/85 border border-neutral-800/90 p-3">
+                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Split Exercises</div>
+                                        <div class="mt-0.5 text-xl font-black text-[#C5A880] tabular-nums" x-text="activeDayMeta.count">0</div>
+                                    </div>
+                                    <div class="rounded-2xl bg-[#0F1115]/85 border border-neutral-800/90 p-3">
+                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Sets</div>
+                                        <div class="mt-0.5 text-xl font-black text-white tabular-nums" x-text="activeDayMeta.sets">0</div>
+                                    </div>
+                                    <div class="rounded-2xl bg-[#0F1115]/85 border border-neutral-800/90 p-3">
+                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Est. Session</div>
+                                        <div class="mt-0.5 text-xl font-black text-white tabular-nums" x-text="'~' + activeDayMeta.estMinutes + 'm'">~0m</div>
+                                    </div>
+                                </div>
 
-                                                <div class="text-right shrink-0 space-y-0.5">
-                                                    <span class="px-2.5 py-1 rounded-lg bg-[#171A22] border border-neutral-800 text-xs font-black text-[#C5A880] font-mono block">
-                                                        {{ $ex->sets }} × {{ $ex->reps }}
-                                                    </span>
-                                                    @if($ex->weight_kg)
-                                                        <span class="text-[10px] text-slate-400 font-bold block">{{ $ex->weight_kg }} kg</span>
-                                                    @endif
-                                                </div>
+                                <!-- Live Daily Workout Progress Bar -->
+                                @if(count($workoutDays))
+                                    <div class="relative rounded-2xl bg-[#0F1115]/75 border border-neutral-800 p-3.5 space-y-2">
+                                        <div class="flex items-center justify-between gap-2 text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-slate-300" x-text="activeDayMeta.label + ' Progress'"></span>
+                                                <span x-show="activeDayProgressPct === 100" x-cloak class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black">
+                                                    ✓ Completed!
+                                                </span>
                                             </div>
+                                            <div class="flex items-center gap-2.5">
+                                                <span class="font-black text-[#C5A880] tabular-nums" x-text="activeDayDoneCount + ' / ' + activeDayMeta.count + ' (' + activeDayProgressPct + '%)'"></span>
+                                                <button type="button" x-show="activeDayDoneCount > 0" x-cloak @click="clearDayDone()" class="text-[10px] font-bold text-slate-400 hover:text-white underline cursor-pointer">
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
+                                            <div class="h-full rounded-full bg-gradient-to-r from-[#C5A880] to-emerald-400 transition-all duration-300"
+                                                 :style="'width: ' + activeDayProgressPct + '%'"></div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </header>
+
+                            <!-- Workout Body -->
+                            <div class="p-4 sm:p-6 space-y-5 bg-[#12151C]">
+
+                                <!-- Coach's Instructions Callout -->
+                                @if(!empty($plan->notes))
+                                    <div x-data="{ expandedNotes: false }" class="rounded-2xl bg-[#C5A880]/5 border border-[#C5A880]/20 p-4 space-y-1.5">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-[#C5A880]">Coach's Notes &amp; Focus</span>
+                                            @if(strlen($plan->notes) > 130)
+                                                <button type="button" @click="expandedNotes = !expandedNotes" class="text-[10px] font-bold text-[#C5A880] underline cursor-pointer" x-text="expandedNotes ? 'Show less' : 'Read full'"></button>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs text-slate-300 leading-relaxed" :class="expandedNotes ? '' : 'line-clamp-3'">{{ $plan->notes }}</p>
+                                    </div>
+                                @endif
+
+                                <!-- Live Rest Timer Countdown Banner -->
+                                <div x-show="restLeft > 0" x-cloak class="rounded-2xl border border-[#C5A880]/50 bg-gradient-to-r from-[#C5A880]/15 via-[#171A22] to-[#171A22] p-4 shadow-lg space-y-3">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-[#C5A880] block">⏱ Rest Timer Active</span>
+                                            <p class="text-xs font-bold text-slate-300 truncate mt-0.5" x-text="restExerciseName"></p>
+                                        </div>
+                                        <div class="text-3xl font-black tabular-nums font-mono text-white shrink-0" role="timer"
+                                             x-text="Math.floor(restLeft / 60) + ':' + String(restLeft % 60).padStart(2, '0')"></div>
+                                    </div>
+                                    <div class="h-1.5 w-full rounded-full bg-neutral-800 overflow-hidden">
+                                        <div class="h-full bg-[#C5A880] transition-all duration-200"
+                                             :style="'width: ' + (restTotal > 0 ? Math.min(100, Math.round((restLeft / restTotal) * 100)) : 0) + '%'"></div>
+                                    </div>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" @click="adjustRest(-15)" class="px-3 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-700 text-xs font-bold text-slate-200 hover:border-[#C5A880]/50 cursor-pointer">-15s</button>
+                                        <button type="button" @click="adjustRest(15)" class="px-3 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-700 text-xs font-bold text-slate-200 hover:border-[#C5A880]/50 cursor-pointer">+15s</button>
+                                        <button type="button" @click="stopRest()" class="px-4 py-1.5 rounded-xl bg-[#C5A880] text-neutral-950 text-xs font-black hover:bg-[#d8bd98] cursor-pointer">Skip Rest</button>
+                                    </div>
+                                </div>
+
+                                @if(count($workoutDays))
+                                    <!-- Interactive Split Day Selector -->
+                                    <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar" aria-label="Workout split day">
+                                        @foreach($workoutDays as $day)
+                                            @php $isTodayDay = ($day === $today); @endphp
+                                            <button type="button"
+                                                    @click="workoutDay = '{{ $day }}'; search = ''; stopRest()"
+                                                    :aria-pressed="workoutDay === '{{ $day }}'"
+                                                    :class="workoutDay === '{{ $day }}' ? 'bg-[#C5A880] text-neutral-950 border-[#C5A880] shadow-md shadow-[#C5A880]/15' : 'bg-[#171A22] text-slate-300 border-neutral-800 hover:border-neutral-700'"
+                                                    class="min-w-[88px] shrink-0 rounded-2xl border px-3.5 py-2.5 text-center transition-all cursor-pointer relative">
+                                                @if($isTodayDay)
+                                                    <span :class="workoutDay === '{{ $day }}' ? 'bg-neutral-950 text-[#C5A880]' : 'bg-[#C5A880]/20 text-[#C5A880]'"
+                                                          class="inline-block px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest mb-1">Today</span>
+                                                @endif
+                                                <span class="block text-xs font-black uppercase tracking-wider">{{ strlen($day) <= 9 ? substr(ucfirst(str_replace('_', ' ', $day)), 0, 3) : ucwords(str_replace('_', ' ', $day)) }}</span>
+                                                <span :class="workoutDay === '{{ $day }}' ? 'text-neutral-900/80' : 'text-slate-400'"
+                                                      class="mt-0.5 block text-[10px] font-semibold">{{ $workoutGroups[$day]->count() }} ex</span>
+                                            </button>
                                         @endforeach
                                     </div>
+
+                                    <!-- Search Inside Selected Split -->
+                                    <div class="flex items-center gap-2.5 rounded-2xl border border-neutral-800 bg-[#0F1115] px-3.5 focus-within:border-[#C5A880]/60 transition-colors">
+                                        <svg aria-hidden="true" class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" stroke-width="1.8"/><path d="m15 15 5 5" stroke-width="1.8"/></svg>
+                                        <input type="search" aria-label="Search exercises in this split" x-model="search" placeholder="Search exercises in this split..." class="min-w-0 w-full bg-transparent py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none">
+                                        <button type="button" x-show="search.trim()" x-cloak @click="search = ''" class="text-xs text-slate-400 hover:text-white px-1 cursor-pointer">✕</button>
+                                    </div>
+
+                                    <!-- Day Exercise Cards -->
+                                    @foreach($workoutDays as $day)
+                                        <div x-show="workoutDay === '{{ $day }}'" x-cloak class="space-y-3">
+                                            <div class="flex items-center justify-between gap-3">
+                                                <h4 class="text-xs font-black uppercase tracking-widest text-white">{{ ucwords(str_replace('_', ' ', $day)) }} Routine</h4>
+                                                <span class="text-[11px] text-slate-400 font-medium">Tap check to track sets</span>
+                                            </div>
+
+                                            <div x-data="{ names: {{ Js::from($workoutGroups[$day]->pluck('exercise_name')->values()) }} }"
+                                                 x-show="search.trim() && !names.some(name => name.toLowerCase().includes(search.trim().toLowerCase()))"
+                                                 x-cloak
+                                                 class="rounded-2xl border border-dashed border-neutral-700 bg-[#171A22]/50 p-6 text-center space-y-2">
+                                                <p class="text-xs text-slate-400">No matching exercises found in {{ ucwords(str_replace('_', ' ', $day)) }}.</p>
+                                                <button type="button" @click="search = ''" class="px-3 py-1.5 rounded-xl bg-[#C5A880]/15 text-[#C5A880] text-xs font-bold cursor-pointer">Clear Search</button>
+                                            </div>
+
+                                            @foreach($workoutGroups[$day]->values() as $index => $ex)
+                                                @php
+                                                    $exId = (int) $ex->id;
+                                                    $matchedLib = $exerciseVideoMatches[$exId] ?? null;
+                                                    $resolvedVideo = $ex->video_url ?: ($matchedLib['video_url'] ?? null);
+                                                    $resolvedNotes = $ex->notes ?: ($matchedLib['notes'] ?? null);
+                                                    $dur = (int) ($ex->duration_seconds ?? 0);
+                                                    $volumeValue = $ex->tracking_type === 'time'
+                                                        ? ($dur > 0 ? (($dur >= 60 && $dur % 60 === 0) ? ($dur / 60) . ' min' : $dur . ' sec') : 'Timed')
+                                                        : $ex->reps;
+                                                    $videoPayload = $resolvedVideo ? [
+                                                        'title' => $ex->exercise_name,
+                                                        'url' => $resolvedVideo,
+                                                        'category' => $matchedLib['category'] ?? ucwords(str_replace('_', ' ', $day)),
+                                                        'equipment' => $matchedLib['equipment'] ?? ($ex->weight ? 'Load: ' . $ex->weight : 'Gym Exercise'),
+                                                        'notes' => $resolvedNotes ?? '',
+                                                        'setsReps' => $ex->sets . ' ' . ($ex->tracking_type === 'time' ? 'Rounds' : 'Sets') . ' × ' . $volumeValue,
+                                                        'source' => $ex->video_url ? 'Assigned Video' : 'Video Library',
+                                                    ] : null;
+                                                @endphp
+
+                                                <article x-data="{ exerciseName: {{ Js::from($ex->exercise_name) }} }"
+                                                         x-show="exerciseName.toLowerCase().includes(search.trim().toLowerCase())"
+                                                         :class="isDone({{ $exId }}) ? 'border-emerald-500/40 bg-emerald-950/15' : 'border-neutral-800 bg-[#171A22] hover:border-neutral-700'"
+                                                         class="rounded-2xl border p-4 sm:p-5 space-y-3.5 transition-all shadow-sm">
+
+                                                    <!-- Top Row: Done Toggle + Number + Title + Badges -->
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div class="flex items-start gap-3 min-w-0">
+                                                            <button type="button"
+                                                                    @click="toggleDone({{ $exId }})"
+                                                                    :aria-pressed="isDone({{ $exId }})"
+                                                                    title="Mark exercise complete"
+                                                                    :class="isDone({{ $exId }}) ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md shadow-emerald-500/20' : 'bg-[#0F1115] border-neutral-700 text-slate-400 hover:border-[#C5A880]'"
+                                                                    class="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 font-black text-sm transition-all cursor-pointer mt-0.5">
+                                                                <span x-show="isDone({{ $exId }})" x-cloak>✓</span>
+                                                                <span x-show="!isDone({{ $exId }})" class="font-mono text-xs text-[#C5A880]">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                                                            </button>
+
+                                                            <div class="min-w-0 space-y-1">
+                                                                <h5 :class="isDone({{ $exId }}) ? 'line-through text-slate-400' : 'text-white'"
+                                                                    class="text-sm sm:text-base font-extrabold leading-snug break-words transition-colors">
+                                                                    {{ $ex->exercise_name }}
+                                                                </h5>
+                                                                <div class="flex flex-wrap items-center gap-1.5">
+                                                                    @if($matchedLib)
+                                                                        <span class="px-2 py-0.5 rounded-md bg-[#0F1115] border border-neutral-800 text-[10px] font-bold text-slate-300">
+                                                                            {{ $matchedLib['category'] }} &middot; {{ $matchedLib['equipment'] }}
+                                                                        </span>
+                                                                    @endif
+                                                                    @if($ex->weight)
+                                                                        <span class="px-2 py-0.5 rounded-md bg-[#C5A880]/10 border border-[#C5A880]/25 text-[10px] font-bold text-[#C5A880]">
+                                                                            🏋️ {{ $ex->weight }}
+                                                                        </span>
+                                                                    @endif
+                                                                    @if($resolvedVideo)
+                                                                        <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold text-emerald-300">
+                                                                            🎬 Form Video
+                                                                        </span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 3-Column Athletic Prescription Grid -->
+                                                    <dl class="grid grid-cols-3 gap-2 rounded-2xl border border-neutral-800/90 bg-[#0F1115] p-3">
+                                                        <div class="text-center border-r border-neutral-800/80 pr-2">
+                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Rounds' : 'Sets' }}</dt>
+                                                            <dd class="mt-0.5 text-base font-black tabular-nums font-mono text-[#C5A880]">{{ $ex->sets }}</dd>
+                                                        </div>
+                                                        <div class="text-center border-r border-neutral-800/80 px-2">
+                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Duration' : 'Reps' }}</dt>
+                                                            <dd class="mt-0.5 text-base font-black tabular-nums font-mono text-white">{{ $volumeValue }}</dd>
+                                                        </div>
+                                                        <div class="text-center pl-2">
+                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rest</dt>
+                                                            <dd class="mt-0.5 text-base font-black tabular-nums font-mono text-slate-200">{{ ($ex->rest_seconds ?? 0) > 0 ? $ex->rest_seconds . 's' : '—' }}</dd>
+                                                        </div>
+                                                    </dl>
+
+                                                    <!-- Balanced Action Buttons Row -->
+                                                    @if(($ex->rest_seconds ?? 0) > 0 || $videoPayload)
+                                                        <div class="flex flex-wrap items-center gap-2">
+                                                            @if(($ex->rest_seconds ?? 0) > 0)
+                                                                <button type="button"
+                                                                        @click="startRest({{ (int) $ex->rest_seconds }}, {{ Js::from($ex->exercise_name) }})"
+                                                                        class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-[#0F1115] hover:bg-neutral-900 border border-[#C5A880]/30 text-xs font-bold text-[#C5A880] flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                    <span>⏱</span>
+                                                                    <span>Start {{ $ex->rest_seconds }}s Rest</span>
+                                                                </button>
+                                                            @endif
+
+                                                            @if($videoPayload)
+                                                                <button type="button"
+                                                                        @click="openExerciseVideo({{ Js::from($videoPayload) }})"
+                                                                        class="flex-1 min-w-[140px] py-2.5 px-3 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black shadow-md shadow-[#C5A880]/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                    <span>▶</span>
+                                                                    <span>Watch Form Video</span>
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </article>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
                                 @else
-                                    <div class="py-6 text-center text-xs text-slate-400">No exercise list found for this plan.</div>
+                                    <div class="py-8 text-center text-xs text-slate-400 rounded-2xl border border-dashed border-neutral-800">
+                                        Your trainer has not added exercises to this plan yet.
+                                    </div>
                                 @endif
                             </div>
-                        </div>
+                        </section>
                     @endforeach
                 @else
                     <div class="p-10 rounded-3xl bg-[#171A22] border border-neutral-800 text-center space-y-3">
@@ -2210,6 +2668,95 @@
                     </template>
                 </div>
             </div>
+
+            <!-- ========================================================= -->
+            <!-- IN-APP EXERCISE VIDEO PLAYER MODAL (CHAMPAGNE STEALTH)    -->
+            <!-- ========================================================= -->
+            <template x-if="activeVideo">
+                <div @keydown.escape.window="closeExerciseVideo()"
+                     @click.self="closeExerciseVideo()"
+                     class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md">
+                    <div @click.stop class="w-full max-w-2xl rounded-3xl bg-[#12151C] border border-neutral-800 shadow-2xl overflow-hidden text-white">
+                        <!-- Modal Header -->
+                        <div class="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-neutral-800 bg-[#171A22]">
+                            <div class="min-w-0 space-y-1.5">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 text-[10px] font-black uppercase tracking-wider"
+                                          x-text="activeVideo.source || 'Video Library'"></span>
+                                    <span x-show="activeVideo.category" class="px-2 py-0.5 rounded-md bg-[#0F1115] border border-neutral-800 text-[10px] font-bold text-slate-300"
+                                          x-text="activeVideo.category"></span>
+                                    <span x-show="activeVideo.equipment" class="px-2 py-0.5 rounded-md bg-[#0F1115] border border-neutral-800 text-[10px] font-semibold text-slate-400"
+                                          x-text="activeVideo.equipment"></span>
+                                </div>
+                                <h3 class="text-base sm:text-lg font-black text-white leading-tight break-words" x-text="activeVideo.title"></h3>
+                            </div>
+                            <button type="button"
+                                    @click="closeExerciseVideo()"
+                                    aria-label="Close video player"
+                                    class="w-9 h-9 rounded-xl bg-[#0F1115] hover:bg-neutral-800 border border-neutral-800 text-slate-300 hover:text-white flex items-center justify-center font-bold shrink-0 cursor-pointer transition-colors">
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- Video Viewport -->
+                        <div class="bg-black aspect-video w-full flex items-center justify-center relative">
+                            <template x-if="resolveVideoKind(activeVideo.url) === 'mp4'">
+                                <video id="portal-exercise-video-player"
+                                       :key="activeVideo.url"
+                                       controls
+                                       autoplay
+                                       loop
+                                       playsinline
+                                       preload="metadata"
+                                       class="w-full h-full object-contain bg-black">
+                                    <source :src="activeVideo.url">
+                                    Your browser cannot play this video directly.
+                                </video>
+                            </template>
+
+                            <template x-if="resolveVideoKind(activeVideo.url) === 'embed'">
+                                <iframe :key="activeVideo.url"
+                                        :src="resolveEmbedUrl(activeVideo.url)"
+                                        class="w-full h-full border-0"
+                                        allow="autoplay; encrypted-media; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </template>
+
+                            <template x-if="resolveVideoKind(activeVideo.url) === 'link'">
+                                <div class="p-8 text-center space-y-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 flex items-center justify-center mx-auto text-xl">▶</div>
+                                    <p class="text-xs text-slate-300">This demonstration opens externally.</p>
+                                    <a :href="activeVideo.url" target="_blank" rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C5A880] text-neutral-950 text-xs font-black">
+                                        Open Demonstration Video &nearr;
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Details & Actions Footer -->
+                        <div class="p-4 sm:p-5 space-y-3 bg-[#171A22] border-t border-neutral-800">
+                            <div x-show="activeVideo.setsReps" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs font-bold text-[#C5A880]">
+                                <span>📊 Target:</span>
+                                <span x-text="activeVideo.setsReps"></span>
+                            </div>
+
+                            <div x-show="activeVideo.notes" class="rounded-2xl bg-[#0F1115] border border-neutral-800 p-3.5 text-xs text-slate-300 leading-relaxed">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-[#C5A880] block mb-1">Proper Form Cues</span>
+                                <p x-text="activeVideo.notes"></p>
+                            </div>
+
+                            <div class="flex items-center justify-end pt-1">
+                                <button type="button"
+                                        @click="closeExerciseVideo()"
+                                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black cursor-pointer transition-colors">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
         @endif
 

@@ -438,6 +438,22 @@ class TrainerController extends Controller
         $tenant = TenantContext::getTenant() ?? $user->tenant;
         $trainer = $this->resolveTrainer($user, $request);
 
+        $request->validate([
+            'title' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:5000',
+            'exercises' => 'sometimes|array|min:1|max:140',
+            'exercises.*.name' => 'required|string|max:255',
+            'exercises.*.day' => 'required|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday,day_1,day_2,day_3,day_4,day_5,day_6,day_7',
+            'exercises.*.sets' => 'required|integer|min:1|max:100',
+            'exercises.*.reps' => 'nullable|string|max:50',
+            'exercises.*.tracking_type' => 'sometimes|in:reps,time',
+            'exercises.*.duration_seconds' => 'nullable|required_if:exercises.*.tracking_type,time|integer|min:1|max:86400',
+            'exercises.*.rest' => 'nullable|integer|min:0|max:3600',
+            'exercises.*.weight' => 'nullable|string|max:50',
+            'exercises.*.notes' => 'nullable|string|max:2000',
+            'exercises.*.video_url' => 'nullable|url:http,https|max:2048',
+        ]);
+
         $presetId = $request->input('preset_id');
         $templateId = $request->input('template_id');
         $title = trim((string) $request->input('title', ''));
@@ -455,88 +471,96 @@ class TrainerController extends Controller
             }
         }
 
-        $newPlan = WorkoutPlan::create([
-            'tenant_id' => $tenant->id,
-            'member_id' => $member->id,
-            'trainer_id' => $trainer?->id,
-            'title' => $title,
-            'goal' => $goal,
-            'level' => $level,
-            'start_date' => now()->toDateString(),
-            'is_template' => false,
-            'notes' => $notes,
-        ]);
+        return DB::transaction(function () use ($request, $tenant, $member, $trainer, $title, $goal, $level, $notes, $presetId, $templateId, $presets): JsonResponse {
+            $newPlan = WorkoutPlan::create([
+                'tenant_id' => $tenant->id,
+                'member_id' => $member->id,
+                'trainer_id' => $trainer?->id,
+                'title' => $title,
+                'goal' => $goal,
+                'level' => $level,
+                'start_date' => now()->toDateString(),
+                'is_template' => false,
+                'notes' => $notes,
+            ]);
 
-        $customExercises = $request->input('exercises', []);
-        $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7'];
+            $customExercises = $request->input('exercises', []);
+            $allowedDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'day_1', 'day_2', 'day_3', 'day_4', 'day_5', 'day_6', 'day_7'];
 
-        // 1. If dynamic exercise list was sent from mobile builder
-        if (! empty($customExercises) && is_array($customExercises)) {
-            $sort = 1;
-            foreach ($customExercises as $ex) {
-                $name = trim((string) ($ex['name'] ?? $ex['exercise_name'] ?? ''));
-                if (empty($name)) {
-                    continue;
-                }
-                $day = strtolower(trim((string) ($ex['day'] ?? 'day_1')));
-                if (! in_array($day, $allowedDays)) {
-                    $day = 'day_1';
-                }
-                $newPlan->exercises()->create([
-                    'day' => $day,
-                    'exercise_name' => $name,
-                    'sets' => max(1, (int) ($ex['sets'] ?? 3)),
-                    'reps' => trim((string) ($ex['reps'] ?? '10-12')),
-                    'weight' => ! empty($ex['weight']) ? trim((string) $ex['weight']) : null,
-                    'rest_seconds' => max(0, (int) ($ex['rest'] ?? $ex['rest_seconds'] ?? 60)),
-                    'notes' => ! empty($ex['notes']) ? trim((string) $ex['notes']) : null,
-                    'sort_order' => $sort++,
-                ]);
-            }
-        }
-        // 2. Otherwise if built-in preset was selected
-        elseif ($presetId && isset($presets[$presetId])) {
-            foreach ($presets[$presetId]['exercises'] as $ex) {
-                $newPlan->exercises()->create($ex);
-            }
-        }
-        // 3. Otherwise if DB template was selected
-        elseif ($templateId) {
-            $template = WorkoutPlan::where('tenant_id', $tenant->id)
-                ->where('is_template', true)
-                ->with('exercises')
-                ->find($templateId);
-
-            if ($template) {
-                foreach ($template->exercises as $ex) {
-                    $exData = $ex->toArray();
-                    unset($exData['id'], $exData['workout_plan_id'], $exData['created_at'], $exData['updated_at']);
-                    $newPlan->exercises()->create($exData);
+            // 1. If dynamic exercise list was sent from mobile builder
+            if (! empty($customExercises) && is_array($customExercises)) {
+                $sort = 1;
+                foreach ($customExercises as $ex) {
+                    $name = trim((string) ($ex['name'] ?? $ex['exercise_name'] ?? ''));
+                    if (empty($name)) {
+                        continue;
+                    }
+                    $day = strtolower(trim((string) ($ex['day'] ?? 'day_1')));
+                    if (! in_array($day, $allowedDays)) {
+                        $day = 'day_1';
+                    }
+                    $newPlan->exercises()->create([
+                        'day' => $day,
+                        'exercise_name' => $name,
+                        'tracking_type' => $ex['tracking_type'] ?? 'reps',
+                        'duration_seconds' => ($ex['tracking_type'] ?? 'reps') === 'time' ? $ex['duration_seconds'] : null,
+                        'video_url' => $ex['video_url'] ?? null,
+                        'sets' => max(1, (int) ($ex['sets'] ?? 3)),
+                        'reps' => trim((string) ($ex['reps'] ?? '10-12')),
+                        'weight' => ! empty($ex['weight']) ? trim((string) $ex['weight']) : null,
+                        'rest_seconds' => max(0, (int) ($ex['rest'] ?? $ex['rest_seconds'] ?? 60)),
+                        'notes' => ! empty($ex['notes']) ? trim((string) $ex['notes']) : null,
+                        'sort_order' => $sort++,
+                    ]);
                 }
             }
-        }
+            // 2. Otherwise if built-in preset was selected
+            elseif ($presetId && isset($presets[$presetId])) {
+                foreach ($presets[$presetId]['exercises'] as $ex) {
+                    $newPlan->exercises()->create($ex);
+                }
+            }
+            // 3. Otherwise if DB template was selected
+            elseif ($templateId) {
+                $template = WorkoutPlan::where('tenant_id', $tenant->id)
+                    ->where('is_template', true)
+                    ->with('exercises')
+                    ->find($templateId);
 
-        $newPlan->load('exercises');
+                if ($template) {
+                    foreach ($template->exercises as $ex) {
+                        $exData = $ex->toArray();
+                        unset($exData['id'], $exData['workout_plan_id'], $exData['created_at'], $exData['updated_at']);
+                        $newPlan->exercises()->create($exData);
+                    }
+                }
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => "Workout plan '{$newPlan->title}' assigned to {$member->full_name}!",
-            'plan' => [
-                'id' => $newPlan->id,
-                'title' => $newPlan->title,
-                'goal' => $newPlan->goal,
-                'level' => $newPlan->level,
-                'exercises_count' => $newPlan->exercises->count(),
-                'exercises' => $newPlan->exercises->map(fn ($e) => [
-                    'day' => $e->day,
-                    'name' => $e->exercise_name,
-                    'sets' => $e->sets,
-                    'reps' => $e->reps,
-                    'rest' => $e->rest_seconds,
-                    'notes' => $e->notes,
-                ]),
-            ],
-        ]);
+            $newPlan->load('exercises');
+
+            return response()->json([
+                'success' => true,
+                'message' => "Workout plan '{$newPlan->title}' assigned to {$member->full_name}!",
+                'plan' => [
+                    'id' => $newPlan->id,
+                    'title' => $newPlan->title,
+                    'goal' => $newPlan->goal,
+                    'level' => $newPlan->level,
+                    'exercises_count' => $newPlan->exercises->count(),
+                    'exercises' => $newPlan->exercises->map(fn ($e) => [
+                        'day' => $e->day,
+                        'name' => $e->exercise_name,
+                        'sets' => $e->sets,
+                        'tracking_type' => $e->tracking_type ?? 'reps',
+                        'duration_seconds' => $e->duration_seconds,
+                        'video_url' => $e->video_url,
+                        'reps' => $e->reps,
+                        'rest' => $e->rest_seconds,
+                        'notes' => $e->notes,
+                    ]),
+                ],
+            ]);
+        });
     }
 
     public function assignDiet(Request $request, int $id): JsonResponse
@@ -1046,6 +1070,9 @@ class TrainerController extends Controller
                         'day' => $e->day,
                         'name' => $e->exercise_name,
                         'sets' => $e->sets,
+                    'tracking_type' => $e->tracking_type ?? 'reps',
+                    'duration_seconds' => $e->duration_seconds,
+                    'video_url' => $e->video_url,
                         'reps' => $e->reps,
                         'rest' => $e->rest_seconds,
                         'notes' => $e->notes,

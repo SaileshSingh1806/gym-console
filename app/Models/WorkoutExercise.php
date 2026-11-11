@@ -15,6 +15,8 @@ class WorkoutExercise extends Model
         'day',
         'exercise_name',
         'sets',
+        'tracking_type',
+        'duration_seconds',
         'reps',
         'weight',
         'rest_seconds',
@@ -25,6 +27,7 @@ class WorkoutExercise extends Model
 
     protected $casts = [
         'sets' => 'integer',
+        'duration_seconds' => 'integer',
         'rest_seconds' => 'integer',
         'sort_order' => 'integer',
     ];

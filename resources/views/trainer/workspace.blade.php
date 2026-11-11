@@ -126,6 +126,7 @@
         showWorkoutDetails: false,
         showDietDetails: false,
 
+        exerciseLibrary: {{ Js::from(\App\Services\ExerciseDatabase::all()) }},
         workoutPresets: {{ Js::from($workoutPresets ?? []) }},
         dietPresets: {{ Js::from($dietPresets ?? []) }},
         workoutTemplates: {{ Js::from($workoutTemplates ?? []) }},
@@ -148,7 +149,7 @@
             goal: 'muscle_gain',
             level: 'intermediate',
             exercises: [],
-            newDay: 'day_1',
+            newDay: 'monday', newType: 'reps', newDuration: 20, newUnit: 'minutes', newVideo: '', librarySearch: '',
             newName: '',
             newSets: 3,
             newReps: '10-12',
@@ -213,7 +214,7 @@
                     'exercises' => $m->activeWorkoutPlan->exercises ? $m->activeWorkoutPlan->exercises->map(fn($e) => [
                         'day' => $e->day,
                         'name' => $e->exercise_name,
-                        'sets' => $e->sets,
+                        'sets' => $e->sets, 'tracking_type' => $e->tracking_type ?? 'reps', 'duration_seconds' => $e->duration_seconds, 'video_url' => $e->video_url,
                         'reps' => $e->reps,
                         'rest' => $e->rest_seconds,
                     ]) : [],
@@ -726,6 +727,11 @@
             });
         },
 
+        workoutWeekday(day) {
+            const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            return /^day_[1-7]$/.test(day || '') ? weekdays[Number(day.slice(4)) - 1] : (day || 'monday');
+        },
+
         openWorkoutAssignModal() {
             this.assignType = 'workout';
             this.showAssignModal = true;
@@ -736,8 +742,9 @@
                 this.workoutBuilder.goal = aw.goal || 'muscle_gain';
                 this.workoutBuilder.level = aw.level || 'intermediate';
                 this.workoutBuilder.exercises = (aw.exercises || []).map(e => ({
-                    day: e.day,
+                    day: this.workoutWeekday(e.day),
                     name: e.name,
+                    tracking_type: e.tracking_type || 'reps', duration_seconds: e.duration_seconds, video_url: e.video_url,
                     sets: e.sets || 3,
                     reps: e.reps || '10-12',
                     rest: e.rest || 60,
@@ -762,9 +769,9 @@
                     this.workoutBuilder.goal = found.goal;
                     this.workoutBuilder.level = found.level;
                     this.workoutBuilder.exercises = JSON.parse(JSON.stringify(found.exercises.map(e => ({
-                        day: e.day,
+                        day: this.workoutWeekday(e.day),
                         name: e.exercise_name,
-                        sets: e.sets,
+                        tracking_type: e.tracking_type || 'reps', duration_seconds: e.duration_seconds, video_url: e.video_url, sets: e.sets,
                         reps: e.reps,
                         rest: e.rest_seconds,
                         notes: e.notes || ''
@@ -778,14 +785,22 @@
                 this.notify('Please enter an exercise name.', 'warning');
                 return;
             }
+            if (!Number.isInteger(Number(this.workoutBuilder.newSets)) || Number(this.workoutBuilder.newSets) < 1 || Number(this.workoutBuilder.newSets) > 100 || (this.workoutBuilder.newType === 'time' && !(Number(this.workoutBuilder.newDuration) > 0))) {
+                this.notify('Enter valid sets and a positive duration.', 'warning');
+                return;
+            }
             this.workoutBuilder.exercises.push({
-                day: this.workoutBuilder.newDay || 'day_1',
+                day: this.workoutBuilder.newDay || 'monday',
+                tracking_type: this.workoutBuilder.newType,
+                duration_seconds: this.workoutBuilder.newType === 'time' ? Math.round(Number(this.workoutBuilder.newDuration) * (this.workoutBuilder.newUnit === 'minutes' ? 60 : 1)) : null,
+                video_url: this.workoutBuilder.newVideo,
                 name: this.workoutBuilder.newName.trim(),
-                sets: Number(this.workoutBuilder.newSets) || 3,
+                sets: Number(this.workoutBuilder.newSets),
                 reps: this.workoutBuilder.newReps.trim() || '10-12',
-                rest: Number(this.workoutBuilder.newRest) || 60,
+                rest: Number(this.workoutBuilder.newRest ?? 60),
                 notes: this.workoutBuilder.newNotes.trim()
             });
+            this.workoutBuilder.newVideo = '';
             this.workoutBuilder.newName = '';
             this.workoutBuilder.newNotes = '';
         },
@@ -979,9 +994,9 @@
             this.workoutBuilder.goal = tpl.goal || 'general_fitness';
             this.workoutBuilder.level = tpl.level || 'intermediate';
             this.workoutBuilder.exercises = (tpl.exercises || []).map(e => ({
-                day: e.day || 'day_1',
+                day: this.workoutWeekday(e.day),
                 name: e.exercise_name || e.name || '',
-                sets: Number(e.sets) || 3,
+                tracking_type: e.tracking_type || 'reps', duration_seconds: e.duration_seconds, video_url: e.video_url, sets: Number(e.sets) || 3,
                 reps: e.reps || '10-12',
                 rest: Number(e.rest_seconds ?? e.rest ?? 60),
                 notes: e.notes || ''
@@ -1770,7 +1785,7 @@
                                     'exercises' => $member->activeWorkoutPlan->exercises ? $member->activeWorkoutPlan->exercises->map(fn($e) => [
                                         'day' => $e->day,
                                         'name' => $e->exercise_name,
-                                        'sets' => $e->sets,
+                                        'sets' => $e->sets, 'tracking_type' => $e->tracking_type ?? 'reps', 'duration_seconds' => $e->duration_seconds, 'video_url' => $e->video_url,
                                         'reps' => $e->reps,
                                         'rest' => $e->rest_seconds,
                                     ]) : [],
@@ -2514,11 +2529,11 @@
                                     <template x-for="ex in selectedMember.active_workout.exercises" :key="ex.name + ex.day">
                                         <div class="p-2 rounded-lg bg-[#171A22] border border-neutral-800 text-xs flex items-center justify-between gap-2">
                                             <div class="min-w-0">
-                                                <span class="text-[9px] text-sky-400 font-bold block" x-text="ex.day"></span>
+                                                <span class="text-[9px] text-sky-400 font-bold block" x-text="workoutWeekday(ex.day)"></span>
                                                 <span class="font-semibold text-neutral-200 truncate block text-[11px]" x-text="ex.name"></span>
                                             </div>
                                             <div class="text-right shrink-0">
-                                                <span class="font-mono text-[10px] text-neutral-300 font-bold block" x-text="ex.sets + ' × ' + ex.reps"></span>
+                                                <span class="font-mono text-[10px] text-neutral-300 font-bold block" x-text="(ex.tracking_type === 'time' ? ex.sets + ' rounds / ' + ex.duration_seconds + ' sec' : ex.sets + ' sets / ' + ex.reps)"></span>
                                                 <span class="text-[9px] text-slate-400 block" x-text="ex.rest ? ex.rest + 's rest' : ''"></span>
                                             </div>
                                         </div>
@@ -3214,16 +3229,28 @@
                                 <span class="text-[10px] text-slate-400">Add or remove below</span>
                             </div>
 
+                            <div class="flex gap-2 overflow-x-auto pb-2">
+                                <template x-for="day in ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']" :key="day">
+                                    <button type="button" @click="workoutBuilder.newDay = day" :class="workoutBuilder.newDay === day ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-white'" class="rounded-lg px-3 py-2 text-xs capitalize" x-text="day.slice(0,3)"></button>
+                                </template>
+                            </div>
+                            <label class="block text-xs text-slate-300">Search exercise library</label>
+                            <input x-model="workoutBuilder.librarySearch" type="search" placeholder="Exercise or muscle group" class="w-full rounded-lg bg-slate-900 p-3 text-sm text-white">
+                            <div x-show="workoutBuilder.librarySearch.length > 1" class="max-h-40 overflow-y-auto">
+                                <template x-for="exercise in exerciseLibrary.filter(e => (e.title + ' ' + e.category).toLowerCase().includes(workoutBuilder.librarySearch.toLowerCase())).slice(0,30)" :key="exercise.id">
+                                    <button type="button" @click="workoutBuilder.newName = exercise.title; workoutBuilder.newVideo = exercise.video_url; workoutBuilder.newSets = exercise.default_sets || 3; workoutBuilder.newReps = exercise.default_reps || '10-12'; workoutBuilder.librarySearch = ''" class="block w-full border-b border-slate-700 p-3 text-left text-sm text-white" x-text="exercise.title + ' / ' + exercise.category"></button>
+                                </template>
+                            </div>
                             <!-- List -->
                             <div class="max-h-56 overflow-y-auto space-y-1.5 pr-1">
                                 <template x-for="(ex, idx) in workoutBuilder.exercises" :key="idx + ex.name">
-                                    <div class="p-2 rounded-xl bg-[#171A22] border border-neutral-800 flex items-center justify-between gap-2 text-xs">
+                                    <div x-show="workoutWeekday(ex.day) === workoutBuilder.newDay" class="p-2 rounded-xl bg-[#171A22] border border-neutral-800 flex items-center justify-between gap-2 text-xs">
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-1.5">
-                                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-[#0F1115] text-sky-400" x-text="ex.day.replace('_', ' ')"></span>
+                                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-[#0F1115] text-sky-400" x-text="workoutWeekday(ex.day)"></span>
                                                 <span class="font-bold text-white truncate" x-text="ex.name"></span>
                                             </div>
-                                            <span class="text-[10px] text-slate-400 mt-0.5 block" x-text="ex.sets + ' sets × ' + ex.reps + (ex.rest ? ' • ' + ex.rest + 's rest' : '') + (ex.notes ? ' • ' + ex.notes : '')"></span>
+                                            <span class="text-[10px] text-slate-400 mt-0.5 block" x-text="(ex.tracking_type === 'time' ? ex.sets + ' rounds / ' + ex.duration_seconds + ' sec' : ex.sets + ' sets / ' + ex.reps) + (ex.rest ? ' • ' + ex.rest + 's rest' : '') + (ex.notes ? ' • ' + ex.notes : '')"></span>
                                         </div>
                                         <button type="button" 
                                                 @click="removeExerciseFromBuilder(idx)" 
@@ -3246,13 +3273,6 @@
                                 <div class="grid grid-cols-3 gap-2">
                                     <div class="col-span-1">
                                         <select x-model="workoutBuilder.newDay" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500">
-                                            <option value="day_1">Day 1</option>
-                                            <option value="day_2">Day 2</option>
-                                            <option value="day_3">Day 3</option>
-                                            <option value="day_4">Day 4</option>
-                                            <option value="day_5">Day 5</option>
-                                            <option value="day_6">Day 6</option>
-                                            <option value="day_7">Day 7</option>
                                             <option value="monday">Monday</option>
                                             <option value="tuesday">Tuesday</option>
                                             <option value="wednesday">Wednesday</option>
@@ -3266,12 +3286,22 @@
                                         <input type="text" x-model="workoutBuilder.newName" @keydown.enter.prevent="addExerciseToBuilder()" placeholder="Exercise name (e.g. Incline DB Flyes)" class="w-full px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500">
                                     </div>
                                 </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="text-xs text-slate-300">Tracking
+                                    <select x-model="workoutBuilder.newType" class="mt-1 w-full rounded-lg bg-slate-900 p-2 text-white"><option value="reps">Sets & reps</option><option value="time">Duration</option></select>
+                                </label>
+                                <div x-show="workoutBuilder.newType === 'time'">
+                                    <label class="text-xs text-slate-300">Duration per round</label>
+                                    <input type="number" min="1" x-model="workoutBuilder.newDuration" class="w-full rounded-lg bg-slate-900 p-2 text-white">
+                                    <select aria-label="Duration unit" x-model="workoutBuilder.newUnit" class="w-full bg-slate-900 p-2 text-white"><option value="minutes">Minutes</option><option value="seconds">Seconds</option></select>
+                                </div>
+                            </div>
                                 <div class="grid grid-cols-3 gap-2 items-center">
                                     <div>
-                                        <input type="number" x-model="workoutBuilder.newSets" placeholder="Sets (3)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
+                                        <label class="text-xs text-slate-300" x-text="workoutBuilder.newType === 'time' ? 'Rounds' : 'Sets'"></label><input min="1" max="100" type="number" x-model="workoutBuilder.newSets" placeholder="Sets (3)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
                                     </div>
                                     <div>
-                                        <input type="text" x-model="workoutBuilder.newReps" placeholder="Reps (10-12)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
+                                        <label x-show="workoutBuilder.newType === 'reps'" class="block text-xs text-slate-300">Reps</label><input x-show="workoutBuilder.newType === 'reps'" aria-label="Repetitions" type="text" x-model="workoutBuilder.newReps" placeholder="Reps (10-12)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
                                     </div>
                                     <div>
                                         <button type="button" @click="addExerciseToBuilder()" class="w-full py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-[11px] transition-all cursor-pointer">
