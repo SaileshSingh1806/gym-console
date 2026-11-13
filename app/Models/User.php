@@ -88,6 +88,45 @@ class User extends Authenticatable
         return $this->hasOne(Trainer::class);
     }
 
+    public function salesTargets(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(StaffSalesTarget::class);
+    }
+
+    public function currentSalesTarget(): ?StaffSalesTarget
+    {
+        $now = now();
+        $target = $this->salesTargets()
+            ->where('start_date', '<=', $now->toDateString())
+            ->where('end_date', '>=', $now->toDateString())
+            ->latest('id')
+            ->first();
+
+        if ($target) {
+            return $target;
+        }
+
+        // Fallback: check metadata for default monthly target
+        $meta = $this->metadata ?? [];
+        $metaRev = (float) ($meta['monthly_sales_target'] ?? 0);
+        $metaAdm = (int) ($meta['monthly_admissions_target'] ?? 0);
+
+        if ($metaRev > 0 || $metaAdm > 0) {
+            return new StaffSalesTarget([
+                'tenant_id' => $this->tenant_id,
+                'user_id' => $this->id,
+                'period_type' => 'monthly',
+                'period_key' => $now->format('Y-m'),
+                'start_date' => $now->copy()->startOfMonth()->toDateString(),
+                'end_date' => $now->copy()->endOfMonth()->toDateString(),
+                'target_revenue' => $metaRev,
+                'target_admissions' => $metaAdm,
+            ]);
+        }
+
+        return null;
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';

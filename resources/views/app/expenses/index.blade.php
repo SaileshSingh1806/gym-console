@@ -56,7 +56,7 @@
 
             <div class="flex items-center gap-2.5">
                 <button type="button" @click="showCategoryModal = true" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer">
-                    <span>+ Category</span>
+                    <span>Add Category</span>
                 </button>
 
                 <button type="button" @click="showExpenseModal = true" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 flex items-center gap-1.5 transition-all cursor-pointer">

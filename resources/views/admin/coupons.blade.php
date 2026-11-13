@@ -85,7 +85,7 @@
 
             <button @click="showCreateModal = true" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs hover:brightness-110 shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>+ Create Promo Coupon</span>
+                <span>Create Promo Coupon</span>
             </button>
         </div>
 

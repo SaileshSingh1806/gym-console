@@ -16,9 +16,13 @@ class Lead extends Model
     protected $fillable = [
         'tenant_id',
         'branch_id',
+        'membership_plan_id',
+        'converted_member_id',
         'name',
         'phone',
+        'alternate_phone',
         'email',
+        'gender',
         'instagram_handle',
         'city',
         'member_count',
@@ -46,6 +50,16 @@ class Lead extends Model
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
+    }
+
+    public function membershipPlan(): BelongsTo
+    {
+        return $this->belongsTo(MembershipPlan::class, 'membership_plan_id');
+    }
+
+    public function convertedMember(): BelongsTo
+    {
+        return $this->belongsTo(Member::class, 'converted_member_id');
     }
 
     public function trials()

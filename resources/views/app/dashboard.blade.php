@@ -9,7 +9,23 @@
             showChurnModal: false, 
             showExpiringModal: false, 
             showBirthdayModal: false,
-            trendPeriod: '30d' 
+            showAiSummaryModal: false,
+            showTutorialsModal: false,
+            finPeriod: 'mtd',
+            trendPeriod: '30d',
+            currency: {{ Js::from($currency) }},
+            financialPeriods: {{ Js::from($metrics['financial_periods'] ?? []) }},
+            trendsByPeriod: {{ Js::from($metrics['trends_by_period'] ?? []) }},
+            formatMoney(val) {
+                const n = Number(val || 0);
+                return this.currency + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+            },
+            setTrendPeriod(p) {
+                this.trendPeriod = p;
+                if (typeof window.updateDashboardTrendCharts === 'function') {
+                    window.updateDashboardTrendCharts(p);
+                }
+            }
          }" 
          class="dashboard-overview space-y-8 pb-12">
 
@@ -83,7 +99,7 @@
 
             <!-- 6. Reports -->
             @if(auth()->user()->hasFeature('reports_finance') && (auth()->user()->hasPermission('reports.balance_sheet') || auth()->user()->hasPermission('expenses.view') || auth()->user()->isGymOwner()))
-            <a href="{{ route('app.expenses.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
+            <a href="{{ route('app.reports.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span>Reports</span>
             </a>
@@ -97,14 +113,14 @@
             </a>
             @endif
 
-            <!-- 8. Tutorials -->
-            <a href="{{ route('app.settings.index') }}" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0">
+            <!-- 8. Quick Guide / Tutorials -->
+            <button type="button" @click="showTutorialsModal = true" class="px-3 sm:px-3.5 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800 flex items-center gap-2 whitespace-nowrap transition-colors shadow-xs shrink-0 cursor-pointer">
                 <svg class="w-4 h-4 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                <span>Tutorials</span>
-            </a>
+                <span>Quick Guide</span>
+            </button>
         </div>
 
-        <!-- ROW 1: MEMBER HEALTH & RETENTION METRICS (Clickable Filter Cards) -->
+                <!-- ROW 1: MEMBER HEALTH & RETENTION METRICS (Clickable Filter Cards) -->
         @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->isGymOwner())
         <div class="dashboard-metrics grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-3 sm:gap-4">
 
@@ -315,7 +331,7 @@
                         </div>
                         <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">Financial Overview</h3>
                     </div>
-                    <select class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 self-start sm:self-auto">
+                    <select x-model="finPeriod" aria-label="Financial Overview Period" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 self-start sm:self-auto cursor-pointer">
                         <option value="mtd">Month Till Date</option>
                         <option value="6m">Last 6 Months</option>
                     </select>
@@ -328,8 +344,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">{{ $currency }}{{ number_format($metrics['total_billed_amount'] ?? $metrics['month_billed_total'], 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed ({{ $metrics['total_billed_count'] ?? $metrics['total_members'] }})</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.total_billed ?? {{ (float) ($metrics['month_billed_total'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed (<span x-text="financialPeriods[finPeriod]?.billed_count ?? {{ (int) ($metrics['total_billed_count'] ?? 0) }}">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
                         </div>
                         <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -340,7 +356,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">0.00</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.product_sales ?? {{ (float) ($metrics['product_sales_mtd'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Product Sales</div>
                         </div>
                         <a href="{{ route('app.inventory.index') }}" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
@@ -352,8 +368,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['total_collected_amount'] ?? $metrics['month_revenue'], 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected ({{ $metrics['total_payments_count'] ?? $metrics['total_members'] }})</div>
+                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.collected ?? {{ (float) ($metrics['month_revenue'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected (<span x-text="financialPeriods[finPeriod]?.collected_count ?? {{ (int) ($metrics['total_payments_count'] ?? 0) }}">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
                         </div>
                         <a href="{{ route('app.payments.index') }}" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -364,8 +380,8 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending ({{ $metrics['due_members_count'] }} Due)</div>
+                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.pending_dues ?? {{ (float) ($metrics['all_dues_remaining'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending (<span x-text="financialPeriods[finPeriod]?.pending_count ?? {{ (int) ($metrics['due_members_count'] ?? 0) }}">{{ $metrics['due_members_count'] }}</span> Due)</div>
                         </div>
                         <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -376,7 +392,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">{{ $metrics['new_clients_count'] }}</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="financialPeriods[finPeriod]?.new_clients ?? {{ (int) ($metrics['new_clients_count'] ?? 0) }}">{{ $metrics['new_clients_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">New Client(s)</div>
                         </div>
                         <a href="{{ route('app.members.index', ['filter' => 'new']) }}" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
@@ -388,7 +404,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate">{{ $metrics['renewals_count'] }}</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="financialPeriods[finPeriod]?.renewals ?? {{ (int) ($metrics['renewals_count'] ?? 0) }}">{{ $metrics['renewals_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Renewals</div>
                         </div>
                         <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
@@ -425,11 +441,11 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate tabular-nums">{{ $currency }}{{ number_format($metrics['month_dues_remaining'] ?? 0, 0) }}</div>
                                 <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate">This Month</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-extrabold text-xs group-hover:scale-105 transition-transform shrink-0">{{ $metrics['due_members_count'] }}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-extrabold text-xs group-hover:scale-105 transition-transform shrink-0">{{ $metrics['month_dues_count'] ?? 0 }}</span>
                     </a>
 
                     <!-- 3. Due Today -->
@@ -439,11 +455,11 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">0</div>
+                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate tabular-nums">{{ $currency }}{{ number_format($metrics['today_dues_remaining'] ?? 0, 0) }}</div>
                                 <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate">Due Today</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400 font-extrabold text-xs shrink-0">0</span>
+                        <span class="px-2 py-0.5 rounded-full {{ ($metrics['today_dues_count'] ?? 0) > 0 ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400' }} font-extrabold text-xs shrink-0">{{ $metrics['today_dues_count'] ?? 0 }}</span>
                     </a>
 
                     <!-- 4. Defaulters -->
@@ -453,11 +469,11 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                             </div>
                             <div class="min-w-0">
-                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate">{{ $currency }}{{ number_format($metrics['all_dues_remaining'] > 0 ? $metrics['all_dues_remaining'] : 0, 0) }}</div>
-                                <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate">Defaulters</div>
+                                <div class="text-lg sm:text-xl font-black text-slate-900 dark:text-white truncate tabular-nums">{{ $currency }}{{ number_format($metrics['defaulters_dues_remaining'] ?? 0, 0) }}</div>
+                                <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase truncate">Defaulters (&gt;7d)</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 font-extrabold text-xs group-hover:scale-105 transition-transform shrink-0">{{ $metrics['due_members_count'] }}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 font-extrabold text-xs group-hover:scale-105 transition-transform shrink-0">{{ $metrics['defaulters_count'] ?? 0 }}</span>
                     </a>
                 </div>
             </div>
@@ -658,13 +674,13 @@
 
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div class="flex items-center bg-slate-100 dark:bg-slate-950 p-0.5 sm:p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-bold">
-                        <button @click="trendPeriod = '30d'" :class="trendPeriod === '30d' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">30D</button>
-                        <button @click="trendPeriod = '90d'" :class="trendPeriod === '90d' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90D</button>
-                        <button @click="trendPeriod = '6m'" :class="trendPeriod === '6m' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6M</button>
-                        <button @click="trendPeriod = '1y'" :class="trendPeriod === '1y' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1Y</button>
+                        <button type="button" @click="setTrendPeriod('30d')" :class="trendPeriod === '30d' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">30D</button>
+                        <button type="button" @click="setTrendPeriod('90d')" :class="trendPeriod === '90d' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90D</button>
+                        <button type="button" @click="setTrendPeriod('6m')" :class="trendPeriod === '6m' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6M</button>
+                        <button type="button" @click="setTrendPeriod('1y')" :class="trendPeriod === '1y' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1Y</button>
                     </div>
-                    <button type="button" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/20 hover:opacity-95 cursor-pointer">
-                        <span>✨ AI Summary</span>
+                    <button type="button" @click="showAiSummaryModal = true" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-600/20 hover:opacity-95 cursor-pointer">
+                        <span>AI Summary</span>
                     </button>
                 </div>
             </div>
@@ -678,7 +694,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Revenue</span>
-                            <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{{ $currency }}{{ number_format($metrics['month_revenue'], 2) }}</span>
+                            <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums" x-text="formatMoney(trendsByPeriod[trendPeriod]?.total_revenue ?? {{ (float) ($metrics['month_revenue'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_revenue'], 2) }}</span>
                         </div>
                         <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold">
                             ↑ Live Revenue
@@ -698,8 +714,8 @@
                             <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Member Growth</span>
                             <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{{ $metrics['active_members'] }} active</span>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold">
-                            ↑ {{ $metrics['new_clients_count'] }} net joins
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 text-xs font-bold tabular-nums">
+                            ↑ <span x-text="trendsByPeriod[trendPeriod]?.total_joins ?? {{ (int) ($metrics['new_clients_count'] ?? 0) }}">{{ $metrics['new_clients_count'] }}</span> joins
                         </span>
                     </div>
                     <div class="h-44 relative">
@@ -716,8 +732,8 @@
                             <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Daily Attendance</span>
                             <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{{ $metrics['today_attendance'] }}/day</span>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-xs font-bold">
-                            Avg: 60 min
+                        <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 text-xs font-bold tabular-nums">
+                            {{ !empty($metrics['avg_attendance_minutes']) ? 'Avg: ' . $metrics['avg_attendance_minutes'] . ' min' : 'Avg: —' }}
                         </span>
                     </div>
                     <div class="h-44 relative">
@@ -1408,6 +1424,96 @@
             </div>
         </div>
 
+
+        <!-- 4. AI Executive Summary Modal -->
+        @php
+            $topPtTrainer = !empty($metrics['pt_financials']['trainers']) ? $metrics['pt_financials']['trainers'][0] : null;
+            $collectionBase = max(1, (float) ($metrics['month_revenue'] ?? 0) + (float) ($metrics['all_dues_remaining'] ?? 0));
+            $collectionRatePct = round(((float) ($metrics['month_revenue'] ?? 0) / $collectionBase) * 100);
+        @endphp
+        <div x-show="showAiSummaryModal"
+             x-cloak
+             style="display: none;"
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm overflow-y-auto">
+            <div @click.away="showAiSummaryModal = false"
+                 class="w-full max-w-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl text-slate-900 dark:text-slate-100 max-h-[90vh] flex flex-col">
+                <div class="p-4 sm:p-5 bg-gradient-to-r from-purple-600/15 to-indigo-600/15 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Gym Performance Summary</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Live operational &amp; revenue snapshot for {{ $tenantName }}</p>
+                    </div>
+                    <button type="button" @click="showAiSummaryModal = false" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
+                </div>
+                <div class="p-4 sm:p-6 space-y-3.5 overflow-y-auto text-xs sm:text-sm">
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 space-y-1">
+                        <div class="font-bold text-emerald-700 dark:text-emerald-400">Revenue &amp; Profitability</div>
+                        <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                            This month's collection is <strong>{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</strong> (including <strong>{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</strong> product sales) with net profit of <strong>{{ $currency }}{{ number_format($metrics['net_profit'] ?? 0, 0) }}</strong>. Collection efficiency stands at <strong>{{ $collectionRatePct }}%</strong>.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 space-y-1">
+                        <div class="font-bold text-amber-700 dark:text-amber-400">Dues &amp; Renewals Priority</div>
+                        <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                            <strong>{{ $metrics['due_members_count'] ?? 0 }}</strong> members have pending dues totaling <strong>{{ $currency }}{{ number_format($metrics['all_dues_remaining'] ?? 0, 0) }}</strong> (<strong>{{ $metrics['defaulters_count'] ?? 0 }}</strong> overdue &gt;7 days). <strong>{{ $metrics['expiring_soon'] ?? 0 }}</strong> memberships expire within 7 days and <strong>{{ $metrics['churn_risk'] ?? 0 }}</strong> are flagged for churn risk.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/50 space-y-1">
+                        <div class="font-bold text-indigo-700 dark:text-indigo-400">Sales, Attendance &amp; Coaching</div>
+                        <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                            Active base: <strong>{{ $metrics['active_members'] ?? 0 }}</strong> members with <strong>{{ $metrics['new_clients_count'] ?? 0 }}</strong> new joins this month. CRM has <strong>{{ $metrics['overdue_followups'] ?? 0 }}</strong> overdue follow-ups and <strong>{{ $metrics['today_followups'] ?? 0 }}</strong> scheduled today.
+                            @if($topPtTrainer)
+                                Top PT performer: <strong>{{ $topPtTrainer['name'] }}</strong> ({{ $currency }}{{ number_format($topPtTrainer['total_collected'], 0) }} collected across {{ $topPtTrainer['active_clients'] }} clients).
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <div class="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 shrink-0">
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold">Follow Up Dues</a>
+                    <button type="button" @click="showAiSummaryModal = false" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Quick Guide / Tutorials Modal -->
+        <div x-show="showTutorialsModal"
+             x-cloak
+             style="display: none;"
+             class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm overflow-y-auto">
+            <div @click.away="showTutorialsModal = false"
+                 class="w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl text-slate-900 dark:text-slate-100 max-h-[90vh] flex flex-col">
+                <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Gym Operations Quick Guide</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Jump directly to common daily workflows</p>
+                    </div>
+                    <button type="button" @click="showTutorialsModal = false" class="p-1.5 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg cursor-pointer">✕</button>
+                </div>
+                <div class="p-4 sm:p-5 space-y-2.5 overflow-y-auto text-xs">
+                    <a href="{{ route('app.members.create') }}" class="block p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors">
+                        <div class="font-bold text-slate-900 dark:text-white">1. Onboard a New Member &amp; Collect Fee</div>
+                        <div class="text-slate-500 dark:text-slate-400 mt-0.5">Create member profile, assign plan, discount, and record partial or full payment.</div>
+                    </a>
+                    <a href="{{ route('app.workouts.index') }}" class="block p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors">
+                        <div class="font-bold text-slate-900 dark:text-white">2. Build Workout Routines (Strength + Cardio/Timed)</div>
+                        <div class="text-slate-500 dark:text-slate-400 mt-0.5">Mix Exercise Library video demos, custom movements, and timed cardio like Treadmill 15 min.</div>
+                    </a>
+                    <a href="{{ route('app.diets.index') }}" class="block p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors">
+                        <div class="font-bold text-slate-900 dark:text-white">3. Create Diet &amp; Nutrition Templates</div>
+                        <div class="text-slate-500 dark:text-slate-400 mt-0.5">Combine Indian food library items with custom meals and macro targets.</div>
+                    </a>
+                    <a href="{{ route('app.settings.index', ['tab' => 'devices']) }}" class="block p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/40 transition-colors">
+                        <div class="font-bold text-slate-900 dark:text-white">4. Connect Biometric / QR Attendance</div>
+                        <div class="text-slate-500 dark:text-slate-400 mt-0.5">Configure Hikvision / Essl push webhook or use the Attendance QR check-in scanner.</div>
+                    </a>
+                </div>
+                <div class="p-3.5 sm:p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex justify-end shrink-0">
+                    <button type="button" @click="showTutorialsModal = false" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer">Done</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Charts Core Javascript Script -->
@@ -1427,13 +1533,15 @@
                 }
             };
 
-            const trendData = {{ Js::from($metrics['trends'] ?? ['labels' => [], 'revenue' => [], 'prev_revenue' => [], 'joins' => [], 'attendance' => []]) }};
+            const trendsByPeriod = {{ Js::from($metrics['trends_by_period'] ?? []) }};
+            const trendData = trendsByPeriod['30d'] || {{ Js::from($metrics['trends'] ?? ['labels' => [], 'revenue' => [], 'prev_revenue' => [], 'joins' => [], 'attendance' => []]) }};
             const monthlyChartData = {{ Js::from($metrics['chart'] ?? ['labels' => [], 'income' => [], 'expenses' => [], 'profit' => []]) }};
+            window._dashCharts = {};
 
             // 1. Revenue Comparison Chart
             const ctxRev = document.getElementById('chartRevenue');
             if (ctxRev) {
-                new Chart(ctxRev, {
+                window._dashCharts.revenue = new Chart(ctxRev, {
                     type: 'line',
                     data: {
                         labels: trendData.labels || [],
@@ -1466,7 +1574,7 @@
             // 2. Member Growth Chart
             const ctxGrowth = document.getElementById('chartGrowth');
             if (ctxGrowth) {
-                new Chart(ctxGrowth, {
+                window._dashCharts.growth = new Chart(ctxGrowth, {
                     type: 'bar',
                     data: {
                         labels: trendData.labels || [],
@@ -1486,7 +1594,7 @@
             // 3. Daily Attendance Chart
             const ctxAtt = document.getElementById('chartAttendance');
             if (ctxAtt) {
-                new Chart(ctxAtt, {
+                window._dashCharts.attendance = new Chart(ctxAtt, {
                     type: 'line',
                     data: {
                         labels: trendData.labels || [],
@@ -1506,6 +1614,26 @@
                     options: chartConfig
                 });
             }
+
+            window.updateDashboardTrendCharts = function (period) {
+                const next = trendsByPeriod[period] || trendData;
+                if (window._dashCharts.revenue) {
+                    window._dashCharts.revenue.data.labels = next.labels || [];
+                    window._dashCharts.revenue.data.datasets[0].data = next.revenue || [];
+                    window._dashCharts.revenue.data.datasets[1].data = next.prev_revenue || [];
+                    window._dashCharts.revenue.update();
+                }
+                if (window._dashCharts.growth) {
+                    window._dashCharts.growth.data.labels = next.labels || [];
+                    window._dashCharts.growth.data.datasets[0].data = next.joins || [];
+                    window._dashCharts.growth.update();
+                }
+                if (window._dashCharts.attendance) {
+                    window._dashCharts.attendance.data.labels = next.labels || [];
+                    window._dashCharts.attendance.data.datasets[0].data = next.attendance || [];
+                    window._dashCharts.attendance.update();
+                }
+            };
 
             // 4. Revenue vs Expenses Chart (6 Months)
             const ctxRevExp = document.getElementById('chartRevVsExp');

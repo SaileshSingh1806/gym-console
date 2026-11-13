@@ -21,10 +21,19 @@ class HikvisionISAPIDriver implements DeviceDriverInterface
         }
 
         try {
-            $url = "http://{$device->ip_address}:{$device->port}/ISAPI/System/status";
+            $user = $device->username ?: 'admin';
+            $pass = (string) ($device->password ?? '');
+            $baseUrl = "http://{$device->ip_address}:{$device->port}";
+
             $response = Http::timeout(3)
-                ->withDigestAuth($device->username ?? 'admin', $device->password ?? '')
-                ->get($url);
+                ->withDigestAuth($user, $pass)
+                ->get("{$baseUrl}/ISAPI/System/deviceInfo");
+
+            if (! $response->successful()) {
+                $response = Http::timeout(3)
+                    ->withDigestAuth($user, $pass)
+                    ->get("{$baseUrl}/ISAPI/System/status");
+            }
 
             $online = $response->successful();
             $device->update([

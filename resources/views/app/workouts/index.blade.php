@@ -488,7 +488,7 @@
 
                     <button type="button" id="videoModalAddBtn" onclick="addCurrentModalVideoToRoutine()"
                             class="w-full sm:w-auto px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span>+ Add to Routine</span>
+                        <span>Add to Routine</span>
                     </button>
                 </div>
             </div>

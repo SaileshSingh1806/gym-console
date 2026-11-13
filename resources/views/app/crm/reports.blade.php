@@ -365,15 +365,96 @@
             </div>
         </div>
 
-        <!-- ==================== SECTION 6: TEAM PERFORMANCE ==================== -->
-        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <h2 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                    <span>Team Performance</span>
-                </h2>
-                <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ count($teamPerformance) }} Active staff members</span>
+        <!-- ==================== SECTION 6: TEAM PERFORMANCE WITH TARGETS ==================== -->
+        <div x-data="{
+            showTargetModal: false,
+            targetForm: {
+                user_id: '',
+                name: '',
+                period_type: 'monthly',
+                start_date: '{{ $startDateInput }}',
+                end_date: '{{ $endDateInput }}',
+                target_revenue: '',
+                target_admissions: '',
+                notes: ''
+            },
+            openSetTarget(staffId, staffName, currentTargetRev, currentTargetAdm) {
+                this.targetForm.user_id = staffId;
+                this.targetForm.name = staffName;
+                this.targetForm.target_revenue = currentTargetRev > 0 ? currentTargetRev : '';
+                this.targetForm.target_admissions = currentTargetAdm > 0 ? currentTargetAdm : '';
+                this.showTargetModal = true;
+            }
+        }" id="targets" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden scroll-mt-20">
+            
+            <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                            Sales Reps &amp; Staff Performance &amp; Targets
+                        </h2>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">Track target vs actual sales, admission closures, and pipeline velocity per staff member</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" 
+                            @click="openSetTarget('', '', '', '')" 
+                            class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>Set Target</span>
+                    </button>
+                    <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg">
+                        {{ count($teamPerformance) }} Active Staff
+                    </span>
+                </div>
             </div>
+
+            <!-- Team Combined Target Summary Banner -->
+            @if(isset($teamTargetSummary) && ($teamTargetSummary['target_revenue'] > 0 || $teamTargetSummary['target_admissions'] > 0))
+                <div class="p-4 bg-gradient-to-r from-indigo-50/80 via-white to-amber-50/50 dark:from-indigo-950/20 dark:via-slate-900 dark:to-amber-950/20 border-b border-slate-200 dark:border-slate-800">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="p-3 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Combined Team Goal</span>
+                            <div class="text-base font-black text-slate-900 dark:text-white mt-0.5 font-mono">
+                                {{ $currency }}{{ number_format($teamTargetSummary['target_revenue']) }}
+                            </div>
+                            <span class="text-[10px] text-slate-500">Goal: {{ $teamTargetSummary['target_admissions'] }} Admissions</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-white dark:bg-slate-950/80 border border-emerald-200 dark:border-emerald-500/20">
+                            <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Achieved So Far</span>
+                            <div class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
+                                {{ $currency }}{{ number_format($teamTargetSummary['achieved_revenue']) }}
+                            </div>
+                            <span class="text-[10px] text-emerald-600 font-bold">{{ $teamTargetSummary['achieved_admissions'] }} Closed Admissions</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-white dark:bg-slate-950/80 border border-amber-200 dark:border-amber-500/20">
+                            <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Balance Remaining</span>
+                            <div class="text-base font-black text-amber-600 dark:text-amber-400 mt-0.5 font-mono">
+                                {{ $currency }}{{ number_format($teamTargetSummary['remaining_revenue']) }}
+                            </div>
+                            <span class="text-[10px] text-amber-600 font-medium">{{ $teamTargetSummary['remaining_admissions'] }} Admissions left</span>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-white dark:bg-slate-950/80 border border-indigo-200 dark:border-indigo-500/20">
+                            <div class="flex items-center justify-between text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                                <span>Goal Completed</span>
+                                <span>{{ $teamTargetSummary['revenue_pct'] }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 mt-2 overflow-hidden">
+                                <div class="h-2.5 rounded-full transition-all duration-500 {{ $teamTargetSummary['revenue_pct'] >= 100 ? 'bg-emerald-500' : ($teamTargetSummary['revenue_pct'] >= 50 ? 'bg-indigo-600' : 'bg-amber-500') }}"
+                                     style="width: {{ min(100, $teamTargetSummary['revenue_pct']) }}%"></div>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-1 block">Period: {{ Carbon\Carbon::parse($startDateInput)->format('d M') }} - {{ Carbon\Carbon::parse($endDateInput)->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Mobile Card View (md:hidden) -->
             <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -384,15 +465,33 @@
                                 <div class="font-bold text-slate-900 dark:text-white text-sm truncate">{{ $tp['name'] }}</div>
                                 <div class="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{{ $tp['role'] }}</div>
                             </div>
-                            <div class="text-right shrink-0">
-                                <div class="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400">
-                                    {{ $currency }}{{ number_format((float) $tp['conversion_value']) }}
+                            <button type="button" 
+                                    @click="openSetTarget({{ $tp['id'] }}, '{{ addslashes($tp['name']) }}', {{ $tp['target_revenue'] }}, {{ $tp['target_admissions'] }})"
+                                    class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] border border-indigo-200 dark:border-indigo-500/20 hover:bg-indigo-100 transition-colors">
+                                {{ $tp['target_revenue'] > 0 ? 'Edit Target' : '+ Set Target' }}
+                            </button>
+                        </div>
+
+                        <!-- Target Progress Card (if set) -->
+                        @if($tp['target_revenue'] > 0 || $tp['target_admissions'] > 0)
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600 dark:text-slate-400 font-medium">Target Revenue:</span>
+                                    <span class="font-bold text-slate-900 dark:text-white font-mono">{{ $currency }}{{ number_format($tp['target_revenue']) }}</span>
                                 </div>
-                                <div class="text-[10px] font-bold text-purple-600 dark:text-purple-400 font-mono">
-                                    {{ $tp['conversion_pct'] }}% Conv.
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600 dark:text-slate-400 font-medium">Achieved:</span>
+                                    <span class="font-black text-emerald-600 dark:text-emerald-400 font-mono">{{ $currency }}{{ number_format($tp['conversion_value']) }} ({{ $tp['target_revenue_pct'] }}%)</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-600 dark:text-slate-400 font-medium">Remaining Due:</span>
+                                    <span class="font-bold text-amber-600 dark:text-amber-400 font-mono">{{ $currency }}{{ number_format($tp['remaining_revenue']) }}</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden mt-1">
+                                    <div class="h-2 rounded-full transition-all {{ $tp['target_revenue_pct'] >= 100 ? 'bg-emerald-500' : 'bg-indigo-600' }}" style="width: {{ min(100, $tp['target_revenue_pct']) }}%"></div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="grid grid-cols-4 gap-1.5 text-center">
                             <div class="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
@@ -408,7 +507,7 @@
                                 <div class="text-xs font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5">{{ $tp['demos'] }}</div>
                             </div>
                             <div class="p-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-                                <div class="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Won</div>
+                                <div class="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase">Admissions</div>
                                 <div class="text-xs font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">{{ $tp['converted'] }}</div>
                             </div>
                         </div>
@@ -425,40 +524,203 @@
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                         <tr>
-                            <th class="py-3 px-4">Staff Member</th>
-                            <th class="py-3 px-4 text-center">Assigned Leads</th>
-                            <th class="py-3 px-4 text-center">Contacted</th>
-                            <th class="py-3 px-4 text-center">Demos Booked</th>
-                            <th class="py-3 px-4 text-center">Converted</th>
-                            <th class="py-3 px-4 text-center">Conversion %</th>
-                            <th class="py-3 px-4 text-right">Conversion Value</th>
+                            <th class="py-3 px-4">Sales Rep / Staff</th>
+                            <th class="py-3 px-3 text-center">Pipeline (Lead/Call/Demo)</th>
+                            <th class="py-3 px-3 text-center">Admissions Won</th>
+                            <th class="py-3 px-4 text-center">Revenue Target</th>
+                            <th class="py-3 px-4 text-center">Achieved</th>
+                            <th class="py-3 px-4 text-center">Remaining Due</th>
+                            <th class="py-3 px-4 text-center">Goal Progress</th>
+                            <th class="py-3 px-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
                         @forelse($teamPerformance as $tp)
                             <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                                <td class="py-3 px-4">
-                                    <div class="font-bold text-slate-900 dark:text-white">{{ $tp['name'] }}</div>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-bold text-slate-900 dark:text-white text-xs">{{ $tp['name'] }}</div>
                                     <div class="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{{ $tp['role'] }}</div>
                                 </td>
-                                <td class="py-3 px-4 text-center font-mono font-semibold">{{ $tp['assigned_leads'] }}</td>
-                                <td class="py-3 px-4 text-center font-mono font-semibold text-blue-600 dark:text-blue-400">{{ $tp['contacted'] }}</td>
-                                <td class="py-3 px-4 text-center font-mono font-semibold text-amber-600 dark:text-amber-400">{{ $tp['demos'] }}</td>
-                                <td class="py-3 px-4 text-center font-mono font-semibold text-emerald-600 dark:text-emerald-400">{{ $tp['converted'] }}</td>
-                                <td class="py-3 px-4 text-center font-mono font-semibold text-purple-600 dark:text-purple-400">{{ $tp['conversion_pct'] }}%</td>
-                                <td class="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                                    {{ $currency }}{{ number_format((float) $tp['conversion_value']) }}
+                                
+                                <td class="py-3.5 px-3 text-center">
+                                    <div class="inline-flex items-center gap-1.5 font-mono text-xs">
+                                        <span class="text-slate-700 dark:text-slate-300 font-semibold" title="Assigned Leads">{{ $tp['assigned_leads'] }}L</span>
+                                        <span class="text-slate-300">/</span>
+                                        <span class="text-blue-600 dark:text-blue-400 font-semibold" title="Contacted">{{ $tp['contacted'] }}C</span>
+                                        <span class="text-slate-300">/</span>
+                                        <span class="text-amber-600 dark:text-amber-400 font-semibold" title="Demos/Trials">{{ $tp['demos'] }}D</span>
+                                    </div>
+                                </td>
+
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono font-bold text-xs border border-emerald-200 dark:border-emerald-500/20">
+                                        {{ $tp['converted'] }} Won
+                                        @if($tp['target_admissions'] > 0)
+                                            <span class="text-[10px] font-normal text-slate-500">/ {{ $tp['target_admissions'] }}</span>
+                                        @endif
+                                    </span>
+                                    <div class="text-[10px] text-purple-600 dark:text-purple-400 font-bold mt-0.5">{{ $tp['conversion_pct'] }}% Conv.</div>
+                                </td>
+
+                                <td class="py-3.5 px-4 text-center font-mono">
+                                    @if($tp['target_revenue'] > 0)
+                                        <div class="font-bold text-slate-900 dark:text-white text-xs">
+                                            {{ $currency }}{{ number_format($tp['target_revenue']) }}
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400 text-[11px] italic">Not Set</span>
+                                    @endif
+                                </td>
+
+                                <td class="py-3.5 px-4 text-center font-mono">
+                                    <div class="font-black text-emerald-600 dark:text-emerald-400 text-xs">
+                                        {{ $currency }}{{ number_format($tp['conversion_value']) }}
+                                    </div>
+                                </td>
+
+                                <td class="py-3.5 px-4 text-center font-mono">
+                                    @if($tp['target_revenue'] > 0)
+                                        <div class="font-bold {{ $tp['remaining_revenue'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400' }} text-xs">
+                                            {{ $tp['remaining_revenue'] > 0 ? ($currency . number_format($tp['remaining_revenue'])) : '🎯 Goal Hit!' }}
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400 text-xs">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="py-3.5 px-4 text-center min-w-[140px]">
+                                    @if($tp['target_revenue'] > 0)
+                                        <div class="space-y-1">
+                                            <div class="flex items-center justify-between text-[10px] font-mono font-bold">
+                                                <span class="{{ $tp['target_revenue_pct'] >= 100 ? 'text-emerald-600' : 'text-indigo-600 dark:text-indigo-400' }}">{{ $tp['target_revenue_pct'] }}%</span>
+                                                <span class="text-slate-400">{{ $tp['target_revenue_pct'] >= 100 ? 'Completed' : 'Pending' }}</span>
+                                            </div>
+                                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                                <div class="h-2 rounded-full transition-all {{ $tp['target_revenue_pct'] >= 100 ? 'bg-emerald-500' : ($tp['target_revenue_pct'] >= 50 ? 'bg-indigo-600' : 'bg-amber-500') }}"
+                                                     style="width: {{ min(100, $tp['target_revenue_pct']) }}%"></div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-slate-400 text-[11px]">-</span>
+                                    @endif
+                                </td>
+
+                                <td class="py-3.5 px-3 text-right">
+                                    <button type="button" 
+                                            @click="openSetTarget({{ $tp['id'] }}, '{{ addslashes($tp['name']) }}', {{ $tp['target_revenue'] }}, {{ $tp['target_admissions'] }})"
+                                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-500/20 text-slate-700 dark:text-slate-300 font-bold text-[11px] transition-colors cursor-pointer">
+                                        {{ $tp['target_revenue'] > 0 ? 'Edit Target' : '+ Target' }}
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="py-10 text-center text-slate-400 dark:text-slate-500 text-xs">
-                                    No team data for this period.
+                                <td colspan="8" class="py-10 text-center text-slate-400 dark:text-slate-500 text-xs">
+                                    No staff performance records found for this period.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <!-- ==================== SET STAFF SALES TARGET MODAL ==================== -->
+            <div x-show="showTargetModal" 
+                 x-cloak 
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+                 @keydown.escape.window="showTargetModal = false">
+                <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4"
+                     @click.outside="showTargetModal = false">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🎯</span>
+                            <div>
+                                <h3 class="text-sm font-black text-slate-900 dark:text-white">Set Sales &amp; Admission Target</h3>
+                                <p class="text-[11px] text-slate-500" x-text="targetForm.name ? ('Assigning target to: ' + targetForm.name) : 'Assign target to sales rep or receptionist'"></p>
+                            </div>
+                        </div>
+                        <button type="button" @click="showTargetModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg font-bold">✕</button>
+                    </div>
+
+                    <form method="POST" action="{{ route('app.crm.targets.save') }}" class="space-y-3.5">
+                        @csrf
+                        
+                        <!-- Staff Select -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Select Staff Member *</label>
+                            <select name="user_id" x-model="targetForm.user_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                <option value="">-- Choose Staff Member --</option>
+                                @foreach($staffMembers as $stf)
+                                    <option value="{{ $stf->id }}">{{ $stf->name }} ({{ ucfirst($stf->role ?? 'Staff') }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Target Period Type -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="period_type" value="monthly" x-model="targetForm.period_type" class="hidden">
+                                <div class="px-2.5 py-1.5 rounded-lg border text-center text-xs font-bold transition-all"
+                                     :class="targetForm.period_type === 'monthly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'">
+                                    Monthly
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="period_type" value="weekly" x-model="targetForm.period_type" class="hidden">
+                                <div class="px-2.5 py-1.5 rounded-lg border text-center text-xs font-bold transition-all"
+                                     :class="targetForm.period_type === 'weekly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'">
+                                    Weekly
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="period_type" value="custom" x-model="targetForm.period_type" class="hidden">
+                                <div class="px-2.5 py-1.5 rounded-lg border text-center text-xs font-bold transition-all"
+                                     :class="targetForm.period_type === 'custom' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800'">
+                                    Custom
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Start Date *</label>
+                                <input type="date" name="start_date" x-model="targetForm.start_date" required class="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">End Date *</label>
+                                <input type="date" name="end_date" x-model="targetForm.end_date" required class="w-full px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Target Amounts -->
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Revenue Target ({{ $currency }}) *</label>
+                                <input type="number" step="100" name="target_revenue" x-model="targetForm.target_revenue" required placeholder="e.g. 150000" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Admissions Goal (Qty)</label>
+                                <input type="number" step="1" name="target_admissions" x-model="targetForm.target_admissions" placeholder="e.g. 25" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Performance Note (Optional)</label>
+                            <textarea name="notes" x-model="targetForm.notes" rows="2" placeholder="e.g. Festival offer sales push, minimum 15 annual packages target..." class="w-full px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none resize-none"></textarea>
+                        </div>
+
+                        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
+                            <button type="button" @click="showTargetModal = false" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                                Save Target Goal
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

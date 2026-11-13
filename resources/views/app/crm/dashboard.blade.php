@@ -6,6 +6,24 @@
     <div class="space-y-6" x-data="{
         showLeadModal: false,
         showTrialModal: false,
+        showTargetModal: false,
+        targetForm: {
+            user_id: '',
+            name: '',
+            period_type: 'monthly',
+            start_date: '{{ now()->startOfMonth()->format('Y-m-d') }}',
+            end_date: '{{ now()->endOfMonth()->format('Y-m-d') }}',
+            target_revenue: '',
+            target_admissions: '',
+            notes: ''
+        },
+        openSetTarget(staffId, staffName, currentRev, currentAdm) {
+            this.targetForm.user_id = staffId;
+            this.targetForm.name = staffName;
+            this.targetForm.target_revenue = currentRev > 0 ? currentRev : '';
+            this.targetForm.target_admissions = currentAdm > 0 ? currentAdm : '';
+            this.showTargetModal = true;
+        }
     }">
         <!-- Top Action Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -29,10 +47,14 @@
                     <span>{{ $conversionRate }}% Conversion</span>
                 </span>
 
-                <button type="button" @click="showLeadModal = true" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
+                <button type="button" @click="openSetTarget('', '', '', '')" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                    <span>🎯 Staff Targets</span>
+                </button>
+
+                <a href="{{ route('app.leads.create') }}" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 transition-all">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Add Lead</span>
-                </button>
+                </a>
 
                 <button type="button" @click="showTrialModal = true" class="px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:hover:text-white text-xs font-bold border border-purple-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer">
                     <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -101,6 +123,178 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==================== SALES TARGET PROGRESS WIDGET ==================== -->
+        @if(isset($myTargetProgress) && ($myTargetProgress['target_revenue'] > 0 || $myTargetProgress['target_admissions'] > 0))
+            <!-- Personal Staff Target Widget -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 text-white border border-indigo-500/30 shadow-xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-500/20 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-base">
+                            🎯
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-white tracking-wide flex items-center gap-2">
+                                <span>Your Sales &amp; Admission Target</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300 font-bold uppercase tracking-wider font-mono">
+                                    {{ now()->format('M Y') }}
+                                </span>
+                            </h3>
+                            <p class="text-[11px] text-indigo-200/80">Track your monthly closures, target quota, and remaining dues</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs px-2.5 py-1 rounded-xl font-bold font-mono {{ $myTargetProgress['revenue_pct'] >= 100 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30' }}">
+                            {{ $myTargetProgress['days_left'] }} Days Left
+                        </span>
+                        <span class="text-xs px-2.5 py-1 rounded-xl font-mono font-black {{ $myTargetProgress['revenue_pct'] >= 100 ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white' }}">
+                            {{ $myTargetProgress['revenue_pct'] }}% Achieved
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Target Revenue -->
+                    <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-0.5">
+                        <span class="text-[10px] text-indigo-200 uppercase tracking-wider font-bold block">Assigned Goal</span>
+                        <div class="text-xl font-black text-white font-mono">
+                            {{ $currency }}{{ number_format($myTargetProgress['target_revenue']) }}
+                        </div>
+                        <span class="text-[11px] text-indigo-300">{{ $myTargetProgress['target_admissions'] }} Admissions Goal</span>
+                    </div>
+
+                    <!-- Achieved -->
+                    <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-0.5">
+                        <span class="text-[10px] text-emerald-300 uppercase tracking-wider font-bold block">Achieved So Far</span>
+                        <div class="text-xl font-black text-emerald-400 font-mono">
+                            {{ $currency }}{{ number_format($myTargetProgress['achieved_revenue']) }}
+                        </div>
+                        <span class="text-[11px] text-emerald-300 font-bold">{{ $myTargetProgress['achieved_admissions'] }} Closed Admissions</span>
+                    </div>
+
+                    <!-- Remaining Due -->
+                    <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-0.5">
+                        <span class="text-[10px] text-amber-300 uppercase tracking-wider font-bold block">Remaining Due</span>
+                        <div class="text-xl font-black text-amber-400 font-mono">
+                            {{ $currency }}{{ number_format($myTargetProgress['remaining_revenue']) }}
+                        </div>
+                        <span class="text-[11px] text-amber-300 font-medium">{{ $myTargetProgress['remaining_admissions'] }} Admissions remaining</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between text-xs text-indigo-200 font-mono">
+                        <span>Pace Requirement: {{ $myTargetProgress['pace_daily_needed'] > 0 ? ($currency . number_format($myTargetProgress['pace_daily_needed']) . '/day to achieve goal') : 'Goal Completed! 🎉' }}</span>
+                        <span class="font-bold text-white">{{ $myTargetProgress['revenue_pct'] }}%</span>
+                    </div>
+                    <div class="w-full bg-white/10 rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
+                        <div class="h-full rounded-full transition-all duration-700 {{ $myTargetProgress['revenue_pct'] >= 100 ? 'bg-emerald-400 shadow-lg shadow-emerald-500/50' : ($myTargetProgress['revenue_pct'] >= 50 ? 'bg-gradient-to-r from-indigo-500 to-indigo-400' : 'bg-gradient-to-r from-amber-500 to-amber-400') }}"
+                             style="width: {{ min(100, $myTargetProgress['revenue_pct']) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        @elseif($currentUser?->isGymOwner() || $currentUser?->isSuperAdmin() || !empty($teamTargetLeaderboard))
+            <!-- Gym Owner / Manager View: Staff Targets Leaderboard -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm font-bold shadow-inner">
+                            🎯
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>Staff Sales &amp; Admissions Targets</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 font-mono font-bold">{{ now()->format('F Y') }}</span>
+                            </h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Live target tracking and quota leaderboard for sales reps and front desk admission staff</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" @click="openSetTarget('', '', '', '')" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            <span>Set Staff Target</span>
+                        </button>
+                        <a href="{{ route('app.crm.reports') }}#targets" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all">
+                            Full Analytics ➔
+                        </a>
+                    </div>
+                </div>
+
+                @if(!empty($teamTargetLeaderboard))
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($teamTargetLeaderboard as $sb)
+                            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-slate-900 dark:text-white text-xs truncate">{{ $sb['name'] }}</div>
+                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 capitalize">{{ $sb['role'] }}</div>
+                                    </div>
+                                    @if($sb['has_target'])
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold {{ $sb['revenue_pct'] >= 100 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400' }}">
+                                            {{ $sb['revenue_pct'] }}% Done
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                                            No Target Set
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-1.5 text-center font-mono">
+                                    <div class="p-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                                        <span class="text-[9px] text-slate-400 block uppercase">Target</span>
+                                        <span class="text-xs font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($sb['target_revenue']) }}</span>
+                                    </div>
+                                    <div class="p-1 rounded-lg bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-500/20">
+                                        <span class="text-[9px] text-emerald-600 dark:text-emerald-400 block uppercase">Achieved</span>
+                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ $currency }}{{ number_format($sb['achieved_revenue']) }}</span>
+                                    </div>
+                                    <div class="p-1 rounded-lg bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-500/20">
+                                        <span class="text-[9px] text-amber-600 dark:text-amber-400 block uppercase">Due</span>
+                                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400">{{ $currency }}{{ number_format($sb['remaining_revenue']) }}</span>
+                                    </div>
+                                </div>
+
+                                @if($sb['has_target'])
+                                    <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                        <div class="h-2 rounded-full transition-all {{ $sb['revenue_pct'] >= 100 ? 'bg-emerald-500' : 'bg-indigo-600' }}"
+                                             style="width: {{ min(100, $sb['revenue_pct']) }}%"></div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                                        <span>Admissions: <strong>{{ $sb['achieved_admissions'] }}</strong> / {{ $sb['target_admissions'] }}</span>
+                                        <button type="button" @click="openSetTarget({{ $sb['user_id'] }}, '{{ addslashes($sb['name']) }}', {{ $sb['target_revenue'] }}, {{ $sb['target_admissions'] }})" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer">Edit</button>
+                                    </div>
+                                @else
+                                    <div class="pt-1 flex items-center justify-between">
+                                        <span class="text-[10px] text-slate-500">Won: {{ $sb['achieved_admissions'] }} members</span>
+                                        <button type="button" @click="openSetTarget({{ $sb['user_id'] }}, '{{ addslashes($sb['name']) }}', 0, 0)" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-[10px] font-black shadow-xs transition-all cursor-pointer">
+                                            + Set Target
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="p-6 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-dashed border-slate-300 dark:border-slate-800 text-center space-y-3">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-lg">
+                            🎯
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900 dark:text-white">No sales representatives or front desk staff added yet</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Add staff members with receptionist or sales roles under Team &amp; Staff to track their monthly revenue and admission targets.</p>
+                        </div>
+                        <div class="flex items-center justify-center gap-2 pt-1">
+                            <a href="{{ route('app.staff.index') }}" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-sm transition-all">
+                                Go to Team &amp; Staff ➔
+                            </a>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        @endif
 
         <!-- Pipeline Overview Funnel -->
         <div class="space-y-3">
@@ -340,7 +534,7 @@
                         </div>
                     @empty
                         <div class="py-6 text-center text-slate-400 dark:text-slate-500 text-xs">
-                            No leads recorded yet. Click <strong>+ Add Lead</strong> to get started.
+                            No leads recorded yet. <a href="{{ route('app.leads.create') }}" class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">Click here to Add Lead</a>.
                         </div>
                     @endforelse
                 </div>
@@ -403,26 +597,35 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4" @click.away="showLeadModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <span>+ Add New Lead</span>
+                        <span>Add New Lead</span>
                     </h3>
                     <button type="button" @click="showLeadModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1 cursor-pointer">&#10005;</button>
                 </div>
 
                 <form action="{{ route('app.leads.store') }}" method="POST" class="space-y-3.5">
                     @csrf
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
-                        <input type="text" name="name" required placeholder="e.g. Rahul Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">First Name *</label>
+                            <input type="text" name="first_name" required placeholder="e.g. Rahul" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Last Name *</label>
+                            <input type="text" name="last_name" required placeholder="e.g. Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
-                            <input type="text" name="phone" required placeholder="9876543210" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <div class="relative flex items-center">
+                                <span class="absolute left-3 text-xs font-bold text-slate-400 dark:text-slate-500">+91</span>
+                                <input type="tel" name="phone" required placeholder="9876543210" class="w-full pl-12 pr-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                            <input type="email" name="email" placeholder="rahul@example.com" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <input type="email" name="email" placeholder="rahul@example.com" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
                         </div>
                     </div>
 
@@ -461,10 +664,16 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned Staff</label>
+                            @php
+                                $cUser = auth()->user();
+                                $defQuickStaffId = ($cUser && !$cUser->isGymOwner() && !$cUser->isSuperAdmin() && $cUser->isStaff()) ? $cUser->id : null;
+                            @endphp
                             <select name="assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                 <option value="">-- Unassigned --</option>
                                 @foreach($staffMembers as $staff)
-                                    <option value="{{ $staff->id }}">{{ $staff->name }} ({{ ucfirst($staff->role ?? 'Staff') }})</option>
+                                    <option value="{{ $staff->id }}" {{ $defQuickStaffId == $staff->id ? 'selected' : '' }}>
+                                        {{ $staff->name }} ({{ ucfirst($staff->role ?? 'Staff') }}) {{ ($cUser && $cUser->id === $staff->id) ? '- You' : '' }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -540,6 +749,93 @@
                     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                         <button type="button" @click="showTrialModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer">Cancel</button>
                         <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 cursor-pointer">Book Demo Session</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== SET STAFF SALES TARGET MODAL ==================== -->
+        <div x-show="showTargetModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+             @keydown.escape.window="showTargetModal = false">
+            <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4"
+                 @click.outside="showTargetModal = false">
+                
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🎯</span>
+                        <div>
+                            <h3 class="text-sm font-black text-slate-900 dark:text-white">Set Sales &amp; Admission Target</h3>
+                            <p class="text-[11px] text-slate-500" x-text="targetForm.name ? ('Assigning target to: ' + targetForm.name) : 'Assign target to sales rep or receptionist'"></p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showTargetModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg font-bold">✕</button>
+                </div>
+
+                <form method="POST" action="{{ route('app.crm.targets.save') }}" class="space-y-3.5">
+                    @csrf
+                    
+                    <!-- Staff Select -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Select Staff Member *</label>
+                        <select name="user_id" x-model="targetForm.user_id" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <option value="">-- Choose Staff Member --</option>
+                            @foreach($staffMembers as $stf)
+                                <option value="{{ $stf->id }}">{{ $stf->name }} ({{ ucfirst($stf->role ?? 'Staff') }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Target Period Type -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Target Period</label>
+                        <select name="period_type" x-model="targetForm.period_type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <option value="monthly">Monthly Target ({{ now()->format('F Y') }})</option>
+                            <option value="weekly">Weekly Target</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3" x-show="targetForm.period_type === 'custom'">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Start Date</label>
+                            <input type="date" name="start_date" x-model="targetForm.start_date" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">End Date</label>
+                            <input type="date" name="end_date" x-model="targetForm.end_date" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs">
+                        </div>
+                    </div>
+
+                    <!-- Revenue Target -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Target Revenue ({{ $currency }}) *</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-xs font-bold text-slate-400">{{ $currency }}</span>
+                            <input type="number" step="0.01" min="0" name="target_revenue" x-model="targetForm.target_revenue" required placeholder="e.g. 50000" class="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Admission Target -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Target Closed Admissions (Members Count) *</label>
+                        <input type="number" min="0" step="1" name="target_admissions" x-model="targetForm.target_admissions" required placeholder="e.g. 15" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold focus:border-indigo-500 focus:outline-none">
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Incentive / Remarks (Optional)</label>
+                        <input type="text" name="notes" placeholder="e.g. 5% commission on achieving 100% quota" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" @click="showTargetModal = false" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30">
+                            Save Target
+                        </button>
                     </div>
                 </form>
             </div>

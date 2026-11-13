@@ -132,7 +132,6 @@ class MemberPayment extends Model
         $tenantSettings = $tenant?->settings ?? [];
 
         $gymName = !empty($invSettings['gym_name']) ? $invSettings['gym_name'] : ($tenant?->name ?? 'Gym');
-        $gymAddress = !empty($invSettings['address']) ? $invSettings['address'] : (!empty($tenantSettings['address']) ? $tenantSettings['address'] : ($this->branch?->address ?? ($tenant?->mainBranch?->address ?? '')));
         $gymPhone = !empty($invSettings['phone']) ? $invSettings['phone'] : ($tenant?->phone ?? '');
 
         $rawPhone = preg_replace('/[^0-9]/', '', (string) ($member?->phone ?? ''));
@@ -147,7 +146,7 @@ class MemberPayment extends Model
         $invoiceNo = $this->receipt_number;
         $amount = number_format((float) $this->amount, 2);
         $date = $this->payment_date ? $this->payment_date->format('d M Y') : $this->created_at->format('d M Y');
-        $currency = $tenant?->currency_symbol ?? 'Rs. ';
+        $currency = $tenant?->currency_symbol ?? '₹';
         $method = strtoupper((string) ($this->payment_method ?? 'CASH'));
 
         $membership = $this->membership ?? $member?->activeMembership ?? $member?->memberships()->latest()->first();
@@ -157,62 +156,61 @@ class MemberPayment extends Model
 
         $publicUrl = $this->public_invoice_url;
 
-        $totalPkg = $membership && (float)$membership->final_amount > 0 ? (float)$membership->final_amount : (float)$this->amount;
-        $totalPaid = $membership && (float)$membership->paid_amount > 0 ? (float)$membership->paid_amount : (float)$this->amount;
-        $due = max(0, $totalPkg - $totalPaid);
-
-        $msg = "🏋️ *{$gymName}*\n";
-        if (!empty($gymAddress)) {
-            $msg .= "📍 _{$gymAddress}_\n";
-        }
-        $msg .= "--------------------------------\n";
-        $msg .= "🧾 *PAYMENT RECEIPT & TAX INVOICE*\n";
-        $msg .= "--------------------------------\n\n";
-        $msg .= "Dear *{$member?->full_name}*,\n";
-        $msg .= "Thank you for your payment! Here are your transaction details:\n\n";
-        $msg .= "📄 *Invoice No:* {$invoiceNo}\n";
-        $msg .= "📅 *Date:* {$date}\n";
-        if ($membership && $totalPkg > (float)$this->amount) {
-            $msg .= "📦 *Total Package Fee:* {$currency}" . number_format($totalPkg, 2) . "\n";
-            $msg .= "💰 *Amount Paid (This Receipt):* {$currency}{$amount}\n";
-            $msg .= "💵 *Total Paid to Date:* {$currency}" . number_format($totalPaid, 2) . "\n";
+        // Financial calculations matching Invoice Sheet exactly
+        $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
+        if ($membership && (float)$membership->final_amount > 0) {
+            $totalPackageAmount = (float) $membership->final_amount;
+            $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $this->amount);
+        } elseif ($plan && (float)$plan->price > 0) {
+            $totalPackageAmount = max(0, (float)$plan->price - $discountAmount);
+            $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $this->amount);
         } else {
-            $msg .= "💰 *Amount Paid:* {$currency}{$amount}\n";
-        }
-        $msg .= "💳 *Payment Mode:* {$method}\n";
-
-        if (($this->payment_method === 'split' || str_contains($this->notes ?? '', 'Split Payment') || str_contains($this->notes ?? '', 'Split:')) && !empty($this->notes)) {
-            $splitText = $this->notes;
-            if (str_contains($splitText, 'Split Payment:')) {
-                $parts = explode('Split Payment:', $splitText);
-                $splitText = 'Split: ' . trim(end($parts));
-            } elseif (str_contains($splitText, 'Split:')) {
-                $parts = explode('Split:', $splitText);
-                $splitText = 'Split: ' . trim(end($parts));
-            }
-            $msg .= "ℹ️ *Breakdown:* {$splitText}\n";
+            $totalPackageAmount = (float) $this->amount;
+            $totalPaidSoFar = (float) $this->amount;
         }
 
-        if (!empty($duration)) {
-            $msg .= "📦 *Package:* {$planName} ({$duration})\n";
+        $balanceDue = max(0, $totalPackageAmount - $totalPaidSoFar);
+        $amountReceived = min($totalPackageAmount, $totalPaidSoFar);
+
+        // Professional, clean business receipt format matching the invoice exactly
+        $lines = [];
+        $lines[] = "*{$gymName}*";
+        $lines[] = "PAYMENT RECEIPT & TAX INVOICE";
+        $lines[] = "--------------------------------";
+        $lines[] = "Dear " . ($member?->full_name ?? 'Member') . ",";
+        $lines[] = "Thank you for your payment. Here are your transaction details:";
+        $lines[] = "";
+        $lines[] = "• Receipt No: {$invoiceNo}";
+        $lines[] = "• Date: {$date}";
+        $lines[] = "• Plan: {$planName}" . (!empty($duration) ? " ({$duration})" : "");
+        $lines[] = "• Payment Mode: {$method}";
+        $lines[] = "• Amount Paid (This Receipt): {$currency}" . number_format((float) $this->amount, 2);
+
+        if ($totalPackageAmount > (float) $this->amount || $membership) {
+            $lines[] = "• Total Package Fee: {$currency}" . number_format($totalPackageAmount, 2);
+            $lines[] = "• Total Amount Received: {$currency}" . number_format($amountReceived, 2);
+        }
+
+        if ($balanceDue > 0) {
+            $lines[] = "• Balance Due: {$currency}" . number_format($balanceDue, 2) . " (Partial Payment)";
+        } else {
+            $lines[] = "• Balance Due: {$currency}0.00 (PAID IN FULL)";
         }
 
         if ($membership && $membership->start_date && $membership->end_date) {
-            $msg .= "⏳ *Tenure:* {$membership->start_date->format('d M Y')} to {$membership->end_date->format('d M Y')}\n";
+            $lines[] = "• Membership Validity: {$membership->start_date->format('d M Y')} to {$membership->end_date->format('d M Y')}";
         }
 
-        if ($due > 0) {
-            $msg .= "⚠️ *Remaining Balance Due:* {$currency}" . number_format($due, 2) . "\n";
-        } else {
-            $msg .= "✅ *Status:* Paid in Full\n";
-        }
+        $lines[] = "";
+        $lines[] = "View & Download Official Invoice:";
+        $lines[] = $publicUrl;
 
-        $msg .= "\n🔗 *View & Download Official Invoice:*\n";
-        $msg .= "{$publicUrl}\n\n";
         if (!empty($gymPhone)) {
-            $msg .= "📞 Helpline / Front Desk: {$gymPhone}\n";
+            $lines[] = "";
+            $lines[] = "Front Desk Helpline: {$gymPhone}";
         }
-        $msg .= "Stay Fit, Stay Strong! 💪";
+
+        $msg = implode("\n", $lines);
 
         return 'https://api.whatsapp.com/send?phone=' . $phone . '&text=' . rawurlencode($msg);
     }

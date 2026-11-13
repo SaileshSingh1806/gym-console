@@ -453,8 +453,17 @@
                         <span>Conversions</span>
                     </a>
 
+                    <!-- Sales Targets -->
+                    <a href="{{ route('app.crm.reports') }}#targets" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.reports') && request()->has('targets')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span>Sales Targets</span>
+                        </div>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">KPI</span>
+                    </a>
+
                     <!-- CRM Reports -->
-                    <a href="{{ route('app.crm.reports') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.reports') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
+                    <a href="{{ route('app.crm.reports') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.reports') && !request()->has('targets') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.reports') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>CRM Reports</span>
                     </a>

@@ -18,6 +18,7 @@ class Member extends Model
     protected $fillable = [
         'tenant_id',
         'branch_id',
+        'lead_id',
         'trainer_id',
         'user_id',
         'member_code',
@@ -75,6 +76,11 @@ class Member extends Model
     public function assignedTrainer(): BelongsTo
     {
         return $this->belongsTo(Trainer::class, 'trainer_id');
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'lead_id');
     }
 
     public function memberships(): HasMany

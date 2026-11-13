@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Attendance;
 use App\Models\Expense;
+use App\Models\InventoryLog;
 use App\Models\Lead;
 use App\Models\Member;
 use App\Models\MemberPayment;
@@ -107,15 +108,17 @@ class ReportService
         $paymentsQuery = MemberPayment::query();
         $expensesQuery = Expense::query();
         $membershipsQuery = Membership::query();
-        $attendanceQuery = Attendance::where('date', now()->toDateString());
+        $baseAttendanceQuery = Attendance::query();
 
         if ($branchId) {
             $membersQuery->where('branch_id', $branchId);
             $paymentsQuery->where('branch_id', $branchId);
             $expensesQuery->where('branch_id', $branchId);
             $membershipsQuery->where('branch_id', $branchId);
-            $attendanceQuery->where('branch_id', $branchId);
+            $baseAttendanceQuery->where('branch_id', $branchId);
         }
+
+        $attendanceQuery = (clone $baseAttendanceQuery)->where('date', now()->toDateString());
 
         $totalMembers = (clone $membersQuery)->count();
         $activeMembers = (clone $membersQuery)->where('status', 'ACTIVE')->count();
@@ -344,14 +347,16 @@ class ReportService
             ->get();
 
         // Financial & Dues Calculations
-        $allDuesTotal = (float) (clone $membershipsQuery)->where('status', 'ACTIVE')->sum('price');
+        $monthStartStr = now()->startOfMonth()->toDateString();
+        $sixMonthsStartStr = now()->subMonths(5)->startOfMonth()->toDateString();
+        $todayStr = now()->toDateString();
+        $sevenDaysAgoStr = now()->subDays(7)->toDateString();
+
         $allPaymentsSum = (float) (clone $paymentsQuery)->sum('amount');
-        $allDuesRemaining = max(0, $allDuesTotal - $allPaymentsSum);
-        $dueMembersCount = (clone $membershipsQuery)->where('status', 'ACTIVE')->count();
         $monthBilledTotal = (float) (clone $membershipsQuery)
-            ->where(function ($q) {
-                $q->where('created_at', '>=', now()->startOfMonth())
-                    ->orWhere('start_date', '>=', now()->startOfMonth()->toDateString());
+            ->where(function ($q) use ($monthStartStr) {
+                $q->where('created_at', '>=', $monthStartStr . ' 00:00:00')
+                    ->orWhere('start_date', '>=', $monthStartStr);
             })
             ->sum(DB::raw('COALESCE(final_amount, price)'));
 
@@ -359,6 +364,12 @@ class ReportService
         $totalActivePackageValue = 0.0;
         $allDuesRemaining = 0.0;
         $dueMembersCount = 0;
+        $monthDuesRemaining = 0.0;
+        $monthDuesCount = 0;
+        $todayDuesRemaining = 0.0;
+        $todayDuesCount = 0;
+        $defaultersDuesRemaining = 0.0;
+        $defaultersCount = 0;
 
         foreach ($activeMemberships as $m) {
             $pkgPrice = (float) ($m->final_amount ?: $m->price);
@@ -367,8 +378,24 @@ class ReportService
 
             $totalActivePackageValue += $pkgPrice;
             $allDuesRemaining += $due;
+
             if ($due > 0) {
                 $dueMembersCount++;
+                $startDateStr = $m->start_date ? $m->start_date->toDateString() : ($m->created_at?->toDateString() ?? $todayStr);
+                $endDateStr = $m->end_date ? $m->end_date->toDateString() : null;
+
+                if ($startDateStr >= $monthStartStr) {
+                    $monthDuesRemaining += $due;
+                    $monthDuesCount++;
+                }
+                if ($startDateStr === $todayStr || $endDateStr === $todayStr) {
+                    $todayDuesRemaining += $due;
+                    $todayDuesCount++;
+                }
+                if (($endDateStr && $endDateStr < $todayStr) || $startDateStr <= $sevenDaysAgoStr) {
+                    $defaultersDuesRemaining += $due;
+                    $defaultersCount++;
+                }
             }
         }
 
@@ -377,20 +404,120 @@ class ReportService
         }
         $monthBilledTotal = max($monthBilledTotal, $monthRevenue + $allDuesRemaining);
 
-        // New Clients: registered this month
-        $newClientsCount = (clone $membersQuery)->where('created_at', '>=', now()->startOfMonth())->count();
-        $renewalsCount = (clone $membershipsQuery)->where('created_at', '>=', now()->startOfMonth())->where('created_at', '>', now()->subMonths(1))->count();
+        // Product / POS Sales (InventoryLog OUT)
+        $posBaseQuery = InventoryLog::where('inventory_logs.tenant_id', $tenant->id)
+            ->where('inventory_logs.type', 'OUT');
+        if ($branchId) {
+            $posBaseQuery->whereHas('item', fn ($q) => $q->where('branch_id', $branchId));
+        }
 
-        // Renewals: Memberships created/renewed this month for members who joined before this month (or have prior memberships)
+        $productSalesMtd = (float) ((clone $posBaseQuery)
+            ->where('inventory_logs.created_at', '>=', $monthStartStr . ' 00:00:00')
+            ->selectRaw('SUM(quantity * unit_price) as total')
+            ->value('total') ?? 0.0);
+        $productSales6m = (float) ((clone $posBaseQuery)
+            ->where('inventory_logs.created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
+            ->selectRaw('SUM(quantity * unit_price) as total')
+            ->value('total') ?? 0.0);
+        $productSalesAll = (float) ((clone $posBaseQuery)
+            ->selectRaw('SUM(quantity * unit_price) as total')
+            ->value('total') ?? 0.0);
+
+        // New Clients & Renewals (MTD + 6M)
+        $newClientsCount = (clone $membersQuery)->where('created_at', '>=', $monthStartStr . ' 00:00:00')->count();
+        $newClients6m = (clone $membersQuery)->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')->count();
+
         $renewalsCount = (clone $membershipsQuery)
-            ->where('created_at', '>=', now()->startOfMonth())
-            ->whereHas('member', function ($q) {
-                $q->where('created_at', '<', now()->startOfMonth());
+            ->where('created_at', '>=', $monthStartStr . ' 00:00:00')
+            ->whereHas('member', function ($q) use ($monthStartStr) {
+                $q->where('created_at', '<', $monthStartStr . ' 00:00:00');
+            })
+            ->count();
+        $renewals6m = (clone $membershipsQuery)
+            ->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
+            ->whereHas('member', function ($q) use ($sixMonthsStartStr) {
+                $q->where('created_at', '<', $sixMonthsStartStr . ' 00:00:00');
             })
             ->count();
 
+        $billed6m = (float) (clone $membershipsQuery)
+            ->where(function ($q) use ($sixMonthsStartStr) {
+                $q->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
+                    ->orWhere('start_date', '>=', $sixMonthsStartStr);
+            })
+            ->sum(DB::raw('COALESCE(final_amount, price)'));
+        $billed6mCount = (clone $membershipsQuery)
+            ->where(function ($q) use ($sixMonthsStartStr) {
+                $q->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
+                    ->orWhere('start_date', '>=', $sixMonthsStartStr);
+            })
+            ->count();
+        $collected6m = (float) (clone $paymentsQuery)
+            ->where('payment_date', '>=', $sixMonthsStartStr)
+            ->sum('amount');
+        $collected6mCount = (clone $paymentsQuery)
+            ->where('payment_date', '>=', $sixMonthsStartStr)
+            ->count();
+
+        $mtdBilledCount = (clone $membershipsQuery)
+            ->where(function ($q) use ($monthStartStr) {
+                $q->where('created_at', '>=', $monthStartStr . ' 00:00:00')
+                    ->orWhere('start_date', '>=', $monthStartStr);
+            })
+            ->count();
+        $mtdCollectedCount = (clone $paymentsQuery)
+            ->where('payment_date', '>=', $monthStartStr)
+            ->count();
+
+        $financialPeriods = [
+            'mtd' => [
+                'total_billed' => $monthBilledTotal,
+                'billed_count' => $mtdBilledCount > 0 ? $mtdBilledCount : $activeMemberships->count(),
+                'product_sales' => $productSalesMtd,
+                'collected' => $monthRevenue,
+                'collected_count' => $mtdCollectedCount,
+                'pending_dues' => $allDuesRemaining,
+                'pending_count' => $dueMembersCount,
+                'new_clients' => $newClientsCount,
+                'renewals' => $renewalsCount,
+            ],
+            '6m' => [
+                'total_billed' => max($billed6m, $collected6m),
+                'billed_count' => $billed6mCount,
+                'product_sales' => $productSales6m,
+                'collected' => $collected6m,
+                'collected_count' => $collected6mCount,
+                'pending_dues' => $allDuesRemaining,
+                'pending_count' => $dueMembersCount,
+                'new_clients' => $newClients6m,
+                'renewals' => $renewals6m,
+            ],
+        ];
+
         $todayAttendanceCount = (clone $attendanceQuery)->count();
         $currentlyInside = (clone $attendanceQuery)->whereNull('check_out')->count();
+
+        // Real average session duration from recent checked-out records (1..360 mins)
+        $recentCheckouts = (clone $baseAttendanceQuery)
+            ->whereNotNull('check_in')
+            ->whereNotNull('check_out')
+            ->where('date', '>=', now()->subDays(30)->toDateString())
+            ->latest('check_in')
+            ->take(200)
+            ->get(['check_in', 'check_out']);
+
+        $validDurations = [];
+        foreach ($recentCheckouts as $att) {
+            if ($att->check_in && $att->check_out) {
+                $mins = (int) $att->check_in->diffInMinutes($att->check_out, false);
+                if ($mins >= 1 && $mins <= 360) {
+                    $validDurations[] = $mins;
+                }
+            }
+        }
+        $avgAttendanceMinutes = ! empty($validDurations)
+            ? (int) round(array_sum($validDurations) / count($validDurations))
+            : null;
 
         $recentPayments = (clone $paymentsQuery)
             ->with(['member', 'receivedBy', 'membership.plan'])
@@ -404,29 +531,14 @@ class ReportService
             ->take(6)
             ->get();
 
-        // Recent daily trends for the 4 dashboard charts
-        $trendLabels = [];
-        $trendRevenue = [];
-        $trendPrevRevenue = [];
-        $trendJoins = [];
-        $trendAttendance = [];
-
-        for ($i = 5; $i >= 0; $i--) {
-            $dayDate = now()->subDays($i)->toDateString();
-            $dayLabel = now()->subDays($i)->format('d M');
-            $prevDayDate = now()->subDays($i + 7)->toDateString();
-
-            $dayRev = (float) (clone $paymentsQuery)->whereDate('payment_date', $dayDate)->sum('amount');
-            $prevDayRev = (float) (clone $paymentsQuery)->whereDate('payment_date', $prevDayDate)->sum('amount');
-            $dayJoins = (clone $membersQuery)->whereDate('created_at', $dayDate)->count();
-            $dayAtt = (clone $attendanceQuery)->whereDate('date', $dayDate)->count();
-
-            $trendLabels[] = $dayLabel;
-            $trendRevenue[] = $dayRev;
-            $trendPrevRevenue[] = $prevDayRev;
-            $trendJoins[] = $dayJoins;
-            $trendAttendance[] = $dayAtt;
-        }
+        // Multi-period trends for dashboard charts (30D / 90D / 6M / 1Y)
+        $trendsByPeriod = [
+            '30d' => $this->buildDashboardTrendSeries($paymentsQuery, $membersQuery, $baseAttendanceQuery, '30d'),
+            '90d' => $this->buildDashboardTrendSeries($paymentsQuery, $membersQuery, $baseAttendanceQuery, '90d'),
+            '6m' => $this->buildDashboardTrendSeries($paymentsQuery, $membersQuery, $baseAttendanceQuery, '6m'),
+            '1y' => $this->buildDashboardTrendSeries($paymentsQuery, $membersQuery, $baseAttendanceQuery, '1y'),
+        ];
+        $defaultTrend = $trendsByPeriod['30d'];
 
         // ----------------------------------------------------
         // Monthly Personal Training (PT) Financial Overview
@@ -615,21 +727,99 @@ class ReportService
             'dormant_members_list' => $dormantMembersList,
             'all_dues_remaining' => $allDuesRemaining,
             'due_members_count' => $dueMembersCount,
+            'month_dues_remaining' => $monthDuesRemaining,
+            'month_dues_count' => $monthDuesCount,
+            'today_dues_remaining' => $todayDuesRemaining,
+            'today_dues_count' => $todayDuesCount,
+            'defaulters_dues_remaining' => $defaultersDuesRemaining,
+            'defaulters_count' => $defaultersCount,
+            'product_sales_mtd' => $productSalesMtd,
+            'product_sales_6m' => $productSales6m,
+            'product_sales_all' => $productSalesAll,
+            'financial_periods' => $financialPeriods,
+            'avg_attendance_minutes' => $avgAttendanceMinutes,
             'new_clients_count' => $newClientsCount,
             'renewals_count' => $renewalsCount,
-            'trends' => [
-                'labels' => $trendLabels,
-                'revenue' => $trendRevenue,
-                'prev_revenue' => $trendPrevRevenue,
-                'joins' => $trendJoins,
-                'attendance' => $trendAttendance,
-            ],
+            'trends' => $defaultTrend,
+            'trends_by_period' => $trendsByPeriod,
             'chart' => [
                 'labels' => $chartLabels,
                 'income' => $chartIncome,
                 'expenses' => $chartExpense,
                 'profit' => $chartProfit,
             ],
+        ];
+    }
+
+    /**
+     * Build revenue, joins, and attendance chart series for a given period key.
+     *
+     * @return array<string, mixed>
+     */
+    private function buildDashboardTrendSeries($paymentsQuery, $membersQuery, $baseAttendanceQuery, string $period): array
+    {
+        $labels = [];
+        $revenue = [];
+        $prevRevenue = [];
+        $joins = [];
+        $attendance = [];
+
+        if ($period === '90d') {
+            for ($w = 11; $w >= 0; $w--) {
+                $end = now()->subWeeks($w)->endOfDay();
+                $start = $end->copy()->subDays(6)->startOfDay();
+                $prevEnd = $start->copy()->subDay()->endOfDay();
+                $prevStart = $prevEnd->copy()->subDays(6)->startOfDay();
+
+                $labels[] = $start->format('d M');
+                $revenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$start->toDateString(), $end->toDateString()])->sum('amount'), 2);
+                $prevRevenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$prevStart->toDateString(), $prevEnd->toDateString()])->sum('amount'), 2);
+                $joins[] = (clone $membersQuery)->whereBetween('created_at', [$start, $end])->count();
+                $attendance[] = (clone $baseAttendanceQuery)->whereBetween('date', [$start->toDateString(), $end->toDateString()])->count();
+            }
+        } elseif ($period === '6m' || $period === '1y') {
+            $monthsCount = $period === '1y' ? 12 : 6;
+            for ($m = $monthsCount - 1; $m >= 0; $m--) {
+                $dt = now()->subMonths($m);
+                $start = $dt->copy()->startOfMonth();
+                $end = $dt->copy()->endOfMonth();
+                $prevDt = $dt->copy()->subYear();
+                $prevStart = $prevDt->copy()->startOfMonth();
+                $prevEnd = $prevDt->copy()->endOfMonth();
+
+                $labels[] = $dt->format($period === '1y' ? 'M y' : 'M Y');
+                $revenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$start->toDateString(), $end->toDateString()])->sum('amount'), 2);
+                $prevRevenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$prevStart->toDateString(), $prevEnd->toDateString()])->sum('amount'), 2);
+                $joins[] = (clone $membersQuery)->whereBetween('created_at', [$start, $end])->count();
+                $attendance[] = (clone $baseAttendanceQuery)->whereBetween('date', [$start->toDateString(), $end->toDateString()])->count();
+            }
+        } else {
+            // 30d daily
+            for ($i = 29; $i >= 0; $i--) {
+                $day = now()->subDays($i);
+                $dayDate = $day->toDateString();
+                $prevDayDate = $day->copy()->subDays(30)->toDateString();
+
+                $labels[] = $day->format('d M');
+                $revenue[] = round((float) (clone $paymentsQuery)->whereDate('payment_date', $dayDate)->sum('amount'), 2);
+                $prevRevenue[] = round((float) (clone $paymentsQuery)->whereDate('payment_date', $prevDayDate)->sum('amount'), 2);
+                $joins[] = (clone $membersQuery)->whereDate('created_at', $dayDate)->count();
+                $attendance[] = (clone $baseAttendanceQuery)->whereDate('date', $dayDate)->count();
+            }
+        }
+
+        $totalAtt = array_sum($attendance);
+        $avgAtt = count($attendance) > 0 ? round($totalAtt / count($attendance), 1) : 0;
+
+        return [
+            'labels' => $labels,
+            'revenue' => $revenue,
+            'prev_revenue' => $prevRevenue,
+            'joins' => $joins,
+            'attendance' => $attendance,
+            'total_revenue' => round(array_sum($revenue), 2),
+            'total_joins' => array_sum($joins),
+            'avg_attendance' => $avgAtt,
         ];
     }
 }

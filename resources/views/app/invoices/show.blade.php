@@ -105,6 +105,7 @@
         }
 
         $balanceDue = max(0, $totalPackageAmount - $totalPaidSoFar);
+        $amountReceivedDisplay = min($totalPackageAmount, $totalPaidSoFar);
 
         // Status pill & badge styling
         if ($balanceDue > 0) {
@@ -345,10 +346,12 @@
                     }
                     $breakdownText = preg_replace('/^Split[:\s-]*/i', '', trim($breakdownText));
 
-                    if (preg_match('/Cash.*?\\+\\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
+                    if (preg_match('/([A-Za-z]+)\s*(?:₹|Rs\.?|\$)?[\d,.]*.*?\+\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
+                        $modeText = strtoupper($matches[1]) . ' + ' . strtoupper($matches[2]);
+                    } elseif (preg_match('/Cash.*?\\+\\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
                         $modeText = 'CASH + ' . strtoupper($matches[1]);
                     } else {
-                        $modeText = 'CASH + ONLINE';
+                        $modeText = 'SPLIT PAYMENT';
                     }
                 }
 
@@ -563,7 +566,7 @@
                     </div>
                     <div class="flex items-center justify-between text-xs">
                         <span class="text-slate-600 font-normal">Amount Received</span>
-                        <span class="font-bold text-emerald-600">{{ $currency }}{{ number_format($totalPaidSoFar, 0) }}</span>
+                        <span class="font-bold text-emerald-600">{{ $currency }}{{ number_format($amountReceivedDisplay, 0) }}</span>
                     </div>
                     
                     <!-- Balance Due Box -->

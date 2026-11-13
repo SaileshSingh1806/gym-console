@@ -44,6 +44,8 @@
             employee_category: '',
             joining_date: '',
             monthly_salary: '',
+            monthly_sales_target: '',
+            monthly_admissions_target: '',
             payout_type: '',
             gender: '',
             dob: '',
@@ -82,6 +84,8 @@
                 employee_category: '',
                 joining_date: '{{ now()->format('Y-m-d') }}',
                 monthly_salary: '',
+                monthly_sales_target: '',
+                monthly_admissions_target: '',
                 payout_type: '',
                 gender: '',
                 dob: '',
@@ -114,6 +118,8 @@
                 employee_category: meta.employee_category || '',
                 joining_date: meta.joining_date || '',
                 monthly_salary: meta.monthly_salary || '',
+                monthly_sales_target: meta.monthly_sales_target || '',
+                monthly_admissions_target: meta.monthly_admissions_target || '',
                 payout_type: meta.payout_type || '',
                 gender: meta.gender || '',
                 dob: meta.dob || '',
@@ -860,6 +866,34 @@
                                     <option value="Fixed + Commission">Fixed + Commission</option>
                                     <option value="Daily Wage">Daily Wage</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Sales & Admission Targets -->
+                        <div class="p-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/10 space-y-2 mt-2">
+                            <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">
+                                <span>🎯 Monthly Sales &amp; Admission Targets</span>
+                                <span class="text-[9px] font-normal text-slate-500 dark:text-slate-400 lowercase">(optional)</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Monthly Revenue Target (₹)</label>
+                                    <input type="number" 
+                                           step="100" 
+                                           name="monthly_sales_target" 
+                                           x-model="staffForm.monthly_sales_target" 
+                                           placeholder="e.g. 100000" 
+                                           class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Monthly Admissions Target (Qty)</label>
+                                    <input type="number" 
+                                           step="1" 
+                                           name="monthly_admissions_target" 
+                                           x-model="staffForm.monthly_admissions_target" 
+                                           placeholder="e.g. 20" 
+                                           class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                </div>
                             </div>
                         </div>
                     </div>

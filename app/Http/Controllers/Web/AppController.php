@@ -378,7 +378,7 @@ class AppController extends Controller
         return view('app.members.index', compact('members', 'branches', 'membershipPlans'));
     }
 
-    public function createMember(): View
+    public function createMember(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $branches = Branch::all();
@@ -387,7 +387,12 @@ class AppController extends Controller
         $staff = User::where('tenant_id', $tenant->id)->get();
         $nextMemberCode = $tenant->generateNextMemberCode();
 
-        return view('app.members.create', compact('branches', 'membershipPlans', 'trainers', 'staff', 'nextMemberCode'));
+        $lead = null;
+        if ($request->filled('lead_id')) {
+            $lead = Lead::where('tenant_id', $tenant->id)->with('membershipPlan')->find($request->input('lead_id'));
+        }
+
+        return view('app.members.create', compact('branches', 'membershipPlans', 'trainers', 'staff', 'nextMemberCode', 'lead'));
     }
 
     public function lookupMemberPhone(Request $request): JsonResponse
@@ -577,12 +582,18 @@ class AppController extends Controller
                 'start_date' => 'nullable|date',
                 'discount' => 'nullable|numeric|min:0',
                 'initial_payment_amount' => 'nullable|numeric|min:0',
-                'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
+                'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
                 'transaction_reference' => 'nullable|string|max:100',
                 'is_split_payment' => 'nullable|boolean',
+                'split_method_1' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+                'split_amount_1' => 'nullable|numeric|min:0',
+                'split_ref_1' => 'nullable|string|max:100',
+                'split_method_2' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+                'split_amount_2' => 'nullable|numeric|min:0',
+                'split_ref_2' => 'nullable|string|max:100',
                 'split_cash_amount' => 'nullable|numeric|min:0',
                 'split_online_amount' => 'nullable|numeric|min:0',
-                'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+                'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque,cash,bank_transfer',
                 'split_online_reference' => 'nullable|string|max:100',
                 'notes' => 'nullable|string|max:500',
             ]);
@@ -603,18 +614,22 @@ class AppController extends Controller
                     $membership = $this->membershipService->assignMembership($member, $plan, $membershipOptions);
 
                     $isSplit = $request->boolean('is_split_payment');
-                    $splitCash = (float) $request->input('split_cash_amount', 0);
-                    $splitOnline = (float) $request->input('split_online_amount', 0);
-                    $splitMethod = $request->input('split_online_method', 'upi');
-                    $splitRef = $request->input('split_online_reference');
+                    $method1 = $request->input('split_method_1', 'cash');
+                    $amt1 = (float) $request->input('split_amount_1', $request->input('split_cash_amount', 0));
+                    $ref1 = $request->input('split_ref_1');
 
-                    if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-                        $totalPaid = $splitCash + $splitOnline;
+                    $method2 = $request->input('split_method_2', $request->input('split_online_method', 'upi'));
+                    $amt2 = (float) $request->input('split_amount_2', $request->input('split_online_amount', 0));
+                    $ref2 = $request->input('split_ref_2', $request->input('split_online_reference'));
+
+                    if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
+                        $totalPaid = $amt1 + $amt2;
                         $currency = $tenant?->currency_symbol ?? '₹';
-                        $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
-                        if (!empty($splitRef)) {
-                            $breakdown .= " (Ref: {$splitRef})";
-                        }
+                        $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
+                        $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
+                        $breakdown = "Split Payment: {$part1} + {$part2}";
+                        $primaryRef = !empty($ref1) ? $ref1 : (!empty($ref2) ? $ref2 : null);
+
                         $notes = ! empty($validated['notes'])
                             ? trim($validated['notes']) . " | {$breakdown}"
                             : $breakdown;
@@ -624,7 +639,7 @@ class AppController extends Controller
                             $totalPaid,
                             'split',
                             $membership,
-                            $splitRef ?: null,
+                            $primaryRef,
                             $notes
                         );
                     } else {
@@ -648,12 +663,25 @@ class AppController extends Controller
             }
         }
 
+        $existingLeadMemberId = null;
+        if ($request->filled('lead_id')) {
+            $existingLeadMember = Member::where('tenant_id', $tenant?->id)->where('phone', $request->input('phone'))->first();
+            if ($existingLeadMember) {
+                $existingLeadMemberId = $existingLeadMember->id;
+            }
+        }
+
+        $phoneRule = Rule::unique('members', 'phone')->where('tenant_id', $tenant?->id);
+        if ($existingLeadMemberId) {
+            $phoneRule->ignore($existingLeadMemberId);
+        }
+
         $validated = $request->validate([
-            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('members', 'member_code')->where('tenant_id', $tenant?->id)],
+            'lead_id' => 'nullable|integer',
+            'member_code' => ['nullable', 'string', 'max:50', Rule::unique('members', 'member_code')->where('tenant_id', $tenant?->id)->ignore($existingLeadMemberId)],
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
-            'phone' => 'required|string|max:30',
-            'phone' => ['required', 'string', 'max:30', Rule::unique('members', 'phone')->where('tenant_id', $tenant?->id)],
+            'phone' => ['required', 'string', 'max:30', $phoneRule],
             'alternate_phone' => 'nullable|string|max:30',
             'email' => 'nullable|email|max:150',
             'gender' => 'nullable|in:male,female,other,Male,Female,Other',
@@ -682,12 +710,18 @@ class AppController extends Controller
             'medical_history' => 'nullable|string|max:1000',
             'discount' => 'nullable|numeric|min:0',
             'initial_payment_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
+            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
             'transaction_reference' => 'nullable|string|max:100',
             'is_split_payment' => 'nullable|boolean',
+            'split_method_1' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+            'split_amount_1' => 'nullable|numeric|min:0',
+            'split_ref_1' => 'nullable|string|max:100',
+            'split_method_2' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+            'split_amount_2' => 'nullable|numeric|min:0',
+            'split_ref_2' => 'nullable|string|max:100',
             'split_cash_amount' => 'nullable|numeric|min:0',
             'split_online_amount' => 'nullable|numeric|min:0',
-            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque,cash,bank_transfer',
             'split_online_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
             'photo' => 'nullable|image|max:10240',
@@ -772,7 +806,12 @@ class AppController extends Controller
                 'metadata' => $metadata,
             ]);
 
-            $member = $this->membershipService->createMember($tenant, $createPayload);
+            if ($existingLeadMemberId && isset($existingLeadMember)) {
+                $existingLeadMember->update($createPayload);
+                $member = $existingLeadMember;
+            } else {
+                $member = $this->membershipService->createMember($tenant, $createPayload);
+            }
             $enrolledGroupCount = 0;
 
             if (! empty($validated['membership_plan_id'])) {
@@ -785,18 +824,22 @@ class AppController extends Controller
                 $membership = $this->membershipService->assignMembership($member, $plan, $membershipOptions);
 
                 $isSplit = $request->boolean('is_split_payment');
-                $splitCash = (float) $request->input('split_cash_amount', 0);
-                $splitOnline = (float) $request->input('split_online_amount', 0);
-                $splitMethod = $request->input('split_online_method', 'upi');
-                $splitRef = $request->input('split_online_reference');
+                $method1 = $request->input('split_method_1', 'cash');
+                $amt1 = (float) $request->input('split_amount_1', $request->input('split_cash_amount', 0));
+                $ref1 = $request->input('split_ref_1');
 
-                if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-                    $totalPaid = $splitCash + $splitOnline;
+                $method2 = $request->input('split_method_2', $request->input('split_online_method', 'upi'));
+                $amt2 = (float) $request->input('split_amount_2', $request->input('split_online_amount', 0));
+                $ref2 = $request->input('split_ref_2', $request->input('split_online_reference'));
+
+                if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
+                    $totalPaid = $amt1 + $amt2;
                     $currency = $tenant?->currency_symbol ?? '₹';
-                    $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
-                    if (!empty($splitRef)) {
-                        $breakdown .= " (Ref: {$splitRef})";
-                    }
+                    $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
+                    $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
+                    $breakdown = "Split Payment: {$part1} + {$part2}";
+                    $primaryRef = !empty($ref1) ? $ref1 : (!empty($ref2) ? $ref2 : null);
+
                     $notes = ! empty($validated['notes'])
                         ? trim($validated['notes']) . " | {$breakdown}"
                         : $breakdown;
@@ -806,7 +849,7 @@ class AppController extends Controller
                         $totalPaid,
                         'split',
                         $membership,
-                        $splitRef ?: null,
+                        $primaryRef,
                         $notes
                     );
                 } else {
@@ -884,6 +927,22 @@ class AppController extends Controller
 
                         $enrolledGroupCount++;
                     }
+                }
+            }
+
+            if ($request->filled('lead_id')) {
+                $lead = Lead::where('tenant_id', $tenant->id)->find($request->input('lead_id'));
+                if ($lead) {
+                    $lead->update([
+                        'status' => 'CONVERTED',
+                        'stage' => 'PAID',
+                        'converted_member_id' => $member->id,
+                        'notes' => trim(($lead->notes ? $lead->notes . ' | ' : '') . "Converted to Member: {$member->full_name} ({$member->member_code})"),
+                    ]);
+                    $member->update(['lead_id' => $lead->id]);
+                    ActivityLog::log('lead_converted', "Lead '{$lead->name}' successfully converted to Member '{$member->full_name}' ({$member->member_code})", $member);
+
+                    return redirect()->route('app.members.show', $member->id)->with('success', "Lead '{$lead->name}' converted to Member successfully! (Member ID: {$member->member_code})");
                 }
             }
 
@@ -1114,12 +1173,18 @@ class AppController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
+            'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
             'transaction_reference' => 'nullable|string|max:100',
             'is_split_payment' => 'nullable|boolean',
+            'split_method_1' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+            'split_amount_1' => 'nullable|numeric|min:0',
+            'split_ref_1' => 'nullable|string|max:100',
+            'split_method_2' => 'nullable|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+            'split_amount_2' => 'nullable|numeric|min:0',
+            'split_ref_2' => 'nullable|string|max:100',
             'split_cash_amount' => 'nullable|numeric|min:0',
             'split_online_amount' => 'nullable|numeric|min:0',
-            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque',
+            'split_online_method' => 'nullable|string|in:upi,card,netbanking,cheque,cash,bank_transfer',
             'split_online_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
@@ -1127,18 +1192,22 @@ class AppController extends Controller
         $membership = $member->activeMembership ?? $member->memberships()->latest()->first();
 
         $isSplit = $request->boolean('is_split_payment');
-        $splitCash = (float) $request->input('split_cash_amount', 0);
-        $splitOnline = (float) $request->input('split_online_amount', 0);
-        $splitMethod = $request->input('split_online_method', 'upi');
-        $splitRef = $request->input('split_online_reference');
+        $method1 = $request->input('split_method_1', 'cash');
+        $amt1 = (float) $request->input('split_amount_1', $request->input('split_cash_amount', 0));
+        $ref1 = $request->input('split_ref_1');
 
-        if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-            $totalCollected = $splitCash + $splitOnline;
+        $method2 = $request->input('split_method_2', $request->input('split_online_method', 'upi'));
+        $amt2 = (float) $request->input('split_amount_2', $request->input('split_online_amount', 0));
+        $ref2 = $request->input('split_ref_2', $request->input('split_online_reference'));
+
+        if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
+            $totalCollected = $amt1 + $amt2;
             $currency = $member->tenant?->currency_symbol ?? '₹';
-            $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
-            if (!empty($splitRef)) {
-                $breakdown .= " (Ref: {$splitRef})";
-            }
+            $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
+            $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
+            $breakdown = "Split Payment: {$part1} + {$part2}";
+            $primaryRef = !empty($ref1) ? $ref1 : (!empty($ref2) ? $ref2 : null);
+
             $notes = ! empty($validated['notes'])
                 ? trim($validated['notes']) . " | {$breakdown}"
                 : $breakdown;
@@ -1148,7 +1217,7 @@ class AppController extends Controller
                 $totalCollected,
                 'split',
                 $membership,
-                $splitRef ?: null,
+                $primaryRef,
                 $notes
             );
         } else {
@@ -2233,6 +2302,12 @@ class AppController extends Controller
             'payment_method' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
             'transaction_reference' => 'nullable|string|max:100',
             'is_split_payment' => 'nullable|boolean',
+            'split_method_1' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
+            'split_amount_1' => 'nullable|numeric|min:0',
+            'split_ref_1' => 'nullable|string|max:100',
+            'split_method_2' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
+            'split_amount_2' => 'nullable|numeric|min:0',
+            'split_ref_2' => 'nullable|string|max:100',
             'split_cash_amount' => 'nullable|numeric|min:0',
             'split_online_amount' => 'nullable|numeric|min:0',
             'split_online_method' => 'nullable|string|in:cash,card,pos,upi,bank_transfer,netbanking,cheque,online',
@@ -2341,18 +2416,21 @@ class AppController extends Controller
             }
 
             $isSplit = $request->boolean('is_split_payment');
-            $splitCash = (float) $request->input('split_cash_amount', 0);
-            $splitOnline = (float) $request->input('split_online_amount', 0);
-            $splitMethod = $request->input('split_online_method', 'upi');
-            $splitRef = $request->input('split_online_reference');
+            $method1 = $request->input('split_method_1', 'cash');
+            $amt1 = (float) $request->input('split_amount_1', $request->input('split_cash_amount', 0));
+            $ref1 = $request->input('split_ref_1');
 
-            if ($isSplit && ($splitCash > 0 || $splitOnline > 0)) {
-                $totalSplit = $splitCash + $splitOnline;
+            $method2 = $request->input('split_method_2', $request->input('split_online_method', 'upi'));
+            $amt2 = (float) $request->input('split_amount_2', $request->input('split_online_amount', 0));
+            $ref2 = $request->input('split_ref_2', $request->input('split_online_reference'));
+
+            if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
+                $totalSplit = $amt1 + $amt2;
                 $currency = $tenant->currency_symbol ?? '₹';
-                $breakdown = "Split Payment: Cash {$currency}" . number_format($splitCash, 2) . " + " . strtoupper($splitMethod) . " {$currency}" . number_format($splitOnline, 2);
-                if (!empty($splitRef)) {
-                    $breakdown .= " (Ref: {$splitRef})";
-                }
+                $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
+                $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
+                $breakdown = "Split Payment: {$part1} + {$part2}";
+                $primaryRef = !empty($ref1) ? $ref1 : (!empty($ref2) ? $ref2 : null);
                 $combinedNotes = trim($itemLabel . " | {$breakdown}" . ($notes ? " | {$notes}" : ''));
 
                 $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $tenant->id);
@@ -2365,14 +2443,15 @@ class AppController extends Controller
                     'invoice_number' => $invoiceNumber,
                     'amount' => $totalSplit,
                     'payment_method' => 'split',
-                    'transaction_reference' => $splitRef ?: null,
+                    'transaction_reference' => $primaryRef,
                     'payment_date' => $paymentDate,
                     'received_by_user_id' => auth()->id(),
                     'notes' => $combinedNotes,
                 ]);
 
                 if ($membership) {
-                    $membership->update(['paid_amount' => (float) $membership->paid_amount + $totalSplit]);
+                    $newPaid = min((float) $membership->final_amount, (float) $membership->paid_amount + $totalSplit);
+                    $membership->update(['paid_amount' => $newPaid]);
                 }
 
                 ActivityLog::log('member_payment_received', "Recorded split payment of {$currency}" . number_format($totalSplit, 2) . " ({$breakdown}) from {$member->full_name} ({$invoiceNumber})", $payment);
@@ -2411,7 +2490,7 @@ class AppController extends Controller
                 ]);
 
                 if ($membership) {
-                    $newPaid = (float) $membership->paid_amount + $collectedAmount;
+                    $newPaid = min((float) $membership->final_amount, (float) $membership->paid_amount + $collectedAmount);
                     $membership->update(['paid_amount' => $newPaid]);
                 }
 
@@ -4710,7 +4789,55 @@ class AppController extends Controller
             ->orderBy('name')
             ->get();
         $upcomingTrials = LeadTrial::with('lead', 'assignedTo')->whereDate('trial_date', '>=', today())->orderBy('trial_date')->limit(6)->get();
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
+
+        // Target progress calculation for Dashboard Widget
+        $currentUser = Auth::user();
+        $now = now();
+        $thisMonthStart = $now->copy()->startOfMonth();
+        $thisMonthEnd = $now->copy()->endOfMonth();
+
+        $myTarget = $currentUser ? $currentUser->currentSalesTarget() : null;
+        $myTargetProgress = $myTarget ? $myTarget->calculateProgress() : null;
+
+        // Team targets leaderboard (for Owner & Managers)
+        $monthTargets = \App\Models\StaffSalesTarget::where('tenant_id', $tenant->id)
+            ->where('start_date', '<=', $thisMonthEnd->toDateString())
+            ->where('end_date', '>=', $thisMonthStart->toDateString())
+            ->get();
+
+        $teamTargetLeaderboard = [];
+        foreach ($staffMembers as $stf) {
+            $tObj = $monthTargets->firstWhere('user_id', $stf->id) ?? $stf->currentSalesTarget();
+            if ($tObj) {
+                $prog = $tObj->calculateProgress();
+                $teamTargetLeaderboard[] = array_merge($prog, [
+                    'user_id' => $stf->id,
+                    'name' => $stf->name,
+                    'role' => $stf->role ?? 'Staff',
+                    'has_target' => true,
+                ]);
+            } else {
+                $leadRev = (float) \App\Models\Lead::where('tenant_id', $tenant->id)->where('assigned_to_user_id', $stf->id)->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])->whereIn('stage', ['PAID', 'CONVERTED'])->sum('estimated_value');
+                $payRev = (float) \App\Models\MemberPayment::where('tenant_id', $tenant->id)->where('received_by_user_id', $stf->id)->whereBetween('payment_date', [$thisMonthStart, $thisMonthEnd])->sum('amount');
+                $leadAdm = (int) \App\Models\Lead::where('tenant_id', $tenant->id)->where('assigned_to_user_id', $stf->id)->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])->whereIn('stage', ['PAID', 'CONVERTED'])->count();
+
+                $teamTargetLeaderboard[] = [
+                    'user_id' => $stf->id,
+                    'name' => $stf->name,
+                    'role' => $stf->role ?? 'Staff',
+                    'has_target' => false,
+                    'target_revenue' => 0,
+                    'achieved_revenue' => max($leadRev, $payRev),
+                    'remaining_revenue' => 0,
+                    'revenue_pct' => 0,
+                    'target_admissions' => 0,
+                    'achieved_admissions' => $leadAdm,
+                    'remaining_admissions' => 0,
+                    'days_left' => max(0, (int) now()->diffInDays($thisMonthEnd, false) + 1),
+                ];
+            }
+        }
 
         return view('app.crm.dashboard', compact(
             'totalLeads',
@@ -4726,7 +4853,9 @@ class AppController extends Controller
             'demoBookedLeads',
             'upcomingTrials',
             'staffMembers',
-            'tenant'
+            'tenant',
+            'myTargetProgress',
+            'teamTargetLeaderboard'
         ));
     }
 
@@ -4814,31 +4943,34 @@ class AppController extends Controller
             return response()->stream($callback, 200, $headers);
         }
 
-        $leads = $query->latest()->paginate(20)->withQueryString();
+        $leads = $query->with(['assignedTo', 'membershipPlan', 'convertedMember'])->latest()->paginate(20)->withQueryString();
         $totalLeadsCount = Lead::where('tenant_id', $tenant->id)->count();
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
         $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $membershipPlans = MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->get();
 
-        return view('app.crm.leads', compact('leads', 'totalLeadsCount', 'staffMembers', 'branches', 'tenant'));
+        return view('app.crm.leads', compact('leads', 'totalLeadsCount', 'staffMembers', 'branches', 'tenant', 'membershipPlans'));
     }
 
     public function createLead(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
-        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->get() : collect();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
         $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
+        $membershipPlans = $tenant ? MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->get() : collect();
 
-        return view('app.crm.create_lead', compact('tenant', 'staffMembers', 'branches'));
+        return view('app.crm.create_lead', compact('tenant', 'staffMembers', 'branches', 'membershipPlans'));
     }
 
     public function editLead(Request $request, $id): View
     {
         $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
         $lead = Lead::when($tenant, fn ($q) => $q->where('tenant_id', $tenant->id))->findOrFail($id);
-        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->get() : collect();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
         $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
+        $membershipPlans = $tenant ? MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->get() : collect();
 
-        return view('app.crm.edit_lead', compact('tenant', 'lead', 'staffMembers', 'branches'));
+        return view('app.crm.edit_lead', compact('tenant', 'lead', 'staffMembers', 'branches', 'membershipPlans'));
     }
 
     public function storeLead(Request $request): RedirectResponse
@@ -4846,12 +4978,17 @@ class AppController extends Controller
         $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? (session('active_tenant_id') ? Tenant::find(session('active_tenant_id')) : null) ?? Tenant::first();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:50',
+            'first_name' => 'nullable|string|max:120',
+            'last_name' => 'nullable|string|max:120',
+            'name' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:50',
+            'alternate_phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|string|max:20',
             'instagram_handle' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'member_count' => 'nullable|integer|min:1',
+            'membership_plan_id' => 'nullable|exists:membership_plans,id',
             'source' => 'nullable|string|max:50',
             'stage' => 'nullable|string|max:50',
             'assigned_to_user_id' => 'nullable|exists:users,id',
@@ -4860,8 +4997,16 @@ class AppController extends Controller
             'remarks' => 'nullable|string|max:255',
             'next_action' => 'nullable|string|max:255',
             'estimated_value' => 'nullable|numeric|min:0',
+            'trial_date' => 'nullable|date',
+            'trial_time' => 'nullable|string|max:50',
+            'trial_status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
         ]);
+
+        $fullName = trim(($validated['first_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+        if (empty($fullName)) {
+            $fullName = $validated['name'] ?? ($validated['first_name'] ?? 'New Lead');
+        }
 
         $stage = $validated['stage'] ?? 'NEW_LEAD';
         $source = $validated['source'] ?? 'walk_in';
@@ -4877,23 +5022,41 @@ class AppController extends Controller
             default => 'NEW',
         };
 
+        $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
+        $branchId = $validated['branch_id'] ?? null;
+        if (empty($branchId) && $branches->count() === 1) {
+            $branchId = $branches->first()->id;
+        }
+
+        $assignedToUserId = $validated['assigned_to_user_id'] ?? null;
+        $currentUser = Auth::user();
+        if (empty($assignedToUserId) && $currentUser && !$currentUser->isGymOwner() && !$currentUser->isSuperAdmin() && $currentUser->isStaff()) {
+            $assignedToUserId = $currentUser->id;
+        }
+
         $lead = Lead::create([
             'tenant_id' => $tenant?->id,
-            'branch_id' => $validated['branch_id'] ?? null,
-            'name' => $validated['name'],
+            'branch_id' => $branchId,
+            'membership_plan_id' => $validated['membership_plan_id'] ?? null,
+            'name' => $fullName,
             'phone' => $validated['phone'] ?? '',
+            'alternate_phone' => $validated['alternate_phone'] ?? null,
             'email' => $validated['email'] ?? null,
+            'gender' => $validated['gender'] ?? null,
             'instagram_handle' => $validated['instagram_handle'] ?? null,
             'city' => $validated['city'] ?? null,
             'member_count' => $validated['member_count'] ?? 1,
             'source' => $source,
             'status' => $status,
             'stage' => $stage,
-            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'assigned_to_user_id' => $assignedToUserId,
             'follow_up_date' => $validated['follow_up_date'] ?? null,
             'remarks' => $validated['remarks'] ?? null,
             'next_action' => $validated['next_action'] ?? null,
             'estimated_value' => $validated['estimated_value'] ?? 0,
+            'trial_date' => $validated['trial_date'] ?? null,
+            'trial_time' => $validated['trial_time'] ?? null,
+            'trial_status' => $validated['trial_status'] ?? 'upcoming',
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -4908,12 +5071,17 @@ class AppController extends Controller
         $lead = Lead::when($tenant, fn ($q) => $q->where('tenant_id', $tenant->id))->findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:50',
+            'first_name' => 'nullable|string|max:120',
+            'last_name' => 'nullable|string|max:120',
+            'name' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:50',
+            'alternate_phone' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|string|max:20',
             'instagram_handle' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'member_count' => 'nullable|integer|min:1',
+            'membership_plan_id' => 'nullable|exists:membership_plans,id',
             'source' => 'nullable|string|max:50',
             'stage' => 'nullable|string|max:50',
             'assigned_to_user_id' => 'nullable|exists:users,id',
@@ -4922,8 +5090,16 @@ class AppController extends Controller
             'remarks' => 'nullable|string|max:255',
             'next_action' => 'nullable|string|max:255',
             'estimated_value' => 'nullable|numeric|min:0',
+            'trial_date' => 'nullable|date',
+            'trial_time' => 'nullable|string|max:50',
+            'trial_status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
         ]);
+
+        $fullName = trim(($validated['first_name'] ?? '') . ' ' . ($validated['last_name'] ?? ''));
+        if (empty($fullName)) {
+            $fullName = $validated['name'] ?? ($validated['first_name'] ?? $lead->name);
+        }
 
         $stage = $validated['stage'] ?? $lead->stage;
         $source = $validated['source'] ?? $lead->source;
@@ -4939,14 +5115,23 @@ class AppController extends Controller
             default => 'NEW',
         };
 
+        $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
+        $branchId = $validated['branch_id'] ?? null;
+        if (empty($branchId) && $branches->count() === 1) {
+            $branchId = $branches->first()->id;
+        }
+
         $lead->update([
-            'name' => $validated['name'],
+            'name' => $fullName,
             'phone' => $validated['phone'] ?? '',
+            'alternate_phone' => $validated['alternate_phone'] ?? null,
             'email' => $validated['email'] ?? null,
+            'gender' => $validated['gender'] ?? null,
             'instagram_handle' => $validated['instagram_handle'] ?? null,
             'city' => $validated['city'] ?? null,
             'member_count' => $validated['member_count'] ?? 1,
-            'branch_id' => $validated['branch_id'] ?? null,
+            'branch_id' => $branchId,
+            'membership_plan_id' => array_key_exists('membership_plan_id', $validated) ? $validated['membership_plan_id'] : $lead->membership_plan_id,
             'source' => $source,
             'status' => $status,
             'stage' => $stage,
@@ -4955,6 +5140,9 @@ class AppController extends Controller
             'remarks' => $validated['remarks'] ?? null,
             'next_action' => $validated['next_action'] ?? null,
             'estimated_value' => $validated['estimated_value'] ?? 0,
+            'trial_date' => $validated['trial_date'] ?? null,
+            'trial_time' => $validated['trial_time'] ?? null,
+            'trial_status' => $validated['trial_status'] ?? $lead->trial_status ?? 'upcoming',
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -5175,7 +5363,7 @@ class AppController extends Controller
             })
             ->orderBy('name')
             ->get();
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
 
         return view('app.crm.trials', compact(
             'trials',
@@ -5282,15 +5470,42 @@ class AppController extends Controller
             $query->where('source', $request->source);
         }
 
+        if ($request->filled('stage') && $request->stage !== 'all') {
+            $stageFilter = strtoupper($request->stage);
+            if ($stageFilter === 'NEW_LEAD') {
+                $query->where(function ($q) {
+                    $q->whereIn('stage', ['NEW_LEAD', 'NEW', 'new_lead', 'new'])
+                        ->orWhereNull('stage');
+                });
+            } elseif ($stageFilter === 'PAID') {
+                $query->whereIn('stage', ['PAID', 'CONVERTED', 'paid', 'converted']);
+            } else {
+                $query->where('stage', $stageFilter);
+            }
+        }
+
+        $statsBase = Lead::where('tenant_id', $tenant->id)
+            ->whereIn('source', ['website', 'walk_in', 'facebook', 'instagram', 'google', 'whatsapp', 'phone', 'referral', 'other']);
+
+        $enquiryStats = [
+            'total' => (clone $statsBase)->count(),
+            'new' => (clone $statsBase)->where(function ($q) {
+                $q->whereIn('stage', ['NEW_LEAD', 'NEW', 'new_lead', 'new'])->orWhereNull('stage');
+            })->count(),
+            'today' => (clone $statsBase)->whereDate('created_at', now()->toDateString())->count(),
+            'converted' => (clone $statsBase)->whereIn('stage', ['PAID', 'CONVERTED', 'paid', 'converted'])->count(),
+        ];
+
         $enquiries = $query->latest()->paginate(15)->withQueryString();
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
         $branches = Branch::where('tenant_id', $tenant->id)->get();
 
         return view('app.crm.subpages', [
             'section' => 'enquiries',
-            'title' => 'Enquiries & Direct Walk-Ins',
-            'subtitle' => 'Incoming website forms, walk-ins, phone calls, and social media inquiries',
+            'title' => 'Enquiries & Walk-Ins',
+            'subtitle' => 'Track walk-ins, calls, website forms, and social media leads',
             'enquiries' => $enquiries,
+            'enquiryStats' => $enquiryStats,
             'staffMembers' => $staffMembers,
             'branches' => $branches,
             'tenant' => $tenant,
@@ -5329,6 +5544,12 @@ class AppController extends Controller
             default => 'NEW',
         };
 
+        $assignedToUserId = $validated['assigned_to_user_id'] ?? null;
+        $currentUser = Auth::user();
+        if (empty($assignedToUserId) && $currentUser && !$currentUser->isGymOwner() && !$currentUser->isSuperAdmin() && $currentUser->isStaff()) {
+            $assignedToUserId = $currentUser->id;
+        }
+
         $lead = Lead::create([
             'tenant_id' => $tenant->id,
             'branch_id' => $validated['branch_id'] ?? null,
@@ -5338,7 +5559,7 @@ class AppController extends Controller
             'source' => $source,
             'status' => $status,
             'stage' => $stage,
-            'assigned_to_user_id' => $validated['assigned_to_user_id'] ?? null,
+            'assigned_to_user_id' => $assignedToUserId,
             'follow_up_date' => $validated['follow_up_date'] ?? null,
             'remarks' => $validated['remarks'] ?? ($validated['notes'] ?? null),
             'notes' => $validated['notes'] ?? ($validated['remarks'] ?? null),
@@ -5584,32 +5805,74 @@ class AppController extends Controller
             ];
         }
 
-        // 7. Team Performance
-        $staffMembers = User::where('tenant_id', $tenant->id)->get();
+        // 7. Team Performance with Targets
+        $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
+        
+        $staffTargets = \App\Models\StaffSalesTarget::where('tenant_id', $tenant->id)
+            ->where('start_date', '<=', $endDate->toDateString())
+            ->where('end_date', '>=', $startDate->toDateString())
+            ->get();
+
         $teamPerformance = [];
+        $totalTeamTargetRevenue = 0;
+        $totalTeamAchievedRevenue = 0;
+        $totalTeamTargetAdmissions = 0;
+        $totalTeamAchievedAdmissions = 0;
+
         foreach ($staffMembers as $staff) {
             $staffLeads = $allLeads->filter(fn ($l) => $l->assigned_to_user_id == $staff->id);
-            if ($staffLeads->isNotEmpty()) {
-                $sTotal = $staffLeads->count();
-                $sContacted = $staffLeads->filter(fn ($l) => ! in_array(strtoupper($l->effective_stage), ['NEW_LEAD', 'NEW']))->count();
-                $sDemos = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['DEMO_BOOKED', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']))->count();
-                $sConverted = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->count();
-                $sValue = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->sum('estimated_value');
-                $sPct = $sTotal > 0 ? round(($sConverted / $sTotal) * 100, 1) : 0;
+            $sTotal = $staffLeads->count();
+            $sContacted = $staffLeads->filter(fn ($l) => ! in_array(strtoupper($l->effective_stage), ['NEW_LEAD', 'NEW']))->count();
+            $sDemos = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['DEMO_BOOKED', 'TRIAL', 'TRIAL_SCHEDULED', 'PAID', 'CONVERTED']))->count();
+            $sConverted = $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->count();
+            $sValue = (float) $staffLeads->filter(fn ($l) => in_array(strtoupper($l->effective_stage), ['PAID', 'CONVERTED']))->sum('estimated_value');
+            $sPct = $sTotal > 0 ? round(($sConverted / $sTotal) * 100, 1) : 0;
 
-                $teamPerformance[] = [
-                    'id' => $staff->id,
-                    'name' => $staff->name,
-                    'role' => $staff->role ?? 'Staff',
-                    'assigned_leads' => $sTotal,
-                    'contacted' => $sContacted,
-                    'demos' => $sDemos,
-                    'converted' => $sConverted,
-                    'conversion_value' => $sValue,
-                    'conversion_pct' => $sPct,
-                ];
-            }
+            // Target resolution: specific period target or metadata fallback
+            $matchedTarget = $staffTargets->firstWhere('user_id', $staff->id);
+            $targetRev = $matchedTarget ? (float) $matchedTarget->target_revenue : (float) ($staff->metadata['monthly_sales_target'] ?? 0);
+            $targetAdm = $matchedTarget ? (int) $matchedTarget->target_admissions : (int) ($staff->metadata['monthly_admissions_target'] ?? 0);
+
+            $remainingRev = max(0, $targetRev - $sValue);
+            $remainingAdm = max(0, $targetAdm - $sConverted);
+            $targetRevPct = $targetRev > 0 ? min(100, round(($sValue / $targetRev) * 100, 1)) : 0;
+            $targetAdmPct = $targetAdm > 0 ? min(100, round(($sConverted / $targetAdm) * 100, 1)) : 0;
+
+            $totalTeamTargetRevenue += $targetRev;
+            $totalTeamAchievedRevenue += $sValue;
+            $totalTeamTargetAdmissions += $targetAdm;
+            $totalTeamAchievedAdmissions += $sConverted;
+
+            $teamPerformance[] = [
+                'id' => $staff->id,
+                'name' => $staff->name,
+                'role' => $staff->role ?? 'Staff',
+                'assigned_leads' => $sTotal,
+                'contacted' => $sContacted,
+                'demos' => $sDemos,
+                'converted' => $sConverted,
+                'conversion_value' => $sValue,
+                'conversion_pct' => $sPct,
+                'target_revenue' => $targetRev,
+                'target_admissions' => $targetAdm,
+                'remaining_revenue' => $remainingRev,
+                'remaining_admissions' => $remainingAdm,
+                'target_revenue_pct' => $targetRevPct,
+                'target_admissions_pct' => $targetAdmPct,
+                'target_id' => $matchedTarget?->id,
+            ];
         }
+
+        $teamTargetSummary = [
+            'target_revenue' => $totalTeamTargetRevenue,
+            'achieved_revenue' => $totalTeamAchievedRevenue,
+            'remaining_revenue' => max(0, $totalTeamTargetRevenue - $totalTeamAchievedRevenue),
+            'revenue_pct' => $totalTeamTargetRevenue > 0 ? min(100, round(($totalTeamAchievedRevenue / $totalTeamTargetRevenue) * 100, 1)) : 0,
+            'target_admissions' => $totalTeamTargetAdmissions,
+            'achieved_admissions' => $totalTeamAchievedAdmissions,
+            'remaining_admissions' => max(0, $totalTeamTargetAdmissions - $totalTeamAchievedAdmissions),
+            'admissions_pct' => $totalTeamTargetAdmissions > 0 ? min(100, round(($totalTeamAchievedAdmissions / $totalTeamTargetAdmissions) * 100, 1)) : 0,
+        ];
 
         return view('app.crm.reports', compact(
             'tenant',
@@ -5633,8 +5896,64 @@ class AppController extends Controller
             'trendNewLeads',
             'trendConversions',
             'branchReports',
-            'teamPerformance'
+            'teamPerformance',
+            'teamTargetSummary'
         ));
+    }
+
+    public function saveStaffTarget(Request $request): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? Auth::user()?->tenant ?? Tenant::first();
+        if (! $tenant) {
+            return back()->with('error', 'No active gym tenant found.');
+        }
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'period_type' => 'required|in:monthly,weekly,custom',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'target_revenue' => 'required|numeric|min:0',
+            'target_admissions' => 'nullable|integer|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $staffUser = User::where('tenant_id', $tenant->id)->findOrFail($validated['user_id']);
+
+        $startDate = Carbon::parse($validated['start_date'])->toDateString();
+        $endDate = Carbon::parse($validated['end_date'])->toDateString();
+        $periodKey = Carbon::parse($validated['start_date'])->format('Y-m');
+
+        \App\Models\StaffSalesTarget::updateOrCreate(
+            [
+                'tenant_id' => $tenant->id,
+                'user_id' => $staffUser->id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+            [
+                'period_type' => $validated['period_type'],
+                'period_key' => $periodKey,
+                'target_revenue' => $validated['target_revenue'],
+                'target_admissions' => $validated['target_admissions'] ?? 0,
+                'created_by_user_id' => Auth::id(),
+                'notes' => $validated['notes'] ?? null,
+            ]
+        );
+
+        // Also save to staff metadata as default monthly target
+        if ($validated['period_type'] === 'monthly') {
+            $meta = $staffUser->metadata ?? [];
+            $meta['monthly_sales_target'] = (float) $validated['target_revenue'];
+            $meta['monthly_admissions_target'] = (int) ($validated['target_admissions'] ?? 0);
+            $staffUser->metadata = $meta;
+            $staffUser->save();
+        }
+
+        $currency = $tenant->currency_symbol ?? '₹';
+        ActivityLog::log('staff_target_updated', "Set {$validated['period_type']} sales target for {$staffUser->name}: {$currency}".number_format($validated['target_revenue'], 0)." and ".($validated['target_admissions'] ?? 0)." admissions.");
+
+        return back()->with('success', "Sales target for {$staffUser->name} saved successfully!");
     }
 
     public function balanceSheet(Request $request): View|RedirectResponse
@@ -6646,9 +6965,15 @@ class AppController extends Controller
         $device = Device::where('tenant_id', $tenant->id)->findOrFail($id);
 
         $driver = $this->accessControlService->getDriver($device);
-        $driver->checkHealth($device);
+        $online = $driver->checkHealth($device);
+        $device->refresh();
 
-        ActivityLog::log('device_pinged', "Tested connection to biometric device '{$device->name}'", $device);
+        ActivityLog::log('device_pinged', "Tested connection to biometric device '{$device->name}' ({$device->status})", $device);
+
+        if (! $online) {
+            return redirect()->route('app.settings.index', ['tab' => 'devices'])
+                ->with('error', "Device '{$device->name}' ping failed ({$device->status}). Please verify IP, port, username, password, and ISAPI access.");
+        }
 
         return redirect()->route('app.settings.index', ['tab' => 'devices'])->with('success', "Device '{$device->name}' ping check passed (ONLINE).");
     }
@@ -7101,6 +7426,8 @@ class AppController extends Controller
             'employee_category' => 'nullable|string|max:50',
             'joining_date' => 'nullable|date',
             'monthly_salary' => 'nullable|numeric|min:0',
+            'monthly_sales_target' => 'nullable|numeric|min:0',
+            'monthly_admissions_target' => 'nullable|integer|min:0',
             'payout_type' => 'nullable|string|max:50',
             'gender' => 'nullable|string|max:20',
             'dob' => 'nullable|date',
@@ -7138,6 +7465,8 @@ class AppController extends Controller
             'employee_category' => $validated['employee_category'] ?? null,
             'joining_date' => $validated['joining_date'] ?? null,
             'monthly_salary' => $validated['monthly_salary'] ?? null,
+            'monthly_sales_target' => $validated['monthly_sales_target'] ?? 0,
+            'monthly_admissions_target' => $validated['monthly_admissions_target'] ?? 0,
             'payout_type' => $validated['payout_type'] ?? null,
             'gender' => $validated['gender'] ?? null,
             'dob' => $validated['dob'] ?? null,
@@ -7171,6 +7500,25 @@ class AppController extends Controller
         $roleModel = Role::where('tenant_id', $tenant->id)->where('name', $validated['role'])->first();
         if ($roleModel) {
             $user->roles()->sync([$roleModel->id]);
+        }
+
+        // Auto-create monthly sales target if set
+        if (!empty($validated['monthly_sales_target']) || !empty($validated['monthly_admissions_target'])) {
+            \App\Models\StaffSalesTarget::updateOrCreate(
+                [
+                    'tenant_id' => $tenant->id,
+                    'user_id' => $user->id,
+                    'period_key' => now()->format('Y-m'),
+                    'start_date' => now()->startOfMonth()->toDateString(),
+                    'end_date' => now()->endOfMonth()->toDateString(),
+                ],
+                [
+                    'period_type' => 'monthly',
+                    'target_revenue' => $validated['monthly_sales_target'] ?? 0,
+                    'target_admissions' => $validated['monthly_admissions_target'] ?? 0,
+                    'created_by_user_id' => Auth::id(),
+                ]
+            );
         }
 
         // If trainer role, auto-create or link Trainer record
@@ -7247,6 +7595,8 @@ class AppController extends Controller
             'employee_category' => 'nullable|string|max:50',
             'joining_date' => 'nullable|date',
             'monthly_salary' => 'nullable|numeric|min:0',
+            'monthly_sales_target' => 'nullable|numeric|min:0',
+            'monthly_admissions_target' => 'nullable|integer|min:0',
             'payout_type' => 'nullable|string|max:50',
             'gender' => 'nullable|string|max:20',
             'dob' => 'nullable|date',
@@ -7273,6 +7623,8 @@ class AppController extends Controller
             'employee_category' => $validated['employee_category'] ?? null,
             'joining_date' => $validated['joining_date'] ?? null,
             'monthly_salary' => $validated['monthly_salary'] ?? null,
+            'monthly_sales_target' => $validated['monthly_sales_target'] ?? 0,
+            'monthly_admissions_target' => $validated['monthly_admissions_target'] ?? 0,
             'payout_type' => $validated['payout_type'] ?? null,
             'gender' => $validated['gender'] ?? null,
             'dob' => $validated['dob'] ?? null,
@@ -7312,6 +7664,25 @@ class AppController extends Controller
         $roleModel = Role::where('tenant_id', $tenant->id)->where('name', $validated['role'])->first();
         if ($roleModel) {
             $user->roles()->sync([$roleModel->id]);
+        }
+
+        // Auto-create monthly sales target if set
+        if (!empty($validated['monthly_sales_target']) || !empty($validated['monthly_admissions_target'])) {
+            \App\Models\StaffSalesTarget::updateOrCreate(
+                [
+                    'tenant_id' => $tenant->id,
+                    'user_id' => $user->id,
+                    'period_key' => now()->format('Y-m'),
+                    'start_date' => now()->startOfMonth()->toDateString(),
+                    'end_date' => now()->endOfMonth()->toDateString(),
+                ],
+                [
+                    'period_type' => 'monthly',
+                    'target_revenue' => $validated['monthly_sales_target'] ?? 0,
+                    'target_admissions' => $validated['monthly_admissions_target'] ?? 0,
+                    'created_by_user_id' => Auth::id(),
+                ]
+            );
         }
 
         // Sync linked Trainer if user is a trainer

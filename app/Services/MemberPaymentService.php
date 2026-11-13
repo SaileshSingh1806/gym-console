@@ -38,7 +38,7 @@ class MemberPaymentService
             ]);
 
             if ($membership) {
-                $newPaid = (float) $membership->paid_amount + $amount;
+                $newPaid = min((float) $membership->final_amount, (float) $membership->paid_amount + $amount);
                 $membership->update(['paid_amount' => $newPaid]);
             }
 

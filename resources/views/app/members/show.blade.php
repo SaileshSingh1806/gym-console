@@ -478,26 +478,44 @@
 
         // Split Payment State
         isSplitPayment: false,
-        splitCashAmount: '',
-        splitOnlineAmount: '',
-        splitOnlineMethod: 'upi',
-        splitOnlineRef: '',
+        splitMethod1: 'cash',
+        splitAmount1: '',
+        splitRef1: '',
+        splitMethod2: 'upi',
+        splitAmount2: '',
+        splitRef2: '',
 
         toggleSplitPayment() {
             this.isSplitPayment = !this.isSplitPayment;
             if (this.isSplitPayment) {
                 const total = Number(this.paymentAmount || 0);
-                const half = Math.floor(total / 2);
-                this.splitCashAmount = half > 0 ? half : '';
-                this.splitOnlineAmount = (total - half) > 0 ? (total - half) : '';
-                this.updateSplitTotal();
+                const half = Math.round((total / 2) * 100) / 100;
+                this.splitAmount1 = half > 0 ? half : '';
+                this.splitAmount2 = (total - half) > 0 ? (total - half) : '';
+                this.splitMethod1 = this.splitMethod1 || 'cash';
+                this.splitMethod2 = this.splitMethod2 || 'upi';
+                this.updateSplitFromFirst();
             }
         },
 
-        updateSplitTotal() {
-            const cash = Number(this.splitCashAmount || 0);
-            const online = Number(this.splitOnlineAmount || 0);
-            this.paymentAmount = cash + online;
+        updateSplitFromFirst() {
+            const total = Number(this.paymentAmount || 0);
+            const a1 = Number(this.splitAmount1 || 0);
+            if (total > 0 && a1 >= 0) {
+                const rem = Math.max(0, Math.round((total - a1) * 100) / 100);
+                this.splitAmount2 = rem > 0 ? rem : 0;
+            }
+            this.syncSplitTotal();
+        },
+
+        updateSplitFromSecond() {
+            this.syncSplitTotal();
+        },
+
+        syncSplitTotal() {
+            const a1 = Number(this.splitAmount1 || 0);
+            const a2 = Number(this.splitAmount2 || 0);
+            this.paymentAmount = Math.round((a1 + a2) * 100) / 100;
         },
 
         portalLinkLoading: false,
@@ -567,6 +585,11 @@
                         <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold shrink-0">
                             {{ $member->member_code }}
                         </span>
+                        @if($member->lead_id)
+                            <a href="{{ route('app.leads.edit', $member->lead_id) }}" title="Converted from CRM Lead #{{ $member->lead_id }}" class="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 text-xs font-bold shrink-0 hover:bg-indigo-100 dark:hover:bg-indigo-500/25 transition-all">
+                                CRM Lead #{{ $member->lead_id }} ↗
+                            </a>
+                        @endif
                     </div>
 
                     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5">
@@ -1269,7 +1292,7 @@
                                                                 <button type="button" 
                                                                         @click="showAddPaymentModal = true" 
                                                                         class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 shadow-sm cursor-pointer">
-                                                                    <span>+ Collect Remaining Fee</span>
+                                                                    <span>Collect Remaining Fee</span>
                                                                     <span>({{ $currency }}{{ number_format($subDue, 2) }})</span>
                                                                 </button>
                                                             @else
@@ -2266,7 +2289,7 @@
                                 @click="openEnrollClass('')" 
                                 class="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                            <span>+ Enroll in Class</span>
+                            <span>Enroll in Class</span>
                         </button>
                     </div>
 
@@ -2825,9 +2848,9 @@
                         <span class="font-bold text-slate-700 dark:text-slate-300">Payment Breakdown</span>
                         <button type="button" 
                                 @click="toggleSplitPayment()" 
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer border"
-                                :class="isSplitPayment ? 'bg-amber-500 text-slate-950 border-amber-400 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700'">
-                            <span x-text="isSplitPayment ? '✓ Split Mode Active' : '⚡ Split (Cash + Online)'"></span>
+                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer border"
+                                :class="isSplitPayment ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700'">
+                            <span x-text="isSplitPayment ? '✓ Split Payment Active' : 'Split Payment (2 Methods)'"></span>
                         </button>
                     </div>
 
@@ -2842,17 +2865,18 @@
                                    x-model="paymentAmount" 
                                    step="0.01" 
                                    min="0.01" 
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-black text-sm focus:border-emerald-500 focus:outline-none">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-sm focus:border-indigo-500 focus:outline-none">
                         </div>
 
                         <div>
                             <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
-                            <select name="payment_method" x-model="paymentMethod" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none">
+                            <select name="payment_method" x-model="paymentMethod" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
                                 <option value="cash">Cash</option>
                                 <option value="upi">UPI / QR Code</option>
                                 <option value="card">Card (POS)</option>
                                 <option value="netbanking">Net Banking</option>
                                 <option value="cheque">Cheque</option>
+                                <option value="bank_transfer">Bank Transfer</option>
                             </select>
                         </div>
 
@@ -2861,60 +2885,88 @@
                             <input type="text" 
                                    name="transaction_reference" 
                                    placeholder="e.g. UPI Ref / Txn ID" 
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-emerald-500 focus:outline-none">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-indigo-500 focus:outline-none">
                         </div>
                     </div>
 
                     <!-- Split Mode -->
-                    <div x-show="isSplitPayment" class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-300 dark:border-amber-500/40 space-y-3">
+                    <div x-show="isSplitPayment" class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-3">
                         <div class="flex items-center justify-between text-xs">
-                            <span class="font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider">⚡ Split Payment</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-300">
-                                Total: <strong class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">{{ $currency }}<span x-text="Number(paymentAmount || 0).toFixed(2)"></span></strong>
+                            <span class="font-semibold text-slate-700 dark:text-slate-300">Split into 2 Payment Modes</span>
+                            <span class="text-slate-600 dark:text-slate-400 text-xs">
+                                Total Paid: <strong class="text-slate-900 dark:text-white tabular-nums font-semibold">{{ $currency }}<span x-text="Number(paymentAmount || 0).toFixed(2)"></span></strong>
                             </span>
                         </div>
 
                         <div class="space-y-3">
-                            <!-- 1. Cash Component -->
-                            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
-                                <span class="font-black text-slate-900 dark:text-white text-xs flex items-center gap-1">💵 1. Cash Component</span>
-                                <input type="number" 
-                                       name="split_cash_amount" 
-                                       x-model="splitCashAmount" 
-                                       @input="updateSplitTotal()" 
-                                       step="any" 
-                                       min="0" 
-                                       placeholder="Cash Amount (e.g. 4000)" 
-                                       class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
-                            </div>
-
-                            <!-- 2. Online Component -->
-                            <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs">
-                                <span class="font-black text-slate-900 dark:text-white text-xs flex items-center gap-1">📲 2. Online / Digital</span>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" 
-                                           name="split_online_amount" 
-                                           x-model="splitOnlineAmount" 
-                                           @input="updateSplitTotal()" 
-                                           step="any" 
-                                           min="0" 
-                                           placeholder="Online Amount (e.g. 4000)" 
-                                           class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs focus:border-amber-500 focus:outline-none">
-
-                                    <select name="split_online_method" 
-                                            x-model="splitOnlineMethod" 
-                                            class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none">
-                                        <option value="upi">UPI / QR Code</option>
-                                        <option value="card">Card (POS)</option>
+                            <!-- Part 1 -->
+                            <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Payment 1</span>
+                                    <span class="text-[11px] text-slate-400">First part</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <select name="split_method_1" 
+                                            x-model="splitMethod1" 
+                                            class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-indigo-500 focus:outline-none">
+                                        <option value="cash">Cash</option>
+                                        <option value="upi">UPI / QR</option>
+                                        <option value="card">Card / POS</option>
                                         <option value="netbanking">Net Banking</option>
                                         <option value="cheque">Cheque</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
                                     </select>
+                                    <input type="number" 
+                                           name="split_amount_1" 
+                                           x-model="splitAmount1" 
+                                           @input="updateSplitFromFirst()" 
+                                           step="any" 
+                                           min="0" 
+                                           placeholder="Amount" 
+                                           class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white tabular-nums text-xs font-medium focus:border-indigo-500 focus:outline-none">
                                 </div>
                                 <input type="text" 
-                                       name="split_online_reference" 
-                                       x-model="splitOnlineRef" 
-                                       placeholder="UPI Ref / Txn ID (Optional)" 
-                                       class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-amber-500 focus:outline-none">
+                                       name="split_ref_1" 
+                                       x-model="splitRef1" 
+                                       placeholder="Ref / Txn ID (Optional)" 
+                                       class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
+                                <input type="hidden" name="split_cash_amount" :value="splitMethod1 === 'cash' ? splitAmount1 : (splitMethod2 === 'cash' ? splitAmount2 : 0)">
+                            </div>
+
+                            <!-- Part 2 (Auto-calculated, Editable) -->
+                            <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-medium text-slate-700 dark:text-slate-300">Payment 2</span>
+                                    <span class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">Auto-remaining (Editable)</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <select name="split_method_2" 
+                                            x-model="splitMethod2" 
+                                            class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-indigo-500 focus:outline-none">
+                                        <option value="upi">UPI / QR</option>
+                                        <option value="card">Card / POS</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="netbanking">Net Banking</option>
+                                        <option value="cheque">Cheque</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                    </select>
+                                    <input type="number" 
+                                           name="split_amount_2" 
+                                           x-model="splitAmount2" 
+                                           @input="updateSplitFromSecond()" 
+                                           step="any" 
+                                           min="0" 
+                                           placeholder="Remaining" 
+                                           class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white tabular-nums text-xs font-medium focus:border-indigo-500 focus:outline-none">
+                                </div>
+                                <input type="text" 
+                                       name="split_ref_2" 
+                                       x-model="splitRef2" 
+                                       placeholder="Ref / Txn ID (Optional)" 
+                                       class="w-full px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-indigo-500 focus:outline-none">
+                                <input type="hidden" name="split_online_amount" :value="splitMethod2 !== 'cash' ? splitAmount2 : (splitMethod1 !== 'cash' ? splitAmount1 : 0)">
+                                <input type="hidden" name="split_online_method" :value="splitMethod2 !== 'cash' ? splitMethod2 : (splitMethod1 !== 'cash' ? splitMethod1 : 'upi')">
+                                <input type="hidden" name="split_online_reference" :value="splitRef2 || splitRef1 || ''">
                             </div>
                         </div>
                     </div>

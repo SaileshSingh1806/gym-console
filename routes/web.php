@@ -231,6 +231,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/enquiries', [AppController::class, 'storeEnquiry'])->name('app.enquiries.store')->middleware('permission:crm.leads.create');
         Route::get('/crm/conversions', [AppController::class, 'crmConversions'])->name('app.crm.conversions')->middleware('permission:crm.reports,crm.view');
         Route::get('/crm/reports', [AppController::class, 'crmReports'])->name('app.crm.reports')->middleware('permission:crm.reports,crm.view');
+        Route::post('/crm/targets', [AppController::class, 'saveStaffTarget'])->name('app.crm.targets.save')->middleware('permission:crm.reports,crm.view');
     });
 
     // WhatsApp Marketing, Bulk Messaging & Cloud API Automation

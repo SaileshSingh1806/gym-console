@@ -2295,7 +2295,7 @@
                             <button type="button" 
                                     @click="openMeasurementModal(selectedMember)" 
                                     class="px-2.5 py-1 rounded-lg bg-[#C5A880]/15 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] border border-amber-500/20 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
-                                <span>+ Log Stats</span>
+                                <span>Log Stats</span>
                             </button>
                         </div>
                     </div>
@@ -3092,7 +3092,7 @@
                             <button type="button" 
                                     @click="addCustomMetric()" 
                                     class="px-2 py-0.5 rounded-lg bg-[#C5A880]/15 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer">
-                                <span>+ Add Custom Metric</span>
+                                <span>Add Custom Metric</span>
                             </button>
                         </div>
 

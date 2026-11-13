@@ -262,13 +262,18 @@
                                     </form>
                                 </td>
 
-                                <!-- Conversion Amount -->
+                                 <!-- Conversion Amount / Plan -->
                                 <td class="py-3 px-3.5 font-mono">
+                                    @if($lead->membershipPlan)
+                                        <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                                            {{ $lead->membershipPlan->name }}
+                                        </div>
+                                    @endif
                                     @if($lead->estimated_value > 0)
-                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 inline-block mt-0.5">
                                             {{ $currency }}{{ number_format((float) $lead->estimated_value) }}
                                         </span>
-                                    @else
+                                    @elseif(!$lead->membershipPlan)
                                         <span class="text-slate-400 dark:text-slate-600">--</span>
                                     @endif
                                 </td>
@@ -301,9 +306,26 @@
                                     {{ $lead->created_at ? $lead->created_at->format('d M y') : '--' }}
                                 </td>
 
-                                <!-- Actions -->
+                                 <!-- Actions -->
                                 <td class="py-3 px-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
+                                    <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                        <!-- Convert / Member Link -->
+                                        @if($lead->converted_member_id)
+                                            <a href="{{ route('app.members.show', $lead->converted_member_id) }}" 
+                                               title="View Joined Member Profile" 
+                                               class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 text-[10.5px] font-bold flex items-center gap-1 transition-all">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                <span>Member ↗</span>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('app.members.create', ['lead_id' => $lead->id]) }}" 
+                                               title="Convert Lead into Registered Member" 
+                                               class="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 dark:bg-indigo-500/15 dark:hover:bg-indigo-600 dark:text-indigo-400 dark:hover:text-white dark:border-indigo-500/30 text-[10.5px] font-bold flex items-center gap-1 transition-all">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                                <span>Join Member</span>
+                                            </a>
+                                        @endif
+
                                         <!-- WhatsApp -->
                                         @if($lead->phone)
                                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $lead->phone) }}?text=Hello%20{{ urlencode($lead->name) }},%20greeting%20from%20{{ urlencode($tenant->name ?? 'GymDeskHub') }}" target="_blank" title="Send WhatsApp Message" class="p-1.5 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200 dark:bg-slate-950 dark:hover:bg-emerald-500/20 dark:text-slate-400 dark:hover:text-emerald-400 dark:border-slate-800 transition-all">
@@ -354,22 +376,31 @@
             <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4" @click.away="showAddLeadModal = false">
                 <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
                     <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                        <span>+ Add New Lead</span>
+                        <span>Add New Lead</span>
                     </h3>
                     <button type="button" @click="showAddLeadModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
                 </div>
 
                 <form action="{{ route('app.leads.store') }}" method="POST" class="space-y-3.5">
                     @csrf
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
-                        <input type="text" name="name" required placeholder="e.g. Rahul Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">First Name *</label>
+                            <input type="text" name="first_name" required placeholder="e.g. Rahul" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Last Name *</label>
+                            <input type="text" name="last_name" required placeholder="e.g. Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
-                            <input type="text" name="phone" required placeholder="9876543210" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <div class="relative flex items-center">
+                                <span class="absolute left-3 text-xs font-bold text-slate-400 dark:text-slate-500">+91</span>
+                                <input type="tel" name="phone" required placeholder="9876543210" class="w-full pl-12 pr-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
@@ -412,10 +443,16 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned Staff</label>
+                            @php
+                                $cUser = auth()->user();
+                                $defQuickStaffId = ($cUser && !$cUser->isGymOwner() && !$cUser->isSuperAdmin() && $cUser->isStaff()) ? $cUser->id : null;
+                            @endphp
                             <select name="assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                 <option value="">-- Unassigned --</option>
                                 @foreach($staffMembers as $staff)
-                                    <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                                    <option value="{{ $staff->id }}" {{ $defQuickStaffId == $staff->id ? 'selected' : '' }}>
+                                        {{ $staff->name }} {{ ($cUser && $cUser->id === $staff->id) ? '(You)' : '' }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
