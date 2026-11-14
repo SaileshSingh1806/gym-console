@@ -4093,11 +4093,12 @@
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0 w-16">Trainer</span>
+                                        <span class="text-slate-500 dark:text-slate-400 font-semibold text-xs shrink-0 w-16">Trainer <span class="text-rose-500 font-bold">*</span></span>
                                         <select name="trainer_id" 
                                                 x-model="ptTrainerId" 
+                                                required
                                                 class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none shadow-sm">
-                                            <option value="">Select Trainer</option>
+                                            <option value="">Select Coach / Trainer (Mandatory) *</option>
                                             @foreach($trainers as $t)
                                                 <option value="{{ $t->id }}">{{ $t->full_name }} ({{ $t->specialization ?? 'Trainer' }})</option>
                                             @endforeach

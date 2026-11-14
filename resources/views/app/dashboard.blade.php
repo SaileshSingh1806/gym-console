@@ -484,7 +484,7 @@
         <!-- PERSONAL TRAINING (PT) OVERVIEW -->
         @php
             $canSeePtFinancials = auth()->user()->isGymOwner() 
-                || auth()->user()->hasPermission('dashboard.pt_financials');
+                || auth()->user()->isSuperAdmin();
         @endphp
         @if($canSeePtFinancials)
             @php

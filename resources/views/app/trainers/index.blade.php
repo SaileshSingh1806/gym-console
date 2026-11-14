@@ -324,9 +324,11 @@
                                             ★ Featured
                                         </span>
                                     @endif
+                                    @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" title="Trainer's Personal Training Commission">
                                         {{ number_format($trainer->commission_percent ?? 40, 0) }}% PT Comm
                                     </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -453,6 +455,7 @@
                                 <option value="Hourly">Hourly</option>
                             </select>
                         </div>
+                        @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                         <div>
                             <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
                             <div class="relative">
@@ -460,6 +463,7 @@
                                 <span class="absolute right-2.5 top-2.5 text-xs font-bold text-slate-400">%</span>
                             </div>
                         </div>
+                        @endif
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
                             <select name="salary_pay_day" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
@@ -595,6 +599,7 @@
                                     <option value="Hourly">Hourly</option>
                                 </select>
                             </div>
+                            @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                             <div>
                                 <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
                                 <div class="relative">
@@ -602,6 +607,7 @@
                                     <span class="absolute right-2.5 top-2.5 text-xs font-bold text-slate-400">%</span>
                                 </div>
                             </div>
+                            @endif
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
                                 <select name="salary_pay_day" x-model="trainerForm.salary_pay_day" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">

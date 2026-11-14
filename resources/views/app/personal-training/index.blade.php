@@ -83,7 +83,13 @@
         trainerMemberSearch: '',
         membersList: {{ Js::from($members) }},
         plansData: {{ Js::from($plans) }},
-        trainersData: {{ Js::from($trainers) }},
+        trainersData: {{ Js::from($trainers->map(function($t) {
+            $arr = $t->toArray();
+            if (!auth()->user()->isGymOwner() && !auth()->user()->isSuperAdmin()) {
+                unset($arr['commission_percent'], $arr['salary'], $arr['hourly_rate']);
+            }
+            return $arr;
+        })) }},
         activePackagesData: {{ Js::from($activeMemberPackages) }},
 
         get assignedCount() {
@@ -782,17 +788,19 @@
                                                 <span class="text-amber-600 dark:text-amber-400 font-semibold">Due: {{ $currency }}{{ number_format($pkg->final_amount - $pkg->paid_amount, 2) }}</span>
                                             @endif
 
-                                            @php
-                                                $effComm = (float) (
-                                                    $pkg->trainer_commission_percent
-                                                    ?? $pkg->trainer?->commission_percent
-                                                    ?? $pkg->ptPlan?->trainer_commission_percent
-                                                    ?? 40.0
-                                                );
-                                            @endphp
-                                            <span class="px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[9px] border border-amber-500/20" title="Trainer's Commission Split">
-                                                {{ number_format($effComm, 0) }}% Comm
-                                            </span>
+                                            @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
+                                                @php
+                                                    $effComm = (float) (
+                                                        $pkg->trainer_commission_percent
+                                                        ?? $pkg->trainer?->commission_percent
+                                                        ?? $pkg->ptPlan?->trainer_commission_percent
+                                                        ?? 40.0
+                                                    );
+                                                @endphp
+                                                <span class="px-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[9px] border border-amber-500/20" title="Trainer's Commission Split">
+                                                    {{ number_format($effComm, 0) }}% Comm
+                                                </span>
+                                            @endif
                                         </div>
                                     </td>
 
@@ -1379,7 +1387,9 @@
                                 <th class="py-2.5 px-3">Sessions</th>
                                 <th class="py-2.5 px-3">Validity</th>
                                 <th class="py-2.5 px-3">Price</th>
-                                <th class="py-2.5 px-3">Commission</th>
+                                @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
+                                    <th class="py-2.5 px-3">Commission</th>
+                                @endif
                                 <th class="py-2.5 px-3">GST</th>
                                 <th class="py-2.5 px-3">Sold</th>
                                 <th class="py-2.5 px-3">Status</th>
@@ -1432,6 +1442,7 @@
                                         @endif
                                     </td>
 
+                                    @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                                     <!-- Commission -->
                                     <td class="py-2.5 px-3">
                                         @if($plan->trainer_commission_percent !== null && (float)$plan->trainer_commission_percent > 0)
@@ -1440,6 +1451,7 @@
                                             <span class="text-slate-400 dark:text-slate-500">-</span>
                                         @endif
                                     </td>
+                                    @endif
 
                                     <!-- GST -->
                                     <td class="py-2.5 px-3 text-slate-700 dark:text-slate-300">
@@ -1683,8 +1695,8 @@
                         <textarea name="description" x-model="planForm.description" rows="2" placeholder="What's included, training style, etc." class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-amber-500 focus:outline-none"></textarea>
                     </div>
 
-                    <!-- Row of 4: Total Sessions, Validity, Price, Commission -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <!-- Row of 3 or 4: Total Sessions, Validity, Price, Commission -->
+                    <div class="grid grid-cols-2 {{ (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) ? 'sm:grid-cols-4' : 'sm:grid-cols-3' }} gap-2.5">
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Total sessions *</label>
                             <input type="number" name="total_sessions" x-model="planForm.total_sessions" required min="1" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
@@ -1697,10 +1709,12 @@
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Default price ({{ $currency }}) *</label>
                             <input type="number" step="0.01" name="default_price" x-model="planForm.default_price" required min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
                         </div>
+                        @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Trainer comm. (%)</label>
                             <input type="number" step="0.01" name="trainer_commission_percent" x-model="planForm.trainer_commission_percent" placeholder="Optional" min="0" max="100" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-amber-500 focus:outline-none">
                         </div>
+                        @endif
                     </div>
 
                     <!-- GST / HSN-SAC Section (Fully Optional) -->
@@ -1805,11 +1819,13 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Assigned Trainer / Coach</label>
-                            <select name="trainer_id" x-model="assignForm.trainer_id" @change="onTrainerSelect()" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
-                                <option value="">-- Select Coach --</option>
+                            <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                                Assigned Trainer / Coach <span class="text-rose-500 font-bold">*</span>
+                            </label>
+                            <select name="trainer_id" x-model="assignForm.trainer_id" @change="onTrainerSelect()" required class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                <option value="">-- Select Coach (Mandatory) * --</option>
                                 @foreach($trainers as $tr)
-                                    <option value="{{ $tr->id }}">{{ $tr->full_name }} ({{ $tr->specialization ?? 'Coach' }} • {{ number_format($tr->commission_percent ?? 40, 0) }}%)</option>
+                                    <option value="{{ $tr->id }}">{{ $tr->full_name }} ({{ $tr->specialization ?? 'Coach' }}{{ (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) ? ' • ' . number_format($tr->commission_percent ?? 40, 0) . '%' : '' }})</option>
                                 @endforeach
                             </select>
                         </div>
@@ -1840,7 +1856,7 @@
                     <!-- Pricing & Payment -->
                     <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2.5">
                         <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Pricing & Collection</div>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <div class="grid grid-cols-2 {{ (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) ? 'sm:grid-cols-4' : 'sm:grid-cols-3' }} gap-2.5">
                             <div>
                                 <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Price ({{ $currency }}) *</label>
                                 <input type="number" step="0.01" name="price" x-model="assignForm.price" required min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
@@ -1853,6 +1869,7 @@
                                 <label class="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Paid Now ({{ $currency }})</label>
                                 <input type="number" step="0.01" name="paid_amount" x-model="assignForm.paid_amount" min="0" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                             </div>
+                            @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                             <div>
                                 <label class="block text-[10px] font-semibold text-amber-600 dark:text-amber-400 mb-1 flex items-center justify-between">
                                     <span>PT Comm (%)</span>
@@ -1863,6 +1880,7 @@
                                     <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <div class="grid grid-cols-2 gap-2.5 pt-0.5">
@@ -2043,6 +2061,7 @@
                                 <option value="Hourly">Hourly</option>
                             </select>
                         </div>
+                        @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                         <div>
                             <label class="block text-[11px] font-semibold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
                             <div class="relative">
@@ -2050,6 +2069,7 @@
                                 <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
                             </div>
                         </div>
+                        @endif
                         <div>
                             <label class="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
                             <select name="salary_pay_day" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none">
@@ -2197,6 +2217,7 @@
                                     <option value="Hourly">Hourly</option>
                                 </select>
                             </div>
+                            @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
                             <div>
                                 <label class="block text-[11px] font-bold text-amber-600 dark:text-amber-400 mb-1">PT Comm (%)</label>
                                 <div class="relative">
@@ -2204,6 +2225,7 @@
                                     <span class="absolute right-2 top-1.5 text-xs font-bold text-slate-400">%</span>
                                 </div>
                             </div>
+                            @endif
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Salary Pay Day</label>
                                 <select name="salary_pay_day" x-model="trainerForm.salary_pay_day" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">

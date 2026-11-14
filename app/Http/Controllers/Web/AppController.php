@@ -1543,7 +1543,7 @@ class AppController extends Controller
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
         $validated = $request->validate([
-            'trainer_id' => 'nullable|exists:trainers,id',
+            'trainer_id' => 'required|exists:trainers,id',
             'pt_package_name' => 'required|string|max:150',
             'sessions' => 'nullable|integer|min:1',
             'validity_days' => 'nullable|integer|min:1',
@@ -1555,10 +1555,13 @@ class AppController extends Controller
             'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
+        ], [
+            'trainer_id.required' => 'Assigned Trainer / Coach is mandatory for adding a PT Package.',
+            'trainer_id.exists' => 'The selected Trainer / Coach does not exist.',
         ]);
 
         try {
-            $trainer = ! empty($validated['trainer_id']) ? Trainer::find($validated['trainer_id']) : null;
+            $trainer = Trainer::findOrFail($validated['trainer_id']);
             $startDate = Carbon::parse($validated['start_date']);
             $validity = (int) ($validated['validity_days'] ?? 30);
             $endDate = $startDate->copy()->addDays($validity);
@@ -2998,7 +3001,7 @@ class AppController extends Controller
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
             'pt_plan_id' => 'nullable|exists:pt_plans,id',
-            'trainer_id' => 'nullable|exists:trainers,id',
+            'trainer_id' => 'required|exists:trainers,id',
             'package_name' => 'required|string|max:150',
             'total_sessions' => 'required|integer|min:1',
             'validity_days' => 'required|integer|min:1',
@@ -3010,6 +3013,9 @@ class AppController extends Controller
             'payment_method' => 'nullable|string|in:cash,upi,card,netbanking,cheque',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
+        ], [
+            'trainer_id.required' => 'Assigned Trainer / Coach is mandatory for creating a PT Package.',
+            'trainer_id.exists' => 'The selected Trainer / Coach does not exist.',
         ]);
 
         $member = Member::where('tenant_id', $tenant->id)->findOrFail($validated['member_id']);
@@ -3022,11 +3028,13 @@ class AppController extends Controller
         $finalAmount = max(0, $price - $discount);
         $paidAmount = (float) ($validated['paid_amount'] ?? 0);
 
-        $trainer = ! empty($validated['trainer_id']) ? Trainer::find($validated['trainer_id']) : null;
+        $trainer = Trainer::where('tenant_id', $tenant->id)->findOrFail($validated['trainer_id']);
         $ptPlan = ! empty($validated['pt_plan_id']) ? PtPlan::find($validated['pt_plan_id']) : null;
-        $commPercent = $request->filled('trainer_commission_percent')
+        
+        $isGymOwner = auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin();
+        $commPercent = ($isGymOwner && $request->filled('trainer_commission_percent'))
             ? (float) $request->input('trainer_commission_percent')
-            : ($trainer?->commission_percent ?? $ptPlan?->trainer_commission_percent ?? 40.0);
+            : ($trainer->commission_percent ?? $ptPlan?->trainer_commission_percent ?? 40.0);
 
         $package = MemberPtPackage::create([
             'tenant_id' => $tenant->id,
@@ -3694,7 +3702,10 @@ class AppController extends Controller
         $validated['status'] = $validated['status'] ?? 'ACTIVE';
         $validated['salary'] = $validated['salary'] ?? 0.00;
         $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
-        $validated['commission_percent'] = $request->filled('commission_percent') ? (float) $request->input('commission_percent') : 40.0;
+        $isOwnerOrAdmin = auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin();
+        $validated['commission_percent'] = ($isOwnerOrAdmin && $request->filled('commission_percent')) 
+            ? (float) $request->input('commission_percent') 
+            : 40.0;
         $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
         $validated['is_featured'] = $request->has('is_featured');
 
@@ -3799,8 +3810,11 @@ class AppController extends Controller
         $validated['status'] = $validated['status'] ?? 'ACTIVE';
         $validated['salary'] = $validated['salary'] ?? 0.00;
         $validated['salary_type'] = $validated['salary_type'] ?? 'Fixed Monthly';
-        if ($request->has('commission_percent')) {
+        $isOwnerOrAdmin = auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin();
+        if ($isOwnerOrAdmin && $request->has('commission_percent')) {
             $validated['commission_percent'] = $request->filled('commission_percent') ? (float) $request->input('commission_percent') : null;
+        } else {
+            unset($validated['commission_percent']);
         }
         $validated['salary_pay_day'] = $validated['salary_pay_day'] ?? '1st of every month';
         $validated['is_featured'] = $request->has('is_featured');
