@@ -418,88 +418,200 @@ class ReportService
             $posBaseQuery->whereHas('item', fn ($q) => $q->where('branch_id', $branchId));
         }
 
-        $productSalesMtd = (float) ((clone $posBaseQuery)
-            ->where('inventory_logs.created_at', '>=', $monthStartStr . ' 00:00:00')
-            ->selectRaw('SUM(quantity * unit_price) as total')
-            ->value('total') ?? 0.0);
-        $productSales6m = (float) ((clone $posBaseQuery)
-            ->where('inventory_logs.created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
-            ->selectRaw('SUM(quantity * unit_price) as total')
-            ->value('total') ?? 0.0);
-        $productSalesAll = (float) ((clone $posBaseQuery)
-            ->selectRaw('SUM(quantity * unit_price) as total')
-            ->value('total') ?? 0.0);
+        $basePtPackages = MemberPtPackage::where('tenant_id', $tenant->id)
+            ->whereNotIn('status', ['CANCELLED']);
+        if ($branchId) {
+            $basePtPackages->where('branch_id', $branchId);
+        }
 
-        // New Clients & Renewals (MTD + 6M)
-        $newClientsCount = (clone $membersQuery)->where('created_at', '>=', $monthStartStr . ' 00:00:00')->count();
-        $newClients6m = (clone $membersQuery)->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')->count();
-
-        $renewalsCount = (clone $membershipsQuery)
-            ->where('created_at', '>=', $monthStartStr . ' 00:00:00')
-            ->whereHas('member', function ($q) use ($monthStartStr) {
-                $q->where('created_at', '<', $monthStartStr . ' 00:00:00');
-            })
-            ->count();
-        $renewals6m = (clone $membershipsQuery)
-            ->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
-            ->whereHas('member', function ($q) use ($sixMonthsStartStr) {
-                $q->where('created_at', '<', $sixMonthsStartStr . ' 00:00:00');
-            })
+        $ptDueRemaining = (float) (clone $basePtPackages)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)')
+            ->sum(DB::raw('COALESCE(final_amount, price) - COALESCE(paid_amount, 0)'));
+        $ptDueCount = (clone $basePtPackages)
+            ->where('status', 'ACTIVE')
+            ->whereRaw('COALESCE(final_amount, price) > COALESCE(paid_amount, 0)')
             ->count();
 
-        $billed6m = (float) (clone $membershipsQuery)
-            ->where(function ($q) use ($sixMonthsStartStr) {
-                $q->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
-                    ->orWhere('start_date', '>=', $sixMonthsStartStr);
-            })
-            ->sum(DB::raw('COALESCE(final_amount, price)'));
-        $billed6mCount = (clone $membershipsQuery)
-            ->where(function ($q) use ($sixMonthsStartStr) {
-                $q->where('created_at', '>=', $sixMonthsStartStr . ' 00:00:00')
-                    ->orWhere('start_date', '>=', $sixMonthsStartStr);
-            })
-            ->count();
-        $collected6m = (float) (clone $paymentsQuery)
-            ->where('payment_date', '>=', $sixMonthsStartStr)
-            ->sum('amount');
-        $collected6mCount = (clone $paymentsQuery)
-            ->where('payment_date', '>=', $sixMonthsStartStr)
-            ->count();
-
-        $mtdBilledCount = (clone $membershipsQuery)
-            ->where(function ($q) use ($monthStartStr) {
-                $q->where('created_at', '>=', $monthStartStr . ' 00:00:00')
-                    ->orWhere('start_date', '>=', $monthStartStr);
-            })
-            ->count();
-        $mtdCollectedCount = (clone $paymentsQuery)
-            ->where('payment_date', '>=', $monthStartStr)
-            ->count();
-
-        $financialPeriods = [
-            'mtd' => [
-                'total_billed' => $monthBilledTotal,
-                'billed_count' => $mtdBilledCount > 0 ? $mtdBilledCount : $activeMemberships->count(),
-                'product_sales' => $productSalesMtd,
-                'collected' => $monthRevenue,
-                'collected_count' => $mtdCollectedCount,
-                'pending_dues' => $allDuesRemaining,
-                'pending_count' => $dueMembersCount,
-                'new_clients' => $newClientsCount,
-                'renewals' => $renewalsCount,
-            ],
-            '6m' => [
-                'total_billed' => max($billed6m, $collected6m),
-                'billed_count' => $billed6mCount,
-                'product_sales' => $productSales6m,
-                'collected' => $collected6m,
-                'collected_count' => $collected6mCount,
-                'pending_dues' => $allDuesRemaining,
-                'pending_count' => $dueMembersCount,
-                'new_clients' => $newClients6m,
-                'renewals' => $renewals6m,
-            ],
+        $periodsDef = [
+            'today' => ['start' => now()->toDateString(), 'end' => now()->toDateString(), 'label' => 'Today'],
+            'yesterday' => ['start' => now()->subDay()->toDateString(), 'end' => now()->subDay()->toDateString(), 'label' => 'Yesterday'],
+            'mtd' => ['start' => $monthStartStr, 'end' => null, 'label' => 'Month Till Date (MTD)'],
+            'last_month' => ['start' => now()->subMonth()->startOfMonth()->toDateString(), 'end' => now()->subMonth()->endOfMonth()->toDateString(), 'label' => 'Last Month'],
+            '30d' => ['start' => now()->subDays(30)->toDateString(), 'end' => null, 'label' => 'Last 30 Days'],
+            '90d' => ['start' => now()->subDays(90)->toDateString(), 'end' => null, 'label' => 'Last 90 Days'],
+            '6m' => ['start' => $sixMonthsStartStr, 'end' => null, 'label' => 'Last 6 Months'],
+            'ytd' => ['start' => now()->startOfYear()->toDateString(), 'end' => null, 'label' => 'This Year (YTD)'],
+            'all' => ['start' => null, 'end' => null, 'label' => 'All Time'],
         ];
+
+        $financialPeriods = [];
+
+        foreach ($periodsDef as $pKey => $pCfg) {
+            $pStart = $pCfg['start'];
+            $pEnd = $pCfg['end'];
+
+            // Gym Memberships Billed
+            $gymBilledQ = (clone $membershipsQuery);
+            if ($pStart) {
+                $gymBilledQ->where(function ($q) use ($pStart, $pEnd) {
+                    $q->where(function ($sq) use ($pStart, $pEnd) {
+                        $sq->where('created_at', '>=', $pStart . ' 00:00:00');
+                        if ($pEnd) $sq->where('created_at', '<=', $pEnd . ' 23:59:59');
+                    })->orWhere(function ($sq) use ($pStart, $pEnd) {
+                        $sq->where('start_date', '>=', $pStart);
+                        if ($pEnd) $sq->where('start_date', '<=', $pEnd);
+                    });
+                });
+            }
+            $gymBilled = (float) (clone $gymBilledQ)->sum(DB::raw('COALESCE(final_amount, price)'));
+            $gymBilledCount = (clone $gymBilledQ)->count();
+
+            // PT Packages Billed
+            $ptBilledQ = (clone $basePtPackages);
+            if ($pStart) {
+                $ptBilledQ->where(function ($q) use ($pStart, $pEnd) {
+                    $q->where(function ($sq) use ($pStart, $pEnd) {
+                        $sq->where('created_at', '>=', $pStart . ' 00:00:00');
+                        if ($pEnd) $sq->where('created_at', '<=', $pEnd . ' 23:59:59');
+                    })->orWhere(function ($sq) use ($pStart, $pEnd) {
+                        $sq->where('start_date', '>=', $pStart);
+                        if ($pEnd) $sq->where('start_date', '<=', $pEnd);
+                    });
+                });
+            }
+            $ptBilled = (float) (clone $ptBilledQ)->sum(DB::raw('COALESCE(final_amount, price)'));
+            $ptBilledCount = (clone $ptBilledQ)->count();
+
+            // Payments Collected
+            $payQ = (clone $paymentsQuery);
+            if ($pStart) {
+                $payQ->where('payment_date', '>=', $pStart);
+                if ($pEnd) $payQ->where('payment_date', '<=', $pEnd);
+            }
+            $totalCollected = (float) (clone $payQ)->sum('amount');
+            $totalCollectedCount = (clone $payQ)->count();
+
+            $ptPayQ = (clone $payQ)->where(function ($q) {
+                $q->where('notes', 'like', '%PT Package%')
+                  ->orWhere('notes', 'like', '%Personal Training%');
+            });
+            $ptCollected = (float) (clone $ptPayQ)->sum('amount');
+            $ptCollectedCount = (clone $ptPayQ)->count();
+
+            $gymCollected = max(0, $totalCollected - $ptCollected);
+            $gymCollectedCount = max(0, $totalCollectedCount - $ptCollectedCount);
+
+            // POS / Product Sales
+            $posQ = (clone $posBaseQuery);
+            if ($pStart) {
+                $posQ->where('inventory_logs.created_at', '>=', $pStart . ' 00:00:00');
+                if ($pEnd) $posQ->where('inventory_logs.created_at', '<=', $pEnd . ' 23:59:59');
+            }
+            $periodProductSales = (float) ($posQ->selectRaw('SUM(quantity * unit_price) as total')->value('total') ?? 0.0);
+
+            // New Clients
+            $newClientsQ = (clone $membersQuery);
+            if ($pStart) {
+                $newClientsQ->where('created_at', '>=', $pStart . ' 00:00:00');
+                if ($pEnd) $newClientsQ->where('created_at', '<=', $pEnd . ' 23:59:59');
+            }
+            $periodNewClients = $newClientsQ->count();
+
+            // Renewals
+            $renewalsQ = (clone $membershipsQuery);
+            if ($pStart) {
+                $renewalsQ->where('created_at', '>=', $pStart . ' 00:00:00');
+                if ($pEnd) $renewalsQ->where('created_at', '<=', $pEnd . ' 23:59:59');
+                $renewalsQ->whereHas('member', function ($q) use ($pStart) {
+                    $q->where('created_at', '<', $pStart . ' 00:00:00');
+                });
+            } else {
+                $renewalsQ->whereRaw('0 = 1');
+            }
+            $periodRenewals = $renewalsQ->count();
+
+            // Dues
+            $periodGymPending = $allDuesRemaining;
+            $periodGymPendingCount = $dueMembersCount;
+            $periodPtPending = $ptDueRemaining;
+            $periodPtPendingCount = $ptDueCount;
+
+            $financialPeriods[$pKey] = [
+                'label' => $pCfg['label'],
+                // Backward-compatible top-level keys
+                'total_billed' => $gymBilled + $ptBilled,
+                'billed_count' => $gymBilledCount + $ptBilledCount,
+                'product_sales' => $periodProductSales,
+                'collected' => $totalCollected,
+                'collected_count' => $totalCollectedCount,
+                'pending_dues' => $periodGymPending + $periodPtPending,
+                'pending_count' => $periodGymPendingCount + $periodPtPendingCount,
+                'new_clients' => $periodNewClients,
+                'renewals' => $periodRenewals,
+
+                // Scopes for With PT / Gym Only / PT Only
+                'all' => [
+                    'total_billed' => $gymBilled + $ptBilled,
+                    'billed_count' => $gymBilledCount + $ptBilledCount,
+                    'product_sales' => $periodProductSales,
+                    'collected' => $totalCollected,
+                    'collected_count' => $totalCollectedCount,
+                    'pending_dues' => $periodGymPending + $periodPtPending,
+                    'pending_count' => $periodGymPendingCount + $periodPtPendingCount,
+                    'new_clients' => $periodNewClients,
+                    'renewals' => $periodRenewals,
+                    'gym_billed' => $gymBilled,
+                    'pt_billed' => $ptBilled,
+                    'gym_collected' => $gymCollected,
+                    'pt_collected' => $ptCollected,
+                    'gym_pending' => $periodGymPending,
+                    'pt_pending' => $periodPtPending,
+                ],
+                'gym' => [
+                    'total_billed' => $gymBilled,
+                    'billed_count' => $gymBilledCount,
+                    'product_sales' => $periodProductSales,
+                    'collected' => $gymCollected,
+                    'collected_count' => $gymCollectedCount,
+                    'pending_dues' => $periodGymPending,
+                    'pending_count' => $periodGymPendingCount,
+                    'new_clients' => $periodNewClients,
+                    'renewals' => $periodRenewals,
+                    'gym_billed' => $gymBilled,
+                    'pt_billed' => 0,
+                    'gym_collected' => $gymCollected,
+                    'pt_collected' => 0,
+                    'gym_pending' => $periodGymPending,
+                    'pt_pending' => 0,
+                ],
+                'pt' => [
+                    'total_billed' => $ptBilled,
+                    'billed_count' => $ptBilledCount,
+                    'product_sales' => 0,
+                    'collected' => $ptCollected,
+                    'collected_count' => $ptCollectedCount,
+                    'pending_dues' => $periodPtPending,
+                    'pending_count' => $periodPtPendingCount,
+                    'new_clients' => $ptBilledCount,
+                    'renewals' => 0,
+                    'gym_billed' => 0,
+                    'pt_billed' => $ptBilled,
+                    'gym_collected' => 0,
+                    'pt_collected' => $ptCollected,
+                    'gym_pending' => 0,
+                    'pt_pending' => $periodPtPending,
+                ],
+            ];
+        }
+
+        $productSalesMtd = $financialPeriods['mtd']['product_sales'] ?? 0.0;
+        $productSales6m = $financialPeriods['6m']['product_sales'] ?? 0.0;
+        $productSalesAll = $financialPeriods['all']['product_sales'] ?? 0.0;
+        $newClientsCount = $financialPeriods['mtd']['new_clients'] ?? 0;
+        $newClients6m = $financialPeriods['6m']['new_clients'] ?? 0;
+        $renewalsCount = $financialPeriods['mtd']['renewals'] ?? 0;
+        $renewals6m = $financialPeriods['6m']['renewals'] ?? 0;
 
         $todayAttendanceCount = (clone $attendanceQuery)->count();
         $currentlyInside = (clone $attendanceQuery)->whereNull('check_out')->count();

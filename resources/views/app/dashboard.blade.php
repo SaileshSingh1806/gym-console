@@ -11,11 +11,39 @@
             showBirthdayModal: false,
             showAiSummaryModal: false,
             showTutorialsModal: false,
-            finPeriod: 'mtd',
+            finPeriod: '6m',
+            finScope: 'all',
             trendPeriod: '30d',
             currency: {{ Js::from($currency) }},
             financialPeriods: {{ Js::from($metrics['financial_periods'] ?? []) }},
             trendsByPeriod: {{ Js::from($metrics['trends_by_period'] ?? []) }},
+            getFin(key) {
+                const p = this.financialPeriods[this.finPeriod] || {};
+                const s = p[this.finScope] || p;
+                return s[key] ?? 0;
+            },
+            getFinBreakdown(metric) {
+                const p = this.financialPeriods[this.finPeriod] || {};
+                const a = p['all'] || p;
+                if (this.finScope === 'all') {
+                    const g = a['gym_' + metric] ?? 0;
+                    const pt = a['pt_' + metric] ?? 0;
+                    if (pt > 0) {
+                        return 'Gym ' + this.formatShort(g) + ' • PT ' + this.formatShort(pt);
+                    }
+                } else if (this.finScope === 'gym') {
+                    return 'Gym Memberships Only';
+                } else if (this.finScope === 'pt') {
+                    return 'Personal Training (PT) Only';
+                }
+                return null;
+            },
+            formatShort(v) {
+                const n = Number(v || 0);
+                if (n >= 100000) return '₹' + (n / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
+                if (n >= 1000) return '₹' + (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+                return '₹' + n;
+            },
             formatMoney(val) {
                 const n = Number(val || 0);
                 return this.currency + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -322,19 +350,59 @@
         @if(auth()->user()->hasPermission('dashboard.financials') || auth()->user()->isGymOwner())
         <div class="space-y-4 sm:space-y-6">
             
-            <!-- Financial Overview 6 Cards -->
+            <!-- Financial Overview 6 Cards (With PT & Breakdown Filters) -->
             <div class="p-3.5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 sm:space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-3 sm:pb-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800/80 pb-3 sm:pb-4">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">Financial Overview</h3>
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+                                <span>Financial Overview</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+                                      :class="finScope === 'all' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30' : (finScope === 'pt' ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30')"
+                                      x-text="finScope === 'all' ? 'With PT Included' : (finScope === 'pt' ? 'PT Only' : 'Gym Memberships Only')">
+                                </span>
+                            </h3>
+                            <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Gym Memberships & Personal Training revenue breakdown</p>
+                        </div>
                     </div>
-                    <select x-model="finPeriod" aria-label="Financial Overview Period" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 self-start sm:self-auto cursor-pointer">
-                        <option value="mtd">Month Till Date</option>
-                        <option value="6m">Last 6 Months</option>
-                    </select>
+
+                    <!-- Controls: Scope (With PT / Gym / PT) + Time Period Select -->
+                    <div class="flex flex-wrap items-center gap-2 self-start lg:self-auto">
+                        <!-- PT Scope Toggle Pills -->
+                        <div class="inline-flex p-0.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[11px] font-bold">
+                            <button type="button" @click="finScope = 'all'" 
+                                    :class="finScope === 'all' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
+                                    class="px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
+                                <span>With PT (All)</span>
+                            </button>
+                            <button type="button" @click="finScope = 'gym'" 
+                                    :class="finScope === 'gym' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
+                                    class="px-2.5 py-1 rounded-lg transition-all cursor-pointer">
+                                <span>Gym Only</span>
+                            </button>
+                            <button type="button" @click="finScope = 'pt'" 
+                                    :class="finScope === 'pt' ? 'bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
+                                    class="px-2.5 py-1 rounded-lg transition-all cursor-pointer">
+                                <span>PT Only</span>
+                            </button>
+                        </div>
+
+                        <!-- Time Period Dropdown with ALL filters -->
+                        <select x-model="finPeriod" aria-label="Financial Overview Period" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="mtd">Month Till Date (MTD)</option>
+                            <option value="last_month">Last Month</option>
+                            <option value="30d">Last 30 Days</option>
+                            <option value="90d">Last 90 Days</option>
+                            <option value="6m">Last 6 Months</option>
+                            <option value="ytd">This Year (YTD)</option>
+                            <option value="all">All Time (कुल आंकड़े)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
@@ -344,8 +412,9 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.total_billed ?? {{ (float) ($metrics['month_billed_total'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed (<span x-text="financialPeriods[finPeriod]?.billed_count ?? {{ (int) ($metrics['total_billed_count'] ?? 0) }}">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(getFin('total_billed'))">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed (<span x-text="getFin('billed_count')">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
+                            <div class="text-[9px] font-medium text-slate-400 dark:text-slate-500 mt-1 truncate" x-show="getFinBreakdown('billed')" x-text="getFinBreakdown('billed')"></div>
                         </div>
                         <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -356,7 +425,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.product_sales ?? {{ (float) ($metrics['product_sales_mtd'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="formatMoney(getFin('product_sales'))">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Product Sales</div>
                         </div>
                         <a href="{{ route('app.inventory.index') }}" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
@@ -368,8 +437,9 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.collected ?? {{ (float) ($metrics['month_revenue'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected (<span x-text="financialPeriods[finPeriod]?.collected_count ?? {{ (int) ($metrics['total_payments_count'] ?? 0) }}">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
+                            <div class="text-base sm:text-xl font-black text-emerald-600 dark:text-emerald-400 leading-tight truncate tabular-nums" x-text="formatMoney(getFin('collected'))">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected (<span x-text="getFin('collected_count')">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
+                            <div class="text-[9px] font-medium text-emerald-600/80 dark:text-emerald-400/80 mt-1 truncate" x-show="getFinBreakdown('collected')" x-text="getFinBreakdown('collected')"></div>
                         </div>
                         <a href="{{ route('app.payments.index') }}" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -380,8 +450,9 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-100 dark:bg-amber-500/10 text-amber-800 dark:text-amber-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate tabular-nums" x-text="formatMoney(financialPeriods[finPeriod]?.pending_dues ?? {{ (float) ($metrics['all_dues_remaining'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending (<span x-text="financialPeriods[finPeriod]?.pending_count ?? {{ (int) ($metrics['due_members_count'] ?? 0) }}">{{ $metrics['due_members_count'] }}</span> Due)</div>
+                            <div class="text-base sm:text-xl font-black text-amber-700 dark:text-amber-400 leading-tight truncate tabular-nums" x-text="formatMoney(getFin('pending_dues'))">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending (<span x-text="getFin('pending_count')">{{ $metrics['due_members_count'] }}</span> Due)</div>
+                            <div class="text-[9px] font-medium text-amber-600/80 dark:text-amber-400/80 mt-1 truncate" x-show="getFinBreakdown('pending')" x-text="getFinBreakdown('pending')"></div>
                         </div>
                         <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
@@ -392,7 +463,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="financialPeriods[finPeriod]?.new_clients ?? {{ (int) ($metrics['new_clients_count'] ?? 0) }}">{{ $metrics['new_clients_count'] }}</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">New Client(s)</div>
                         </div>
                         <a href="{{ route('app.members.index', ['filter' => 'new']) }}" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
@@ -404,7 +475,7 @@
                             <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 flex items-center justify-center mb-2">
                                 <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                             </div>
-                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="financialPeriods[finPeriod]?.renewals ?? {{ (int) ($metrics['renewals_count'] ?? 0) }}">{{ $metrics['renewals_count'] }}</div>
+                            <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Renewals</div>
                         </div>
                         <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
