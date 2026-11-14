@@ -40,7 +40,7 @@
             },
             getBilledUrl() {
                 if (this.finScope === 'pt') {
-                    return '{{ route('app.personal-training.index') }}';
+                    return '{{ route('app.pt.index') }}';
                 }
                 return '{{ route('app.memberships.index') }}?date_filter=' + this.finPeriod;
             },
@@ -52,7 +52,7 @@
             },
             getPendingUrl() {
                 if (this.finScope === 'pt') {
-                    return '{{ route('app.personal-training.index') }}';
+                    return '{{ route('app.pt.index') }}';
                 }
                 return '{{ route('app.members.index') }}?filter=due';
             },
