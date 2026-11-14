@@ -107,9 +107,9 @@ class ReportService
         $membersQuery = Member::query();
         $paymentsQuery = MemberPayment::query()->where(function ($q) {
             $q->whereNull('notes')->orWhere(function ($nq) {
-                $nq->where('notes', 'not like', '%[REVERSED]%')
-                   ->where('notes', 'not like', '%[CANCELLED]%')
-                   ->where('notes', 'not like', '%[TRANSFERRED]%');
+                $nq->where('notes', 'not like', '%REVERSED%')
+                   ->where('notes', 'not like', '%CANCELLED%')
+                   ->where('notes', 'not like', '%TRANSFERRED%');
             });
         });
         $expensesQuery = Expense::query();
