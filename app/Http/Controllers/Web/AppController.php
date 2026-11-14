@@ -358,7 +358,26 @@ class AppController extends Controller
                     $q->where('date', '>=', now()->subDays(14)->toDateString());
                 });
         } elseif ($request->filter === 'new') {
-            $query->where('created_at', '>=', now()->startOfMonth());
+            $df = $request->get('date_filter');
+            if ($df === 'today') {
+                $query->whereDate('created_at', now()->toDateString());
+            } elseif ($df === 'yesterday') {
+                $query->whereDate('created_at', now()->subDay()->toDateString());
+            } elseif ($df === 'last_month') {
+                $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]);
+            } elseif ($df === '30d') {
+                $query->where('created_at', '>=', now()->subDays(30));
+            } elseif ($df === '90d') {
+                $query->where('created_at', '>=', now()->subDays(90));
+            } elseif ($df === '6m') {
+                $query->where('created_at', '>=', now()->subMonths(5)->startOfMonth());
+            } elseif ($df === 'ytd' || $df === 'this_year') {
+                $query->where('created_at', '>=', now()->startOfYear());
+            } elseif ($df === 'all') {
+                // all new members
+            } else {
+                $query->where('created_at', '>=', now()->startOfMonth());
+            }
         }
 
         $sortBy = $request->get('sort', 'member_id_desc');
@@ -1708,10 +1727,34 @@ class AppController extends Controller
         return back()->with('success', "Body measurements logged successfully for {$member->full_name}!");
     }
 
-    public function memberships(): View
+    public function memberships(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $memberships = Membership::with(['member', 'plan', 'branch'])->latest()->paginate(15);
+        $query = Membership::with(['member', 'plan', 'branch'])
+            ->whereNotIn('status', ['CANCELLED', 'TRANSFERRED']);
+
+        if ($request->filled('date_filter')) {
+            $df = $request->date_filter;
+            if ($df === 'today') {
+                $query->whereDate('start_date', now()->toDateString());
+            } elseif ($df === 'yesterday') {
+                $query->whereDate('start_date', now()->subDay()->toDateString());
+            } elseif ($df === 'mtd' || $df === 'month_till_date') {
+                $query->where('start_date', '>=', now()->startOfMonth()->toDateString());
+            } elseif ($df === 'last_month') {
+                $query->whereBetween('start_date', [now()->subMonth()->startOfMonth()->toDateString(), now()->subMonth()->endOfMonth()->toDateString()]);
+            } elseif ($df === '30d') {
+                $query->where('start_date', '>=', now()->subDays(30)->toDateString());
+            } elseif ($df === '90d') {
+                $query->where('start_date', '>=', now()->subDays(90)->toDateString());
+            } elseif ($df === '6m') {
+                $query->where('start_date', '>=', now()->subMonths(5)->startOfMonth()->toDateString());
+            } elseif ($df === 'ytd' || $df === 'this_year') {
+                $query->where('start_date', '>=', now()->startOfYear()->toDateString());
+            }
+        }
+
+        $memberships = $query->latest('id')->paginate(15)->withQueryString();
         $plans = MembershipPlan::latest()->get();
         $members = Member::where('status', 'ACTIVE')->get();
 
@@ -2250,12 +2293,37 @@ class AppController extends Controller
             $query->whereDate('payment_date', now()->subDay()->toDateString());
         } elseif ($dateFilter === 'this_week') {
             $query->whereBetween('payment_date', [now()->startOfWeek()->toDateString(), now()->endOfWeek()->toDateString()]);
-        } elseif ($dateFilter === 'month_till_date') {
+        } elseif ($dateFilter === 'mtd' || $dateFilter === 'month_till_date') {
             $query->whereBetween('payment_date', [now()->startOfMonth()->toDateString(), now()->toDateString()]);
         } elseif ($dateFilter === 'last_month') {
             $query->whereBetween('payment_date', [now()->subMonth()->startOfMonth()->toDateString(), now()->subMonth()->endOfMonth()->toDateString()]);
-        } elseif ($dateFilter === 'this_year') {
+        } elseif ($dateFilter === '30d') {
+            $query->where('payment_date', '>=', now()->subDays(30)->toDateString());
+        } elseif ($dateFilter === '90d') {
+            $query->where('payment_date', '>=', now()->subDays(90)->toDateString());
+        } elseif ($dateFilter === '6m') {
+            $query->where('payment_date', '>=', now()->subMonths(5)->startOfMonth()->toDateString());
+        } elseif ($dateFilter === 'this_year' || $dateFilter === 'ytd') {
             $query->whereBetween('payment_date', [now()->startOfYear()->toDateString(), now()->toDateString()]);
+        }
+
+        // Type filter (pt, gym)
+        if ($request->filled('type') && $request->type !== 'all') {
+            $type = strtolower($request->type);
+            if ($type === 'pt') {
+                $query->where(function ($q) {
+                    $q->where('notes', 'like', '%PT Package%')
+                      ->orWhere('notes', 'like', '%Personal Training%');
+                });
+            } elseif ($type === 'gym') {
+                $query->where(function ($q) {
+                    $q->whereNull('notes')
+                      ->orWhere(function ($sq) {
+                          $sq->where('notes', 'not like', '%PT Package%')
+                             ->where('notes', 'not like', '%Personal Training%');
+                      });
+                });
+            }
         }
 
         // Method filter

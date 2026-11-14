@@ -11,7 +11,7 @@
             showBirthdayModal: false,
             showAiSummaryModal: false,
             showTutorialsModal: false,
-            finPeriod: '6m',
+            finPeriod: 'mtd',
             finScope: 'all',
             trendPeriod: '30d',
             currency: {{ Js::from($currency) }},
@@ -37,6 +37,30 @@
                     return 'Personal Training (PT) Only';
                 }
                 return null;
+            },
+            getBilledUrl() {
+                if (this.finScope === 'pt') {
+                    return '{{ route('app.personal-training.index') }}';
+                }
+                return '{{ route('app.memberships.index') }}?date_filter=' + this.finPeriod;
+            },
+            getCollectedUrl() {
+                let url = '{{ route('app.payments.index') }}?date_filter=' + this.finPeriod;
+                if (this.finScope === 'pt') url += '&type=pt';
+                else if (this.finScope === 'gym') url += '&type=gym';
+                return url;
+            },
+            getPendingUrl() {
+                if (this.finScope === 'pt') {
+                    return '{{ route('app.personal-training.index') }}';
+                }
+                return '{{ route('app.members.index') }}?filter=due';
+            },
+            getNewClientsUrl() {
+                return '{{ route('app.members.index') }}?filter=new&date_filter=' + this.finPeriod;
+            },
+            getRenewalsUrl() {
+                return '{{ route('app.memberships.index') }}?date_filter=' + this.finPeriod;
             },
             formatShort(v) {
                 const n = Number(v || 0);
@@ -392,15 +416,15 @@
 
                         <!-- Time Period Dropdown with ALL filters -->
                         <select x-model="finPeriod" aria-label="Financial Overview Period" class="bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="mtd">This Month (MTD)</option>
                             <option value="today">Today</option>
                             <option value="yesterday">Yesterday</option>
-                            <option value="mtd">Month Till Date (MTD)</option>
                             <option value="last_month">Last Month</option>
                             <option value="30d">Last 30 Days</option>
                             <option value="90d">Last 90 Days</option>
                             <option value="6m">Last 6 Months</option>
                             <option value="ytd">This Year (YTD)</option>
-                            <option value="all">All Time (कुल आंकड़े)</option>
+                            <option value="all">All Time</option>
                         </select>
                     </div>
                 </div>
@@ -416,7 +440,7 @@
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Total Billed (<span x-text="getFin('billed_count')">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
                             <div class="text-[9px] font-medium text-slate-400 dark:text-slate-500 mt-1 truncate" x-show="getFinBreakdown('billed')" x-text="getFinBreakdown('billed')"></div>
                         </div>
-                        <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
+                        <a :href="getBilledUrl()" class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
 
                     <!-- 2. Product Sales -->
@@ -441,7 +465,7 @@
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Collected (<span x-text="getFin('collected_count')">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
                             <div class="text-[9px] font-medium text-emerald-600/80 dark:text-emerald-400/80 mt-1 truncate" x-show="getFinBreakdown('collected')" x-text="getFinBreakdown('collected')"></div>
                         </div>
-                        <a href="{{ route('app.payments.index') }}" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
+                        <a :href="getCollectedUrl()" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
 
                     <!-- 4. Payments Pending -->
@@ -454,7 +478,7 @@
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Pending (<span x-text="getFin('pending_count')">{{ $metrics['due_members_count'] }}</span> Due)</div>
                             <div class="text-[9px] font-medium text-amber-600/80 dark:text-amber-400/80 mt-1 truncate" x-show="getFinBreakdown('pending')" x-text="getFinBreakdown('pending')"></div>
                         </div>
-                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
+                        <a :href="getPendingUrl()" class="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
 
                     <!-- 5. New Clients -->
@@ -466,7 +490,7 @@
                             <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">New Client(s)</div>
                         </div>
-                        <a href="{{ route('app.members.index', ['filter' => 'new']) }}" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
+                        <a :href="getNewClientsUrl()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
 
                     <!-- 6. Renewals -->
@@ -478,7 +502,7 @@
                             <div class="text-base sm:text-xl font-black text-slate-900 dark:text-white leading-tight truncate tabular-nums" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
                             <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1 truncate">Renewals</div>
                         </div>
-                        <a href="{{ route('app.memberships.index') }}" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
+                        <a :href="getRenewalsUrl()" class="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-bold mt-2.5 inline-block">View More →</a>
                     </div>
                 </div>
             </div>
