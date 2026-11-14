@@ -16,18 +16,15 @@
             formElement: null,
             selectElement: null
         },
-        handleStageChange(event, leadId, leadName, currentStage, currentAmount) {
+        handleStageChange(event, leadId, leadName, currentStage, currentAmount, convertedMemberId = null) {
             const newStage = event.target.value;
             if (newStage === 'PAID') {
-                this.paidModalData = {
-                    leadId: leadId,
-                    leadName: leadName,
-                    previousStage: currentStage,
-                    paidAmount: (currentAmount && currentAmount > 0) ? currentAmount : '',
-                    formElement: event.target.form,
-                    selectElement: event.target
-                };
-                this.showPaidModal = true;
+                if (convertedMemberId) {
+                    window.location.href = "{{ url('/app/members') }}/" + convertedMemberId;
+                } else {
+                    event.target.value = currentStage;
+                    window.location.href = "{{ route('app.members.create') }}?lead_id=" + leadId;
+                }
             } else {
                 event.target.form.submit();
             }
@@ -267,7 +264,7 @@
                                 <td class="py-3 px-3.5">
                                     <form action="{{ route('app.leads.stage', $lead->id) }}" method="POST" class="inline-block">
                                         @csrf
-                                        <select name="stage" @change="handleStageChange($event, {{ $lead->id }}, '{{ addslashes($lead->name) }}', '{{ $st }}', {{ (float) ($lead->estimated_value ?? 0) }})" class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold border cursor-pointer focus:outline-none {{ $stageStyle }}">
+                                        <select name="stage" @change="handleStageChange($event, {{ $lead->id }}, '{{ addslashes($lead->name) }}', '{{ $st }}', {{ (float) ($lead->estimated_value ?? 0) }}, {{ $lead->converted_member_id ? $lead->converted_member_id : 'null' }})" class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold border cursor-pointer focus:outline-none {{ $stageStyle }}">
                                             <option value="NEW_LEAD" {{ in_array($st, ['NEW_LEAD', 'NEW']) ? 'selected' : '' }}>New Lead</option>
                                             <option value="CONTACTED" {{ $st === 'CONTACTED' ? 'selected' : '' }}>Contacted</option>
                                             <option value="DEMO_BOOKED" {{ $st === 'DEMO_BOOKED' ? 'selected' : '' }}>Demo Booked</option>
@@ -327,20 +324,13 @@
                                  <!-- Actions -->
                                 <td class="py-3 px-3.5 text-right">
                                     <div class="flex items-center justify-end gap-1.5 flex-wrap">
-                                        <!-- Convert / Member Link -->
+                                        <!-- Converted Member Link -->
                                         @if($lead->converted_member_id)
                                             <a href="{{ route('app.members.show', $lead->converted_member_id) }}" 
                                                title="View Joined Member Profile" 
                                                class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 text-[10.5px] font-bold flex items-center gap-1 transition-all">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                 <span>Member ↗</span>
-                                            </a>
-                                        @else
-                                            <a href="{{ route('app.members.create', ['lead_id' => $lead->id]) }}" 
-                                               title="Convert Lead into Registered Member" 
-                                               class="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 dark:bg-indigo-500/15 dark:hover:bg-indigo-600 dark:text-indigo-400 dark:hover:text-white dark:border-indigo-500/30 text-[10.5px] font-bold flex items-center gap-1 transition-all">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                                <span>Join Member</span>
                                             </a>
                                         @endif
 

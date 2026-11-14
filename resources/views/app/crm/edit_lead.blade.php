@@ -79,12 +79,6 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                         <span>Converted Member: {{ $lead->convertedMember?->member_code ?? 'Joined' }} ↗</span>
                     </a>
-                @else
-                    <a href="{{ route('app.members.create', ['lead_id' => $lead->id]) }}" 
-                       class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                        <span>Convert to Member ➔</span>
-                    </a>
                 @endif
 
                 <a href="{{ route('app.leads.index') }}" 
@@ -292,7 +286,9 @@
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                             Pipeline Stage
                         </label>
-                        <select name="stage" x-model="stage" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer transition-all">
+                        <select name="stage" x-model="stage" 
+                                @change="if ($event.target.value === 'PAID' && {{ $lead->converted_member_id ? 'false' : 'true' }}) { window.location.href = '{{ route('app.members.create', ['lead_id' => $lead->id]) }}'; }"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-indigo-500 focus:outline-none shadow-sm cursor-pointer transition-all">
                             <option value="NEW_LEAD">🔵 New Lead (Initial Inquiry)</option>
                             <option value="CONTACTED">💬 Contacted / Qualified</option>
                             <option value="DEMO_BOOKED">📅 Demo / Trial Booked</option>
