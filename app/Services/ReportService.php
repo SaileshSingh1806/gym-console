@@ -113,7 +113,7 @@ class ReportService
             });
         });
         $expensesQuery = Expense::query();
-        $membershipsQuery = Membership::query();
+        $membershipsQuery = Membership::query()->whereNotIn('status', ['CANCELLED', 'TRANSFERRED']);
         $baseAttendanceQuery = Attendance::query();
 
         if ($branchId) {
