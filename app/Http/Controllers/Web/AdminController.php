@@ -18,6 +18,7 @@ use App\Models\SupportTicket;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\AiDietPlannerService;
+use App\Services\ImageOptimizerService;
 use App\Services\ReportService;
 use App\Services\SubscriptionService;
 use App\Services\SupportTicketService;
@@ -48,7 +49,8 @@ class AdminController extends Controller implements HasMiddleware
     public function __construct(
         protected ReportService $reportService,
         protected TenantService $tenantService,
-        protected SubscriptionService $subscriptionService
+        protected SubscriptionService $subscriptionService,
+        protected ImageOptimizerService $imageOptimizerService
     ) {}
 
     // 1. Dashboard
@@ -96,7 +98,7 @@ class AdminController extends Controller implements HasMiddleware
         $totalMembers = Member::count();
         $totalUsers = User::where('role', '!=', 'super_admin')->count();
         $gymOwnersCount = User::where('role', 'gym_owner')->count();
-        $totalStaffCount = User::where('role', '!=', 'super_admin')->where('role', '!=', 'gym_owner')->count();
+        $totalStaffCount = User::whereNotIn('role', ['super_admin', 'gym_owner', 'member'])->count();
         $superAdminCount = User::where('role', 'super_admin')->count();
         $totalTicketsCount = SupportTicket::withoutGlobalScopes()->count();
         $urgentTicketsCount = SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress', 'pending'])->where('priority', 'urgent')->count();
@@ -168,7 +170,7 @@ class AdminController extends Controller implements HasMiddleware
         $gymStats = [
             'totalGymsCount' => Tenant::count(),
             'totalBranchesCount' => Branch::count(),
-            'totalStaffCount' => User::whereNotNull('tenant_id')->where('role', '!=', 'super_admin')->count(),
+            'totalStaffCount' => User::whereNotNull('tenant_id')->whereNotIn('role', ['super_admin', 'gym_owner', 'member'])->count(),
             'activeGymsCount' => Tenant::where('status', 'ACTIVE')->count(),
             'trialGymsCount' => Tenant::where('status', 'TRIAL')->count(),
             'totalPlatformMembersCount' => Member::count(),
@@ -924,12 +926,12 @@ class AdminController extends Controller implements HasMiddleware
         ]);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('uploads/branding', 'public');
+            $path = $this->imageOptimizerService->optimizeAndStore($request->file('logo'), 'uploads/branding', 800, 85);
             $validated['logo_url'] = asset('storage/'.$path);
         }
 
         if ($request->hasFile('favicon')) {
-            $path = $request->file('favicon')->store('uploads/branding', 'public');
+            $path = $this->imageOptimizerService->optimizeAndStore($request->file('favicon'), 'uploads/branding', 256, 90);
             $validated['favicon_url'] = asset('storage/'.$path);
         }
 
@@ -1027,7 +1029,7 @@ class AdminController extends Controller implements HasMiddleware
         ]);
 
         if ($request->hasFile('og_image')) {
-            $path = $request->file('og_image')->store('uploads/seo', 'public');
+            $path = $this->imageOptimizerService->optimizeAndStore($request->file('og_image'), 'uploads/seo', 1200, 85);
             $validated['og_image_url'] = asset('storage/'.$path);
         }
 

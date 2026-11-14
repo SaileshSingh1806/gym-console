@@ -210,12 +210,50 @@
         triggerEditFileInput() {
             this.$refs.editPhotoInput.click();
         },
-        onEditPhotoSelected(e) {
+        async compressClientSide(file, maxDim = 1200, quality = 0.85) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        let dataUrl = canvas.toDataURL('image/webp', quality);
+                        if (!dataUrl.startsWith('data:image/webp')) {
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
+        },
+        async onEditPhotoSelected(e) {
             const file = e.target.files[0];
             if (file) {
                 this.editPhotoPreview = URL.createObjectURL(file);
-                this.editCapturedPhotoData = '';
                 this.editRemovePhoto = false;
+                const compressed = await this.compressClientSide(file, 1200, 0.85);
+                if (compressed) {
+                    this.editCapturedPhotoData = compressed;
+                }
             }
         },
         async openEditWebcam() {
@@ -253,7 +291,10 @@
                 canvas.height = video.videoHeight || 480;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                let dataUrl = canvas.toDataURL('image/webp', 0.85);
+                if (!dataUrl.startsWith('data:image/webp')) {
+                    dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                }
                 this.editPhotoPreview = dataUrl;
                 this.editCapturedPhotoData = dataUrl;
                 this.editRemovePhoto = false;
@@ -651,7 +692,15 @@
 
                                 <!-- Plan & Validity -->
                                 <td class="py-3 px-3.5">
-                                    @if($membership)
+                                    @if($membership && $membership->status === 'CANCELLED')
+                                        <div class="font-bold text-slate-400 dark:text-slate-500 leading-tight flex items-center gap-1.5">
+                                            <span class="line-through">{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
+                                            <span class="px-1.5 py-0.2 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-[9px] font-bold border border-rose-200 dark:border-rose-500/20">Cancelled</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 leading-tight mt-0.5 font-mono">
+                                            Package Cancelled / Transferred
+                                        </div>
+                                    @elseif($membership)
                                         <div class="font-bold text-slate-900 dark:text-white leading-tight flex items-center gap-1.5">
                                             <span>{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
                                             @if($daysLeft !== null)
@@ -674,7 +723,14 @@
 
                                 <!-- Fee & Balance with Live Indicators -->
                                 <td class="py-3 px-3.5">
-                                    @if($membership)
+                                    @if($membership && $membership->status === 'CANCELLED')
+                                        <div class="font-semibold text-slate-400 dark:text-slate-500 leading-tight text-xs">
+                                            <span class="line-through">{{ $currency }}{{ number_format($paidAmt, 0) }}</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 dark:text-slate-500 font-bold leading-tight mt-0.5">
+                                            Cancelled / Transferred
+                                        </div>
+                                    @elseif($membership)
                                         <div class="font-semibold text-slate-900 dark:text-white leading-tight text-xs">
                                             {{ $currency }}{{ number_format($paidAmt, 0) }} <span class="text-[10px] text-slate-400 font-normal">/ {{ $currency }}{{ number_format($finalAmt, 0) }}</span>
                                         </div>

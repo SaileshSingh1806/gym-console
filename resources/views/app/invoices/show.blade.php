@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
+        [x-cloak] { display: none !important; }
         *, *:before, *:after {
             box-sizing: border-box;
         }
@@ -58,7 +60,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center antialiased overflow-x-hidden">
+<body x-data="{ showEditMethodModal: false, selectedMethod: '{{ strtolower($payment->payment_method ?? 'cash') }}', txnRef: '{{ addslashes($payment->transaction_reference ?? '') }}', changeReason: '' }" class="bg-slate-100 text-slate-900 min-h-screen py-3 sm:py-6 px-2 sm:px-6 flex flex-col items-center antialiased overflow-x-hidden">
 
     @php
         $tenantSettings = $tenant->settings ?? [];
@@ -214,6 +216,17 @@
                     <span>WhatsApp</span>
                 </a>
 
+                @auth
+                    @if((auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('payments.edit_method')) && !request()->routeIs('app.invoices.public'))
+                        <button type="button" 
+                                @click="showEditMethodModal = true" 
+                                class="px-3 sm:px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Change Payment Mode</span>
+                        </button>
+                    @endif
+                @endauth
+
                 <button type="button" 
                         onclick="window.print()" 
                         class="px-3 sm:px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer">
@@ -363,7 +376,11 @@
                                      str_contains($lower, 'imported') || 
                                      str_contains($lower, 'csv') || 
                                      str_contains($lower, 'fee balance') || 
-                                     str_contains($lower, 'subscription payment');
+                                     str_contains($lower, 'subscription payment') ||
+                                     str_contains($lower, 'conversion') ||
+                                     str_contains($lower, 'crm') ||
+                                     str_contains($lower, 'lead') ||
+                                     str_contains($lower, 'auto-created');
                     if (! $isBoilerplate && ! empty($rawNotes)) {
                         $cleanNote = $rawNotes;
                     }
@@ -391,8 +408,19 @@
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
-                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8">
-                            {{ $modeText }}
+                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8 inline-flex items-center gap-1.5">
+                            <span>{{ $modeText }}</span>
+                            @auth
+                                @if((auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('payments.edit_method')) && !request()->routeIs('app.invoices.public'))
+                                    <button type="button" 
+                                            @click="showEditMethodModal = true" 
+                                            title="Gym Owner: Change Payment Mode" 
+                                            class="no-print px-1.5 py-0.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-bold cursor-pointer inline-flex items-center gap-0.5 transition-colors">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        <span>Edit</span>
+                                    </button>
+                                @endif
+                            @endauth
                         </span>
                     </div>
                 </div>
@@ -676,6 +704,122 @@
         </div>
 
     </div>
+
+    @auth
+        @if((auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('payments.edit_method')) && !request()->routeIs('app.invoices.public'))
+            <!-- ==================== EDIT PAYMENT METHOD MODAL ==================== -->
+            <div x-show="showEditMethodModal" 
+                 x-cloak 
+                 class="no-print fixed inset-0 z-50 overflow-y-auto"
+                 @keydown.escape.window="showEditMethodModal = false">
+                
+                <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity" 
+                     @click="showEditMethodModal = false"></div>
+
+                <div class="flex min-h-full items-center justify-center p-3 sm:p-4 text-center">
+                    <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all border border-slate-200"
+                         @click.stop>
+                        
+                        <!-- Header -->
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-amber-500/10">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-black">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm sm:text-base font-black text-slate-900">Change Payment Mode</h3>
+                                    <p class="text-[11px] text-amber-800 font-medium">Gym Owner Only &bull; Instant Invoice Sync</p>
+                                </div>
+                            </div>
+                            <button type="button" 
+                                    @click="showEditMethodModal = false" 
+                                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <form action="{{ route('app.payments.update-method', $payment->id) }}" method="POST" class="p-5 space-y-4">
+                            @csrf
+
+                            <!-- Info Box -->
+                            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Invoice:</span>
+                                    <strong class="font-mono text-slate-900">{{ $invoiceNo }}</strong>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Member:</span>
+                                    <strong class="text-slate-900">{{ $member->full_name }}</strong>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500">Amount Paid:</span>
+                                    <strong class="font-mono text-emerald-600 font-bold">{{ $currency }}{{ number_format($payment->amount, 2) }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Mode Select -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Select Correct Payment Mode <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="payment_method" 
+                                        x-model="selectedMethod" 
+                                        required 
+                                        class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs font-semibold focus:border-amber-500 focus:outline-none cursor-pointer">
+                                    <option value="cash">💵 Cash</option>
+                                    <option value="upi">📱 UPI / QR Code</option>
+                                    <option value="card">💳 Card (POS Machine)</option>
+                                    <option value="netbanking">🌐 Net Banking</option>
+                                    <option value="cheque">📄 Cheque</option>
+                                    <option value="bank_transfer">🏦 Bank Transfer (NEFT/IMPS)</option>
+                                </select>
+                            </div>
+
+                            <!-- Ref -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Transaction Ref / UTR No. <span class="text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                <input type="text" 
+                                       name="transaction_reference" 
+                                       x-model="txnRef" 
+                                       placeholder="e.g. UPI Ref, POS Auth Code" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs font-mono focus:border-amber-500 focus:outline-none">
+                            </div>
+
+                            <!-- Reason -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Reason for Correction <span class="text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                <input type="text" 
+                                       name="change_reason" 
+                                       x-model="changeReason" 
+                                       placeholder="e.g. Member paid by UPI, was mistakenly saved as Cash" 
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-900 text-xs focus:border-amber-500 focus:outline-none">
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
+                                <button type="button" 
+                                        @click="showEditMethodModal = false" 
+                                        class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer">
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                        class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors shadow-md cursor-pointer flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    <span>Update Invoice Mode</span>
+                                </button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endauth
 
     <script>
         if (window.location.search.includes('print=1') || window.location.search.includes('autoprint=1')) {

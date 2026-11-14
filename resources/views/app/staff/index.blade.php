@@ -250,6 +250,7 @@
                     <option value="gym_owner" {{ request('role') === 'gym_owner' ? 'selected' : '' }}>Gym Owner</option>
                     <option value="gym_manager" {{ request('role') === 'gym_manager' ? 'selected' : '' }}>Gym Manager</option>
                     <option value="receptionist" {{ request('role') === 'receptionist' ? 'selected' : '' }}>Receptionist (Front Desk)</option>
+                    <option value="sales" {{ request('role') === 'sales' ? 'selected' : '' }}>Sales Executive</option>
                     <option value="trainer" {{ request('role') === 'trainer' ? 'selected' : '' }}>Fitness Trainer</option>
                     <option value="accountant" {{ request('role') === 'accountant' ? 'selected' : '' }}>Accountant</option>
                     <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>General Staff</option>
@@ -703,6 +704,7 @@
                                         class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
                                     <optgroup label="Standard Roles">
                                         <option value="receptionist">Receptionist</option>
+                                        <option value="sales">Sales Executive</option>
                                         <option value="gym_manager">Gym Manager</option>
                                         <option value="trainer">Trainer</option>
                                         <option value="accountant">Accountant</option>

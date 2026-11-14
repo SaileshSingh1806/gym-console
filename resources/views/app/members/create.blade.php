@@ -140,11 +140,49 @@
         triggerFileInput() {
             this.$refs.photoInput.click();
         },
-        onPhotoSelected(e) {
+        async compressClientSide(file, maxDim = 1200, quality = 0.85) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w > h) {
+                                h = Math.round((h * maxDim) / w);
+                                w = maxDim;
+                            } else {
+                                w = Math.round((w * maxDim) / h);
+                                h = maxDim;
+                            }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        let dataUrl = canvas.toDataURL('image/webp', quality);
+                        if (!dataUrl.startsWith('data:image/webp')) {
+                            dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
+        },
+        async onPhotoSelected(e) {
             const file = e.target.files[0];
             if (file) {
                 this.photoPreview = URL.createObjectURL(file);
-                this.capturedPhotoData = '';
+                const compressed = await this.compressClientSide(file, 1200, 0.85);
+                if (compressed) {
+                    this.capturedPhotoData = compressed;
+                }
             }
         },
         async openWebcam() {
@@ -182,7 +220,10 @@
                 canvas.height = video.videoHeight || 480;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                let dataUrl = canvas.toDataURL('image/webp', 0.85);
+                if (!dataUrl.startsWith('data:image/webp')) {
+                    dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+                }
                 this.photoPreview = dataUrl;
                 this.capturedPhotoData = dataUrl;
                 this.closeWebcam();

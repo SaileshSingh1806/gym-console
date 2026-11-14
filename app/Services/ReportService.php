@@ -105,7 +105,13 @@ class ReportService
         }
 
         $membersQuery = Member::query();
-        $paymentsQuery = MemberPayment::query();
+        $paymentsQuery = MemberPayment::query()->where(function ($q) {
+            $q->whereNull('notes')->orWhere(function ($nq) {
+                $nq->where('notes', 'not like', '%[REVERSED]%')
+                   ->where('notes', 'not like', '%[CANCELLED]%')
+                   ->where('notes', 'not like', '%[TRANSFERRED]%');
+            });
+        });
         $expensesQuery = Expense::query();
         $membershipsQuery = Membership::query();
         $baseAttendanceQuery = Attendance::query();
@@ -354,6 +360,7 @@ class ReportService
 
         $allPaymentsSum = (float) (clone $paymentsQuery)->sum('amount');
         $monthBilledTotal = (float) (clone $membershipsQuery)
+            ->where('status', '!=', 'CANCELLED')
             ->where(function ($q) use ($monthStartStr) {
                 $q->where('created_at', '>=', $monthStartStr . ' 00:00:00')
                     ->orWhere('start_date', '>=', $monthStartStr);

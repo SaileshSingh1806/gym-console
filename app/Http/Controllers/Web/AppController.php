@@ -48,6 +48,7 @@ use App\Services\AccessControl\AccessControlService;
 use App\Services\AiDietPlannerService;
 use App\Services\AttendanceService;
 use App\Services\FeatureGateService;
+use App\Services\ImageOptimizerService;
 use App\Services\MemberPaymentService;
 use App\Services\MemberImportExportService;
 use App\Services\MembershipService;
@@ -81,7 +82,8 @@ class AppController extends Controller
         protected AttendanceService $attendanceService,
         protected AccessControlService $accessControlService,
         protected SubscriptionService $subscriptionService,
-        protected FeatureGateService $featureGateService
+        protected FeatureGateService $featureGateService,
+        protected ImageOptimizerService $imageOptimizerService
     ) {}
 
     protected function resolveTenant(): ?Tenant
@@ -741,22 +743,15 @@ class AppController extends Controller
                 return redirect()->route('app.members.index')->with('success', "Member '{$validated['first_name']} {$validated['last_name']}' created successfully!");
             }
 
-            // Handle Photo Upload / Base64 Snapshot
+            // Handle Photo Upload / Base64 Snapshot with Automatic High-Efficiency Compression
             $photoPath = null;
             if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('members/photos', 'public');
+                $photoPath = $this->imageOptimizerService->optimizeAndStore($request->file('photo'), 'members/photos', 1200, 82);
             } elseif (! empty($validated['photo_data']) && str_starts_with($validated['photo_data'], 'data:image')) {
-                @[$type, $data] = explode(';', $validated['photo_data']);
-                @[, $data] = explode(',', $data);
-                if ($data) {
-                    $decodedImage = base64_decode($data);
-                    $fileName = 'members/photos/cam_'.Str::random(20).'.jpg';
-                    Storage::disk('public')->put($fileName, $decodedImage);
-                    $photoPath = $fileName;
-                }
+                $photoPath = $this->imageOptimizerService->optimizeAndStore($validated['photo_data'], 'members/photos', 1200, 82);
             }
 
-            // Handle ID Documents
+            // Handle ID Documents with Automatic Compression
             $savedDocuments = [];
             if ($request->has('id_documents') && is_array($request->id_documents)) {
                 foreach ($request->id_documents as $idx => $doc) {
@@ -764,10 +759,10 @@ class AppController extends Controller
                         $frontPath = null;
                         $backPath = null;
                         if ($request->hasFile("id_documents.{$idx}.front")) {
-                            $frontPath = $request->file("id_documents.{$idx}.front")->store('members/documents', 'public');
+                            $frontPath = $this->imageOptimizerService->optimizeAndStore($request->file("id_documents.{$idx}.front"), 'members/documents', 1600, 85);
                         }
                         if ($request->hasFile("id_documents.{$idx}.back")) {
-                            $backPath = $request->file("id_documents.{$idx}.back")->store('members/documents', 'public');
+                            $backPath = $this->imageOptimizerService->optimizeAndStore($request->file("id_documents.{$idx}.back"), 'members/documents', 1600, 85);
                         }
                         $savedDocuments[] = [
                             'type' => $doc['type'] ?? 'Aadhaar Card',
@@ -1003,19 +998,12 @@ class AppController extends Controller
                 if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
                     Storage::disk('public')->delete($member->photo_path);
                 }
-                $photoPath = $request->file('photo')->store('members/photos', 'public');
+                $photoPath = $this->imageOptimizerService->optimizeAndStore($request->file('photo'), 'members/photos', 1200, 82);
             } elseif (! empty($validated['photo_data']) && str_starts_with($validated['photo_data'], 'data:image')) {
-                @[$type, $data] = explode(';', $validated['photo_data']);
-                @[, $data] = explode(',', $data);
-                if ($data) {
-                    if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
-                        Storage::disk('public')->delete($member->photo_path);
-                    }
-                    $decodedImage = base64_decode($data);
-                    $fileName = 'members/photos/cam_'.Str::random(20).'.jpg';
-                    Storage::disk('public')->put($fileName, $decodedImage);
-                    $photoPath = $fileName;
+                if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
+                    Storage::disk('public')->delete($member->photo_path);
                 }
+                $photoPath = $this->imageOptimizerService->optimizeAndStore($validated['photo_data'], 'members/photos', 1200, 82);
             } elseif ($request->boolean('remove_photo')) {
                 if ($member->photo_path && Storage::disk('public')->exists($member->photo_path)) {
                     Storage::disk('public')->delete($member->photo_path);
@@ -1241,6 +1229,10 @@ class AppController extends Controller
     {
         $member = Member::findOrFail($id);
         $name = $member->full_name;
+
+        // Cascade delete associated payments and memberships
+        MemberPayment::where('member_id', $member->id)->delete();
+        Membership::where('member_id', $member->id)->delete();
         $member->delete();
 
         ActivityLog::log('member_deleted', "Deleted member {$name}");
@@ -1482,6 +1474,67 @@ class AppController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         }
+    }
+
+    public function cancelMembership(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $membershipId = $request->input('membership_id');
+        $membership = $membershipId
+            ? Membership::where('tenant_id', $tenant->id)->where('member_id', $member->id)->findOrFail($membershipId)
+            : ($member->activeMembership ?? $member->memberships()->latest()->first());
+
+        if (! $membership) {
+            return back()->with('error', 'No membership subscription found to cancel.');
+        }
+
+        $reason = trim($request->input('reason', 'Membership cancelled by gym administrator'));
+        $voidFee = $request->boolean('void_fee', true);
+
+        // Update Membership
+        $auditNote = sprintf(
+            '[CANCELLED on %s by %s | Reason: %s]',
+            now()->format('d/m/Y H:i'),
+            auth()->user()->name,
+            $reason
+        );
+        $existingNotes = $membership->notes ? trim($membership->notes) : '';
+        $membership->update([
+            'status' => 'CANCELLED',
+            'notes' => $existingNotes ? ($existingNotes . "\n" . $auditNote) : $auditNote,
+        ]);
+
+        // If member has no other active memberships, set member status to INACTIVE
+        $otherActive = Membership::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where('id', '!=', $membership->id)
+            ->where('status', 'ACTIVE')
+            ->exists();
+
+        if (! $otherActive) {
+            $member->update(['status' => 'INACTIVE']);
+        }
+
+        // Void or transfer fee from dashboard revenue
+        if ($voidFee) {
+            foreach ($membership->payments as $pay) {
+                $payNote = sprintf('[TRANSFERRED / CANCELLED on %s by %s | %s]', now()->format('d/m/Y H:i'), auth()->user()->name, $reason);
+                $existPayNotes = $pay->notes ? trim($pay->notes) : '';
+                $pay->update([
+                    'notes' => $existPayNotes ? ($existPayNotes . "\n" . $payNote) : $payNote,
+                ]);
+            }
+        }
+
+        ActivityLog::log(
+            'membership_cancelled',
+            "Cancelled membership for {$member->full_name} ({$membership->plan?->name}) - Reason: {$reason}",
+            $membership
+        );
+
+        return back()->with('success', "Membership for '{$member->full_name}' has been cancelled and excluded from active dashboard revenue.");
     }
 
     public function addPtPackage(Request $request, int $id): RedirectResponse
@@ -2165,7 +2218,10 @@ class AppController extends Controller
     public function payments(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $query = MemberPayment::with(['member.branch', 'membership.plan', 'receivedBy'])->latest('payment_date')->latest('id');
+        $query = MemberPayment::with(['member.branch', 'membership.plan', 'receivedBy'])
+            ->whereHas('member')
+            ->latest('payment_date')
+            ->latest('id');
 
         // Search filter (member name, phone, email, member_code, invoice_number, transaction_reference)
         if ($request->filled('search')) {
@@ -2247,7 +2303,11 @@ class AppController extends Controller
         // Clone for aggregates
         $aggQuery = clone $query;
         $totalCollected = (float) (clone $aggQuery)->where(function ($q) {
-            $q->whereNull('notes')->orWhere('notes', 'not like', '%[REVERSED]%');
+            $q->whereNull('notes')->orWhere(function ($nq) {
+                $nq->where('notes', 'not like', '%[REVERSED]%')
+                   ->where('notes', 'not like', '%[CANCELLED]%')
+                   ->where('notes', 'not like', '%[TRANSFERRED]%');
+            });
         })->sum('amount');
 
         // Total Due calculation across filtered records
@@ -2527,6 +2587,89 @@ class AppController extends Controller
         ActivityLog::log('payment_reversed', "Reversed payment receipt {$payment->invoice_number} of {$currency}".number_format($payment->amount, 2), $payment);
 
         return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
+    }
+
+    public function deletePayment(int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        // Strict Authorization: Gym Owner / Super Admin only
+        if (! $user->isGymOwner() && ! $user->isSuperAdmin() && ! $user->hasPermission('payments.refund')) {
+            return back()->with('error', 'Unauthorized. Only Gym Owners can delete payment receipts.');
+        }
+
+        $payment = MemberPayment::with('membership')->where('tenant_id', $tenant->id)->findOrFail($id);
+
+        if ($payment->membership && ! str_contains($payment->notes ?? '', '[REVERSED]')) {
+            $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
+            $payment->membership->update(['paid_amount' => $newPaid]);
+        }
+
+        $invNo = $payment->invoice_number;
+        $amount = $payment->amount;
+        $payment->delete();
+
+        $currency = $tenant->currency_symbol ?? '₹';
+        ActivityLog::log('payment_deleted', "Deleted payment receipt {$invNo} of {$currency}".number_format($amount, 2), $payment);
+
+        return back()->with('success', "Payment receipt '{$invNo}' deleted successfully.");
+    }
+
+    public function updatePaymentMethod(Request $request, int $id): RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $user = auth()->user();
+
+        // Strict Authorization: Gym Owner / Super Admin only
+        if (! $user->isGymOwner() && ! $user->isSuperAdmin() && ! $user->hasPermission('payments.edit_method')) {
+            return back()->with('error', 'Unauthorized. Only Gym Owners can correct payment methods on financial receipts.');
+        }
+
+        $payment = MemberPayment::with(['membership.plan', 'member'])
+            ->where('tenant_id', $tenant->id)
+            ->findOrFail($id);
+
+        $validated = $request->validate([
+            'payment_method' => 'required|string|in:cash,upi,card,netbanking,cheque,bank_transfer',
+            'transaction_reference' => 'nullable|string|max:100',
+            'change_reason' => 'nullable|string|max:255',
+        ]);
+
+        $oldMethod = strtoupper($payment->payment_method ?? 'N/A');
+        $newMethod = strtoupper($validated['payment_method']);
+
+        $auditNote = sprintf(
+            '[Payment mode changed from %s to %s by %s on %s%s]',
+            $oldMethod,
+            $newMethod,
+            $user->name,
+            now()->format('d/m/Y H:i'),
+            ! empty($validated['change_reason']) ? ' | Reason: '.trim($validated['change_reason']) : ''
+        );
+
+        $existingNotes = $payment->notes ? trim($payment->notes) : '';
+        $updatedNotes = $existingNotes ? ($existingNotes."\n".$auditNote) : $auditNote;
+
+        $updateData = [
+            'payment_method' => $validated['payment_method'],
+            'notes' => $updatedNotes,
+        ];
+
+        if ($request->has('transaction_reference')) {
+            $updateData['transaction_reference'] = ! empty($validated['transaction_reference']) ? trim($validated['transaction_reference']) : null;
+        }
+
+        $payment->update($updateData);
+
+        $currency = $tenant->currency_symbol ?? '₹';
+        ActivityLog::log(
+            'payment_method_updated',
+            "Payment method for receipt #{$payment->invoice_number} ({$currency}".number_format($payment->amount, 2).") changed from {$oldMethod} to {$newMethod} by Gym Owner {$user->name}".(! empty($validated['change_reason']) ? " (Reason: {$validated['change_reason']})" : ''),
+            $payment
+        );
+
+        return back()->with('success', "Payment method for receipt #{$payment->invoice_number} updated to {$newMethod} successfully!");
     }
 
     public function sendPaymentReceipt(int $id): RedirectResponse
@@ -3556,7 +3699,7 @@ class AppController extends Controller
         $validated['is_featured'] = $request->has('is_featured');
 
         if ($request->hasFile('photo')) {
-            $validated['photo_path'] = $request->file('photo')->store('trainers', 'public');
+            $validated['photo_path'] = $this->imageOptimizerService->optimizeAndStore($request->file('photo'), 'trainers', 1200, 82);
         }
 
         $trainer = Trainer::create($validated);
@@ -3663,10 +3806,10 @@ class AppController extends Controller
         $validated['is_featured'] = $request->has('is_featured');
 
         if ($request->hasFile('photo')) {
-            if ($trainer->photo_path) {
+            if ($trainer->photo_path && Storage::disk('public')->exists($trainer->photo_path)) {
                 Storage::disk('public')->delete($trainer->photo_path);
             }
-            $validated['photo_path'] = $request->file('photo')->store('trainers', 'public');
+            $validated['photo_path'] = $this->imageOptimizerService->optimizeAndStore($request->file('photo'), 'trainers', 1200, 82);
         }
 
         $trainer->update($validated);
@@ -3883,7 +4026,7 @@ class AppController extends Controller
         $validated['price_includes_gst'] = $request->has('price_includes_gst') && $validated['gst_rate'] > 0;
 
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail_path'] = $request->file('thumbnail')->store('classes', 'public');
+            $validated['thumbnail_path'] = $this->imageOptimizerService->optimizeAndStore($request->file('thumbnail'), 'classes', 1200, 82);
         }
 
         $schedulesInput = $request->input('schedules', []);
@@ -3963,7 +4106,7 @@ class AppController extends Controller
             if ($gymClass->thumbnail_path) {
                 Storage::disk('public')->delete($gymClass->thumbnail_path);
             }
-            $validated['thumbnail_path'] = $request->file('thumbnail')->store('classes', 'public');
+            $validated['thumbnail_path'] = $this->imageOptimizerService->optimizeAndStore($request->file('thumbnail'), 'classes', 1200, 82);
         }
 
         $schedulesInput = $request->input('schedules', []);
@@ -4839,6 +4982,8 @@ class AppController extends Controller
             }
         }
 
+        $membershipPlans = $tenant ? MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->orderBy('price', 'desc')->get() : collect();
+
         return view('app.crm.dashboard', compact(
             'totalLeads',
             'newThisMonth',
@@ -4854,6 +4999,7 @@ class AppController extends Controller
             'upcomingTrials',
             'staffMembers',
             'tenant',
+            'membershipPlans',
             'myTargetProgress',
             'teamTargetLeaderboard'
         ));
@@ -5245,18 +5391,22 @@ class AppController extends Controller
                 'email' => $lead->email,
                 'join_date' => now()->toDateString(),
                 'status' => 'ACTIVE',
-                'notes' => "Converted from CRM Lead #{$lead->id} ({$lead->name})",
+                'notes' => null,
+                'lead_id' => $lead->id,
                 'qr_code_token' => Str::random(32),
             ]);
         } else {
-            $member->update(['status' => 'ACTIVE']);
+            $member->update([
+                'status' => 'ACTIVE',
+                'lead_id' => $member->lead_id ?: $lead->id,
+            ]);
         }
 
         $amount = $paidAmount ?? (float) ($lead->estimated_value ?? 0);
         if ($amount > 0) {
             $activeMembership = $member->activeMembership;
-            $defaultPlan = MembershipPlan::where('tenant_id', $tenant->id)->first();
-            $defaultPlan = MembershipPlan::where('tenant_id', $tenant->id)->first() ?? MembershipPlan::create([
+            $leadPlan = $lead->membership_plan_id ? MembershipPlan::where('tenant_id', $tenant->id)->find($lead->membership_plan_id) : null;
+            $defaultPlan = $leadPlan ?? MembershipPlan::where('tenant_id', $tenant->id)->first() ?? MembershipPlan::create([
                 'tenant_id' => $tenant->id,
                 'branch_id' => $branchId,
                 'name' => 'General Membership',
@@ -5286,7 +5436,7 @@ class AppController extends Controller
                     'final_amount' => $amount,
                     'paid_amount' => $amount,
                     'status' => 'ACTIVE',
-                    'notes' => "Auto-created from CRM Lead #{$lead->id} conversion",
+                    'notes' => null,
                 ]);
             } else {
                 $activeMembership->increment('paid_amount', $amount);
@@ -5303,17 +5453,19 @@ class AppController extends Controller
                 ->first();
 
             if (! $recentPayment) {
+                $invoiceNumber = MemberPayment::generateInvoiceNumber((int) $tenant->id);
+
                 MemberPayment::create([
                     'tenant_id' => $tenant->id,
                     'branch_id' => $branchId,
                     'member_id' => $member->id,
                     'membership_id' => $activeMembership?->id,
-                    'invoice_number' => 'INV-CRM-'.strtoupper(Str::random(6)).'-'.date('Ymd'),
+                    'invoice_number' => $invoiceNumber,
                     'amount' => $amount,
                     'payment_method' => 'cash',
                     'payment_date' => now()->toDateString(),
                     'received_by_user_id' => auth()->id(),
-                    'notes' => "Conversion payment from CRM Lead: {$lead->name}",
+                    'notes' => null,
                 ]);
             }
         }
@@ -5453,6 +5605,7 @@ class AppController extends Controller
     {
         $tenant = TenantContext::getTenant() ?? Auth::user()->tenant;
         $query = Lead::where('tenant_id', $tenant->id)
+            ->with(['assignedTo', 'membershipPlan'])
             ->whereIn('source', ['website', 'walk_in', 'facebook', 'instagram', 'google', 'whatsapp', 'phone', 'referral', 'other']);
 
         if ($request->filled('search')) {
@@ -5499,6 +5652,7 @@ class AppController extends Controller
         $enquiries = $query->latest()->paginate(15)->withQueryString();
         $staffMembers = $tenant ? User::where('tenant_id', $tenant->id)->whereNotIn('role', ['member', 'trainer', 'super_admin', 'gym_owner'])->where('status', 'ACTIVE')->orderBy('name')->get() : collect();
         $branches = Branch::where('tenant_id', $tenant->id)->get();
+        $membershipPlans = $tenant ? MembershipPlan::where('tenant_id', $tenant->id)->where('is_active', true)->orderBy('price', 'desc')->get() : collect();
 
         return view('app.crm.subpages', [
             'section' => 'enquiries',
@@ -5508,6 +5662,7 @@ class AppController extends Controller
             'enquiryStats' => $enquiryStats,
             'staffMembers' => $staffMembers,
             'branches' => $branches,
+            'membershipPlans' => $membershipPlans,
             'tenant' => $tenant,
         ]);
     }
@@ -5524,6 +5679,7 @@ class AppController extends Controller
             'stage' => 'nullable|string|max:50',
             'branch_id' => 'nullable|exists:branches,id',
             'assigned_to_user_id' => 'nullable|exists:users,id',
+            'membership_plan_id' => 'nullable|exists:membership_plans,id',
             'follow_up_date' => 'nullable|date',
             'estimated_value' => 'nullable|numeric|min:0',
             'remarks' => 'nullable|string',
@@ -5550,9 +5706,23 @@ class AppController extends Controller
             $assignedToUserId = $currentUser->id;
         }
 
+        $planId = $validated['membership_plan_id'] ?? null;
+        $estValue = $validated['estimated_value'] ?? null;
+        if ((empty($estValue) || (float) $estValue == 0) && $planId) {
+            $plan = MembershipPlan::find($planId);
+            $estValue = $plan?->price ?? 0;
+        }
+
+        $branches = $tenant ? Branch::where('tenant_id', $tenant->id)->get() : collect();
+        $branchId = $validated['branch_id'] ?? null;
+        if (empty($branchId)) {
+            $branchId = $currentUser?->branch_id ?? $branches->first()?->id;
+        }
+
         $lead = Lead::create([
             'tenant_id' => $tenant->id,
-            'branch_id' => $validated['branch_id'] ?? null,
+            'branch_id' => $branchId,
+            'membership_plan_id' => $planId,
             'name' => $validated['name'],
             'phone' => $validated['phone'] ?? '',
             'email' => $validated['email'] ?? null,
@@ -5563,10 +5733,10 @@ class AppController extends Controller
             'follow_up_date' => $validated['follow_up_date'] ?? null,
             'remarks' => $validated['remarks'] ?? ($validated['notes'] ?? null),
             'notes' => $validated['notes'] ?? ($validated['remarks'] ?? null),
-            'estimated_value' => $validated['estimated_value'] ?? 0,
+            'estimated_value' => $estValue ?? 0,
         ]);
 
-        ActivityLog::log('enquiry_created', "Recorded direct enquiry/walk-in for {$lead->name}");
+        ActivityLog::log('enquiry_created', "Recorded direct enquiry/walk-in for {$lead->name}".($planId ? " (Pitched: {$lead->membershipPlan?->name})" : ''));
 
         return back()->with('success', "Enquiry for {$lead->name} recorded successfully!");
     }
@@ -7229,17 +7399,13 @@ class AppController extends Controller
 
             // 1. Handle Custom Seal / Stamp Image Upload
             if ($request->hasFile('invoice_seal')) {
-                $file = $request->file('invoice_seal');
-                $filename = 'seal_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
-                $path = $file->storeAs('seals', $filename, 'public');
+                $path = $this->imageOptimizerService->optimizeAndStore($request->file('invoice_seal'), 'seals', 800, 85);
                 $invoiceData['seal_url'] = asset('storage/'.$path);
             }
 
             // 2. Handle Custom Authorized Signature Image Upload
             if ($request->hasFile('invoice_signature')) {
-                $file = $request->file('invoice_signature');
-                $filename = 'sig_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
-                $path = $file->storeAs('signatures', $filename, 'public');
+                $path = $this->imageOptimizerService->optimizeAndStore($request->file('invoice_signature'), 'signatures', 800, 85);
                 $invoiceData['signature_url'] = asset('storage/'.$path);
             }
 
@@ -7248,9 +7414,7 @@ class AppController extends Controller
 
         // Handle Logo Upload
         if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            $filename = 'tenant_'.$tenant->id.'_'.time().'.'.$file->getClientOriginalExtension();
-            $path = $file->storeAs('logos', $filename, 'public');
+            $path = $this->imageOptimizerService->optimizeAndStore($request->file('logo'), 'logos', 800, 85);
             $tenant->logo_url = asset('storage/'.$path);
         } elseif ($request->filled('logo_url')) {
             $tenant->logo_url = trim($request->logo_url);
@@ -7346,7 +7510,11 @@ class AppController extends Controller
     public function staff(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $query = User::where('tenant_id', $tenant->id)->with('branches')->latest('id');
+        $query = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->with('branches')
+            ->latest('id');
 
         if ($request->filled('search')) {
             $s = trim($request->search);
@@ -7367,11 +7535,14 @@ class AppController extends Controller
 
         $staffMembers = $query->paginate(15)->withQueryString();
 
-        // Aggregates
-        $allTenantUsers = User::where('tenant_id', $tenant->id)->get();
+        // Aggregates (excluding gym members and super admin)
+        $allTenantUsers = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->get();
         $totalStaff = $allTenantUsers->count();
         $activeStaff = $allTenantUsers->where('status', 'ACTIVE')->count();
-        $managerStaff = $allTenantUsers->whereIn('role', ['gym_manager', 'receptionist'])->count();
+        $managerStaff = $allTenantUsers->whereIn('role', ['gym_manager', 'receptionist', 'sales'])->count();
         $trainerStaff = $allTenantUsers->where('role', 'trainer')->count();
         $totalMonthlySalary = $allTenantUsers->sum(function ($u) {
             $salary = $u->metadata['monthly_salary'] ?? 0;
@@ -7406,7 +7577,7 @@ class AppController extends Controller
         }
 
         $allowedRoles = array_unique(array_merge(
-            ['gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'],
+            ['gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'],
             Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
         ));
 
@@ -7572,10 +7743,13 @@ class AppController extends Controller
     public function updateStaff(Request $request, int $id): RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+        $user = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->findOrFail($id);
 
         $allowedRoles = array_unique(array_merge(
-            ['gym_owner', 'gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'],
+            ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'],
             Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
         ));
 
@@ -7722,7 +7896,10 @@ class AppController extends Controller
     public function deleteStaff(int $id): RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+        $user = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->findOrFail($id);
 
         if ($user->id === auth()->id()) {
             return back()->with('error', 'You cannot delete your own logged-in account.');
@@ -7754,7 +7931,10 @@ class AppController extends Controller
     public function toggleStaffStatus(int $id): RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+        $user = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->findOrFail($id);
 
         if ($user->id === auth()->id()) {
             return back()->with('error', 'You cannot change the status of your own account.');
@@ -7780,7 +7960,10 @@ class AppController extends Controller
     public function resetStaffPassword(Request $request, int $id): RedirectResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $user = User::where('tenant_id', $tenant->id)->findOrFail($id);
+        $user = User::where('tenant_id', $tenant->id)
+            ->whereNotIn('role', ['member', 'super_admin'])
+            ->whereDoesntHave('memberProfile')
+            ->findOrFail($id);
 
         $validated = $request->validate([
             'password' => 'required|string|min:6',
@@ -7813,9 +7996,11 @@ class AppController extends Controller
             ->with(['permissions', 'users'])
             ->get();
 
-        // Calculate staff count for each role
+        // Calculate staff count for each role (excluding gym members and super admin)
         foreach ($roles as $r) {
             $r->staff_count = User::where('tenant_id', $tenant->id)
+                ->whereNotIn('role', ['member', 'super_admin'])
+                ->whereDoesntHave('memberProfile')
                 ->where(function ($q) use ($r) {
                     $q->where('role', $r->name)
                         ->orWhereHas('roles', function ($rq) use ($r) {

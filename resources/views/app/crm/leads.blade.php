@@ -56,6 +56,7 @@
             name: '',
             phone: '',
             email: '',
+            membership_plan_id: '',
             source: 'website',
             stage: 'NEW_LEAD',
             assigned_to_user_id: '',
@@ -65,12 +66,29 @@
             estimated_value: 0,
             notes: ''
         },
+        quickSelectedPlanId: '',
+        quickEstimatedValue: 0,
+        onQuickPlanChange(event) {
+            const opt = event.target.options[event.target.selectedIndex];
+            const price = opt ? opt.getAttribute('data-price') : 0;
+            this.quickSelectedPlanId = event.target.value;
+            this.quickEstimatedValue = price ? Number(price) : 0;
+        },
+        onEditPlanChange(event) {
+            const opt = event.target.options[event.target.selectedIndex];
+            const price = opt ? opt.getAttribute('data-price') : 0;
+            this.editLeadData.membership_plan_id = event.target.value;
+            if (price) {
+                this.editLeadData.estimated_value = Number(price);
+            }
+        },
         openEditModal(lead) {
             this.editLeadData = {
                 id: lead.id,
                 name: lead.name || '',
                 phone: lead.phone || '',
                 email: lead.email || '',
+                membership_plan_id: lead.membership_plan_id || '',
                 source: lead.source || 'website',
                 stage: lead.stage || lead.status || 'NEW_LEAD',
                 assigned_to_user_id: lead.assigned_to_user_id || '',
@@ -457,8 +475,24 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Conversion Amount ({{ $currency }})</label>
-                            <input type="number" step="0.01" name="estimated_value" placeholder="e.g. 5000" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Pitched Membership</label>
+                                <span x-show="quickEstimatedValue > 0" x-cloak class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                    {{ $currency }}<span x-text="Number(quickEstimatedValue).toLocaleString('en-IN')"></span>
+                                </span>
+                            </div>
+                            <select name="membership_plan_id" 
+                                    x-model="quickSelectedPlanId" 
+                                    @change="onQuickPlanChange($event)"
+                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                <option value="" data-price="">-- Select Pitched Package --</option>
+                                @foreach($membershipPlans ?? [] as $plan)
+                                    <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
+                                        {{ $plan->name }} ({{ $plan->duration_value }} {{ ucfirst($plan->duration_type ?? 'Months') }}) • {{ $currency }}{{ number_format($plan->price) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="estimated_value" :value="quickEstimatedValue">
                         </div>
                     </div>
 
@@ -546,8 +580,24 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Conversion Amount ({{ $currency }})</label>
-                            <input type="number" step="0.01" name="estimated_value" x-model="editLeadData.estimated_value" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Pitched Membership</label>
+                                <span x-show="editLeadData.estimated_value > 0" x-cloak class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                    {{ $currency }}<span x-text="Number(editLeadData.estimated_value).toLocaleString('en-IN')"></span>
+                                </span>
+                            </div>
+                            <select name="membership_plan_id" 
+                                    x-model="editLeadData.membership_plan_id" 
+                                    @change="onEditPlanChange($event)"
+                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                <option value="" data-price="">-- Select Pitched Package --</option>
+                                @foreach($membershipPlans ?? [] as $plan)
+                                    <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
+                                        {{ $plan->name }} ({{ $plan->duration_value }} {{ ucfirst($plan->duration_type ?? 'Months') }}) • {{ $currency }}{{ number_format($plan->price) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="estimated_value" :value="editLeadData.estimated_value">
                         </div>
                     </div>
 

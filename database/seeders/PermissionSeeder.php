@@ -54,6 +54,7 @@ class PermissionSeeder extends Seeder
                     ['name' => 'payments.view', 'display_name' => 'View Payments & Receipts', 'description' => 'Inspect payment records and transaction logs'],
                     ['name' => 'payments.record', 'display_name' => 'Collect / Record Payment', 'description' => 'Accept cash, POS, card, or UPI fee collections'],
                     ['name' => 'payments.refund', 'display_name' => 'Refund / Reverse Payment', 'description' => 'Reverse or cancel recorded transactions'],
+                    ['name' => 'payments.edit_method', 'display_name' => 'Correct Payment Method', 'description' => 'Change payment mode (Cash/UPI/Card) on recorded receipts (Owner only)'],
                     ['name' => 'payments.invoice_view', 'display_name' => 'View & Print Tax Invoices', 'description' => 'Generate, inspect, and print official tax invoices'],
                 ],
             ],
@@ -208,6 +209,7 @@ class PermissionSeeder extends Seeder
             'payments.view' => 'payments_pos',
             'payments.record' => 'payments_pos',
             'payments.refund' => 'payments_pos',
+            'payments.edit_method' => 'payments_pos',
             'payments.invoice_view' => 'payments_pos',
 
             // Attendance
@@ -330,6 +332,14 @@ class PermissionSeeder extends Seeder
                 'whatsapp.view', 'whatsapp.contacts', 'whatsapp.inbox',
                 'inventory.view',
             ],
+            'sales' => [
+                'dashboard.view', 'dashboard.member_stats',
+                'crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.trials', 'crm.reports',
+                'members.view', 'members.create',
+                'memberships.view', 'plans.view',
+                'payments.view', 'payments.record', 'payments.invoice_view',
+                'whatsapp.view', 'whatsapp.contacts', 'whatsapp.inbox',
+            ],
             'trainer' => [
                 'pt.view', 'pt.sessions_manage',
                 'workouts.view', 'workouts.create', 'workouts.edit',
@@ -449,6 +459,7 @@ class PermissionSeeder extends Seeder
                     'display_name' => match ($roleSlug) {
                         'gym_manager' => 'Gym Manager',
                         'receptionist' => 'Receptionist',
+                        'sales' => 'Sales Executive',
                         'trainer' => 'Fitness Trainer',
                         'accountant' => 'Accountant',
                         'staff' => 'General Staff',

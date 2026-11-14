@@ -100,6 +100,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/members/{id}/collect-fee', [AppController::class, 'collectMemberFee'])->name('app.members.collect-fee')->middleware('permission:payments.record');
         Route::post('/members/{id}/freeze', [AppController::class, 'toggleFreezeMember'])->name('app.members.freeze')->middleware('permission:members.freeze');
         Route::post('/members/{id}/add-subscription', [AppController::class, 'addMemberSubscription'])->name('app.members.add-subscription')->middleware('permission:memberships.create,memberships.edit,plans.create,plans.edit,members.create,members.edit');
+        Route::post('/members/{id}/cancel-membership', [AppController::class, 'cancelMembership'])->name('app.members.cancel-membership')->middleware('permission:memberships.edit,members.edit,members.delete');
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package')->middleware('permission:pt.create');
         Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class')->middleware('permission:classes.book');
         Route::post('/members/{id}/generate-portal-link', [AppController::class, 'generateMemberPortalLink'])->name('app.members.generate-portal-link')->middleware('permission:members.edit,members.view');
@@ -121,6 +122,8 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/payments', [AppController::class, 'payments'])->name('app.payments.index')->middleware('permission:payments.view');
         Route::post('/payments', [AppController::class, 'storePayment'])->name('app.payments.store')->middleware('permission:payments.record');
         Route::post('/payments/{id}/reverse', [AppController::class, 'reversePayment'])->name('app.payments.reverse')->middleware('permission:payments.refund');
+        Route::delete('/payments/{id}', [AppController::class, 'deletePayment'])->name('app.payments.delete')->middleware('permission:payments.refund');
+        Route::post('/payments/{id}/update-method', [AppController::class, 'updatePaymentMethod'])->name('app.payments.update-method')->middleware('permission:payments.edit_method');
         Route::post('/payments/{id}/send-email', [AppController::class, 'sendPaymentReceipt'])->name('app.payments.send-email')->middleware('permission:payments.view,payments.record');
     });
     Route::middleware(['feature:payments_pos', 'permission:payments.invoice_view,payments.view'])->get('/invoices/{id}', [AppController::class, 'showInvoice'])->name('app.invoices.show');

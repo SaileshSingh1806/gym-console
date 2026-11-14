@@ -39,6 +39,14 @@
         activeTab: 'subscriptions',
         showAddPaymentModal: false,
         showAddSubscriptionModal: false,
+        showCancelMembershipModal: false,
+        cancelSubId: null,
+        cancelSubPlanName: '',
+        openCancelMembershipModal(subId, planName) {
+            this.cancelSubId = subId;
+            this.cancelSubPlanName = planName;
+            this.showCancelMembershipModal = true;
+        },
         showAddPtModal: false,
         showEditModal: {{ request()->boolean('edit') ? 'true' : 'false' }},
         editPlanId: '{{ $activeMembership?->membership_plan_id ?? '' }}',
@@ -1248,6 +1256,10 @@
                                                     <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-black text-[10px]">
                                                         Active
                                                     </span>
+                                                @elseif($sub->status === 'CANCELLED')
+                                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-bold text-[10px]">
+                                                        Cancelled
+                                                    </span>
                                                 @else
                                                     <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-[10px]">
                                                         Expired
@@ -1267,6 +1279,17 @@
                                                             <svg class="w-3.5 h-3.5 transition-transform" :class="showPayments ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                                         </button>
                                                     @endif
+
+                                                    @if($sub->status === 'ACTIVE' && (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('memberships.edit')))
+                                                        <button type="button" 
+                                                                @click="openCancelMembershipModal({{ $sub->id }}, '{{ addslashes($sub->plan->name ?? 'Membership Plan') }}')"
+                                                                title="Cancel / Void this membership subscription" 
+                                                                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20 text-xs font-bold transition-colors shadow-sm cursor-pointer flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                            <span>Cancel</span>
+                                                        </button>
+                                                    @endif
+
                                                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}?text={{ urlencode('Subscription: ' . ($sub->plan->name ?? '') . ' | Period: ' . $sub->start_date->format('d/m/Y') . ' - ' . $sub->end_date->format('d/m/Y') . ' | Total: ' . $currency . number_format($sub->final_amount, 2)) }}" 
                                                        target="_blank" 
                                                        title="Send via WhatsApp" 
@@ -1315,7 +1338,7 @@
                                                                         <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $pDate }}</span>
                                                                         <span class="text-slate-400">•</span>
                                                                         <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[10px] font-bold uppercase text-slate-700 dark:text-slate-300">{{ $p->payment_method }}</span>
-                                                                        @if(!empty($p->notes))
+                                                                        @if(!empty($p->notes) && !str_contains(strtolower($p->notes), 'crm') && !str_contains(strtolower($p->notes), 'conversion') && !str_contains(strtolower($p->notes), 'lead'))
                                                                             <span class="text-slate-400">•</span>
                                                                             <span class="text-slate-500 dark:text-slate-400 text-[11px] truncate max-w-[200px]">{{ $p->notes }}</span>
                                                                         @endif
@@ -5034,5 +5057,61 @@
                 </div>
             </div>
         </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODAL: CANCEL MEMBERSHIP SUBSCRIPTION -->
+        <!-- ========================================================================= -->
+        <div x-show="showCancelMembershipModal" 
+             class="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" 
+             x-cloak>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-left" 
+                 @click.away="showCancelMembershipModal = false">
+                <div class="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center font-black shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 dark:text-white">Cancel Membership</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Cancel package &amp; remove from active dashboard fees</p>
+                    </div>
+                </div>
+
+                <form action="{{ route('app.members.cancel-membership', $member->id) }}" method="POST" class="space-y-4">
+                    @csrf
+                    <input type="hidden" name="membership_id" :value="cancelSubId">
+
+                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs">
+                        <span>Cancelling package for <strong>{{ $member->full_name }}</strong>: <span class="font-bold underline" x-text="cancelSubPlanName"></span>. This will set member status to <strong>Inactive</strong>.</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                            Reason for Cancellation <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="reason" 
+                               required 
+                               placeholder="e.g. Package transferred to husband Minesh Gajjar (ARM045)" 
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:border-rose-500 focus:outline-none">
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" name="void_fee" value="1" checked class="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 dark:text-white block">Void / Transfer Fee from Dashboard</span>
+                                <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">Check this so this package's fee is NOT counted or double-counted in your gym dashboard revenue.</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" @click="showCancelMembershipModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md shadow-rose-600/25 transition-all cursor-pointer">Confirm Cancellation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </x-app-layout>

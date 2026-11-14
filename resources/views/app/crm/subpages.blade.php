@@ -13,6 +13,14 @@
     <div class="crm-enquiries-scope space-y-6" x-data="{
         showAddModal: {{ $errors->any() ? 'true' : 'false' }},
         followUpDate: '{{ old('follow_up_date', '') }}',
+        selectedPlanId: '{{ old('membership_plan_id', '') }}',
+        estimatedValue: '{{ old('estimated_value', '') }}',
+        onPlanChange(event) {
+            const selectedOpt = event.target.options[event.target.selectedIndex];
+            const price = selectedOpt ? selectedOpt.getAttribute('data-price') : '';
+            this.selectedPlanId = event.target.value;
+            this.estimatedValue = price || '';
+        },
         setQuickFollowUp(days) {
             const d = new Date();
             d.setDate(d.getDate() + days);
@@ -301,8 +309,13 @@
                                         @else
                                             <div class="text-slate-400">No follow-up</div>
                                         @endif
+                                        @if($enq->membershipPlan)
+                                            <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 truncate max-w-[170px]" title="{{ $enq->membershipPlan->name }}">
+                                                🎯 {{ $enq->membershipPlan->name }}
+                                            </div>
+                                        @endif
                                         @if((float) ($enq->estimated_value ?? 0) > 0)
-                                            <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">{{ $currency }}{{ number_format((float) $enq->estimated_value, 0) }}</div>
+                                            <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">{{ $currency }}{{ number_format((float) $enq->estimated_value, 0) }}</div>
                                         @endif
                                     </td>
                                     <td class="py-3.5 px-4 text-slate-500 dark:text-slate-400 max-w-[220px]">
@@ -445,9 +458,9 @@
                                 </div>
                             </div>
 
-                            <!-- Section 3: Follow-Up & Value -->
+                            <!-- Section 3: Follow-Up & Pitched Membership -->
                             <div class="space-y-2.5 pt-3.5 border-t border-slate-200 dark:border-slate-800">
-                                <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Follow-Up &amp; Value</h4>
+                                <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Follow-Up &amp; Pitched Membership</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
@@ -461,8 +474,26 @@
                                         <input type="date" name="follow_up_date" x-model="followUpDate" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums focus:border-indigo-500 focus:outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Expected Value ({{ $currency }})</label>
-                                        <input type="number" step="0.01" min="0" name="estimated_value" value="{{ old('estimated_value') }}" placeholder="3500" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                Pitched Membership Plan
+                                            </label>
+                                            <span x-show="estimatedValue && estimatedValue > 0" x-cloak class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                                {{ $currency }}<span x-text="Number(estimatedValue).toLocaleString('en-IN')"></span>
+                                            </span>
+                                        </div>
+                                        <select name="membership_plan_id" 
+                                                x-model="selectedPlanId" 
+                                                @change="onPlanChange($event)" 
+                                                class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                            <option value="" data-price="">-- Select Pitched Membership Plan --</option>
+                                            @foreach($membershipPlans ?? [] as $plan)
+                                                <option value="{{ $plan->id }}" data-price="{{ $plan->price }}" {{ (string) old('membership_plan_id') === (string) $plan->id ? 'selected' : '' }}>
+                                                    {{ $plan->name }} ({{ $plan->duration_value }} {{ ucfirst($plan->duration_type ?? 'Months') }}) • {{ $currency }}{{ number_format($plan->price) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="hidden" name="estimated_value" :value="estimatedValue">
                                     </div>
                                 </div>
                             </div>

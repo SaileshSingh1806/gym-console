@@ -1,7 +1,7 @@
 <x-app-layout header="Roles & Permissions">
     @php
         $tenant = auth()->user()->tenant;
-        $systemRoleNames = ['gym_owner', 'gym_manager', 'receptionist', 'trainer', 'accountant', 'staff'];
+        $systemRoleNames = ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'];
     @endphp
 
     <div x-data="{

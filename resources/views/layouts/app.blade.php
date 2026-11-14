@@ -124,13 +124,13 @@
          x-transition:leave="transition-opacity ease-linear duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs lg:hidden" 
+         class="fixed inset-0 z-[100] bg-slate-950/75 backdrop-blur-xs lg:hidden" 
          @click="sidebarOpen = false" 
          x-cloak></div>
 
     <!-- Sidebar Navigation (Drawer on Mobile, Fixed Column on Desktop) -->
     <aside :class="sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full lg:translate-x-0'" 
-           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
+           class="fixed inset-y-0 left-0 z-[101] w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0 lg:z-auto">
         <!-- Brand Header -->
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/50 backdrop-blur">
             <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0 group focus:outline-none">
@@ -402,16 +402,16 @@
             @endif
 
             @php
-                $canBiz = ($user->hasPermission('crm.view') && $user->hasFeature('crm_leads'))
-                    || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.manage']) && $user->hasFeature('reports_finance'))
-                    || ($user->hasPermission('inventory.view') && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
+                $canBiz = ($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
+                    || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create']) && $user->hasFeature('reports_finance'))
+                    || ($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
             @endphp
 
             @if($canBiz)
             <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Business & Growth</div>
 
             <!-- CRM & Leads Expandable Section -->
-            @if($user->hasPermission('crm.view') && $user->hasFeature('crm_leads'))
+            @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
             @php
                 $isCrmActive = request()->routeIs('app.crm.*') || request()->routeIs('app.leads.*') || request()->routeIs('app.trials.*');
             @endphp
@@ -429,31 +429,39 @@
 
                 <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
                     <!-- CRM Dashboard -->
+                    @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
                     <a href="{{ route('app.crm.dashboard') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.dashboard') || request()->routeIs('app.crm.index')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.crm.dashboard') || request()->routeIs('app.crm.index')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>CRM Dashboard</span>
                     </a>
+                    @endif
 
                     <!-- Leads -->
+                    @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create']))
                     <a href="{{ route('app.leads.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.leads.*') || request()->routeIs('app.crm.leads')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.leads.*') || request()->routeIs('app.crm.leads')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Leads</span>
                     </a>
-
+                    @endif
 
                     <!-- Trial -->
+                    @if($user->hasAnyPermission(['crm.view', 'crm.trials']))
                     <a href="{{ route('app.crm.trials') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.trials') || request()->routeIs('app.trials.*')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.crm.trials') || request()->routeIs('app.trials.*')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Trial</span>
                     </a>
+                    @endif
 
                     <!-- Conversions -->
+                    @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.reports']))
                     <a href="{{ route('app.crm.conversions') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.conversions') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.conversions') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Conversions</span>
                     </a>
+                    @endif
 
                     <!-- Sales Targets -->
+                    @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
                     <a href="{{ route('app.crm.reports') }}#targets" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.reports') && request()->has('targets')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <div class="flex items-center gap-2.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -467,6 +475,7 @@
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.reports') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>CRM Reports</span>
                     </a>
+                    @endif
                 </div>
             </div>
             @endif
@@ -556,7 +565,7 @@
 
 
             <!-- Report & Finance -->
-            @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.manage']) && $user->hasFeature('reports_finance'))
+            @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create']) && $user->hasFeature('reports_finance'))
             @php
                 $isFinanceActive = request()->routeIs('app.finance.*') || request()->routeIs('app.reports.*') || request()->routeIs('app.expenses.*') || request()->routeIs('app.balance-sheet.*');
             @endphp
@@ -587,7 +596,7 @@
                     @endif
 
                     <!-- Expenses -->
-                    @if($user->hasPermission('expenses.view') || $user->hasPermission('expenses.create'))
+                    @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete']))
                     <a href="{{ route('app.expenses.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.expenses.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Expenses</span>
@@ -598,7 +607,7 @@
             @endif
 
             <!-- Inventory & Equipment Maintenance -->
-            @if($user->hasPermission('inventory.view') && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']))
+            @if($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']))
             <a href="{{ route('app.inventory.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.inventory.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
                 <div class="flex items-center gap-3 min-w-0">
                     <svg class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -610,7 +619,8 @@
             @endif
 
             @php
-                $canAdmin = ($user->hasAnyPermission(['staff.view', 'roles.manage']) && $user->hasFeature('staff_roles'))
+                $canAdmin = ($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
+                    || (($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
                     || $user->isGymOwner()
                     || $user->isSuperAdmin()
                     || $user->hasPermission('settings.manage');
@@ -620,7 +630,7 @@
             <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Administration</div>
 
             <!-- Staff & Team Management Expandable -->
-            @if($user->hasAnyPermission(['staff.view', 'roles.manage']) && $user->hasFeature('staff_roles'))
+            @if($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
             @php
                 $isStaffActive = request()->routeIs('app.staff.*') || request()->routeIs('app.roles.*');
             @endphp
@@ -635,7 +645,7 @@
 
                 <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
                     <!-- Staff Members List -->
-                    @if($user->hasPermission('staff.view'))
+                    @if($user->hasAnyPermission(['staff.view', 'staff.create', 'staff.edit']))
                     <a href="{{ route('app.staff.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.staff.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.staff.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Staff Members</span>
@@ -651,6 +661,17 @@
                     @endif
                 </div>
             </div>
+            @endif
+
+            <!-- Biometric IoT Devices -->
+            @if(($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
+            <a href="{{ route('app.devices.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.devices.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
+                    <span>BIOMETRIC DEVICES</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
             @endif
 
             <!-- Subscription & Billing -->
@@ -814,7 +835,7 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 {{ $isStealthApp ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4]' : 'bg-white/95 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800' }} backdrop-blur-md px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 transition-colors duration-200 shrink-0">
+        <header class="h-16 {{ $isStealthApp ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4]' : 'bg-white/95 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800' }} backdrop-blur-md px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @if(request()->routeIs('trainer.*') || $isPureTrainer)
                     @php
@@ -1270,11 +1291,13 @@
                                     </a>
                                 @endif
 
+                                @if(auth()->user()->hasFeature('whatsapp_marketing') && auth()->user()->hasPermission('whatsapp.view'))
                                 <a href="{{ route('app.whatsapp.dashboard') }}" 
                                    class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors font-medium">
                                     <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                     <span>WhatsApp Marketing Hub</span>
                                 </a>
+                                @endif
                             @endif
 
                             @if(auth()->user()->isMember())
@@ -1524,8 +1547,8 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="fixed bottom-0 inset-x-0 z-[9999] {{ $isStealthApp ? ($isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-white/95 dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800/90' }} backdrop-blur-lg px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all"
-         style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 9999 !important;">
+         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-white/95 dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800/90' }} backdrop-blur-lg px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all"
+         style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 40 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
                 <!-- Member Fitness App Navigation (Option 2 Luxury Studio) -->

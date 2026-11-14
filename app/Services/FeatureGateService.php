@@ -40,7 +40,7 @@ class FeatureGateService
         $current = match ($resourceType) {
             'members' => $tenant->members()->count(),
             'branches' => $tenant->branches()->count(),
-            'staff' => $tenant->users()->whereNotIn('role', ['gym_owner', 'super_admin'])->count(),
+            'staff' => $tenant->users()->whereNotIn('role', ['gym_owner', 'super_admin', 'member'])->count(),
             default => 0,
         };
 
