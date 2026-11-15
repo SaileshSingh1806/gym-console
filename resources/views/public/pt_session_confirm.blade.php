@@ -111,8 +111,21 @@
                 
                 <!-- Gym Branding -->
                 <div class="text-center space-y-2.5">
-                    @if(!empty($tenant->logo_url))
-                        <img src="{{ asset('storage/' . $tenant->logo_url) }}" alt="{{ $tenant->name }}" class="h-12 sm:h-14 w-auto max-w-[180px] mx-auto object-contain drop-shadow-md">
+                    @php
+                        $rawLogo = $tenant->logo_url ?? null;
+                        $gymLogo = null;
+                        if (!empty($rawLogo)) {
+                            if (str_starts_with($rawLogo, 'http://') || str_starts_with($rawLogo, 'https://')) {
+                                $gymLogo = $rawLogo;
+                            } elseif (str_starts_with($rawLogo, '/storage/') || str_starts_with($rawLogo, 'storage/')) {
+                                $gymLogo = asset(ltrim($rawLogo, '/'));
+                            } else {
+                                $gymLogo = asset('storage/' . $rawLogo);
+                            }
+                        }
+                    @endphp
+                    @if(!empty($gymLogo))
+                        <img src="{{ $gymLogo }}" alt="{{ $tenant->name }}" class="h-12 sm:h-14 w-auto max-w-[180px] mx-auto object-contain drop-shadow-md" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xl mx-auto shadow-lg shadow-amber-500/20\'>{{ strtoupper(substr($tenant->name ?: \'G\', 0, 2)) }}</div>';">
                     @else
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 font-black text-xl mx-auto shadow-lg shadow-amber-500/20">
                             {{ strtoupper(substr($tenant->name ?: 'G', 0, 2)) }}
