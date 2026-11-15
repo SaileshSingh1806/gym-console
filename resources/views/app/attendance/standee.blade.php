@@ -69,9 +69,13 @@
             </span>
 
             <div class="p-4 bg-slate-50 rounded-2xl border-2 border-slate-200 inline-block shadow-inner">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data={{ urlencode($checkinUrl) }}" 
-                     alt="Gym Checkin QR Code" 
-                     class="w-56 h-56 mx-auto rounded-lg">
+                <div id="qrcode-wrapper" class="w-56 h-56 mx-auto flex items-center justify-center [&_img]:mx-auto [&_canvas]:mx-auto [&_img]:rounded-lg [&_canvas]:rounded-lg">
+                    <img id="fallback-qr" 
+                         src="https://quickchart.io/qr?size=260&margin=1&text={{ urlencode($checkinUrl) }}" 
+                         alt="Gym Checkin QR Code" 
+                         class="w-56 h-56 mx-auto rounded-lg object-contain"
+                         onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=260x260&data={{ urlencode($checkinUrl) }}';">
+                </div>
             </div>
 
             <p class="text-xs text-slate-600 font-medium max-w-xs mx-auto leading-relaxed">
@@ -107,6 +111,36 @@
         <p>💡 Tip: Place this printed poster on your reception desk or turnstile entrance for automatic member attendance.</p>
     </div>
 
+    <!-- Client-side QR generator with instant fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var qrWrapper = document.getElementById("qrcode-wrapper");
+            var fallbackQr = document.getElementById("fallback-qr");
+            if (typeof QRCode !== "undefined" && qrWrapper) {
+                try {
+                    var tempDiv = document.createElement("div");
+                    new QRCode(tempDiv, {
+                        text: {!! json_encode($checkinUrl) !!},
+                        width: 224,
+                        height: 224,
+                        colorDark: "#0f172a",
+                        colorLight: "#f8fafc",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    setTimeout(function() {
+                        var qrImg = tempDiv.querySelector("img") || tempDiv.querySelector("canvas");
+                        if (qrImg) {
+                            qrWrapper.innerHTML = "";
+                            qrWrapper.appendChild(qrImg);
+                        }
+                    }, 50);
+                } catch (e) {
+                    console.warn("Client QRCode fallback to QuickChart:", e);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 

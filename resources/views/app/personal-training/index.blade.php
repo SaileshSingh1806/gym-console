@@ -2520,9 +2520,10 @@
                         <div class="space-y-4">
                             <!-- QR Code Box -->
                             <div class="relative inline-block mx-auto p-4 rounded-3xl bg-white shadow-2xl border-4 border-amber-500/40">
-                                <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=' + encodeURIComponent(qrSession.confirmUrl)" 
+                                <img :src="'https://quickchart.io/qr?size=260&margin=2&text=' + encodeURIComponent(qrSession.confirmUrl)" 
                                      alt="PT Confirmation QR Code" 
-                                     class="w-52 h-52 sm:w-60 sm:h-60 mx-auto object-contain">
+                                     class="w-52 h-52 sm:w-60 sm:h-60 mx-auto object-contain"
+                                     @error="$event.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=' + encodeURIComponent(qrSession.confirmUrl)">
                                 
                                 <div class="mt-2 pt-2 border-t border-slate-100 text-center">
                                     <span class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Session PIN</span>

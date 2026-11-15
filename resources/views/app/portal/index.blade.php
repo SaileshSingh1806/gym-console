@@ -2461,7 +2461,7 @@
 
                     <!-- QR Code -->
                     <div class="p-4 rounded-2xl bg-white mx-auto inline-block shadow-lg">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto">
+                        <img src="https://quickchart.io/qr?size=200&margin=1&text={{ urlencode($member->qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}';">
                     </div>
 
                     <p class="text-xs text-slate-400">Scan this pass at the front desk scanner or turnstile to log your attendance.</p>
