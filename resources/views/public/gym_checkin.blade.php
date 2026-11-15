@@ -152,7 +152,7 @@
                                        value="{{ old('identifier') }}" 
                                        required 
                                        autofocus 
-                                       placeholder="e.g. 8980986524 or ARM184" 
+                                       placeholder="e.g. 9876543210 or MEM001" 
                                        class="w-full pl-10 pr-4 py-3.5 rounded-xl bg-[#080d17] border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-all font-mono">
                             </div>
                         </div>

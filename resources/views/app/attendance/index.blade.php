@@ -108,7 +108,7 @@
                 <input type="text" 
                        x-model="scanCode" 
                        @keydown.enter.prevent="submitFastScan('check_in')"
-                       placeholder="Scan QR or enter Member ID / Phone (e.g. ARM184, 8980986524)..." 
+                       placeholder="Scan QR or enter Member ID / Phone (e.g. MEM001, 9876543210)..." 
                        class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 font-mono">
             </div>
 
