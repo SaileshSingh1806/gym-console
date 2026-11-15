@@ -765,7 +765,7 @@
                     <!-- Photo Header -->
                     <div class="relative aspect-[4/3] bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden">
                         @if($member->avatar_url)
-                            <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" class="w-full h-full object-cover">
+                            <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" loading="lazy" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full bg-slate-100 dark:bg-gradient-to-tr dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
                                 <div class="w-20 h-20 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center text-2xl font-black text-slate-800 dark:text-white shadow-inner mb-2">

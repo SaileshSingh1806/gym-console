@@ -299,7 +299,7 @@
                         <div class="flex items-start gap-3 mb-3">
                             <div class="relative shrink-0">
                                 @if($trainer->photo_path)
-                                    <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" class="w-11 h-11 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm">
+                                    <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" loading="lazy" class="w-11 h-11 rounded-xl object-cover border border-slate-200 dark:border-slate-700 shadow-sm">
                                 @else
                                     <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-black text-sm flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
                                         {{ substr($trainer->first_name, 0, 1) }}{{ substr($trainer->last_name, 0, 1) }}
