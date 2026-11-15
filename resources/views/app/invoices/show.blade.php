@@ -342,29 +342,66 @@
             ══════════════════════════════════════════ -->
             @php
                 $rawNotes = $payment->notes ?? '';
-                $isSplit = ($payment->payment_method === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
+                $isSplit = (strtolower($payment->payment_method ?? '') === 'split' || str_contains($rawNotes, 'Split Payment') || str_contains($rawNotes, 'Split:'));
                 
-                // Determine friendly payment mode text without the word "SPLIT"
-                $modeText = strtoupper($payment->payment_method ?? 'UPI');
-                $breakdownText = null;
+                $formatMethodName = function(string $name): string {
+                    $clean = strtoupper(trim($name));
+                    return match ($clean) {
+                        'UPI' => 'UPI',
+                        'CASH' => 'Cash',
+                        'CARD' => 'Card',
+                        'CHEQUE' => 'Cheque',
+                        'BANK_TRANSFER', 'BANK TRANSFER', 'NETBANKING' => 'Bank Transfer',
+                        'POS' => 'POS Card',
+                        default => ucwords(strtolower($name))
+                    };
+                };
+
+                $modeText = $formatMethodName($payment->payment_method ?? 'UPI');
+                $splitItems = [];
 
                 if ($isSplit) {
-                    $breakdownText = $rawNotes;
-                    if (str_contains($breakdownText, 'Split Payment:')) {
-                        $parts = explode('Split Payment:', $breakdownText);
-                        $breakdownText = trim(end($parts));
-                    } elseif (str_contains($breakdownText, 'Split:')) {
-                        $parts = explode('Split:', $breakdownText);
-                        $breakdownText = trim(end($parts));
-                    }
-                    $breakdownText = preg_replace('/^Split[:\s-]*/i', '', trim($breakdownText));
-
-                    if (preg_match('/([A-Za-z]+)\s*(?:₹|Rs\.?|\$)?[\d,.]*.*?\+\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
-                        $modeText = strtoupper($matches[1]) . ' + ' . strtoupper($matches[2]);
-                    } elseif (preg_match('/Cash.*?\\+\\s*([A-Za-z]+)/i', $rawNotes, $matches)) {
-                        $modeText = 'CASH + ' . strtoupper($matches[1]);
+                    if (preg_match('/Split(?:\s+Payment)?:\s*(.*?)(?:\||$)/iu', $rawNotes, $m)) {
+                        $breakdownRaw = trim($m[1]);
                     } else {
-                        $modeText = 'SPLIT PAYMENT';
+                        $breakdownRaw = trim($rawNotes);
+                    }
+
+                    $parts = explode('+', $breakdownRaw);
+                    $methodsFound = [];
+
+                    foreach ($parts as $p) {
+                        $p = trim($p);
+                        if (empty($p)) continue;
+                        if (preg_match('/^([A-Za-z\s_]+?)\s*([^\d\s]*\s*[\d,]+(?:\.\d+)?)\s*(\(.*?\))?$/u', $p, $pm)) {
+                            $mName = $formatMethodName(trim($pm[1]));
+                            $mAmt = trim($pm[2]);
+                            $mRef = isset($pm[3]) ? trim($pm[3]) : '';
+                            $splitItems[] = [
+                                'method' => $mName,
+                                'amount' => $mAmt,
+                                'ref' => $mRef,
+                            ];
+                            $methodsFound[] = $mName;
+                        } else {
+                            $subParts = preg_split('/\s+/', $p, 2);
+                            $mName = $formatMethodName($subParts[0] ?? 'Cash');
+                            $mAmt = trim($subParts[1] ?? '');
+                            $splitItems[] = [
+                                'method' => $mName,
+                                'amount' => $mAmt,
+                                'ref' => '',
+                            ];
+                            $methodsFound[] = $mName;
+                        }
+                    }
+
+                    if (count($methodsFound) >= 2) {
+                        $modeText = implode(' & ', array_slice($methodsFound, 0, 2));
+                    } elseif (count($methodsFound) === 1) {
+                        $modeText = $methodsFound[0];
+                    } else {
+                        $modeText = 'Cash & UPI';
                     }
                 }
 
@@ -408,7 +445,7 @@
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
-                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8 inline-flex items-center gap-1.5">
+                        <span class="font-bold text-slate-900 col-span-7 sm:col-span-8 inline-flex items-center gap-1.5">
                             <span>{{ $modeText }}</span>
                             @auth
                                 @if((auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || auth()->user()->hasPermission('payments.edit_method')) && !request()->routeIs('app.invoices.public'))
@@ -525,14 +562,23 @@
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-xs">
                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
-                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase">
+                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7">
                             {{ $modeText }}
                         </span>
                     </div>
-                    @if($isSplit && !empty($breakdownText))
-                        <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
-                            <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
-                            <span>{{ $breakdownText }}</span>
+                    @if($isSplit && !empty($splitItems))
+                        <div class="py-0.5 space-y-1">
+                            @foreach($splitItems as $sItem)
+                                <div class="grid grid-cols-12 gap-1 text-xs">
+                                    <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">{{ $sItem['method'] }}:</span>
+                                    <span class="font-bold text-slate-900 col-span-6 sm:col-span-7">
+                                        {{ $sItem['amount'] }}
+                                        @if(!empty($sItem['ref']))
+                                            <span class="text-[10px] font-normal text-slate-500 ml-1">{{ $sItem['ref'] }}</span>
+                                        @endif
+                                    </span>
+                                </div>
+                            @endforeach
                         </div>
                     @endif
 

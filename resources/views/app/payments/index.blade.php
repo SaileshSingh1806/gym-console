@@ -65,6 +65,53 @@
             this.selectedInvoice = inv;
             this.showInvoiceModal = true;
         },
+        getInvoiceModeText(inv) {
+            if (!inv) return 'Cash';
+            const notes = inv.notes || '';
+            const isSplit = (inv.method && inv.method.toLowerCase() === 'split') || notes.includes('Split Payment') || notes.includes('Split:');
+            if (!isSplit) {
+                const m = (inv.method || 'Cash').toUpperCase();
+                return m === 'UPI' ? 'UPI' : (m === 'CASH' ? 'Cash' : (m === 'CARD' ? 'Card' : (m === 'CHEQUE' ? 'Cheque' : (m === 'BANK_TRANSFER' ? 'Bank Transfer' : inv.method))));
+            }
+            let raw = notes;
+            if (raw.includes('Split Payment:')) raw = raw.split('Split Payment:').pop();
+            else if (raw.includes('Split:')) raw = raw.split('Split:').pop();
+            if (raw.includes('|')) raw = raw.split('|')[0];
+            const parts = raw.split('+');
+            const methods = [];
+            parts.forEach(p => {
+                p = p.trim();
+                const match = p.match(/^([A-Za-z\s_]+)/);
+                if (match) {
+                    let m = match[1].trim().toUpperCase();
+                    methods.push(m === 'UPI' ? 'UPI' : (m === 'CASH' ? 'Cash' : (m === 'CARD' ? 'Card' : (m === 'CHEQUE' ? 'Cheque' : (m === 'BANK_TRANSFER' ? 'Bank Transfer' : match[1].trim())))));
+                }
+            });
+            return methods.length >= 2 ? (methods[0] + ' & ' + methods[1]) : (methods[0] || 'Cash & UPI');
+        },
+        getInvoiceSplitItems(inv) {
+            if (!inv) return [];
+            const notes = inv.notes || '';
+            const isSplit = (inv.method && inv.method.toLowerCase() === 'split') || notes.includes('Split Payment') || notes.includes('Split:');
+            if (!isSplit) return [];
+            let raw = notes;
+            if (raw.includes('Split Payment:')) raw = raw.split('Split Payment:').pop();
+            else if (raw.includes('Split:')) raw = raw.split('Split:').pop();
+            if (raw.includes('|')) raw = raw.split('|')[0];
+            const parts = raw.split('+');
+            const items = [];
+            parts.forEach(p => {
+                p = p.trim();
+                if (!p) return;
+                const m = p.match(/^([A-Za-z\s_]+?)\s*([^\d\s]*\s*[\d,]+(?:\.\d+)?)\s*(\(.*?\))?$/);
+                if (m) {
+                    let name = m[1].trim().toUpperCase();
+                    name = name === 'UPI' ? 'UPI' : (name === 'CASH' ? 'Cash' : (name === 'CARD' ? 'Card' : (name === 'CHEQUE' ? 'Cheque' : (name === 'BANK_TRANSFER' ? 'Bank Transfer' : m[1].trim()))));
+                    items.push({ method: name, amount: m[2].trim(), ref: (m[3] || '').trim() });
+                }
+            });
+            return items;
+        },
 
         // Edit Payment Method Modal (Gym Owner Only)
         showEditMethodModal: false,
@@ -1466,7 +1513,7 @@
                                     </div>
                                     <div class="grid grid-cols-12 gap-1 text-xs">
                                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Payment Mode:</span>
-                                        <span class="font-bold uppercase text-slate-900 col-span-7 sm:col-span-8" x-text="selectedInvoice.method || 'UPI'"></span>
+                                        <span class="font-bold text-slate-900 col-span-7 sm:col-span-8" x-text="getInvoiceModeText(selectedInvoice)"></span>
                                     </div>
                                 </div>
 
@@ -1529,12 +1576,15 @@
                                     </div>
                                     <div class="grid grid-cols-12 gap-1 text-xs">
                                         <span class="text-slate-500 font-normal col-span-6 sm:col-span-5">Payment Mode:</span>
-                                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7 uppercase" x-text="(selectedInvoice.method === 'SPLIT' || (selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment'))) ? 'SPLIT PAYMENT' : (selectedInvoice.method || 'UPI')"></span>
+                                        <span class="font-bold text-slate-900 col-span-6 sm:col-span-7" x-text="getInvoiceModeText(selectedInvoice)"></span>
                                     </div>
-                                    <template x-if="selectedInvoice.notes && selectedInvoice.notes.includes('Split Payment')">
-                                        <div class="py-1 px-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-bold my-1">
-                                            <span class="text-[9px] text-amber-700 uppercase tracking-wider block font-extrabold">Payment Breakdown:</span>
-                                            <span x-text="selectedInvoice.notes.split(' | ').filter(n => n.includes('Split Payment')).join('') || selectedInvoice.notes"></span>
+                                    <template x-for="item in getInvoiceSplitItems(selectedInvoice)" :key="item.method">
+                                        <div class="grid grid-cols-12 gap-1 text-xs py-0.5">
+                                            <span class="text-slate-500 font-normal col-span-6 sm:col-span-5" x-text="item.method + ':'"></span>
+                                            <span class="font-bold text-slate-900 col-span-6 sm:col-span-7">
+                                                <span x-text="item.amount"></span>
+                                                <span class="text-[10px] font-normal text-slate-500 ml-1" x-show="item.ref" x-text="item.ref"></span>
+                                            </span>
                                         </div>
                                     </template>
                                     <div class="grid grid-cols-12 gap-1 text-xs">
