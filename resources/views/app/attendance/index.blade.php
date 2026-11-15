@@ -185,9 +185,13 @@
                 <div class="p-3.5 space-y-2.5">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-xs shrink-0">
-                                {{ substr($att->member->first_name ?? 'M', 0, 1) }}
-                            </div>
+                            @if($att->member?->avatar_url)
+                                <img src="{{ $att->member->avatar_url }}" alt="{{ $att->member->full_name }}" loading="lazy" class="w-8 h-8 rounded-full object-cover border border-amber-200 dark:border-amber-500/30 shrink-0">
+                            @else
+                                <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-xs shrink-0">
+                                    {{ substr($att->member->first_name ?? 'M', 0, 1) }}
+                                </div>
+                            @endif
                             <div class="min-w-0">
                                 <span class="font-bold text-slate-900 dark:text-white text-xs block truncate">{{ $att->member->full_name ?? 'Member' }}</span>
                                 <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-mono">{{ $att->member->member_code ?? '' }}</span>
@@ -252,9 +256,13 @@
                     @forelse($attendance as $att)
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                             <td class="py-3 px-4 flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-[10px]">
-                                    {{ substr($att->member->first_name ?? 'M', 0, 1) }}
-                                </div>
+                                @if($att->member?->avatar_url)
+                                    <img src="{{ $att->member->avatar_url }}" alt="{{ $att->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-amber-200 dark:border-amber-500/30 shrink-0">
+                                @else
+                                    <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-[10px]">
+                                        {{ substr($att->member->first_name ?? 'M', 0, 1) }}
+                                    </div>
+                                @endif
                                 <div>
                                     <span class="font-bold text-slate-900 dark:text-white block">{{ $att->member->full_name ?? 'Member' }}</span>
                                     <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ $att->member->member_code ?? '' }}</span>

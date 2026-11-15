@@ -883,9 +883,13 @@
                         @forelse($metrics['expiring_members_list'] as $exp)
                             <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs gap-2">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center font-bold text-[10px] shrink-0">
-                                        {{ substr($exp->member?->first_name ?? 'M', 0, 1) }}
-                                    </div>
+                                    @if($exp->member?->avatar_url)
+                                        <img src="{{ $exp->member->avatar_url }}" alt="{{ $exp->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-amber-200 dark:border-amber-500/30 shrink-0">
+                                    @else
+                                        <div class="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                            {{ substr($exp->member?->first_name ?? 'M', 0, 1) }}
+                                        </div>
+                                    @endif
                                     <div class="min-w-0">
                                         <div class="font-bold text-slate-900 dark:text-white leading-tight truncate">{{ $exp->member?->full_name }}</div>
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $exp->plan?->name ?? 'Standard' }}</div>
@@ -977,9 +981,13 @@
                         @forelse($metrics['recently_expired_list'] as $recExp)
                             <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs gap-2">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-7 h-7 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 flex items-center justify-center font-bold text-[10px] shrink-0">
-                                        {{ substr($recExp->member?->first_name ?? 'M', 0, 1) }}
-                                    </div>
+                                    @if($recExp->member?->avatar_url)
+                                        <img src="{{ $recExp->member->avatar_url }}" alt="{{ $recExp->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-red-200 dark:border-red-500/30 shrink-0">
+                                    @else
+                                        <div class="w-7 h-7 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                            {{ substr($recExp->member?->first_name ?? 'M', 0, 1) }}
+                                        </div>
+                                    @endif
                                     <div class="min-w-0">
                                         <div class="font-bold text-slate-900 dark:text-white leading-tight truncate">{{ $recExp->member?->full_name }}</div>
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ $recExp->plan?->name ?? 'Membership' }}</div>
@@ -1200,9 +1208,13 @@
                         @forelse($metrics['recent_attendance'] as $att)
                             <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs gap-2">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold text-[10px] shrink-0">
-                                        {{ substr($att->member?->first_name ?? 'M', 0, 1) }}
-                                    </div>
+                                    @if($att->member?->avatar_url)
+                                        <img src="{{ $att->member->avatar_url }}" alt="{{ $att->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-teal-200 dark:border-teal-500/30 shrink-0">
+                                    @else
+                                        <div class="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                            {{ substr($att->member?->first_name ?? 'M', 0, 1) }}
+                                        </div>
+                                    @endif
                                     <div class="min-w-0">
                                         <div class="font-bold text-slate-900 dark:text-white leading-tight truncate">{{ $att->member?->full_name }}</div>
                                         <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ \Carbon\Carbon::parse($att->check_in)->format('h:i A') }}</div>

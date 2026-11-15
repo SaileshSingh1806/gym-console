@@ -520,9 +520,13 @@
                         <!-- Top Row: Member Header + Status -->
                         <div class="flex items-start justify-between gap-2">
                             <a href="{{ route('app.members.show', $member->id) }}" class="flex items-center gap-2.5 min-w-0 group">
-                                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-sm shadow-sm shrink-0">
-                                    {{ strtoupper(substr($member->first_name, 0, 1)) }}
-                                </div>
+                                @if($member->avatar_url)
+                                    <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" loading="lazy" class="w-10 h-10 rounded-xl object-cover border border-amber-200 dark:border-amber-500/30 shadow-sm shrink-0">
+                                @else
+                                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-black text-amber-600 dark:text-amber-400 text-sm shadow-sm shrink-0">
+                                        {{ strtoupper(substr($member->first_name, 0, 1)) }}
+                                    </div>
+                                @endif
                                 <div class="min-w-0">
                                     <div class="font-bold text-slate-900 dark:text-white text-sm truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                                         {{ $member->full_name }}
@@ -663,9 +667,13 @@
                                 <!-- Member info with ID and Joined cleanly stacked -->
                                 <td class="py-3 px-3.5">
                                     <a href="{{ route('app.members.show', $member->id) }}" class="flex items-center gap-2.5 group">
-                                        <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-gradient-to-tr dark:from-amber-500/20 dark:to-orange-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-xs shadow-sm shrink-0 group-hover:scale-105 transition-transform">
-                                            {{ strtoupper(substr($member->first_name, 0, 1)) }}
-                                        </div>
+                                        @if($member->avatar_url)
+                                            <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" loading="lazy" class="w-8 h-8 rounded-lg object-cover border border-amber-200 dark:border-amber-500/30 shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                                        @else
+                                            <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-gradient-to-tr dark:from-amber-500/20 dark:to-orange-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-bold text-amber-600 dark:text-amber-400 text-xs shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                                                {{ strtoupper(substr($member->first_name, 0, 1)) }}
+                                            </div>
+                                        @endif
                                         <div class="min-w-0">
                                             <span class="font-bold text-slate-900 dark:text-white text-xs block leading-tight truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{{ $member->full_name }}</span>
                                             <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-medium block leading-tight mt-0.5">{{ $member->member_code }}</span>
