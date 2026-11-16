@@ -104,6 +104,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/members/{id}/add-pt-package', [AppController::class, 'addPtPackage'])->name('app.members.add-pt-package')->middleware('permission:pt.create');
         Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class')->middleware('permission:classes.book');
         Route::post('/members/{id}/generate-portal-link', [AppController::class, 'generateMemberPortalLink'])->name('app.members.generate-portal-link')->middleware('permission:members.edit,members.view');
+        Route::post('/members/{id}/update-password', [AppController::class, 'updateMemberPassword'])->name('app.members.update-password')->middleware('permission:members.edit');
     });
 
     // Member Measurements (Available to Trainers, Staff, and Members)

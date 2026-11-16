@@ -9128,6 +9128,72 @@ class AppController extends Controller
         ]);
     }
 
+    public function updateMemberPassword(Request $request, int $id): JsonResponse|RedirectResponse
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $member = Member::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'password' => 'required|string|min:4|max:100',
+            'send_whatsapp' => 'nullable|boolean',
+        ], [
+            'password.required' => 'Please provide a password.',
+            'password.min' => 'Password must be at least 4 characters.',
+        ]);
+
+        $newPassword = trim($validated['password']);
+
+        $user = $member->user;
+        if (! $user) {
+            $memberEmail = ! empty($member->email) ? $member->email : ('member_'.($member->phone ?: $member->id).'@gym.portal');
+            $user = User::where('email', $memberEmail)->first();
+            if (! $user) {
+                $user = User::create([
+                    'tenant_id' => $member->tenant_id,
+                    'name' => $member->full_name ?: ($member->phone ?? 'Member '.$member->member_code),
+                    'email' => $memberEmail,
+                    'phone' => $member->phone,
+                    'role' => 'member',
+                    'status' => 'ACTIVE',
+                    'password' => Hash::make($newPassword),
+                ]);
+            } else {
+                $user->update([
+                    'password' => Hash::make($newPassword),
+                    'role' => 'member',
+                    'status' => 'ACTIVE',
+                ]);
+            }
+            $member->update(['user_id' => $user->id]);
+        } else {
+            $user->update([
+                'password' => Hash::make($newPassword),
+                'status' => 'ACTIVE',
+            ]);
+        }
+
+        ActivityLog::log('member_password_updated', "Updated portal password for member '{$member->full_name}' ({$member->member_code})", $member);
+
+        $loginUrl = route('login');
+        $gymName = $tenant->name ?? 'Gym';
+        $cleanPhone = preg_replace('/[^0-9]/', '', $member->phone ?? '');
+        $waPhone = strlen($cleanPhone) === 10 ? ('91'.$cleanPhone) : $cleanPhone;
+        $waMsg = "Hello {$member->first_name},\n\nYour {$gymName} Portal credentials have been set:\n\n📱 Mobile / ID: {$member->phone}\n🔑 Password: {$newPassword}\n\nLogin URL: {$loginUrl}\n\nPlease keep your credentials safe.";
+        $waUrl = 'https://wa.me/'.$waPhone.'?text='.urlencode($waMsg);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Password for '{$member->full_name}' updated successfully to: {$newPassword}",
+                'password' => $newPassword,
+                'whatsapp_url' => $waUrl,
+                'send_whatsapp' => (bool) $request->boolean('send_whatsapp', true),
+            ]);
+        }
+
+        return back()->with('success', "Password for '{$member->full_name}' updated successfully to: {$newPassword}");
+    }
+
     /**
      * Display member feedbacks / suggestions (Gym Member view or Owner Management view).
      */

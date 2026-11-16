@@ -598,6 +598,54 @@
                 this.portalLinkLoading = false;
                 alert('Network error generating link');
             });
+        },
+
+        // Member Direct Password Modal State & Methods
+        showPasswordModal: false,
+        passwordInput: '',
+        showPasswordText: false,
+        passwordSendWhatsapp: true,
+        passwordSubmitting: false,
+        passwordSuccessMsg: '',
+        passwordErrorMsg: '',
+        submitMemberPassword() {
+            if (!this.passwordInput || this.passwordInput.length < 4) {
+                this.passwordErrorMsg = 'Password must be at least 4 characters long.';
+                return;
+            }
+            this.passwordSubmitting = true;
+            this.passwordErrorMsg = '';
+            this.passwordSuccessMsg = '';
+            fetch('{{ route('app.members.update-password', $member->id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    password: this.passwordInput,
+                    send_whatsapp: this.passwordSendWhatsapp
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.passwordSubmitting = false;
+                if (data.success) {
+                    this.passwordSuccessMsg = data.message;
+                    if (this.passwordSendWhatsapp && data.whatsapp_url) {
+                        setTimeout(() => {
+                            window.open(data.whatsapp_url, '_blank');
+                        }, 500);
+                    }
+                } else {
+                    this.passwordErrorMsg = data.message || 'Error updating password';
+                }
+            })
+            .catch(() => {
+                this.passwordSubmitting = false;
+                this.passwordErrorMsg = 'Network error updating password';
+            });
         }
     }" class="space-y-4 sm:space-y-6 pb-32 sm:pb-16 max-w-7xl mx-auto">
 
@@ -768,6 +816,13 @@
                                 <span x-show="!portalLinkLoading">Send Portal Setup Link</span>
                                 <span x-show="portalLinkLoading">Generating Link...</span>
                             </button>
+
+                            <button type="button" 
+                                    @click="showPasswordModal = true; showWhatsappMenu = false; passwordInput = ''; passwordSuccessMsg = ''; passwordErrorMsg = '';" 
+                                    class="w-full text-left px-4 py-2.5 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 flex items-center gap-2 transition-colors cursor-pointer border-t border-slate-100 dark:border-slate-800 font-bold">
+                                <span>🔑</span>
+                                <span>Set Portal Password</span>
+                            </button>
                         </div>
                     </div>
 
@@ -779,6 +834,15 @@
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         <span x-show="!portalLinkLoading">Send Portal Link</span>
                         <span x-show="portalLinkLoading">Sending...</span>
+                    </button>
+
+                    <!-- Actions: Set Direct Password Button -->
+                    <button type="button" 
+                            @click="showPasswordModal = true; passwordInput = ''; passwordSuccessMsg = ''; passwordErrorMsg = '';" 
+                            title="Set or reset portal login password for this member"
+                            class="w-full sm:w-auto px-3 py-2 sm:py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-400 border border-amber-500/30 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        <span>Set Password</span>
                     </button>
 
                     <!-- Actions: Delete -->
@@ -5161,6 +5225,150 @@
                         <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md shadow-rose-600/25 transition-all cursor-pointer">Confirm Cancellation</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Set / Reset Member Password Modal -->
+        <div x-show="showPasswordModal" 
+             x-cloak 
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
+             @keydown.escape.window="showPasswordModal = false">
+            <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-7 space-y-5"
+                 @click.away="showPasswordModal = false">
+                
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-black">
+                            🔑
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">
+                                Set Portal Login Password
+                            </h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                                Set or change member's personal login password
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" @click="showPasswordModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg cursor-pointer">
+                        &times;
+                    </button>
+                </div>
+
+                <!-- Member Info Badge -->
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <div>
+                        <span class="font-bold text-slate-900 dark:text-white block">{{ $member->full_name }}</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">
+                            ID: {{ $member->member_code }} &bull; Phone: {{ $member->phone }}
+                        </span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        Active Account
+                    </span>
+                </div>
+
+                <!-- Success Alert -->
+                <template x-if="passwordSuccessMsg">
+                    <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span>✅</span>
+                            <span class="font-bold" x-text="passwordSuccessMsg"></span>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Error Alert -->
+                <template x-if="passwordErrorMsg">
+                    <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span class="font-bold" x-text="passwordErrorMsg"></span>
+                    </div>
+                </template>
+
+                <!-- Form Content -->
+                <div class="space-y-4">
+                    <!-- Password Field -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                            New Password <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <input :type="showPasswordText ? 'text' : 'password'" 
+                                   x-model="passwordInput" 
+                                   required 
+                                   placeholder="Enter new password (min. 4 characters)"
+                                   class="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 text-xs focus:border-amber-500 focus:outline-none font-mono">
+                            <button type="button" 
+                                    @click="showPasswordText = !showPasswordText" 
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                                <span x-show="!showPasswordText" class="text-xs">👁️</span>
+                                <span x-show="showPasswordText" class="text-xs">🙈</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Preset Buttons -->
+                    <div class="space-y-1.5">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">
+                            Quick 1-Click Presets:
+                        </span>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" 
+                                    @click="passwordInput = '123456'"
+                                    class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1 cursor-pointer">
+                                <span>Default:</span>
+                                <span class="font-mono text-amber-600 dark:text-amber-400 font-extrabold">123456</span>
+                            </button>
+                            <button type="button" 
+                                    @click="passwordInput = '{{ preg_replace('/[^0-9]/', '', $member->phone ?? '') }}'"
+                                    class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1 cursor-pointer">
+                                <span>Mobile:</span>
+                                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-extrabold">{{ substr(preg_replace('/[^0-9]/', '', $member->phone ?? ''), -10) }}</span>
+                            </button>
+                            <button type="button" 
+                                    @click="passwordInput = Math.floor(100000 + Math.random() * 900000).toString()"
+                                    class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1 cursor-pointer">
+                                <span>🎲 Random 6-Digit</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Notification Toggle -->
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" x-model="passwordSendWhatsapp" class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                            <div class="text-xs">
+                                <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>Send Credentials to Member on WhatsApp</span>
+                                    <span class="text-emerald-600 text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 px-1.5 py-0.5 rounded">Auto</span>
+                                </span>
+                                <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">
+                                    Opens WhatsApp chat with login link, member ID, and their new password pre-written.
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" 
+                                @click="showPasswordModal = false" 
+                                class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer">
+                            Close
+                        </button>
+                        <button type="button" 
+                                @click="submitMemberPassword()" 
+                                :disabled="passwordSubmitting || !passwordInput"
+                                class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black shadow-md shadow-amber-500/25 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
+                            <span x-show="passwordSubmitting" class="animate-spin text-xs">⏳</span>
+                            <span x-show="!passwordSubmitting">Save &amp; Update Password</span>
+                            <span x-show="passwordSubmitting">Saving...</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
