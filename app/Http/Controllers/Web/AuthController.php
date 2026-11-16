@@ -51,19 +51,73 @@ class AuthController extends Controller
         $digitsOnly = preg_replace('/[^0-9]/', '', $loginInput);
         $suffix10 = strlen($digitsOnly) >= 10 ? substr($digitsOnly, -10) : $digitsOnly;
 
-        // 1. Check if direct User exists by email or phone
-        $userQuery = User::where('email', $loginInput);
-        if (! empty($digitsOnly)) {
-            $userQuery->orWhere('phone', $loginInput)
-                      ->orWhere('phone', 'like', "%{$suffix10}");
-        }
-        $user = $userQuery->first();
+        $candidateUsers = collect();
 
-        // 2. If not found directly on User, search in Member records
+        // 1. If login input matches an exact Member Code (e.g. GYM0004, ARM210)
+        $memberByCode = Member::where('member_code', $loginInput)->first();
+        if ($memberByCode) {
+            if ($memberByCode->user_id && $memberByCode->user) {
+                $candidateUsers->push($memberByCode->user);
+            } else {
+                $memberEmail = ! empty($memberByCode->email) ? $memberByCode->email : ('member_'.($memberByCode->phone ?: $memberByCode->id).'@gym.portal');
+                $u = User::where('email', $memberEmail)->first();
+                if ($u) {
+                    $memberByCode->update(['user_id' => $u->id]);
+                    $candidateUsers->push($u);
+                }
+            }
+        }
+
+        // 2. Direct email search on User
+        if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+            $userByEmail = User::where('email', $loginInput)->first();
+            if ($userByEmail) {
+                $candidateUsers->push($userByEmail);
+            }
+        }
+
+        // 3. Search by Phone number (only when digits length >= 10)
+        if (strlen($digitsOnly) >= 10) {
+            $usersByPhone = User::where('phone', $loginInput)
+                ->orWhere('phone', 'like', "%{$suffix10}")
+                ->get();
+            foreach ($usersByPhone as $u) {
+                $candidateUsers->push($u);
+            }
+
+            $membersByPhone = Member::where('phone', $loginInput)
+                ->orWhere('phone', 'like', "%{$suffix10}")
+                ->get();
+            foreach ($membersByPhone as $m) {
+                if ($m->user_id && $m->user) {
+                    $candidateUsers->push($m->user);
+                } else {
+                    $memberEmail = ! empty($m->email) ? $m->email : ('member_'.($m->phone ?: $m->id).'@gym.portal');
+                    $u = User::where('email', $memberEmail)->first();
+                    if ($u) {
+                        $m->update(['user_id' => $u->id]);
+                        $candidateUsers->push($u);
+                    }
+                }
+            }
+        }
+
+        $candidateUsers = $candidateUsers->unique('id');
+
+        // Check if any candidate user matches password
+        $user = null;
+        foreach ($candidateUsers as $candUser) {
+            if (Hash::check($password, $candUser->password)) {
+                $user = $candUser;
+                break;
+            }
+        }
+
+        // 4. Fallback: If no candidate matched, check if member exists without a User account yet (First-time password setup)
         if (! $user) {
             $memberQuery = Member::where('member_code', $loginInput)
                 ->orWhere('email', $loginInput);
-            if (! empty($digitsOnly)) {
+            if (strlen($digitsOnly) >= 10) {
                 $memberQuery->orWhere('phone', $loginInput)
                             ->orWhere('phone', 'like', "%{$suffix10}");
             }
@@ -71,9 +125,10 @@ class AuthController extends Controller
 
             if ($member) {
                 if ($member->user_id && $member->user) {
-                    $user = $member->user;
+                    if (Hash::check($password, $member->user->password)) {
+                        $user = $member->user;
+                    }
                 } else {
-                    // Create or find user account for this member
                     $memberEmail = ! empty($member->email) ? $member->email : ('member_'.($member->phone ?: $member->id).'@gym.portal');
                     $user = User::where('email', $memberEmail)->first();
 
@@ -87,14 +142,18 @@ class AuthController extends Controller
                             'status' => $member->status === 'SUSPENDED' ? 'SUSPENDED' : 'ACTIVE',
                             'password' => Hash::make($password),
                         ]);
+                    } elseif (! Hash::check($password, $user->password)) {
+                        $user = null;
                     }
 
-                    $member->update(['user_id' => $user->id]);
+                    if ($user) {
+                        $member->update(['user_id' => $user->id]);
+                    }
                 }
             }
         }
 
-        // 3. Authenticate User if found
+        // 5. Authenticate User if found
         if ($user) {
             $passwordMatches = Hash::check($password, $user->password);
 
