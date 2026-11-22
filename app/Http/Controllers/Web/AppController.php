@@ -1944,6 +1944,24 @@ class AppController extends Controller
         return back()->with('success', "Membership Plan '{$plan->name}' updated successfully!");
     }
 
+    public function toggleMembershipPlanStatus(int $id): RedirectResponse
+    {
+        $u = auth()->user();
+        if (! $u->isGymOwner() && ! $u->hasPermission('plans.edit') && ! $u->hasPermission('memberships.edit') && ! $u->hasPermission('memberships.manage') && ! $u->hasPermission('plans.create')) {
+            abort(403, 'Unauthorized. You do not have permission to modify membership plans.');
+        }
+
+        $plan = MembershipPlan::findOrFail($id);
+        $plan->is_active = ! $plan->is_active;
+        $plan->save();
+
+        $actionText = $plan->is_active 
+            ? 'resumed and is now available for new enrollments.' 
+            : 'paused and will no longer appear during member enrollment.';
+
+        return back()->with('success', "Membership Package '{$plan->name}' has been {$actionText}");
+    }
+
     public function deleteMembershipPlan(int $id): RedirectResponse
     {
         $u = auth()->user();

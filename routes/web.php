@@ -115,6 +115,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/memberships', [AppController::class, 'memberships'])->name('app.memberships.index')->middleware('permission:memberships.view,plans.view,plans.create,plans.edit,memberships.create,memberships.edit');
         Route::post('/membership-plans', [AppController::class, 'storeMembershipPlan'])->name('app.membership-plans.store')->middleware('permission:plans.create,memberships.create');
         Route::post('/membership-plans/{id}', [AppController::class, 'updateMembershipPlan'])->name('app.membership-plans.update')->middleware('permission:plans.edit,memberships.edit');
+        Route::post('/membership-plans/{id}/toggle-status', [AppController::class, 'toggleMembershipPlanStatus'])->name('app.membership-plans.toggle-status')->middleware('permission:plans.edit,memberships.edit');
         Route::delete('/membership-plans/{id}', [AppController::class, 'deleteMembershipPlan'])->name('app.membership-plans.delete')->middleware('permission:plans.delete,memberships.delete');
     });
 

@@ -2,6 +2,7 @@
     @php
         $currency = auth()->user()->tenant?->currency_symbol ?? '₹';
         $activeBranchId = \App\Services\TenantContext::branchId();
+        $membershipPlans = ($membershipPlans ?? collect())->filter(fn ($p) => (bool) $p->is_active);
         $plansJson = $membershipPlans->mapWithKeys(function ($p) {
             return [$p->id => [
                 'id' => $p->id,

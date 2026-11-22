@@ -59,7 +59,7 @@
         <!-- Membership Plans Available -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
             @forelse($plans as $plan)
-                <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-amber-500/50 dark:hover:border-amber-500/40 transition shadow-sm group">
+                <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border {{ $plan->is_active ? 'border-slate-200 dark:border-slate-800 hover:border-amber-500/50 dark:hover:border-amber-500/40' : 'border-amber-300/40 dark:border-amber-500/30 bg-amber-500/[0.02] dark:bg-amber-500/[0.03]' }} flex flex-col justify-between transition shadow-sm group">
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <div class="min-w-0">
@@ -88,11 +88,26 @@
                                     @endif
                                 </div>
                             </div>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] {{ $plan->is_active ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700' }} font-bold">
-                                {{ $plan->is_active ? 'Active' : 'Inactive' }}
-                            </span>
+                            @if($plan->is_active)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    Active
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30 shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Paused
+                                </span>
+                            @endif
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2 min-h-[32px]">{{ $plan->description ?? 'Standard full gym floor access membership plan.' }}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 line-clamp-2 min-h-[32px]">{{ $plan->description ?? 'Standard full gym floor access membership plan.' }}</p>
+
+                        @if(! $plan->is_active)
+                            <div class="mb-3 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                <span>Paused (Hidden from new enrollment)</span>
+                            </div>
+                        @endif
 
                         <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 mb-3 space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
                             <div class="flex justify-between items-baseline">
@@ -142,6 +157,27 @@
                             ]) }}" class="flex-1 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 text-xs font-bold transition cursor-pointer text-center">
                                 Edit Plan
                             </button>
+
+                            <!-- Pause / Resume Toggle Button -->
+                            <form action="{{ route('app.membership-plans.toggle-status', $plan->id) }}" method="POST" class="inline">
+                                @csrf
+                                @if($plan->is_active)
+                                    <button type="submit" 
+                                            title="Pause this membership package (hide from new enrollments)" 
+                                            class="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Pause</span>
+                                    </button>
+                                @else
+                                    <button type="submit" 
+                                            title="Resume this membership package (show in new enrollments)" 
+                                            class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>Resume</span>
+                                    </button>
+                                @endif
+                            </form>
+
                             @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.delete') || auth()->user()->hasPermission('memberships.delete') || auth()->user()->hasPermission('memberships.manage'))
                             <form action="{{ route('app.membership-plans.delete', $plan->id) }}" method="POST" 
                                   data-confirm="Are you sure you want to delete membership plan '{{ addslashes($plan->name) }}'? Existing active member subscriptions with this plan will remain valid." 
@@ -453,8 +489,9 @@
                         <div class="pt-1">
                             <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                                 <input type="checkbox" name="is_active" value="1" checked class="rounded bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-800 text-amber-500 focus:ring-0">
-                                <span class="text-xs font-semibold">Enable this plan for registrations</span>
+                                <span class="text-xs font-semibold">Active & Available for Enrollment</span>
                             </label>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 ml-5 mt-0.5">Uncheck to save as Paused (will not appear during new member enrollments).</p>
                         </div>
 
                         <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
@@ -614,8 +651,9 @@
                             <div class="pt-1">
                                 <label class="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                                     <input type="checkbox" name="is_active" value="1" x-model="editPlan.is_active" class="rounded bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-800 text-amber-500 focus:ring-0">
-                                    <span class="text-xs font-semibold">Active and selectable</span>
+                                    <span class="text-xs font-semibold">Active & Available for Enrollment</span>
                                 </label>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 ml-5 mt-0.5">Uncheck to pause this plan. Paused plans will not appear during member enrollment.</p>
                             </div>
 
                             <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
