@@ -1965,10 +1965,12 @@ class AppController extends Controller
     public function attendance(Request $request): View
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $branchId = TenantContext::getBranchId();
         $branchId = TenantContext::branchId();
 
-        $query = Attendance::with(['member', 'device']);
+        // 1-Hour Auto-Checkout: Automatically finalize any check-ins older than 60 minutes
+        $this->attendanceService->autoCheckoutStaleCheckins($tenant?->id);
+
+        $query = Attendance::with(['member.activeMembership.plan', 'device']);
         if ($tenant) {
             $query->where('tenant_id', $tenant->id);
         }
@@ -1976,9 +1978,9 @@ class AppController extends Controller
             $query->where('branch_id', $branchId);
         }
 
-        $attendance = $query->latest('check_in')->latest('id')->paginate(20);
+        $attendance = $query->latest('check_in')->latest('id')->paginate(25);
 
-        $membersQuery = Member::where('status', 'ACTIVE');
+        $membersQuery = Member::with(['activeMembership.plan'])->where('status', 'ACTIVE');
         if ($tenant) {
             $membersQuery->where('tenant_id', $tenant->id);
         }
@@ -1991,9 +1993,22 @@ class AppController extends Controller
             ->whereNull('check_out')
             ->pluck('member_id');
 
-        $summary = $this->attendanceService->getTodaySummary($branchId);
+        $membersJson = $members->map(function ($m) use ($currentlyInsideMemberIds) {
+            return [
+                'id' => $m->id,
+                'name' => $m->full_name,
+                'code' => $m->member_code,
+                'phone' => $m->phone ?? '',
+                'avatar' => $m->avatar_url,
+                'initials' => strtoupper(substr($m->first_name ?? 'M', 0, 1)),
+                'plan' => $m->activeMembership?->plan?->name ?? 'Active Member',
+                'is_inside' => $currentlyInsideMemberIds->contains($m->id),
+            ];
+        })->values();
 
-        return view('app.attendance.index', compact('attendance', 'members', 'currentlyInsideMemberIds', 'summary'));
+        $summary = $this->attendanceService->getTodaySummary($branchId, $tenant?->id);
+
+        return view('app.attendance.index', compact('attendance', 'members', 'membersJson', 'currentlyInsideMemberIds', 'summary'));
     }
 
     public function storeCheckin(Request $request): RedirectResponse
@@ -2016,9 +2031,11 @@ class AppController extends Controller
             return back()->with('success', "Check-out recorded for {$member->full_name}.");
         }
 
-        $this->attendanceService->checkIn($member, 'manual');
+        $record = $this->attendanceService->checkIn($member, 'manual');
+        $checkInTime = \Carbon\Carbon::parse($record->check_in);
+        $autoCheckoutTime = $checkInTime->copy()->addMinutes(60);
 
-        return back()->with('success', "Check-in recorded for {$member->full_name}.");
+        return back()->with('success', "Check-in recorded for {$member->full_name} at {$checkInTime->format('h:i A')} (Auto-checkout at {$autoCheckoutTime->format('h:i A')}).");
     }
 
     public function checkoutAttendance(int $id): RedirectResponse
@@ -2042,25 +2059,28 @@ class AppController extends Controller
     public function attendanceQrScan(Request $request): JsonResponse
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $memberId = $request->input('member_id');
         $token = trim($request->input('qr_token', $request->input('code', '')));
 
-        if (empty($token)) {
-            return response()->json(['success' => false, 'message' => 'Please provide a valid QR Code or Member Code.'], 422);
+        if ($memberId) {
+            $member = Member::where('tenant_id', $tenant->id)->find($memberId);
+        } elseif (! empty($token)) {
+            $cleanDigits = preg_replace('/[^0-9]/', '', $token);
+            $suffix10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
+
+            $member = Member::where('tenant_id', $tenant->id)
+                ->where(function ($q) use ($token, $suffix10) {
+                    $q->where('qr_code_token', $token)
+                      ->orWhere('member_code', $token)
+                      ->orWhere('email', $token);
+                    if (! empty($suffix10)) {
+                        $q->orWhere('phone', $token)
+                          ->orWhere('phone', 'like', "%{$suffix10}");
+                    }
+                })->first();
+        } else {
+            return response()->json(['success' => false, 'message' => 'Please provide a valid member ID, phone, or QR code.'], 422);
         }
-
-        $cleanDigits = preg_replace('/[^0-9]/', '', $token);
-        $suffix10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
-
-        $member = Member::where('tenant_id', $tenant->id)
-            ->where(function ($q) use ($token, $suffix10) {
-                $q->where('qr_code_token', $token)
-                  ->orWhere('member_code', $token)
-                  ->orWhere('email', $token);
-                if (! empty($suffix10)) {
-                    $q->orWhere('phone', $token)
-                      ->orWhere('phone', 'like', "%{$suffix10}");
-                }
-            })->first();
 
         if (! $member) {
             return response()->json(['success' => false, 'message' => "Member not found for '{$token}'."], 404);
@@ -2088,7 +2108,7 @@ class AppController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Goodbye {$member->first_name}! Check-out recorded at " . now()->format('h:i A') . ".",
+                'message' => "Check-out recorded for {$member->first_name} at " . now()->format('h:i A') . ".",
                 'action' => 'check_out',
                 'member' => [
                     'id' => $member->id,
@@ -2099,18 +2119,21 @@ class AppController extends Controller
             ]);
         }
 
-        $record = $this->attendanceService->checkIn($member, 'qr');
+        $record = $this->attendanceService->checkIn($member, ! empty($memberId) ? 'manual' : 'qr');
+        $checkInTime = \Carbon\Carbon::parse($record->check_in);
+        $autoCheckoutTime = $checkInTime->copy()->addMinutes(60);
 
         return response()->json([
             'success' => true,
-            'message' => "Welcome {$member->full_name}! Check-in recorded at " . now()->format('h:i A') . ".",
+            'message' => "Welcome {$member->full_name}! Check-in recorded at " . $checkInTime->format('h:i A') . " (Auto-checkout set for " . $autoCheckoutTime->format('h:i A') . ").",
             'action' => 'check_in',
             'member' => [
                 'id' => $member->id,
                 'name' => $member->full_name,
                 'code' => $member->member_code,
-                'time' => now()->format('h:i A'),
-                'plan' => $member->activeMembership?->plan?->name ?? 'Standard',
+                'time' => $checkInTime->format('h:i A'),
+                'auto_checkout' => $autoCheckoutTime->format('h:i A'),
+                'plan' => $member->activeMembership?->plan?->name ?? 'Active Member',
             ],
         ]);
     }

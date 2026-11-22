@@ -11,6 +11,33 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceService
 {
+    public function autoCheckoutStaleCheckins(?int $tenantId = null): int
+    {
+        $cutoff = now()->subMinutes(60);
+
+        $query = Attendance::withoutGlobalScopes()
+            ->whereNull('check_out')
+            ->where('check_in', '<=', $cutoff);
+
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
+
+        $records = $query->get();
+        $count = 0;
+
+        foreach ($records as $record) {
+            $checkInTime = Carbon::parse($record->check_in);
+            $record->update([
+                'check_out' => $checkInTime->copy()->addMinutes(60),
+                'status' => 'AUTO_CHECKOUT',
+            ]);
+            $count++;
+        }
+
+        return $count;
+    }
+
     public function checkIn(Member $member, string $method = 'manual', ?Device $device = null, ?Carbon $time = null): Attendance
     {
         $time = $time ?? now();
@@ -24,16 +51,22 @@ class AttendanceService
                 ->where('tenant_id', $member->tenant_id)
                 ->where('member_id', $member->id)
                 ->where('date', $today)
+                ->whereNull('check_out')
                 ->latest('id')
                 ->first();
 
-            if ($existing && ! $existing->check_out) {
-                // Already inside today, update if no check in time
-                if (! $existing->check_in) {
-                    $existing->update(['check_in' => $time]);
+            if ($existing) {
+                $checkInTime = Carbon::parse($existing->check_in);
+                // If member checked in more than 60 minutes ago, auto-checkout previous session and allow new check-in!
+                if ($checkInTime->diffInMinutes($time) >= 60) {
+                    $existing->update([
+                        'check_out' => $checkInTime->copy()->addMinutes(60),
+                        'status' => 'AUTO_CHECKOUT',
+                    ]);
+                } else {
+                    // Already inside within 60 minutes, return active record
+                    return $existing;
                 }
-
-                return $existing;
             }
 
             $attendance = Attendance::create([
@@ -114,9 +147,15 @@ class AttendanceService
         return $this->checkIn($member, $method, $device, $eventTime);
     }
 
-    public function getTodaySummary(?int $branchId = null): array
+    public function getTodaySummary(?int $branchId = null, ?int $tenantId = null): array
     {
+        $this->autoCheckoutStaleCheckins($tenantId);
+
         $query = Attendance::where('date', now()->toDateString());
+
+        if ($tenantId) {
+            $query->where('tenant_id', $tenantId);
+        }
 
         if ($branchId) {
             $query->where('branch_id', $branchId);
