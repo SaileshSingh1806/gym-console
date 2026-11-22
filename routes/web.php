@@ -301,9 +301,9 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/reports', [AppController::class, 'expenseReport'])->name('app.reports.index')->middleware('permission:reports.member_report,expenses.view');
         Route::get('/expenses', [AppController::class, 'expenses'])->name('app.expenses.index')->middleware('permission:expenses.view');
         Route::post('/expenses', [AppController::class, 'storeExpense'])->name('app.expenses.store')->middleware('permission:expenses.create');
-        Route::put('/expenses/{id}', [AppController::class, 'updateExpense'])->name('app.expenses.update')->whereNumber('id')->middleware('permission:expenses.create');
+        Route::put('/expenses/{id}', [AppController::class, 'updateExpense'])->name('app.expenses.update')->whereNumber('id')->middleware('permission:expenses.edit,expenses.create');
         Route::delete('/expenses/{id}', [AppController::class, 'deleteExpense'])->name('app.expenses.delete')->whereNumber('id')->middleware('permission:expenses.delete');
-        Route::post('/expenses/categories', [AppController::class, 'storeExpenseCategory'])->name('app.expenses.categories.store')->middleware('permission:expenses.create');
+        Route::post('/expenses/categories', [AppController::class, 'storeExpenseCategory'])->name('app.expenses.categories.store')->middleware('permission:expenses.categories,expenses.create');
 
         Route::get('/finance/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.finance.balance-sheet')->middleware('permission:reports.balance_sheet');
         Route::get('/finance/balance-sheet/pdf', [AppController::class, 'balanceSheetPdf'])->name('app.finance.balance-sheet.pdf')->middleware('permission:reports.balance_sheet');

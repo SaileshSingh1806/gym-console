@@ -154,7 +154,7 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return in_array($this->role, ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'])
+        return in_array($this->role, ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'expense_manager', 'staff'])
             || ($this->tenant_id && Role::where('tenant_id', $this->tenant_id)->where('name', $this->role)->exists());
     }
 

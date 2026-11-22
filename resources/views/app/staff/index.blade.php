@@ -253,6 +253,7 @@
                     <option value="sales" {{ request('role') === 'sales' ? 'selected' : '' }}>Sales Executive</option>
                     <option value="trainer" {{ request('role') === 'trainer' ? 'selected' : '' }}>Fitness Trainer</option>
                     <option value="accountant" {{ request('role') === 'accountant' ? 'selected' : '' }}>Accountant</option>
+                    <option value="expense_manager" {{ request('role') === 'expense_manager' ? 'selected' : '' }}>Expense / Finance Manager</option>
                     <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>General Staff</option>
                     @if(isset($roles))
                         @foreach($roles->where('is_system', false) as $cr)
@@ -294,8 +295,10 @@
                             'gym_owner' => 'bg-purple-50 dark:bg-purple-500/15 border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300',
                             'gym_manager' => 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300',
                             'receptionist' => 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300',
+                            'sales' => 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300',
                             'trainer' => 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400',
                             'accountant' => 'bg-sky-50 dark:bg-sky-500/15 border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-400',
+                            'expense_manager' => 'bg-rose-50 dark:bg-rose-500/15 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400',
                             default => 'bg-amber-50 dark:bg-amber-500/15 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300',
                         };
                         $matchedRole = isset($roles) ? $roles->firstWhere('name', $u->role) : null;
@@ -303,8 +306,10 @@
                             'gym_owner' => 'Gym Owner',
                             'gym_manager' => 'Gym Manager',
                             'receptionist' => 'Receptionist',
+                            'sales' => 'Sales Executive',
                             'trainer' => 'Trainer',
                             'accountant' => 'Accountant',
+                            'expense_manager' => 'Expense / Finance Manager',
                             default => ucfirst(str_replace('_', ' ', $u->role ?: 'Staff')),
                         };
                         $branchList = $u->branches->pluck('name')->join(', ');
@@ -449,8 +454,10 @@
                                     'gym_owner' => 'bg-purple-50 dark:bg-purple-500/15 border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300',
                                     'gym_manager' => 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300',
                                     'receptionist' => 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300',
+                                    'sales' => 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300',
                                     'trainer' => 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400',
                                     'accountant' => 'bg-sky-50 dark:bg-sky-500/15 border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-400',
+                                    'expense_manager' => 'bg-rose-50 dark:bg-rose-500/15 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400',
                                     default => 'bg-amber-50 dark:bg-amber-500/15 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300',
                                 };
                                 $matchedRole = isset($roles) ? $roles->firstWhere('name', $u->role) : null;
@@ -458,8 +465,10 @@
                                     'gym_owner' => 'Gym Owner',
                                     'gym_manager' => 'Gym Manager',
                                     'receptionist' => 'Receptionist',
+                                    'sales' => 'Sales Executive',
                                     'trainer' => 'Trainer',
                                     'accountant' => 'Accountant',
+                                    'expense_manager' => 'Expense / Finance Manager',
                                     default => ucfirst(str_replace('_', ' ', $u->role ?: 'Staff')),
                                 };
                                 $branchList = $u->branches->pluck('name')->join(', ');
@@ -708,6 +717,7 @@
                                         <option value="gym_manager">Gym Manager</option>
                                         <option value="trainer">Trainer</option>
                                         <option value="accountant">Accountant</option>
+                                        <option value="expense_manager">Expense / Finance Manager</option>
                                         <option value="staff">Staff</option>
                                         <option value="gym_owner" x-show="staffForm.role === 'gym_owner'">Gym Owner</option>
                                     </optgroup>

@@ -403,7 +403,7 @@
 
             @php
                 $canBiz = ($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
-                    || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create']) && $user->hasFeature('reports_finance'))
+                    || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) && $user->hasFeature('reports_finance'))
                     || ($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
             @endphp
 
@@ -565,7 +565,7 @@
 
 
             <!-- Report & Finance -->
-            @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create']) && $user->hasFeature('reports_finance'))
+            @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) && $user->hasFeature('reports_finance'))
             @php
                 $isFinanceActive = request()->routeIs('app.finance.*') || request()->routeIs('app.reports.*') || request()->routeIs('app.expenses.*') || request()->routeIs('app.balance-sheet.*');
             @endphp
@@ -596,7 +596,7 @@
                     @endif
 
                     <!-- Expenses -->
-                    @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete']))
+                    @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']))
                     <a href="{{ route('app.expenses.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.expenses.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
                         <span>Expenses</span>
@@ -621,7 +621,7 @@
             @php
                 $canAdmin = ($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
                     || (($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
-                    || $user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete'])
+                    || $user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories'])
                     || $user->isGymOwner()
                     || $user->isSuperAdmin()
                     || $user->hasPermission('settings.manage');
@@ -665,7 +665,7 @@
             @endif
 
             <!-- Expenses (Operational Overhead Tracker) in Administration -->
-            @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete']) || $user->isGymOwner())
+            @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) || $user->isGymOwner())
             <a href="{{ route('app.expenses.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
                 <div class="flex items-center gap-3">
                     <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>

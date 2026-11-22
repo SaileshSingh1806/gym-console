@@ -83,11 +83,13 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                @if(auth()->user()->isGymOwner() || auth()->user()->hasAnyPermission(['expenses.categories', 'expenses.create']))
                 <!-- Add Category -->
                 <button type="button" @click="showCategoryModal = true" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                     <span>Categories</span>
                 </button>
+                @endif
 
                 <!-- Export CSV -->
                 <a href="{{ route('app.expenses.index', array_merge(request()->query(), ['export' => 'csv'])) }}" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer">
@@ -95,11 +97,13 @@
                     <span>Export CSV</span>
                 </a>
 
+                @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('expenses.create'))
                 <!-- Record Expense -->
                 <button type="button" @click="showExpenseModal = true" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-black shadow-md shadow-rose-600/25 flex items-center gap-1.5 transition-all cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Record Expense</span>
                 </button>
+                @endif
             </div>
         </div>
 
@@ -317,11 +321,14 @@
                                 </td>
                                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
                                     <div class="inline-flex items-center gap-1.5">
+                                        @if(auth()->user()->isGymOwner() || auth()->user()->hasAnyPermission(['expenses.edit', 'expenses.create']))
                                         <!-- Edit Button -->
                                         <button type="button" @click="openEdit({{ $expDataJson }})" class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:text-slate-500 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all cursor-pointer" title="Edit Expense">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </button>
+                                        @endif
 
+                                        @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('expenses.delete'))
                                         <!-- Delete Button -->
                                         <form action="{{ route('app.expenses.delete', $exp->id) }}" method="POST" 
                                               data-confirm="Are you sure you want to delete this expense of {{ $currency }}{{ number_format($exp->amount, 2) }} for '{{ addslashes($exp->title) }}'?" 
@@ -335,6 +342,7 @@
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

@@ -7916,7 +7916,7 @@ class AppController extends Controller
         }
 
         $allowedRoles = array_unique(array_merge(
-            ['gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'],
+            ['gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'expense_manager', 'staff'],
             Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
         ));
 
@@ -8088,7 +8088,7 @@ class AppController extends Controller
             ->findOrFail($id);
 
         $allowedRoles = array_unique(array_merge(
-            ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'staff'],
+            ['gym_owner', 'gym_manager', 'receptionist', 'sales', 'trainer', 'accountant', 'expense_manager', 'staff'],
             Role::where('tenant_id', $tenant->id)->pluck('name')->toArray()
         ));
 

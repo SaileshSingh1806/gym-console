@@ -125,14 +125,21 @@ class PermissionSeeder extends Seeder
                     ['name' => 'crm.reports', 'display_name' => 'View CRM Reports', 'description' => 'Inspect sales conversion analytics and reports'],
                 ],
             ],
+            'expenses' => [
+                'label' => 'Expenses & Operational Overheads',
+                'permissions' => [
+                    ['name' => 'expenses.view', 'display_name' => 'View Expenses', 'description' => 'Inspect gym expense records, vendor bills & monthly overheads'],
+                    ['name' => 'expenses.create', 'display_name' => 'Record Expense / Bill', 'description' => 'Record expenses, bills, rent, supplies & staff payouts'],
+                    ['name' => 'expenses.edit', 'display_name' => 'Edit / Update Expense', 'description' => 'Modify amounts, dates, titles, vendors or payment details'],
+                    ['name' => 'expenses.delete', 'display_name' => 'Delete Expense', 'description' => 'Remove expense records from gym accounting'],
+                    ['name' => 'expenses.categories', 'display_name' => 'Manage Expense Categories', 'description' => 'Create and customize overhead and bill categories'],
+                ],
+            ],
             'finance' => [
-                'label' => 'Reports & Financial Management',
+                'label' => 'Reports & Financial Balance Sheet',
                 'permissions' => [
                     ['name' => 'reports.member_report', 'display_name' => 'View Member Report', 'description' => 'Inspect member report and PDF export'],
                     ['name' => 'reports.balance_sheet', 'display_name' => 'View Financial Balance Sheet', 'description' => 'Access balance sheet, P&L & revenue statements'],
-                    ['name' => 'expenses.view', 'display_name' => 'View Expenses', 'description' => 'Inspect expense logs and vendor bills'],
-                    ['name' => 'expenses.create', 'display_name' => 'Record Expense / Bill', 'description' => 'Record expenses, bills, rent & staff payouts'],
-                    ['name' => 'expenses.delete', 'display_name' => 'Delete Expense', 'description' => 'Remove expense records'],
                 ],
             ],
             'inventory' => [
@@ -274,7 +281,9 @@ class PermissionSeeder extends Seeder
             'reports.balance_sheet' => 'reports_finance',
             'expenses.view' => 'reports_finance',
             'expenses.create' => 'reports_finance',
+            'expenses.edit' => 'reports_finance',
             'expenses.delete' => 'reports_finance',
+            'expenses.categories' => 'reports_finance',
 
             // Inventory & Maintenance
             'inventory.view' => 'inventory_stock',
@@ -314,6 +323,7 @@ class PermissionSeeder extends Seeder
                 'services.view', 'services.create', 'services.edit', 'services.book',
                 'crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.trials', 'crm.reports',
                 'whatsapp.view', 'whatsapp.contacts', 'whatsapp.campaigns', 'whatsapp.templates', 'whatsapp.inbox', 'whatsapp.settings',
+                'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.categories',
                 'reports.member_report',
                 'inventory.view', 'inventory.create', 'inventory.edit', 'equipment.maintenance',
                 'devices.view',
@@ -354,8 +364,14 @@ class PermissionSeeder extends Seeder
                 'memberships.view', 'plans.view',
                 'payments.view', 'payments.record', 'payments.refund', 'payments.invoice_view',
                 'reports.member_report', 'reports.balance_sheet',
-                'expenses.view', 'expenses.create', 'expenses.delete',
+                'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories',
                 'inventory.view',
+            ],
+            'expense_manager' => [
+                'dashboard.view', 'dashboard.financials',
+                'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories',
+                'reports.member_report', 'reports.balance_sheet',
+                'payments.view', 'payments.invoice_view',
             ],
             'staff' => [
                 'dashboard.view', 'dashboard.attendance_stats',
@@ -462,6 +478,7 @@ class PermissionSeeder extends Seeder
                         'sales' => 'Sales Executive',
                         'trainer' => 'Fitness Trainer',
                         'accountant' => 'Accountant',
+                        'expense_manager' => 'Expense / Finance Manager',
                         'staff' => 'General Staff',
                         default => ucfirst($roleSlug),
                     },
