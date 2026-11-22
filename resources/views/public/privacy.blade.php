@@ -22,7 +22,7 @@
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">1. Overview</h2>
                     <p>
-                        At <strong>GymDeskHub</strong> ("we", "us", or "our"), accessible from <strong>gymdeskhub.com</strong>, the privacy of our subscribers, gym staff, and gym members is of paramount importance. This Privacy Policy outlines the types of information collected and recorded by GymDeskHub and how we handle and protect it.
+                        At <strong>GymDeskHub</strong> (an individual / sole proprietorship enterprise legally owned and operated by <strong>Sailesh Singh</strong>, "we", "us", or "our"), accessible from <strong>gymdeskhub.com</strong>, the privacy of our subscribers, gym staff, and gym members is of paramount importance. This Privacy Policy outlines the types of information collected and recorded by GymDeskHub and how we handle and protect it.
                     </p>
                 </div>
 
@@ -87,7 +87,8 @@
                         In accordance with Information Technology Act, 2000 and rules made thereunder, the contact details of the Grievance Officer are:
                     </p>
                     <div class="mt-2 text-slate-400 text-xs space-y-1">
-                        <p><strong class="text-slate-200">Grievance Officer:</strong> Compliance Officer, GymDeskHub</p>
+                        <p><strong class="text-slate-200">Legal Entity:</strong> GymDeskHub (Proprietor: Sailesh Singh)</p>
+                        <p><strong class="text-slate-200">Grievance Officer:</strong> Sailesh Singh (Compliance Officer, GymDeskHub)</p>
                         <p><strong class="text-slate-200">Email:</strong> <a href="mailto:grievance@gymdeskhub.com" class="text-amber-400">grievance@gymdeskhub.com</a> / <a href="mailto:support@gymdeskhub.com" class="text-amber-400">support@gymdeskhub.com</a></p>
                         <p><strong class="text-slate-200">Phone:</strong> +91 99749 95179 (Mon - Sat, 10:00 AM - 6:00 PM IST)</p>
                         <p><strong class="text-slate-200">Office:</strong> GymDeskHub Technologies, Ahmedabad, Gujarat, 380015, India</p>

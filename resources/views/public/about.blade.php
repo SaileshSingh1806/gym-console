@@ -191,6 +191,35 @@
     </section>
 
     {{-- ══════════════════════════════════════════════════════════════
+         LEGAL ENTITY & OWNERSHIP (MANDATORY PAYMENT GATEWAY & KYC COMPLIANCE)
+    ══════════════════════════════════════════════════════════════ --}}
+    <section class="py-14 sm:py-16 bg-[#070b14] border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rounded-3xl bg-[#0c121e] border border-slate-800 p-8 sm:p-10 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="space-y-3">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                            <span>Business &amp; Legal Ownership</span>
+                        </div>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white">
+                            GymDeskHub
+                        </h3>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl">
+                            <strong>GymDeskHub</strong> is an individual enterprise / sole proprietorship legally owned and operated by <strong class="text-white font-semibold">Sailesh Singh</strong>.
+                        </p>
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-400 space-y-2 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-8 shrink-0">
+                        <p><span class="text-slate-500 font-medium">Business Constitution:</span> <strong class="text-slate-200">Individual / Sole Proprietorship</strong></p>
+                        <p><span class="text-slate-500 font-medium">Proprietor / Legal Owner:</span> <strong class="text-white font-semibold">Sailesh Singh</strong></p>
+                        <p><span class="text-slate-500 font-medium">Operating City:</span> <strong class="text-slate-200">Ahmedabad, Gujarat, India</strong></p>
+                        <p><span class="text-slate-500 font-medium">Official Contact:</span> <strong class="text-slate-200">+91 99749 95179 &bull; support@gymdeskhub.com</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════════════════════════
          CLOSING CTA BANNER
     ══════════════════════════════════════════════════════════════ --}}
     <section class="py-20 lg:py-24 bg-[#090d16]">

@@ -108,15 +108,16 @@
                         </div>
                     </div>
 
-                    {{-- Channel 5: Office Location --}}
+                    {{-- Channel 5: Office Location & Legal Entity --}}
                     <div class="p-5 sm:p-6 rounded-3xl bg-[#0c121e] border border-slate-800 flex items-start gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-300 flex items-center justify-center shrink-0 border border-slate-700 text-xl">
                             📍
                         </div>
                         <div class="flex-1 min-w-0">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 border border-slate-700 inline-block">Headquarters</div>
-                            <div class="text-base font-bold text-white mt-1">GymDeskHub Technologies</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 border border-slate-700 inline-block">Headquarters &amp; Legal Entity</div>
+                            <div class="text-base font-bold text-white mt-1">GymDeskHub</div>
                             <div class="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                                Individual Enterprise &bull; Proprietor: <strong class="text-white font-medium">Sailesh Singh</strong><br>
                                 Ahmedabad, Gujarat 380015, India<br>
                                 Grievance: <a href="mailto:grievance@gymdeskhub.in" class="text-amber-400 hover:underline">grievance@gymdeskhub.in</a>
                             </div>

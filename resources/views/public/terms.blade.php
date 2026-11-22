@@ -22,7 +22,7 @@
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">1. Agreement to Terms</h2>
                     <p>
-                        These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("Gym Owner", "Subscriber", or "User"), and <strong>GymDeskHub</strong> ("we", "us", or "our"), concerning your access to and use of the <strong>gymdeskhub.com</strong> website, cloud dashboard, member portals, and desktop biometric agent sync tools (collectively, the "Platform" or "Service").
+                        These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("Gym Owner", "Subscriber", or "User"), and <strong>GymDeskHub</strong> (an individual business owned and operated by <strong>Sailesh Singh</strong>, "we", "us", or "our"), concerning your access to and use of the <strong>gymdeskhub.com</strong> website, cloud dashboard, member portals, and desktop biometric agent sync tools (collectively, the "Platform" or "Service").
                     </p>
                     <p class="mt-2">
                         By accessing or subscribing to the Platform, you acknowledge that you have read, understood, and agreed to be bound by all of these Terms and Conditions. If you do not agree with all of these terms, you are expressly prohibited from using the Platform and must discontinue use immediately.
@@ -99,7 +99,7 @@
                         For any legal inquiries or questions regarding these Terms, contact:
                     </p>
                     <div class="mt-2 text-slate-400 text-xs space-y-1">
-                        <p><strong class="text-slate-200">Legal Department:</strong> GymDeskHub Technologies</p>
+                        <p><strong class="text-slate-200">Legal Entity:</strong> GymDeskHub (Proprietor: Sailesh Singh)</p>
                         <p><strong class="text-slate-200">Email:</strong> <a href="mailto:support@gymdeskhub.com" class="text-amber-400">support@gymdeskhub.com</a></p>
                         <p><strong class="text-slate-200">Phone:</strong> +91 99749 95179</p>
                         <p><strong class="text-slate-200">Operating Address:</strong> Ahmedabad, Gujarat, 380015, India</p>

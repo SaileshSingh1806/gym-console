@@ -22,7 +22,7 @@
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">1. Digital Nature of Service (No Physical Shipping)</h2>
                     <p>
-                        <strong>GymDeskHub</strong> (accessible at <strong>gymdeskhub.com</strong>) is an online Software-as-a-Service (SaaS) cloud application providing gym operations management, biometric sync utilities, and billing portals.
+                        <strong>GymDeskHub</strong> (an individual business owned and operated by <strong>Sailesh Singh</strong>, accessible at <strong>gymdeskhub.com</strong>) is an online Software-as-a-Service (SaaS) cloud application providing gym operations management, biometric sync utilities, and billing portals.
                     </p>
                     <p class="mt-2 text-slate-400">
                         <strong>No physical goods, CDs, printed manuals, or merchandise are packaged or physically shipped</strong> to your shipping address for standard software subscriptions.

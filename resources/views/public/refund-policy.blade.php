@@ -82,6 +82,7 @@
                         If you have questions regarding an invoice, pending refund, or billing dispute:
                     </p>
                     <div class="mt-2 text-slate-400 text-xs space-y-1">
+                        <p><strong class="text-slate-200">Legal Entity:</strong> GymDeskHub (Proprietor: Sailesh Singh)</p>
                         <p><strong class="text-slate-200">Billing Support:</strong> GymDeskHub Accounts</p>
                         <p><strong class="text-slate-200">Email:</strong> <a href="mailto:support@gymdeskhub.com" class="text-amber-400">support@gymdeskhub.com</a> / <a href="mailto:billing@gymdeskhub.com" class="text-amber-400">billing@gymdeskhub.com</a></p>
                         <p><strong class="text-slate-200">Phone / WhatsApp:</strong> +91 99749 95179</p>

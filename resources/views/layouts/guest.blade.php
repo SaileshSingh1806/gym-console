@@ -485,9 +485,14 @@
         <!-- Footer Bottom -->
         <div class="border-t border-slate-800/60">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-                <p>
-                    {{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'GymDeskHub') . '. All rights reserved.') }}
-                </p>
+                <div>
+                    <p>
+                        {{ $platformSettings['footer_copyright'] ?? ('© ' . date('Y') . ' ' . ($platformSettings['app_name'] ?? 'GymDeskHub') . '. All rights reserved.') }}
+                    </p>
+                    <p class="mt-0.5 text-[11px] text-slate-600">
+                        GymDeskHub is an individual enterprise owned and operated by <strong class="text-slate-400 font-normal">Sailesh Singh</strong>.
+                    </p>
+                </div>
                 <div class="flex items-center gap-4">
                     <span>Enterprise Security &amp; Tenant Isolation</span>
                 </div>
