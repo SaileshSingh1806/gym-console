@@ -125,6 +125,12 @@
         onPlanChange() {
             this.paidNowAmount = this.finalFee;
         },
+        onDiscountChange() {
+            this.paidNowAmount = this.finalFee;
+            if (this.isSplitPayment) {
+                this.updateSplitFromFirst();
+            }
+        },
 
         // Height Unit Toggle
         heightUnit: 'cm',
@@ -317,6 +323,12 @@
         },
         onExistingPlanChange() {
             this.existingPaidNowAmount = this.existingFinalFee;
+        },
+        onExistingDiscountChange() {
+            this.existingPaidNowAmount = this.existingFinalFee;
+            if (this.existingIsSplitPayment) {
+                this.updateExistingSplitFromFirst();
+            }
         },
 
         async searchMemberByPhone() {
@@ -815,6 +827,7 @@
                             <input type="number" 
                                    name="discount" 
                                    x-model="discountAmount" 
+                                   @input="onDiscountChange()"
                                    min="0" 
                                    step="any" 
                                    placeholder="0" 
@@ -1530,6 +1543,7 @@
                                     <input type="number" 
                                            name="discount" 
                                            x-model="existingDiscountAmount" 
+                                           @input="onExistingDiscountChange()"
                                            min="0" 
                                            placeholder="0" 
                                            class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-amber-500 focus:outline-none shadow-sm">

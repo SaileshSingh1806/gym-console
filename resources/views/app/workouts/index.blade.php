@@ -475,8 +475,7 @@
             </div>
 
             <div class="p-4 bg-slate-950/90 border-t border-slate-800/80 space-y-3">
-                <p id="videoModalNotes" class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-800 leading-relaxed">
-                    Form cue: Keep core engaged, control the tempo, and use a full range of motion.
+                <p id="videoModalNotes" class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-800 leading-relaxed hidden">
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
@@ -1094,7 +1093,14 @@
             document.getElementById('videoModalTitle').innerText = title;
             document.getElementById('videoModalCategory').innerText = category || 'General';
             document.getElementById('videoModalEquipment').innerText = equipment || 'Exercise';
-            document.getElementById('videoModalNotes').innerText = notes || 'Form cue: Maintain steady tempo, brace your core, and work through a full range of motion.';
+            const notesEl = document.getElementById('videoModalNotes');
+            if (notes && notes.trim() !== '') {
+                notesEl.innerText = notes;
+                notesEl.classList.remove('hidden');
+            } else {
+                notesEl.innerText = '';
+                notesEl.classList.add('hidden');
+            }
 
             const player = document.getElementById('modalVideoPlayer');
             player.src = videoUrl;

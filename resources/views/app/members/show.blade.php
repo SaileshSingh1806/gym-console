@@ -2294,7 +2294,7 @@
                                                                     <span>{{ $m->meal_name }}</span>
                                                                 </div>
                                                                 @if($m->items_description)
-                                                                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{{ $m->items_description }}</p>
+                                                                    <p class="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed whitespace-pre-line">{{ $m->items_description }}</p>
                                                                 @endif
                                                             </div>
                                                             <div class="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center text-right shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
@@ -3786,7 +3786,12 @@
                             "Membership is non-transferable and valid exclusively for the registered individual and specified tenure.",
                             "Members are required to carry clean training footwear, workout towel, and follow gym etiquette at all times.",
                             "Management reserves the right to adjust facility operating hours and enforce safety protocols.",
-                            "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access."
+                            "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access.",
+                            "All memberships and personal training sessions must be utilized strictly within the stipulated validity period; unutilized sessions or duration will automatically lapse upon expiry.",
+                            "Members confirm they are medically fit for physical exercise, and management accepts no liability for any pre-existing health conditions, injuries, or emergencies during workouts.",
+                            "Members are solely responsible for their personal belongings, cash, and valuables, and management accepts no liability for any loss, theft, or damage within the facility or lockers.",
+                            "Gym equipment, weights, and accessories must be handled with care and re-racked after use, and any deliberate misuse or damage to facility property will be charged to the member.",
+                            "Management strictly enforces zero tolerance against misconduct, harassment, or rule violations, which will result in immediate termination of membership without refund."
                         ];
                         if (!empty($invSettings['terms'])) {
                             $rawTerms = array_filter(array_map('trim', explode("\n", $invSettings['terms'])));
@@ -5000,11 +5005,11 @@
 
                                     <div class="space-y-2">
                                         <div>
-                                            <input type="text" 
-                                                   :name="'meals[' + idx + '][items_description]'" 
-                                                   x-model="meal.items_description" 
-                                                   placeholder="Food items & quantities (e.g. 3 Boiled Eggs, 2 Toast, 1 Glass Milk, 1 Apple)" 
-                                                   class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500">
+                                            <textarea rows="2" 
+                                                      :name="'meals[' + idx + '][items_description]'" 
+                                                      x-model="meal.items_description" 
+                                                      placeholder="Food items & quantities (e.g. 3 Boiled Eggs, 2 Toast, 1 Glass Milk, 1 Apple)" 
+                                                      class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
                                         </div>
                                         <div class="grid grid-cols-4 gap-1.5">
                                             <div>

@@ -645,6 +645,9 @@ class AppController extends Controller
 
                     if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
                         $totalPaid = $amt1 + $amt2;
+                        if ($membership && $membership->final_amount !== null) {
+                            $totalPaid = min((float) $membership->final_amount, $totalPaid);
+                        }
                         $currency = $tenant?->currency_symbol ?? '₹';
                         $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
                         $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
@@ -665,6 +668,9 @@ class AppController extends Controller
                         );
                     } else {
                         $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
+                        if ($membership && $membership->final_amount !== null) {
+                            $initialPay = min((float) $membership->final_amount, $initialPay);
+                        }
                         if ($initialPay > 0) {
                             $this->paymentService->recordPayment(
                                 $member,
@@ -848,6 +854,9 @@ class AppController extends Controller
 
                 if ($isSplit && ($amt1 > 0 || $amt2 > 0)) {
                     $totalPaid = $amt1 + $amt2;
+                    if ($membership && $membership->final_amount !== null) {
+                        $totalPaid = min((float) $membership->final_amount, $totalPaid);
+                    }
                     $currency = $tenant?->currency_symbol ?? '₹';
                     $part1 = strtoupper($method1) . " {$currency}" . number_format($amt1, 2) . (!empty($ref1) ? " (Ref: {$ref1})" : '');
                     $part2 = strtoupper($method2) . " {$currency}" . number_format($amt2, 2) . (!empty($ref2) ? " (Ref: {$ref2})" : '');
@@ -868,6 +877,9 @@ class AppController extends Controller
                     );
                 } else {
                     $initialPay = (float) ($validated['initial_payment_amount'] ?? 0);
+                    if ($membership && $membership->final_amount !== null) {
+                        $initialPay = min((float) $membership->final_amount, $initialPay);
+                    }
                     if ($initialPay > 0) {
                         $this->paymentService->recordPayment(
                             $member,
@@ -1421,7 +1433,71 @@ class AppController extends Controller
         $membership = $payment->membership ?? $member->activeMembership ?? $member->memberships()->latest()->first();
         $plan = $membership?->plan;
 
-        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant'));
+        $ptPackage = null;
+        if (empty($payment->membership_id) || str_contains($payment->notes ?? '', 'PT Package') || str_contains($payment->notes ?? '', 'Personal Training')) {
+            $ptPackage = MemberPtPackage::with(['trainer', 'ptPlan'])
+                ->where('tenant_id', $tenant->id)
+                ->where('member_id', $member->id)
+                ->latest('id')
+                ->first();
+        }
+
+        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant', 'ptPackage'));
+    }
+
+    public function showPtPackageInvoice(int $id): View
+    {
+        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+        $ptPackage = MemberPtPackage::with(['member.branch', 'trainer', 'ptPlan'])
+            ->where('tenant_id', $tenant->id)
+            ->findOrFail($id);
+
+        $member = $ptPackage->member;
+        $user = auth()->user();
+
+        if ($user->role === 'member') {
+            $isOwnInvoice = ($member->user_id === $user->id)
+                || (! empty($user->phone) && $member->phone === $user->phone)
+                || (! empty($user->email) && $member->email === $user->email);
+
+            if (! $isOwnInvoice) {
+                abort(403, 'Unauthorized to view this invoice.');
+            }
+        }
+
+        if (in_array($user->role, ['trainer', 'staff']) && ! $user->hasAnyPermission(['payments.invoice_view', 'payments.view', 'pt.view'])) {
+            abort(403, 'Unauthorized to view invoices.');
+        }
+
+        $payment = MemberPayment::where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->where(function ($q) use ($ptPackage) {
+                $q->where('notes', 'like', "%{$ptPackage->package_name}%")
+                  ->orWhere('notes', 'like', '%PT Package%');
+            })
+            ->latest('id')
+            ->first();
+
+        if (! $payment) {
+            $invoiceNumber = 'RCP-PT-'.date('Ymd', strtotime($ptPackage->start_date)).str_pad((string) $ptPackage->id, 4, '0', STR_PAD_LEFT);
+            $payment = MemberPayment::create([
+                'tenant_id' => $tenant->id,
+                'branch_id' => $ptPackage->branch_id ?? $member->branch_id,
+                'member_id' => $member->id,
+                'membership_id' => null,
+                'invoice_number' => $invoiceNumber,
+                'amount' => $ptPackage->paid_amount > 0 ? $ptPackage->paid_amount : $ptPackage->final_amount,
+                'payment_method' => 'cash',
+                'payment_date' => $ptPackage->start_date ?? now()->toDateString(),
+                'received_by_user_id' => auth()->id(),
+                'notes' => "PT Package: {$ptPackage->package_name}".($ptPackage->trainer ? " ({$ptPackage->trainer->full_name})" : ''),
+            ]);
+        }
+
+        $membership = null;
+        $plan = null;
+
+        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant', 'ptPackage'));
     }
 
     public function showPublicInvoice(int $id, string $hash): View
@@ -1437,7 +1513,16 @@ class AppController extends Controller
         $membership = $payment->membership ?? $member?->activeMembership ?? $member?->memberships()->latest()->first();
         $plan = $membership?->plan;
 
-        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant'));
+        $ptPackage = null;
+        if (empty($payment->membership_id) || str_contains($payment->notes ?? '', 'PT Package') || str_contains($payment->notes ?? '', 'Personal Training')) {
+            $ptPackage = MemberPtPackage::with(['trainer', 'ptPlan'])
+                ->where('tenant_id', $tenant->id)
+                ->where('member_id', $member->id)
+                ->latest('id')
+                ->first();
+        }
+
+        return view('app.invoices.show', compact('payment', 'member', 'membership', 'plan', 'tenant', 'ptPackage'));
     }
 
     public function toggleFreezeMember(int $id): RedirectResponse
@@ -6856,7 +6941,7 @@ class AppController extends Controller
         ));
     }
 
-    public function expenses(Request $request): View|RedirectResponse
+    public function expenses(Request $request): View|RedirectResponse|\Symfony\Component\HttpFoundation\StreamedResponse
     {
         $tenant = $this->resolveTenant();
         if (! $tenant) {
@@ -6865,8 +6950,50 @@ class AppController extends Controller
         $branches = Branch::where('tenant_id', $tenant->id)->get();
         $categories = ExpenseCategory::where('tenant_id', $tenant->id)->get();
 
-        $query = Expense::where('tenant_id', $tenant->id)
-            ->with(['category', 'branch']);
+        // Auto-seed default expense categories if empty
+        if ($categories->isEmpty()) {
+            $defaultCategories = [
+                'Gym Rent & Property Lease',
+                'Electricity & Utility Bills',
+                'Trainer & Staff Salaries',
+                'Equipment Maintenance & Repairs',
+                'Cleaning, Housekeeping & Sanitization',
+                'Water, Drinking & Pantry Supplies',
+                'Marketing, Social Media & Advertising',
+                'Software, Internet & Subscriptions',
+                'Supplements & Pro Shop Stock',
+                'Office, Stationary & Printing',
+                'Miscellaneous & Petty Cash',
+            ];
+            foreach ($defaultCategories as $catName) {
+                ExpenseCategory::firstOrCreate([
+                    'tenant_id' => $tenant->id,
+                    'name' => $catName,
+                ]);
+            }
+            $categories = ExpenseCategory::where('tenant_id', $tenant->id)->get();
+        }
+
+        $period = $request->get('period', 'this_month');
+        $query = Expense::where('tenant_id', $tenant->id)->with(['category', 'branch']);
+
+        // Date Period Filtering
+        if ($period === 'this_month') {
+            $query->whereBetween('expense_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()]);
+        } elseif ($period === 'last_month') {
+            $query->whereBetween('expense_date', [now()->subMonth()->startOfMonth()->toDateString(), now()->subMonth()->endOfMonth()->toDateString()]);
+        } elseif ($period === 'last_3_months') {
+            $query->whereBetween('expense_date', [now()->subMonths(2)->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()]);
+        } elseif ($period === 'this_year') {
+            $query->whereBetween('expense_date', [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()]);
+        } elseif ($period === 'custom') {
+            if ($request->filled('date_from')) {
+                $query->where('expense_date', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->where('expense_date', '<=', $request->date_to);
+            }
+        }
 
         if ($request->filled('branch_id') && $request->branch_id !== 'all') {
             $query->where('branch_id', $request->branch_id);
@@ -6884,13 +7011,75 @@ class AppController extends Controller
             });
         }
 
-        $expenses = $query->latest('expense_date')->latest('id')->paginate(15);
+        // CSV Export support
+        if ($request->get('export') === 'csv') {
+            $exportRows = (clone $query)->latest('expense_date')->get();
+            $filename = 'gym_expenses_' . now()->format('Y_m_d_His') . '.csv';
+            return response()->streamDownload(function () use ($exportRows) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Title / Purpose', 'Category', 'Branch', 'Amount', 'Date', 'Payment Method', 'Notes']);
+                foreach ($exportRows as $row) {
+                    fputcsv($handle, [
+                        $row->title,
+                        $row->category->name ?? 'General',
+                        $row->branch->name ?? 'Main',
+                        $row->amount,
+                        $row->expense_date ? $row->expense_date->format('Y-m-d') : '',
+                        strtoupper((string) $row->payment_method),
+                        $row->notes ?? '',
+                    ]);
+                }
+                fclose($handle);
+            }, $filename, ['Content-Type' => 'text/csv']);
+        }
+
+        // Stats & Totals
         $totalAmount = (float) Expense::where('tenant_id', $tenant->id)->sum('amount');
         $thisMonthAmount = (float) Expense::where('tenant_id', $tenant->id)
-            ->where('expense_date', '>=', now()->startOfMonth()->toDateString())
+            ->whereBetween('expense_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->sum('amount');
+        $lastMonthAmount = (float) Expense::where('tenant_id', $tenant->id)
+            ->whereBetween('expense_date', [now()->subMonth()->startOfMonth()->toDateString(), now()->subMonth()->endOfMonth()->toDateString()])
+            ->sum('amount');
+        $todayAmount = (float) Expense::where('tenant_id', $tenant->id)
+            ->whereDate('expense_date', now()->toDateString())
             ->sum('amount');
 
-        return view('app.expenses.index', compact('tenant', 'expenses', 'categories', 'branches', 'totalAmount', 'thisMonthAmount'));
+        $periodAmount = (float) (clone $query)->sum('amount');
+        $expenses = $query->latest('expense_date')->latest('id')->paginate(15)->withQueryString();
+
+        // Top Category Breakdown for This Month
+        $categoryBreakdown = Expense::where('tenant_id', $tenant->id)
+            ->whereBetween('expense_date', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
+            ->selectRaw('expense_category_id, sum(amount) as cat_total')
+            ->groupBy('expense_category_id')
+            ->orderByDesc('cat_total')
+            ->with('category')
+            ->get()
+            ->map(function ($item) use ($thisMonthAmount) {
+                $name = $item->category->name ?? 'General';
+                $amt = (float) $item->cat_total;
+                $pct = $thisMonthAmount > 0 ? round(($amt / $thisMonthAmount) * 100, 1) : 0;
+                return [
+                    'name' => $name,
+                    'amount' => $amt,
+                    'percentage' => $pct,
+                ];
+            });
+
+        return view('app.expenses.index', compact(
+            'tenant',
+            'expenses',
+            'categories',
+            'branches',
+            'totalAmount',
+            'thisMonthAmount',
+            'lastMonthAmount',
+            'todayAmount',
+            'periodAmount',
+            'period',
+            'categoryBreakdown'
+        ));
     }
 
     public function storeExpense(Request $request): RedirectResponse
@@ -6916,6 +7105,33 @@ class AppController extends Controller
         Expense::create($validated);
 
         return back()->with('success', 'Expense recorded successfully!');
+    }
+
+    public function updateExpense(Request $request, int $id): RedirectResponse
+    {
+        $tenant = $this->resolveTenant();
+        if (! $tenant) {
+            return back()->with('error', 'No active gym tenant found.');
+        }
+
+        $expense = Expense::where('tenant_id', $tenant->id)->findOrFail($id);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'expense_category_id' => 'nullable|exists:expense_categories,id',
+            'payment_method' => 'required|in:cash,bank_transfer,card,upi,other',
+            'branch_id' => 'nullable|exists:branches,id',
+            'notes' => 'nullable|string',
+        ]);
+
+        $defaultBranch = Branch::where('tenant_id', $tenant->id)->first();
+        $validated['branch_id'] = $validated['branch_id'] ?? $defaultBranch?->id;
+
+        $expense->update($validated);
+
+        return back()->with('success', 'Expense updated successfully!');
     }
 
     public function deleteExpense(int $id): RedirectResponse

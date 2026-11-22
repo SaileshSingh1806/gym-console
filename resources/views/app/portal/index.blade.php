@@ -131,6 +131,15 @@
             if (!payload || !payload.url || !/^(\/|https?:\/\/)/i.test(payload.url)) {
                 return;
             }
+            if (!payload.sets && payload.setsReps) {
+                const parts = String(payload.setsReps).split(/[×*xX]/);
+                if (parts.length >= 2) {
+                    payload.sets = parts[0].replace(/[^0-9]/g, '').trim() || parts[0].trim();
+                    payload.reps = parts.slice(1).join('×').trim();
+                } else {
+                    payload.reps = payload.setsReps;
+                }
+            }
             this.activeVideo = payload;
         },
 
@@ -811,6 +820,9 @@
                                             $qTarget = $ex->tracking_type === 'time'
                                                 ? ($ex->sets . '×' . (($qDur >= 60 && $qDur % 60 === 0) ? ($qDur / 60) . 'm' : $qDur . 's'))
                                                 : ($ex->sets . '×' . $ex->reps);
+                                            $qReps = $ex->tracking_type === 'time'
+                                                ? (($qDur >= 60 && $qDur % 60 === 0) ? ($qDur / 60) . ' min' : ($qDur > 0 ? $qDur . ' sec' : 'Timed'))
+                                                : (string) ($ex->reps ?: '10-12');
                                             $qSub = $qMatch['category'] ?? ($ex->weight ? 'Load: ' . $ex->weight : (($ex->rest_seconds ?? 0) > 0 ? 'Rest ' . $ex->rest_seconds . 's' : 'Workout'));
                                         @endphp
                                         <div class="p-3 rounded-2xl bg-[#0F1115]/70 border border-neutral-800/90 hover:border-[#C5A880]/30 transition-colors flex items-center justify-between gap-2">
@@ -826,6 +838,11 @@
                                                                     'category' => $qMatch['category'] ?? 'Assigned Exercise',
                                                                     'equipment' => $qMatch['equipment'] ?? 'Form Guide',
                                                                     'notes' => $ex->notes ?: ($qMatch['notes'] ?? ''),
+                                                                    'sets' => (string) ($ex->sets ?: '3'),
+                                                                    'reps' => (string) $qReps,
+                                                                    'trackingType' => $ex->tracking_type,
+                                                                    'rest' => ($ex->rest_seconds ?? 0) > 0 ? $ex->rest_seconds . 's' : '',
+                                                                    'weight' => $ex->weight ?: '',
                                                                     'setsReps' => $qTarget,
                                                                     'source' => $ex->video_url ? 'Assigned Video' : 'Video Library',
                                                                 ]) }})"
@@ -1553,7 +1570,12 @@
                                                         'category' => $matchedLib['category'] ?? ucwords(str_replace('_', ' ', $day)),
                                                         'equipment' => $matchedLib['equipment'] ?? ($ex->weight ? 'Load: ' . $ex->weight : 'Gym Exercise'),
                                                         'notes' => $resolvedNotes ?? '',
-                                                        'setsReps' => $ex->sets . ' ' . ($ex->tracking_type === 'time' ? 'Rounds' : 'Sets') . ' × ' . $volumeValue,
+                                                        'sets' => (string) ($ex->sets ?: '3'),
+                                                        'reps' => (string) ($volumeValue ?: '10-12'),
+                                                        'trackingType' => $ex->tracking_type,
+                                                        'rest' => ($ex->rest_seconds ?? 0) > 0 ? $ex->rest_seconds . 's' : '',
+                                                        'weight' => $ex->weight ?: '',
+                                                        'setsReps' => $ex->sets . ' Sets × ' . $volumeValue,
                                                         'source' => $ex->video_url ? 'Assigned Video' : 'Video Library',
                                                     ] : null;
                                                 @endphp
@@ -1669,277 +1691,432 @@
                 @endif
             </div>
 
-            <!-- TAB 3: DIET & NUTRITION (ATHLETIC STEALTH) -->
-            <div x-show="tab === 'diets'" x-cloak class="space-y-5">
+            <!-- TAB 3: DIET & MEAL PLAN (REFINED PROFESSIONAL MEMBER INTERFACE) -->
+            <div x-show="tab === 'diets'" x-cloak class="space-y-6">
                 @if($member->dietPlans->isNotEmpty())
                     @foreach($member->dietPlans as $diet)
                         @php
+                            $targetCals = (int) ($diet->daily_calories ?? 2000);
                             $pGrams = (int) ($diet->protein_grams ?? 0);
                             $cGrams = (int) ($diet->carbs_grams ?? 0);
                             $fGrams = (int) ($diet->fat_grams ?? 0);
-                            $pKcal = $pGrams * 4;
-                            $cKcal = $cGrams * 4;
-                            $fKcal = $fGrams * 9;
-                            $totalMacroKcal = max(1, $pKcal + $cKcal + $fKcal);
-                            $pPct = round(($pKcal / $totalMacroKcal) * 100);
-                            $cPct = round(($cKcal / $totalMacroKcal) * 100);
-                            $fPct = max(0, 100 - ($pPct + $cPct));
+
+                            // Curated dish thumbnail lookup function for fitness meals
+                            $resolveMealThumb = function($type, $name, $items) {
+                                $haystack = strtolower($type . ' ' . $name . ' ' . $items);
+                                if (str_contains($haystack, 'egg') || str_contains($haystack, 'omelet') || str_contains($haystack, 'breakfast') || str_contains($haystack, 'oat')) {
+                                    return 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=240&auto=format&fit=crop&q=80';
+                                }
+                                if (str_contains($haystack, 'snack') || str_contains($haystack, 'fruit') || str_contains($haystack, 'apple') || str_contains($haystack, 'chana') || str_contains($haystack, 'nut')) {
+                                    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=240&auto=format&fit=crop&q=80';
+                                }
+                                if (str_contains($haystack, 'chicken') || str_contains($haystack, 'fish') || str_contains($haystack, 'meat') || str_contains($haystack, 'lunch') || str_contains($haystack, 'rice')) {
+                                    return 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=240&auto=format&fit=crop&q=80';
+                                }
+                                if (str_contains($haystack, 'shake') || str_contains($haystack, 'whey') || str_contains($haystack, 'protein') || str_contains($haystack, 'post') || str_contains($haystack, 'smoothie')) {
+                                    return 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=240&auto=format&fit=crop&q=80';
+                                }
+                                if (str_contains($haystack, 'dinner') || str_contains($haystack, 'paneer') || str_contains($haystack, 'roti') || str_contains($haystack, 'dal') || str_contains($haystack, 'tofu')) {
+                                    return 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=240&auto=format&fit=crop&q=80';
+                                }
+                                return 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=240&auto=format&fit=crop&q=80';
+                            };
+
+                            // Prepare meal collection with parsed items
+                            $preparedMeals = [];
+                            foreach ($diet->meals as $meal) {
+                                $rawItems = $meal->items_description ?: ($meal->items ?: '');
+                                $normalized = str_replace(["\r\n", "\r"], "\n", $rawItems);
+                                if (!str_contains($normalized, "\n")) {
+                                    $withBreaks = preg_replace('/(\d(?:\.\d+)?g\s*[PCF]|\bkcal)\s*(?=[A-Z0-9•\-\*])/u', "$1\n", $normalized);
+                                    if (str_contains($withBreaks, "\n")) {
+                                        $normalized = $withBreaks;
+                                    } elseif (!preg_match('/kcal|\bg\s*[PCF]\b/ui', $normalized)) {
+                                        $normalized = str_replace(',', "\n", $normalized);
+                                    }
+                                }
+                                $parsedItems = [];
+                                foreach (explode("\n", $normalized) as $line) {
+                                    $clean = trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($line)));
+                                    if ($clean !== '') {
+                                        $parts = explode(' — ', $clean, 2);
+                                        $fullTitle = trim($parts[0]);
+                                        $macros = isset($parts[1]) ? trim($parts[1]) : null;
+
+                                        // Split primary name and portion if parenthesis exist
+                                        if (preg_match('/^([^\(]+)\s*(\(.+\))$/u', $fullTitle, $matches)) {
+                                            $foodName = trim($matches[1]);
+                                            $portionDesc = trim($matches[2]);
+                                        } else {
+                                            $foodName = $fullTitle;
+                                            $portionDesc = '';
+                                        }
+
+                                        $parsedItems[] = [
+                                            'name' => $foodName,
+                                            'portion' => $portionDesc,
+                                            'full_title' => $fullTitle,
+                                            'macros' => $macros,
+                                        ];
+                                    }
+                                }
+
+                                $mealTimeFormatted = null;
+                                if (!empty($meal->recommended_time)) {
+                                    try {
+                                        $mealTimeFormatted = \Carbon\Carbon::parse($meal->recommended_time)->format('h:i A');
+                                    } catch (\Throwable $e) {
+                                        $mealTimeFormatted = substr((string)$meal->recommended_time, 0, 5);
+                                    }
+                                } elseif (!empty($meal->meal_time)) {
+                                    $mealTimeFormatted = $meal->meal_time;
+                                }
+
+                                $mealTypeRaw = strtolower((string) ($meal->meal_type ?? ''));
+                                $typeLabel = match(true) {
+                                    str_contains($mealTypeRaw, 'breakfast') => 'Breakfast',
+                                    str_contains($mealTypeRaw, 'morning') || str_contains($mealTypeRaw, 'snack_1') => 'Mid-Morning Snack',
+                                    str_contains($mealTypeRaw, 'lunch') => 'Lunch',
+                                    str_contains($mealTypeRaw, 'evening') || str_contains($mealTypeRaw, 'pre') => 'Evening Snack',
+                                    str_contains($mealTypeRaw, 'post') => 'Post-Workout Fuel',
+                                    str_contains($mealTypeRaw, 'dinner') => 'Dinner',
+                                    str_contains($mealTypeRaw, 'bed') || str_contains($mealTypeRaw, 'night') => 'Bedtime Recovery',
+                                    default => ucwords(str_replace('_', ' ', $meal->meal_type ?: 'Meal')),
+                                };
+
+                                // Single clean display title (avoids duplicate breakfast/breakfast)
+                                $displayTitle = (!empty($meal->meal_name) && strtolower(trim($meal->meal_name)) !== strtolower(trim($typeLabel)))
+                                    ? $meal->meal_name
+                                    : $typeLabel;
+
+                                $thumb = $resolveMealThumb($mealTypeRaw, (string)$meal->meal_name, $rawItems);
+
+                                $preparedMeals[] = [
+                                    'id' => $meal->id,
+                                    'name' => $displayTitle,
+                                    'type' => $typeLabel,
+                                    'time' => $mealTimeFormatted,
+                                    'calories' => (int) ($meal->calories ?? 0),
+                                    'protein' => (int) ($meal->protein_grams ?? 0),
+                                    'carbs' => (int) ($meal->carbs_grams ?? 0),
+                                    'fat' => (int) ($meal->fat_grams ?? 0),
+                                    'image' => $thumb,
+                                    'items' => $parsedItems,
+                                    'items_count' => count($parsedItems),
+                                    'guidelines' => $diet->guidelines ?? '',
+                                ];
+                            }
                         @endphp
 
-                        <div class="rounded-3xl bg-[#171A22] border border-neutral-800 p-5 sm:p-7 shadow-xl space-y-6">
-                            
-                            <!-- Plan Title, Prescribed Badge & Daily Calorie Hero -->
-                            <div class="flex items-start justify-between gap-4 border-b border-neutral-800 pb-5 flex-wrap">
-                                <div class="space-y-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ $diet->title }}</h3>
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30">Active Nutrition</span>
+                        <div class="rounded-3xl bg-[#171A22] border border-neutral-800 p-4 sm:p-6 shadow-xl space-y-6"
+                             x-data="{
+                                dateOffset: 0,
+                                eatenMap: {},
+                                activeMealModal: null,
+                                planTargetCals: {{ $targetCals }},
+                                planTargetP: {{ $pGrams }},
+                                planTargetC: {{ $cGrams }},
+                                planTargetF: {{ $fGrams }},
+                                mealsList: {{ Js::from($preparedMeals) }},
+
+                                init() {
+                                    this.loadEatenState();
+                                },
+
+                                get currentDisplayDate() {
+                                    const d = new Date();
+                                    d.setDate(d.getDate() + this.dateOffset);
+                                    if (this.dateOffset === 0) return 'Today, ' + d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                                    if (this.dateOffset === -1) return 'Yesterday, ' + d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                                    if (this.dateOffset === 1) return 'Tomorrow, ' + d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                                    return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+                                },
+
+                                get storageKey() {
+                                    const d = new Date();
+                                    d.setDate(d.getDate() + this.dateOffset);
+                                    const dateKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                                    return 'gym_portal_eaten_{{ $member->id }}_' + dateKey;
+                                },
+
+                                loadEatenState() {
+                                    try {
+                                        const raw = localStorage.getItem(this.storageKey);
+                                        this.eatenMap = raw ? JSON.parse(raw) : {};
+                                    } catch (e) {
+                                        this.eatenMap = {};
+                                    }
+                                },
+
+                                saveEatenState() {
+                                    try {
+                                        localStorage.setItem(this.storageKey, JSON.stringify(this.eatenMap));
+                                    } catch (e) {}
+                                },
+
+                                changeDay(delta) {
+                                    this.dateOffset += delta;
+                                    this.loadEatenState();
+                                },
+
+                                isEaten(mealId) {
+                                    return !!this.eatenMap[mealId];
+                                },
+
+                                toggleEaten(mealId) {
+                                    if (this.eatenMap[mealId]) {
+                                        delete this.eatenMap[mealId];
+                                    } else {
+                                        this.eatenMap[mealId] = true;
+                                    }
+                                    this.saveEatenState();
+                                },
+
+                                get loggedTotals() {
+                                    let cals = 0, p = 0, c = 0, f = 0, count = 0;
+                                    this.mealsList.forEach(m => {
+                                        if (this.isEaten(m.id)) {
+                                            cals += m.calories || 0;
+                                            p += m.protein || 0;
+                                            c += m.carbs || 0;
+                                            f += m.fat || 0;
+                                            count++;
+                                        }
+                                    });
+                                    const calsPct = this.planTargetCals > 0 ? Math.min(100, Math.round((cals / this.planTargetCals) * 100)) : 0;
+                                    return { cals, p, c, f, count, calsPct };
+                                },
+
+                                openDetail(meal) {
+                                    this.activeMealModal = meal;
+                                },
+
+                                closeDetail() {
+                                    this.activeMealModal = null;
+                                }
+                             }">
+
+                            <!-- 1. Header with Plan Title & Prescribed Badge -->
+                            <div class="flex items-center justify-between gap-3 border-b border-neutral-800 pb-3 flex-wrap">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2.5 flex-wrap">
+                                        <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight truncate">{{ $diet->title }}</h3>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 shrink-0">
+                                            Active Plan
+                                        </span>
                                     </div>
-                                    <p class="text-xs text-slate-400 flex items-center gap-2">
-                                        <span>Prescribed Nutrition &amp; Macro Balance</span>
+                                    <p class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                                        <span>Daily Meal Schedule &amp; Target Nutrition</span>
                                         @if($diet->start_date)
-                                            <span>• Started {{ \Carbon\Carbon::parse($diet->start_date)->format('d M Y') }}</span>
+                                            <span class="text-slate-600">•</span>
+                                            <span>Since {{ \Carbon\Carbon::parse($diet->start_date)->format('d M') }}</span>
                                         @endif
                                     </p>
                                 </div>
-
-                                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                                    <div class="px-3.5 py-2 rounded-2xl bg-[#0F1115] border border-neutral-800 text-right">
-                                        <div class="text-base sm:text-lg font-black text-white font-mono flex items-center gap-1.5">
-                                            <span class="text-amber-400">🔥</span>
-                                            <span>{{ number_format($diet->daily_calories ?? 2000) }}</span>
-                                            <span class="text-xs text-slate-400 font-normal">kcal</span>
-                                        </div>
-                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Daily Intake Target</span>
-                                    </div>
-                                </div>
                             </div>
 
-                            <!-- Visual Macro Distribution Progress Bar -->
-                            <div class="p-4 sm:p-5 rounded-2xl bg-[#0F1115]/80 border border-neutral-800 space-y-3">
-                                <div class="flex items-center justify-between text-xs">
-                                    <span class="font-bold text-white uppercase text-[11px] tracking-wider flex items-center gap-1.5">
-                                        <span>📊 Macro Distribution Ratio</span>
-                                    </span>
-                                    <span class="text-slate-400 text-[11px] font-mono">
-                                        {{ $pPct }}% Protein • {{ $cPct }}% Carbs • {{ $fPct }}% Fats
-                                    </span>
-                                </div>
-
-                                <!-- Multi-segment Proportional Bar -->
-                                <div class="w-full bg-neutral-900 rounded-full h-3 p-0.5 flex overflow-hidden border border-neutral-800 shadow-inner gap-0.5">
-                                    <div class="h-full rounded-l-full bg-blue-500 transition-all duration-500 shadow-sm" style="width: {{ $pPct }}%" title="Protein: {{ $pPct }}%"></div>
-                                    <div class="h-full bg-emerald-500 transition-all duration-500 shadow-sm" style="width: {{ $cPct }}%" title="Carbohydrates: {{ $cPct }}%"></div>
-                                    <div class="h-full rounded-r-full bg-rose-500 transition-all duration-500 shadow-sm" style="width: {{ $fPct }}%" title="Fats: {{ $fPct }}%"></div>
-                                </div>
-
-                                <!-- Macro Cards (Blue, Emerald, Rose) -->
-                                <div class="grid grid-cols-3 gap-2.5 pt-1 text-center">
-                                    <!-- Protein -->
-                                    <div class="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center">
-                                        <div class="flex items-center justify-center gap-1">
-                                            <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-                                            <span class="text-[10px] font-black uppercase text-blue-400 tracking-wider">Protein</span>
+                            <!-- 2. Daily Nutrition Summary Card (Full Width, Balanced & Responsive) -->
+                            <div class="p-4 sm:p-5 rounded-2xl bg-[#0F1115] border border-neutral-800 space-y-4 shadow-sm">
+                                <!-- Top row: Big Calories & Date Selector -->
+                                <div class="flex items-start justify-between gap-3 flex-wrap">
+                                    <div>
+                                        <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 block mb-1">Daily Target Consumption</span>
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="text-2xl sm:text-3xl font-black text-white font-mono leading-none tracking-tight">
+                                                <span x-text="loggedTotals.cals.toLocaleString()"></span>
+                                            </span>
+                                            <span class="text-sm sm:text-base font-bold text-slate-400 font-mono">
+                                                / {{ number_format($targetCals) }} kcal
+                                            </span>
                                         </div>
-                                        <div class="text-lg sm:text-xl font-black text-white mt-1 font-mono">{{ $diet->protein_grams ?? 120 }}<span class="text-xs text-blue-300 font-normal">g</span></div>
-                                        <span class="text-[10px] text-blue-300/80 block mt-0.5">Muscle Growth</span>
+                                        <span class="text-xs text-[#C5A880] font-medium block mt-1" 
+                                              x-text="loggedTotals.count === 0 ? '0 of ' + mealsList.length + ' meals logged today' : (loggedTotals.count + ' of ' + mealsList.length + ' meals logged (' + loggedTotals.calsPct + '% completed)')">
+                                        </span>
+                                    </div>
+
+                                    <!-- Date Switcher Pill -->
+                                    <div class="flex items-center gap-1 p-1 rounded-xl bg-[#171A22] border border-neutral-800 shadow-xs shrink-0">
+                                        <button type="button" @click="changeDay(-1)" class="w-8 h-8 rounded-lg hover:bg-neutral-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Previous Day">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                                        </button>
+                                        <span class="px-3 py-1 text-xs font-black font-mono text-white tracking-tight cursor-default" x-text="currentDisplayDate"></span>
+                                        <button type="button" @click="changeDay(1)" class="w-8 h-8 rounded-lg hover:bg-neutral-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Next Day">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Subtle Progress Bar -->
+                                <div class="w-full bg-neutral-900 rounded-full h-2.5 overflow-hidden border border-neutral-800">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-[#C5A880] to-amber-400 transition-all duration-300 shadow-sm"
+                                         :style="'width: ' + loggedTotals.calsPct + '%'"></div>
+                                </div>
+
+                                <!-- Macro Grid: Equal Symmetrical 3-Column Responsive Fill -->
+                                <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5 pt-1">
+                                    <!-- Protein -->
+                                    <div class="p-3 sm:p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
+                                        <span class="text-[10px] sm:text-xs font-black uppercase text-blue-400 tracking-wider block">Protein</span>
+                                        <div class="text-base sm:text-xl font-black text-white font-mono mt-0.5">
+                                            <span x-text="loggedTotals.p"></span><span class="text-xs text-blue-300/80 font-normal"> / {{ $pGrams }}g</span>
+                                        </div>
+                                        <span class="text-[9px] text-blue-300/70 block mt-0.5 font-medium">Muscle Growth</span>
                                     </div>
 
                                     <!-- Carbs -->
-                                    <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-                                        <div class="flex items-center justify-center gap-1">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                            <span class="text-[10px] font-black uppercase text-emerald-400 tracking-wider">Carbs</span>
+                                    <div class="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                                        <span class="text-[10px] sm:text-xs font-black uppercase text-emerald-400 tracking-wider block">Carbs</span>
+                                        <div class="text-base sm:text-xl font-black text-white font-mono mt-0.5">
+                                            <span x-text="loggedTotals.c"></span><span class="text-xs text-emerald-300/80 font-normal"> / {{ $cGrams }}g</span>
                                         </div>
-                                        <div class="text-lg sm:text-xl font-black text-white mt-1 font-mono">{{ $diet->carbs_grams ?? 220 }}<span class="text-xs text-emerald-300 font-normal">g</span></div>
-                                        <span class="text-[10px] text-emerald-300/80 block mt-0.5">Workout Fuel</span>
+                                        <span class="text-[9px] text-emerald-300/70 block mt-0.5 font-medium">Energy Fuel</span>
                                     </div>
 
                                     <!-- Fats -->
-                                    <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
-                                        <div class="flex items-center justify-center gap-1">
-                                            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
-                                            <span class="text-[10px] font-black uppercase text-rose-400 tracking-wider">Fats</span>
+                                    <div class="p-3 sm:p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center">
+                                        <span class="text-[10px] sm:text-xs font-black uppercase text-rose-400 tracking-wider block">Fats</span>
+                                        <div class="text-base sm:text-xl font-black text-white font-mono mt-0.5">
+                                            <span x-text="loggedTotals.f"></span><span class="text-xs text-rose-300/80 font-normal"> / {{ $fGrams }}g</span>
                                         </div>
-                                        <div class="text-lg sm:text-xl font-black text-white mt-1 font-mono">{{ $diet->fat_grams ?? 60 }}<span class="text-xs text-rose-300 font-normal">g</span></div>
-                                        <span class="text-[10px] text-rose-300/80 block mt-0.5">Hormones &amp; Joints</span>
+                                        <span class="text-[9px] text-rose-300/70 block mt-0.5 font-medium">Healthy Joints</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Daily Hydration Strip -->
-                            <div class="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-between text-xs text-sky-200 shadow-xs">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="text-base">💧</span>
-                                    <div>
-                                        <span class="font-bold text-white block">Optimal Daily Hydration</span>
-                                        <span class="text-[11px] text-sky-300">Aim for 3.5 – 4.0 Litres of pure water daily for metabolism &amp; muscle fullness.</span>
-                                    </div>
-                                </div>
-                                <span class="hidden sm:inline-block px-2.5 py-1 rounded-xl bg-sky-500/20 text-sky-300 font-black font-mono text-[11px] border border-sky-500/30">
-                                    4 Litres Goal
-                                </span>
-                            </div>
-
-                            <!-- Meal Timetable Schedule -->
-                            <div class="space-y-3.5 pt-2">
+                            <!-- 3. Refined Meal List (Clean, Bold, Perfectly Aligned) -->
+                            <div class="space-y-3.5 pt-1">
                                 <div class="flex items-center justify-between">
-                                    <h4 class="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                                         <span>🍽️</span>
-                                        <span>Daily Meal Schedule</span>
+                                        <span>Today's Meal Schedule</span>
                                     </h4>
-                                    <span class="text-xs font-bold text-slate-400">
-                                        {{ $diet->meals->count() }} {{ $diet->meals->count() === 1 ? 'Meal' : 'Meals' }} Timetable
+                                    <span class="text-xs font-mono font-bold text-slate-400">
+                                        {{ count($preparedMeals) }} {{ count($preparedMeals) === 1 ? 'Meal' : 'Meals' }}
                                     </span>
                                 </div>
 
-                                @if($diet->meals->isNotEmpty())
+                                @if(!empty($preparedMeals))
                                     <div class="space-y-3">
-                                        @foreach($diet->meals as $meal)
-                                            @php
-                                                $mealTypeRaw = strtolower((string) ($meal->meal_type ?? ''));
-                                                $mealMeta = match(true) {
-                                                    str_contains($mealTypeRaw, 'breakfast') => [
-                                                        'icon' => '🌅',
-                                                        'badge' => 'Breakfast',
-                                                        'badgeColor' => 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'morning') || str_contains($mealTypeRaw, 'snack_1') => [
-                                                        'icon' => '🍎',
-                                                        'badge' => 'Mid-Morning Snack',
-                                                        'badgeColor' => 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'lunch') => [
-                                                        'icon' => '🥗',
-                                                        'badge' => 'Lunch',
-                                                        'badgeColor' => 'bg-blue-500/15 text-blue-400 border-blue-500/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'pre') || str_contains($mealTypeRaw, 'evening') => [
-                                                        'icon' => '⚡',
-                                                        'badge' => 'Pre-Workout Fuel',
-                                                        'badgeColor' => 'bg-purple-500/15 text-purple-400 border-purple-500/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'post') => [
-                                                        'icon' => '🥤',
-                                                        'badge' => 'Post-Workout Shake',
-                                                        'badgeColor' => 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'dinner') => [
-                                                        'icon' => '🍲',
-                                                        'badge' => 'Dinner',
-                                                        'badgeColor' => 'bg-[#C5A880]/15 text-[#C5A880] border-[#C5A880]/30'
-                                                    ],
-                                                    str_contains($mealTypeRaw, 'bed') || str_contains($mealTypeRaw, 'night') => [
-                                                        'icon' => '🥛',
-                                                        'badge' => 'Bedtime Recovery',
-                                                        'badgeColor' => 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30'
-                                                    ],
-                                                    default => [
-                                                        'icon' => '🍽️',
-                                                        'badge' => ucwords(str_replace('_', ' ', $meal->meal_type ?: 'Meal')),
-                                                        'badgeColor' => 'bg-neutral-800 text-slate-300 border-neutral-700'
-                                                    ],
-                                                };
+                                        @foreach($preparedMeals as $meal)
+                                            <!-- Meal Card: Thumbnail + Clean Title & Time + Nutrition Strip + 44px Checkmark -->
+                                            <div class="group rounded-2xl bg-[#0F1115] border border-neutral-800 hover:border-[#C5A880]/40 p-3.5 sm:p-4 transition-all shadow-xs space-y-3 cursor-pointer"
+                                                 :class="isEaten({{ $meal['id'] }}) ? 'border-emerald-500/50 bg-emerald-500/[0.03]' : ''"
+                                                 @click="openDetail(mealsList.find(m => m.id === {{ $meal['id'] }}))">
 
-                                                $mealTimeFormatted = null;
-                                                if (!empty($meal->recommended_time)) {
-                                                    try {
-                                                        $mealTimeFormatted = \Carbon\Carbon::parse($meal->recommended_time)->format('h:i A');
-                                                    } catch (\Throwable $e) {
-                                                        $mealTimeFormatted = substr((string)$meal->recommended_time, 0, 5);
-                                                    }
-                                                } elseif (!empty($meal->meal_time)) {
-                                                    $mealTimeFormatted = $meal->meal_time;
-                                                }
-
-                                                $rawItems = $meal->items_description ?: ($meal->items ?: '');
-                                                if (str_contains($rawItems, "\n")) {
-                                                    $foodItems = array_values(array_filter(array_map(fn ($line) => trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($line))), explode("\n", str_replace("\r\n", "\n", $rawItems)))));
-                                                } else {
-                                                    $foodItems = preg_match('/kcal|\bg\s*[PCF]\b|^\s*[•\-\*]/ui', $rawItems)
-                                                        ? [trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($rawItems)))]
-                                                        : array_values(array_filter(array_map(fn ($part) => trim((string) preg_replace('/^[•\-\*]\s*/u', '', trim($part))), explode(',', $rawItems))));
-                                                }
-                                            @endphp
-
-                                            <div class="rounded-2xl bg-[#0F1115]/80 border border-neutral-800 hover:border-neutral-700 p-4 sm:p-5 space-y-3.5 transition-all shadow-sm">
-                                                <!-- Meal Header: Icon, Name, Timing & Nutrients -->
-                                                <div class="flex items-start justify-between gap-3 flex-wrap">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="w-10 h-10 rounded-xl bg-[#171A22] border border-neutral-800 text-lg flex items-center justify-center shrink-0 shadow-sm">
-                                                            {{ $mealMeta['icon'] }}
+                                                <!-- Top Row: Thumbnail + Single Title with Time + Checkmark Button -->
+                                                <div class="flex items-center gap-3.5 sm:gap-4">
+                                                    <!-- Food Thumbnail (56px) with rounded corners & fallback -->
+                                                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden bg-[#171A22] border border-neutral-800 shrink-0 shadow-inner">
+                                                        <img src="{{ $meal['image'] }}" 
+                                                             alt="{{ $meal['name'] }}" 
+                                                             loading="lazy"
+                                                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                             onerror="this.onerror=null; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                                                        <div class="hidden w-full h-full flex items-center justify-center text-xl bg-[#171A22]">
+                                                            🍽️
                                                         </div>
-                                                        <div>
-                                                            <div class="flex items-center gap-2 flex-wrap">
-                                                                <h5 class="text-sm sm:text-base font-black text-white tracking-tight">{{ $meal->meal_name ?: $mealMeta['badge'] }}</h5>
-                                                                <span class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider {{ $mealMeta['badgeColor'] }} border">
-                                                                    {{ $mealMeta['badge'] }}
+
+                                                        <!-- Eaten Checkmark Overlay Badge -->
+                                                        <div x-show="isEaten({{ $meal['id'] }})" x-cloak
+                                                             class="absolute inset-0 bg-emerald-950/80 backdrop-blur-[1px] flex items-center justify-center text-white transition-opacity">
+                                                            <div class="w-6 h-6 rounded-full bg-emerald-500 text-neutral-950 flex items-center justify-center text-xs font-black shadow-md">✓</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Center Column: Single Title + Inline Time + Food Items Preview -->
+                                                    <div class="min-w-0 flex-1">
+                                                        <!-- Single Meal Name with Time right next to it -->
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            <h5 class="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-[#C5A880] transition-colors leading-tight">
+                                                                {{ $meal['name'] }}
+                                                            </h5>
+                                                            @if(!empty($meal['time']))
+                                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#171A22] border border-neutral-700/80 text-[11px] font-bold font-mono text-[#C5A880] shrink-0">
+                                                                    <svg class="w-3 h-3 text-[#C5A880]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                    {{ $meal['time'] }}
                                                                 </span>
-                                                            </div>
-                                                            @if($mealTimeFormatted)
-                                                                <div class="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
-                                                                    <svg class="w-3.5 h-3.5 text-[#C5A880]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                                    <span>Recommended at <strong class="text-slate-200">{{ $mealTimeFormatted }}</strong></span>
-                                                                </div>
                                                             @endif
                                                         </div>
+
+                                                        <!-- Food Items Portion Preview -->
+                                                        <p class="text-xs text-slate-400 mt-1 line-clamp-1 leading-relaxed">
+                                                            {{ implode(' • ', array_map(fn($it) => $it['name'], array_slice($meal['items'], 0, 3))) }}
+                                                            @if(count($meal['items']) > 3)
+                                                                <span class="text-slate-500">+{{ count($meal['items']) - 3 }} more</span>
+                                                            @endif
+                                                        </p>
                                                     </div>
 
-                                                    <!-- Meal Nutrition Badges (Calories & P/C/F) -->
-                                                    <div class="flex items-center gap-1.5 flex-wrap ml-auto">
-                                                        @if($meal->calories)
-                                                            <span class="px-2.5 py-1 rounded-xl text-xs font-black bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono flex items-center gap-1">
-                                                                <span>🔥</span>
-                                                                <span>{{ $meal->calories }} kcal</span>
-                                                            </span>
-                                                        @endif
-                                                        @if($meal->protein_grams)
-                                                            <span class="px-2 py-1 rounded-xl text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
-                                                                {{ $meal->protein_grams }}g P
-                                                            </span>
-                                                        @endif
-                                                        @if($meal->carbs_grams)
-                                                            <span class="px-2 py-1 rounded-xl text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                                                                {{ $meal->carbs_grams }}g C
-                                                            </span>
-                                                        @endif
-                                                        @if($meal->fat_grams)
-                                                            <span class="px-2 py-1 rounded-xl text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono">
-                                                                {{ $meal->fat_grams }}g F
-                                                            </span>
-                                                        @endif
-                                                    </div>
+                                                    <!-- Separate 'Mark as eaten' action button (>=44px touch target) -->
+                                                    <button type="button" 
+                                                            @click.stop="toggleEaten({{ $meal['id'] }})"
+                                                            :class="isEaten({{ $meal['id'] }}) 
+                                                                ? 'bg-emerald-500 text-neutral-950 shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400' 
+                                                                : 'bg-[#171A22] text-slate-400 hover:text-white border border-neutral-700/80 hover:border-neutral-500'"
+                                                            class="w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ml-auto"
+                                                            :title="isEaten({{ $meal['id'] }}) ? 'Marked as eaten (click to undo)' : 'Mark as eaten'">
+                                                        <svg class="w-5 h-5 transition-transform" :class="isEaten({{ $meal['id'] }}) ? 'scale-110' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                        </svg>
+                                                    </button>
                                                 </div>
 
-                                                <!-- Food Items Checklist Grid -->
-                                                @if(!empty($foodItems))
-                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-neutral-800/80">
-                                                        @foreach($foodItems as $item)
-                                                            <div class="flex items-start gap-2.5 p-2.5 rounded-xl bg-[#171A22] border border-neutral-800/90 text-xs text-slate-200 hover:border-[#C5A880]/30 transition-colors">
-                                                                <span class="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">✓</span>
-                                                                <span class="font-medium leading-relaxed">{{ $item }}</span>
-                                                            </div>
-                                                        @endforeach
+                                                <!-- Bottom Nutrition Strip: BIG, PROMINENT, CLEARLY ALIGNED -->
+                                                <div class="pt-2.5 border-t border-neutral-800/80 flex items-center justify-between gap-3 text-xs flex-wrap">
+                                                    <div class="flex items-center gap-3 sm:gap-4 font-mono flex-wrap">
+                                                        <!-- Calories -->
+                                                        <div class="flex items-center gap-1.5 text-white font-black text-sm sm:text-base">
+                                                            <span class="text-amber-400 text-sm">🔥</span>
+                                                            <span>{{ number_format($meal['calories']) }}</span>
+                                                            <span class="text-[11px] text-amber-400 font-bold">kcal</span>
+                                                        </div>
+
+                                                        <span class="text-neutral-700 hidden sm:inline">•</span>
+
+                                                        <!-- Protein -->
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                            <span class="text-slate-400 text-[11px]">Prot:</span>
+                                                            <span class="text-blue-400 font-mono font-black">{{ $meal['protein'] }}g</span>
+                                                        </div>
+
+                                                        <span class="text-neutral-700 hidden sm:inline">•</span>
+
+                                                        <!-- Carbs -->
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                            <span class="text-slate-400 text-[11px]">Carb:</span>
+                                                            <span class="text-emerald-400 font-mono font-black">{{ $meal['carbs'] }}g</span>
+                                                        </div>
+
+                                                        <span class="text-neutral-700 hidden sm:inline">•</span>
+
+                                                        <!-- Fats -->
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                            <span class="text-slate-400 text-[11px]">Fat:</span>
+                                                            <span class="text-rose-400 font-mono font-black">{{ $meal['fat'] }}g</span>
+                                                        </div>
                                                     </div>
-                                                @else
-                                                    <div class="text-xs text-slate-400 italic">No specific items listed.</div>
-                                                @endif
+
+                                                    <span class="text-[11px] text-[#C5A880] font-bold group-hover:underline flex items-center gap-1">
+                                                        <span>Details</span>
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                                    </span>
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
                                 @else
-                                    <div class="py-6 text-center text-xs text-slate-400 bg-[#0F1115]/50 rounded-2xl border border-dashed border-neutral-800">
-                                        No daily meal schedule added yet.
+                                    <div class="py-8 text-center text-xs text-slate-400 bg-[#0F1115]/50 rounded-2xl border border-dashed border-neutral-800">
+                                        No meals scheduled in this plan yet.
                                     </div>
                                 @endif
                             </div>
 
-                            <!-- Guidelines & Rules Card -->
+                            <!-- 4. Guidelines / Advice from Trainer or Nutritionist -->
                             @if(!empty($diet->guidelines))
                                 <div class="p-4 sm:p-5 rounded-2xl bg-[#C5A880]/5 border border-[#C5A880]/20 space-y-2">
                                     <div class="flex items-center gap-2">
                                         <span class="text-base">💡</span>
-                                        <span class="font-black uppercase tracking-wider text-xs text-[#C5A880]">Nutritionist Advice &amp; Guidelines:</span>
+                                        <span class="font-black uppercase tracking-wider text-xs text-[#C5A880]">Notes from Trainer / Nutritionist:</span>
                                     </div>
                                     <p class="text-xs text-slate-300 leading-relaxed pl-6">
                                         {{ $diet->guidelines }}
@@ -1947,6 +2124,165 @@
                                 </div>
                             @endif
 
+                            <!-- 5. Accessible Meal Details Bottom Sheet / Modal (Refined Professional UI/UX) -->
+                            <div x-show="activeMealModal" x-cloak 
+                                 class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md transition-opacity"
+                                 @keydown.escape.window="closeDetail()">
+                                
+                                <div class="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-[#13161C] border border-neutral-800/90 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+                                     @click.away="closeDetail()">
+                                    
+                                    <!-- Mobile Drag Handle Indicator -->
+                                    <div class="pt-3 pb-1 flex justify-center sm:hidden shrink-0">
+                                        <div class="w-10 h-1 rounded-full bg-neutral-700/80"></div>
+                                    </div>
+
+                                    <!-- Scrollable Modal Content -->
+                                    <div class="p-5 sm:p-6 overflow-y-auto space-y-5">
+                                        
+                                        <!-- Header: Photo Thumbnail, Title & Timing -->
+                                        <div class="flex items-start justify-between gap-3 pb-4 border-b border-neutral-800/80">
+                                            <div class="flex items-center gap-3.5 min-w-0">
+                                                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-[#0F1115] border border-neutral-800 shrink-0 shadow-lg relative">
+                                                    <img :src="activeMealModal?.image" 
+                                                         :alt="activeMealModal?.name" 
+                                                         class="w-full h-full object-cover">
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <h3 class="text-lg sm:text-xl font-black text-white tracking-tight leading-tight truncate" x-text="activeMealModal?.name"></h3>
+                                                        <template x-if="activeMealModal?.time">
+                                                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-[#1A1E26] text-[#C5A880] border border-neutral-700/80 shrink-0 flex items-center gap-1">
+                                                                <svg class="w-3 h-3 text-[#C5A880]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                <span x-text="activeMealModal?.time"></span>
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                    <span class="text-xs text-slate-400 mt-1 block font-medium" x-text="activeMealModal?.type"></span>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" @click="closeDetail()" class="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0" title="Close">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Total Nutrition Cards (Balanced 4-column responsive grid) -->
+                                        <div class="grid grid-cols-4 gap-2 text-center">
+                                            <div class="p-3 rounded-2xl bg-[#0F1115] border border-neutral-800">
+                                                <span class="text-[10px] font-black text-amber-400 block uppercase tracking-wider">Calories</span>
+                                                <span class="text-base sm:text-lg font-black text-white font-mono block mt-1" x-text="activeMealModal?.calories ? activeMealModal.calories + ' kcal' : '—'"></span>
+                                            </div>
+                                            <div class="p-3 rounded-2xl bg-[#0F1115] border border-neutral-800">
+                                                <span class="text-[10px] font-black text-blue-400 block uppercase tracking-wider">Protein</span>
+                                                <span class="text-base sm:text-lg font-black text-white font-mono block mt-1" x-text="activeMealModal?.protein ? activeMealModal.protein + 'g' : '—'"></span>
+                                            </div>
+                                            <div class="p-3 rounded-2xl bg-[#0F1115] border border-neutral-800">
+                                                <span class="text-[10px] font-black text-emerald-400 block uppercase tracking-wider">Carbs</span>
+                                                <span class="text-base sm:text-lg font-black text-white font-mono block mt-1" x-text="activeMealModal?.carbs ? activeMealModal.carbs + 'g' : '—'"></span>
+                                            </div>
+                                            <div class="p-3 rounded-2xl bg-[#0F1115] border border-neutral-800">
+                                                <span class="text-[10px] font-black text-rose-400 block uppercase tracking-wider">Fats</span>
+                                                <span class="text-base sm:text-lg font-black text-white font-mono block mt-1" x-text="activeMealModal?.fat ? activeMealModal.fat + 'g' : '—'"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Food Items & Portions Section -->
+                                        <div class="space-y-3 pt-1">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                                                    <span>🥗</span>
+                                                    <span>Food Items &amp; Portions</span>
+                                                </h4>
+                                                <span class="text-xs font-mono font-bold text-[#C5A880]" x-text="(activeMealModal?.items?.length || 0) + ' items'"></span>
+                                            </div>
+
+                                            <!-- Item Cards with High-End Layout -->
+                                            <div class="space-y-2">
+                                                <template x-for="(food, fIdx) in (activeMealModal?.items || [])" :key="fIdx">
+                                                    <div class="p-3 sm:p-3.5 rounded-2xl bg-[#0F1115] border border-neutral-800/90 hover:border-neutral-700 transition-all flex items-center justify-between gap-3 shadow-xs">
+                                                        <div class="flex items-start gap-3 min-w-0 flex-1">
+                                                            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 shadow-sm">✓</span>
+                                                            <div class="min-w-0 flex-1">
+                                                                <span class="font-black text-sm text-white block leading-snug" x-text="food.name"></span>
+                                                                <template x-if="food.portion">
+                                                                    <span class="text-xs text-slate-400 block mt-0.5 font-medium leading-relaxed" x-text="food.portion"></span>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <template x-if="food.macros">
+                                                            <div class="px-2.5 py-1 rounded-xl bg-[#1A1E26] border border-neutral-800 text-right shrink-0">
+                                                                <span class="text-xs font-mono font-black text-[#C5A880] block" x-text="food.macros"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                                <template x-if="!activeMealModal?.items || activeMealModal?.items.length === 0">
+                                                    <div class="text-xs text-slate-400 italic py-4 text-center bg-[#0F1115] rounded-2xl border border-neutral-800">
+                                                        No specific ingredients listed.
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <!-- Content Beneath Food Items: Preparation Notes & Trainer Advice -->
+                                        <div class="space-y-3 pt-2 border-t border-neutral-800/80">
+                                            <h4 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                                                <span>💡</span>
+                                                <span>Preparation &amp; Trainer Advice</span>
+                                            </h4>
+
+                                            <div class="p-4 rounded-2xl bg-[#0F1115] border border-[#C5A880]/20 space-y-2.5">
+                                                <div class="flex items-start gap-3">
+                                                    <span class="w-8 h-8 rounded-xl bg-[#C5A880]/15 text-[#C5A880] flex items-center justify-center text-sm shrink-0 border border-[#C5A880]/30 font-bold">
+                                                        PT
+                                                    </span>
+                                                    <div class="min-w-0 flex-1">
+                                                        <span class="text-xs font-black text-white block">Certified Coach Guidance</span>
+                                                        <p class="text-xs text-slate-300 mt-1 leading-relaxed" 
+                                                           x-text="activeMealModal?.guidelines ? activeMealModal.guidelines : 'Cook with minimal processed oils. Ensure proper hydration with 400–500ml water before or after eating to maximize nutrient absorption and lean muscle recovery.'">
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Hydration Pill Strip -->
+                                                <div class="pt-2 border-t border-neutral-800/80 flex items-center gap-2 text-[11px] text-sky-300">
+                                                    <span>💧</span>
+                                                    <span>Keep at least 20 minutes gap between meal and cold water intake.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Sticky Bottom Action Footer -->
+                                    <div class="p-4 sm:p-5 bg-[#0F1115] border-t border-neutral-800 flex items-center gap-3 shrink-0">
+                                        <button type="button" 
+                                                @click="toggleEaten(activeMealModal.id)"
+                                                :class="isEaten(activeMealModal?.id) 
+                                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25 ring-2 ring-emerald-400' 
+                                                    : 'bg-[#C5A880] hover:bg-[#d6ba93] text-neutral-950 shadow-[#C5A880]/25'"
+                                                class="flex-1 py-3.5 px-5 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                                            <template x-if="isEaten(activeMealModal?.id)">
+                                                <span class="flex items-center gap-2">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                    <span>✓ Completed Today (Tap to Undo)</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="!isEaten(activeMealModal?.id)">
+                                                <span class="flex items-center gap-2">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                    <span>Mark as Eaten Today</span>
+                                                </span>
+                                            </template>
+                                        </button>
+                                        <button type="button" @click="closeDetail()" class="py-3.5 px-5 rounded-2xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer shrink-0">
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 @else
@@ -1961,7 +2297,6 @@
                     </div>
                 @endif
             </div>
-
             <!-- TAB 4: PERSONAL TRAINING & DEDICATED COACH -->
             <div x-show="tab === 'pt'" x-cloak class="space-y-5">
                 @if($activePt)
@@ -2767,22 +3102,45 @@
                         </div>
 
                         <!-- Details & Actions Footer -->
-                        <div class="p-4 sm:p-5 space-y-3 bg-[#171A22] border-t border-neutral-800">
-                            <div x-show="activeVideo.setsReps" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs font-bold text-[#C5A880]">
-                                <span>📊 Target:</span>
-                                <span x-text="activeVideo.setsReps"></span>
-                            </div>
+                        <div class="p-4 sm:p-5 space-y-4 bg-[#171A22] border-t border-neutral-800">
+                            <!-- Distinct Prescription Cards: Sets & Reps -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <!-- SETS -->
+                                <div class="rounded-2xl bg-[#0F1115] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block"
+                                          x-text="activeVideo.trackingType === 'time' ? 'Rounds' : 'Sets'">Sets</span>
+                                    <span class="mt-1 text-lg sm:text-xl font-black font-mono text-[#C5A880] block tabular-nums"
+                                          x-text="activeVideo.sets || '3'"></span>
+                                </div>
 
-                            <div x-show="activeVideo.notes" class="rounded-2xl bg-[#0F1115] border border-neutral-800 p-3.5 text-xs text-slate-300 leading-relaxed">
-                                <span class="text-[10px] font-black uppercase tracking-wider text-[#C5A880] block mb-1">Proper Form Cues</span>
-                                <p x-text="activeVideo.notes"></p>
+                                <!-- REPS / DURATION -->
+                                <div class="rounded-2xl bg-[#0F1115] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block"
+                                          x-text="activeVideo.trackingType === 'time' ? 'Duration' : 'Reps'">Reps</span>
+                                    <span class="mt-1 text-lg sm:text-xl font-black font-mono text-white block tabular-nums"
+                                          x-text="activeVideo.reps || activeVideo.setsReps || '10-12'"></span>
+                                </div>
+
+                                <!-- REST (if available) -->
+                                <div x-show="activeVideo.rest" class="rounded-2xl bg-[#0F1115] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Rest</span>
+                                    <span class="mt-1 text-lg sm:text-xl font-black font-mono text-slate-200 block tabular-nums"
+                                          x-text="activeVideo.rest"></span>
+                                </div>
+
+                                <!-- WEIGHT / LOAD (if available) -->
+                                <div x-show="activeVideo.weight" class="rounded-2xl bg-[#0F1115] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Load</span>
+                                    <span class="mt-1 text-sm sm:text-base font-black font-mono text-[#C5A880] block truncate"
+                                          x-text="activeVideo.weight"></span>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-end pt-1">
                                 <button type="button"
                                         @click="closeExerciseVideo()"
-                                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black cursor-pointer transition-colors">
-                                    Close
+                                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#C5A880] hover:bg-[#d8bd98] text-neutral-950 text-xs font-black cursor-pointer transition-colors shadow-sm">
+                                    Close Video
                                 </button>
                             </div>
                         </div>

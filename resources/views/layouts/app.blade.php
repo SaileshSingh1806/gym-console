@@ -621,6 +621,7 @@
             @php
                 $canAdmin = ($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
                     || (($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
+                    || $user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete'])
                     || $user->isGymOwner()
                     || $user->isSuperAdmin()
                     || $user->hasPermission('settings.manage');
@@ -661,6 +662,17 @@
                     @endif
                 </div>
             </div>
+            @endif
+
+            <!-- Expenses (Operational Overhead Tracker) in Administration -->
+            @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.delete']) || $user->isGymOwner())
+            <a href="{{ route('app.expenses.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
+                <div class="flex items-center gap-3">
+                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
+                    <span>EXPENSES</span>
+                </div>
+                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
             @endif
 
             <!-- Biometric IoT Devices -->

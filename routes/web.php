@@ -146,6 +146,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/pt-plans/{id}/toggle', [AppController::class, 'togglePtPlan'])->name('app.pt-plans.toggle')->middleware('permission:pt.plans.manage');
         Route::delete('/pt-plans/{id}', [AppController::class, 'deletePtPlan'])->name('app.pt-plans.delete')->middleware('permission:pt.plans.manage');
         Route::post('/pt-packages', [AppController::class, 'assignPtPackage'])->name('app.pt-packages.store')->middleware('permission:pt.create');
+        Route::get('/pt-packages/{id}/invoice', [AppController::class, 'showPtPackageInvoice'])->name('app.pt-packages.invoice')->middleware('permission:pt.view,payments.invoice_view');
         Route::post('/pt-packages/{id}/log-session', [AppController::class, 'logPtSession'])->name('app.pt-packages.log-session')->middleware('permission:pt.sessions_manage');
         Route::post('/pt-packages/{id}/cancel', [AppController::class, 'cancelPtPackage'])->name('app.pt-packages.cancel')->middleware('permission:pt.delete');
         Route::post('/pt-sessions', [AppController::class, 'storePtSession'])->name('app.pt-sessions.store')->middleware('permission:pt.sessions_manage');
@@ -299,6 +300,7 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/reports', [AppController::class, 'expenseReport'])->name('app.reports.index')->middleware('permission:reports.member_report,expenses.view');
         Route::get('/expenses', [AppController::class, 'expenses'])->name('app.expenses.index')->middleware('permission:expenses.view');
         Route::post('/expenses', [AppController::class, 'storeExpense'])->name('app.expenses.store')->middleware('permission:expenses.create');
+        Route::put('/expenses/{id}', [AppController::class, 'updateExpense'])->name('app.expenses.update')->whereNumber('id')->middleware('permission:expenses.create');
         Route::delete('/expenses/{id}', [AppController::class, 'deleteExpense'])->name('app.expenses.delete')->whereNumber('id')->middleware('permission:expenses.delete');
         Route::post('/expenses/categories', [AppController::class, 'storeExpenseCategory'])->name('app.expenses.categories.store')->middleware('permission:expenses.create');
 

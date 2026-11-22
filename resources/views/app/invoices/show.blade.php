@@ -89,21 +89,45 @@
         $invoiceDate = $payment->payment_date ? $payment->payment_date->format('d M Y') : $payment->created_at->format('d M Y');
         $verificationText = !empty($invSettings['verification_text']) ? $invSettings['verification_text'] : 'Verified & Recorded';
 
-        // Financial calculations based on Membership Package
-        $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
-        
-        if ($membership && (float)$membership->final_amount > 0) {
-            $totalPackageAmount = (float) $membership->final_amount;
-            $baseRate = (float) ($membership->price > 0 ? $membership->price : ($totalPackageAmount + $discountAmount));
-            $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
-        } elseif ($plan && (float)$plan->price > 0) {
-            $baseRate = (float) $plan->price;
-            $totalPackageAmount = max(0, $baseRate - $discountAmount);
-            $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
+        // Financial calculations based on Membership Package or PT Package
+        if (isset($ptPackage) && $ptPackage) {
+            $discountAmount = (float) ($ptPackage->discount ?? 0);
+            $totalPackageAmount = (float) ($ptPackage->final_amount > 0 ? $ptPackage->final_amount : $ptPackage->price);
+            $baseRate = (float) ($ptPackage->price > 0 ? $ptPackage->price : ($totalPackageAmount + $discountAmount));
+            $totalPaidSoFar = (float) ($ptPackage->paid_amount > 0 ? $ptPackage->paid_amount : $payment->amount);
+            $durationFormatted = $ptPackage->total_sessions . ' Sessions';
+            $startDate = $ptPackage->start_date ? $ptPackage->start_date->format('d M Y') : $invoiceDate;
+            $endDate = $ptPackage->end_date ? $ptPackage->end_date->format('d M Y') : $invoiceDate;
+            $membershipStatus = 'Personal Training (' . ($ptPackage->status ?? 'ACTIVE') . ')';
         } else {
-            $baseRate = (float) $payment->amount;
-            $totalPackageAmount = (float) $payment->amount;
-            $totalPaidSoFar = (float) $payment->amount;
+            $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
+            
+            if ($membership && (float)$membership->final_amount > 0) {
+                $totalPackageAmount = (float) $membership->final_amount;
+                $baseRate = (float) ($membership->price > 0 ? $membership->price : ($totalPackageAmount + $discountAmount));
+                $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
+            } elseif ($plan && (float)$plan->price > 0) {
+                $baseRate = (float) $plan->price;
+                $totalPackageAmount = max(0, $baseRate - $discountAmount);
+                $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $payment->amount);
+            } else {
+                $baseRate = (float) $payment->amount;
+                $totalPackageAmount = (float) $payment->amount;
+                $totalPaidSoFar = (float) $payment->amount;
+            }
+
+            // Plan Duration calculation
+            $durationFormatted = '12 Months';
+            if ($plan) {
+                $durationFormatted = $plan->duration_value . ' ' . ucfirst($plan->duration_type ?? 'Months');
+            } elseif ($membership && $membership->start_date && $membership->end_date) {
+                $diffMonths = $membership->start_date->diffInMonths($membership->end_date);
+                $durationFormatted = $diffMonths > 0 ? ($diffMonths . ' Months') : '1 Month';
+            }
+
+            $startDate = $membership && $membership->start_date ? $membership->start_date->format('d M Y') : $invoiceDate;
+            $endDate = $membership && $membership->end_date ? $membership->end_date->format('d M Y') : '12 Oct 2027';
+            $membershipStatus = ($membership && $membership->status === 'ACTIVE') ? 'Active Membership' : 'Active Membership';
         }
 
         $balanceDue = max(0, $totalPackageAmount - $totalPaidSoFar);
@@ -120,26 +144,18 @@
             $statusDotClass = 'bg-emerald-500';
         }
 
-        // Plan Duration calculation
-        $durationFormatted = '12 Months';
-        if ($plan) {
-            $durationFormatted = $plan->duration_value . ' ' . ucfirst($plan->duration_type ?? 'Months');
-        } elseif ($membership && $membership->start_date && $membership->end_date) {
-            $diffMonths = $membership->start_date->diffInMonths($membership->end_date);
-            $durationFormatted = $diffMonths > 0 ? ($diffMonths . ' Months') : '1 Month';
-        }
-
-        $startDate = $membership && $membership->start_date ? $membership->start_date->format('d M Y') : $invoiceDate;
-        $endDate = $membership && $membership->end_date ? $membership->end_date->format('d M Y') : '12 Oct 2027';
-        $membershipStatus = ($membership && $membership->status === 'ACTIVE') ? 'Active Membership' : 'Active Membership';
-
         // Terms
         $defaultTerms = [
             "Fees once paid are strictly non-refundable and non-transferable under any circumstances.",
             "Membership is non-transferable and valid exclusively for the registered individual and specified tenure.",
             "Members are required to carry clean training footwear, workout towel, and follow gym etiquette at all times.",
             "Management reserves the right to adjust facility operating hours and enforce safety protocols.",
-            "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access."
+            "Any unpaid dues must be cleared on or before the specified due date to maintain uninterrupted facility access.",
+            "All memberships and personal training sessions must be utilized strictly within the stipulated validity period; unutilized sessions or duration will automatically lapse upon expiry.",
+            "Members confirm they are medically fit for physical exercise, and management accepts no liability for any pre-existing health conditions, injuries, or emergencies during workouts.",
+            "Members are solely responsible for their personal belongings, cash, and valuables, and management accepts no liability for any loss, theft, or damage within the facility or lockers.",
+            "Gym equipment, weights, and accessories must be handled with care and re-racked after use, and any deliberate misuse or damage to facility property will be charged to the member.",
+            "Management strictly enforces zero tolerance against misconduct, harassment, or rule violations, which will result in immediate termination of membership without refund."
         ];
         if (!empty($invSettings['terms'])) {
             $rawTerms = array_filter(array_map('trim', explode("\n", $invSettings['terms'])));
@@ -170,11 +186,19 @@
     <div class="no-print w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-2.5 sm:gap-3 mb-3 sm:mb-4">
         @auth
             @if(!request()->routeIs('app.invoices.public'))
-                <a href="{{ route('app.members.show', $member->id) }}" 
-                   class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    <span>Back to Member</span>
-                </a>
+                @if(isset($ptPackage) && $ptPackage)
+                    <a href="{{ route('app.pt.index') }}" 
+                       class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span>Back to PT Packages</span>
+                    </a>
+                @else
+                    <a href="{{ route('app.members.show', $member->id) }}" 
+                       class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 border border-slate-300 text-xs font-bold transition-all shadow-sm inline-flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span>Back to Member</span>
+                    </a>
+                @endif
             @else
                 <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                     <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-black text-xs shadow-sm">
@@ -466,10 +490,10 @@
                 <div class="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-slate-50/90 border border-slate-100/90 space-y-1">
                     <div class="flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
                         <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
-                        <span>MEMBERSHIP &amp; PLAN DETAILS</span>
+                        <span>{{ isset($ptPackage) && $ptPackage ? 'PERSONAL TRAINING DETAILS' : 'MEMBERSHIP & PLAN DETAILS' }}</span>
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
-                        <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Duration:</span>
+                        <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">{{ isset($ptPackage) && $ptPackage ? 'Sessions:' : 'Duration:' }}</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $durationFormatted }}</span>
                     </div>
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
@@ -480,10 +504,17 @@
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Expiry Date:</span>
                         <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $endDate }}</span>
                     </div>
+                    @if(isset($ptPackage) && $ptPackage && $ptPackage->trainer)
+                    <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
+                        <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Coach:</span>
+                        <span class="font-bold text-slate-900 col-span-7 sm:col-span-8">{{ $ptPackage->trainer->full_name }}</span>
+                    </div>
+                    @else
                     <div class="grid grid-cols-12 gap-1 text-[11px] sm:text-xs">
                         <span class="text-slate-500 font-normal col-span-5 sm:col-span-4">Status:</span>
                         <span class="font-bold text-emerald-600 col-span-7 sm:col-span-8">{{ $membershipStatus }}</span>
                     </div>
+                    @endif
                 </div>
 
             </div>
@@ -498,9 +529,24 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1.5">
                             <span class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-bold text-slate-300">#1</span>
-                            <span class="font-black text-xs text-white truncate block">{{ $plan->name ?? 'Gym Membership' }}</span>
+                            @if(isset($ptPackage) && $ptPackage)
+                                @php
+                                    $cleanPkgName = trim($ptPackage->package_name);
+                                    $displayTitle = 'Personal Training';
+                                    if (!is_numeric($cleanPkgName) && !empty($cleanPkgName) && !str_starts_with(strtolower($cleanPkgName), 'personal training')) {
+                                        $displayTitle .= ' - ' . $cleanPkgName;
+                                    }
+                                @endphp
+                                <span class="font-black text-xs text-white truncate block">{{ $displayTitle }}</span>
+                            @else
+                                <span class="font-black text-xs text-white truncate block">{{ $plan->name ?? 'Gym Membership' }}</span>
+                            @endif
                         </div>
-                        @if(!empty($cleanNote))
+                        @if(isset($ptPackage) && $ptPackage)
+                            <span class="text-[10.5px] text-amber-300/90 block mt-1 leading-snug">
+                                Assigned Coach: {{ $ptPackage->trainer?->full_name ?? 'Personal Trainer' }}
+                            </span>
+                        @elseif(!empty($cleanNote))
                             <span class="text-[10.5px] text-amber-300/90 block mt-1 leading-snug">{{ $cleanNote }}</span>
                         @endif
                     </div>
@@ -537,9 +583,21 @@
                         <tr class="text-slate-900">
                             <td class="py-3 px-3 text-center text-slate-500 font-medium text-xs">1</td>
                             <td class="py-3 px-3">
-                                <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
-                                @if(!empty($cleanNote))
-                                    <span class="text-[11px] text-slate-500 block mt-0.5">{{ $cleanNote }}</span>
+                                @if(isset($ptPackage) && $ptPackage)
+                                    @php
+                                        $cleanPkgName = trim($ptPackage->package_name);
+                                        $displayTitle = 'Personal Training';
+                                        if (!is_numeric($cleanPkgName) && !empty($cleanPkgName) && !str_starts_with(strtolower($cleanPkgName), 'personal training')) {
+                                            $displayTitle .= ' - ' . $cleanPkgName;
+                                        }
+                                    @endphp
+                                    <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $displayTitle }}</span>
+                                    <span class="text-[11px] text-slate-500 block mt-0.5">Assigned Coach: {{ $ptPackage->trainer?->full_name ?? 'Personal Trainer' }}</span>
+                                @else
+                                    <span class="font-bold text-slate-950 text-xs sm:text-sm block">{{ $plan->name ?? 'Gym Membership' }}</span>
+                                    @if(!empty($cleanNote))
+                                        <span class="text-[11px] text-slate-500 block mt-0.5">{{ $cleanNote }}</span>
+                                    @endif
                                 @endif
                             </td>
                             <td class="py-3 px-3 text-center font-medium text-slate-700 text-xs">{{ $durationFormatted }}</td>
@@ -666,7 +724,7 @@
                 <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">
                     TERMS &amp; CONDITIONS
                 </div>
-                <ol class="list-decimal pl-4 space-y-0.5 text-[10.5px] sm:text-[11px] text-slate-600 leading-relaxed font-normal">
+                <ol class="list-decimal pl-4 space-y-0.5 text-[10px] sm:text-[10.5px] text-slate-600 leading-snug font-normal">
                     @foreach($termsList as $term)
                         <li>{{ $term }}</li>
                     @endforeach

@@ -2954,7 +2954,7 @@
                             <!-- High Contrast QR Code -->
                             <div class="inline-block p-3 rounded-2xl bg-white border-2 border-slate-900 shadow-sm">
                                 <img :src="'https://quickchart.io/qr?size=240&margin=2&text=' + encodeURIComponent(loggerSession.confirmUrl)"
-                                     @error="$event.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=' + encodeURIComponent(loggerSession.confirmUrl)" 
+                                     x-on:error="$event.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=' + encodeURIComponent(loggerSession.confirmUrl)" 
                                      alt="PT Session QR" 
                                      class="w-52 h-52 sm:w-60 sm:h-60 mx-auto object-contain">
                                 

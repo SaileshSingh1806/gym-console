@@ -149,25 +149,50 @@ class MemberPayment extends Model
         $currency = $tenant?->currency_symbol ?? '₹';
         $method = strtoupper((string) ($this->payment_method ?? 'CASH'));
 
-        $membership = $this->membership ?? $member?->activeMembership ?? $member?->memberships()->latest()->first();
-        $plan = $membership?->plan;
-        $planName = $plan?->name ?? 'Gym Membership';
-        $duration = $plan ? ($plan->duration_value . ' ' . ucfirst($plan->duration_type ?? 'Months')) : '';
+        $ptPackage = null;
+        if (str_contains($this->notes ?? '', 'PT Package') || str_contains($this->notes ?? '', 'Personal Training') || empty($this->membership_id)) {
+            $ptPackage = MemberPtPackage::with(['trainer'])
+                ->where('tenant_id', $this->tenant_id)
+                ->where('member_id', $this->member_id)
+                ->latest('id')
+                ->first();
+        }
+
+        if ($ptPackage) {
+            $cleanPkgName = trim($ptPackage->package_name);
+            $displayTitle = 'Personal Training';
+            if (!is_numeric($cleanPkgName) && !empty($cleanPkgName) && !str_starts_with(strtolower($cleanPkgName), 'personal training')) {
+                $displayTitle .= ' - ' . $cleanPkgName;
+            }
+            $planName = $displayTitle;
+            $duration = $ptPackage->total_sessions . " Sessions" . ($ptPackage->trainer ? " • Coach {$ptPackage->trainer->full_name}" : '');
+            $totalPackageAmount = (float) ($ptPackage->final_amount > 0 ? $ptPackage->final_amount : $ptPackage->price);
+            $totalPaidSoFar = (float) ($ptPackage->paid_amount > 0 ? $ptPackage->paid_amount : $this->amount);
+            $validityLine = "• PT Validity: {$ptPackage->start_date->format('d M Y')} to {$ptPackage->end_date->format('d M Y')}";
+        } else {
+            $membership = $this->membership ?? $member?->activeMembership ?? $member?->memberships()->latest()->first();
+            $plan = $membership?->plan;
+            $planName = $plan?->name ?? 'Gym Membership';
+            $duration = $plan ? ($plan->duration_value . ' ' . ucfirst($plan->duration_type ?? 'Months')) : '';
+
+            // Financial calculations matching Invoice Sheet exactly
+            $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
+            if ($membership && (float)$membership->final_amount > 0) {
+                $totalPackageAmount = (float) $membership->final_amount;
+                $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $this->amount);
+            } elseif ($plan && (float)$plan->price > 0) {
+                $totalPackageAmount = max(0, (float)$plan->price - $discountAmount);
+                $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $this->amount);
+            } else {
+                $totalPackageAmount = (float) $this->amount;
+                $totalPaidSoFar = (float) $this->amount;
+            }
+            $validityLine = ($membership && $membership->start_date && $membership->end_date)
+                ? "• Membership Validity: {$membership->start_date->format('d M Y')} to {$membership->end_date->format('d M Y')}"
+                : null;
+        }
 
         $publicUrl = $this->public_invoice_url;
-
-        // Financial calculations matching Invoice Sheet exactly
-        $discountAmount = $membership ? (float) ($membership->discount ?? 0) : 0;
-        if ($membership && (float)$membership->final_amount > 0) {
-            $totalPackageAmount = (float) $membership->final_amount;
-            $totalPaidSoFar = (float) ($membership->paid_amount > 0 ? $membership->paid_amount : $this->amount);
-        } elseif ($plan && (float)$plan->price > 0) {
-            $totalPackageAmount = max(0, (float)$plan->price - $discountAmount);
-            $totalPaidSoFar = (float) ($membership?->paid_amount > 0 ? $membership->paid_amount : $this->amount);
-        } else {
-            $totalPackageAmount = (float) $this->amount;
-            $totalPaidSoFar = (float) $this->amount;
-        }
 
         $balanceDue = max(0, $totalPackageAmount - $totalPaidSoFar);
         $amountReceived = min($totalPackageAmount, $totalPaidSoFar);
@@ -186,7 +211,7 @@ class MemberPayment extends Model
         $lines[] = "• Payment Mode: {$method}";
         $lines[] = "• Amount Paid (This Receipt): {$currency}" . number_format((float) $this->amount, 2);
 
-        if ($totalPackageAmount > (float) $this->amount || $membership) {
+        if ($totalPackageAmount > (float) $this->amount || $ptPackage || isset($membership)) {
             $lines[] = "• Total Package Fee: {$currency}" . number_format($totalPackageAmount, 2);
             $lines[] = "• Total Amount Received: {$currency}" . number_format($amountReceived, 2);
         }
@@ -197,8 +222,8 @@ class MemberPayment extends Model
             $lines[] = "• Balance Due: {$currency}0.00 (PAID IN FULL)";
         }
 
-        if ($membership && $membership->start_date && $membership->end_date) {
-            $lines[] = "• Membership Validity: {$membership->start_date->format('d M Y')} to {$membership->end_date->format('d M Y')}";
+        if (!empty($validityLine)) {
+            $lines[] = $validityLine;
         }
 
         $lines[] = "";
