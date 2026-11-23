@@ -152,6 +152,23 @@ class Member extends Model
         return $this->hasMany(ClassBooking::class);
     }
 
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(MemberAgreement::class);
+    }
+
+    public function activeAgreement(): HasOne
+    {
+        return $this->hasOne(MemberAgreement::class)
+            ->where('status', MemberAgreement::STATUS_COMPLETED)
+            ->latestOfMany();
+    }
+
+    public function latestAgreement(): HasOne
+    {
+        return $this->hasOne(MemberAgreement::class)->latestOfMany();
+    }
+
     public function serviceBookings(): HasMany
     {
         return $this->hasMany(GymServiceBooking::class);

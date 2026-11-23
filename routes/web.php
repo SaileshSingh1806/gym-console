@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Web\AdminController;
+use App\Http\Controllers\Web\AgreementController;
 use App\Http\Controllers\Web\AppController;
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\PublicAgreementController;
 use App\Http\Controllers\Web\PublicController;
 use App\Http\Controllers\Web\TrainerController;
 use App\Http\Controllers\Web\WhatsAppController;
@@ -32,6 +34,16 @@ Route::post('/gym/{slug}/checkin', [PublicController::class, 'processGymCheckin'
 Route::get('/pt-session/confirm/{token}', [AppController::class, 'showPtSessionConfirm'])->name('pt-session.confirm');
 Route::post('/pt-session/confirm/{token}', [AppController::class, 'submitPtSessionConfirm'])->name('pt-session.confirm.submit');
 Route::post('/pt-session/confirm/{token}/issue', [AppController::class, 'submitPtSessionIssue'])->name('pt-session.confirm.issue');
+
+// Digital Member Agreement & Health Declaration (Mobile-First Signing)
+Route::prefix('agreements/{token}')->group(function () {
+    Route::get('/', [PublicAgreementController::class, 'show'])->name('public.agreement.show');
+    Route::post('/profile/confirm', [PublicAgreementController::class, 'confirmProfile'])->name('public.agreement.profile.confirm');
+    Route::post('/health', [PublicAgreementController::class, 'submitHealth'])->name('public.agreement.health.submit');
+    Route::post('/sign', [PublicAgreementController::class, 'submitSignature'])->name('public.agreement.sign.submit');
+    Route::get('/download', [PublicAgreementController::class, 'download'])->name('public.agreement.download');
+    Route::post('/decline', [PublicAgreementController::class, 'decline'])->name('public.agreement.decline');
+});
 
 // Authentication & Onboarding Routes
 Route::get('/portal/setup/{token}', [AuthController::class, 'showMemberPasswordSetup'])->name('portal.setup');
@@ -105,6 +117,17 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::post('/members/{id}/enroll-class', [AppController::class, 'enrollMemberInClass'])->name('app.members.enroll-class')->middleware('permission:classes.book');
         Route::post('/members/{id}/generate-portal-link', [AppController::class, 'generateMemberPortalLink'])->name('app.members.generate-portal-link')->middleware('permission:members.edit,members.view');
         Route::post('/members/{id}/update-password', [AppController::class, 'updateMemberPassword'])->name('app.members.update-password')->middleware('permission:members.edit');
+
+        // Digital Member Agreements & Health Declarations
+        Route::get('/agreements', [AgreementController::class, 'index'])->name('app.agreements.index')->middleware('permission:agreements.view,members.view');
+        Route::get('/agreements/settings', [AgreementController::class, 'settings'])->name('app.agreements.settings')->middleware('permission:agreements.manage');
+        Route::post('/agreements/settings', [AgreementController::class, 'saveSettings'])->name('app.agreements.settings.save')->middleware('permission:agreements.manage');
+        Route::post('/agreements/generate/{memberId}', [AgreementController::class, 'generateForMember'])->name('app.agreements.generate')->middleware('permission:agreements.send,members.edit');
+        Route::post('/agreements/send/{agreementId}', [AgreementController::class, 'sendLink'])->name('app.agreements.send')->middleware('permission:agreements.send,members.edit');
+        Route::post('/agreements/bulk-generate', [AgreementController::class, 'bulkGenerate'])->name('app.agreements.bulk-generate')->middleware('permission:agreements.send,members.edit');
+        Route::post('/agreements/{id}/medical-review', [AgreementController::class, 'medicalReview'])->name('app.agreements.medical-review')->middleware('permission:agreements.manage');
+        Route::get('/agreements/{id}/pdf', [AgreementController::class, 'downloadPdf'])->name('app.agreements.pdf')->middleware('permission:agreements.view,members.view');
+        Route::get('/agreements/{id}/audit', [AgreementController::class, 'viewAudit'])->name('app.agreements.audit')->middleware('permission:agreements.view,members.view');
     });
 
     // Member Measurements (Available to Trainers, Staff, and Members)

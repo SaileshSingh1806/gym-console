@@ -33,6 +33,9 @@ class PermissionSeeder extends Seeder
                     ['name' => 'members.delete', 'display_name' => 'Delete Member', 'description' => 'Archive or delete members'],
                     ['name' => 'members.freeze', 'display_name' => 'Freeze / Suspend Member', 'description' => 'Toggle membership freeze & unfreeze status'],
                     ['name' => 'members.measurements', 'display_name' => 'Record Measurements', 'description' => 'Log body weight, chest, arms & fat % stats'],
+                    ['name' => 'agreements.view', 'display_name' => 'View Agreements & Health', 'description' => 'View digital member agreements, signed documents & health declarations'],
+                    ['name' => 'agreements.send', 'display_name' => 'Send Agreement Link', 'description' => 'Generate and send agreement links via WhatsApp or SMS to members'],
+                    ['name' => 'agreements.manage', 'display_name' => 'Manage Agreement Settings', 'description' => 'Configure agreement terms, terrace rules, and review flagged medical declarations'],
                 ],
             ],
             'billing' => [
@@ -201,6 +204,9 @@ class PermissionSeeder extends Seeder
             'members.delete' => 'members_management',
             'members.freeze' => 'members_management',
             'members.measurements' => 'members_management',
+            'agreements.view' => 'members_management',
+            'agreements.send' => 'members_management',
+            'agreements.manage' => 'members_management',
 
             // Memberships & Plans
             'memberships.view' => 'memberships_billing',
@@ -312,6 +318,7 @@ class PermissionSeeder extends Seeder
             'gym_manager' => [
                 'dashboard.view', 'dashboard.financials', 'dashboard.pt_financials', 'dashboard.member_stats', 'dashboard.attendance_stats',
                 'members.view', 'members.create', 'members.edit', 'members.freeze', 'members.measurements',
+                'agreements.view', 'agreements.send', 'agreements.manage',
                 'memberships.view', 'memberships.create', 'plans.view', 'plans.create', 'plans.edit',
                 'payments.view', 'payments.record', 'payments.invoice_view',
                 'attendance.view', 'attendance.checkin',
@@ -332,6 +339,7 @@ class PermissionSeeder extends Seeder
             'receptionist' => [
                 'dashboard.view', 'dashboard.member_stats', 'dashboard.attendance_stats',
                 'members.view', 'members.create', 'members.edit', 'members.measurements',
+                'agreements.view', 'agreements.send',
                 'memberships.view', 'memberships.create', 'plans.view',
                 'payments.view', 'payments.record', 'payments.invoice_view',
                 'attendance.view', 'attendance.checkin',
@@ -346,6 +354,7 @@ class PermissionSeeder extends Seeder
                 'dashboard.view', 'dashboard.member_stats',
                 'crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.leads.edit', 'crm.trials', 'crm.reports',
                 'members.view', 'members.create',
+                'agreements.view', 'agreements.send',
                 'memberships.view', 'plans.view',
                 'payments.view', 'payments.record', 'payments.invoice_view',
                 'whatsapp.view', 'whatsapp.contacts', 'whatsapp.inbox',

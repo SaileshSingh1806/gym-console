@@ -956,6 +956,18 @@ class AppController extends Controller
                 }
             }
 
+            // Automatically generate personalized Digital Member Agreement
+            $agreementShareUrl = null;
+            $agreementWhatsAppUrl = null;
+            try {
+                $agreementService = app(\App\Services\MemberAgreementService::class);
+                $agreement = $agreementService->getOrCreateAgreementForMember($member, true, 'whatsapp');
+                $agreementShareUrl = $agreement->share_url;
+                $agreementWhatsAppUrl = $agreement->whatsapp_share_url;
+            } catch (\Throwable $e) {
+                \Log::warning("Could not auto-generate agreement for member {$member->id}: " . $e->getMessage());
+            }
+
             if ($request->filled('lead_id')) {
                 $lead = Lead::where('tenant_id', $tenant->id)->find($request->input('lead_id'));
                 if ($lead) {
@@ -968,15 +980,28 @@ class AppController extends Controller
                     $member->update(['lead_id' => $lead->id]);
                     ActivityLog::log('lead_converted', "Lead '{$lead->name}' successfully converted to Member '{$member->full_name}' ({$member->member_code})", $member);
 
-                    return redirect()->route('app.members.show', $member->id)->with('success', "Lead '{$lead->name}' converted to Member successfully! (Member ID: {$member->member_code})");
+                    $redir = redirect()->route('app.members.show', $member->id)->with('success', "Lead '{$lead->name}' converted to Member successfully! (Member ID: {$member->member_code})");
+                    if ($agreementShareUrl) {
+                        $redir->with('agreement_share_url', $agreementShareUrl)
+                              ->with('agreement_whatsapp_url', $agreementWhatsAppUrl)
+                              ->with('agreement_member_name', $member->full_name);
+                    }
+                    return $redir;
                 }
             }
 
-            if ($enrolledGroupCount > 0) {
-                return redirect()->route('app.members.index')->with('success', "Primary member '{$member->full_name}' and {$enrolledGroupCount} group member(s) enrolled successfully under {$plan->name}!");
+            $successMsg = $enrolledGroupCount > 0
+                ? "Primary member '{$member->full_name}' and {$enrolledGroupCount} group member(s) enrolled successfully under {$plan->name}!"
+                : "Member '{$member->full_name}' enrolled successfully! (Member ID: {$member->member_code})";
+
+            $redir = redirect()->route('app.members.show', $member->id)->with('success', $successMsg);
+            if ($agreementShareUrl) {
+                $redir->with('agreement_share_url', $agreementShareUrl)
+                      ->with('agreement_whatsapp_url', $agreementWhatsAppUrl)
+                      ->with('agreement_member_name', $member->full_name);
             }
 
-            return redirect()->route('app.members.index')->with('success', "Member '{$member->full_name}' enrolled successfully!");
+            return $redir;
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         }
@@ -1387,8 +1412,18 @@ class AppController extends Controller
             ->with(['meals', 'trainer'])
             ->get();
 
+        $latestAgreement = $member->latestAgreement;
+        if (! $latestAgreement) {
+            try {
+                $latestAgreement = app(\App\Services\MemberAgreementService::class)->getOrCreateAgreementForMember($member);
+            } catch (\Throwable $e) {
+                $latestAgreement = null;
+            }
+        }
+
         return view('app.members.show', compact(
             'member',
+            'latestAgreement',
             'activeMembership',
             'daysLeft',
             'monthsActive',

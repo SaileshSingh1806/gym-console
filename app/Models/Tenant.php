@@ -73,6 +73,21 @@ class Tenant extends Model
         return $this->hasOne(Subscription::class)->latestOfMany();
     }
 
+    public function agreementTemplates(): HasMany
+    {
+        return $this->hasMany(TenantAgreementTemplate::class);
+    }
+
+    public function activeAgreementTemplate(): HasOne
+    {
+        return $this->hasOne(TenantAgreementTemplate::class)->where('is_active', true)->latestOfMany();
+    }
+
+    public function memberAgreements(): HasMany
+    {
+        return $this->hasMany(MemberAgreement::class);
+    }
+
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
