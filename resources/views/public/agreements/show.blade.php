@@ -59,24 +59,42 @@
                     <label class="check declaration"><input type="checkbox" x-model="healthConfirmed"><span>I confirm that the health information I have provided is accurate to the best of my knowledge.</span></label>
                     <div class="actions health-actions"><span class="save-hint" x-text="allAnswered() ? (healthConfirmed ? 'Ready to continue' : 'Confirm your declaration to continue') : (config.questionIds.length - answeredCount()) + ' questions remaining'"></span><button class="secondary" :disabled="loading" @click="go(2)">Back</button><button class="primary" :disabled="loading || !allAnswered() || !healthConfirmed" @click="submitHealth()" x-text="loading ? 'Saving...' : 'Continue to terms'"></button></div>
                 </section>
-                <section x-cloak x-show="step === 4">
+                <section x-cloak x-show="step === 4" :class="{ 'reader-large': largeText }">
                     <div class="sectionintro"><p class="eyebrow">03 / Membership terms</p><h2>Read your agreement</h2><p>These terms apply to your membership at {{ $tenant->name }}.</p></div>
+                    <div class="reading-tools">
+                        <details class="browser-translation-help">
+                            <summary>Translate this page</summary>
+                            <p>Use your browser's Translate option and choose your preferred language.</p>
+                            <ul>
+                                <li><strong>Chrome on mobile:</strong> Open the browser menu and tap Translate.</li>
+                                <li><strong>Chrome or Edge on desktop:</strong> Right-click the page and choose Translate.</li>
+                                <li><strong>Safari on iPhone:</strong> Open the page menu in the address bar and look for Translate.</li>
+                            </ul>
+                            <p>Options and languages depend on your browser. If Translate is unavailable, open this link in Chrome or Edge.</p>
+                        </details>
+                        <div class="reading-size" role="group" aria-label="Reading text size"><button type="button" :aria-pressed="!largeText" @click="largeText = false" aria-label="Standard text size">A</button><button type="button" :aria-pressed="largeText" @click="largeText = true" aria-label="Larger text size">A+</button></div>
+                    </div>
+                    <details class="reader-index"><summary>Jump to a section ({{ count($template->terms_sections ?? []) }})</summary>
                     <nav class="terms-index" aria-label="Agreement sections">
                         <span class="eyebrow">In this agreement</span>
                         @foreach($template->terms_sections ?? [] as $section)
                             <a href="#agreement-section-{{ $loop->iteration }}"><span>{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>{{ mb_convert_case($section['title'], MB_CASE_TITLE) }}</a>
                         @endforeach
                     </nav>
+                    </details>
                     @foreach($template->terms_sections ?? [] as $section)
                         <section class="terms" id="agreement-section-{{ $loop->iteration }}">
-                            <header class="terms-heading"><span class="terms-number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><h3>{{ mb_convert_case($section['title'], MB_CASE_TITLE) }}</h3></header>
+                            <header class="terms-heading"><span class="terms-number">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><h3 dir="auto">{{ mb_convert_case($section['title'], MB_CASE_TITLE) }}</h3>
+
+                            </header>
                             <ul class="terms-clauses">
                                 @foreach($section['clauses'] ?? [] as $clause)
-                                    <li @class(['policy-emphasis' => str_contains(strtolower($clause), 'fees are non-refundable')])>{{ $clause }}</li>
+                                    <li dir="auto" @class(['policy-emphasis' => str_contains(strtolower($clause), 'fees are non-refundable')])>{{ $clause }}</li>
                                 @endforeach
                             </ul>
                         </section>
                     @endforeach
+                    <p class="notice">Translations are provided for reading assistance and may contain errors. If a term is unclear, ask gym staff before signing.</p>
                     <label class="check declaration"><input type="checkbox" x-model="termsConfirmed"><span>I have read and accept the membership terms above.</span></label>
                     @if($agreement->terrace_rules_included)<label class="check" style="margin-top:16px"><input type="checkbox" x-model="terraceConfirmed"><span>I have read and accept the open terrace access and safety rules.</span></label>@endif
                     <div class="actions"><button class="secondary" @click="go(3)">Back</button><button class="primary" :disabled="!termsConfirmed || (config.terrace && !terraceConfirmed)" @click="go(5)">Continue to signature</button></div>
@@ -95,7 +113,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('agreementFlow', (config) => ({
-                config, step: config.step, answers: { ...config.answers }, reference: config.reference,
+                config, largeText: false, step: config.step, answers: { ...config.answers }, reference: config.reference,
                 medicalReview: config.medicalReview, profileConfirmed: false, healthConfirmed: false,
                 termsConfirmed: false, terraceConfirmed: false, loading: false, error: '', hasSignature: false, drawing: false,
                 go(step) { this.step = step; this.error = ''; window.scrollTo({ top: 0, behavior: 'auto' }); },

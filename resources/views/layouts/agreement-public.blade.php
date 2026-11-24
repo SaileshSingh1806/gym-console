@@ -150,6 +150,23 @@
         .terms-clauses .policy-emphasis { margin:8px -8px; padding:14px 16px; background:#fff8e9; border:1px solid #e9d6ac; border-radius:6px; color:#654c21; }
         .terms-clauses .policy-emphasis::before { display:none; }
         @media(max-width:600px) { .terms-heading { padding:16px; } .terms-clauses { padding:6px 16px 10px; } .terms h3 { font-size:15px; } .terms-index { padding:16px; } }
+        .reading-tools { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:16px 18px; margin:0 0 20px; border:1px solid #e1e4e2; background:#fafaf7; border-radius:8px; }
+        .reading-tools strong { font-size:13px; font-weight:600; }
+        .reading-tools p { font-size:12px; color:#69717b; margin-top:3px; }
+        .browser-translation-help { flex:1; min-width:200px; }
+        .browser-translation-help summary { cursor:pointer; font-size:13px; font-weight:600; padding:8px 0; }
+        .browser-translation-help ul { margin:12px 0; padding-left:18px; color:#555d65; font-size:13px; line-height:1.8; }
+        .reading-size { display:flex; align-items:center; gap:8px; }
+        .reading-size button { width:40px; height:40px; border:1px solid #d8dadc; border-radius:6px; background:#fff; font-weight:600; }
+        .reading-size button[aria-pressed="true"] { background:#252d36; color:#fff; border-color:#252d36; }
+        .terms-heading { flex-wrap:wrap; }
+        .terms-heading h3 { flex:1; min-width:160px; }
+        .translate-section { display:inline-flex; align-items:center; justify-content:center; min-height:40px; padding:8px 12px; border:1px solid #d8dadc; border-radius:6px; background:white; color:#414954; font-size:12px; font-weight:600; text-decoration:none; }
+        .translate-section:hover { border-color:#9b793d; background:#fffaf0; }
+        .reader-large .terms-clauses li { font-size:17px; line-height:1.9; }
+        .reader-index { margin-bottom:24px; border-bottom:1px solid #e1e4e2; }
+        .reader-index summary { cursor:pointer; padding:12px 0 16px; font-size:13px; font-weight:600; }
+        .reader-index .terms-index { margin-bottom:18px; }
         @media print { .brandbar,.footer,.steps,.actions { display:none}
         .page { margin:0; max-width:none}
         .sheet { box-shadow:none; border:0}
@@ -160,7 +177,7 @@
 <body>
     <header class="brandbar"><div class="brandinner"><div class="brand">
         @if($tenant->logo_url)<img src="{{ $tenant->logo_url }}" alt="{{ $tenant->name }}">@else<span class="brandmark">{{ mb_substr($tenant->name, 0, 1) }}</span>@endif
-        <span>{{ $tenant->name }}</span></div><span class="muted">Member services</span></div></header>
+        <span>{{ $tenant->name }}</span></div></div></header>
     <main class="page">{{ $slot }}</main>
     <footer class="footer"><span>{{ $tenant->name }} &middot; Membership records</span><span>Powered by GymDeskHub</span></footer>
 </body>

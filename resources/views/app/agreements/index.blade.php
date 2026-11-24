@@ -1,93 +1,33 @@
 <x-app-layout header="Digital Member Agreements & Health Declarations">
-    <div x-data="agreementManager()" class="space-y-6">
+    <div @keydown.escape.window="openQuickGenerateModal = false; openBulkModal = false; openHealthModal = false; openAuditModal = false" x-data="agreementManager()" class="agreement-workspace space-y-6">
 
-        <!-- Top Header & Quick Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-                    <span class="p-2 bg-indigo-600/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 rounded-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </span>
-                    Digital Member Agreements & Health
-                </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Manage paperless member onboarding, PAR-Q health declarations, electronic signatures, and legal compliance.
-                </p>
-            </div>
-
-            <div class="flex items-center gap-2.5 flex-wrap">
-                <button type="button" @click="openQuickGenerateModal = true" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm shadow-indigo-500/20 transition-all hover:scale-[1.01]">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                    <span>Generate Member Link</span>
-                </button>
-
-                <button type="button" @click="openBulkModal = true" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span>Bulk Generate</span>
-                </button>
-
+        <header class="agreement-page-header">
+            <div><p class="agreement-eyebrow">Member records</p><h1>Agreements &amp; health declarations</h1><p class="agreement-description">Track signatures, review health responses and manage member documents.</p></div>
+            <div class="agreement-header-actions">
                 @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('agreements.manage'))
-                <a href="{{ route('app.agreements.settings') }}" class="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span>Settings & Terms</span>
-                </a>
+                    <a href="{{ route('app.agreements.settings') }}" class="agreement-button">Manage terms</a>
                 @endif
+                <button type="button" @click="openBulkModal = true" class="agreement-button">Bulk generate</button>
+                <button type="button" @click="openQuickGenerateModal = true" class="agreement-button agreement-button-primary"><span aria-hidden="true">+</span> Create agreement</button>
             </div>
-        </div>
-
-        <!-- Metric KPI Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Total Generated -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    <span>Total Generated</span>
-                    <span class="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-300">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </span>
+        </header>
+        <div x-cloak x-show="feedback" class="agreement-feedback" :class="{ 'is-error': feedbackError }" role="status"><span x-text="feedback"></span><button type="button" @click="feedback = ''" aria-label="Dismiss notification">&times;</button></div>
+        <div class="agreement-summary-heading"><h2>Agreement overview</h2><span>Across all member records</span></div>
+        <section class="agreement-overview" aria-label="Agreement overview">
+            @foreach([
+                ['label' => 'Total agreements', 'value' => $stats['total'] ?? 0, 'detail' => 'Generated member records', 'filter' => 'all'],
+                ['label' => 'Signed', 'value' => $stats['completed'] ?? 0, 'detail' => ($stats['completion_rate'] ?? 0).'% of agreements', 'filter' => 'completed'],
+                ['label' => 'Awaiting signature', 'value' => $stats['pending'] ?? 0, 'detail' => 'Follow up with members', 'filter' => 'pending'],
+                ['label' => 'Health disclosures', 'value' => $stats['medical_review'] ?? 0, 'detail' => 'Includes reviewed declarations', 'filter' => null],
+            ] as $metric)
+                <div class="agreement-metric metric-{{ $metric['filter'] ?? 'health' }}"><div class="metric-label"><span>{{ $metric['label'] }}</span><span class="metric-indicator" aria-hidden="true"></span></div><strong>{{ number_format($metric['value']) }}</strong><p>{{ $metric['detail'] }}</p>
+                    @if($metric['filter'] === 'completed')<progress class="metric-progress" max="100" value="{{ max(0, min(100, $stats['completion_rate'] ?? 0)) }}" aria-label="Signed agreements percentage"></progress>@endif
+                    @if($metric['filter'])<a href="{{ route('app.agreements.index', ['status' => $metric['filter']]) }}" aria-label="View {{ strtolower($metric['label']) }}">View records <span aria-hidden="true">&rarr;</span></a>@endif
                 </div>
-                <div class="text-2xl font-black text-slate-900 dark:text-white mt-2">{{ number_format($stats['total'] ?? 0) }}</div>
-                <div class="text-xs text-slate-500 mt-1">Current Active Version: v{{ $activeTemplate->version }}</div>
-            </div>
-
-            <!-- Completed & Signed -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                    <span>Signed & Completed</span>
-                    <span class="p-1.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg text-emerald-600 dark:text-emerald-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </span>
-                </div>
-                <div class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2">{{ number_format($stats['completed'] ?? 0) }}</div>
-                <div class="text-xs text-emerald-700 dark:text-emerald-500 font-semibold mt-1">{{ $stats['completion_rate'] ?? 0 }}% completion rate</div>
-            </div>
-
-            <!-- Pending Signature -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-                    <span>Pending Signature</span>
-                    <span class="p-1.5 bg-amber-50 dark:bg-amber-950/40 rounded-lg text-amber-600 dark:text-amber-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </span>
-                </div>
-                <div class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-2">{{ number_format($stats['pending'] ?? 0) }}</div>
-                <div class="text-xs text-amber-700 dark:text-amber-500 mt-1">Awaiting member completion</div>
-            </div>
-
-            <!-- Medical Review Flagged -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                    <span>Medical Review Needed</span>
-                    <span class="p-1.5 bg-rose-50 dark:bg-rose-950/40 rounded-lg text-rose-600 dark:text-rose-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </span>
-                </div>
-                <div class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-2">{{ number_format($stats['medical_review'] ?? 0) }}</div>
-                <div class="text-xs text-rose-700 dark:text-rose-500 font-semibold mt-1">Health conditions flagged</div>
-            </div>
-        </div>
-
+            @endforeach
+        </section>
         <!-- Filter Tabs & Search -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm space-y-4">
+        <div class="agreement-records bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <!-- Status Tabs -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs font-bold">
@@ -114,9 +54,10 @@
                     <input type="hidden" name="status" value="{{ $statusFilter }}">
                     <div class="relative w-full md:w-72">
                         <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search member, phone, ID..."
+                        <input type="text" name="search" value="{{ request('search') }}" aria-label="Search agreements by member, phone or ID" placeholder="Search name, phone or member ID"
                                class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
+                    <button type="submit" class="agreement-button">Search</button>
                     @if(request('search'))
                     <a href="{{ route('app.agreements.index', ['status' => $statusFilter]) }}" class="px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                         Clear
@@ -127,8 +68,8 @@
 
             <!-- Agreements Table -->
             <div class="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase tracking-wider font-extrabold text-[10px] border-b border-slate-200/80 dark:border-slate-800">
+                <table class="agreement-table w-full text-left text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase tracking-wider font-semibold text-[10px] border-b border-slate-200/80 dark:border-slate-800">
                         <tr>
                             <th class="py-3 px-4">Member</th>
                             <th class="py-3 px-3">Plan & Dates</th>
@@ -146,8 +87,8 @@
                             <td class="py-3 px-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center shrink-0 border border-indigo-200/50 overflow-hidden">
-                                        @if($ag->member?->profile_photo_url)
-                                            <img src="{{ $ag->member->profile_photo_url }}" alt="{{ $ag->member->full_name }}" class="w-full h-full object-cover">
+                                        @if($ag->member?->avatar_url)
+                                            <img src="{{ $ag->member->avatar_url }}" alt="{{ $ag->member->full_name }}" class="w-full h-full object-cover">
                                         @else
                                             {{ strtoupper(substr($ag->member?->first_name ?? 'M', 0, 1)) }}
                                         @endif
@@ -193,26 +134,26 @@
                             <!-- Agreement Status -->
                             <td class="py-3 px-3">
                                 @if($ag->isCompleted())
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                                         Signed & Completed
                                     </span>
                                 @elseif($ag->requiresMedicalReview())
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                                         Needs Review
                                     </span>
                                 @elseif($ag->status === 'link_sent' || $ag->status === 'LINK_SENT')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-sky-600"></span>
                                         Link Sent
                                     </span>
                                 @elseif(strtoupper((string) $ag->status) === 'DECLINED')
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
                                         Declined
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
                                         Pending
                                     </span>
@@ -224,12 +165,12 @@
                                 @if($ag->has_medical_conditions)
                                     <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/60 transition-colors">
                                         <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                        Flagged Condition
+                                        Health disclosure
                                     </button>
                                 @elseif($ag->health_declaration_accepted_at)
                                     <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 transition-colors">
                                         <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        Clear (All No)
+                                        No conditions reported
                                     </button>
                                 @else
                                     <span class="text-slate-400 text-[11px] italic">Not completed</span>
@@ -251,27 +192,28 @@
 
                             <!-- Action Buttons -->
                             <td class="py-3 px-4 text-right">
-                                <div class="inline-flex items-center gap-1.5 justify-end">
+                                <div class="agreement-row-actions">
                                     @if($ag->isCompleted())
                                         <!-- View / Download PDF Document -->
                                         <a href="{{ route('app.agreements.pdf', $ag->id) }}" target="_blank"
                                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 transition shadow-sm"
                                            title="View Official Signed Document">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            <span>View PDF</span>
+                                            <span>View document</span>
                                         </a>
 
-                                        <!-- View Cryptographic Audit Trail -->
+                                        <!-- View Agreement History -->
                                         <button type="button" @click="fetchAuditTrail({{ $ag->id }})"
                                                 class="p-1.5 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition"
-                                                title="View Cryptographic Audit Trail & SHA-256 Reference">
+                                                title="View Agreement History & SHA-256 Reference">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        <span>History</span>
                                         </button>
                                     @elseif($ag->requiresMedicalReview())
                                         <!-- Review Health Disclosures -->
                                         <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})"
                                                 class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-sm">
-                                            Review Medical
+                                            Review health
                                         </button>
                                     @else
                                         <!-- 1-Click Copy Link -->
@@ -279,6 +221,7 @@
                                                 class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                                                 title="Copy Direct Agreement Link">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                        <span>Copy link</span>
                                         </button>
 
                                         <!-- WhatsApp Direct Share -->
@@ -286,6 +229,7 @@
                                            class="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors"
                                            title="Share via WhatsApp">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                        <span>WhatsApp</span>
                                         </a>
                                     @endif
                                 </div>
@@ -318,17 +262,17 @@
         <div x-show="openQuickGenerateModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-cloak>
             <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="openQuickGenerateModal = false"></div>
             <div class="min-h-full flex items-center justify-center p-4">
-                <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                <div class="relative bg-white dark:bg-slate-900 rounded-xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
                     
                     <!-- Modal Header -->
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-3">
-                            <span class="p-2.5 bg-gradient-to-tr from-indigo-500 to-violet-600 text-white rounded-2xl shadow-md shadow-indigo-500/20">
+                            <span class="p-2.5 bg-indigo-600 text-white rounded-2xl shadow-md shadow-indigo-500/20">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Generate Member Agreement</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Search member and create encrypted link for mobile signing</p>
+                                <h3 class="text-base font-semibold text-slate-900 dark:text-white tracking-tight">Generate Member Agreement</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Choose a member to create their signing link.</p>
                             </div>
                         </div>
                         <button type="button" @click="openQuickGenerateModal = false" class="p-1 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
@@ -361,7 +305,7 @@
                                 <template x-for="m in filteredMembers" :key="m.id">
                                     <button type="button" @click="selectMember(m)"
                                             class="w-full text-left p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-800/80 flex items-center gap-3 transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 shadow-sm hover:shadow">
-                                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden border border-indigo-400/30">
+                                        <div class="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden border border-indigo-400/30">
                                             <template x-if="m.photo">
                                                 <img :src="m.photo" :alt="m.name" class="w-full h-full object-cover">
                                             </template>
@@ -372,7 +316,7 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2">
                                                 <span class="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition" x-text="m.name"></span>
-                                                <span class="font-mono text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800" x-text="m.code"></span>
+                                                <span class="font-mono text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800" x-text="m.code"></span>
                                             </div>
                                             <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5 truncate">
                                                 <span x-text="m.phone"></span>
@@ -403,7 +347,7 @@
 
                             <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between gap-3 shadow-sm">
                                 <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/30 overflow-hidden border border-indigo-400/30">
+                                    <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white font-semibold text-sm flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/30 overflow-hidden border border-indigo-400/30">
                                         <template x-if="selectedMember?.photo">
                                             <img :src="selectedMember.photo" :alt="selectedMember.name" class="w-full h-full object-cover">
                                         </template>
@@ -413,8 +357,8 @@
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-2">
-                                            <h4 class="text-sm font-black text-slate-900 dark:text-white truncate" x-text="selectedMember?.name"></h4>
-                                            <span class="font-mono text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold" x-text="selectedMember?.code"></span>
+                                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate" x-text="selectedMember?.name"></h4>
+                                            <span class="font-mono text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold" x-text="selectedMember?.code"></span>
                                         </div>
                                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate" x-text="selectedMember?.phone + ' • ' + selectedMember?.plan"></p>
                                     </div>
@@ -457,7 +401,7 @@
                         <button type="button"
                                 @click="generateLinkForMember()"
                                 :disabled="!selectedMemberId || isGenerating"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold rounded-xl transition-all shadow-md active:scale-95"
                                 :class="selectedMemberId ? 'bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-indigo-500/25 cursor-pointer' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'">
                             <svg x-show="!isGenerating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                             <span x-text="isGenerating ? 'Generating Link...' : 'Generate Encrypted Link'"></span>
@@ -471,7 +415,7 @@
         <div x-show="openBulkModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="openBulkModal = false"></div>
             <div class="min-h-full flex items-center justify-center p-4">
-                <form action="{{ route('app.agreements.bulk-generate') }}" method="POST" class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                <form action="{{ route('app.agreements.bulk-generate') }}" method="POST" class="relative bg-white dark:bg-slate-900 rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
                     @csrf
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-2.5">
@@ -479,7 +423,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white">Bulk Generate Agreements</h3>
+                                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Bulk Generate Agreements</h3>
                                 <p class="text-xs text-slate-500">Batch generate for existing enrolled members</p>
                             </div>
                         </div>
@@ -490,8 +434,8 @@
 
                     <div class="space-y-3 text-xs">
                         <div class="p-3.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
-                            <div class="font-bold text-slate-900 dark:text-white">Target Group: Unsent Active Members</div>
-                            <div class="text-slate-500 mt-1">Found <strong class="text-indigo-600">{{ count($unsentMembers) }}</strong> members without active digital agreement links.</div>
+                            <div class="font-bold text-slate-900 dark:text-white">Members in this batch</div>
+                            <div class="text-slate-500 mt-1">Found <strong class="text-indigo-600">{{ count($unsentMembers) }}</strong> members available. Existing active agreements are reused.</div>
                         </div>
 
                         <div>
@@ -525,18 +469,18 @@
         <div x-show="openHealthModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="openHealthModal = false"></div>
             <div class="min-h-full flex items-center justify-center p-4">
-                <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                <div class="relative bg-white dark:bg-slate-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-2.5">
                             <span class="p-2 bg-rose-50 dark:bg-rose-950/60 text-rose-600 rounded-xl">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white" x-text="activeAgreementModal?.member?.first_name + '\'s Health Declaration'"></h3>
-                                <p class="text-xs text-slate-500">PAR-Q 7-Question Medical Screening</p>
+                                <h3 class="text-base font-semibold text-slate-900 dark:text-white" x-text="activeAgreementModal?.member?.first_name + '\'s Health Declaration'"></h3>
+                                <p class="text-xs text-slate-500">Member-reported health information</p>
                             </div>
                         </div>
-                        <button type="button" @click="openHealthModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <button type="button" aria-label="Close health declaration" @click="openHealthModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -546,7 +490,7 @@
                             <div class="p-3.5 rounded-2xl border text-xs" :class="ans.answer === 'yes' ? 'bg-rose-50/70 border-rose-200 text-rose-950 dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-200' : 'bg-slate-50 border-slate-200/80 text-slate-700 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-300'">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="font-bold flex-1" x-text="(idx + 1) + '. ' + ans.question"></div>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase shrink-0" :class="ans.answer === 'yes' ? 'bg-rose-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" x-text="ans.answer"></span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase shrink-0" :class="ans.answer === 'yes' ? 'bg-rose-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'" x-text="ans.answer"></span>
                                 </div>
                                 <div x-show="ans.answer === 'yes' && ans.details" class="mt-2 pt-2 border-t border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300">
                                     <strong>Member Disclosure:</strong> <span x-text="ans.details"></span>
@@ -555,18 +499,18 @@
                         </template>
 
                         <!-- Approval Action if Medical Review Required -->
-                        <div x-show="activeAgreementModal?.status === 'medical_review'" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 space-y-3">
+                        <div x-show="['medical_review', 'MEDICAL_REVIEW_REQUIRED'].includes(activeAgreementModal?.status)" class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 space-y-3">
                             <div class="text-xs font-bold text-amber-900 dark:text-amber-200">
-                                Staff / Owner Medical Clearance
+                                Staff review
                             </div>
                             <p class="text-[11px] text-amber-800 dark:text-amber-300">
-                                Review the flagged medical responses above with the head trainer. You can approve the member for customized workout routines or record advisory notes.
+                                Review the member's responses and record any follow-up or medical advice received. This records a staff review, not medical clearance.
                             </p>
                             <form :action="'/app/agreements/' + activeAgreementModal?.id + '/medical-review'" method="POST" class="space-y-2">
                                 @csrf
-                                <input type="text" name="notes" placeholder="Optional clearance notes (e.g., cleared by doctor, avoid heavy deadlifts)..." class="w-full text-xs rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white">
+                                <input type="text" name="notes" placeholder="Review notes and any advice received from a qualified clinician" class="w-full text-xs rounded-xl border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-900 p-2 text-slate-900 dark:text-white">
                                 <button type="submit" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm">
-                                    Approve & Clear for Training
+                                    Record review
                                 </button>
                             </form>
                         </div>
@@ -581,22 +525,22 @@
             </div>
         </div>
 
-        <!-- 4. Cryptographic Audit Trail Modal -->
+        <!-- 4. Agreement History Modal -->
         <div x-show="openAuditModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-cloak>
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="openAuditModal = false"></div>
             <div class="min-h-full flex items-center justify-center p-4">
-                <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                <div class="relative bg-white dark:bg-slate-900 rounded-xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-2.5">
                             <span class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 rounded-xl">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white">Cryptographic Audit Certificate</h3>
-                                <p class="text-xs text-slate-500">SHA-256 Digital Signature Trail</p>
+                                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Agreement history</h3>
+                                <p class="text-xs text-slate-500">Signature details and recorded activity</p>
                             </div>
                         </div>
-                        <button type="button" @click="openAuditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <button type="button" aria-label="Close agreement history" @click="openAuditModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -624,7 +568,7 @@
 
                         <!-- Audit Events Timeline -->
                         <div>
-                            <div class="font-bold text-slate-700 dark:text-slate-300 mb-2">Chronological Event Logs</div>
+                            <div class="font-bold text-slate-700 dark:text-slate-300 mb-2">Activity</div>
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
                                 <template x-for="(ev, idx) in (auditData?.audit_trail || [])" :key="idx">
                                     <div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-950 text-[11px]">
@@ -650,6 +594,64 @@
 
     </div>
 
+
+    <style>
+        .agreement-workspace { --ag-text:#172235; --ag-muted:#65748a; --ag-line:#e2e7ed; --ag-surface:#fff; --ag-soft:#f7f9fb; }
+        .dark .agreement-workspace { --ag-text:#eef2f7; --ag-muted:#9ba9bc; --ag-line:#2a3648; --ag-surface:#0f172a; --ag-soft:#151f31; }
+        .agreement-page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:8px 0 6px; }
+        .agreement-eyebrow { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ag-muted); margin-bottom:8px; }
+        .agreement-page-header h1 { font-size:clamp(23px,2.4vw,30px); font-weight:600; letter-spacing:-.8px; line-height:1.25; color:var(--ag-text); }
+        .agreement-description { font-size:13px; line-height:1.7; color:var(--ag-muted); margin-top:9px; }
+        .agreement-header-actions { display:flex; flex-wrap:wrap; gap:8px; flex-shrink:0; }
+        .agreement-button { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:40px; padding:9px 14px; border:1px solid var(--ag-line); border-radius:7px; background:var(--ag-surface); color:var(--ag-text); font-size:12px; font-weight:600; white-space:nowrap; }
+        .agreement-button:hover { background:var(--ag-soft); }
+        .agreement-button-primary { background:#4f46e5; border-color:#4f46e5; color:#fff; }
+        .agreement-button-primary:hover { background:#4338ca; }
+        .agreement-overview { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid var(--ag-line); border-radius:10px; background:var(--ag-surface); overflow:hidden; }
+        .agreement-metric { padding:22px 24px; border-right:1px solid var(--ag-line); }
+        .agreement-metric:last-child { border-right:0; }
+        .agreement-metric>span { color:var(--ag-muted); font-size:12px; font-weight:500; }
+        .agreement-metric strong { display:block; margin-top:8px; font-size:32px; line-height:1.2; letter-spacing:-1px; font-weight:600; font-variant-numeric:tabular-nums; color:var(--ag-text); }
+        .agreement-metric p { margin-top:7px; font-size:11px; color:var(--ag-muted); }
+        .agreement-metric a { display:inline-flex; gap:10px; margin-top:14px; color:var(--ag-muted); font-size:11px; }
+        .agreement-metric a:hover { color:#6366f1; }
+        .agreement-table { min-width:1020px; }
+        .agreement-table th { font-size:10px; font-weight:600; letter-spacing:.06em; padding-top:14px; padding-bottom:14px; }
+        .agreement-table td { padding-top:18px; padding-bottom:18px; font-size:12px; }
+        .agreement-table td:first-child { min-width:210px; }
+        .agreement-table td:last-child a,.agreement-table td:last-child button { min-height:34px; min-width:34px; }
+        .agreement-feedback { display:flex; justify-content:space-between; gap:16px; padding:12px 16px; border:1px solid var(--ag-line); border-left:3px solid #6366f1; border-radius:6px; color:var(--ag-text); background:var(--ag-surface); font-size:13px; }
+        .agreement-feedback.is-error { border-left-color:#dc2626; }
+        .agreement-workspace :focus-visible { outline:2px solid #6366f1; outline-offset:3px; }
+        .agreement-summary-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:-12px; }
+        .agreement-summary-heading h2 { color:var(--ag-text); font-size:15px; font-weight:600; }
+        .agreement-summary-heading>span { font-size:12px; color:var(--ag-muted); }
+        .agreement-overview { gap:14px; background:transparent; border:0; border-radius:0; overflow:visible; }
+        .agreement-metric { position:relative; display:flex; flex-direction:column; padding:23px; border:1px solid var(--ag-line); border-radius:12px; background:var(--ag-surface); }
+        .agreement-metric:last-child { border-right:1px solid var(--ag-line); }
+        .metric-label { display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--ag-muted); font-size:13px; font-weight:500; }
+        .metric-indicator { width:8px; height:8px; border-radius:50%; background:#8794a7; flex-shrink:0; }
+        .metric-completed .metric-indicator { background:#059669; }
+        .metric-pending .metric-indicator { background:#d97706; }
+        .metric-health .metric-indicator { background:#e87979; }
+        .metric-all { border-top:3px solid #6366f1; padding-top:21px; }
+        .agreement-metric strong { font-size:38px; margin-top:16px; }
+        .agreement-metric p { font-size:12px; line-height:1.6; margin-top:8px; min-height:38px; }
+        .agreement-metric a { font-size:12px; font-weight:500; padding-top:12px; margin-top:auto; border-top:1px solid var(--ag-line); justify-content:space-between; }
+        .metric-progress { appearance:none; width:100%; height:4px; margin:0 0 12px; border:0; border-radius:4px; overflow:hidden; background:var(--ag-line); }
+        .metric-progress::-webkit-progress-bar { background:var(--ag-line); }
+        .metric-progress::-webkit-progress-value { background:#059669; }
+        .metric-progress::-moz-progress-bar { background:#059669; }
+        .agreement-row-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; min-width:240px; }
+        .agreement-table td:last-child a,.agreement-table td:last-child button,.agreement-table td:nth-child(5) button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; min-width:44px; padding:10px 14px; font-size:13px; font-weight:600; line-height:1.35; border-radius:8px; white-space:nowrap; }
+        .agreement-table td:last-child a,.agreement-table td:last-child button { border:1px solid var(--ag-line); }
+        .agreement-table td button svg,.agreement-table td:last-child a svg { width:17px; height:17px; flex-shrink:0; }
+        .agreement-workspace .fixed button[type=submit] { min-height:44px; font-size:13px; }
+        @media(max-width:1200px) { .agreement-page-header { flex-direction:column; align-items:flex-start; gap:18px; } }
+        @media(max-width:640px) { .agreement-overview { grid-template-columns:repeat(2,minmax(0,1fr)); } .agreement-metric { padding:18px; border-bottom:1px solid var(--ag-line); } .agreement-metric:nth-child(2) { border-right:1px solid var(--ag-line); } .agreement-metric:nth-child(n+3) { border-bottom:1px solid var(--ag-line); } .agreement-header-actions { width:100%; } .agreement-header-actions .agreement-button-primary { flex:1; } .agreement-records { padding:12px; } }
+        @media(max-width:640px) { .agreement-overview { gap:10px; } .agreement-metric { padding:16px; } .metric-all { padding-top:14px; } .metric-label { font-size:12px; } .agreement-metric strong { font-size:32px; } .agreement-summary-heading>span { display:none; } }
+    </style>
+
     <!-- Alpine.js Page Controller -->
     <script>
         function agreementManager() {
@@ -666,6 +668,8 @@
                 generatedResult: null,
                 activeAgreementModal: null,
                 auditData: null,
+                feedback: '',
+                feedbackError: false,
 
                 get filteredMembers() {
                     if (!this.memberSearch || !this.memberSearch.trim()) {
@@ -697,8 +701,8 @@
                 copyText(text) {
                     if (!text) return;
                     navigator.clipboard.writeText(text).then(() => {
-                        alert('Agreement link copied to clipboard!');
-                    });
+                        this.feedbackError = false; this.feedback = 'Agreement link copied.';
+                    }).catch(() => { this.feedbackError = true; this.feedback = 'Copy failed. Open the agreement and copy its address.'; });
                 },
 
                 generateLinkForMember() {
@@ -713,7 +717,7 @@
                             'Accept': 'application/json'
                         }
                     })
-                    .then(res => res.json())
+                    .then(async res => { const data = await res.json(); if (!res.ok || !data.success) throw new Error(data.message || 'Request failed'); return data; })
                     .then(data => {
                         this.isGenerating = false;
                         if (data.success) {
@@ -722,12 +726,18 @@
                     })
                     .catch(err => {
                         this.isGenerating = false;
-                        alert('Could not generate link. Please try again.');
+                        this.feedbackError = true; this.feedback = 'Could not generate the agreement. Please try again.';
                     });
                 },
 
                 viewHealthDetails(agreement) {
-                    this.activeAgreementModal = agreement;
+                    const questions = agreement.template?.health_questions || [];
+                    const answers = agreement.health_declaration_answers || {};
+                    this.activeAgreementModal = { ...agreement, health_declaration_answers: Object.entries(answers).map(([id, answer]) => ({
+                        ...answer,
+                        question: answer.question || questions.find(question => question.id === id)?.question || id.replaceAll('_', ' '),
+                        details: answer.explanation || answer.details || ''
+                    })) };
                     this.openHealthModal = true;
                 },
 
@@ -737,13 +747,13 @@
                             'Accept': 'application/json'
                         }
                     })
-                    .then(res => res.json())
+                    .then(async res => { const data = await res.json(); if (!res.ok || !data.success) throw new Error(data.message || 'Request failed'); return data; })
                     .then(data => {
                         if (data.success) {
                             this.auditData = data;
                             this.openAuditModal = true;
                         }
-                    });
+                    }).catch(() => { this.feedbackError = true; this.feedback = 'Could not load agreement history. Please try again.'; });
                 }
             }
         }

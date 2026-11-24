@@ -2125,7 +2125,7 @@
                             <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
                                     <div class="text-xs font-bold text-indigo-950 dark:text-indigo-200">Direct Member Signing Link</div>
-                                    <div class="text-[11px] text-indigo-800/80 dark:text-indigo-300">Opens fast mobile agreement workflow with SMS/WhatsApp OTP verification.</div>
+                                    <div class="text-[11px] text-indigo-800/80 dark:text-indigo-300">Opens the member profile, health declaration and signing steps.</div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button type="button" @click="navigator.clipboard.writeText('{{ $ag->share_url }}'); alert('Link copied to clipboard!');" class="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm hover:bg-indigo-50 transition-colors">
@@ -2144,17 +2144,24 @@
                             <div class="space-y-3 pt-2">
                                 <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Submitted PAR-Q Medical Questionnaire</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                                    @foreach($ag->health_declaration_answers as $idx => $qAns)
+                                    @php
+                                        $healthQuestions = collect($ag->template?->health_questions ?? \App\Models\TenantAgreementTemplate::getDefaultHealthQuestions())->keyBy('id');
+                                    @endphp
+                                    @foreach($ag->health_declaration_answers as $questionId => $qAns)
+                                        @php
+                                            $questionText = $qAns['question'] ?? ($healthQuestions->get($questionId)['question'] ?? 'Health question');
+                                            $disclosure = $qAns['explanation'] ?? $qAns['details'] ?? null;
+                                        @endphp
                                         <div class="p-3 rounded-xl border text-xs {{ ($qAns['answer'] ?? '') === 'yes' ? 'bg-rose-50/80 border-rose-200 dark:bg-rose-950/30 dark:border-rose-900' : 'bg-slate-50 border-slate-200/70 dark:bg-slate-950 dark:border-slate-800' }}">
                                             <div class="flex items-start justify-between gap-2">
-                                                <div class="font-semibold text-slate-800 dark:text-slate-200">{{ $idx + 1 }}. {{ $qAns['question'] ?? '' }}</div>
+                                                <div class="font-semibold text-slate-800 dark:text-slate-200">{{ $loop->iteration }}. {{ $questionText }}</div>
                                                 <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase shrink-0 {{ ($qAns['answer'] ?? '') === 'yes' ? 'bg-rose-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300' }}">
                                                     {{ $qAns['answer'] ?? 'no' }}
                                                 </span>
                                             </div>
-                                            @if(($qAns['answer'] ?? '') === 'yes' && !empty($qAns['details']))
+                                            @if(($qAns['answer'] ?? '') === 'yes' && !empty($disclosure))
                                                 <div class="mt-2 text-[11px] text-rose-900 dark:text-rose-300 bg-white/70 dark:bg-slate-900 p-2 rounded-lg">
-                                                    <strong>Details:</strong> {{ $qAns['details'] }}
+                                                    <strong>Details:</strong> {{ $disclosure }}
                                                 </div>
                                             @endif
                                         </div>
