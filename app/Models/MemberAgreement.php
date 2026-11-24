@@ -101,17 +101,20 @@ class MemberAgreement extends Model
 
     public function isCompleted(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        return in_array(strtoupper((string) $this->status), [self::STATUS_COMPLETED, 'COMPLETED'])
+            || ! empty($this->signed_at);
     }
 
     public function isPending(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_LINK_SENT, self::STATUS_NOT_SENT]);
+        return ! $this->isCompleted()
+            && in_array(strtoupper((string) $this->status), [self::STATUS_PENDING, self::STATUS_LINK_SENT, self::STATUS_NOT_SENT, 'PENDING', 'LINK_SENT', 'NOT_SENT']);
     }
 
     public function requiresMedicalReview(): bool
     {
-        return $this->status === self::STATUS_MEDICAL_REVIEW || ($this->has_medical_conditions && ! $this->reviewed_at);
+        return in_array(strtoupper((string) $this->status), [self::STATUS_MEDICAL_REVIEW, 'MEDICAL_REVIEW_REQUIRED', 'MEDICAL_REVIEW'])
+            || ($this->has_medical_conditions && ! $this->reviewed_at);
     }
 
     public function isExpired(): bool

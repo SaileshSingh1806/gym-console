@@ -192,22 +192,22 @@
 
                             <!-- Agreement Status -->
                             <td class="py-3 px-3">
-                                @if($ag->status === 'completed')
+                                @if($ag->isCompleted())
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                                        Completed
+                                        Signed & Completed
                                     </span>
-                                @elseif($ag->status === 'medical_review')
+                                @elseif($ag->requiresMedicalReview())
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
                                         Needs Review
                                     </span>
-                                @elseif($ag->status === 'link_sent')
+                                @elseif($ag->status === 'link_sent' || $ag->status === 'LINK_SENT')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
                                         <span class="w-1.5 h-1.5 rounded-full bg-sky-600"></span>
                                         Link Sent
                                     </span>
-                                @elseif($ag->status === 'declined')
+                                @elseif(strtoupper((string) $ag->status) === 'DECLINED')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
                                         Declined
                                     </span>
@@ -252,31 +252,28 @@
                             <!-- Action Buttons -->
                             <td class="py-3 px-4 text-right">
                                 <div class="inline-flex items-center gap-1.5 justify-end">
-                                    @if($ag->status === 'completed')
+                                    @if($ag->isCompleted())
                                         <!-- View / Download PDF Document -->
                                         <a href="{{ route('app.agreements.pdf', $ag->id) }}" target="_blank"
-                                           class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                                           class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 transition shadow-sm"
                                            title="View Official Signed Document">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            <span>View PDF</span>
                                         </a>
 
                                         <!-- View Cryptographic Audit Trail -->
                                         <button type="button" @click="fetchAuditTrail({{ $ag->id }})"
-                                                class="p-2 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                                                class="p-1.5 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 dark:text-slate-300 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition"
                                                 title="View Cryptographic Audit Trail & SHA-256 Reference">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                         </button>
-                                    @endif
-
-                                    @if($ag->status === 'medical_review')
+                                    @elseif($ag->requiresMedicalReview())
                                         <!-- Review Health Disclosures -->
                                         <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})"
                                                 class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-sm">
                                             Review Medical
                                         </button>
-                                    @endif
-
-                                    @if(in_array($ag->status, ['pending', 'link_sent']))
+                                    @else
                                         <!-- 1-Click Copy Link -->
                                         <button type="button" @click="copyText('{{ $ag->share_url }}')"
                                                 class="p-2 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
@@ -317,51 +314,134 @@
             @endif
         </div>
 
-        <!-- 1. Quick Generate Modal -->
+        <!-- 1. Quick Generate Modal with Real-time Search -->
         <div x-show="openQuickGenerateModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" x-cloak>
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="openQuickGenerateModal = false"></div>
+            <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="openQuickGenerateModal = false"></div>
             <div class="min-h-full flex items-center justify-center p-4">
-                <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                        <div class="flex items-center gap-2.5">
-                            <span class="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-xl">
+                <div class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                    
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <span class="p-2.5 bg-gradient-to-tr from-indigo-500 to-violet-600 text-white rounded-2xl shadow-md shadow-indigo-500/20">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-black text-slate-900 dark:text-white">Generate Member Agreement</h3>
-                                <p class="text-xs text-slate-500">Generates unique encrypted link for mobile signing</p>
+                                <h3 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">Generate Member Agreement</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Search member and create encrypted link for mobile signing</p>
                             </div>
                         </div>
-                        <button type="button" @click="openQuickGenerateModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <button type="button" @click="openQuickGenerateModal = false" class="p-1 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
 
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Select Gym Member</label>
-                            <select x-model="selectedMemberId" class="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="">-- Choose Member --</option>
-                                @foreach($unsentMembers as $m)
-                                    <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->member_code }} • {{ $m->phone }})</option>
-                                @endforeach
-                            </select>
+                        <!-- STATE A: No Member Selected (Search Mode) -->
+                        <div x-show="!selectedMember" class="space-y-3">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                                <span>Select Gym Member</span>
+                                <span class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold" x-text="(filteredMembers.length) + ' members found'"></span>
+                            </div>
+
+                            <!-- Live Search Input -->
+                            <div class="relative">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <input type="text"
+                                       x-model="memberSearch"
+                                       placeholder="Type name, phone (e.g. 98765...), or Member ID (e.g. ARM133)..."
+                                       class="w-full text-xs rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 pl-10 pr-9 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-inner">
+                                <button type="button" x-show="memberSearch" @click="memberSearch = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold p-1">
+                                    &times;
+                                </button>
+                            </div>
+
+                            <!-- Scrollable Member Selection List -->
+                            <div class="max-h-56 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100 dark:divide-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 p-1.5">
+                                <template x-for="m in filteredMembers" :key="m.id">
+                                    <button type="button" @click="selectMember(m)"
+                                            class="w-full text-left p-2.5 rounded-xl hover:bg-white dark:hover:bg-slate-800/80 flex items-center gap-3 transition group border border-transparent hover:border-slate-200 dark:hover:border-slate-700/60 shadow-sm hover:shadow">
+                                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 text-white font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden border border-indigo-400/30">
+                                            <template x-if="m.photo">
+                                                <img :src="m.photo" :alt="m.name" class="w-full h-full object-cover">
+                                            </template>
+                                            <template x-if="!m.photo">
+                                                <span x-text="m.initials"></span>
+                                            </template>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-xs text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition" x-text="m.name"></span>
+                                                <span class="font-mono text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800" x-text="m.code"></span>
+                                            </div>
+                                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5 truncate">
+                                                <span x-text="m.phone"></span>
+                                                <span>&bull;</span>
+                                                <span class="truncate" x-text="m.plan"></span>
+                                            </div>
+                                        </div>
+                                        <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                </template>
+
+                                <div x-show="filteredMembers.length === 0" class="p-6 text-center text-xs text-slate-400 space-y-1">
+                                    <p>No members found matching "<span class="font-semibold text-slate-300" x-text="memberSearch"></span>"</p>
+                                    <button type="button" @click="memberSearch = ''" class="text-indigo-500 hover:underline font-bold text-[11px]">Clear search</button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Generated Link Preview & Sharing Options -->
-                        <div x-show="generatedResult" class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800 space-y-3">
-                            <div class="text-xs font-bold text-indigo-950 dark:text-indigo-200 flex items-center justify-between">
-                                <span>Unique Link Ready!</span>
-                                <span class="text-[10px] bg-indigo-200/60 dark:bg-indigo-900 px-2 py-0.5 rounded-full font-mono">256-bit Token</span>
+                        <!-- STATE B: Member Selected (Summary Card) -->
+                        <div x-show="selectedMember" class="space-y-3">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                                <span>Selected Member</span>
+                                <button type="button" @click="clearSelectedMember()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Change Member</span>
+                                </button>
                             </div>
-                            <input type="text" readonly :value="generatedResult?.share_url" class="w-full text-xs font-mono bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200">
+
+                            <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/80 flex items-center justify-between gap-3 shadow-sm">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/30 overflow-hidden border border-indigo-400/30">
+                                        <template x-if="selectedMember?.photo">
+                                            <img :src="selectedMember.photo" :alt="selectedMember.name" class="w-full h-full object-cover">
+                                        </template>
+                                        <template x-if="!selectedMember?.photo">
+                                            <span x-text="selectedMember?.initials"></span>
+                                        </template>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="text-sm font-black text-slate-900 dark:text-white truncate" x-text="selectedMember?.name"></h4>
+                                            <span class="font-mono text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-bold" x-text="selectedMember?.code"></span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate" x-text="selectedMember?.phone + ' • ' + selectedMember?.plan"></p>
+                                    </div>
+                                </div>
+                                <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- STATE C: Generated Link Ready -->
+                        <div x-show="generatedResult" class="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 space-y-3">
+                            <div class="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center justify-between">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Personalized Agreement Link Ready!</span>
+                                </span>
+                                <span class="text-[10px] bg-emerald-200/60 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded-full font-mono font-bold">256-bit Token</span>
+                            </div>
+                            <input type="text" readonly :value="generatedResult?.share_url" class="w-full text-xs font-mono bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-200 select-all shadow-inner">
                             
-                            <div class="flex items-center gap-2 pt-1">
-                                <button type="button" @click="copyText(generatedResult?.share_url)" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs shadow-sm">
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <button type="button" @click="copyText(generatedResult?.share_url)" class="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-xs shadow-md transition active:scale-95">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                     <span>Copy Link</span>
                                 </button>
-                                <a :href="generatedResult?.whatsapp_url" target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm">
+                                <a :href="generatedResult?.whatsapp_url" target="_blank" class="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition active:scale-95">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                     <span>WhatsApp</span>
                                 </a>
@@ -369,13 +449,18 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2">
-                        <button type="button" @click="openQuickGenerateModal = false" class="px-4 py-2 text-xs font-bold rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                    <!-- Modal Action Buttons -->
+                    <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" @click="openQuickGenerateModal = false" class="px-4 py-2.5 text-xs font-bold rounded-xl text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition">
                             Close
                         </button>
-                        <button type="button" @click="generateLinkForMember()" :disabled="!selectedMemberId || isGenerating" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white shadow-sm">
-                            <span x-show="!isGenerating">Generate Link</span>
-                            <span x-show="isGenerating">Generating...</span>
+                        <button type="button"
+                                @click="generateLinkForMember()"
+                                :disabled="!selectedMemberId || isGenerating"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all shadow-md active:scale-95"
+                                :class="selectedMemberId ? 'bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white shadow-indigo-500/25 cursor-pointer' : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'">
+                            <svg x-show="!isGenerating" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                            <span x-text="isGenerating ? 'Generating Link...' : 'Generate Encrypted Link'"></span>
                         </button>
                     </div>
                 </div>
@@ -573,11 +658,41 @@
                 openBulkModal: false,
                 openHealthModal: false,
                 openAuditModal: false,
+                membersList: @json($membersJson ?? []),
+                memberSearch: '',
+                selectedMember: null,
                 selectedMemberId: '',
                 isGenerating: false,
                 generatedResult: null,
                 activeAgreementModal: null,
                 auditData: null,
+
+                get filteredMembers() {
+                    if (!this.memberSearch || !this.memberSearch.trim()) {
+                        return this.membersList.slice(0, 40);
+                    }
+                    const q = this.memberSearch.toLowerCase().trim();
+                    return this.membersList.filter(m =>
+                        (m.name && m.name.toLowerCase().includes(q)) ||
+                        (m.code && m.code.toLowerCase().includes(q)) ||
+                        (m.phone && m.phone.toLowerCase().includes(q)) ||
+                        (m.plan && m.plan.toLowerCase().includes(q))
+                    ).slice(0, 40);
+                },
+
+                selectMember(m) {
+                    this.selectedMember = m;
+                    this.selectedMemberId = m.id;
+                    this.memberSearch = '';
+                    this.generatedResult = null;
+                },
+
+                clearSelectedMember() {
+                    this.selectedMember = null;
+                    this.selectedMemberId = '';
+                    this.memberSearch = '';
+                    this.generatedResult = null;
+                },
 
                 copyText(text) {
                     if (!text) return;

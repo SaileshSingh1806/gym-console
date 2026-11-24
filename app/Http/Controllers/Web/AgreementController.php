@@ -34,13 +34,17 @@ class AgreementController extends Controller
         // Filter by Status Tab
         $statusFilter = $request->input('status', 'all');
         if ($statusFilter === 'completed') {
-            $query->where('status', MemberAgreement::STATUS_COMPLETED);
+            $query->where(function ($q) {
+                $q->whereIn('status', [MemberAgreement::STATUS_COMPLETED, 'completed', 'COMPLETED'])
+                    ->orWhereNotNull('signed_at');
+            });
         } elseif ($statusFilter === 'pending') {
-            $query->whereIn('status', [MemberAgreement::STATUS_PENDING, MemberAgreement::STATUS_LINK_SENT]);
+            $query->whereIn('status', [MemberAgreement::STATUS_PENDING, MemberAgreement::STATUS_LINK_SENT, 'pending', 'link_sent', 'PENDING', 'LINK_SENT'])
+                ->whereNull('signed_at');
         } elseif ($statusFilter === 'medical_review') {
-            $query->where('status', MemberAgreement::STATUS_MEDICAL_REVIEW);
+            $query->whereIn('status', [MemberAgreement::STATUS_MEDICAL_REVIEW, 'medical_review', 'MEDICAL_REVIEW_REQUIRED']);
         } elseif ($statusFilter === 'expired') {
-            $query->where('status', MemberAgreement::STATUS_EXPIRED);
+            $query->whereIn('status', [MemberAgreement::STATUS_EXPIRED, 'expired', 'EXPIRED']);
         }
 
         // Search Filter (Member Name, Phone, Member ID)
@@ -56,13 +60,23 @@ class AgreementController extends Controller
 
         $agreements = $query->latest('id')->paginate(15)->withQueryString();
 
-        // Also fetch members who haven't been sent an agreement yet for the quick-send selector
-        $pendingMemberIds = MemberAgreement::where('tenant_id', $tenant->id)->pluck('member_id')->toArray();
+        // Also fetch members for the quick-send selector with search & plans
         $unsentMembers = Member::where('tenant_id', $tenant->id)
-            ->whereNotIn('id', $pendingMemberIds)
+            ->with(['activeMembership.plan'])
             ->orderBy('first_name')
-            ->take(100)
             ->get();
+
+        $membersJson = $unsentMembers->map(function ($m) {
+            return [
+                'id' => $m->id,
+                'name' => $m->full_name,
+                'code' => $m->member_code ?? ('#' . $m->id),
+                'phone' => $m->phone ?? '',
+                'plan' => $m->activeMembership?->plan?->name ?? 'Standard Active Plan',
+                'photo' => $m->profile_photo_url ?? null,
+                'initials' => strtoupper(substr($m->first_name ?? 'M', 0, 1)),
+            ];
+        });
 
         $activeTemplate = $this->agreementService->getOrCreateActiveTemplate($tenant);
 
@@ -71,6 +85,7 @@ class AgreementController extends Controller
             'stats',
             'statusFilter',
             'unsentMembers',
+            'membersJson',
             'activeTemplate',
             'tenant'
         ));

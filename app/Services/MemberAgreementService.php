@@ -347,22 +347,40 @@ class MemberAgreementService
         $totalMembers = Member::where('tenant_id', $tenant->id)->count();
 
         $completedCount = MemberAgreement::where('tenant_id', $tenant->id)
-            ->where('status', MemberAgreement::STATUS_COMPLETED)
+            ->where(function ($q) {
+                $q->whereIn('status', [MemberAgreement::STATUS_COMPLETED, 'completed', 'COMPLETED'])
+                    ->orWhereNotNull('signed_at');
+            })
             ->count();
 
         $medicalReviewCount = MemberAgreement::where('tenant_id', $tenant->id)
-            ->where('status', MemberAgreement::STATUS_MEDICAL_REVIEW)
+            ->where(function ($q) {
+                $q->whereIn('status', [MemberAgreement::STATUS_MEDICAL_REVIEW, 'medical_review', 'MEDICAL_REVIEW_REQUIRED'])
+                    ->orWhere('has_medical_conditions', true);
+            })
             ->count();
 
         $pendingCount = MemberAgreement::where('tenant_id', $tenant->id)
-            ->whereIn('status', [MemberAgreement::STATUS_PENDING, MemberAgreement::STATUS_LINK_SENT])
+            ->where(function ($q) {
+                $q->whereIn('status', [MemberAgreement::STATUS_PENDING, MemberAgreement::STATUS_LINK_SENT, 'pending', 'link_sent', 'PENDING', 'LINK_SENT'])
+                    ->whereNull('signed_at');
+            })
             ->count();
 
+        $totalAgreements = MemberAgreement::where('tenant_id', $tenant->id)->count();
         $notSentCount = max(0, $totalMembers - ($completedCount + $medicalReviewCount + $pendingCount));
-
-        $completionPercentage = $totalMembers > 0 ? round(($completedCount / $totalMembers) * 100, 1) : 0;
+        $completionPercentage = $totalAgreements > 0 ? round(($completedCount / $totalAgreements) * 100, 1) : 0;
 
         return [
+            // Short keys (used by index.blade.php)
+            'total' => $totalAgreements,
+            'completed' => $completedCount,
+            'pending' => $pendingCount,
+            'medical_review' => $medicalReviewCount,
+            'completion_rate' => $completionPercentage,
+
+            // Long keys (backwards compatibility)
+            'total_agreements' => $totalAgreements,
             'total_members' => $totalMembers,
             'completed_count' => $completedCount,
             'pending_count' => $pendingCount,
