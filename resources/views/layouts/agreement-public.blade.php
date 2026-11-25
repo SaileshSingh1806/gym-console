@@ -167,6 +167,17 @@
         .reader-index { margin-bottom:24px; border-bottom:1px solid #e1e4e2; }
         .reader-index summary { cursor:pointer; padding:12px 0 16px; font-size:13px; font-weight:600; }
         .reader-index .terms-index { margin-bottom:18px; }
+        .terms-acceptance-card { padding:20px; background:#faf9f5; border:1.5px solid #deded6; border-radius:10px; margin:22px 0 10px; transition:border-color .2s, box-shadow .2s; }
+        .terms-acceptance-card.has-error { border-color:#e05244; background:#fff7f6; box-shadow:0 0 0 3px rgba(224,82,68,0.12); }
+        .terms-error-message { display:flex; align-items:center; gap:8px; margin-top:14px; padding:10px 14px; background:#fde8e6; border:1px solid #f8b4ab; border-radius:6px; color:#a8281b; font-size:13px; font-weight:600; }
+        .terms-error-message .error-icon { width:18px; height:18px; flex-shrink:0; stroke:#a8281b; }
+        .highlight-checkbox { outline:2px solid #e05244; outline-offset:2px; border-radius:4px; padding:4px 6px; }
+        .terms-actions { display:flex; justify-content:space-between; align-items:center; gap:14px; margin-top:24px; padding-top:20px; border-top:1px solid #e5e5e0; }
+        .continue-to-sign-btn { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:12px 26px; border-radius:8px; font-size:14px; font-weight:700; letter-spacing:-0.2px; text-decoration:none; color:#ffffff; background:#242830; border:1px solid #1a1e24; box-shadow:0 2px 6px rgba(0,0,0,0.08); transition:all .2s ease; cursor:pointer; }
+        .continue-to-sign-btn:hover { background:#323843; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.12); }
+        .continue-to-sign-btn:active { transform:translateY(0); }
+        .continue-to-sign-btn.is-ready { background:linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%); border-color:#3730a3; box-shadow:0 4px 14px rgba(67,56,202,0.28); }
+        .continue-to-sign-btn.is-ready:hover { background:linear-gradient(135deg, #2e1065 0%, #4f46e5 100%); transform:translateY(-1.5px); box-shadow:0 6px 18px rgba(79,70,229,0.36); }
         @media print { .brandbar,.footer,.steps,.actions { display:none}
         .page { margin:0; max-width:none}
         .sheet { box-shadow:none; border:0}
@@ -179,6 +190,6 @@
         @if($tenant->logo_url)<img src="{{ $tenant->logo_url }}" alt="{{ $tenant->name }}">@else<span class="brandmark">{{ mb_substr($tenant->name, 0, 1) }}</span>@endif
         <span>{{ $tenant->name }}</span></div></div></header>
     <main class="page">{{ $slot }}</main>
-    <footer class="footer"><span>{{ $tenant->name }} &middot; Membership records</span><span>Powered by GymDeskHub</span></footer>
+    <footer class="footer"><span>{{ $tenant->name }} &middot; Membership Records</span><span>Digital Member Agreement</span></footer>
 </body>
 </html>

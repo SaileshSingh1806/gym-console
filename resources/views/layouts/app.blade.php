@@ -644,7 +644,7 @@
             <!-- Staff & Team Management Expandable -->
             @if($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
             @php
-                $isStaffActive = request()->routeIs('app.staff.*') || request()->routeIs('app.roles.*');
+                $isStaffActive = request()->routeIs('app.staff.*') || request()->routeIs('app.roles.*') || request()->routeIs('app.payroll.*');
             @endphp
             <div x-data="{ open: {{ $isStaffActive ? 'true' : 'false' }} }" class="space-y-0.5">
                 <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 rounded-xl {{ $isStaffActive ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors cursor-pointer">
@@ -671,6 +671,12 @@
                         <span>Roles & Permissions</span>
                     </a>
                     @endif
+
+                    <!-- Salary & Payslips -->
+                    <a href="{{ route('app.payroll.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.payroll.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.payroll.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
+                        <span>Salary &amp; Payslips</span>
+                    </a>
                 </div>
             </div>
             @endif
