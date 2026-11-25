@@ -112,6 +112,7 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
     <x-workspace-ui-styles />
+    @stack('styles')
 </head>
 <body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115]' : 'bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }} selection:bg-[#C5A880]/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
