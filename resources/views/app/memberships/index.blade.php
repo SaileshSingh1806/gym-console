@@ -1,7 +1,8 @@
 <x-app-layout header="Memberships">
     @push('styles')
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
-            .membership-workspace { font-size: 14px; line-height: 1.5; }
+            .membership-workspace { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
             .membership-workspace .membership-plan { min-width: 0; }
             .membership-workspace table { font-variant-numeric: tabular-nums; }
             .membership-workspace input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]),
@@ -12,15 +13,15 @@
             .membership-workspace .membership-plan button { white-space: nowrap; }
             .membership-workspace .membership-plan > div:last-child { flex-wrap: wrap; }
             .membership-workspace {
-                --mw-surface: #fff; --mw-text: #24262a; --mw-muted: #666b73; --mw-line: #e2e4e8; --mw-hover: #f7f8fa;
-                --mw-button: #272b30; --mw-button-text: #fff; --mw-active: #24734d;
+                --mw-surface: #ffffff; --mw-text: #202b36; --mw-muted: #63717e; --mw-line: #e0e6eb; --mw-hover: #f5f7fa; --mw-accent: #345b79; --mw-soft: #edf3f8;
+                --mw-button: #345b79; --mw-button-text: #fff; --mw-active: #23734e;
             }
             .dark .membership-workspace {
-                --mw-surface: #191b1f; --mw-text: #e7e8eb; --mw-muted: #a4a8b0; --mw-line: #303339; --mw-hover: #22252a;
-                --mw-button: #e5e7eb; --mw-button-text: #191b1f; --mw-active: #83c8a3;
+                --mw-surface: #1b222b; --mw-text: #e8edf2; --mw-muted: #a5b2c0; --mw-line: #35404d; --mw-hover: #232d38; --mw-accent: #a8c9e5; --mw-soft: #26394a;
+                --mw-button: #a8c9e5; --mw-button-text: #182938; --mw-active: #8bcba8;
             }
             .membership-workspace .membership-panel { background: var(--mw-surface); color: var(--mw-text); border: 1px solid var(--mw-line); border-radius: 6px; }
-            .membership-workspace .membership-plan-row { display: grid; grid-template-columns: minmax(135px,2fr) minmax(85px,1fr) minmax(75px,.85fr) minmax(105px,1.1fr) minmax(70px,.75fr) minmax(155px,1.35fr); gap: 12px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--mw-line); font-size: 13px; }
+            .membership-workspace .membership-plan-row { display: grid; grid-template-columns: minmax(135px,2fr) minmax(85px,1fr) minmax(75px,.85fr) minmax(105px,1.1fr) minmax(70px,.75fr) minmax(190px,1.5fr); gap: 12px; align-items: center; padding: 11px 16px; border-bottom: 1px solid var(--mw-line); font-size: 13px; }
             .membership-workspace .membership-plan-row:last-child { border-bottom: 0; }
             .membership-workspace .membership-plan-head { color: var(--mw-muted); font-weight: 500; font-size: 12px; background: var(--mw-hover); border-radius: 6px 6px 0 0; padding-block: 9px; }
             .membership-workspace .membership-muted { color: var(--mw-muted); }
@@ -32,9 +33,9 @@
             .membership-workspace .membership-status.is-active { color: var(--mw-active); }
             .membership-workspace .membership-status i { width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
             .membership-workspace .membership-mobile-label { display: none; }
-            @media (max-width: 1200px) and (min-width: 768px) {
+            @media (max-width: 1280px) and (min-width: 768px) {
                 .membership-workspace .membership-plan-list { overflow-x: auto; }
-                .membership-workspace .membership-plan-row { min-width: 760px; }
+                .membership-workspace .membership-plan-row { min-width: 800px; }
             }
             @media (max-width: 767px) {
                 .membership-workspace .membership-plan-head { display: none; }
@@ -43,6 +44,28 @@
                 .membership-workspace .membership-mobile-label { display: block; font-size: 11px; color: var(--mw-muted); margin-bottom: 2px; }
                 .membership-workspace .membership-row-actions { padding-top: 5px; }
             }
+            .membership-workspace .membership-plan-list { overflow-x: auto; }
+            .membership-workspace .membership-plan-row:not(.membership-plan-head):hover { background: var(--mw-hover); }
+            .membership-workspace .membership-plan-head { font-weight: 600; }
+            .membership-workspace .membership-primary:hover { filter: brightness(.93); }
+            .membership-workspace .membership-action { border-color: transparent; color: var(--mw-muted); }
+            .membership-workspace .membership-action:hover { background: var(--mw-soft); color: var(--mw-accent); }
+            .membership-workspace .membership-delete:hover { color: #c24141; }
+            .membership-workspace .membership-section-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 13px 16px; border-bottom:1px solid var(--mw-line); }
+            .membership-workspace .membership-section-header h3 { color:var(--mw-text); font-size:15px; font-weight:600; letter-spacing:-.015em; }
+            .membership-workspace .membership-panel table { color:var(--mw-text); font-size:13px; }
+            .membership-workspace .membership-panel table thead { background:var(--mw-hover); color:var(--mw-muted); border-color:var(--mw-line); }
+            .membership-workspace .membership-panel table th { font-size:12px; font-weight:600; white-space:nowrap; }
+            .membership-workspace .membership-panel table td { font-size:13px; }
+            .membership-workspace .membership-panel table tbody tr:hover { background:var(--mw-hover); }
+            .membership-workspace .membership-panel a { color:var(--mw-accent); }
+            .membership-workspace .membership-panel a:hover { text-decoration:underline; }
+            .membership-workspace .membership-dialog { background:var(--mw-surface); color:var(--mw-text); border-color:var(--mw-line); }
+            .membership-workspace .membership-dialog :is(input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]),select,textarea) { background:var(--mw-surface); color:var(--mw-text); border-color:var(--mw-line); border-radius:6px; font-size:14px; }
+            .membership-workspace .membership-dialog :is(input,select,textarea):focus { border-color:var(--mw-accent); }
+            .membership-workspace .membership-dialog label:has(input[type="radio"]:checked) { background:var(--mw-soft); border-color:var(--mw-accent); color:var(--mw-accent); box-shadow:none; }
+            .membership-workspace .membership-dialog button[type="submit"] { background:var(--mw-button); color:var(--mw-button-text); box-shadow:none; }
+            .membership-workspace .membership-dialog input[type="checkbox"] { accent-color:var(--mw-button); }
             .membership-workspace [x-cloak] { display: none !important; }
         </style>
     @endpush
@@ -88,8 +111,8 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-0">
             <div class="flex items-center gap-3">
                 <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">Membership plans</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Manage pricing and enrollment.</p>
+                    <h3 class="text-xl font-semibold tracking-tight" style="color:var(--mw-text)">Membership plans</h3>
+                    <p class="text-sm membership-muted mt-1">Manage membership pricing, duration and availability.</p>
                 </div>
             </div>
             @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.manage'))
@@ -102,6 +125,7 @@
 
         <!-- Membership plans: compact management list -->
         <section class="membership-panel" aria-label="Membership plans">
+            <div class="membership-section-header"><h3>Plans <span class="membership-muted text-xs font-normal ml-1">{{ count($plans) }}</span></h3><span class="membership-muted text-xs">Enrollment availability</span></div>
             <div class="membership-plan-list">
                 <div class="membership-plan-row membership-plan-head" aria-hidden="true">
                     <span>Plan</span><span>Duration</span><span>Capacity</span><span>Price</span><span>Status</span><span>Actions</span>
@@ -193,8 +217,8 @@
 
         <!-- Active Member Contracts: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
         <div class="membership-panel overflow-hidden">
-            <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Member subscriptions</h3>
+            <div class="membership-section-header">
+                <h3 class="font-semibold">Member subscriptions</h3>
                 <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $memberships->total() }} total</span>
             </div>
 
@@ -282,7 +306,7 @@
                                 <td class="py-2.5 px-3.5 font-medium text-slate-900 dark:text-white text-sm">
                                     {{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($ms->final_amount, 2) }}
                                 </td>
-                                <td class="py-2.5 px-3.5 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                                <td class="py-2.5 px-3.5 text-slate-700 dark:text-slate-300 font-semibold text-sm">
                                     {{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($ms->paid_amount, 2) }}
                                 </td>
                                 <td class="py-2.5 px-3.5">
@@ -310,7 +334,7 @@
         @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('plans.edit') || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.edit') || auth()->user()->hasPermission('memberships.manage'))
             <!-- Create Membership Plan Modal -->
             <div x-show="showNewModal" role="dialog" aria-modal="true" aria-label="Create plan" @keydown.escape.window="showNewModal = false" class="fixed inset-0 z-50 overflow-y-auto bg-black/70  flex items-center justify-center p-3 sm:p-4" x-cloak>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-lg max-w-xl w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl" @click.away="showNewModal = false">
+                <div class="membership-dialog bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-lg max-w-xl w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl" @click.away="showNewModal = false">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-semibold text-sm">
@@ -382,11 +406,11 @@
 
                             <!-- Custom Capacity Input when Group or Family is selected -->
                             <template x-if="newPlanType === 'group' || newPlanType === 'family'">
-                                <div class="mt-3 p-3 rounded-lg bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                <div class="mt-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
                                     <div class="flex items-center justify-between gap-3">
                                         <div>
-                                            <label class="block text-sm font-medium text-amber-900 dark:text-amber-200">Member capacity</label>
-                                            <p class="text-xs text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
+                                            <label class="block text-sm font-medium text-slate-800 dark:text-slate-200">Member capacity</label>
+                                            <p class="text-xs text-slate-600 dark:text-slate-300">e.g. Set <strong>5</strong> for a 5-people group package</p>
                                         </div>
                                         <div class="w-24">
                                             <input type="number" 
@@ -422,7 +446,7 @@
                                     <button type="button" @click="newDurationValue = 1; newDurationType = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">1M</button>
                                     <button type="button" @click="newDurationValue = 3; newDurationType = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">3M</button>
                                     <button type="button" @click="newDurationValue = 6; newDurationType = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">6M</button>
-                                    <button type="button" @click="newDurationValue = 1; newDurationType = 'years'" class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 cursor-pointer">1 Year</button>
+                                    <button type="button" @click="newDurationValue = 1; newDurationType = 'years'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">1 Year</button>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
@@ -457,7 +481,7 @@
                                 <div class="flex items-center gap-2">
                                     <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-medium">✓</span>
                                     <span class="font-medium text-slate-700 dark:text-slate-300">
-                                        Price per member: <strong class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}<span x-text="Math.round(newPrice / (newMaxMembers || 1)).toLocaleString()"></span> / person</strong>
+                                        Price per member: <strong class="text-slate-700 dark:text-slate-300 font-semibold">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}<span x-text="Math.round(newPrice / (newMaxMembers || 1)).toLocaleString()"></span> / person</strong>
                                     </span>
                                 </div>
                                 <span class="text-xs font-medium text-slate-500 uppercase tracking-wider" x-text="newMaxMembers + ' Persons Package'"></span>
@@ -482,7 +506,7 @@
 
             <!-- Edit Membership Plan Modal -->
             <div x-show="editPlan !== null" class="fixed inset-0 z-50 overflow-y-auto bg-black/70  flex items-center justify-center p-3 sm:p-4" x-cloak>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-lg max-w-xl w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl" @click.away="editPlan = null">
+                <div class="membership-dialog bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-lg max-w-xl w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 shadow-2xl" @click.away="editPlan = null">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-semibold text-sm">
@@ -548,11 +572,11 @@
 
                                 <!-- Custom Capacity Input for Edit -->
                                 <template x-if="editPlan.plan_type === 'group' || editPlan.plan_type === 'family'">
-                                    <div class="mt-3 p-3 rounded-lg bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                                    <div class="mt-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
                                         <div class="flex items-center justify-between gap-3">
                                             <div>
-                                                <label class="block text-sm font-medium text-amber-900 dark:text-amber-200">Member capacity</label>
-                                                <p class="text-xs text-amber-700 dark:text-amber-400">e.g. Set <strong>5</strong> for a 5-people group package</p>
+                                                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200">Member capacity</label>
+                                                <p class="text-xs text-slate-600 dark:text-slate-300">e.g. Set <strong>5</strong> for a 5-people group package</p>
                                             </div>
                                             <div class="w-24">
                                                 <input type="number" 
@@ -585,7 +609,7 @@
                                         <button type="button" @click="editPlan.duration_value = 1; editPlan.duration_type = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">1M</button>
                                         <button type="button" @click="editPlan.duration_value = 3; editPlan.duration_type = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">3M</button>
                                         <button type="button" @click="editPlan.duration_value = 6; editPlan.duration_type = 'months'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">6M</button>
-                                        <button type="button" @click="editPlan.duration_value = 1; editPlan.duration_type = 'years'" class="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 cursor-pointer">1 Year</button>
+                                        <button type="button" @click="editPlan.duration_value = 1; editPlan.duration_type = 'years'" class="px-2 py-0.5 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 cursor-pointer">1 Year</button>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
@@ -619,7 +643,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-medium">✓</span>
                                         <span class="font-medium text-slate-700 dark:text-slate-300">
-                                            Price per member: <strong class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}<span x-text="Math.round(editPlan.price / (editPlan.max_members || 1)).toLocaleString()"></span> / person</strong>
+                                            Price per member: <strong class="text-slate-700 dark:text-slate-300 font-semibold">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}<span x-text="Math.round(editPlan.price / (editPlan.max_members || 1)).toLocaleString()"></span> / person</strong>
                                         </span>
                                     </div>
                                     <span class="text-xs font-medium text-slate-500 uppercase tracking-wider" x-text="editPlan.max_members + ' Persons Package'"></span>
