@@ -1,7 +1,7 @@
 <x-guest-layout :hide-nav="true" :hide-footer="true" :noindex="true" title="Sign in — {{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        .gdh-login { --surface:#151b23; --canvas:#10151c; --line:#303b48; --text:#e8edf2; --muted:#a5b2c0; --accent:#a8c9e5; font-family:Inter,system-ui,sans-serif; color:var(--text); background:var(--canvas); min-height:100vh; min-height:100dvh; display:grid; grid-template-rows:auto 1fr auto; padding:0 clamp(20px,5vw,72px); font-size:14px; line-height:1.5; color-scheme:dark; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        .gdh-login { --surface:#151618; --canvas:#101113; --line:#292c30; --text:#f1f3f5; --muted:#a1a8b0; --accent:#f5a623; font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--text); background:var(--canvas); min-height:100vh; min-height:100dvh; display:grid; grid-template-rows:auto 1fr auto; padding:0 clamp(20px,5vw,72px); font-size:14px; line-height:1.5; color-scheme:dark; }
         .gdh-login * { box-sizing:border-box; }
         .gdh-login a { color:var(--accent); text-decoration:none; }
         .gdh-login a:hover { text-decoration:underline; text-underline-offset:3px; }
@@ -25,9 +25,9 @@
         .gdh-login-password { position:relative; }
         .gdh-login-password input { padding-right:66px; }
         .gdh-login-show { position:absolute; right:5px; top:5px; bottom:5px; padding:0 10px; border-radius:5px; color:var(--muted); font-size:12px; font-weight:500; cursor:pointer; }
-        .gdh-login-show:hover { background:#232d38; color:var(--text); }
-        .gdh-login-submit { width:100%; min-height:46px; border-radius:7px; background:var(--accent); color:#182938; font-weight:600; font-size:14px; cursor:pointer; }
-        .gdh-login-submit:hover:not(:disabled) { background:#bfd8ec; }
+        .gdh-login-show:hover { background:#1c1e21; color:var(--text); }
+        .gdh-login-submit { width:100%; min-height:46px; border-radius:7px; background:var(--accent); color:#151618; font-weight:600; font-size:14px; cursor:pointer; }
+        .gdh-login-submit:hover:not(:disabled) { background:#ffb942; }
         .gdh-login-submit:disabled { opacity:.65; cursor:wait; }
         .gdh-login-notice { border:1px solid var(--line); border-left:3px solid currentColor; border-radius:6px; padding:11px 13px; margin-bottom:18px; font-size:13px; }
         .gdh-login-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; border-top:1px solid var(--line); padding:20px 0; color:var(--muted); }
