@@ -7,13 +7,13 @@
         .payments-workspace .payment-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
         .payments-workspace .payment-metric { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-top:2px solid rgb(var(--metric-tone,var(--c-line-strong))); border-radius:12px; min-width:0; padding:14px 16px; }
         .payments-workspace .payment-metric-label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:rgb(var(--c-fg-muted)); font-size:12px; }
-        .payments-workspace .payment-metric-label svg { width:18px; height:18px; color:rgb(var(--metric-tone,var(--c-fg-muted))); }
+        .payments-workspace .payment-metric-label svg { flex-shrink:0; width:18px; height:18px; color:rgb(var(--metric-tone,var(--c-fg-muted))); }
         .payments-workspace .payment-metric-value { margin-top:7px; font-size:24px; font-weight:600; line-height:1.3; color:rgb(var(--metric-tone,var(--c-fg))); overflow-wrap:anywhere; }
         .payments-workspace .payment-metric-caption { font-size:12px; margin-top:4px; color:rgb(var(--c-fg-muted)); }
         .payments-workspace .payment-ledger { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; min-width:0; }
         .payments-workspace .payment-ledger-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgb(var(--c-line)); gap:12px; }
         .payments-workspace .payment-filters { padding:12px 16px; border-bottom:1px solid rgb(var(--c-line)); }
-        .payments-workspace .payment-filters-grid { display:grid; grid-template-columns:minmax(210px,2fr) repeat(4,minmax(110px,1fr)); gap:8px; align-items:center; }
+        .payments-workspace .payment-filters-grid { display:grid; grid-template-columns:minmax(180px,2fr) repeat(4,minmax(100px,1fr)); gap:8px; align-items:center; }
         .payments-workspace .payment-filters :is(input,select) { height:36px; min-height:36px; padding-block:0; border-radius:8px; font-size:13px; font-weight:400; }
         .payments-workspace .payment-table { font-size:13px; min-width:780px; }
         .payments-workspace .payment-table thead { position:sticky; top:0; z-index:1; background:rgb(var(--c-raised)); }
@@ -30,8 +30,8 @@
         .payments-workspace .payment-action { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; min-width:34px; padding:7px 9px; border:1px solid rgb(var(--c-line-strong)); border-radius:8px; background:rgb(var(--c-surface)); color:rgb(var(--c-fg)); font-size:12px; font-weight:500; white-space:nowrap; cursor:pointer; }
         .payments-workspace .payment-action:hover { background:rgb(var(--c-raised)); }
         .payments-workspace .payment-action svg { width:16px; height:16px; flex-shrink:0; }
-        .payments-workspace .payment-action-whatsapp { color:#128C4B; background:rgb(37 211 102 / .10); border-color:rgb(37 211 102 / .24); }
-        html.dark .payments-workspace .payment-action-whatsapp { color:#25D366; }
+        .ds-body .operations-workspace .payments-workspace .payment-action-whatsapp { color:#128C4B; background:rgb(37 211 102 / .10); border-color:rgb(37 211 102 / .24); }
+        html.dark .ds-body .operations-workspace .payments-workspace .payment-action-whatsapp { color:#25D366; }
         .payments-workspace .payment-action-whatsapp:hover { background:rgb(37 211 102 / .18); }
         .payments-workspace .payment-action-warning { color:rgb(var(--c-warning)); background:rgb(var(--c-warning) / .10); border-color:rgb(var(--c-warning) / .24); }
         .payments-workspace .payment-action-danger { color:rgb(var(--c-danger)); background:rgb(var(--c-danger) / .10); border-color:rgb(var(--c-danger) / .24); }
@@ -47,6 +47,8 @@
         .payments-workspace .payment-modal { width:min(100%,940px); max-height:calc(100dvh - 32px); overflow:auto; background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:0; font-size:14px; }
         .payments-workspace .payment-modal form { padding:20px; }
         .payments-workspace .payment-modal :is(input,select,textarea) { border-radius:8px; }
+        .payments-workspace .payment-modal input[name="collected_amount"] { background:transparent; border:0; color:rgb(var(--c-success)); font-size:18px; }
+        .payments-workspace .payment-modal .payment-footer .ds-btn { min-height:36px; }
         .payments-workspace .payment-modal label { font-size:12px; }
         .payments-workspace .payment-modal .payment-section-heading { font-weight:600; font-size:14px; color:rgb(var(--c-fg)); margin-bottom:8px; }
         .payments-workspace .payment-modal .payment-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; }
@@ -573,8 +575,7 @@
                         <div class="payment-mobile-actions flex items-center gap-1.5 pt-1">
                             <a href="{{ route('app.invoices.show', $p->id) }}" 
                                target="_blank" 
-                               title="View / Print Tax Invoice Receipt"
-                               class="flex-1 py-1.5 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:border-line text-xs font-semibold flex items-center justify-center gap-1 transition-colors">
+                               title="View / Print Tax Invoice Receipt" class="payment-action flex-1">
                                 <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span>Receipt</span>
                             </a>
@@ -582,7 +583,7 @@
                             <a href="{{ $p->whatsapp_share_url }}" 
                                target="_blank" 
                                title="Share Receipt on WhatsApp" 
-                               class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 transition-colors">
+                               class="payment-action payment-action-whatsapp">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                             </a>
 
@@ -590,7 +591,7 @@
                                 <button type="button" 
                                         @click="openEditMethod({{ $p->id }}, '{{ $receiptNo }}', '{{ number_format($p->amount, 2) }}', '{{ addslashes($member?->full_name ?? 'N/A') }}', '{{ strtolower($p->payment_method ?? 'cash') }}', '{{ addslashes($p->transaction_reference ?? '') }}')"
                                         title="Gym Owner: Change Payment Mode" 
-                                        class="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20 transition-colors cursor-pointer">
+                                        class="payment-action payment-action-warning">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
                             @endif
@@ -599,7 +600,7 @@
                                 <button type="button" 
                                         @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
                                         title="Collect Remaining Due" 
-                                        class="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-1">
+                                        class="payment-action payment-action-warning">
                                     <span>Collect due</span>
                                 </button>
                             @endif
@@ -755,7 +756,7 @@
                                         <a href="{{ route('app.invoices.show', $p->id) }}" 
                                            target="_blank" 
                                            title="View / Print Tax Invoice Receipt ({{ $receiptNo }})" 
-                                           class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-indigo-600 border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors cursor-pointer">
+                                           class="payment-action">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </a>
 
@@ -763,7 +764,7 @@
                                         <a href="{{ $p->whatsapp_share_url }}" 
                                            target="_blank" 
                                            title="Share Receipt on WhatsApp" 
-                                           class="p-1.5 rounded-lg bg-raised hover:bg-emerald-50 text-emerald-600 border border-line dark:bg-raised dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-line transition-colors">
+                                           class="payment-action payment-action-whatsapp">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                         </a>
 
@@ -817,7 +818,7 @@
                                             <button type="button" 
                                                     @click="openEditMethod({{ $p->id }}, '{{ $receiptNo }}', '{{ number_format($p->amount, 2) }}', '{{ addslashes($member?->full_name ?? 'N/A') }}', '{{ strtolower($p->payment_method ?? 'cash') }}', '{{ addslashes($p->transaction_reference ?? '') }}')"
                                                     title="Gym Owner: Change Payment Mode (Cash/UPI/Card)" 
-                                                    class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-200/80 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 transition-colors cursor-pointer">
+                                                    class="payment-action payment-action-warning">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>Correct payment method</span>
                                             </button>
                                         @endif
@@ -847,7 +848,7 @@
                                             <button type="button" 
                                                     @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
                                                     title="Collect Due Payment (Due: {{ $currency }}{{ number_format($dueAmount, 2) }})" 
-                                                    class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white border border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500 dark:text-emerald-400 dark:hover:text-slate-950 dark:border-emerald-500/40 transition-all cursor-pointer">
+                                                    class="payment-action payment-action-warning">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             </button>
                                         @endif
