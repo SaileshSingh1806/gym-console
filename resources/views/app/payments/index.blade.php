@@ -1,4 +1,79 @@
 <x-app-layout header="Payments">
+
+    @push('styles')
+    <style>
+        .payments-workspace { min-width:0; font-variant-numeric:tabular-nums; }
+        .payments-workspace .payment-page-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+        .payments-workspace .payment-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .payments-workspace .payment-metric { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-top:2px solid rgb(var(--metric-tone,var(--c-line-strong))); border-radius:12px; min-width:0; padding:14px 16px; }
+        .payments-workspace .payment-metric-label { display:flex; align-items:center; justify-content:space-between; gap:8px; color:rgb(var(--c-fg-muted)); font-size:12px; }
+        .payments-workspace .payment-metric-label svg { flex-shrink:0; width:18px; height:18px; color:rgb(var(--metric-tone,var(--c-fg-muted))); }
+        .payments-workspace .payment-metric-value { margin-top:7px; font-size:24px; font-weight:600; line-height:1.3; color:rgb(var(--metric-tone,var(--c-fg))); overflow-wrap:anywhere; }
+        .payments-workspace .payment-metric-caption { font-size:12px; margin-top:4px; color:rgb(var(--c-fg-muted)); }
+        .payments-workspace .payment-ledger { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; min-width:0; }
+        .payments-workspace .payment-ledger-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid rgb(var(--c-line)); gap:12px; }
+        .payments-workspace .payment-filters { padding:12px 16px; border-bottom:1px solid rgb(var(--c-line)); }
+        .payments-workspace .payment-filters-grid { display:grid; grid-template-columns:minmax(180px,2fr) repeat(4,minmax(100px,1fr)); gap:8px; align-items:center; }
+        .payments-workspace .payment-filters :is(input,select) { height:36px; min-height:36px; padding-block:0; border-radius:8px; font-size:13px; font-weight:400; }
+        .payments-workspace .payment-table { font-size:13px; min-width:780px; }
+        .payments-workspace .payment-table thead { position:sticky; top:0; z-index:1; background:rgb(var(--c-raised)); }
+        .payments-workspace .payment-table th { padding:10px 12px; font-size:12px; font-weight:500; white-space:nowrap; }
+        .payments-workspace .payment-table td { padding:12px; vertical-align:middle; }
+        .payments-workspace .payment-table :is(th,td):nth-child(3) { text-align:right; }
+        .payments-workspace .payment-table td:nth-child(3)>div:first-child { font-size:14px; font-weight:600; white-space:nowrap; }
+        .payments-workspace .payment-table td:first-child>div:first-child { font-size:14px; }
+        .payments-workspace .payment-table td:first-child .font-mono { font-family:inherit; }
+        .payments-workspace .payment-table-scroll { overflow:auto; max-height: min(70vh, 760px); }
+        .payments-workspace .payment-mobile-row { padding:14px; }
+        .payments-workspace .payment-mobile-row .payment-mobile-details { padding:10px 0; border:0; border-top:1px solid rgb(var(--c-line)); border-bottom:1px solid rgb(var(--c-line)); border-radius:0; background:transparent; }
+        .payments-workspace .payment-mobile-actions { flex-wrap:wrap; }
+        .payments-workspace .payment-action { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; min-width:34px; padding:7px 9px; border:1px solid rgb(var(--c-line-strong)); border-radius:8px; background:rgb(var(--c-surface)); color:rgb(var(--c-fg)); font-size:12px; font-weight:500; white-space:nowrap; cursor:pointer; }
+        .payments-workspace .payment-action:hover { background:rgb(var(--c-raised)); }
+        .payments-workspace .payment-action svg { width:16px; height:16px; flex-shrink:0; }
+        .ds-body .operations-workspace .payments-workspace .payment-action-whatsapp { color:#128C4B; background:rgb(37 211 102 / .10); border-color:rgb(37 211 102 / .24); }
+        html.dark .ds-body .operations-workspace .payments-workspace .payment-action-whatsapp { color:#25D366; }
+        .payments-workspace .payment-action-whatsapp:hover { background:rgb(37 211 102 / .18); }
+        .payments-workspace .payment-action-warning { color:rgb(var(--c-warning)); background:rgb(var(--c-warning) / .10); border-color:rgb(var(--c-warning) / .24); }
+        .payments-workspace .payment-action-danger { color:rgb(var(--c-danger)); background:rgb(var(--c-danger) / .10); border-color:rgb(var(--c-danger) / .24); }
+        .payments-workspace .payment-action-info { color:rgb(var(--c-info)); background:rgb(var(--c-info) / .10); border-color:rgb(var(--c-info) / .24); }
+        .payments-workspace .payment-action-menu { position:fixed; z-index:100; width:218px; max-width:calc(100vw - 16px); max-height:calc(100dvh - 16px); overflow:auto; padding:5px; border:1px solid rgb(var(--c-line-strong)); border-radius:8px; background:rgb(var(--c-surface)); text-align:left; }
+        .payments-workspace .payment-action-menu form { display:block; }
+        .payments-workspace .payment-action-menu .payment-action { width:100%; justify-content:flex-start; background:transparent; border:0; }
+        .payments-workspace .payment-action-menu .payment-action:hover { background:rgb(var(--c-raised)); }
+        .payments-workspace .payment-action-menu .payment-action-danger { color:rgb(var(--c-danger)); }
+        .payments-workspace .payment-action-menu .payment-action-warning { color:rgb(var(--c-warning)); }
+        .payments-workspace .payment-action-menu .payment-action-info { color:rgb(var(--c-info)); }
+        .payments-workspace .payment-action-menu .payment-action[aria-disabled="true"] { opacity:.55; }
+        .payments-workspace .payment-modal { width:min(100%,940px); max-height:calc(100dvh - 32px); overflow:auto; background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:0; font-size:14px; }
+        .payments-workspace .payment-modal form { padding:20px; }
+        .payments-workspace .payment-modal :is(input,select,textarea) { border-radius:8px; }
+        .payments-workspace .payment-modal input[name="collected_amount"] { background:transparent; border:0; color:rgb(var(--c-success)); font-size:18px; }
+        .payments-workspace .payment-modal .payment-footer .ds-btn { min-height:36px; }
+        .payments-workspace .payment-modal label { font-size:12px; }
+        .payments-workspace .payment-modal .payment-section-heading { font-weight:600; font-size:14px; color:rgb(var(--c-fg)); margin-bottom:8px; }
+        .payments-workspace .payment-modal .payment-breakdown { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; }
+        .payments-workspace .payment-modal .payment-summary-panel { background:rgb(var(--c-raised)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:14px; min-width:0; }
+        .payments-workspace .payment-modal .payment-amount-panel { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:14px; min-width:0; }
+        .payments-workspace .payment-modal .payment-footer { position:sticky; bottom:0; background:rgb(var(--c-surface)); padding:12px 0 0; z-index:2; }
+        @media(max-width:1050px) {
+            .payments-workspace .payment-filters-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+            .payments-workspace .payment-search { grid-column:1/-1; }
+        }
+        @media(max-width:640px) {
+            .payments-workspace .payment-page-header .ds-btn { width:100%; }
+            .payments-workspace .payment-summary { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+            .payments-workspace .payment-metric:first-child { grid-column:1/-1; }
+            .payments-workspace .payment-metric { padding:12px; }
+            .payments-workspace .payment-metric-value { font-size:20px; }
+            .payments-workspace .payment-filters-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .payments-workspace .payment-filters,.payments-workspace .payment-ledger-header { padding:12px; }
+            .payments-workspace .payment-modal { max-height:calc(100dvh - 16px); }
+            .payments-workspace .payment-modal form { padding:14px; }
+            .payments-workspace .payment-modal .payment-breakdown { grid-template-columns:minmax(0,1fr); }
+        }
+    </style>
+    @endpush
+
     @php
         $currency = auth()->user()->tenant?->currency_symbol ?? '₹';
         $tenant = auth()->user()->tenant;
@@ -306,20 +381,54 @@
             this.paymentDate = '{{ now()->format('Y-m-d') }}';
             this.showRecordPaymentModal = true;
         }
-    }" class="space-y-4">
+    }" class="space-y-4 payments-workspace">
 
-        <!-- ========================================== -->
-        <!-- TOP FILTER BAR                             -->
-        <!-- ========================================== -->
-        <form method="GET" action="{{ route('app.payments.index') }}" class="space-y-3">
-            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
+        <div class="payment-page-header">
+            <div>
+                <h1 class="ds-title">Payments &amp; POS</h1>
+                <p class="ds-caption mt-1">Manage transactions, outstanding balances and receipts.</p>
+            </div>
+                            <!-- Action Button: Record payment -->
+                <button type="button" 
+                        @click="openRecordModal()" 
+                        class="ds-btn ds-btn-primary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 4v16m8-8H4"/></svg>
+                    <span>Record Payment</span>
+                </button>
+        </div>
+        <section class="payment-summary" aria-label="Payment summary">
+            <div class="payment-metric" style="--metric-tone:var(--c-success)">
+                <div class="payment-metric-label">Total collected <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-2M3 7h16a2 2 0 0 1 2 2v6h-5a3 3 0 0 1 0-6h5"/></svg></div>
+                <div class="payment-metric-value">{{ $currency }}{{ number_format($totalCollected, 2) }}</div>
+                <div class="payment-metric-caption">Collected payments</div>
+            </div>
+            <div class="payment-metric" @if($totalDue > 0) style="--metric-tone:var(--c-warning)" @endif>
+                <div class="payment-metric-label">Outstanding dues <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg></div>
+                <div class="payment-metric-value">{{ $currency }}{{ number_format($totalDue, 2) }}</div>
+                <div class="payment-metric-caption">Pending collection</div>
+            </div>
+            <div class="payment-metric">
+                <div class="payment-metric-label">Transactions <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3l4 2 4-2 4 2 4-2v18l-4-2-4 2-4-2-4 2V3Zm4 6h8m-8 4h8"/></svg></div>
+                <div class="payment-metric-value">{{ $payments->total() }}</div>
+                <div class="payment-metric-caption">Payments recorded</div>
+            </div>
+        </section>
+        <section class="payment-ledger" aria-label="Transaction history">
+            <div class="payment-ledger-header">
+                <div>
+                    <h2 class="ds-heading">Transaction history</h2>
+                    <p class="ds-caption mt-1">{{ $payments->total() }} payment records</p>
+                </div>
+            </div>
+            <form method="GET" action="{{ route('app.payments.index') }}" class="payment-filters">
+            <div class="payment-filters-grid">
                 <!-- Search Input -->
-                <div class="col-span-2 sm:flex-1 sm:min-w-[240px] relative">
+                <div class="payment-search relative min-w-0">
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-fg-muted">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <input type="text" 
-                           name="search" 
+                           name="search" aria-label="Search payments" 
                            value="{{ request('search') }}" 
                            placeholder="Search name, phone, email, ID, receipt..." 
                            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none transition-colors">
@@ -327,40 +436,40 @@
 
                 <!-- Date Range Dropdown -->
                 <div>
-                    <select name="date_filter" 
+                    <select name="date_filter" aria-label="Payment date range" 
                             onchange="this.form.submit()" 
                             class="w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
-                        <option value="all" {{ request('date_filter', 'all') === 'all' ? 'selected' : '' }}>All Time</option>
-                        <option value="month_till_date" {{ request('date_filter') === 'month_till_date' ? 'selected' : '' }}>Month Till Date</option>
+                        <option value="all" {{ request('date_filter', 'all') === 'all' ? 'selected' : '' }}>All time</option>
+                        <option value="month_till_date" {{ request('date_filter') === 'month_till_date' ? 'selected' : '' }}>Month to date</option>
                         <option value="today" {{ request('date_filter') === 'today' ? 'selected' : '' }}>Today</option>
                         <option value="yesterday" {{ request('date_filter') === 'yesterday' ? 'selected' : '' }}>Yesterday</option>
-                        <option value="this_week" {{ request('date_filter') === 'this_week' ? 'selected' : '' }}>This Week</option>
-                        <option value="last_month" {{ request('date_filter') === 'last_month' ? 'selected' : '' }}>Last Month</option>
-                        <option value="this_year" {{ request('date_filter') === 'this_year' ? 'selected' : '' }}>This Year</option>
+                        <option value="this_week" {{ request('date_filter') === 'this_week' ? 'selected' : '' }}>This week</option>
+                        <option value="last_month" {{ request('date_filter') === 'last_month' ? 'selected' : '' }}>Last month</option>
+                        <option value="this_year" {{ request('date_filter') === 'this_year' ? 'selected' : '' }}>This year</option>
                     </select>
                 </div>
 
                 <!-- Methods Dropdown -->
                 <div>
-                    <select name="method" 
+                    <select name="method" aria-label="Payment method" 
                             onchange="this.form.submit()" 
                             class="w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
-                        <option value="all" {{ request('method') === 'all' || !request('method') ? 'selected' : '' }}>All Methods</option>
+                        <option value="all" {{ request('method') === 'all' || !request('method') ? 'selected' : '' }}>All methods</option>
                         <option value="cash" {{ request('method') === 'cash' ? 'selected' : '' }}>Cash</option>
                         <option value="card" {{ request('method') === 'card' ? 'selected' : '' }}>Card</option>
                         <option value="upi" {{ request('method') === 'upi' ? 'selected' : '' }}>UPI</option>
-                        <option value="netbanking" {{ request('method') === 'netbanking' ? 'selected' : '' }}>Net Banking</option>
+                        <option value="netbanking" {{ request('method') === 'netbanking' ? 'selected' : '' }}>Net banking</option>
                         <option value="cheque" {{ request('method') === 'cheque' ? 'selected' : '' }}>Cheque</option>
-                        <option value="bank_transfer" {{ request('method') === 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                        <option value="bank_transfer" {{ request('method') === 'bank_transfer' ? 'selected' : '' }}>Bank transfer</option>
                     </select>
                 </div>
 
                 <!-- Status Dropdown -->
                 <div>
-                    <select name="status" 
+                    <select name="status" aria-label="Payment status" 
                             onchange="this.form.submit()" 
                             class="w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
-                        <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Status</option>
+                        <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All statuses</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="partial" {{ request('status') === 'partial' ? 'selected' : '' }}>Partial</option>
                         <option value="reversed" {{ request('status') === 'reversed' ? 'selected' : '' }}>Reversed</option>
@@ -369,47 +478,19 @@
 
                 <!-- Due Dates Dropdown -->
                 <div>
-                    <select name="due_filter" 
+                    <select name="due_filter" aria-label="Outstanding balance filter" 
                             onchange="this.form.submit()" 
                             class="w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
-                        <option value="all" {{ request('due_filter') === 'all' || !request('due_filter') ? 'selected' : '' }}>All Due Dates</option>
-                        <option value="has_due" {{ request('due_filter') === 'has_due' ? 'selected' : '' }}>Has Due</option>
-                        <option value="no_due" {{ request('due_filter') === 'no_due' ? 'selected' : '' }}>No Due</option>
+                        <option value="all" {{ request('due_filter') === 'all' || !request('due_filter') ? 'selected' : '' }}>All due dates</option>
+                        <option value="has_due" {{ request('due_filter') === 'has_due' ? 'selected' : '' }}>Has due</option>
+                        <option value="no_due" {{ request('due_filter') === 'no_due' ? 'selected' : '' }}>No due</option>
                     </select>
                 </div>
 
-                <!-- Action Button: Record Payment -->
-                <button type="button" 
-                        @click="openRecordModal()" 
-                        class="col-span-2 sm:col-span-1 w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap sm:ml-auto">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>Record Payment</span>
-                </button>
+
             </div>
         </form>
 
-        <!-- ========================================== -->
-        <!-- SUMMARY BANNER BAR                         -->
-        <!-- ========================================== -->
-        <div class="px-4 sm:px-5 py-3 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-            <span class="font-semibold text-fg-muted dark:text-fg-muted">
-                {{ $payments->total() }} payments recorded
-            </span>
-            <div class="flex items-center gap-3">
-                <span class="font-semibold text-fg dark:text-white">
-                    Total: <strong class="text-emerald-600 dark:text-emerald-400">{{ $currency }}{{ number_format($totalCollected, 2) }}</strong>
-                </span>
-                <span class="text-fg-muted dark:text-fg-muted">•</span>
-                <span class="font-black {{ $totalDue > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400' }}">
-                    Due: <strong>{{ $currency }}{{ number_format($totalDue, 2) }}</strong>
-                </span>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- PAYMENTS: MOBILE CARDS & DESKTOP TABLE     -->
-        <!-- ========================================== -->
-        <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             
             <!-- Mobile Cards View (block md:hidden) -->
             <div class="block md:hidden divide-y divide-line dark:divide-line">
@@ -437,7 +518,7 @@
                         $planName = $membership?->plan?->name ?? (($p->notes && ! $isConversionNote) ? Str::limit($p->notes, 30) : 'Standard Membership');
                         $receiptNo = $p->invoice_number;
                     @endphp
-                    <div class="p-4 space-y-3">
+                    <div class="payment-mobile-row space-y-3">
                         <!-- Top Row: Member Info + Status Badge -->
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0">
@@ -463,13 +544,13 @@
                         </div>
 
                         <!-- Details Grid -->
-                        <div class="p-2.5 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line text-xs space-y-1.5">
+                        <div class="payment-mobile-details text-xs space-y-1.5">
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-fg-muted dark:text-fg-muted">Package / Item:</span>
                                 <span class="font-semibold text-fg dark:text-fg truncate max-w-[180px]">{{ $planName }}</span>
                             </div>
                             <div class="flex items-center justify-between text-xs">
-                                <span class="text-fg-muted dark:text-fg-muted">Payment Date:</span>
+                                <span class="text-fg-muted dark:text-fg-muted">Payment date:</span>
                                 <span class="font-mono text-fg-muted dark:text-fg-muted">{{ $p->payment_date ? $p->payment_date->format('d/m/Y') : $p->created_at->format('d/m/Y') }}</span>
                             </div>
                             <div class="flex items-center justify-between text-xs">
@@ -477,25 +558,24 @@
                                 <span class="px-2 py-0.5 rounded bg-raised dark:bg-raised text-xs font-semibold text-fg-muted dark:text-fg-muted">{{ $p->payment_method }}</span>
                             </div>
                             <div class="flex items-center justify-between pt-1 border-t border-line dark:border-line">
-                                <span class="text-fg-muted dark:text-fg-muted font-medium">Amount Paid:</span>
+                                <span class="text-fg-muted dark:text-fg-muted font-medium">Amount paid:</span>
                                 <span class="text-sm font-black {{ $isReversed ? 'text-rose-600 line-through' : 'text-emerald-600 dark:text-emerald-400' }}">
                                     {{ $isReversed ? '-' : '' }}{{ $currency }}{{ number_format($p->amount, 2) }}
                                 </span>
                             </div>
                             @if($dueAmount > 0)
                                 <div class="flex items-center justify-between text-xs text-rose-600 dark:text-rose-400 font-semibold">
-                                    <span>Remaining Due:</span>
+                                    <span>Remaining due:</span>
                                     <span>{{ $currency }}{{ number_format($dueAmount, 2) }}</span>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Action Bar -->
-                        <div class="flex items-center gap-1.5 pt-1">
+                        <div class="payment-mobile-actions flex items-center gap-1.5 pt-1">
                             <a href="{{ route('app.invoices.show', $p->id) }}" 
                                target="_blank" 
-                               title="View / Print Tax Invoice Receipt"
-                               class="flex-1 py-1.5 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:border-line text-xs font-semibold flex items-center justify-center gap-1 transition-colors">
+                               title="View / Print Tax Invoice Receipt" class="payment-action flex-1">
                                 <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span>Receipt</span>
                             </a>
@@ -503,7 +583,7 @@
                             <a href="{{ $p->whatsapp_share_url }}" 
                                target="_blank" 
                                title="Share Receipt on WhatsApp" 
-                               class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/20 transition-colors">
+                               class="payment-action payment-action-whatsapp">
                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                             </a>
 
@@ -511,7 +591,7 @@
                                 <button type="button" 
                                         @click="openEditMethod({{ $p->id }}, '{{ $receiptNo }}', '{{ number_format($p->amount, 2) }}', '{{ addslashes($member?->full_name ?? 'N/A') }}', '{{ strtolower($p->payment_method ?? 'cash') }}', '{{ addslashes($p->transaction_reference ?? '') }}')"
                                         title="Gym Owner: Change Payment Mode" 
-                                        class="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/20 transition-colors cursor-pointer">
+                                        class="payment-action payment-action-warning">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
                             @endif
@@ -520,8 +600,8 @@
                                 <button type="button" 
                                         @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
                                         title="Collect Remaining Due" 
-                                        class="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-1">
-                                    <span>Collect Due</span>
+                                        class="payment-action payment-action-warning">
+                                    <span>Collect due</span>
                                 </button>
                             @endif
 
@@ -533,7 +613,7 @@
                                       data-confirm-type="warning" 
                                       class="inline">
                                     @csrf
-                                    <button type="submit" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20 transition-colors" title="Reverse Payment">
+                                    <button type="submit" class="payment-action payment-action-danger" title="Reverse Payment">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                     </button>
                                 </form>
@@ -542,7 +622,7 @@
                     </div>
                 @empty
                     <div class="p-8 text-center text-fg-muted dark:text-fg-muted space-y-2">
-                        <div class="text-3xl">💳</div>
+                        <svg class="w-6 h-6 mx-auto text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
                         <p class="text-sm font-semibold text-fg-muted dark:text-fg-muted">No payment receipts found.</p>
                         <p class="text-xs text-fg-muted">Tap "+ Record Payment" to collect a fee or record membership.</p>
                     </div>
@@ -550,17 +630,17 @@
             </div>
 
             <!-- Desktop Table View (hidden md:block) -->
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[700px]">
-                    <thead class="bg-raised dark:bg-slate-950/70 border-b border-line dark:border-line text-xs text-fg-muted dark:text-fg-muted font-semibold">
+            <div class="hidden md:block payment-table-scroll">
+                <table class="payment-table w-full text-left">
+                    <thead class="bg-raised border-b border-line dark:border-line text-xs text-fg-muted dark:text-fg-muted font-semibold">
                         <tr>
-                            <th class="py-3.5 px-4">MEMBER</th>
-                            <th class="py-3.5 px-4">TYPE</th>
-                            <th class="py-3.5 px-4">AMOUNT</th>
-                            <th class="py-3.5 px-4">METHOD</th>
-                            <th class="py-3.5 px-4">DATE</th>
-                            <th class="py-3.5 px-4">STATUS</th>
-                            <th class="py-3.5 px-4 text-right">ACTIONS</th>
+                            <th class="py-3.5 px-4">Member</th>
+                            <th class="py-3.5 px-4">Type</th>
+                            <th class="py-3.5 px-4">Amount</th>
+                            <th class="py-3.5 px-4">Method</th>
+                            <th class="py-3.5 px-4">Date</th>
+                            <th class="py-3.5 px-4">Status</th>
+                            <th class="py-3.5 px-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-line dark:divide-line text-fg-muted dark:text-fg-muted">
@@ -676,7 +756,7 @@
                                         <a href="{{ route('app.invoices.show', $p->id) }}" 
                                            target="_blank" 
                                            title="View / Print Tax Invoice Receipt ({{ $receiptNo }})" 
-                                           class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-indigo-600 border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors cursor-pointer">
+                                           class="payment-action">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </a>
 
@@ -684,10 +764,15 @@
                                         <a href="{{ $p->whatsapp_share_url }}" 
                                            target="_blank" 
                                            title="Share Receipt on WhatsApp" 
-                                           class="p-1.5 rounded-lg bg-raised hover:bg-emerald-50 text-emerald-600 border border-line dark:bg-raised dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-line transition-colors">
+                                           class="payment-action payment-action-whatsapp">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                         </a>
 
+                                        <div x-data="{ open: false, left: 0, top: 0 }" @keydown.escape.window="open = false" @scroll.window.capture="open = false" @resize.window="open = false">
+                                            <button type="button" class="payment-action" title="More payment actions" aria-label="More payment actions" :aria-expanded="open" @click="if(open){open=false}else{const r=$el.getBoundingClientRect();left=Math.max(8,Math.min(r.right-218,window.innerWidth-226));top=Math.max(8,Math.min(r.bottom+6,window.innerHeight-246));open=true;$nextTick(()=>{const m=$refs.menu.getBoundingClientRect();top=Math.max(8,Math.min(r.bottom+6,window.innerHeight-m.height-8));if(r.bottom+6+m.height>window.innerHeight && r.top-m.height-6>=8)top=r.top-m.height-6;})}">
+                                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+                                            </button>
+                                            <div x-cloak x-show="open" x-ref="menu" @click.outside="open = false" :style="'left:'+left+'px;top:'+top+'px'" class="payment-action-menu">
                                         <!-- Email Receipt (Direct Send) -->
                                         @if(!empty($member->email))
                                             <form action="{{ route('app.payments.send-email', $p->id) }}" method="POST" class="inline"
@@ -698,16 +783,16 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         title="Direct Send Email Receipt ({{ $member->email }})" 
-                                                        class="p-1.5 rounded-lg bg-raised hover:bg-blue-100 text-fg-muted hover:text-blue-600 dark:bg-raised dark:hover:bg-blue-600/30 dark:text-fg-muted dark:hover:text-blue-400 transition-colors cursor-pointer">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                        class="payment-action payment-action-info">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>Email receipt</span>
                                                 </button>
                                             </form>
                                         @else
                                             <button type="button" 
                                                     onclick="alert('No email address registered for this member.')" 
                                                     title="No email address registered" 
-                                                    class="p-1.5 rounded-lg bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted cursor-not-allowed">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                    class="payment-action" aria-disabled="true">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg><span>Email unavailable</span>
                                             </button>
                                         @endif
 
@@ -722,8 +807,8 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         title="Reverse / Cancel Payment" 
-                                                        class="p-1.5 rounded-lg bg-raised hover:bg-rose-100 text-fg-muted hover:text-rose-600 dark:bg-raised dark:hover:bg-rose-900/50 dark:text-fg-muted dark:hover:text-rose-400 transition-colors cursor-pointer">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                                        class="payment-action payment-action-danger">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg><span>Reverse payment</span>
                                                 </button>
                                             </form>
                                         @endif
@@ -733,8 +818,8 @@
                                             <button type="button" 
                                                     @click="openEditMethod({{ $p->id }}, '{{ $receiptNo }}', '{{ number_format($p->amount, 2) }}', '{{ addslashes($member?->full_name ?? 'N/A') }}', '{{ strtolower($p->payment_method ?? 'cash') }}', '{{ addslashes($p->transaction_reference ?? '') }}')"
                                                     title="Gym Owner: Change Payment Mode (Cash/UPI/Card)" 
-                                                    class="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 hover:text-amber-800 border border-amber-200/80 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 transition-colors cursor-pointer">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    class="payment-action payment-action-warning">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg><span>Correct payment method</span>
                                             </button>
                                         @endif
 
@@ -750,17 +835,20 @@
                                                 @method('DELETE')
                                                 <button type="submit" 
                                                         title="Delete Payment Receipt" 
-                                                        class="p-1.5 rounded-lg bg-raised hover:bg-rose-100 text-fg-muted hover:text-rose-600 dark:bg-raised dark:hover:bg-rose-900/50 dark:text-fg-muted dark:hover:text-rose-400 transition-colors cursor-pointer">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        class="payment-action payment-action-danger">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg><span>Delete receipt</span>
                                                 </button>
                                             </form>
                                         @endif
 
+
+                                            </div>
+                                        </div>
                             @if($dueAmount > 0 && !$isReversed)
                                             <button type="button" 
                                                     @click="openCollectDue({{ $member->id }}, {{ $dueAmount }}, '{{ addslashes($planName) }}', {{ $membership?->id ?? 'null' }})"
                                                     title="Collect Due Payment (Due: {{ $currency }}{{ number_format($dueAmount, 2) }})" 
-                                                    class="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white border border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500 dark:text-emerald-400 dark:hover:text-slate-950 dark:border-emerald-500/40 transition-all cursor-pointer">
+                                                    class="payment-action payment-action-warning">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                             </button>
                                         @endif
@@ -770,7 +858,7 @@
                         @empty
                             <tr>
                                 <td colspan="7" class="py-12 text-center text-fg-muted dark:text-fg-muted">
-                                    <div class="text-3xl mb-2">💳</div>
+                                    <svg class="w-6 h-6 mx-auto text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
                                     <p class="text-sm font-semibold text-fg-muted dark:text-fg-muted">No payment receipts found.</p>
                                     <p class="text-xs text-fg-muted dark:text-fg-muted mt-1">Click "+ Record Payment" to collect a fee or record membership.</p>
                                 </td>
@@ -781,11 +869,11 @@
             </div>
 
             @if($payments->hasPages())
-                <div class="p-3 sm:p-4 border-t border-line dark:border-line bg-raised dark:bg-slate-950/50">
+                <div class="p-3 sm:p-4 border-t border-line dark:border-line bg-raised">
                     {{ $payments->links() }}
                 </div>
             @endif
-        </div>
+        </section>
 
         <!-- ========================================================================= -->
         <!-- MODAL: RECORD PAYMENT / INVOICE                                           -->
@@ -793,11 +881,11 @@
         <div x-show="showRecordPaymentModal" 
              x-transition:enter="ease-out duration-200"
              x-transition:leave="ease-in duration-150"
-             class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" 
+             class="fixed inset-0 z-50 overflow-y-auto bg-black/70 flex items-center justify-center p-3 sm:p-4" 
              style="display: none;"
              x-cloak>
             
-            <div @click.away="showRecordPaymentModal = false" class="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl p-4 sm:p-6 space-y-5 text-xs relative">
+            <div @click.away="showRecordPaymentModal = false" class="payment-modal relative">
                     
                     <!-- Top-Right Close Button -->
                     <button type="button" 
@@ -813,18 +901,16 @@
                         <!-- Header Section: Gym Info & INVOICE -->
                         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-line dark:border-line pb-5 pr-10">
                             <div>
-                                <h2 class="text-base font-semibold text-fg dark:text-white">{{ $tenant->name ?? 'POWERFIT GYM' }}</h2>
-                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">{{ $tenant->address ?? '123 Fitness Street, Health City' }}</p>
-                                <p class="text-xs text-fg-muted dark:text-fg-muted">Ph: {{ $tenant->phone ?? '080 6940 9814' }}</p>
-                                <p class="text-xs font-mono text-fg-muted dark:text-fg-muted">{{ $tenant->metadata['gstin'] ?? 'GSTIN: 27AAACM3025E1ZZ' }}</p>
+                                <h2 class="ds-title">Record payment</h2>
+                                <p class="ds-caption mt-1">Create a payment receipt · {{ $tenant->name ?? 'Gym' }}</p>
                             </div>
 
                             <div class="text-left sm:text-right">
-                                <h1 class="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">INVOICE</h1>
+                                <span class="ds-caption">Payment date</span>
                                 <div class="flex items-center gap-2 mt-2 sm:justify-end">
-                                    <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold">Date</span>
+                                    
                                     <input type="date" 
-                                           name="payment_date" 
+                                           name="payment_date" aria-label="Payment date" 
                                            x-model="paymentDate" 
                                            class="px-3 py-1 rounded-lg bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white font-mono text-xs focus:border-accent focus:outline-none">
                                 </div>
@@ -833,7 +919,7 @@
 
                         <!-- BILL TO Section: Interactive Member Search Dropdown -->
                         <div>
-                            <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block mb-1.5">BILL TO</span>
+                            <span class="payment-section-heading block">Member details</span>
                             
                             <!-- Search Member Input with Auto-Suggest -->
                             <div class="relative">
@@ -895,6 +981,7 @@
 
                         <!-- Item Description Table Grid -->
                         <div class="space-y-2">
+                            <h3 class="payment-section-heading">Billing items</h3>
                             <!-- Table Headers -->
                             <div class="hidden sm:flex items-center gap-3 text-xs font-semibold text-fg-muted dark:text-fg-muted border-b border-line dark:border-line pb-2 px-1">
                                 <div class="w-6 shrink-0">#</div>
@@ -1080,14 +1167,16 @@
                                 <button type="button" 
                                         class="px-3.5 py-1.5 rounded-lg border border-dashed border-indigo-400 dark:border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                    <span>Add Line Item</span>
+                                    <span>Add line item</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Financial Breakdown Summary (Right Aligned) -->
-                        <div class="flex justify-end pt-1">
-                            <div class="w-full sm:max-w-xs space-y-2 border-t border-line dark:border-line pt-3 text-xs">
+                        <div class="payment-breakdown">
+                        <div class="payment-summary-panel space-y-2 text-xs">
+                            <h3 class="payment-section-heading">Payment summary</h3>
+                            <div class="space-y-2">
                                 <div class="flex items-center justify-between text-fg-muted dark:text-fg-muted">
                                     <span>Subtotal</span>
                                     <span class="font-semibold text-fg dark:text-white">{{ $currency }}<span x-text="Number(itemAmount || 0).toFixed(2)"></span></span>
@@ -1120,15 +1209,15 @@
                                 </div>
 
                                 <div class="flex items-center justify-between font-semibold text-sm text-fg dark:text-white pt-2 border-t border-line dark:border-line">
-                                    <span>TOTAL</span>
+                                    <span>Total payable</span>
                                     <span class="text-base text-indigo-600 dark:text-indigo-400 font-semibold">{{ $currency }}<span x-text="computedTotal.toFixed(2)"></span></span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- AMOUNT TO COLLECT Box -->
-                        <div class="p-4 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line space-y-3">
-                            <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">AMOUNT TO COLLECT</span>
+                        <div class="payment-amount-panel space-y-3">
+                            <span class="payment-section-heading block">Amount to collect</span>
                             <div class="flex items-center gap-3">
                                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface dark:bg-surface border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-semibold text-base">
                                     <span>{{ $currency }}</span>
@@ -1144,14 +1233,15 @@
 
                             <label class="flex items-center gap-2 text-xs text-fg-muted dark:text-fg-muted font-semibold cursor-pointer pt-1">
                                 <input type="checkbox" name="activate_now" value="1" checked class="w-4 h-4 rounded border-line dark:border-line bg-surface dark:bg-surface text-indigo-600 focus:ring-0">
-                                <span><strong>👤+ Activate membership now:</strong> Member can start using the gym immediately despite pending dues</span>
+                                <span><strong>Activate membership now:</strong> Member can start using the gym immediately despite pending dues</span>
                             </label>
                         </div>
 
+                        </div>
                         <!-- PAYMENT METHOD SECTION -->
                         <div class="space-y-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Payment Breakdown</span>
+                                <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Payment method</span>
                                 <button type="button" 
                                         @click="toggleSplitPayment()" 
                                         class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer border"
@@ -1290,18 +1380,18 @@
                         </div>
 
                         <!-- Footer Actions -->
-                        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-line dark:border-line pt-4 gap-3">
-                            <p class="text-xs text-fg-muted dark:text-fg-muted italic text-center sm:text-left">Thank you for your membership!</p>
+                        <div class="payment-footer flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between border-t border-line gap-3">
+                            <p class="text-xs text-fg-muted dark:text-fg-muted italic text-center sm:text-left">Review the payment details before recording.</p>
                             <div class="flex items-center gap-3 justify-end">
                                 <button type="button" 
                                         @click="showRecordPaymentModal = false" 
-                                        class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:border-line font-semibold text-xs transition-colors cursor-pointer text-center">
+                                        class="ds-btn ds-btn-secondary w-full sm:w-auto">
                                     Cancel
                                 </button>
                                 <button type="submit" 
-                                        class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                        class="ds-btn ds-btn-primary w-full sm:w-auto">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                                    <span>Record Payment</span>
+                                    <span>Record payment</span>
                                 </button>
                             </div>
                         </div>
