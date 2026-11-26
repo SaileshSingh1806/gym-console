@@ -49,6 +49,25 @@
         .dashboard-overview .owner-finance .finance-collected .ds-kpi { color:rgb(var(--c-success)); }
         .dashboard-overview .owner-finance .finance-pending .ds-kpi { color:rgb(var(--c-warning)); }
         .dashboard-overview .owner-finance .finance-count { font-size:12px; color:rgb(var(--c-fg-muted)); margin-top:3px; }
+        .dashboard-overview .owner-due-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .dashboard-overview .owner-due-card { --metric-tone:var(--c-fg-muted); display:flex; flex-direction:column; gap:7px; padding:12px 14px; min-width:0; background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; text-align:left; }
+        .dashboard-overview .owner-due-card.owner-tone-warning { --metric-tone:var(--c-warning); border-top:2px solid rgb(var(--c-warning)); }
+        .dashboard-overview .owner-due-card.owner-tone-danger { --metric-tone:var(--c-danger); border-top:2px solid rgb(var(--c-danger)); }
+        .dashboard-overview .owner-due-card:hover { background:rgb(var(--c-raised)); border-color:rgb(var(--c-line-strong)); }
+        .dashboard-overview .owner-due-meta { display:flex; flex-direction:column; align-items:flex-start; gap:5px; margin-top:auto; }
+        .dashboard-overview .owner-due-count { color:rgb(var(--metric-tone)); background:rgb(var(--metric-tone) / .12); padding:3px 8px; border-radius:999px; font-size:12px; font-weight:500; }
+        .dashboard-overview .owner-pt-header, .dashboard-overview .owner-pt-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:12px 16px; }
+        .dashboard-overview .owner-pt-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:rgb(var(--c-line)); border-block:1px solid rgb(var(--c-line)); }
+        .dashboard-overview .owner-pt-cell { --metric-tone:var(--c-fg-muted); background:rgb(var(--c-surface)); min-width:0; display:flex; flex-direction:column; gap:8px; padding:14px 16px; }
+        .dashboard-overview .owner-pt-cell.owner-tone-success { --metric-tone:var(--c-success); }
+        .dashboard-overview .owner-pt-cell.owner-tone-warning { --metric-tone:var(--c-warning); }
+        @container (min-width:800px) {
+            .dashboard-overview .owner-due-grid, .dashboard-overview .owner-pt-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+        }
+        @container (max-width:400px) {
+            .dashboard-overview .owner-due-card, .dashboard-overview .owner-pt-cell { padding:10px 12px; }
+            .dashboard-overview .owner-due-card .ds-kpi, .dashboard-overview .owner-pt-cell .ds-kpi { font-size:20px; }
+        }
         @container (min-width:600px) {
             .dashboard-overview .owner-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
             .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -404,32 +423,40 @@
             </div>
 
             <!-- Dues -->
-            <div class="space-y-3">
-                <h2 class="ds-heading">Dues</h2>
-                <div class="ds-stat-grid owner-dues">
+            <section class="space-y-3" aria-label="Outstanding dues">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="ds-heading">Outstanding dues</h2>
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-xs font-medium text-accent-fg hover:underline">View all dues <x-icon name="arrow-right" :size="13" class="inline-block align-middle" /></a>
+                </div>
+                <div class="owner-due-grid">
                     @php
                         $dueCells = [
-                            ['All dues',          $metrics['all_dues_remaining'],               $metrics['due_members_count'],        null],
-                            ['This month',        $metrics['month_dues_remaining'] ?? 0,        $metrics['month_dues_count'] ?? 0,    null],
-                            ['Due today',         $metrics['today_dues_remaining'] ?? 0,        $metrics['today_dues_count'] ?? 0,    'warning'],
-                            ['Defaulters (>7 days)', $metrics['defaulters_dues_remaining'] ?? 0, $metrics['defaulters_count'] ?? 0,    'danger'],
+                            ['All dues', $metrics['all_dues_remaining'], $metrics['due_members_count'], 'neutral', 'wallet', 'Total outstanding'],
+                            ['This month', $metrics['month_dues_remaining'] ?? 0, $metrics['month_dues_count'] ?? 0, 'neutral', 'calendar', 'Current month'],
+                            ['Due today', $metrics['today_dues_remaining'] ?? 0, $metrics['today_dues_count'] ?? 0, 'warning', 'clock', 'Requires attention today'],
+                            ['Defaulters', $metrics['defaulters_dues_remaining'] ?? 0, $metrics['defaulters_count'] ?? 0, 'danger', 'alert', 'Overdue by more than 7 days'],
                         ];
                     @endphp
-                    @foreach($dueCells as [$dueLabel, $dueAmount, $dueCount, $dueTone])
-                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="bg-surface p-4 flex items-center justify-between gap-3 hover:bg-raised/60 transition-colors">
-                            <div class="min-w-0">
-                                <div class="ds-caption truncate">{{ $dueLabel }}</div>
-                                <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($dueAmount, 0) }}</div>
-                            </div>
-                            <span class="ds-badge tabular-nums shrink-0 {{ $dueTone && $dueCount > 0 ? 'ds-badge-'.$dueTone : 'ds-badge-neutral' }}">{{ $dueCount }}</span>
+                    @foreach($dueCells as [$dueLabel, $dueAmount, $dueCount, $dueTone, $dueIcon, $dueDescription])
+                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}"
+                           class="owner-due-card owner-tone-{{ ($dueCount > 0 || $dueAmount > 0) ? $dueTone : 'neutral' }}">
+                            <span class="owner-status-heading">
+                                <span>{{ $dueLabel }}</span>
+                                <x-icon :name="$dueIcon" :size="18" class="owner-status-icon" />
+                            </span>
+                            <span class="ds-kpi owner-status-value">{{ $currency }}{{ number_format($dueAmount, 0) }}</span>
+                            <span class="owner-due-meta">
+                                <span class="owner-due-count tabular-nums">{{ $dueCount }} {{ $dueCount == 1 ? 'member' : 'members' }}</span>
+                                <span class="owner-status-description">{{ $dueDescription }}</span>
+                            </span>
                         </a>
                     @endforeach
                 </div>
-            </div>
+            </section>
         </section>
         @endif
 
-        <!-- PERSONAL TRAINING (PT) OVERVIEW -->
+        <!-- Personal training financial overview -->
         @php
             $canSeePtFinancials = auth()->user()->isGymOwner()
                 || auth()->user()->isSuperAdmin();
@@ -438,119 +465,52 @@
             @php
                 $ptFin = $metrics['pt_financials'] ?? [
                     'month_collected' => 0,
-                    'month_billed' => 0,
                     'pending_dues' => 0,
                     'total_trainer_commission' => 0,
                     'total_gym_profit' => 0,
-                    'gym_share_percent' => 60,
-                    'trainer_share_percent' => 40,
-                    'total_sessions_conducted' => 0,
-                    'total_sessions_remaining' => 0,
-                    'trainers' => [],
-                    'active_packages_count' => 0,
+                ];
+                $ptOverview = [
+                    ['PT collection', $ptFin['month_collected'] ?? 0, 'wallet', 'success'],
+                    ['Pending dues', $ptFin['pending_dues'] ?? 0, 'clock', ($ptFin['pending_dues'] ?? 0) > 0 ? 'warning' : 'neutral'],
+                    ['Gym earnings', $ptFin['total_gym_profit'] ?? 0, 'building', 'neutral'],
+                    ['Trainer payouts', $ptFin['total_trainer_commission'] ?? 0, 'users', 'neutral'],
                 ];
             @endphp
-            <div id="pt-financial-section" class="p-3.5 sm:p-6 rounded-xl bg-surface border border-line space-y-3 sm:space-y-4">
-                <!-- Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-line pb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-raised text-fg-muted border border-line flex items-center justify-center shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <section id="pt-financial-section" class="ds-card overflow-hidden" aria-label="Personal training financial overview">
+                <div class="owner-pt-header">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <x-icon name="users" :size="18" class="text-fg-muted" />
+                        <h2 class="ds-heading">Personal training overview</h2>
+                    </div>
+                    <form method="GET" action="{{ route('app.dashboard') }}#pt-financial-section" class="flex items-center">
+                        @if(request('branch_id'))
+                            <input type="hidden" name="branch_id" value="{{ request('branch_id') }}">
+                        @endif
+                        <select name="pt_month" aria-label="Personal training financial month" onchange="this.form.submit()" class="ds-select !w-auto">
+                            @forelse($ptFin['available_months'] ?? [] as $mVal => $mLabel)
+                                <option value="{{ $mVal }}" {{ ($ptFin['selected_month'] ?? now()->format('Y-m')) === $mVal ? 'selected' : '' }}>{{ $mLabel }}</option>
+                            @empty
+                                <option value="{{ $ptFin['selected_month'] ?? now()->format('Y-m') }}">{{ now()->format('F Y') }}</option>
+                            @endforelse
+                        </select>
+                    </form>
+                </div>
+                <div class="owner-pt-grid">
+                    @foreach($ptOverview as [$ptLabel, $ptAmount, $ptIcon, $ptTone])
+                        <div class="owner-pt-cell owner-tone-{{ $ptTone }}">
+                            <span class="owner-status-heading">
+                                <span>{{ $ptLabel }}</span>
+                                <x-icon :name="$ptIcon" :size="18" class="owner-status-icon" />
+                            </span>
+                            <span class="ds-kpi owner-status-value">{{ $currency }}{{ number_format($ptAmount, 0) }}</span>
                         </div>
-                        <h3 class="font-semibold text-fg text-sm sm:text-base">Personal training</h3>
-                    </div>
-
-                    <div class="flex items-center gap-2.5 self-start sm:self-auto">
-                        <!-- Quick Month Filter Dropdown -->
-                        <form method="GET" action="{{ route('app.dashboard') }}#pt-financial-section" class="flex items-center">
-                            @if(request('branch_id'))
-                                <input type="hidden" name="branch_id" value="{{ request('branch_id') }}">
-                            @endif
-                            <select name="pt_month"
-                                    onchange="this.form.submit()"
-                                    class="bg-raised border border-line text-xs font-semibold text-fg-muted rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent/40 cursor-pointer">
-                                @foreach($ptFin['available_months'] ?? [] as $mVal => $mLabel)
-                                    <option value="{{ $mVal }}" {{ ($ptFin['selected_month'] ?? now()->format('Y-m')) === $mVal ? 'selected' : '' }}>
-                                        {{ $mLabel }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </form>
-
-                        <a href="{{ route('app.trainers.index') }}" class="text-xs font-semibold text-fg-muted hover:underline">
-                            Manage trainers
-                        </a>
-                    </div>
+                    @endforeach
                 </div>
-
-                <!-- PT KPIs -->
-                <div class="ds-stat-grid grid-cols-2 lg:grid-cols-4">
-                    <div class="bg-surface p-4 min-w-0">
-                        <div class="ds-caption truncate">PT collection</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['month_collected'], 0) }}</div>
-                        <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['active_packages_count'] }} active {{ $ptFin['active_packages_count'] === 1 ? 'package' : 'packages' }}</div>
-                    </div>
-                    <div class="bg-surface p-4 min-w-0">
-                        <div class="ds-caption truncate">Gym net profit</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['total_gym_profit'], 0) }}</div>
-                        <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['gym_share_percent'] }}% gym share</div>
-                    </div>
-                    <div class="bg-surface p-4 min-w-0">
-                        <div class="ds-caption truncate">Trainer payouts</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['total_trainer_commission'], 0) }}</div>
-                        <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['trainer_share_percent'] }}% trainer share</div>
-                    </div>
-                    <div class="bg-surface p-4 min-w-0">
-                        <div class="ds-caption truncate">Pending dues</div>
-                        <div class="ds-kpi mt-1 truncate {{ $ptFin['pending_dues'] > 0 ? '!text-warning' : '' }}">{{ $currency }}{{ number_format($ptFin['pending_dues'], 0) }}</div>
-                        <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['pending_dues'] > 0 ? 'To collect' : 'Cleared' }}</div>
-                    </div>
+                <div class="owner-pt-footer">
+                    <span class="ds-caption">Monthly personal training financials</span>
+                    <a href="{{ route('app.pt.index') }}" class="finance-link text-xs font-medium text-accent-fg hover:underline inline-flex items-center gap-1">View PT details <x-icon name="arrow-right" :size="14" /></a>
                 </div>
-
-                <!-- Trainer Payouts (Compact scrollable list - capped at max-h-48 so 10+ trainers never bloat dashboard) -->
-                @if(!empty($ptFin['trainers']))
-                <div class="pt-2 border-t border-line">
-                    <div class="max-h-44 overflow-y-auto divide-y divide-line rounded-xl border border-line">
-                        <table class="w-full text-left text-xs">
-                            <thead class="sticky top-0 bg-raised text-xs font-semibold text-fg-muted">
-                                <tr>
-                                    <th class="px-3 py-2">Trainer</th>
-                                    <th class="px-3 py-2 text-center">Clients</th>
-                                    <th class="px-3 py-2 text-right">Collection</th>
-                                    <th class="px-3 py-2 text-right">Payout</th>
-                                    <th class="px-3 py-2 text-right">Gym profit</th>
-                                    <th class="px-3 py-2 text-center">Sessions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-line bg-surface">
-                                @foreach($ptFin['trainers'] as $tr)
-                                    <tr class="hover:bg-raised">
-                                        <td class="px-3 py-2 font-semibold text-fg">
-                                            {{ $tr['name'] }}
-                                        </td>
-                                        <td class="px-3 py-2 text-center text-fg-muted">
-                                            {{ $tr['active_clients'] }}
-                                        </td>
-                                        <td class="px-3 py-2 text-right font-semibold text-fg">
-                                            {{ $currency }}{{ number_format($tr['total_collected'], 0) }}
-                                        </td>
-                                        <td class="px-3 py-2 text-right font-semibold text-fg-muted">
-                                            {{ $currency }}{{ number_format($tr['trainer_commission'], 0) }}
-                                        </td>
-                                        <td class="px-3 py-2 text-right font-semibold text-fg-muted">
-                                            {{ $currency }}{{ number_format($tr['gym_profit'], 0) }}
-                                        </td>
-                                        <td class="px-3 py-2 text-center text-xs text-fg-muted">
-                                            {{ $tr['sessions_conducted'] }} / {{ $tr['sessions_conducted'] + $tr['sessions_remaining'] }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                @endif
-            </div>
+            </section>
         @endif
 
         <!-- ROW 5: TRENDS & INSIGHTS (NEW) 4 ANALYTICS CHARTS -->
