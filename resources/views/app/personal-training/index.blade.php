@@ -2372,7 +2372,7 @@
 
         <!-- ==================== LOG PT SESSION WITH QR MODAL ==================== -->
         <div x-show="showLogQrModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
-            <div class="bg-surface dark:bg-[#0c1220] border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 space-y-4" @click.away="showLogQrModal = false; stopQrPolling()">
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 sm:p-7 space-y-4" @click.away="showLogQrModal = false; stopQrPolling()">
                 
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
