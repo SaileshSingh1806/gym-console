@@ -145,7 +145,7 @@ class ReportService
         $chartProfit = [];
 
         for ($i = 5; $i >= 0; $i--) {
-            $dt = now()->subMonths($i);
+            $dt = now()->startOfMonth()->subMonths($i);
             $start = $dt->copy()->startOfMonth()->toDateString();
             $end = $dt->copy()->endOfMonth()->toDateString();
 
@@ -880,17 +880,21 @@ class ReportService
         $labels = [];
         $revenue = [];
         $prevRevenue = [];
+        $prevLabels = [];
         $joins = [];
         $attendance = [];
 
         if ($period === '90d') {
-            for ($w = 11; $w >= 0; $w--) {
-                $end = now()->subWeeks($w)->endOfDay();
-                $start = $end->copy()->subDays(6)->startOfDay();
-                $prevEnd = $start->copy()->subDay()->endOfDay();
-                $prevStart = $prevEnd->copy()->subDays(6)->startOfDay();
+            $today = now()->startOfDay();
+            $first = $today->copy()->subDays(89);
+            for ($offset = 0; $offset < 90; $offset += 7) {
+                $start = $first->copy()->addDays($offset);
+                $end = $start->copy()->addDays(min(6, 89 - $offset))->endOfDay();
+                $prevStart = $start->copy()->subDays(90);
+                $prevEnd = $end->copy()->subDays(90);
 
                 $labels[] = $start->format('d M');
+                $prevLabels[] = $prevStart->format('d M') . ' – ' . $prevEnd->format('d M');
                 $revenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$start->toDateString(), $end->toDateString()])->sum('amount'), 2);
                 $prevRevenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$prevStart->toDateString(), $prevEnd->toDateString()])->sum('amount'), 2);
                 $joins[] = (clone $membersQuery)->whereBetween('created_at', [$start, $end])->count();
@@ -899,14 +903,15 @@ class ReportService
         } elseif ($period === '6m' || $period === '1y') {
             $monthsCount = $period === '1y' ? 12 : 6;
             for ($m = $monthsCount - 1; $m >= 0; $m--) {
-                $dt = now()->subMonths($m);
+                $dt = now()->startOfMonth()->subMonths($m);
                 $start = $dt->copy()->startOfMonth();
                 $end = $dt->copy()->endOfMonth();
-                $prevDt = $dt->copy()->subYear();
+                $prevDt = $dt->copy()->subMonths($monthsCount);
                 $prevStart = $prevDt->copy()->startOfMonth();
                 $prevEnd = $prevDt->copy()->endOfMonth();
 
                 $labels[] = $dt->format($period === '1y' ? 'M y' : 'M Y');
+                $prevLabels[] = $prevDt->format('M Y');
                 $revenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$start->toDateString(), $end->toDateString()])->sum('amount'), 2);
                 $prevRevenue[] = round((float) (clone $paymentsQuery)->whereBetween('payment_date', [$prevStart->toDateString(), $prevEnd->toDateString()])->sum('amount'), 2);
                 $joins[] = (clone $membersQuery)->whereBetween('created_at', [$start, $end])->count();
@@ -920,6 +925,7 @@ class ReportService
                 $prevDayDate = $day->copy()->subDays(30)->toDateString();
 
                 $labels[] = $day->format('d M');
+                $prevLabels[] = $day->copy()->subDays(30)->format('d M Y');
                 $revenue[] = round((float) (clone $paymentsQuery)->whereDate('payment_date', $dayDate)->sum('amount'), 2);
                 $prevRevenue[] = round((float) (clone $paymentsQuery)->whereDate('payment_date', $prevDayDate)->sum('amount'), 2);
                 $joins[] = (clone $membersQuery)->whereDate('created_at', $dayDate)->count();
@@ -934,6 +940,7 @@ class ReportService
             'labels' => $labels,
             'revenue' => $revenue,
             'prev_revenue' => $prevRevenue,
+            'prev_labels' => $prevLabels,
             'joins' => $joins,
             'attendance' => $attendance,
             'total_revenue' => round(array_sum($revenue), 2),
