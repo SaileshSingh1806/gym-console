@@ -785,7 +785,7 @@
                         ],
                     ] as $i => $faq)
                         <div class="rounded-2xl sm:rounded-3xl transition-all duration-200 overflow-hidden"
-                             :class="open === {{ $i }} ? 'bg-[#0f172a] border-2 border-amber-500/70 shadow-lg' : 'bg-[#0c121e] border border-slate-800 hover:border-slate-700'">
+                             :class="open === {{ $i }} ? 'bg-[#151618] border-2 border-amber-500/70 shadow-lg' : 'bg-[#0c121e] border border-slate-800 hover:border-slate-700'">
                             
                             <button type="button" 
                                     class="w-full flex items-center justify-between gap-4 sm:gap-6 px-6 sm:px-8 py-5 sm:py-6 text-left transition-colors cursor-pointer group"

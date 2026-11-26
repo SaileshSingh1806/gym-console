@@ -30,7 +30,7 @@
     </p>
 
     <!-- Credentials Highlight Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+    <div style="background-color: #151618; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
         <h3 style="margin: 0 0 14px 0; font-size: 13px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px;">
             🔑 Your Gym Owner Login Credentials
         </h3>

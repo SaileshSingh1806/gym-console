@@ -10,7 +10,7 @@
         table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
         img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
         table { border-collapse: collapse !important; }
-        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #151618; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         @media screen and (max-width: 600px) {
             .mobile-padding { padding-left: 16px !important; padding-right: 16px !important; }
             .mobile-stack { display: block !important; width: 100% !important; }
@@ -106,7 +106,7 @@
 
                     <!-- Footer Bar -->
                     <tr>
-                        <td style="background-color: #0f172a; padding: 26px 32px; border-top: 1px solid #1e293b; text-align: center;">
+                        <td style="background-color: #151618; padding: 26px 32px; border-top: 1px solid #1e293b; text-align: center;">
                             <p style="margin: 0; font-size: 12px; font-weight: 700; color: #cbd5e1; line-height: 18px;">
                                 © 2026 {{ $resolvedBrandName }}. All rights reserved.
                             </p>

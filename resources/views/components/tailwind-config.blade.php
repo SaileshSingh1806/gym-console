@@ -9,6 +9,7 @@
                     sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
                 },
                 colors: {
+                    slate: { 900: '#151618' },
                     canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
                     surface: 'rgb(var(--c-surface) / <alpha-value>)',
                     raised: 'rgb(var(--c-raised) / <alpha-value>)',

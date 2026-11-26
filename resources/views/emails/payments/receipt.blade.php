@@ -18,7 +18,7 @@
     </div>
 
     <!-- Receipt Summary Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+    <div style="background-color: #151618; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 13px;">
             <tr>
                 <td style="padding: 6px 0; color: #94a3b8; width: 40%;">Receipt Number:</td>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Gym Details & Notes -->
-    <div style="font-size: 12px; color: #94a3b8; line-height: 18px; background-color: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 20px;">
+    <div style="font-size: 12px; color: #94a3b8; line-height: 18px; background-color: rgba(21, 22, 24, 0.6); padding: 14px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 20px;">
         <p style="margin: 0 0 4px 0; font-weight: 700; color: #ffffff;">Issued By: {{ $tenant->name }}</p>
         <p style="margin: 0;">{{ $tenant->mainBranch->address ?? ($tenant->address ?? '') }}</p>
         @if($tenant->phone)
