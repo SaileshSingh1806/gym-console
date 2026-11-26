@@ -14,32 +14,32 @@
     <div class="diet-ui-scope space-y-6">
         <!-- Success / Error Notifications -->
         @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1 cursor-pointer">✕</button>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('error') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1 cursor-pointer">✕</button>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm">
-                <div class="font-bold text-xs mb-1">Please fix the following issues:</div>
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
+                <div class="font-semibold text-xs mb-1">Please fix the following issues:</div>
                 <ul class="list-disc pl-5 text-xs space-y-0.5">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -51,23 +51,23 @@
         <!-- ==================== TOP HEADER & ACTIONS ==================== -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
+                <h2 class="text-xl sm:text-2xl font-semibold text-fg dark:text-white tracking-tight">
                     Diet &amp; Nutrition Plans
                 </h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Build custom meal plans, set macro targets, and share with members.</p>
+                <p class="text-sm text-fg-muted dark:text-fg-muted mt-1">Build custom meal plans, set macro targets, and share with members.</p>
             </div>
 
             <!-- Primary Actions Group -->
             <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                 <button type="button" onclick="openFoodLibraryModal()" 
-                        class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 transition-all cursor-pointer">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        class="px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg text-xs font-semibold border border-line dark:border-line flex items-center gap-2 transition-all cursor-pointer">
+                    <svg class="w-4 h-4 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     <span>Food Library</span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-semibold tabular-nums">{{ count($indianFoods ?? []) }}</span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted text-xs font-semibold tabular-nums">{{ count($indianFoods ?? []) }}</span>
                 </button>
 
                 <button type="button" onclick="openAiDietModal()" 
-                        class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-2 transition-all cursor-pointer">
+                        class="px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg text-xs font-semibold border border-line dark:border-line flex items-center gap-2 transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     <span>Quick Plan Generator</span>
                 </button>
@@ -75,14 +75,14 @@
                 <form action="{{ route('app.diets.seed') }}" method="POST" class="inline">
                     @csrf
                     <button type="submit" 
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-800 shadow-sm transition-all cursor-pointer"
+                            class="px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg-muted text-xs font-semibold border border-line dark:border-line transition-all cursor-pointer"
                             title="Load starter templates">
                         Starter Templates
                     </button>
                 </form>
 
                 <button type="button" onclick="openDietModal()" 
-                        class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/25 flex items-center gap-2 transition-all cursor-pointer">
+                        class="px-4 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ops-primary">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
                     <span>Create Diet Plan</span>
                 </button>
@@ -90,19 +90,19 @@
         </div>
 
         <!-- ==================== PLANS TOOLBAR & SEARCH BAR ==================== -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line">
             <div class="flex items-center gap-2.5 px-1">
-                <span class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-sm">
+                <span class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-accent text-accent-on ops-primary">
                     Diet Plans ({{ $templatePlansCount }})
                 </span>
-                <span class="text-xs text-slate-500 dark:text-slate-400">Saved custom diets &amp; reusable meal plans</span>
+                <span class="text-xs text-fg-muted dark:text-fg-muted">Saved custom diets &amp; reusable meal plans</span>
             </div>
 
             <div class="relative w-full sm:w-72">
                 <input type="text" id="dietSearchInput" oninput="searchDietPlans()" 
                        placeholder="Search plan title..." 
-                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
-                <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent transition-colors">
+                <svg class="w-4 h-4 text-fg-muted dark:text-fg-muted absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
 
@@ -150,24 +150,24 @@
                 @endphp
 
                 <div x-data="{ expanded: false }" 
-                     class="diet-plan-card bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between"
+                     class="diet-plan-card bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-5 hover:border-line dark:hover:border-line transition-all flex flex-col justify-between"
                      data-plan-type="{{ $plan->is_template ? 'template' : 'member' }}"
                      data-title="{{ strtolower($plan->title) }}"
                      data-member="{{ strtolower($memberName) }}">
                     <div>
                         <!-- Card Header: Member or Template identity -->
-                        <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+                        <div class="flex items-start justify-between gap-3 pb-3 border-b border-line dark:border-line">
                             <div class="flex items-center gap-3 min-w-0">
                                 @if(!$plan->is_template && $plan->member)
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-center font-bold text-sm shrink-0">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-center font-semibold text-sm shrink-0">
                                         {{ strtoupper(substr($plan->member->first_name ?? 'M', 0, 1)) }}
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5">
-                                            <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ $plan->member->full_name }}</h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/50">Member</span>
+                                            <h4 class="text-sm font-semibold text-fg dark:text-white truncate">{{ $plan->member->full_name }}</h4>
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/50">Member</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ $plan->member->phone ?? 'No phone' }}</p>
+                                        <p class="text-xs text-fg-muted dark:text-fg-muted font-mono">{{ $plan->member->phone ?? 'No phone' }}</p>
                                     </div>
                                 @else
                                     <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/50 flex items-center justify-center shrink-0">
@@ -175,82 +175,82 @@
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5">
-                                            <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate">Template Plan</h4>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50">Reusable</span>
+                                            <h4 class="text-sm font-semibold text-fg dark:text-white truncate">Template Plan</h4>
+                                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/50">Reusable</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400">Can be assigned to any member</p>
+                                        <p class="text-xs text-fg-muted dark:text-fg-muted">Can be assigned to any member</p>
                                     </div>
                                 @endif
                             </div>
 
                             <!-- Target Calories Badge -->
                             <div class="text-right shrink-0">
-                                <span class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-bold text-xs inline-block">
-                                    {{ $plan->daily_calories ? number_format($plan->daily_calories) : '2,000' }} <span class="text-[10px] text-slate-500 font-normal">kcal</span>
+                                <span class="px-2.5 py-1 rounded-xl bg-raised dark:bg-raised text-fg dark:text-white font-mono font-semibold text-xs inline-block">
+                                    {{ $plan->daily_calories ? number_format($plan->daily_calories) : '2,000' }} <span class="text-xs text-fg-muted font-normal">kcal</span>
                                 </span>
                             </div>
                         </div>
 
                         <!-- Plan Title & Coach -->
                         <div class="py-3">
-                            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-1" title="{{ $plan->title }}">
+                            <h3 class="text-sm font-semibold text-fg dark:text-fg leading-snug line-clamp-1" title="{{ $plan->title }}">
                                 {{ $plan->title }}
                             </h3>
                             @if($plan->trainer)
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Coach: <span class="text-slate-700 dark:text-slate-300 font-medium">{{ $plan->trainer->full_name }}</span></p>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Coach: <span class="text-fg-muted dark:text-fg-muted font-medium">{{ $plan->trainer->full_name }}</span></p>
                             @endif
                         </div>
 
                         <!-- Clean Macronutrients Strip -->
-                        <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80 text-center text-xs">
+                        <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center text-xs">
                             <div>
-                                <span class="block text-[10px] text-slate-400 uppercase font-semibold">Protein</span>
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $protein }}g</span>
+                                <span class="block text-xs text-fg-muted font-semibold">Protein</span>
+                                <span class="font-semibold text-fg dark:text-fg">{{ $protein }}g</span>
                             </div>
-                            <div class="border-x border-slate-200 dark:border-slate-800">
-                                <span class="block text-[10px] text-slate-400 uppercase font-semibold">Carbs</span>
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $carbs }}g</span>
+                            <div class="border-x border-line dark:border-line">
+                                <span class="block text-xs text-fg-muted font-semibold">Carbs</span>
+                                <span class="font-semibold text-fg dark:text-fg">{{ $carbs }}g</span>
                             </div>
                             <div>
-                                <span class="block text-[10px] text-slate-400 uppercase font-semibold">Fats</span>
-                                <span class="font-bold text-slate-800 dark:text-slate-200">{{ $fat }}g</span>
+                                <span class="block text-xs text-fg-muted font-semibold">Fats</span>
+                                <span class="font-semibold text-fg dark:text-fg">{{ $fat }}g</span>
                             </div>
                         </div>
 
                         <!-- Meals Summary & Preview Toggle -->
                         <div class="mt-3">
-                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1.5 flex items-center justify-between">
+                            <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mb-1.5 flex items-center justify-between">
                                 <span>{{ $plan->meals->count() }} Daily Meals:</span>
                                 @if($plan->start_date)
-                                    <span class="text-[11px] font-mono text-slate-400">{{ $plan->start_date->format('d M') }} {{ $plan->end_date ? '→ ' . $plan->end_date->format('d M') : '' }}</span>
+                                    <span class="text-xs font-mono text-fg-muted">{{ $plan->start_date->format('d M') }} {{ $plan->end_date ? '→ ' . $plan->end_date->format('d M') : '' }}</span>
                                 @endif
                             </div>
 
                             <!-- Compact List of Meals (First 3) -->
                             <div class="space-y-1.5">
                                 @forelse($plan->meals->take(3) as $m)
-                                    <div class="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                                    <div class="px-2.5 py-1.5 rounded-lg bg-raised dark:bg-slate-950/60 border border-line dark:border-line flex items-center justify-between text-xs">
                                         <div class="flex items-center gap-2 truncate">
                                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>
-                                            <span class="font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $m->meal_name }}</span>
+                                            <span class="font-semibold text-fg dark:text-fg truncate">{{ $m->meal_name }}</span>
                                         </div>
-                                        <div class="flex items-center gap-2 text-[11px] text-slate-500 shrink-0 font-mono">
+                                        <div class="flex items-center gap-2 text-xs text-fg-muted shrink-0 font-mono">
                                             @if($m->recommended_time)
                                                 <span>{{ date('h:i A', strtotime($m->recommended_time)) }}</span>
                                             @endif
                                             @if($m->calories)
-                                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $m->calories }} kcal</span>
+                                                <span class="font-semibold text-fg-muted dark:text-fg-muted">{{ $m->calories }} kcal</span>
                                             @endif
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="p-3 text-center rounded-lg bg-slate-50 dark:bg-slate-950/40 text-slate-400 text-xs">
+                                    <div class="p-3 text-center rounded-lg bg-raised dark:bg-slate-950/40 text-fg-muted text-xs">
                                         No meals added to schedule yet.
                                     </div>
                                 @endforelse
 
                                 @if($plan->meals->count() > 3)
-                                    <button type="button" @click="expanded = !expanded" class="w-full text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline text-center py-1 font-semibold flex items-center justify-center gap-1 cursor-pointer">
+                                    <button type="button" @click="expanded = !expanded" class="w-full text-xs text-indigo-600 dark:text-indigo-400 hover:underline text-center py-1 font-semibold flex items-center justify-center gap-1 cursor-pointer">
                                         <span x-text="expanded ? 'Hide full meal plan' : '+ See all {{ $plan->meals->count() }} meals & details'"></span>
                                         <svg class="w-3 h-3 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
@@ -258,27 +258,27 @@
                             </div>
 
                             <!-- Expandable Full Meal Schedule -->
-                            <div x-show="expanded" x-cloak class="mt-2.5 space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                            <div x-show="expanded" x-cloak class="mt-2.5 space-y-2 pt-2 border-t border-line dark:border-line">
                                 @foreach($plan->meals->skip(3) as $m)
-                                    <div class="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                                    <div class="px-2.5 py-1.5 rounded-lg bg-raised dark:bg-slate-950/60 border border-line dark:border-line flex items-center justify-between text-xs">
                                         <div class="flex items-center gap-2 truncate">
                                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>
-                                            <span class="font-semibold text-slate-800 dark:text-slate-200 truncate">{{ $m->meal_name }}</span>
+                                            <span class="font-semibold text-fg dark:text-fg truncate">{{ $m->meal_name }}</span>
                                         </div>
-                                        <div class="flex items-center gap-2 text-[11px] text-slate-500 shrink-0 font-mono">
+                                        <div class="flex items-center gap-2 text-xs text-fg-muted shrink-0 font-mono">
                                             @if($m->recommended_time)
                                                 <span>{{ date('h:i A', strtotime($m->recommended_time)) }}</span>
                                             @endif
                                             @if($m->calories)
-                                                <span class="font-bold text-slate-700 dark:text-slate-300">{{ $m->calories }} kcal</span>
+                                                <span class="font-semibold text-fg-muted dark:text-fg-muted">{{ $m->calories }} kcal</span>
                                             @endif
                                         </div>
                                     </div>
                                 @endforeach
 
                                 @if($plan->guidelines)
-                                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800">
-                                        <strong class="font-semibold text-slate-800 dark:text-slate-200 block mb-0.5">Hydration &amp; Guidelines:</strong>
+                                    <div class="p-2.5 rounded-xl bg-raised dark:bg-surface text-xs text-fg-muted dark:text-fg-muted border border-line dark:border-line">
+                                        <strong class="font-semibold text-fg dark:text-fg block mb-0.5">Hydration &amp; Guidelines:</strong>
                                         <p class="whitespace-pre-line">{{ $plan->guidelines }}</p>
                                     </div>
                                 @endif
@@ -287,17 +287,17 @@
                     </div>
 
                     <!-- Action Buttons Footer -->
-                    <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <div class="pt-4 mt-4 border-t border-line dark:border-line flex items-center justify-between gap-2">
                         <button type="button"
                                 onclick="openWhatsAppModal({{ json_encode($planJson) }}, {{ json_encode($memberName) }}, {{ json_encode($recipientPhone) }}, {{ json_encode($gymName) }})"
-                                class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm">
+                                class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
                             <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
                             <span>Share on WhatsApp</span>
                         </button>
 
                         <button type="button"
                                 onclick="editDietPlan({{ json_encode($planJson) }})"
-                                class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                                class="p-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted text-xs font-semibold border border-line dark:border-line transition-colors cursor-pointer"
                                 title="Edit Plan">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         </button>
@@ -310,26 +310,26 @@
                               class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/60 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer" title="Delete Plan">
+                            <button type="submit" class="p-2 rounded-xl bg-raised dark:bg-raised hover:bg-rose-50 dark:hover:bg-rose-950/60 text-fg-muted hover:text-rose-600 dark:text-fg-muted dark:hover:text-rose-400 border border-line dark:border-line transition-colors cursor-pointer" title="Delete Plan">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         </form>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full p-12 sm:p-16 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
-                    <div class="w-16 h-16 rounded-3xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <div class="col-span-full p-12 sm:p-16 text-center bg-surface dark:bg-surface border border-dashed border-line dark:border-line rounded-xl">
+                    <div class="w-16 h-16 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-1">No Diet Plans Yet</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">Create a custom daily meal plan for a member or load starter templates.</p>
+                    <h3 class="text-lg font-semibold text-fg dark:text-white mb-1">No Diet Plans Yet</h3>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted max-w-md mx-auto mb-6">Create a custom daily meal plan for a member or load starter templates.</p>
                     <div class="flex items-center justify-center gap-3 flex-wrap">
-                        <button type="button" onclick="openDietModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
+                        <button type="button" onclick="openDietModal()" class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                             Create Diet Plan
                         </button>
                         <form action="{{ route('app.diets.seed') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg text-xs font-semibold border border-line dark:border-line transition-all cursor-pointer">
                                 Load Starter Templates
                             </button>
                         </form>
@@ -347,43 +347,43 @@
 
     <!-- ==================== 1. INDIAN FOOD LIBRARY & MACROS EXPLORER MODAL ==================== -->
     <div id="foodLibraryModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
+        <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-5xl overflow-hidden relative my-auto max-h-[92vh] flex flex-col text-fg dark:text-fg">
             <!-- Modal Header -->
-            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div class="p-4 sm:p-5 bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Food &amp; Macro Library</h3>
-                            <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-medium border border-amber-500/20 tabular-nums">{{ count($indianFoods ?? []) }} Items</span>
+                            <h3 class="text-base font-semibold text-fg dark:text-white">Food &amp; Macro Library</h3>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-medium border border-amber-500/20 tabular-nums">{{ count($indianFoods ?? []) }} Items</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Calories, protein, carbs, fats, and fiber per serving.</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Calories, protein, carbs, fats, and fiber per serving.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeFoodLibraryModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
+                <button type="button" onclick="closeFoodLibraryModal()" class="w-8 h-8 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
             </div>
 
             <!-- Search & Filters Strip -->
-            <div class="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-3 shrink-0">
+            <div class="p-4 border-b border-line dark:border-line bg-raised dark:bg-slate-950/50 space-y-3 shrink-0">
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <div class="relative flex-1">
                         <input type="text" id="foodLibrarySearch" oninput="filterFoodLibrary()" 
                                placeholder="Search chicken, paneer, eggs, oats, roti, rice, whey..."
-                               class="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500">
-                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                               class="w-full pl-9 pr-4 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                        <svg class="w-4 h-4 text-fg-muted absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
 
                     <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
-                        <button type="button" onclick="setFoodCategoryFilter('all')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shadow-sm shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
-                        <button type="button" onclick="setFoodCategoryFilter('non_veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">Non-Veg &amp; Eggs</button>
-                        <button type="button" onclick="setFoodCategoryFilter('veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="veg_protein">Veg Protein</button>
-                        <button type="button" onclick="setFoodCategoryFilter('carbs')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="carbs">Carbs</button>
-                        <button type="button" onclick="setFoodCategoryFilter('fats')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fats">Fats</button>
-                        <button type="button" onclick="setFoodCategoryFilter('fruits')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fruits">Fruits</button>
-                        <button type="button" onclick="setFoodCategoryFilter('salads')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
-                        <button type="button" onclick="setFoodCategoryFilter('gym_meals')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
+                        <button type="button" onclick="setFoodCategoryFilter('all')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
+                        <button type="button" onclick="setFoodCategoryFilter('non_veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="non_veg_protein">Non-Veg &amp; Eggs</button>
+                        <button type="button" onclick="setFoodCategoryFilter('veg_protein')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="veg_protein">Veg Protein</button>
+                        <button type="button" onclick="setFoodCategoryFilter('carbs')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="carbs">Carbs</button>
+                        <button type="button" onclick="setFoodCategoryFilter('fats')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="fats">Fats</button>
+                        <button type="button" onclick="setFoodCategoryFilter('fruits')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="fruits">Fruits</button>
+                        <button type="button" onclick="setFoodCategoryFilter('salads')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
+                        <button type="button" onclick="setFoodCategoryFilter('gym_meals')" class="food-cat-btn px-3 py-1.5 rounded-lg text-xs font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
                     </div>
                 </div>
             </div>
@@ -392,7 +392,7 @@
             <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="foodLibraryGrid">
                     @foreach($indianFoods ?? [] as $food)
-                        <div class="food-item-card p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between"
+                        <div class="food-item-card p-3.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line hover:border-amber-500/40 transition-all flex flex-col justify-between"
                              data-cat="{{ $food['category'] }}"
                              data-name="{{ strtolower($food['name']) }}"
                              data-hindi="{{ strtolower($food['hindi_name'] ?? '') }}">
@@ -413,47 +413,47 @@
                                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                                                 </span>
                                             @endif
-                                            <h4 class="text-xs font-black text-slate-900 dark:text-white leading-tight">{{ $food['name'] }}</h4>
+                                            <h4 class="text-xs font-semibold text-fg dark:text-white leading-tight">{{ $food['name'] }}</h4>
                                         </div>
-                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium pl-5">{{ $food['hindi_name'] ?? '' }} &bull; Serving: {{ $food['serving'] }}</div>
+                                        <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5 font-medium pl-5">{{ $food['hindi_name'] ?? '' }} &bull; Serving: {{ $food['serving'] }}</div>
                                     </div>
 
-                                    <span class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold shrink-0">
-                                        {{ $food['calories'] }} <span class="text-[9px] font-normal">kcal</span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-mono font-semibold shrink-0">
+                                        {{ $food['calories'] }} <span class="text-xs font-normal">kcal</span>
                                     </span>
                                 </div>
 
                                 <!-- Macros Badges -->
-                                <div class="grid grid-cols-4 gap-1.5 text-center my-2 text-[10px] font-mono">
+                                <div class="grid grid-cols-4 gap-1.5 text-center my-2 text-xs font-mono">
                                     <div class="p-1 rounded-md bg-rose-500/10 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400">
-                                        <span class="block text-[8px] uppercase font-sans text-slate-400">Prot</span>
+                                        <span class="block text-xs font-sans text-fg-muted">Prot</span>
                                         <strong>{{ $food['protein'] }}g</strong>
                                     </div>
                                     <div class="p-1 rounded-md bg-amber-500/10 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                                        <span class="block text-[8px] uppercase font-sans text-slate-400">Carb</span>
+                                        <span class="block text-xs font-sans text-fg-muted">Carb</span>
                                         <strong>{{ $food['carbs'] }}g</strong>
                                     </div>
                                     <div class="p-1 rounded-md bg-cyan-500/10 dark:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400">
-                                        <span class="block text-[8px] uppercase font-sans text-slate-400">Fat</span>
+                                        <span class="block text-xs font-sans text-fg-muted">Fat</span>
                                         <strong>{{ $food['fat'] }}g</strong>
                                     </div>
                                     <div class="p-1 rounded-md bg-teal-500/10 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400">
-                                        <span class="block text-[8px] uppercase font-sans text-slate-400">Fiber</span>
+                                        <span class="block text-xs font-sans text-fg-muted">Fiber</span>
                                         <strong>{{ $food['fiber'] }}g</strong>
                                     </div>
                                 </div>
 
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-2">{{ $food['description'] }}</p>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted leading-snug line-clamp-2">{{ $food['description'] }}</p>
                             </div>
 
-                            <div class="pt-2.5 mt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                            <div class="pt-2.5 mt-2 border-t border-line dark:border-line flex items-center justify-between">
                                 <span class="text-[10px] px-2 py-0.5 rounded-full {{ $food['gym_purpose'] === 'weight_loss' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : ($food['gym_purpose'] === 'muscle_gain' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300') }} font-medium">
                                     {{ $food['gym_purpose'] === 'weight_loss' ? 'Weight Loss' : ($food['gym_purpose'] === 'muscle_gain' ? 'Muscle Gain' : 'All Goals') }}
                                 </span>
 
                                 <button type="button" 
                                         onclick="copyFoodDetails({{ json_encode($food) }})"
-                                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-500 flex items-center gap-1 cursor-pointer">
+                                        class="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-500 flex items-center gap-1 cursor-pointer">
                                     <span>Copy Info</span>
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                 </button>
@@ -467,19 +467,19 @@
 
     <!-- ==================== 2. WHATSAPP DISPATCH MODAL ==================== -->
     <div id="whatsappModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
+        <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-2xl overflow-hidden relative my-auto max-h-[90vh] flex flex-col text-fg dark:text-fg">
             <!-- Modal Header -->
-            <div class="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-slate-50 to-white dark:from-emerald-950/60 dark:via-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div class="p-4 sm:p-5 border-b border-line dark:border-line flex items-center justify-between shrink-0 bg-surface border">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center shadow-inner">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30 flex items-center justify-center">
                         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-black text-slate-900 dark:text-white">Send Diet Plan via WhatsApp</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Review recipient phone number and live preview before sending.</p>
+                        <h3 class="text-base font-semibold text-fg dark:text-white">Send Diet Plan via WhatsApp</h3>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted">Review recipient phone number and live preview before sending.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
+                <button type="button" onclick="closeWhatsAppModal()" class="w-8 h-8 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer">✕</button>
             </div>
 
             <!-- Modal Body -->
@@ -487,55 +487,55 @@
                 <!-- Recipient Phone & Plan Info -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Recipient Mobile Number *</label>
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1.5">Recipient Mobile Number *</label>
                         <div class="relative">
                             <input type="text" id="waRecipientPhone" placeholder="e.g. 9876543210 or 919876543210"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:outline-none focus:border-emerald-500 transition-colors">
-                            <span class="absolute right-3 top-2.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold">WHATSAPP</span>
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white font-mono text-sm focus:outline-none focus:border-emerald-500 transition-colors">
+                            <span class="absolute right-3 top-2.5 text-xs text-fg-muted dark:text-fg-muted font-semibold">WHATSAPP</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Indian 10-digit numbers automatically get country code added.</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-1">Indian 10-digit numbers automatically get country code added.</p>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Recipient / Member</label>
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1.5">Recipient / Member</label>
                         <input type="text" id="waRecipientName" readonly
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm focus:outline-none cursor-default font-medium">
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Assigned recipient in GymDeskHub records.</p>
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line text-fg-muted dark:text-fg-muted text-sm focus:outline-none cursor-default font-medium">
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-1">Assigned recipient in GymDeskHub records.</p>
                     </div>
                 </div>
 
                 <!-- Live Message Preview Box -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <label class="text-xs font-semibold text-fg-muted dark:text-fg-muted flex items-center gap-2">
                             <span>Live WhatsApp Message Preview</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">Formatted Preview</span>
+                            <span class="text-xs px-2 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold">Formatted Preview</span>
                         </label>
-                        <button type="button" onclick="copyModalWaText()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-bold flex items-center gap-1 cursor-pointer">
+                        <button type="button" onclick="copyModalWaText()" class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-semibold flex items-center gap-1 cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                             <span id="copyModalBtnText">Copy Message</span>
                         </button>
                     </div>
 
-                    <div class="p-4 rounded-2xl bg-[#0b141a] border border-[#202c33] text-slate-200 font-sans text-xs leading-relaxed max-h-72 overflow-y-auto whitespace-pre-wrap select-all shadow-inner" id="waMessagePreview">
+                    <div class="p-4 rounded-xl bg-[#0b141a] border border-[#202c33] text-fg font-sans text-xs leading-relaxed max-h-72 overflow-y-auto whitespace-pre-wrap select-all" id="waMessagePreview">
                         <!-- Message text inserted here -->
                     </div>
                 </div>
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
+            <div class="p-4 sm:p-5 bg-raised dark:bg-surface border-t border-line dark:border-line flex items-center justify-between gap-3 shrink-0">
+                <button type="button" onclick="closeWhatsAppModal()" class="px-4 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-fg text-xs font-semibold border border-line dark:border-line transition-colors cursor-pointer">
                     Cancel
                 </button>
 
                 <div class="flex items-center gap-3">
-                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer">
+                    <button type="button" onclick="copyModalWaText()" class="px-4 py-2.5 rounded-xl bg-surface dark:bg-raised hover:bg-raised dark:hover:bg-slate-700 text-fg-muted dark:text-fg hover:text-fg dark:hover:text-fg text-xs font-semibold border border-line dark:border-line transition-colors flex items-center gap-1.5 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                         <span>Copy Text</span>
                     </button>
 
-                    <button type="button" onclick="sendWhatsAppNow()" class="px-5 sm:px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                    <button type="button" onclick="sendWhatsAppNow()" class="px-5 sm:px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.18-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.762-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.106-.525-1.579-.656-2.611-2.261-2.69-2.366-.079-.105-.635-.845-.635-1.611 0-.766.401-1.144.543-1.299.143-.155.312-.194.417-.194.104 0 .208.002.299.006.096.004.225-.036.35.267.13.315.442 1.082.481 1.161.039.079.065.172.013.277-.052.105-.078.17-.156.261-.078.092-.164.205-.234.276-.078.078-.16.163-.069.319.091.156.405.669.868 1.082.597.532 1.101.697 1.258.775.156.078.247.065.338-.039.091-.104.39-.456.494-.612.104-.156.208-.13.351-.078.143.052.909.429 1.065.507.156.078.26.117.299.182.039.065.039.378-.105.783z"/></svg>
                         <span>Send WhatsApp</span>
                     </button>
@@ -546,23 +546,23 @@
 
     <!-- ==================== 3. CREATE / EDIT DIET PLAN MODAL ==================== -->
     <div id="dietPlanModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/75 backdrop-blur-sm p-3 sm:p-5 overflow-y-auto">
-        <div class="diet-ui-scope bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-100">
+        <div class="diet-ui-scope bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-5xl overflow-hidden relative my-auto max-h-[92vh] flex flex-col text-fg dark:text-fg">
             <form id="dietPlanForm" method="POST" action="{{ route('app.diets.store') }}" class="flex flex-col max-h-[92vh]">
                 @csrf
                 <input type="hidden" name="_method" id="dietFormMethod" value="POST">
 
                 <!-- Modal Header -->
-                <div class="px-5 sm:px-7 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div class="px-5 sm:px-7 py-4 bg-surface dark:bg-surface border-b border-line dark:border-line flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3.5">
                         <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white tracking-tight" id="dietModalTitle">Create Diet Plan</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Set daily targets and build meals using custom items or the food library.</p>
+                            <h3 class="text-base sm:text-lg font-semibold text-fg dark:text-white tracking-tight" id="dietModalTitle">Create Diet Plan</h3>
+                            <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Set daily targets and build meals using custom items or the food library.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Close">
+                    <button type="button" onclick="closeDietModal()" class="w-8 h-8 rounded-lg bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Close">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -570,30 +570,30 @@
                 <!-- Modal Form Body (Scrollable) -->
                 <div class="p-5 sm:p-7 overflow-y-auto flex-1 space-y-6">
                     <!-- Section 1: Plan Details & Schedule -->
-                    <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-5">
+                    <div class="p-5 sm:p-6 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line space-y-5">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Plan Details</h4>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Saved in Diet Plans so coaches can assign it to any member from Trainer or Member views.</p>
+                                <h4 class="text-sm font-semibold text-fg dark:text-white">Plan Details</h4>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Saved in Diet Plans so coaches can assign it to any member from Trainer or Member views.</p>
                             </div>
 
                             <input type="hidden" name="is_template" id="dietInputIsTemplate" value="1">
                         </div>
 
                         <div class="space-y-1.5">
-                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                            <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">
                                 Plan Title <span class="text-rose-500">*</span>
                             </label>
                             <input type="text" name="title" id="dietInputTitle" required placeholder="e.g. Lean Muscle Plan (2,200 kcal)"
-                                   class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:border-indigo-500">
+                                   class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-medium focus:outline-none focus:border-accent">
                         </div>
 
                         <!-- Coach & Dates -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Assigned Coach</label>
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Assigned Coach</label>
                                 <select name="trainer_id" id="dietInputTrainerId"
-                                        class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                        class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                                     <option value="">No specific coach</option>
                                     @foreach($trainers as $t)
                                         <option value="{{ $t->id }}">{{ $t->full_name }}</option>
@@ -602,36 +602,36 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Start Date</label>
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Start Date</label>
                                 <input type="date" name="start_date" id="dietInputStartDate"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">End Date</label>
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">End Date</label>
                                 <input type="date" name="end_date" id="dietInputEndDate"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                             </div>
                         </div>
                     </div>
 
                     <!-- Section 2: Daily Targets -->
-                    <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="p-5 sm:p-6 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Daily Calorie &amp; Macro Targets</h4>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Adjust manually or pick a macro split.</p>
+                                <h4 class="text-sm font-semibold text-fg dark:text-white">Daily Calorie &amp; Macro Targets</h4>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Adjust manually or pick a macro split.</p>
                             </div>
 
                             <!-- Macro Presets Quick Buttons -->
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button type="button" onclick="autoCalculateMacros('muscle_gain')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
+                                <button type="button" onclick="autoCalculateMacros('muscle_gain')" class="px-3 py-1.5 rounded-lg bg-surface dark:bg-surface text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-medium hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">
                                     High Protein
                                 </button>
-                                <button type="button" onclick="autoCalculateMacros('fat_loss')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
+                                <button type="button" onclick="autoCalculateMacros('fat_loss')" class="px-3 py-1.5 rounded-lg bg-surface dark:bg-surface text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-medium hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
                                     Fat Loss
                                 </button>
-                                <button type="button" onclick="autoCalculateMacros('maintenance')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-medium hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer">
+                                <button type="button" onclick="autoCalculateMacros('maintenance')" class="px-3 py-1.5 rounded-lg bg-surface dark:bg-surface text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-medium hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer">
                                     Balanced
                                 </button>
                             </div>
@@ -639,47 +639,47 @@
 
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <div class="space-y-1.5">
-                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-fg-muted dark:text-fg-muted">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     <span>Calories (kcal) <span class="text-rose-500">*</span></span>
                                 </label>
                                 <input type="number" name="daily_calories" id="dietInputCalories" required value="2000" min="0" max="15000"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-semibold tabular-nums focus:outline-none focus:border-accent">
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-fg-muted dark:text-fg-muted">
                                     <span class="w-2 h-2 rounded-full bg-rose-500"></span>
                                     <span>Protein (g)</span>
                                 </label>
                                 <input type="number" name="protein_grams" id="dietInputProtein" value="150" min="0" max="1000"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-semibold tabular-nums focus:outline-none focus:border-accent">
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-fg-muted dark:text-fg-muted">
                                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                                     <span>Carbs (g)</span>
                                 </label>
                                 <input type="number" name="carbs_grams" id="dietInputCarbs" value="200" min="0" max="1500"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-semibold tabular-nums focus:outline-none focus:border-accent">
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                <label class="flex items-center gap-1.5 text-xs font-medium text-fg-muted dark:text-fg-muted">
                                     <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
                                     <span>Fats (g)</span>
                                 </label>
                                 <input type="number" name="fat_grams" id="dietInputFats" value="55" min="0" max="1000"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-semibold tabular-nums focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-semibold tabular-nums focus:outline-none focus:border-accent">
                             </div>
                         </div>
 
                         <!-- Live Planned vs Target Bar -->
-                        <div class="pt-3 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                            <div class="text-slate-600 dark:text-slate-400">
+                        <div class="pt-3 border-t border-line dark:border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                            <div class="text-fg-muted dark:text-fg-muted">
                                 Meal Sum:
-                                <span id="planMealsTotalSummary" class="font-semibold text-slate-900 dark:text-white tabular-nums ml-1">0 kcal · 0g P · 0g C · 0g F</span>
+                                <span id="planMealsTotalSummary" class="font-semibold text-fg dark:text-white tabular-nums ml-1">0 kcal · 0g P · 0g C · 0g F</span>
                             </div>
                             <button type="button" onclick="syncTargetsFromMeals()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline self-start sm:self-auto cursor-pointer">
                                 Match targets to meal sum
@@ -689,20 +689,20 @@
 
                     <!-- Section 3: Daily Meals Builder -->
                     <div class="space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line dark:border-line pb-3">
                             <div>
-                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Daily Meals</h4>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Add custom foods, pick from the library, or enter meal items directly.</p>
+                                <h4 class="text-sm font-semibold text-fg dark:text-white">Daily Meals</h4>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Add custom foods, pick from the library, or enter meal items directly.</p>
                             </div>
 
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button type="button" onclick="startBlankCustomPlan()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
+                                <button type="button" onclick="startBlankCustomPlan()" class="px-3 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg text-xs font-medium border border-line dark:border-line transition-colors cursor-pointer">
                                     Start Blank
                                 </button>
-                                <button type="button" onclick="loadStandardMealsPreset()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
+                                <button type="button" onclick="loadStandardMealsPreset()" class="px-3 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg text-xs font-medium border border-line dark:border-line transition-colors cursor-pointer">
                                     Load 5-Meal Sample
                                 </button>
-                                <button type="button" onclick="addMealRow()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                                <button type="button" onclick="addMealRow()" class="px-3.5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-colors cursor-pointer ops-primary">
                                     + Add Meal
                                 </button>
                             </div>
@@ -714,20 +714,20 @@
                     </div>
 
                     <!-- General Guidelines / Advice -->
-                    <div class="p-5 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
-                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Guidelines &amp; Hydration Notes</label>
+                    <div class="p-5 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line space-y-2">
+                        <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Guidelines &amp; Hydration Notes</label>
                         <textarea name="guidelines" id="dietInputGuidelines" rows="3" placeholder="Optional water intake, cooking oil notes, or supplement reminders..."
-                                  class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+                                  class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg placeholder-fg-subtle dark:placeholder-fg-subtle text-sm focus:outline-none focus:border-accent leading-relaxed"></textarea>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="px-5 sm:px-7 py-4 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
+                <div class="px-5 sm:px-7 py-4 bg-surface dark:bg-surface border-t border-line dark:border-line flex items-center justify-between gap-3 shrink-0">
+                    <button type="button" onclick="closeDietModal()" class="px-4 py-2.5 rounded-xl bg-raised dark:bg-surface hover:bg-slate-200 dark:hover:bg-raised text-fg-muted dark:text-fg-muted text-xs font-semibold border border-line dark:border-line transition-colors cursor-pointer">
                         Cancel
                     </button>
 
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ops-primary">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span id="dietSubmitBtnText">Save Diet Plan</span>
                     </button>
@@ -738,35 +738,35 @@
 
     <!-- ==================== 4. FOOD PICKER & CUSTOM FOOD MODAL ==================== -->
     <div id="mealFoodPickerModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/75 backdrop-blur-sm p-3 sm:p-5 overflow-y-auto">
-        <div class="diet-ui-scope bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto max-h-[88vh] flex flex-col text-slate-900 dark:text-slate-100">
-            <div class="px-5 py-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 gap-3">
+        <div class="diet-ui-scope bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-2xl overflow-hidden relative my-auto max-h-[88vh] flex flex-col text-fg dark:text-fg">
+            <div class="px-5 py-4 bg-raised dark:bg-surface border-b border-line dark:border-line flex items-center justify-between shrink-0 gap-3">
                 <div>
-                    <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Add Food to Meal</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="pickerTargetMealName">Adding items to meal</p>
+                    <h4 class="text-sm font-semibold text-fg dark:text-white">Add Food to Meal</h4>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5" id="pickerTargetMealName">Adding items to meal</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="togglePickerCustomForm()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                    <button type="button" onclick="togglePickerCustomForm()" class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-colors cursor-pointer ops-primary">
                         + Custom Food
                     </button>
-                    <button type="button" onclick="closeMealFoodPicker()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-xs font-bold cursor-pointer">✕</button>
+                    <button type="button" onclick="closeMealFoodPicker()" class="w-8 h-8 rounded-lg bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center text-xs font-semibold cursor-pointer">✕</button>
                 </div>
             </div>
 
             <!-- Inline Custom Food Form inside Picker (shown on demand or when food missing) -->
-            <div id="pickerCustomFoodBox" class="hidden p-4 sm:p-5 bg-indigo-50/40 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+            <div id="pickerCustomFoodBox" class="hidden p-4 sm:p-5 bg-indigo-50/40 dark:bg-slate-950/90 border-b border-line dark:border-line space-y-3 shrink-0">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-900 dark:text-white">New Custom Food Item</span>
-                    <button type="button" onclick="togglePickerCustomForm(false)" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Close</button>
+                    <span class="text-xs font-semibold text-fg dark:text-white">New Custom Food Item</span>
+                    <button type="button" onclick="togglePickerCustomForm(false)" class="text-xs text-fg-muted hover:text-fg dark:hover:text-fg cursor-pointer">Close</button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div class="sm:col-span-1">
-                        <input type="text" id="pickerCustomName" placeholder="Food name (e.g. Ragi Malt)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="pickerCustomName" placeholder="Food name (e.g. Ragi Malt)" class="w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div>
-                        <input type="text" id="pickerCustomServing" placeholder="Serving (e.g. 1 glass / 150g)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="pickerCustomServing" placeholder="Serving (e.g. 1 glass / 150g)" class="w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div>
-                        <select id="pickerCustomDietType" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <select id="pickerCustomDietType" class="w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                             <option value="veg">Veg</option>
                             <option value="eggetarian">Eggetarian</option>
                             <option value="non_veg">Non-Veg</option>
@@ -775,20 +775,20 @@
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end">
                     <div>
-                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Calories</label>
-                        <input type="number" id="pickerCustomCalories" min="0" placeholder="250" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs text-fg-muted dark:text-fg-muted mb-1">Calories</label>
+                        <input type="number" id="pickerCustomCalories" min="0" placeholder="250" class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Protein (g)</label>
-                        <input type="number" id="pickerCustomProtein" min="0" step="0.5" placeholder="12" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs text-fg-muted dark:text-fg-muted mb-1">Protein (g)</label>
+                        <input type="number" id="pickerCustomProtein" min="0" step="0.5" placeholder="12" class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Carbs (g)</label>
-                        <input type="number" id="pickerCustomCarbs" min="0" step="0.5" placeholder="30" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs text-fg-muted dark:text-fg-muted mb-1">Carbs (g)</label>
+                        <input type="number" id="pickerCustomCarbs" min="0" step="0.5" placeholder="30" class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">Fats (g)</label>
-                        <input type="number" id="pickerCustomFats" min="0" step="0.5" placeholder="6" class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs text-fg-muted dark:text-fg-muted mb-1">Fats (g)</label>
+                        <input type="number" id="pickerCustomFats" min="0" step="0.5" placeholder="6" class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <button type="button" onclick="submitPickerCustomFood()" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
                         Add Item
@@ -796,19 +796,19 @@
                 </div>
             </div>
 
-            <div class="p-3.5 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-2.5">
+            <div class="p-3.5 bg-raised dark:bg-slate-950/50 border-b border-line dark:border-line shrink-0 space-y-2.5">
                 <input type="text" id="pickerSearchInput" oninput="filterMealPickerList()" 
                        placeholder="Search food library (eggs, chicken, paneer, soya, oats, rice, roti, whey)..."
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg placeholder-fg-subtle focus:outline-none focus:border-accent">
                 <div class="flex items-center gap-1.5 overflow-x-auto text-xs pb-1">
                     <button type="button" onclick="setPickerCategory('all')" class="picker-cat-btn px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 shrink-0" data-cat="all">All ({{ count($indianFoods ?? []) }})</button>
-                    <button type="button" onclick="setPickerCategory('non_veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="non_veg_protein">Non-Veg</button>
-                    <button type="button" onclick="setPickerCategory('veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="veg_protein">Veg Protein</button>
-                    <button type="button" onclick="setPickerCategory('carbs')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="carbs">Carbs</button>
-                    <button type="button" onclick="setPickerCategory('fats')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fats">Fats</button>
-                    <button type="button" onclick="setPickerCategory('fruits')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="fruits">Fruits</button>
-                    <button type="button" onclick="setPickerCategory('salads')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
-                    <button type="button" onclick="setPickerCategory('gym_meals')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
+                    <button type="button" onclick="setPickerCategory('non_veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="non_veg_protein">Non-Veg</button>
+                    <button type="button" onclick="setPickerCategory('veg_protein')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="veg_protein">Veg Protein</button>
+                    <button type="button" onclick="setPickerCategory('carbs')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="carbs">Carbs</button>
+                    <button type="button" onclick="setPickerCategory('fats')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="fats">Fats</button>
+                    <button type="button" onclick="setPickerCategory('fruits')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="fruits">Fruits</button>
+                    <button type="button" onclick="setPickerCategory('salads')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="salads">Fiber &amp; Sabzi</button>
+                    <button type="button" onclick="setPickerCategory('gym_meals')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-raised dark:hover:bg-raised shrink-0" data-cat="gym_meals">Meals &amp; Shakes</button>
                 </div>
             </div>
 
@@ -817,11 +817,11 @@
             </div>
 
             <!-- Sticky Bottom Toolbar -->
-            <div class="px-5 py-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-                <div class="text-xs font-medium text-slate-700 dark:text-slate-300 tabular-nums" id="pickerActiveMealSummary">
+            <div class="px-5 py-3.5 bg-raised dark:bg-surface border-t border-line dark:border-line flex items-center justify-between shrink-0">
+                <div class="text-xs font-medium text-fg-muted dark:text-fg-muted tabular-nums" id="pickerActiveMealSummary">
                     <span>Click <strong>+ Add</strong> on any item or add a custom food.</span>
                 </div>
-                <button type="button" onclick="closeMealFoodPicker()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                <button type="button" onclick="closeMealFoodPicker()" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                     Done
                 </button>
             </div>
@@ -829,37 +829,37 @@
     </div>
 
     <!-- Toast Notification for Quick Copy -->
-    <div id="copyToast" class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-emerald-600 text-white text-xs font-bold shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div id="copyToast" class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-emerald-600 text-white text-xs font-semibold flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         <span>Action completed successfully!</span>
     </div>
 
     <!-- ==================== AI DIET GENERATOR MODAL ==================== -->
     <div id="aiDietModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-        <div class="relative w-full max-w-4xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl my-auto overflow-hidden max-h-[90vh] flex flex-col text-slate-900 dark:text-slate-200">
+        <div class="relative w-full max-w-4xl bg-surface dark:bg-surface border border-line dark:border-line rounded-xl my-auto overflow-hidden max-h-[90vh] flex flex-col text-fg dark:text-fg">
             @php
                 $globalGeminiKey = \App\Models\Setting::getGlobal('gemini_api_key') ?: config('services.gemini.api_key');
                 $globalGeminiModel = \App\Models\Setting::getGlobal('gemini_model') ?: config('services.gemini.model', 'gemini-1.5-flash');
                 $hasGeminiConfigured = !empty($globalGeminiKey);
             @endphp
-            <div class="px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/70 flex items-center justify-between shrink-0">
+            <div class="px-4 sm:px-6 py-4 border-b border-line dark:border-line bg-raised dark:bg-slate-950/70 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-semibold text-slate-900 dark:text-white tracking-tight">Quick Plan Generator</h3>
+                            <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight">Quick Plan Generator</h3>
                             @if($hasGeminiConfigured)
-                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 text-[11px] font-medium">
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 text-xs font-medium">
                                     {{ $globalGeminiModel }}
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Calculate BMR, daily calories, macros, and meal timings from member stats.</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Calculate BMR, daily calories, macros, and meal timings from member stats.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-sm font-bold transition-colors cursor-pointer">
+                <button type="button" onclick="closeAiDietModal()" class="w-8 h-8 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center text-sm font-semibold transition-colors cursor-pointer">
                     ✕
                 </button>
             </div>
@@ -868,10 +868,10 @@
                 <!-- FORM VIEW -->
                 <div id="aiDietFormView" class="space-y-6">
                     <form id="aiDietForm" onsubmit="submitAiDietGeneration(event)" class="space-y-5">
-                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                            <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Member (Optional)</span>
+                        <div class="p-4 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <span class="text-xs font-medium text-fg-muted dark:text-fg-muted">Member (Optional)</span>
                             <div class="w-full sm:w-72">
-                                <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                                <select id="aiMemberSelect" onchange="handleAiMemberSelect()" class="w-full px-3 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                                     <option value="">Manual entry</option>
                                     @foreach($members as $m)
                                         <option value="{{ $m->id }}">{{ $m->full_name }} ({{ $m->phone ?? 'No Phone' }})</option>
@@ -881,40 +881,40 @@
                         </div>
 
                         <div class="space-y-3">
-                            <h4 class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">1. Member Profile &amp; Metrics</h4>
+                            <h4 class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">1. Member Profile &amp; Metrics</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Name *</label>
-                                    <input type="text" id="aiInputName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Name *</label>
+                                    <input type="text" id="aiInputName" required placeholder="e.g. Rahul Sharma" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Age *</label>
-                                    <input type="number" id="aiInputAge" required value="26" min="12" max="90" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Age *</label>
+                                    <input type="number" id="aiInputAge" required value="26" min="12" max="90" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Gender *</label>
-                                    <select id="aiInputGender" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Gender *</label>
+                                    <select id="aiInputGender" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Height (cm) *</label>
-                                    <input type="number" id="aiInputHeight" required value="172" min="100" max="250" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Height (cm) *</label>
+                                    <input type="number" id="aiInputHeight" required value="172" min="100" max="250" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Weight (kg) *</label>
-                                    <input type="number" id="aiInputWeight" required value="72" min="30" max="250" step="0.5" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Weight (kg) *</label>
+                                    <input type="number" id="aiInputWeight" required value="72" min="30" max="250" step="0.5" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800/80">
-                            <h4 class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">2. Fitness Goals &amp; Training</h4>
+                        <div class="space-y-3 pt-2 border-t border-line dark:border-line">
+                            <h4 class="text-xs font-semibold text-indigo-600 dark:text-indigo-400">2. Fitness Goals &amp; Training</h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Fitness Goal *</label>
-                                    <select id="aiInputGoal" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Fitness Goal *</label>
+                                    <select id="aiInputGoal" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                         <option value="muscle_gain">Muscle Gain &amp; Hypertrophy</option>
                                         <option value="fat_loss">Fat Loss &amp; Leaning</option>
                                         <option value="weight_loss">Weight Loss</option>
@@ -923,8 +923,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Activity Level *</label>
-                                    <select id="aiInputActivity" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Activity Level *</label>
+                                    <select id="aiInputActivity" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                         <option value="moderately_active">Moderately Active (Gym 3-5 days)</option>
                                         <option value="very_active">Very Active (Gym 6-7 days)</option>
                                         <option value="lightly_active">Lightly Active (Gym 1-3 days)</option>
@@ -932,16 +932,16 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Workout Timing *</label>
-                                    <select id="aiInputWorkoutTime" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Workout Timing *</label>
+                                    <select id="aiInputWorkoutTime" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                         <option value="morning">Morning (08:00 AM - 11:00 AM)</option>
                                         <option value="evening">Evening (05:00 PM - 08:00 PM)</option>
                                         <option value="early_morning">Early Morning (06:00 AM - 08:00 AM)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mb-1">Diet Preference *</label>
-                                    <select id="aiInputDietPref" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none">
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Diet Preference *</label>
+                                    <select id="aiInputDietPref" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white focus:border-accent focus:outline-none">
                                         <option value="vegetarian">Vegetarian (Lacto / High-Protein)</option>
                                         <option value="non_vegetarian">Non-Vegetarian (Eggs, Chicken, Fish)</option>
                                         <option value="eggetarian">Eggetarian (Eggs + Veg Dairy)</option>
@@ -951,11 +951,11 @@
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
-                            <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer">
+                        <div class="pt-4 border-t border-line dark:border-line flex items-center justify-end gap-3">
+                            <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted text-xs font-semibold transition-colors cursor-pointer">
                                 Cancel
                             </button>
-                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                                 Generate Plan
                             </button>
                         </div>
@@ -966,20 +966,20 @@
                 <div id="aiDietLoadingView" class="hidden py-16 flex flex-col items-center justify-center text-center space-y-4">
                     <div class="w-12 h-12 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
                     <div class="space-y-1">
-                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Generating Diet Plan...</h4>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Calculating BMR, macro split, and meal schedule.</p>
+                        <h4 class="text-sm font-semibold text-fg dark:text-white">Generating Diet Plan...</h4>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted">Calculating BMR, macro split, and meal schedule.</p>
                     </div>
                 </div>
 
                 <!-- AI RESULTS VIEW -->
                 <div id="aiDietResultView" class="hidden space-y-5">
-                    <div class="p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-indigo-50 to-white dark:from-purple-950/40 dark:via-indigo-950/40 dark:to-slate-900 border border-purple-200 dark:border-purple-500/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="p-5 rounded-xl border border-purple-200 dark:border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border-line">
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold uppercase tracking-wider">Generated Plan</span>
-                                <h3 id="aiResPlanTitle" class="text-base font-black text-slate-900 dark:text-white tracking-tight"></h3>
+                                <span id="aiResBadge" class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 text-xs font-semibold">Generated Plan</span>
+                                <h3 id="aiResPlanTitle" class="text-base font-semibold text-fg dark:text-white tracking-tight"></h3>
                             </div>
-                            <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            <div class="flex items-center gap-3 text-xs text-fg-muted dark:text-fg-muted mt-1">
                                 <span id="aiResBmr" class="font-mono"></span>
                                 <span>•</span>
                                 <span id="aiResTdee" class="font-mono"></span>
@@ -987,11 +987,11 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button type="button" id="aiBtnCopyText" onclick="copyAiDietWhatsAppText()" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700/80 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm">
+                            <button type="button" id="aiBtnCopyText" onclick="copyAiDietWhatsAppText()" class="px-3.5 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg text-xs font-semibold border border-line dark:border-line flex items-center gap-1.5 transition-all cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                                 <span>Copy WhatsApp Text</span>
                             </button>
-                            <button type="button" id="aiBtnSavePlan" onclick="saveCurrentAiDietPlan()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 flex items-center gap-1.5 transition-all cursor-pointer">
+                            <button type="button" id="aiBtnSavePlan" onclick="saveCurrentAiDietPlan()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 <span>Save to Member Plans</span>
                             </button>
@@ -999,42 +999,42 @@
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Calories</span>
-                            <span id="aiResCalories" class="text-sm font-black text-amber-600 dark:text-amber-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Calories</span>
+                            <span id="aiResCalories" class="text-sm font-semibold text-amber-600 dark:text-amber-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Protein</span>
-                            <span id="aiResProtein" class="text-sm font-black text-indigo-600 dark:text-indigo-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Protein</span>
+                            <span id="aiResProtein" class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Carbs</span>
-                            <span id="aiResCarbs" class="text-sm font-black text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Carbs</span>
+                            <span id="aiResCarbs" class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Fats</span>
-                            <span id="aiResFat" class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Fats</span>
+                            <span id="aiResFat" class="text-sm font-semibold text-rose-600 dark:text-rose-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Fiber</span>
-                            <span id="aiResFiber" class="text-sm font-black text-teal-600 dark:text-teal-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Fiber</span>
+                            <span id="aiResFiber" class="text-sm font-semibold text-teal-600 dark:text-teal-400 font-mono mt-0.5 block"></span>
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-center">
-                            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase block">Hydration</span>
-                            <span id="aiResWater" class="text-sm font-black text-cyan-600 dark:text-cyan-400 font-mono mt-0.5 block"></span>
+                        <div class="p-3 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
+                            <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold block">Hydration</span>
+                            <span id="aiResWater" class="text-sm font-semibold text-cyan-600 dark:text-cyan-400 font-mono mt-0.5 block"></span>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <h4 class="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Scheduled Meals</h4>
+                        <h4 class="text-xs font-semibold text-fg dark:text-white">Scheduled Meals</h4>
                         <div id="aiResMealsList" class="space-y-3"></div>
                     </div>
 
-                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                        <button type="button" onclick="document.getElementById('aiDietResultView').classList.add('hidden'); document.getElementById('aiDietFormView').classList.remove('hidden');" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer">
+                    <div class="pt-3 border-t border-line dark:border-line flex items-center justify-between">
+                        <button type="button" onclick="document.getElementById('aiDietResultView').classList.add('hidden'); document.getElementById('aiDietFormView').classList.remove('hidden');" class="px-4 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted text-xs font-semibold transition-colors cursor-pointer">
                             &larr; Adjust Parameters
                         </button>
-                        <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors cursor-pointer">
+                        <button type="button" onclick="closeAiDietModal()" class="px-4 py-2 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white text-xs font-semibold transition-colors cursor-pointer">
                             Close
                         </button>
                     </div>
