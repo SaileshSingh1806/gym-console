@@ -671,21 +671,22 @@
                                     @if($exp->member?->phone)
                                         @php
                                             $expiryReminder = implode("\n", [
+                                                '*' . $tenantName . '*',
+                                                '*Membership Renewal Reminder*',
+                                                '',
                                                 'Dear ' . ($exp->member->full_name ?: 'Member') . ',',
                                                 '',
-                                                'This is a friendly reminder that your gym membership is approaching its expiry date.',
+                                                'Your gym membership is due for renewal.',
                                                 '',
-                                                '*Membership details*',
-                                                'Gym: ' . $tenantName,
-                                                'Plan: ' . ($exp->plan?->name ?? 'Membership'),
-                                                'Expiry date: ' . \Carbon\Carbon::parse($exp->end_date)->format('d M Y'),
+                                                '*Membership Plan:* ' . ($exp->plan?->name ?? 'Membership'),
+                                                '*Expiry Date:* ' . \Carbon\Carbon::parse($exp->end_date)->format('d F Y'),
+                                                '*Status:* Expiring Soon',
                                                 '',
-                                                'Please contact our front desk to renew your membership and avoid any interruption to your access.',
+                                                'Please renew your membership before the expiry date to ensure uninterrupted access to the gym.',
                                                 '',
-                                                'Thank you for being a valued member.',
+                                                'For renewal assistance, please contact our front desk.',
                                                 '',
-                                                'Regards,',
-                                                $tenantName . ' Management',
+                                                '*Team ' . $tenantName . '*',
                                             ]);
                                         @endphp
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text={{ rawurlencode($expiryReminder) }}"
@@ -927,21 +928,22 @@
                                     @if($dm->member?->phone)
                                         @php
                                             $paymentReminder = implode("\n", [
+                                                '*' . $tenantName . '*',
+                                                '*Outstanding Payment Reminder*',
+                                                '',
                                                 'Dear ' . ($dm->member->full_name ?: 'Member') . ',',
                                                 '',
-                                                'This is a courteous reminder regarding your outstanding gym membership payment.',
+                                                'As per our records, the following payment is outstanding against your membership.',
                                                 '',
-                                                '*Payment details*',
-                                                'Gym: ' . $tenantName,
-                                                'Plan: ' . ($dm->plan?->name ?? 'Membership'),
-                                                'Outstanding amount: ' . $currency . number_format($dm->due_amount ?? 0, 2),
+                                                '*Membership Plan:* ' . ($dm->plan?->name ?? 'Membership'),
+                                                '*Pending Amount:* ' . $currency . number_format($dm->due_amount ?? 0, 2),
+                                                '*Payment Status:* Pending',
                                                 '',
-                                                'Kindly arrange payment of the outstanding balance at your earliest convenience. For payment assistance, please contact our front desk.',
+                                                'Kindly clear the outstanding balance at the earliest.',
                                                 '',
-                                                'If you have already made the payment, please disregard this reminder.',
+                                                'If the payment has already been made, please disregard this notification.',
                                                 '',
-                                                'Regards,',
-                                                $tenantName . ' Management',
+                                                '*Team ' . $tenantName . '*',
                                             ]);
                                         @endphp
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dm->member->phone) }}?text={{ rawurlencode($paymentReminder) }}" target="_blank" title="Send WhatsApp reminder" aria-label="Send WhatsApp reminder" rel="noopener noreferrer" class="owner-whatsapp-action">
