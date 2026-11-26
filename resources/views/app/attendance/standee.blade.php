@@ -15,7 +15,7 @@
                             100: '#fef3c7',
                             500: '#f59e0b',
                             600: '#d97706',
-                            950: '#0f172a'
+                            950: '#151618'
                         }
                     }
                 }
@@ -251,7 +251,7 @@
                         text: {!! json_encode($checkinUrl) !!},
                         width: 256,
                         height: 256,
-                        colorDark: "#0f172a",
+                        colorDark: "#151618",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
