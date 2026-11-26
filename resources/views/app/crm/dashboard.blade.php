@@ -1,6 +1,7 @@
 <x-app-layout header="CRM Dashboard">
     @php
         $currency = $tenant->currency_symbol ?? '₹';
+        $currentUser = $currentUser ?? auth()->user();
     @endphp
 
     <div class="space-y-6" x-data="{

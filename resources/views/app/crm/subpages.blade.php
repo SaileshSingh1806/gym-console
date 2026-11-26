@@ -4,13 +4,64 @@
         $stats = $enquiryStats ?? ['total' => 0, 'new' => 0, 'today' => 0, 'converted' => 0];
     @endphp
 
+    @push('styles')
     <style>
-        .crm-enquiries-scope {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-    </style>
+        .enquiry-workspace { --eq-surface:#fff; --eq-line:#e2e8f0; --eq-muted:#64748b; --eq-text:#172235; --eq-soft:#f8fafc; }
+        .dark .enquiry-workspace { --eq-surface:#101a2b; --eq-line:#273449; --eq-muted:#9aaabe; --eq-text:#edf2f8; --eq-soft:#152035; }
+        .enquiry-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:4px 0; }
+        .enquiry-kicker { color:var(--eq-muted); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; font-weight:600; }
+        .enquiry-heading h1 { font-size:28px; line-height:1.3; letter-spacing:-.8px; font-weight:650; color:var(--eq-text); }
+        .enquiry-heading p:last-child { font-size:13px; color:var(--eq-muted); margin-top:8px; }
+        .enquiry-add { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:44px; padding:11px 18px; border-radius:7px; font-size:13px; font-weight:600; white-space:nowrap; }
+        .enquiry-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid var(--eq-line); border-radius:10px; background:var(--eq-surface); overflow:hidden; }
+        .enquiry-summary>div { padding:20px 24px; border-right:1px solid var(--eq-line); }
+        .enquiry-summary>div:last-child { border:0; }
+        .enquiry-summary dt { font-size:12px; color:var(--eq-muted); }
+        .enquiry-summary dd { font-size:30px; line-height:1.3; font-weight:600; letter-spacing:-1px; font-variant-numeric:tabular-nums; color:var(--eq-text); margin-top:9px; }
+        .enquiry-summary p { font-size:11px; color:var(--eq-muted); margin-top:5px; }
+        .enquiry-workspace .enquiry-filters { border-radius:9px; padding:16px; gap:12px; box-shadow:none; }
+        .enquiry-filters input,.enquiry-filters select,.enquiry-filters button,.enquiry-filters>a { min-height:42px; font-size:12px; }
+        .enquiry-filters>div>svg { top:13px; }
+        .enquiry-panel { border:1px solid var(--eq-line); border-radius:10px; overflow:hidden; background:var(--eq-surface); }
+        .enquiry-list-heading { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; border-bottom:1px solid var(--eq-line); }
+        .enquiry-list-heading h2 { font-size:15px; font-weight:600; color:var(--eq-text); }
+        .enquiry-list-heading p { font-size:12px; color:var(--eq-muted); margin-top:4px; }
+        .enquiry-list-heading>span { color:var(--eq-muted); font-size:12px; white-space:nowrap; }
+        .enquiry-panel table { min-width:1100px; }
+        .enquiry-panel th { font-size:10px; letter-spacing:.06em; background:var(--eq-soft); padding:13px 18px; }
+        .enquiry-panel td { padding:18px; font-size:12px; vertical-align:middle; }
+        .enquiry-panel td:first-child { min-width:170px; font-size:13px; }
+        .enquiry-panel td select { min-height:38px; max-width:150px; }
+        .enquiry-panel td:last-child a { min-height:38px; min-width:38px; display:inline-flex; align-items:center; justify-content:center; box-shadow:none; }
+        .enquiry-workspace :focus-visible { outline:2px solid var(--theme-accent,#6366f1); outline-offset:3px; }
+        .enquiry-workspace .fixed input,.enquiry-workspace .fixed select { min-height:42px; font-size:13px; }
+        .enquiry-workspace .fixed button { min-height:40px; }
+        @media(max-width:760px) { .enquiry-heading { align-items:flex-start; flex-direction:column; gap:16px; } .enquiry-heading h1 { font-size:24px; } .enquiry-add { width:100%; } .enquiry-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .enquiry-summary>div { padding:16px; border-bottom:1px solid var(--eq-line); } .enquiry-summary>div:nth-child(2) { border-right:0; } .enquiry-summary>div:nth-child(3) { border-bottom:0; } .enquiry-summary dd { font-size:26px; } .enquiry-filters>div { flex-basis:100%; min-width:0; } .enquiry-filters select { flex:1; min-width:120px; } .enquiry-list-heading { align-items:flex-start; flex-direction:column; gap:6px; } }
 
-    <div class="crm-enquiries-scope space-y-6" x-data="{
+        .enquiry-modal .enquiry-dialog { max-width:720px; max-height:calc(100dvh - 48px); border-radius:12px; color:var(--eq-text); background:var(--eq-surface); }
+        .enquiry-dialog-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:24px 28px; border-bottom:1px solid var(--eq-line); flex-shrink:0; }
+        .enquiry-dialog-header h2 { font-size:24px; font-weight:600; line-height:1.3; letter-spacing:-.6px; }
+        .enquiry-dialog-header #enquiry-dialog-description { font-size:13px; color:var(--eq-muted); margin-top:6px; }
+        .enquiry-dialog-close { width:40px; height:40px; display:grid; place-items:center; flex-shrink:0; color:var(--eq-muted); border-radius:7px; }
+        .enquiry-dialog-close:hover { background:var(--eq-soft); color:var(--eq-text); }
+        .enquiry-form-body { padding:0 28px; overflow-y:auto; overscroll-behavior:contain; flex:1; }
+        .enquiry-form-section { padding:22px 0; border-bottom:1px solid var(--eq-line); }
+        .enquiry-form-section:last-child { border-bottom:0; }
+        .enquiry-section-heading { margin-bottom:17px; }
+        .enquiry-section-heading h3 { font-size:14px; font-weight:600; }
+        .enquiry-section-heading p { margin-top:4px; font-size:12px; color:var(--eq-muted); }
+        .enquiry-form-body label { font-size:12px; font-weight:500; margin-bottom:7px; display:block; }
+        .enquiry-workspace .enquiry-form-body input:not([type=hidden]),.enquiry-workspace .enquiry-form-body select,.enquiry-workspace .enquiry-form-body textarea { min-height:44px; font-size:13px; border-radius:7px; border-color:var(--eq-line); background:var(--eq-soft); color:var(--eq-text); }
+        .enquiry-form-body textarea { resize:vertical; }
+        .enquiry-date-shortcuts { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+        .enquiry-workspace .enquiry-date-shortcuts button { min-height:32px; padding:5px 11px; font-size:11px; border:1px solid var(--eq-line); border-radius:6px; }
+        .enquiry-dialog-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 28px; background:var(--eq-surface); border-top:1px solid var(--eq-line); flex-shrink:0; }
+        .enquiry-workspace .enquiry-dialog-footer button { min-height:44px; font-size:13px; padding:10px 20px; }
+        @media(max-width:640px) { .enquiry-workspace .enquiry-modal { padding:8px; } .enquiry-modal .enquiry-dialog { max-height:calc(100dvh - 16px); border-radius:10px; } .enquiry-dialog-header { padding:20px; } .enquiry-form-body { padding:0 20px; } .enquiry-dialog-footer { padding:14px 20px; } .enquiry-dialog-footer button { flex:1; justify-content:center; } }
+    </style>
+    @endpush
+
+    <div class="crm-enquiries-scope {{ ($section ?? '') === 'enquiries' ? 'enquiry-workspace' : '' }} space-y-6" x-data="{
         showAddModal: {{ $errors->any() ? 'true' : 'false' }},
         followUpDate: '{{ old('follow_up_date', '') }}',
         selectedPlanId: '{{ old('membership_plan_id', '') }}',
@@ -110,6 +161,12 @@
             </div>
         @endif
 
+        @if(($section ?? '') === 'enquiries')
+            <header class="enquiry-heading">
+                <div><p class="enquiry-kicker">Member acquisition</p><h1>Enquiries &amp; walk-ins</h1><p>Keep every conversation moving. Track prospects, plan follow-ups and manage new enquiries.</p></div>
+                <button type="button" @click="showAddModal = true" class="enquiry-add bg-indigo-600 hover:bg-indigo-500 text-white"><span aria-hidden="true">+</span> Add enquiry</button>
+            </header>
+        @else
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3.5">
@@ -137,59 +194,29 @@
             </div>
         </div>
 
+        @endif
+
         <!-- ENQUIRIES SECTION -->
         @if(($section ?? '') === 'enquiries')
-            <!-- KPI Strip -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Enquiries</span>
-                        <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        </span>
-                    </div>
-                    <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">{{ number_format((int) ($stats['total'] ?? 0)) }}</div>
-                </div>
-
-                <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">New Leads</span>
-                        <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                        </span>
-                    </div>
-                    <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">{{ number_format((int) ($stats['new'] ?? 0)) }}</div>
-                </div>
-
-                <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Received Today</span>
-                        <span class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </span>
-                    </div>
-                    <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">{{ number_format((int) ($stats['today'] ?? 0)) }}</div>
-                </div>
-
-                <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Converted</span>
-                        <span class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </span>
-                    </div>
-                    <div class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white tabular-nums">{{ number_format((int) ($stats['converted'] ?? 0)) }}</div>
-                </div>
-            </div>
+            <dl class="enquiry-summary" aria-label="Enquiry overview">
+                @foreach([
+                    ['key' => 'total', 'label' => 'Total enquiries', 'detail' => 'Across all sources'],
+                    ['key' => 'new', 'label' => 'New leads', 'detail' => 'Ready for first contact'],
+                    ['key' => 'today', 'label' => 'Received today', 'detail' => 'New enquiries today'],
+                    ['key' => 'converted', 'label' => 'Converted', 'detail' => 'Paid or converted leads'],
+                ] as $metric)
+                    <div><dt>{{ $metric['label'] }}</dt><dd>{{ number_format((int) ($stats[$metric['key']] ?? 0)) }}</dd><p>{{ $metric['detail'] }}</p></div>
+                @endforeach
+            </dl>
 
             <!-- Filter Bar -->
-            <form method="GET" action="{{ route('app.crm.enquiries') }}" class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2.5 shadow-sm">
+            <form method="GET" action="{{ route('app.crm.enquiries') }}" class="enquiry-filters p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2.5 shadow-sm">
                 <div class="relative flex-1 min-w-[220px]">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, phone, email, or notes..." class="w-full pl-9 pr-3.5 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors">
+                    <input type="text" name="search" aria-label="Search enquiries" value="{{ request('search') }}" placeholder="Search by name, phone, email, or notes..." class="w-full pl-9 pr-3.5 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors">
                     <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
 
-                <select name="source" onchange="this.form.submit()" class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+                <select name="source" aria-label="Filter by source" onchange="this.form.submit()" class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
                     <option value="all" {{ request('source') === 'all' || !request('source') ? 'selected' : '' }}>All Sources</option>
                     <option value="walk_in" {{ request('source') === 'walk_in' ? 'selected' : '' }}>Walk-In</option>
                     <option value="phone" {{ request('source') === 'phone' ? 'selected' : '' }}>Phone Call</option>
@@ -202,7 +229,7 @@
                     <option value="other" {{ request('source') === 'other' ? 'selected' : '' }}>Other</option>
                 </select>
 
-                <select name="stage" onchange="this.form.submit()" class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+                <select name="stage" aria-label="Filter by stage" onchange="this.form.submit()" class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
                     <option value="all" {{ request('stage') === 'all' || !request('stage') ? 'selected' : '' }}>All Stages</option>
                     <option value="NEW_LEAD" {{ request('stage') === 'NEW_LEAD' ? 'selected' : '' }}>New Lead</option>
                     <option value="CONTACTED" {{ request('stage') === 'CONTACTED' ? 'selected' : '' }}>Contacted</option>
@@ -224,7 +251,8 @@
             </form>
 
             <!-- Enquiries Table -->
-            <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            <div class="enquiry-panel">
+                <div class="enquiry-list-heading"><div><h2>Enquiry register</h2><p>Contact details, next follow-up and stage in one place.</p></div><span>{{ $enquiries->total() }} {{ $enquiries->total() === 1 ? 'result' : 'results' }}</span></div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[11px] font-semibold">
@@ -311,7 +339,7 @@
                                         @endif
                                         @if($enq->membershipPlan)
                                             <div class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 truncate max-w-[170px]" title="{{ $enq->membershipPlan->name }}">
-                                                🎯 {{ $enq->membershipPlan->name }}
+                                                {{ $enq->membershipPlan->name }}
                                             </div>
                                         @endif
                                         @if((float) ($enq->estimated_value ?? 0) > 0)
@@ -325,12 +353,12 @@
                                     <td class="py-3.5 px-4 text-right">
                                         <div class="flex items-center justify-end gap-1.5">
                                             @if($enq->phone)
-                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $enq->phone) }}?text=Hello%20{{ urlencode($enq->name) }}" target="_blank" title="Message on WhatsApp" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-[11px] inline-flex items-center gap-1.5 transition-colors shadow-sm">
+                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $enq->phone) }}?text=Hello%20{{ urlencode($enq->name) }}" target="_blank" rel="noopener noreferrer" title="Message on WhatsApp" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-[11px] inline-flex items-center gap-1.5 transition-colors shadow-sm">
                                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.469 3.484 1.344 5l-1.406 5.156 5.281-1.375c1.469.797 3.109 1.219 4.75 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-10-9.969-10zm5.813 14.125c-.25.703-1.438 1.344-2 1.422-.516.078-1.172.109-1.891-.125-.438-.141-.984-.328-1.688-.641-2.969-1.281-4.906-4.266-5.047-4.453-.156-.203-1.203-1.609-1.203-3.063s.766-2.172 1.031-2.469c.281-.297.609-.375.813-.375s.406 0 .578.016c.188.016.438-.078.688.531.25.609.859 2.094.938 2.25.078.156.125.344.031.547-.109.203-.156.328-.313.5-.156.172-.328.391-.469.531-.156.156-.328.328-.141.641.188.313.844 1.391 1.813 2.25 1.25 1.109 2.297 1.453 2.609 1.609.313.156.484.125.672-.078.188-.203.781-.906.984-1.219.203-.313.406-.266.688-.156.281.109 1.797.844 2.109 1 .313.156.516.234.594.359.078.125.078.734-.172 1.438z"/></svg>
                                                     <span>WhatsApp</span>
                                                 </a>
                                             @endif
-                                            <a href="{{ route('app.leads.edit', $enq->id) }}" title="Edit Enquiry" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 transition-colors">
+                                            <a href="{{ route('app.leads.edit', $enq->id) }}" title="Edit Enquiry" aria-label="Edit enquiry for {{ $enq->name }}" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700 transition-colors">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                             </a>
                                         </div>
@@ -340,7 +368,7 @@
                                 <tr>
                                     <td colspan="8" class="py-12 text-center">
                                         <div class="text-sm font-medium text-slate-600 dark:text-slate-300">No enquiries match your current filters</div>
-                                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Click &ldquo;Add Enquiry / Walk-In&rdquo; to record a new prospect.</p>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Click &ldquo;Add enquiry&rdquo; to record a new prospect.</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -355,52 +383,42 @@
             </div>
 
             <!-- Modal: Add Enquiry / Walk-In -->
-            <div x-show="showAddModal" class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full max-h-[88vh] shadow-2xl flex flex-col overflow-hidden my-auto" @click.away="showAddModal = false">
-                    <div class="shrink-0 flex items-center justify-between px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-500/20 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">Add Enquiry / Walk-In</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Enter prospect contact details, source, and follow-up schedule.</p>
-                            </div>
-                        </div>
-                        <button type="button" @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" aria-label="Close modal">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>
+            <div x-show="showAddModal" @keydown.escape.window="if (showAddModal) { showAddModal = false; }" class="enquiry-modal fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
+                <div role="dialog" aria-modal="true" aria-labelledby="enquiry-dialog-title" aria-describedby="enquiry-dialog-description" class="enquiry-dialog bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full shadow-2xl flex flex-col overflow-hidden my-auto" @click.away="showAddModal = false">
+                    <header class="enquiry-dialog-header">
+                        <div><p class="enquiry-kicker">New prospect</p><h2 id="enquiry-dialog-title">Add enquiry</h2><p id="enquiry-dialog-description">Record the conversation and decide what happens next.</p></div>
+                        <button type="button" @click="showAddModal = false" class="enquiry-dialog-close" aria-label="Close enquiry form"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="1.5" d="m6 6 12 12M6 18 18 6"/></svg></button>
+                    </header>
 
                     <form action="{{ route('app.crm.enquiries.store') }}" method="POST" class="flex flex-col flex-1 min-h-0">
                         @csrf
-                        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+                        <div class="enquiry-form-body">
                             <!-- Section 1: Prospect Contact -->
-                            <div class="space-y-2.5">
-                                <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Prospect Contact</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="name" value="{{ old('name') }}" required placeholder="Rahul Sharma" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                            <div class="enquiry-form-section">
+                                <div class="enquiry-section-heading"><h3>Contact details</h3><p>Start with their name and phone number.</p></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label for="enquiry-name" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Full Name <span class="text-rose-500">*</span></label>
+                                        <input type="text" autocomplete="name" id="enquiry-name" name="name" value="{{ old('name') }}" required placeholder="Rahul Sharma" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Phone Number <span class="text-rose-500">*</span></label>
-                                        <input type="text" name="phone" value="{{ old('phone') }}" required placeholder="+91 9876543210" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                                        <label for="enquiry-phone" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Phone Number <span class="text-rose-500">*</span></label>
+                                        <input type="tel" inputmode="tel" autocomplete="tel" id="enquiry-phone" name="phone" value="{{ old('phone') }}" required placeholder="+91 9876543210" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                                        <input type="email" name="email" value="{{ old('email') }}" placeholder="rahul@example.com" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
+                                        <label for="enquiry-email" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+                                        <input type="email" autocomplete="email" id="enquiry-email" name="email" value="{{ old('email') }}" placeholder="rahul@example.com" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Section 2: Source & Ownership -->
-                            <div class="space-y-2.5 pt-3.5 border-t border-slate-200 dark:border-slate-800">
-                                <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Source &amp; Ownership</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="enquiry-form-section">
+                                <div class="enquiry-section-heading"><h3>Enquiry details</h3><p>Choose the source, current stage and person responsible.</p></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Source</label>
-                                        <select name="source" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                        <label for="enquiry-source" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Source</label>
+                                        <select id="enquiry-source" name="source" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                             @php $oldSource = old('source', 'walk_in'); @endphp
                                             <option value="walk_in" {{ $oldSource === 'walk_in' ? 'selected' : '' }}>Walk-In</option>
                                             <option value="phone" {{ $oldSource === 'phone' ? 'selected' : '' }}>Phone Call</option>
@@ -415,8 +433,8 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Stage</label>
-                                        <select name="stage" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                        <label for="enquiry-stage" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Stage</label>
+                                        <select id="enquiry-stage" name="stage" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                             @php $oldStage = old('stage', 'NEW_LEAD'); @endphp
                                             <option value="NEW_LEAD" {{ $oldStage === 'NEW_LEAD' ? 'selected' : '' }}>New Lead</option>
                                             <option value="CONTACTED" {{ $oldStage === 'CONTACTED' ? 'selected' : '' }}>Contacted</option>
@@ -430,8 +448,8 @@
 
                                     @if(($branches ?? collect())->count() > 0)
                                         <div>
-                                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Branch</label>
-                                            <select name="branch_id" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                            <label for="enquiry-branch_id" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Branch</label>
+                                            <select id="enquiry-branch_id" name="branch_id" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                                 <option value="">All / Primary Branch</option>
                                                 @foreach($branches as $branch)
                                                     <option value="{{ $branch->id }}" {{ (string) old('branch_id') === (string) $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
@@ -441,12 +459,12 @@
                                     @endif
 
                                     <div class="{{ ($branches ?? collect())->count() > 0 ? '' : 'sm:col-span-2' }}">
-                                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Assign to Staff</label>
+                                        <label for="enquiry-assigned_to_user_id" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Assign to Staff</label>
                                         @php
                                             $cUser = auth()->user();
                                             $defEnqStaffId = old('assigned_to_user_id') ?: (($cUser && !$cUser->isGymOwner() && !$cUser->isSuperAdmin() && $cUser->isStaff()) ? $cUser->id : null);
                                         @endphp
-                                        <select name="assigned_to_user_id" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                        <select id="enquiry-assigned_to_user_id" name="assigned_to_user_id" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
                                             <option value="">Unassigned</option>
                                             @foreach($staffMembers ?? [] as $stf)
                                                 <option value="{{ $stf->id }}" {{ (string) $defEnqStaffId === (string) $stf->id ? 'selected' : '' }}>
@@ -459,34 +477,35 @@
                             </div>
 
                             <!-- Section 3: Follow-Up & Pitched Membership -->
-                            <div class="space-y-2.5 pt-3.5 border-t border-slate-200 dark:border-slate-800">
-                                <h4 class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Follow-Up &amp; Pitched Membership</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="enquiry-form-section">
+                                <div class="enquiry-section-heading"><h3>Plan the next step</h3><p>Set a follow-up date and select a membership if discussed.</p></div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="text-xs font-medium text-slate-700 dark:text-slate-300">Next Follow-Up Date</label>
-                                            <div class="flex items-center gap-1">
+                                            <label for="enquiry-follow_up_date" class="text-xs font-medium text-slate-700 dark:text-slate-300">Next Follow-Up Date</label>
+
+                                        </div>
+                                        <input type="date" id="enquiry-follow_up_date" name="follow_up_date" x-model="followUpDate" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums focus:border-indigo-500 focus:outline-none">
+                                            <div class="enquiry-date-shortcuts">
                                                 <button type="button" @click="setQuickFollowUp(0)" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/20 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">Today</button>
                                                 <button type="button" @click="setQuickFollowUp(1)" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/20 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">Tomorrow</button>
                                                 <button type="button" @click="setQuickFollowUp(3)" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/20 text-[10px] font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer">+3 Days</button>
                                             </div>
-                                        </div>
-                                        <input type="date" name="follow_up_date" x-model="followUpDate" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs tabular-nums focus:border-indigo-500 focus:outline-none">
                                     </div>
                                     <div>
                                         <div class="flex items-center justify-between mb-1">
-                                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">
-                                                Pitched Membership Plan
+                                            <label for="enquiry-membership_plan_id" class="block text-xs font-medium text-slate-700 dark:text-slate-300">
+                                                Membership discussed
                                             </label>
                                             <span x-show="estimatedValue && estimatedValue > 0" x-cloak class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                                                 {{ $currency }}<span x-text="Number(estimatedValue).toLocaleString('en-IN')"></span>
                                             </span>
                                         </div>
-                                        <select name="membership_plan_id" 
+                                        <select id="enquiry-membership_plan_id" name="membership_plan_id" 
                                                 x-model="selectedPlanId" 
                                                 @change="onPlanChange($event)" 
                                                 class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
-                                            <option value="" data-price="">-- Select Pitched Membership Plan --</option>
+                                            <option value="" data-price="">-- Select Membership discussed --</option>
                                             @foreach($membershipPlans ?? [] as $plan)
                                                 <option value="{{ $plan->id }}" data-price="{{ $plan->price }}" {{ (string) old('membership_plan_id') === (string) $plan->id ? 'selected' : '' }}>
                                                     {{ $plan->name }} ({{ $plan->duration_value }} {{ ucfirst($plan->duration_type ?? 'Months') }}) • {{ $currency }}{{ number_format($plan->price) }}
@@ -499,17 +518,17 @@
                             </div>
 
                             <!-- Section 4: Notes / Goal -->
-                            <div class="pt-3.5 border-t border-slate-200 dark:border-slate-800">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Notes / Fitness Goal</label>
-                                <textarea name="remarks" rows="2" placeholder="Interested in 6-month membership, weight loss, or personal training..." class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">{{ old('remarks') }}</textarea>
+                            <div class="enquiry-form-section">
+                                <label for="enquiry-remarks" class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Notes / Fitness Goal</label>
+                                <textarea id="enquiry-remarks" name="remarks" rows="3" placeholder="Interested in 6-month membership, weight loss, or personal training..." class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none">{{ old('remarks') }}</textarea>
                             </div>
                         </div>
 
-                        <div class="shrink-0 flex items-center justify-end gap-2.5 px-6 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50">
+                        <div class="enquiry-dialog-footer">
                             <button type="button" @click="showAddModal = false" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors cursor-pointer">Cancel</button>
                             <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span>Save Enquiry</span>
+                                <span>Save enquiry</span>
                             </button>
                         </div>
                     </form>

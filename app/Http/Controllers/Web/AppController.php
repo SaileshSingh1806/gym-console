@@ -5242,6 +5242,7 @@ class AppController extends Controller
             'upcomingTrials',
             'staffMembers',
             'tenant',
+            'currentUser',
             'membershipPlans',
             'myTargetProgress',
             'teamTargetLeaderboard'

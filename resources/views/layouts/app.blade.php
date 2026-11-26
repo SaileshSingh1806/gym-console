@@ -56,6 +56,7 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
     <x-workspace-ui-styles />
+    @stack('styles')
 </head>
 <body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg' }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
@@ -276,13 +277,14 @@
             <div class="ds-nav-section">Administration</div>
             <div class="space-y-0.5">
                 @if($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
-                    <x-nav-group label="Staff & roles" icon="team" :active="$is('app.staff.*', 'app.roles.*')">
+                    <x-nav-group label="Staff & roles" icon="team" :active="$is('app.staff.*', 'app.roles.*', 'app.payroll.*')">
                         @if($user->hasAnyPermission(['staff.view', 'staff.create', 'staff.edit']))
                             <x-nav-sub :href="route('app.staff.index')" :active="$is('app.staff.*')">Staff members</x-nav-sub>
                         @endif
                         @if($user->hasPermission('roles.manage'))
                             <x-nav-sub :href="route('app.roles.index')" :active="$is('app.roles.*')">Roles &amp; permissions</x-nav-sub>
                         @endif
+                        <x-nav-sub :href="route('app.payroll.index')" :active="$is('app.payroll.*')">Salary &amp; payslips</x-nav-sub>
                     </x-nav-group>
                 @endif
 

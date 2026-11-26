@@ -95,9 +95,34 @@
                         </section>
                     @endforeach
                     <p class="notice">Translations are provided for reading assistance and may contain errors. If a term is unclear, ask gym staff before signing.</p>
-                    <label class="check declaration"><input type="checkbox" x-model="termsConfirmed"><span>I have read and accept the membership terms above.</span></label>
-                    @if($agreement->terrace_rules_included)<label class="check" style="margin-top:16px"><input type="checkbox" x-model="terraceConfirmed"><span>I have read and accept the open terrace access and safety rules.</span></label>@endif
-                    <div class="actions"><button class="secondary" @click="go(3)">Back</button><button class="primary" :disabled="!termsConfirmed || (config.terrace && !terraceConfirmed)" @click="go(5)">Continue to signature</button></div>
+                    
+                    <div id="terms-acceptance-card" class="terms-acceptance-card" :class="{ 'has-error': termsValidationError }">
+                        <label class="check declaration" :class="{ 'highlight-checkbox': termsValidationError && !termsConfirmed }">
+                            <input type="checkbox" x-model="termsConfirmed" @change="termsValidationError = ''">
+                            <span>I confirm that I have read, understood, and accept the membership terms and conditions above.</span>
+                        </label>
+                        @if($agreement->terrace_rules_included)
+                            <label class="check declaration terrace-check" :class="{ 'highlight-checkbox': termsValidationError && !terraceConfirmed }" style="margin-top:14px">
+                                <input type="checkbox" x-model="terraceConfirmed" @change="termsValidationError = ''">
+                                <span>I acknowledge and accept the open terrace workout area safety rules and access restrictions.</span>
+                            </label>
+                        @endif
+                        <div x-cloak x-show="termsValidationError" class="terms-error-message" role="alert">
+                            <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span x-text="termsValidationError"></span>
+                        </div>
+                    </div>
+
+                    <div class="actions terms-actions">
+                        <button type="button" class="secondary" @click="go(3)">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <span>Back</span>
+                        </button>
+                        <button type="button" class="primary continue-to-sign-btn" :class="{ 'is-ready': termsConfirmed && (!config.terrace || terraceConfirmed) }" @click="proceedToSignature()">
+                            <span>Continue to signature</span>
+                            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                    </div>
                 </section>
                 <section x-cloak x-show="step === 5">
                     <div class="sectionintro"><p class="eyebrow">04 / Signature</p><h2>Sign your agreement</h2><p>By signing, you confirm your health declaration and acceptance of the membership terms.</p></div>
@@ -115,8 +140,24 @@
             Alpine.data('agreementFlow', (config) => ({
                 config, largeText: false, step: config.step, answers: { ...config.answers }, reference: config.reference,
                 medicalReview: config.medicalReview, profileConfirmed: false, healthConfirmed: false,
-                termsConfirmed: false, terraceConfirmed: false, loading: false, error: '', hasSignature: false, drawing: false,
-                go(step) { this.step = step; this.error = ''; window.scrollTo({ top: 0, behavior: 'auto' }); },
+                termsConfirmed: false, terraceConfirmed: false, termsValidationError: '', loading: false, error: '', hasSignature: false, drawing: false,
+                go(step) { this.step = step; this.error = ''; this.termsValidationError = ''; window.scrollTo({ top: 0, behavior: 'auto' }); },
+                proceedToSignature() {
+                    this.termsValidationError = '';
+                    if (!this.termsConfirmed) {
+                        this.termsValidationError = 'Please confirm you have read and accepted the membership terms by checking the box above.';
+                        const el = document.getElementById('terms-acceptance-card');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                    if (this.config.terrace && !this.terraceConfirmed) {
+                        this.termsValidationError = 'Please confirm you accept the open terrace access and safety rules by checking the box above.';
+                        const el = document.getElementById('terms-acceptance-card');
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                    this.go(5);
+                },
                 setAnswer(id, answer) {
                     this.answers = { ...this.answers, [id]: { answer, explanation: this.answers[id]?.explanation || '' } };
                     this.error = '';

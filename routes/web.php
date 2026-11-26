@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\AgreementController;
 use App\Http\Controllers\Web\AppController;
 use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\PayrollController;
 use App\Http\Controllers\Web\PublicAgreementController;
 use App\Http\Controllers\Web\PublicController;
 use App\Http\Controllers\Web\TrainerController;
@@ -331,6 +332,16 @@ Route::prefix('app')->middleware(['auth', 'tenant', 'subscription.active'])->gro
         Route::get('/finance/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.finance.balance-sheet')->middleware('permission:reports.balance_sheet');
         Route::get('/finance/balance-sheet/pdf', [AppController::class, 'balanceSheetPdf'])->name('app.finance.balance-sheet.pdf')->middleware('permission:reports.balance_sheet');
         Route::get('/balance-sheet', [AppController::class, 'balanceSheet'])->name('app.balance-sheet.index')->middleware('permission:reports.balance_sheet');
+
+        // Staff Salary & Monthly Payroll Management
+        Route::prefix('payroll')->name('app.payroll.')->group(function () {
+            Route::get('/', [PayrollController::class, 'index'])->name('index');
+            Route::post('/store', [PayrollController::class, 'store'])->name('store');
+            Route::post('/bulk-generate', [PayrollController::class, 'bulkGenerate'])->name('bulk-generate');
+            Route::post('/{id}/mark-paid', [PayrollController::class, 'markPaid'])->name('mark-paid');
+            Route::get('/{id}/document', [PayrollController::class, 'document'])->name('document');
+            Route::delete('/{id}', [PayrollController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // 13 & 14. Inventory & Equipment Maintenance
