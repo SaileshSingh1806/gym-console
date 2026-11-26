@@ -788,7 +788,7 @@
                                 display: false,
                             },
                             tooltip: {
-                                backgroundColor: '#0f172a',
+                                backgroundColor: '#151618',
                                 titleColor: '#ffffff',
                                 bodyColor: '#cbd5e1',
                                 borderColor: '#334155',
