@@ -13,7 +13,7 @@
         }
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: #0f172a;
+            color: #151618;
             background-color: #f8fafc;
             line-height: 1.5;
             font-size: 12px;
@@ -83,7 +83,7 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #0f172a;
+            color: #151618;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 6px;
             margin-top: 24px;
@@ -111,7 +111,7 @@
         .info-item span {
             font-size: 12px;
             font-weight: 700;
-            color: #0f172a;
+            color: #151618;
         }
         .clause-list {
             list-style: none;
@@ -209,7 +209,7 @@
             font-size: 12px;
             cursor: pointer;
         }
-        .document-footer { margin-top: 32px; padding-top: 20px; border-top: 2px solid #0f172a; break-inside: avoid; }
+        .document-footer { margin-top: 32px; padding-top: 20px; border-top: 2px solid #151618; break-inside: avoid; }
         .footer-business strong { font-size: 13px; font-weight: 800; letter-spacing: .02em; }
         .footer-business p { margin-top: 5px; color: #475569; font-size: 11px; white-space: pre-line; }
         .footer-contacts { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 7px; font-size: 10px; color: #475569; overflow-wrap: anywhere; }
@@ -425,7 +425,7 @@
         <!-- Electronic Signature & Audit Certificate -->
         <div class="signature-box">
             <div style="max-width: 480px;">
-                <div style="font-size: 11px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">
+                <div style="font-size: 11px; font-weight: 700; color: #151618; margin-bottom: 2px;">
                     Member Legal Electronic Signature
                 </div>
                 <div style="font-size: 10px; color: #64748b; line-height: 1.4;">
@@ -464,7 +464,7 @@
                         <div style="height: 60px; line-height: 60px; font-style: italic; color: #94a3b8; text-align: center;">Digitally Signed</div>
                     @endif
                 </div>
-                <div style="font-size: 10px; font-weight: bold; color: #0f172a; margin-top: 4px;">
+                <div style="font-size: 10px; font-weight: bold; color: #151618; margin-top: 4px;">
                     {{ $member->full_name }}
                 </div>
                 <div style="font-size: 9px; color: #64748b;">
