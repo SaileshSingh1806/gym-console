@@ -300,7 +300,7 @@
                             <div class="shrink-0 flex items-center gap-2">
                                 <template x-if="m.is_inside">
                                     <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1.5">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                        <span class="ds-dot"></span>
                                         Inside Gym
                                     </span>
                                 </template>
@@ -332,7 +332,7 @@
                                     <div class="mt-2 pt-2 border-t border-line flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-muted">
                                         <span>Member: <strong class="text-fg" x-text="feedback.member.name"></strong> (<span x-text="feedback.member.code"></span>)</span>
                                         <template x-if="feedback.member.auto_checkout">
-                                            <span class="text-amber-300">Auto-Checkout: <strong x-text="feedback.member.auto_checkout"></strong></span>
+                                            <span class="text-warning">Auto-checkout: <strong x-text="feedback.member.auto_checkout"></strong></span>
                                         </template>
                                         <template x-if="feedback.member.plan">
                                             <span>Plan: <strong x-text="feedback.member.plan"></strong></span>
@@ -385,12 +385,12 @@
                             </div>
 
                             @if($isInsideNow)
-                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shrink-0">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span class="ds-badge ds-badge-success shrink-0">
+                                    <span class="ds-dot"></span>
                                     Inside
                                 </span>
                             @else
-                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-raised text-fg-muted border border-line shrink-0">
+                                <span class="ds-badge ds-badge-neutral shrink-0">
                                     Completed
                                 </span>
                             @endif
@@ -399,7 +399,7 @@
                         <div class="attendance-mobile-details grid grid-cols-2 gap-2 text-xs">
                             <div>
                                 <span class="text-fg-muted block text-xs font-semibold">Check-In</span>
-                                <span class="font-semibold text-emerald-400">{{ $checkInTime ? $checkInTime->format('h:i:s A') : '—' }}</span>
+                                <span class="font-semibold text-success">{{ $checkInTime ? $checkInTime->format('h:i:s A') : '—' }}</span>
                             </div>
                             <div>
                                 <span class="text-fg-muted block text-xs font-semibold">Check-Out</span>
@@ -471,7 +471,7 @@
                                 {{-- Check-In Time --}}
                                 <td class="py-3.5 px-5">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-mono font-semibold text-emerald-400 text-xs">
+                                        <span class="font-mono font-semibold text-success text-xs">
                                             {{ $checkInTime ? $checkInTime->format('h:i:s A') : '—' }}
                                         </span>
                                     </div>
@@ -517,12 +517,12 @@
                                 {{-- Status --}}
                                 <td class="py-3.5 px-5">
                                     @if($isInsideNow)
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                        <span class="ds-badge ds-badge-success">
+                                            <span class="ds-dot"></span>
                                             Inside
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-raised text-fg-muted border border-line inline-flex items-center gap-1">
+                                        <span class="ds-badge ds-badge-neutral">
                                             <span>✓</span>
                                             Completed
                                         </span>
