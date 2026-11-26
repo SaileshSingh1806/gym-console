@@ -13,7 +13,7 @@
     </p>
 
     <!-- Reply Box -->
-    <div style="background-color: #0f172a; border-left: 4px solid {{ $isAdminSender ? '#6366f1' : '#38bdf8' }}; border-radius: 12px; border-top: 1px solid #334155; border-right: 1px solid #334155; border-bottom: 1px solid #334155; padding: 20px; margin-bottom: 24px;">
+    <div style="background-color: #151618; border-left: 4px solid {{ $isAdminSender ? '#6366f1' : '#38bdf8' }}; border-radius: 12px; border-top: 1px solid #334155; border-right: 1px solid #334155; border-bottom: 1px solid #334155; padding: 20px; margin-bottom: 24px;">
         <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between;">
             <strong style="color: #ffffff; font-size: 13px;">
                 {{ $reply->user->name ?? ($isAdminSender ? 'Support Team' : 'User') }}
