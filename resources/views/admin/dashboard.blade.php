@@ -1,15 +1,15 @@
 <x-admin-layout header="Platform overview">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        .gdh-admin { --ad-surface:#fff; --ad-muted:#647180; --ad-text:#202b36; --ad-line:#e0e6eb; --ad-hover:#f5f7fa; font-family:Inter,system-ui,sans-serif; font-size:14px; line-height:1.5; }
-        .dark .gdh-admin { --ad-surface:#1b222b; --ad-muted:#a5b2c0; --ad-text:#e8edf2; --ad-line:#35404d; --ad-hover:#232d38; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        .gdh-admin { --ad-surface:#fff; --ad-muted:#647180; --ad-text:#18181b; --ad-line:#e4e4e7; --ad-hover:#f7f8fa; font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-size:13px; line-height:1.5; }
+        .dark .gdh-admin { --ad-surface:#151618; --ad-muted:#a1a8b0; --ad-text:#f1f3f5; --ad-line:#292c30; --ad-hover:#1c1e21; }
         .gdh-admin .ad-panel,.gdh-admin .ad-metrics,.gdh-admin .ad-vitals { background:var(--ad-surface); border:1px solid var(--ad-line); border-radius:8px; color:var(--ad-text); }
-        .gdh-admin .ad-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; }
-        .gdh-admin .ad-metrics>a { min-width:0; padding:14px 16px; border-right:1px solid var(--ad-line); color:var(--ad-text); }
-        .gdh-admin .ad-metrics>a:last-child { border-right:0; }
+        .gdh-admin .ad-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; background:transparent; border:0; }
+        .gdh-admin .ad-metrics>a { min-width:0; padding:12px 14px; border:1px solid var(--ad-line); border-top:1px solid #87919c; border-radius:10px; background:var(--ad-surface); color:var(--ad-text); }
+        .gdh-admin .ad-metrics>a:nth-child(1) { border-top-color:#34b88a; } .gdh-admin .ad-metrics>a:nth-child(2) { border-top-color:#87919c; } .gdh-admin .ad-metrics>a:nth-child(3) { border-top-color:#e05b5b; } .gdh-admin .ad-metrics>a:nth-child(4) { border-top-color:#e6ae30; }
         .gdh-admin .ad-metrics>a:hover { background:var(--ad-hover); }
         .gdh-admin .ad-label { color:var(--ad-muted); font-size:12px; font-weight:500; }
-        .gdh-admin .ad-value { font-size:24px; font-weight:600; line-height:1.3; letter-spacing:-.035em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin:6px 0; }
+        .gdh-admin .ad-value { font-size:23px; font-weight:600; line-height:1.3; letter-spacing:-.035em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin:6px 0; }
         .gdh-admin .ad-meta { font-size:12px; color:var(--ad-muted); }
         .gdh-admin .ad-vitals { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
         .gdh-admin .ad-vitals>div { padding:10px 16px; border-right:1px solid var(--ad-line); }
@@ -19,9 +19,9 @@
         .gdh-admin .ad-panel th { font-size:12px; font-weight:600; white-space:nowrap; }
         .gdh-admin .ad-panel thead { background:var(--ad-hover); color:var(--ad-muted); }
         .gdh-admin .ad-link { color:var(--ad-text); font-weight:500; }
-        .gdh-admin .ad-link:hover { text-decoration:underline; color:var(--theme-accent,#345b79); }
+        .gdh-admin .ad-link:hover { text-decoration:underline; color:var(--theme-accent,#f59e0b); }
         .gdh-admin .ad-primary,.gdh-admin .ad-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:36px; border-radius:6px; padding:8px 13px; font-size:13px; font-weight:500; cursor:pointer; }
-        .gdh-admin .ad-primary { background:var(--theme-accent,#345b79); color:#10151c; }
+        .gdh-admin .ad-primary { background:var(--theme-accent,#f59e0b); color:#10151c; }
         @supports(color:color-contrast(white vs black,white)) { .gdh-admin .ad-primary { color:color-contrast(var(--theme-accent) vs #10151c,#fff); } }
         .gdh-admin .ad-primary:hover { filter:brightness(.92); }
         .gdh-admin .ad-secondary { border:1px solid var(--ad-line); color:var(--ad-text); background:var(--ad-surface); }
@@ -31,15 +31,15 @@
         .gdh-admin .ad-status.is-good { color:#24734d; } .dark .gdh-admin .ad-status.is-good { color:#8bcba8; }
         .gdh-admin .ad-status.is-bad { color:#b42318; } .dark .gdh-admin .ad-status.is-bad { color:#fda4a4; }
         .gdh-admin .ad-dialog input:not([type=hidden]),.gdh-admin .ad-dialog select { min-height:40px; font-size:14px; }
-        .gdh-admin :focus-visible { outline:2px solid var(--theme-accent,#345b79); outline-offset:3px; }
-        @media(max-width:1200px) { .gdh-admin .ad-metrics,.gdh-admin .ad-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); } .gdh-admin .ad-metrics>a:nth-child(2),.gdh-admin .ad-vitals>div:nth-child(2) { border-right:0; } .gdh-admin .ad-metrics>a:nth-child(-n+2),.gdh-admin .ad-vitals>div:nth-child(-n+2) { border-bottom:1px solid var(--ad-line); } }
+        .gdh-admin :focus-visible { outline:2px solid var(--theme-accent,#f59e0b); outline-offset:3px; }
+        @media(max-width:1200px) { .gdh-admin .ad-metrics,.gdh-admin .ad-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); } .gdh-admin .ad-vitals>div:nth-child(2) { border-right:0; } .gdh-admin .ad-vitals>div:nth-child(-n+2) { border-bottom:1px solid var(--ad-line); } }
         @media(max-width:400px) { .gdh-admin .ad-metrics>a,.gdh-admin .ad-vitals>div { padding:11px; } .gdh-admin .ad-value { font-size:20px; } }
     </style>
     <div class="gdh-admin space-y-4" x-data="{ showNewGymModal: false, showNewPlanModal: false }">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h2 class="text-xl font-semibold tracking-tight">Platform overview</h2>
+                <h2 class="text-lg font-semibold tracking-tight">Platform overview</h2>
                 <p class="ad-meta mt-1">Monitor gym accounts, subscriptions and support activity.</p>
             </div>
             <div class="flex flex-wrap gap-2">
