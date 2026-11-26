@@ -65,6 +65,16 @@
         html.dark .dashboard-overview .owner-whatsapp-action { color:#25D366; }
         .dashboard-overview .owner-whatsapp-action:hover { background:#25D366; color:#10351F; }
         .dashboard-overview .owner-whatsapp-action:focus-visible { outline:2px solid #25D366; outline-offset:2px; }
+        .dashboard-overview .owner-cta { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:5px 9px; border:1px solid rgb(var(--cta-tone) / .24); border-radius:8px; background:rgb(var(--cta-tone) / .10); color:rgb(var(--cta-tone)); font-size:12px; font-weight:600; line-height:1.35; white-space:nowrap; flex-shrink:0; cursor:pointer; text-decoration:none; transition:background-color .15s ease,border-color .15s ease; --cta-tone:var(--c-fg-muted); }
+        .dashboard-overview .owner-cta:hover { background:rgb(var(--cta-tone) / .18); border-color:rgb(var(--cta-tone) / .5); text-decoration:none; }
+        .dashboard-overview .owner-cta svg { flex-shrink:0; }
+        .dashboard-overview .owner-cta-whatsapp { --cta-tone:18 140 75; }
+        html.dark .dashboard-overview .owner-cta-whatsapp { --cta-tone:37 211 102; }
+        .dashboard-overview .owner-cta-warning { --cta-tone:var(--c-warning); }
+        .dashboard-overview .owner-cta-info { --cta-tone:var(--c-info); }
+        .dashboard-overview .owner-cta-neutral { --cta-tone:var(--c-fg-muted); }
+        .dashboard-overview .owner-list a.owner-cta { color:rgb(var(--cta-tone)); }
+        .dashboard-overview .owner-list a.owner-cta:hover { text-decoration:none; }
         @container (min-width:800px) {
             .dashboard-overview .owner-due-grid, .dashboard-overview .owner-pt-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
         }
@@ -536,11 +546,11 @@
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div class="flex items-center bg-raised p-0.5 sm:p-1 rounded-xl border border-line text-xs font-semibold">
                         <button type="button" @click="setTrendPeriod('30d')" :class="trendPeriod === '30d' ? 'bg-surface text-fg border border-line-strong' : 'text-fg-muted hover:text-fg border border-transparent'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">30 days</button>
-                        <button type="button" @click="setTrendPeriod('90d')" :class="trendPeriod === '90d' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90 days</button>
-                        <button type="button" @click="setTrendPeriod('6m')" :class="trendPeriod === '6m' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6 months</button>
-                        <button type="button" @click="setTrendPeriod('1y')" :class="trendPeriod === '1y' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1 year</button>
+                        <button type="button" @click="setTrendPeriod('90d')" :class="trendPeriod === '90d' ? 'bg-surface text-fg border border-line-strong' : 'text-fg-muted hover:text-fg border border-transparent'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90 days</button>
+                        <button type="button" @click="setTrendPeriod('6m')" :class="trendPeriod === '6m' ? 'bg-surface text-fg border border-line-strong' : 'text-fg-muted hover:text-fg border border-transparent'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6 months</button>
+                        <button type="button" @click="setTrendPeriod('1y')" :class="trendPeriod === '1y' ? 'bg-surface text-fg border border-line-strong' : 'text-fg-muted hover:text-fg border border-transparent'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1 year</button>
                     </div>
-                    <button type="button" @click="showAiSummaryModal = true" class="px-3 py-1.5 rounded-xl text-fg font-semibold text-xs flex items-center gap-1.5 hover:opacity-95 cursor-pointer">
+                    <button type="button" @click="showAiSummaryModal = true" class="owner-cta owner-cta-info">
                         <span>AI summary</span>
                     </button>
                 </div>
@@ -732,8 +742,9 @@
                                     </div>
                                 </div>
                                 @if($bday->phone)
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bday->phone) }}?text=Happy%20Birthday%20{{ urlencode($bday->first_name) }}!%20Wishing%20you%20a%20healthy%20and%20fit%20year%20ahead%20from%20{{ urlencode($tenantName) }}!%20" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold flex items-center gap-1 transition-all shrink-0">
-                                        <span>Wish</span>
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bday->phone) }}?text=Happy%20Birthday%20{{ urlencode($bday->first_name) }}!%20Wishing%20you%20a%20healthy%20and%20fit%20year%20ahead%20from%20{{ urlencode($tenantName) }}!%20" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+<span>Wish</span>
                                     </a>
                                 @endif
                             </div>
@@ -778,8 +789,9 @@
                                         <div class="text-xs text-fg-muted truncate">{{ $recExp->plan?->name ?? 'Membership' }}</div>
                                     </div>
                                 </div>
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $recExp->member?->phone ?? '') }}?text=Hi%20{{ urlencode($recExp->member?->first_name ?? 'there') }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Get%20special%20renewal%20offers%20today." target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold transition-all shrink-0">
-                                    Reach Out
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $recExp->member?->phone ?? '') }}?text=Hi%20{{ urlencode($recExp->member?->first_name ?? 'there') }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Get%20special%20renewal%20offers%20today." target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+Reach out
                                 </a>
                             </div>
                         @empty
@@ -888,7 +900,7 @@
                                              {{ $lead->follow_up_date ? \Carbon\Carbon::parse($lead->follow_up_date)->format('d M') : 'Pending' }}
                                         </span>
                                     @endif
-                                    <a href="{{ route('app.leads.index') }}" class="px-2 py-1 rounded bg-raised hover:bg-raised text-fg text-xs font-semibold">
+                                    <a href="{{ route('app.leads.index') }}" class="owner-cta owner-cta-warning">
                                         Follow up
                                     </a>
                                 </div>
@@ -1061,8 +1073,9 @@
                                     <div class="text-xs text-fg-muted font-medium truncate">>14 days inactive</div>
                                 </div>
                                 @if($dmMember->phone)
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dmMember->phone) }}?text=Hi%20{{ urlencode($dmMember->first_name) }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Keep%20up%20your%20fitness%20streak%20and%20come%20in%20for%20a%20workout%20today!" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold transition-all shrink-0">
-                                        Re-engage
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dmMember->phone) }}?text=Hi%20{{ urlencode($dmMember->first_name) }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Keep%20up%20your%20fitness%20streak%20and%20come%20in%20for%20a%20workout%20today!" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+Re-engage
                                     </a>
                                 @endif
                             </div>
@@ -1153,15 +1166,16 @@
                                             <div class="flex items-center justify-end gap-2">
                                                 @if($crm->member?->phone)
                                                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $crm->member->phone) }}?text={{ urlencode('Hi ' . ($crm->member?->full_name ?? 'there') . ', we missed you at ' . ($tenantName ?? 'the gym') . '! Your membership expires on ' . \Carbon\Carbon::parse($crm->end_date)->format('d M') . '. Renew today for an exclusive loyalty discount!') }}"
-                                                       target="_blank"
+                                                       target="_blank" rel="noopener noreferrer"
                                                        title="WhatsApp Outreach"
-                                                       class="px-2.5 py-1.5 rounded-xl bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all inline-flex items-center gap-1.5">
-                                                        <span> WhatsApp</span>
+                                                       class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+<span> WhatsApp</span>
                                                     </a>
                                                 @endif
                                                 <a href="{{ route('app.members.show', $crm->member_id) }}"
                                                    title="View Profile"
-                                                   class="p-1.5 rounded-xl bg-raised text-fg-muted hover:bg-raised hover:text-fg transition-all inline-flex items-center">
+                                                   class="owner-cta owner-cta-neutral">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                                 </a>
                                             </div>
@@ -1243,8 +1257,9 @@
                                     </td>
                                     <td class="py-2.5 px-3">
                                         @if($exp->member?->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all">
-                                                WhatsApp
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+WhatsApp
                                             </a>
                                         @endif
                                     </td>
@@ -1311,8 +1326,9 @@
                                     <td class="py-2.5 px-3 text-fg-muted">{{ $bm->dob ? \Carbon\Carbon::parse($bm->dob)->format('d M') : 'Today' }}</td>
                                     <td class="py-2.5 px-3">
                                         @if($bm->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'GymDeskHub') . '!  Stay fit and healthy!') }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all inline-flex items-center gap-1">
-                                                <span> Send Wish</span>
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'GymDeskHub') . '!  Stay fit and healthy!') }}" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
+<span> Send wish</span>
                                             </a>
                                         @endif
                                     </td>
@@ -1382,8 +1398,8 @@
                     </div>
                 </div>
                 <div class="p-3.5 sm:p-4 bg-raised border-t border-line flex justify-end gap-2 shrink-0">
-                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="px-3.5 py-2 rounded-xl bg-accent hover:bg-fg-muted text-slate-950 text-xs font-semibold">Follow Up Dues</a>
-                    <button type="button" @click="showAiSummaryModal = false" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold cursor-pointer">Close</button>
+                    <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="owner-cta owner-cta-warning">Follow up dues</a>
+                    <button type="button" @click="showAiSummaryModal = false" class="ds-btn ds-btn-secondary">Close</button>
                 </div>
             </div>
         </div>
@@ -1421,7 +1437,7 @@
                     </a>
                 </div>
                 <div class="p-3.5 sm:p-4 bg-raised border-t border-line flex justify-end shrink-0">
-                    <button type="button" @click="showTutorialsModal = false" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold cursor-pointer">Done</button>
+                    <button type="button" @click="showTutorialsModal = false" class="ds-btn ds-btn-secondary">Done</button>
                 </div>
             </div>
         </div>
