@@ -2106,7 +2106,9 @@ class AppController extends Controller
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $checkinUrl = route('gym.checkin', ['slug' => $tenant->slug ?: $tenant->id]);
 
-        return view('app.attendance.standee', compact('tenant', 'checkinUrl'));
+        $qrSvg = app(\App\Services\AttendanceQrService::class)->svg($checkinUrl);
+
+        return view('app.attendance.standee', compact('tenant', 'checkinUrl', 'qrSvg'));
     }
 
     public function attendanceQrScan(Request $request): JsonResponse

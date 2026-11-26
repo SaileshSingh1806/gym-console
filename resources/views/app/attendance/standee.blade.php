@@ -72,8 +72,6 @@
         .standee-qr { width:min(256px,100%); aspect-ratio:1; background:#fff; border:1px solid #e2e8f0; margin:auto; display:grid; place-items:center; }
         #qrcode-render { width:100%; min-width:0; }
         #qrcode-render svg { display:block; width:100%; height:auto; }
-        #qrcode-status { font-size:12px; color:#475569; padding:8px; }
-        #qrcode-status[hidden] { display:none; }
         @media screen and (max-width:480px) {
             .standee-a4-page { min-height:0; padding:18px 12px; gap:16px; }
             .standee-a4-page .relative.inline-block { width:100%; max-width:300px; padding:12px; }
@@ -177,11 +175,9 @@
                 <div class="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-slate-900"></div>
 
                 <!-- QR Container -->
-                <div id="qrcode-wrapper" class="standee-qr" role="img" aria-label="Gym check-in QR code">
-                    <div id="qrcode-render"></div>
-                    <p id="qrcode-status" role="status">Loading QR code…</p>
+                <div id="qrcode-wrapper" class="standee-qr">
+                    <div id="qrcode-render">{!! $qrSvg !!}</div>
                 </div>
-                <noscript><p class="text-xs">Enable JavaScript to display the QR code.</p></noscript>
                 <a class="no-print text-xs underline block mt-2" href="{{ $checkinUrl }}">Open check-in link</a>
 
                 <!-- Live Camera Indicator Badge -->
@@ -250,50 +246,5 @@
         <p>💡 Tip: For best results, select <strong>A4 Paper</strong> and set Margins to <strong>None / Default</strong> in your print dialog.</p>
     </div>
 
-    <!-- Same-origin QR library: no external QR provider or image timing dependency. -->
-    <script src="{{ asset('vendor/qrcode/qrcode.min.js') }}?v=1"></script>
-    <script>
-        (function () {
-            const target = document.getElementById('qrcode-render');
-            const status = document.getElementById('qrcode-status');
-            try {
-                if (typeof QRCode !== 'function') throw new Error('QR library unavailable');
-                const qr = new QRCode(target, {
-                    text: {{ \Illuminate\Support\Js::from($checkinUrl) }},
-                    width: 320,
-                    height: 320,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-                // Render from the generated module matrix into a stable SVG.
-                // Avoid QRCode.js canvas/image conversion race on mobile browsers.
-                const model = qr._oQRCode;
-                const count = model.getModuleCount();
-                const ns = 'http://www.w3.org/2000/svg';
-                const svg = document.createElementNS(ns, 'svg');
-                const size = count + 8;
-                svg.setAttribute('viewBox', '0 0 '+size+' '+size);
-                svg.setAttribute('shape-rendering', 'crispEdges');
-                svg.setAttribute('aria-hidden','true');
-                const white = document.createElementNS(ns, 'rect');
-                white.setAttribute('width', size); white.setAttribute('height', size); white.setAttribute('fill','#fff');
-                svg.appendChild(white);
-                let d = '';
-                for (let row=0; row<count; row++) {
-                    for (let col=0; col<count; col++) {
-                        if (model.isDark(row,col)) d += 'M'+(col+4)+' '+(row+4)+'h1v1h-1z';
-                    }
-                }
-                const path = document.createElementNS(ns,'path');
-                path.setAttribute('d',d);path.setAttribute('fill','#000');svg.appendChild(path);
-                target.replaceChildren(svg);
-                status.hidden = true;
-            } catch (error) {
-                target.replaceChildren();
-                status.textContent = 'QR code could not be displayed. Reload this page or open the check-in link below.';
-            }
-        })();
-    </script>
 </body>
 </html>
