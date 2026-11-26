@@ -232,53 +232,53 @@
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-line rounded-b-xl overflow-hidden">
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Billed (<span x-text="getFin('billed_count')" class="tabular-nums">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('total_billed'))">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
+                            <div class="ds-kpi mt-1.5 truncate" x-text="formatMoney(getFin('total_billed'))">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
                             <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('billed')" x-text="getFinBreakdown('billed')"></div>
                         </div>
                         <a :href="getBilledUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
 
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Product sales</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('product_sales'))">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
+                            <div class="ds-kpi mt-1.5 truncate" x-text="formatMoney(getFin('product_sales'))">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
                         </div>
                         <a href="{{ route('app.inventory.index') }}" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
 
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Collected (<span x-text="getFin('collected_count')" class="tabular-nums">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('collected'))">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
+                            <div class="ds-kpi mt-1.5 truncate" x-text="formatMoney(getFin('collected'))">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
                             <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('collected')" x-text="getFinBreakdown('collected')"></div>
                         </div>
                         <a :href="getCollectedUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
 
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Pending (<span x-text="getFin('pending_count')" class="tabular-nums">{{ $metrics['due_members_count'] }}</span> due)</div>
-                            <div class="ds-kpi mt-1 truncate !text-warning" x-text="formatMoney(getFin('pending_dues'))">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                            <div class="ds-kpi mt-1.5 truncate !text-warning" x-text="formatMoney(getFin('pending_dues'))">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
                             <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('pending')" x-text="getFinBreakdown('pending')"></div>
                         </div>
                         <a :href="getPendingUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
 
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">New clients</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
+                            <div class="ds-kpi mt-1.5 truncate" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
                         </div>
                         <a :href="getNewClientsUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
 
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface p-5 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Renewals</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
+                            <div class="ds-kpi mt-1.5 truncate" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
                         </div>
                         <a :href="getRenewalsUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
                     </div>
@@ -298,10 +298,10 @@
                         ];
                     @endphp
                     @foreach($dueCells as [$dueLabel, $dueAmount, $dueCount, $dueTone])
-                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="bg-surface p-4 flex items-center justify-between gap-3 hover:bg-raised/60 transition-colors">
+                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="bg-surface p-5 flex items-center justify-between gap-3 hover:bg-raised/60 transition-colors">
                             <div class="min-w-0">
                                 <div class="ds-caption truncate">{{ $dueLabel }}</div>
-                                <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($dueAmount, 0) }}</div>
+                                <div class="ds-kpi mt-1.5 truncate">{{ $currency }}{{ number_format($dueAmount, 0) }}</div>
                             </div>
                             <span class="ds-badge tabular-nums shrink-0 {{ $dueTone && $dueCount > 0 ? 'ds-badge-'.$dueTone : 'ds-badge-neutral' }}">{{ $dueCount }}</span>
                         </a>
@@ -367,24 +367,24 @@
 
                 <!-- PT KPIs -->
                 <div class="ds-stat-grid grid-cols-2 lg:grid-cols-4">
-                    <div class="bg-surface p-4 min-w-0">
+                    <div class="bg-surface p-5 min-w-0">
                         <div class="ds-caption truncate">PT collection</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['month_collected'], 0) }}</div>
+                        <div class="ds-kpi mt-1.5 truncate">{{ $currency }}{{ number_format($ptFin['month_collected'], 0) }}</div>
                         <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['active_packages_count'] }} active {{ $ptFin['active_packages_count'] === 1 ? 'package' : 'packages' }}</div>
                     </div>
-                    <div class="bg-surface p-4 min-w-0">
+                    <div class="bg-surface p-5 min-w-0">
                         <div class="ds-caption truncate">Gym net profit</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['total_gym_profit'], 0) }}</div>
+                        <div class="ds-kpi mt-1.5 truncate">{{ $currency }}{{ number_format($ptFin['total_gym_profit'], 0) }}</div>
                         <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['gym_share_percent'] }}% gym share</div>
                     </div>
-                    <div class="bg-surface p-4 min-w-0">
+                    <div class="bg-surface p-5 min-w-0">
                         <div class="ds-caption truncate">Trainer payouts</div>
-                        <div class="ds-kpi mt-1 truncate">{{ $currency }}{{ number_format($ptFin['total_trainer_commission'], 0) }}</div>
+                        <div class="ds-kpi mt-1.5 truncate">{{ $currency }}{{ number_format($ptFin['total_trainer_commission'], 0) }}</div>
                         <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['trainer_share_percent'] }}% trainer share</div>
                     </div>
-                    <div class="bg-surface p-4 min-w-0">
+                    <div class="bg-surface p-5 min-w-0">
                         <div class="ds-caption truncate">Pending dues</div>
-                        <div class="ds-kpi mt-1 truncate {{ $ptFin['pending_dues'] > 0 ? '!text-warning' : '' }}">{{ $currency }}{{ number_format($ptFin['pending_dues'], 0) }}</div>
+                        <div class="ds-kpi mt-1.5 truncate {{ $ptFin['pending_dues'] > 0 ? '!text-warning' : '' }}">{{ $currency }}{{ number_format($ptFin['pending_dues'], 0) }}</div>
                         <div class="text-xs text-fg-subtle mt-1">{{ $ptFin['pending_dues'] > 0 ? 'To collect' : 'Cleared' }}</div>
                     </div>
                 </div>

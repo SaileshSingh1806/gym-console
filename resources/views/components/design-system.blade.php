@@ -87,6 +87,16 @@
         border: 1px solid rgb(var(--c-line));
         border-radius: 12px;
     }
+    /* KPI cell (used inside .ds-stat-grid) — self-contained, does not rely on utility classes */
+    .ds-stat {
+        display: block; width: 100%; min-width: 0; text-align: left;
+        padding: 20px 22px; background: rgb(var(--c-surface)); border: 0; font: inherit;
+        color: inherit; text-decoration: none; cursor: pointer;
+        transition: background-color .15s ease;
+    }
+    .ds-stat:hover { background: rgb(var(--c-raised) / 0.6); }
+    .ds-stat-label { display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; font-weight: 500; color: rgb(var(--c-fg-muted)); }
+    .ds-stat-value { display: block; margin-top: 6px; font-size: 30px; line-height: 38px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: rgb(var(--c-fg)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .ds-card-link { transition: border-color .15s ease, background-color .15s ease; }
     .ds-card-link:hover { border-color: rgb(var(--c-line-strong)); background: rgb(var(--c-raised) / 0.6); }
 
@@ -134,7 +144,7 @@
     .ds-title   { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; color: rgb(var(--c-fg)); }
     .ds-heading { font-size: 14px; line-height: 20px; font-weight: 600; color: rgb(var(--c-fg)); }
     .ds-caption { font-size: 12px; line-height: 16px; font-weight: 500; color: rgb(var(--c-fg-muted)); }
-    .ds-kpi     { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: rgb(var(--c-fg)); }
+    .ds-kpi     { font-size: 28px; line-height: 36px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: rgb(var(--c-fg)); }
 
     /* ───────── Sidebar navigation ───────── */
     .ds-nav-section { padding: 18px 10px 6px; font-size: 12px; line-height: 16px; font-weight: 500; color: rgb(var(--c-fg-subtle)); }

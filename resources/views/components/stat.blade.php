@@ -10,12 +10,12 @@
     $dot = ['warning' => 'text-warning', 'danger' => 'text-danger'][$tone] ?? 'text-fg-subtle';
 @endphp
 <{{ $tag }} @if($href) href="{{ $href }}" @else type="button" @endif
-    {{ $attributes->class(['block w-full bg-surface p-4 text-left transition-colors hover:bg-raised/60 cursor-pointer']) }}>
-    <span class="flex items-center gap-1.5 ds-caption">
+    {{ $attributes->class(['ds-stat']) }}>
+    <span class="ds-stat-label">
         <span class="truncate">{{ $label }}</span>
         @if($flag)
             <span class="ds-dot {{ $dot }} shrink-0" aria-hidden="true"></span>
         @endif
     </span>
-    <span class="ds-kpi mt-1 block truncate">{{ $value }}</span>
+    <span class="ds-stat-value">{{ $value }}</span>
 </{{ $tag }}>
