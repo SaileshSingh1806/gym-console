@@ -27,7 +27,7 @@
     </p>
 
     <!-- OTP Code Highlight Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 26px 20px; margin: 24px 0; text-align: center;">
+    <div style="background-color: #151618; border: 1px solid #334155; border-radius: 16px; padding: 26px 20px; margin: 24px 0; text-align: center;">
         <span style="display: block; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">
             ONE-TIME VERIFICATION CODE
         </span>
