@@ -136,25 +136,25 @@
     }" class="space-y-5 sm:space-y-6">
 
         <!-- ==================== TOP NAVIGATION BAR & TABS ==================== -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line dark:border-line pb-3">
             <div class="flex items-center gap-2 flex-wrap">
                 <!-- Staff Tab (Active) -->
                 <a href="{{ route('app.staff.index') }}" 
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-accent text-accent-on ops-primary">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     <span>Staff Members</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 dark:bg-slate-950/60 font-black">{{ $totalStaff }}</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-xs bg-white/20 dark:bg-slate-950/60 font-semibold">{{ $totalStaff }}</span>
                 </a>
 
                 <!-- Roles & Permissions Tab -->
                 <a href="{{ route('app.roles.index') }}" 
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 bg-surface dark:bg-surface text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-fg hover:bg-raised dark:hover:bg-raised border border-line dark:border-line">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     <span>Roles & Permissions</span>
                 </a>
 
                 @if(isset($staffQuota))
-                <span class="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold font-mono flex items-center gap-1.5">
+                <span class="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-semibold font-mono flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full {{ $staffQuota['allowed'] ? 'bg-emerald-500 dark:bg-emerald-400' : 'bg-amber-500 dark:bg-amber-400' }}"></span>
                     <span>Staff Quota: {{ $staffQuota['current'] }}/{{ $staffQuota['limit'] == -1 ? 'Unlimited' : $staffQuota['limit'] }}</span>
                 </span>
@@ -165,14 +165,14 @@
             <div class="flex items-center gap-2">
                 @if(isset($staffQuota) && ! $staffQuota['allowed'])
                     <a href="{{ route('app.subscription.index') }}" 
-                       class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-all whitespace-nowrap">
+                       class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all whitespace-nowrap">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span>Upgrade for More Staff</span>
                     </a>
                 @else
                     <button type="button" 
                             @click="openAddStaff()" 
-                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all cursor-pointer whitespace-nowrap">
+                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ops-primary">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span>Add Staff</span>
                     </button>
@@ -183,10 +183,10 @@
         <!-- ==================== TOP KPI STATS BANNER ==================== -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <!-- Total Staff -->
-            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div class="p-3.5 sm:p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Total Team</span>
-                    <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-0.5 block">{{ $totalStaff }}</span>
+                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Total Team</span>
+                    <span class="text-xl sm:text-2xl font-semibold text-fg dark:text-white mt-0.5 block">{{ $totalStaff }}</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -194,10 +194,10 @@
             </div>
 
             <!-- Active Staff -->
-            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div class="p-3.5 sm:p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Active Access</span>
-                    <span class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">{{ $activeStaff }}</span>
+                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Active Access</span>
+                    <span class="text-xl sm:text-2xl font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5 block">{{ $activeStaff }}</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -205,10 +205,10 @@
             </div>
 
             <!-- Managers & Front Desk -->
-            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div class="p-3.5 sm:p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Managers & Desk</span>
-                    <span class="text-xl sm:text-2xl font-black text-sky-600 dark:text-sky-400 mt-0.5 block">{{ $managerStaff }}</span>
+                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Managers & Desk</span>
+                    <span class="text-xl sm:text-2xl font-semibold text-sky-600 dark:text-sky-400 mt-0.5 block">{{ $managerStaff }}</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -216,10 +216,10 @@
             </div>
 
             <!-- Trainers & Coaches -->
-            <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+            <div class="p-3.5 sm:p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Trainers / Coaches</span>
-                    <span class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">{{ $trainerStaff }}</span>
+                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Trainers / Coaches</span>
+                    <span class="text-xl sm:text-2xl font-semibold text-amber-600 dark:text-amber-400 mt-0.5 block">{{ $trainerStaff }}</span>
                 </div>
                 <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -228,24 +228,24 @@
         </div>
 
         <!-- ==================== FILTER TOOLBAR ==================== -->
-        <form method="GET" action="{{ route('app.staff.index') }}" class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5">
+        <form method="GET" action="{{ route('app.staff.index') }}" class="p-3.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5">
             <!-- Search Bar -->
             <div class="flex-1 min-w-[200px] relative">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-fg-muted dark:text-fg-muted">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 <input type="text" 
                        name="search" 
                        value="{{ request('search') }}" 
                        placeholder="Search staff name, email, phone, employee ID..." 
-                       class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                       class="w-full pl-10 pr-4 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none transition-colors">
             </div>
 
             <!-- Role Dropdown -->
             <div class="w-full sm:w-auto">
                 <select name="role" 
                         onchange="this.form.submit()" 
-                        class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                        class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                     <option value="all" {{ request('role') === 'all' || !request('role') ? 'selected' : '' }}>All Roles</option>
                     <option value="gym_owner" {{ request('role') === 'gym_owner' ? 'selected' : '' }}>Gym Owner</option>
                     <option value="gym_manager" {{ request('role') === 'gym_manager' ? 'selected' : '' }}>Gym Manager</option>
@@ -267,7 +267,7 @@
             <div class="w-full sm:w-auto">
                 <select name="status" 
                         onchange="this.form.submit()" 
-                        class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                        class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                     <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Status</option>
                     <option value="ACTIVE" {{ request('status') === 'ACTIVE' ? 'selected' : '' }}>Active</option>
                     <option value="SUSPENDED" {{ request('status') === 'SUSPENDED' ? 'selected' : '' }}>Suspended</option>
@@ -276,17 +276,17 @@
             </div>
 
             @if(request('search') || (request('role') && request('role') !== 'all') || (request('status') && request('status') !== 'all'))
-                <a href="{{ route('app.staff.index') }}" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white text-xs font-bold text-center transition-all">
+                <a href="{{ route('app.staff.index') }}" class="px-3.5 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white text-xs font-semibold text-center transition-all">
                     Reset
                 </a>
             @endif
         </form>
 
         <!-- ==================== STAFF DIRECTORY LIST / TABLE ==================== -->
-        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             
             <!-- Mobile Card View (md:hidden) -->
-            <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-800/60">
+            <div class="md:hidden divide-y divide-line dark:divide-line">
                 @forelse($staffMembers as $u)
                     @php
                         $meta = $u->metadata ?? [];
@@ -320,17 +320,17 @@
                     <div class="p-4 space-y-3">
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-white text-sm shrink-0 shadow-sm">
+                                <div class="w-10 h-10 rounded-full bg-raised dark:bg-raised border border-line dark:border-line flex items-center justify-center font-semibold text-fg-muted dark:text-white text-sm shrink-0">
                                     {{ strtoupper(substr($u->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0">
-                                    <div class="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-1.5 truncate">
+                                    <div class="font-semibold text-fg dark:text-white text-sm flex items-center gap-1.5 truncate">
                                         <span class="truncate">{{ $u->name }}</span>
                                         @if($u->id === auth()->id())
-                                            <span class="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-[9px] font-bold border border-indigo-200 dark:border-indigo-500/30 shrink-0">You</span>
+                                            <span class="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-xs font-semibold border border-indigo-200 dark:border-indigo-500/30 shrink-0">You</span>
                                         @endif
                                     </div>
-                                    <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{{ $meta['designation'] ?? 'General Staff' }}</div>
+                                    <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5 truncate">{{ $meta['designation'] ?? 'General Staff' }}</div>
                                 </div>
                             </div>
                             
@@ -340,41 +340,41 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-                            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block">Emp ID &amp; Phone</span>
-                                <div class="font-mono font-semibold text-slate-800 dark:text-slate-200 mt-0.5 truncate">{{ $empId }}</div>
-                                <div class="font-mono text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ $u->phone ?: 'No phone' }}</div>
+                            <div class="p-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line">
+                                <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Emp ID &amp; Phone</span>
+                                <div class="font-mono font-semibold text-fg dark:text-fg mt-0.5 truncate">{{ $empId }}</div>
+                                <div class="font-mono text-xs text-fg-muted dark:text-fg-muted truncate">{{ $u->phone ?: 'No phone' }}</div>
                             </div>
-                            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block">Salary &amp; Access</span>
-                                <div class="font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                            <div class="p-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line">
+                                <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">Salary &amp; Access</span>
+                                <div class="font-mono font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
                                     {{ $salaryVal !== null ? ($currency . number_format($salaryVal, 2)) : '—' }}
                                 </div>
                                 <div class="mt-0.5">
                                     @if($canLogin)
-                                        <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">✓ Login On</span>
+                                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">✓ Login On</span>
                                     @else
-                                        <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">✕ Login Off</span>
+                                        <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">✕ Login Off</span>
                                     @endif
-                                    <span class="text-[10px] text-slate-400 mx-1">•</span>
+                                    <span class="text-xs text-fg-muted mx-1">•</span>
                                     <span class="text-[10px] font-bold {{ $u->status === 'ACTIVE' ? 'text-emerald-600 dark:text-emerald-400' : ($u->status === 'SUSPENDED' ? 'text-rose-600' : 'text-slate-400') }}">{{ ucfirst(strtolower($u->status ?? 'Active')) }}</span>
                                 </div>
                             </div>
                         </div>
 
                         @if(!empty($branchList))
-                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <div class="text-xs text-fg-muted dark:text-fg-muted flex items-center gap-1">
                                 <span>📍</span>
                                 <span class="truncate">{{ $branchList }}</span>
                             </div>
                         @endif
 
                         <!-- Action Buttons -->
-                        <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                        <div class="flex items-center justify-end gap-1.5 pt-2 border-t border-line dark:border-line">
                             <!-- Edit Button -->
                             <button type="button" 
                                     @click="openEditStaff({{ json_encode($u) }}, {{ json_encode($meta) }}, {{ json_encode($branchIds) }})"
-                                    class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1 border border-slate-200 dark:border-slate-700 transition-colors">
+                                    class="px-2.5 py-1.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg text-xs font-semibold flex items-center gap-1 border border-line dark:border-line transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                 <span>Edit</span>
                             </button>
@@ -382,7 +382,7 @@
                             <!-- Reset Password -->
                             <button type="button" 
                                     @click="openPasswordModal({{ $u->id }}, '{{ addslashes($u->name) }}')"
-                                    class="p-1.5 rounded-xl bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-slate-700 transition-colors"
+                                    class="p-1.5 rounded-xl bg-amber-50 dark:bg-raised hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-line transition-colors"
                                     title="Reset Password">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                             </button>
@@ -392,7 +392,7 @@
                                 <form action="{{ route('app.staff.toggle-status', $u->id) }}" method="POST" class="inline">
                                     @csrf
                                     <button type="submit" 
-                                            class="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors"
+                                            class="p-1.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line transition-colors"
                                             title="{{ $u->status === 'ACTIVE' ? 'Suspend Staff' : 'Activate Staff' }}">
                                         @if($u->status === 'ACTIVE')
                                             <svg class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
@@ -412,7 +412,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" 
-                                            class="p-1.5 rounded-xl bg-rose-50 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-slate-700 transition-colors"
+                                            class="p-1.5 rounded-xl bg-rose-50 dark:bg-raised hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-line transition-colors"
                                             title="Delete Staff">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
@@ -421,10 +421,10 @@
                         </div>
                     </div>
                 @empty
-                    <div class="p-8 text-center text-slate-500">
+                    <div class="p-8 text-center text-fg-muted">
                         <div class="text-3xl mb-2">👥</div>
-                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-400">No staff members found.</p>
-                        <p class="text-xs text-slate-500 mt-1">Tap "+ Add Staff" to add team members.</p>
+                        <p class="text-sm font-semibold text-fg-muted dark:text-fg-muted">No staff members found.</p>
+                        <p class="text-xs text-fg-muted mt-1">Tap "+ Add Staff" to add team members.</p>
                     </div>
                 @endforelse
             </div>
@@ -432,7 +432,7 @@
             <!-- Desktop Table View (hidden md:block) -->
             <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <thead class="bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line text-xs font-semibold text-fg-muted dark:text-fg-muted">
                         <tr>
                             <th class="py-3.5 px-4">NAME</th>
                             <th class="py-3.5 px-4">EMPLOYEE ID</th>
@@ -445,7 +445,7 @@
                             <th class="py-3.5 px-4 text-right">ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                    <tbody class="divide-y divide-line dark:divide-line text-fg-muted dark:text-fg-muted">
                         @forelse($staffMembers as $u)
                             @php
                                 $meta = $u->metadata ?? [];
@@ -476,22 +476,22 @@
                                 $canLogin = !isset($meta['can_login']) || $meta['can_login'];
                                 $salaryVal = isset($meta['monthly_salary']) && floatval($meta['monthly_salary']) > 0 ? (float)$meta['monthly_salary'] : null;
                             @endphp
-                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                            <tr class="hover:bg-raised dark:hover:bg-raised transition-colors">
                                 <!-- NAME -->
                                 <td class="py-3.5 px-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-white text-xs shrink-0 shadow-sm">
+                                        <div class="w-8 h-8 rounded-full bg-raised dark:bg-raised border border-line dark:border-line flex items-center justify-center font-semibold text-fg-muted dark:text-white text-xs shrink-0">
                                             {{ strtoupper(substr($u->name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div class="font-bold text-slate-900 dark:text-white text-xs flex items-center gap-1.5">
+                                            <div class="font-semibold text-fg dark:text-white text-xs flex items-center gap-1.5">
                                                 <span>{{ $u->name }}</span>
                                                 @if($u->id === auth()->id())
-                                                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-[9px] font-bold border border-indigo-200 dark:border-indigo-500/30">You</span>
+                                                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 text-xs font-semibold border border-indigo-200 dark:border-indigo-500/30">You</span>
                                                 @endif
                                             </div>
                                             @if(!empty($branchList))
-                                                <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $branchList }}</div>
+                                                <div class="text-xs text-fg-muted dark:text-fg-muted">{{ $branchList }}</div>
                                             @endif
                                         </div>
                                     </div>
@@ -500,11 +500,11 @@
                                 <!-- EMPLOYEE ID -->
                                 <td class="py-3.5 px-4">
                                     @if(!empty($empId))
-                                        <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 font-mono text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                        <span class="px-2 py-0.5 rounded bg-raised dark:bg-raised border border-line dark:border-line font-mono text-xs font-semibold text-fg-muted dark:text-fg-muted">
                                             {{ $empId }}
                                         </span>
                                     @else
-                                        <span class="text-slate-400">—</span>
+                                        <span class="text-fg-muted">—</span>
                                     @endif
                                 </td>
 
@@ -516,32 +516,32 @@
                                 </td>
 
                                 <!-- DESIGNATION -->
-                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300 text-xs">
+                                <td class="py-3.5 px-4 text-fg-muted dark:text-fg-muted text-xs">
                                     {{ $meta['designation'] ?? '—' }}
                                 </td>
 
                                 <!-- PHONE -->
-                                <td class="py-3.5 px-4 text-slate-600 dark:text-slate-300 font-mono text-xs">
+                                <td class="py-3.5 px-4 text-fg-muted dark:text-fg-muted font-mono text-xs">
                                     {{ $u->phone ?: '—' }}
                                 </td>
 
                                 <!-- SALARY -->
-                                <td class="py-3.5 px-4 font-mono text-xs text-slate-800 dark:text-slate-200">
+                                <td class="py-3.5 px-4 font-mono text-xs text-fg dark:text-fg">
                                     @if($salaryVal !== null)
                                         {{ $currency }}{{ number_format($salaryVal, 2) }}
                                     @else
-                                        <span class="text-slate-400">—</span>
+                                        <span class="text-fg-muted">—</span>
                                     @endif
                                 </td>
 
                                 <!-- LOGIN -->
                                 <td class="py-3.5 px-4">
                                     @if($canLogin)
-                                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] inline-flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold text-xs inline-flex items-center gap-1">
                                             ✓ On
                                         </span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-[10px] inline-flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-raised dark:bg-raised border border-line dark:border-line text-fg-muted dark:text-fg-muted font-semibold text-xs inline-flex items-center gap-1">
                                             ✕ Off
                                         </span>
                                     @endif
@@ -550,15 +550,15 @@
                                 <!-- STATUS -->
                                 <td class="py-3.5 px-4">
                                     @if($u->status === 'ACTIVE')
-                                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-[10px]">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold text-xs">
                                             Active
                                         </span>
                                     @elseif($u->status === 'SUSPENDED')
-                                        <span class="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-bold text-[10px]">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-semibold text-xs">
                                             Suspended
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold text-[10px]">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-raised dark:bg-raised border border-line dark:border-line text-fg-muted dark:text-fg-muted font-semibold text-xs">
                                             Inactive
                                         </span>
                                     @endif
@@ -571,7 +571,7 @@
                                         <button type="button" 
                                                 @click="openEditStaff({{ json_encode($u) }}, {{ json_encode($meta) }}, {{ json_encode($branchIds) }})"
                                                 title="Edit Staff Member" 
-                                                class="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer border border-slate-200 dark:border-slate-700">
+                                                class="p-1.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white transition-colors cursor-pointer border border-line dark:border-line">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                         </button>
 
@@ -579,7 +579,7 @@
                                         <button type="button" 
                                                 @click="openPasswordModal({{ $u->id }}, '{{ addslashes($u->name) }}')"
                                                 title="Reset Password" 
-                                                class="p-1.5 rounded-xl bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer border border-amber-200 dark:border-slate-700">
+                                                class="p-1.5 rounded-xl bg-amber-50 dark:bg-raised hover:bg-amber-100 dark:hover:bg-slate-700 text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer border border-amber-200 dark:border-line">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                                         </button>
 
@@ -589,7 +589,7 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         title="{{ $u->status === 'ACTIVE' ? 'Suspend Staff Account' : 'Activate Staff Account' }}" 
-                                                        class="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer border border-slate-200 dark:border-slate-700">
+                                                        class="p-1.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white transition-colors cursor-pointer border border-line dark:border-line">
                                                     @if($u->status === 'ACTIVE')
                                                         <svg class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                                     @else
@@ -609,7 +609,7 @@
                                                 @method('DELETE')
                                                 <button type="submit" 
                                                         title="Delete Staff Member" 
-                                                        class="p-1.5 rounded-xl bg-rose-50 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer border border-rose-200 dark:border-slate-700">
+                                                        class="p-1.5 rounded-xl bg-rose-50 dark:bg-raised hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 transition-colors cursor-pointer border border-rose-200 dark:border-line">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>
                                             </form>
@@ -619,10 +619,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="py-12 text-center text-slate-500">
+                                <td colspan="9" class="py-12 text-center text-fg-muted">
                                     <div class="text-3xl mb-2">👥</div>
-                                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-400">No staff members found.</p>
-                                    <p class="text-xs text-slate-500 mt-1">Click "+ Add Staff" to add front desk, trainers, or managers.</p>
+                                    <p class="text-sm font-semibold text-fg-muted dark:text-fg-muted">No staff members found.</p>
+                                    <p class="text-xs text-fg-muted mt-1">Click "+ Add Staff" to add front desk, trainers, or managers.</p>
                                 </td>
                             </tr>
                         @endforelse
@@ -631,7 +631,7 @@
             </div>
 
             @if($staffMembers->hasPages())
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
+                <div class="p-4 border-t border-line dark:border-line bg-raised dark:bg-slate-950/40">
                     {{ $staffMembers->links() }}
                 </div>
             @endif
@@ -644,20 +644,20 @@
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" 
              x-cloak>
             
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl relative text-slate-900 dark:text-slate-200" 
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 relative text-fg dark:text-fg" 
                  @click.away="showAddStaffModal = false; showEditStaffModal = false">
                 
                 <!-- Close Button -->
                 <button type="button" 
                         @click="showAddStaffModal = false; showEditStaffModal = false" 
-                        class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-20 cursor-pointer" 
+                        class="absolute top-4 right-4 p-2 rounded-xl text-fg-muted hover:text-fg-muted dark:hover:text-white hover:bg-raised dark:hover:bg-raised transition-colors z-20 cursor-pointer" 
                         title="Close modal">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
 
                 <!-- Title Bar -->
-                <div class="border-b border-slate-200 dark:border-slate-800 pb-3 mb-5">
-                    <h2 class="text-base font-extrabold text-slate-900 dark:text-white" x-text="showEditStaffModal ? 'Edit Staff Member' : 'Add Staff Member'"></h2>
+                <div class="border-b border-line dark:border-line pb-3 mb-5">
+                    <h2 class="text-base font-semibold text-fg dark:text-white" x-text="showEditStaffModal ? 'Edit Staff Member' : 'Add Staff Member'"></h2>
                 </div>
 
                 <form :action="showEditStaffModal ? ('{{ url('app/staff') }}/' + staffForm.id) : '{{ route('app.staff.store') }}'" 
@@ -669,48 +669,48 @@
 
                     <!-- 1. BASIC INFO SECTION -->
                     <div class="space-y-3">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">BASIC INFO</h4>
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">BASIC INFO</h4>
                         
                         <!-- Row 1: Full Name, Phone, Email -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name <span class="text-rose-500">*</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Full Name <span class="text-rose-500">*</span></label>
                                 <input type="text" 
                                        name="name" 
                                        x-model="staffForm.name" 
                                        required 
                                        placeholder="e.g. Rahul Sharma" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none transition-colors">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phone <span class="text-rose-500">*</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Phone <span class="text-rose-500">*</span></label>
                                 <input type="text" 
                                        name="phone" 
                                        x-model="staffForm.phone" 
                                        required 
                                        placeholder="10-digit phone" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none transition-colors">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email <span class="text-slate-400 text-[10px] font-normal">(Optional)</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Email <span class="text-fg-muted text-xs font-normal">(Optional)</span></label>
                                 <input type="email" 
                                        name="email" 
                                        x-model="staffForm.email" 
                                        placeholder="email@example.com" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none transition-colors">
                             </div>
                         </div>
 
                         <!-- Row 2: Role, Login Access Checkbox, Status -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 items-center pt-1">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Role <span class="text-rose-500">*</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Role <span class="text-rose-500">*</span></label>
                                 <select name="role" 
                                         x-model="staffForm.role" 
                                         required 
-                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                                     <optgroup label="Standard Roles">
                                         <option value="receptionist">Receptionist</option>
                                         <option value="sales">Sales Executive</option>
@@ -733,23 +733,23 @@
 
                             <!-- Login Access Checkbox -->
                             <div class="pt-2 sm:pt-0">
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Login Access</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Login Access</label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" 
                                            name="can_login" 
                                            value="1" 
                                            x-model="staffForm.can_login" 
-                                           class="w-4 h-4 rounded border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="text-xs font-medium text-slate-800 dark:text-slate-200">Can log in to portal</span>
+                                           class="w-4 h-4 rounded border-line dark:border-line bg-surface dark:bg-surface text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-xs font-medium text-fg dark:text-fg">Can log in to portal</span>
                                 </label>
-                                <p class="text-[10px] text-slate-500 mt-0.5">Disable for non-login staff</p>
+                                <p class="text-xs text-fg-muted mt-0.5">Disable for non-login staff</p>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Status</label>
                                 <select name="status" 
                                         x-model="staffForm.status" 
-                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-semibold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                                     <option value="ACTIVE">Active</option>
                                     <option value="INACTIVE">Inactive</option>
                                     <option value="SUSPENDED">Suspended</option>
@@ -759,7 +759,7 @@
 
                         <!-- Optional Password Input when login access is enabled -->
                         <div x-show="staffForm.can_login" class="pt-1">
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">
                                 <span x-text="showEditStaffModal ? 'Password (Leave blank to keep unchanged)' : 'Login Password'"></span>
                             </label>
                             <input type="password" 
@@ -767,71 +767,71 @@
                                    x-model="staffForm.password" 
                                    :required="!showEditStaffModal && staffForm.can_login" 
                                    placeholder="Minimum 6 characters" 
-                                   class="w-full sm:w-80 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                   class="w-full sm:w-80 px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
                     <!-- 2. EMPLOYMENT SECTION -->
-                    <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">EMPLOYMENT</h4>
+                    <div class="space-y-3 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">EMPLOYMENT</h4>
                         
                         <!-- Row 1: Employee ID, Device Emp No, Maid ID -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Employee ID</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Employee ID</label>
                                 <input type="text" 
                                        name="employee_id" 
                                        x-model="staffForm.employee_id" 
                                        placeholder="EMP003" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
-                                <p class="text-[10px] text-slate-500 mt-0.5">Auto-generated if left empty</p>
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
+                                <p class="text-xs text-fg-muted mt-0.5">Auto-generated if left empty</p>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Device Emp No <span class="text-slate-400 text-[10px]">(eSSL)</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Device Emp No <span class="text-fg-muted text-xs">(eSSL)</span></label>
                                 <input type="text" 
                                        name="device_emp_no" 
                                        x-model="staffForm.device_emp_no" 
                                        placeholder="e.g. 4" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
-                                <p class="text-[10px] text-slate-500 mt-0.5">Number registered on biometric device</p>
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
+                                <p class="text-xs text-fg-muted mt-0.5">Number registered on biometric device</p>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Maid ID <span class="text-slate-400 text-[10px]">(Optional)</span></label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Maid ID <span class="text-fg-muted text-xs">(Optional)</span></label>
                                 <input type="text" 
                                        name="maid_id" 
                                        x-model="staffForm.maid_id" 
                                        placeholder="" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                             </div>
                         </div>
 
                         <!-- Row 2: Designation, Department, Employee Category, Joining Date -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Designation</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Designation</label>
                                 <input type="text" 
                                        name="designation" 
                                        x-model="staffForm.designation" 
                                        placeholder="e.g. Trainer, Housekeeping" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Department</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Department</label>
                                 <input type="text" 
                                        name="department" 
                                        x-model="staffForm.department" 
                                        placeholder="" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Employee Category</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Employee Category</label>
                                 <select name="employee_category" 
                                         x-model="staffForm.employee_category" 
-                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none cursor-pointer">
                                     <option value="">Select</option>
                                     <option value="Full Time">Full Time</option>
                                     <option value="Part Time">Part Time</option>
@@ -843,34 +843,34 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Joining Date</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Joining Date</label>
                                 <input type="date" 
                                        name="joining_date" 
                                        x-model="staffForm.joining_date" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-mono focus:border-accent focus:outline-none">
                             </div>
                         </div>
                     </div>
 
                     <!-- 3. SALARY SECTION -->
-                    <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">SALARY</h4>
+                    <div class="space-y-3 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">SALARY</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Monthly Salary</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Monthly Salary</label>
                                 <input type="number" 
                                        step="0.01" 
                                        name="monthly_salary" 
                                        x-model="staffForm.monthly_salary" 
                                        placeholder="0.00" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white font-mono text-xs focus:border-accent focus:outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Payout Type</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Payout Type</label>
                                 <select name="payout_type" 
                                         x-model="staffForm.payout_type" 
-                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none cursor-pointer">
                                     <option value="">Select</option>
                                     <option value="Fixed Monthly">Fixed Monthly</option>
                                     <option value="Hourly / Session Based">Hourly / Session Based</option>
@@ -883,42 +883,42 @@
 
                         <!-- Monthly Sales & Admission Targets -->
                         <div class="p-3 rounded-xl bg-indigo-50/60 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/10 space-y-2 mt-2">
-                            <div class="flex items-center gap-1.5 text-[11px] font-extrabold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider">
+                            <div class="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
                                 <span>🎯 Monthly Sales &amp; Admission Targets</span>
-                                <span class="text-[9px] font-normal text-slate-500 dark:text-slate-400 lowercase">(optional)</span>
+                                <span class="text-xs font-normal text-fg-muted dark:text-fg-muted lowercase">(optional)</span>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Monthly Revenue Target (₹)</label>
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Monthly Revenue Target (₹)</label>
                                     <input type="number" 
                                            step="100" 
                                            name="monthly_sales_target" 
                                            x-model="staffForm.monthly_sales_target" 
                                            placeholder="e.g. 100000" 
-                                           class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg font-mono text-xs focus:border-accent focus:outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Monthly Admissions Target (Qty)</label>
+                                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Monthly Admissions Target (Qty)</label>
                                     <input type="number" 
                                            step="1" 
                                            name="monthly_admissions_target" 
                                            x-model="staffForm.monthly_admissions_target" 
                                            placeholder="e.g. 20" 
-                                           class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white font-mono text-xs focus:border-indigo-500 focus:outline-none">
+                                           class="w-full px-3 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg font-mono text-xs focus:border-accent focus:outline-none">
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 4. PERSONAL SECTION -->
-                    <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">PERSONAL</h4>
+                    <div class="space-y-3 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">PERSONAL</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Gender</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Gender</label>
                                 <select name="gender" 
                                         x-model="staffForm.gender" 
-                                        class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                        class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none cursor-pointer">
                                     <option value="">Select</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
@@ -931,52 +931,52 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Anniversary</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Anniversary</label>
                                 <input type="date" 
                                        name="anniversary" 
                                        x-model="staffForm.anniversary" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-mono focus:border-accent focus:outline-none">
                             </div>
                         </div>
                     </div>
 
                     <!-- 5. BANKING SECTION -->
-                    <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">BANKING</h4>
+                    <div class="space-y-3 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">BANKING</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">PAN Card</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">PAN Card</label>
                                 <input type="text" 
                                        name="pan_card" 
                                        x-model="staffForm.pan_card" 
                                        placeholder="ABCDE1234F" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono uppercase focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-mono focus:border-accent focus:outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Bank Account No.</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Bank Account No.</label>
                                 <input type="text" 
                                        name="bank_account_no" 
                                        x-model="staffForm.bank_account_no" 
                                        placeholder="Account number" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-mono focus:border-accent focus:outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Bank IFSC</label>
+                                <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Bank IFSC</label>
                                 <input type="text" 
                                        name="bank_ifsc" 
                                        x-model="staffForm.bank_ifsc" 
                                        placeholder="E.G. SBIN0001234" 
-                                       class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono uppercase focus:border-indigo-500 focus:outline-none">
+                                       class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-mono focus:border-accent focus:outline-none">
                             </div>
                         </div>
                     </div>
 
                     <!-- 6. BRANCHES SECTION -->
-                    <div class="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">BRANCHES</h4>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Assign Branches</label>
+                    <div class="space-y-2 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">BRANCHES</h4>
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1.5">Assign Branches</label>
 
                         <div class="space-y-2">
                             <template x-for="b in allBranches" :key="b.id">
@@ -991,51 +991,51 @@
                                         <span x-text="b.name"></span>
                                     </div>
 
-                                    <div x-show="staffForm.selected_branches.includes(b.id)" class="text-indigo-600 dark:text-indigo-400 text-xs font-bold">
+                                    <div x-show="staffForm.selected_branches.includes(b.id)" class="text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
                                         ✓
                                     </div>
                                     <input type="checkbox" name="branches[]" :value="b.id" :checked="staffForm.selected_branches.includes(b.id)" class="hidden">
                                 </div>
                             </template>
                         </div>
-                        <p class="text-[10px] text-slate-500 mt-1">Select all branches this staff member works at</p>
+                        <p class="text-xs text-fg-muted mt-1">Select all branches this staff member works at</p>
                     </div>
 
                     <!-- 7. OTHER SECTION -->
-                    <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <h4 class="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">OTHER</h4>
+                    <div class="space-y-3 pt-3 border-t border-line dark:border-line">
+                        <h4 class="text-xs font-semibold text-fg-muted dark:text-fg-muted">OTHER</h4>
                         
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Address</label>
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Address</label>
                             <textarea name="address" 
                                       x-model="staffForm.address" 
                                       rows="3" 
                                       placeholder="Home address" 
-                                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none transition-colors"></textarea>
+                                      class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none transition-colors"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Notes</label>
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Notes</label>
                             <textarea name="notes" 
                                       x-model="staffForm.notes" 
                                       rows="3" 
                                       placeholder="Any additional notes..." 
-                                      class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 text-xs focus:border-indigo-500 focus:outline-none transition-colors"></textarea>
+                                      class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none transition-colors"></textarea>
                         </div>
                     </div>
 
                     <!-- 8. FOOTER BUTTONS -->
-                    <div class="flex items-center justify-start gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-start gap-3 pt-4 border-t border-line dark:border-line">
                         <button type="button" 
                                 @click="showAddStaffModal = false; showEditStaffModal = false" 
-                                class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-transparent dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer border border-slate-200 dark:border-transparent">
+                                class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 dark:bg-transparent dark:hover:bg-raised text-fg-muted dark:text-fg-muted font-semibold text-xs transition-colors cursor-pointer border border-line dark:border-transparent">
                             Cancel
                         </button>
                         
                         <button type="submit" 
                                 :disabled="isSubmitting"
                                 :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': isSubmitting }"
-                                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                                class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer ops-primary">
                             <svg x-show="!isSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                             <svg x-show="isSubmitting" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             <span x-text="isSubmitting ? 'Saving...' : 'Save'">Save</span>
@@ -1051,43 +1051,43 @@
         <div x-show="showPasswordModal" 
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 dark:bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" 
              x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative text-slate-900 dark:text-slate-200" 
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl max-w-md w-full p-5 sm:p-6 relative text-fg dark:text-fg" 
                  @click.away="showPasswordModal = false">
                 
                 <button type="button" 
                         @click="showPasswordModal = false" 
-                        class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                        class="absolute top-4 right-4 p-2 rounded-xl text-fg-muted hover:text-fg-muted dark:hover:text-white hover:bg-raised dark:hover:bg-raised transition-colors cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
 
-                <div class="border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
-                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <div class="border-b border-line dark:border-line pb-3 mb-4">
+                    <h3 class="text-base font-semibold text-fg dark:text-white flex items-center gap-2">
                         <svg class="w-5 h-5 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                         <span>Reset Password</span>
                     </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Set a new login password for <span class="font-bold text-slate-900 dark:text-white" x-text="passwordStaffName"></span></p>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-1">Set a new login password for <span class="font-semibold text-fg dark:text-white" x-text="passwordStaffName"></span></p>
                 </div>
 
                 <form :action="'{{ url('app/staff') }}/' + passwordStaffId + '/reset-password'" method="POST" class="space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">New Password <span class="text-rose-500">*</span></label>
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">New Password <span class="text-rose-500">*</span></label>
                         <input type="password" 
                                name="password" 
                                required 
                                minlength="6" 
                                placeholder="Minimum 6 characters" 
-                               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none transition-colors">
+                               class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none transition-colors">
                     </div>
 
                     <div class="flex items-center justify-end gap-2.5 pt-2">
                         <button type="button" 
                                 @click="showPasswordModal = false" 
-                                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-transparent hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer border border-slate-200 dark:border-transparent">
+                                class="px-4 py-2 rounded-xl bg-raised dark:bg-transparent hover:bg-slate-200 dark:hover:bg-raised text-fg-muted dark:text-fg-muted font-semibold text-xs transition-colors cursor-pointer border border-line dark:border-transparent">
                             Cancel
                         </button>
                         <button type="submit" 
-                                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer">
+                                class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer ops-primary">
                             <span>Update Password</span>
                         </button>
                     </div>

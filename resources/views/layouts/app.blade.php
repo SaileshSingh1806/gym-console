@@ -939,7 +939,7 @@
         @endif
 
         <!-- Page View Body -->
-        <main class="flex-1 p-3.5 sm:p-5 md:p-8 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-8 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden {{ !$isStealthApp && request()->routeIs('app.*') && !request()->routeIs('app.dashboard', 'app.portal.*', 'app.feedback.member', 'app.invoices.*') ? 'operations-workspace' : '' }}">
             {{ $slot }}
         </main>
     </div>

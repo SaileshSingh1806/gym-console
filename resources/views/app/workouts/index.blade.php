@@ -13,17 +13,17 @@
     <div class="workout-ui-scope space-y-6">
         <!-- Success / Error Alerts -->
         @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <span class="text-sm font-medium">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-semibold p-1 cursor-pointer">Close</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1 cursor-pointer">Close</button>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 shadow-sm">
+            <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400">
                 <div class="font-semibold text-sm mb-1">Please fix the following issues:</div>
                 <ul class="list-disc pl-5 text-xs space-y-1">
                     @foreach($errors->all() as $error)
@@ -36,21 +36,21 @@
         <!-- Top Header & Actions -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
+                <h2 class="text-xl sm:text-2xl font-semibold text-fg dark:text-white tracking-tight">
                     Workout Routines
                 </h2>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Create custom routines or pick exercises from the video library.</p>
+                <p class="text-sm text-fg-muted dark:text-fg-muted mt-1">Create custom routines or pick exercises from the video library.</p>
             </div>
 
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                 <button type="button" onclick="openExerciseLibraryModal()"
-                        class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-800 flex items-center gap-2 transition-all cursor-pointer shadow-sm">
+                        class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg text-xs font-semibold border border-line dark:border-line flex items-center gap-2 transition-all cursor-pointer">
                     <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     <span>Exercise Library</span>
-                    <span class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-semibold tabular-nums">{{ count($exercises ?? []) }}</span>
+                    <span class="px-1.5 py-0.5 rounded-md bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted text-xs font-semibold tabular-nums">{{ count($exercises ?? []) }}</span>
                 </button>
                 <button type="button" onclick="openWorkoutModal()"
-                        class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/20 flex items-center gap-2 transition-all cursor-pointer">
+                        class="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ops-primary">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4"/></svg>
                     <span>Create Workout Routine</span>
                 </button>
@@ -59,38 +59,38 @@
 
         <!-- Summary Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-                <div class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Routines</div>
-                <div class="text-2xl font-semibold text-slate-900 dark:text-white mt-1.5 tabular-nums">{{ $plans->total() }}</div>
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1">All saved programs</div>
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line">
+                <div class="text-xs font-medium text-fg-muted dark:text-fg-muted">Total Routines</div>
+                <div class="text-2xl font-semibold text-fg dark:text-white mt-1.5 tabular-nums">{{ $plans->total() }}</div>
+                <div class="text-xs text-fg-muted dark:text-fg-muted mt-1">All saved programs</div>
             </div>
 
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-                <div class="text-xs font-medium text-slate-500 dark:text-slate-400">Member Assigned</div>
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line">
+                <div class="text-xs font-medium text-fg-muted dark:text-fg-muted">Member Assigned</div>
                 <div class="text-2xl font-semibold text-indigo-600 dark:text-indigo-400 mt-1.5 tabular-nums">{{ $plans->where('is_template', false)->count() }}</div>
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1">Assigned to specific members</div>
+                <div class="text-xs text-fg-muted dark:text-fg-muted mt-1">Assigned to specific members</div>
             </div>
 
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
-                <div class="text-xs font-medium text-slate-500 dark:text-slate-400">Templates</div>
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line">
+                <div class="text-xs font-medium text-fg-muted dark:text-fg-muted">Templates</div>
                 <div class="text-2xl font-semibold text-amber-600 dark:text-amber-400 mt-1.5 tabular-nums">{{ $plans->where('is_template', true)->count() }}</div>
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-1">Reusable splits &amp; master plans</div>
+                <div class="text-xs text-fg-muted dark:text-fg-muted mt-1">Reusable splits &amp; master plans</div>
             </div>
         </div>
 
         <!-- Filter & Search Controls -->
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line">
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
                 <button type="button" onclick="filterWorkouts('all')" id="btnFilterAll"
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all bg-indigo-600 text-white shadow-sm cursor-pointer shrink-0">
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all bg-accent text-accent-on cursor-pointer shrink-0 ops-primary">
                     All Routines ({{ $plans->total() }})
                 </button>
                 <button type="button" onclick="filterWorkouts('member')" id="btnFilterMember"
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0">
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white hover:bg-raised dark:hover:bg-raised cursor-pointer shrink-0">
                     Member Assigned
                 </button>
                 <button type="button" onclick="filterWorkouts('template')" id="btnFilterTemplate"
-                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0">
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white hover:bg-raised dark:hover:bg-raised cursor-pointer shrink-0">
                     Templates Only
                 </button>
             </div>
@@ -98,8 +98,8 @@
             <div class="relative w-full sm:w-72">
                 <input type="text" id="workoutSearchInput" oninput="searchWorkouts()"
                        placeholder="Search routine title or member..."
-                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
-                <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                       class="w-full pl-9 pr-4 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent transition-colors">
+                <svg class="w-4 h-4 text-fg-muted dark:text-fg-muted absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
         </div>
 
@@ -138,31 +138,31 @@
                     }
                 @endphp
 
-                <div class="workout-card p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm"
+                <div class="workout-card p-5 sm:p-6 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col justify-between hover:border-line dark:hover:border-line transition-all"
                      data-plan-type="{{ $plan->is_template ? 'template' : 'member' }}"
                      data-title="{{ strtolower($plan->title) }}"
                      data-member="{{ strtolower($plan->member?->full_name ?? 'template') }}">
                     <div>
                         <!-- Card Header -->
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-4 border-b border-line dark:border-line">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2 mb-1.5 flex-wrap">
                                     @if($plan->is_template)
-                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                             Template
                                         </span>
                                     @else
-                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                                             Member Plan
                                         </span>
                                     @endif
 
-                                    <span class="text-xs text-slate-500 dark:text-slate-400">
-                                        Level: <strong class="text-slate-800 dark:text-slate-200 font-semibold">{{ $formattedLevel }}</strong>
+                                    <span class="text-xs text-fg-muted dark:text-fg-muted">
+                                        Level: <strong class="text-fg dark:text-fg font-semibold">{{ $formattedLevel }}</strong>
                                     </span>
                                 </div>
 
-                                <h4 class="font-semibold text-slate-900 dark:text-white text-base leading-snug">{{ $plan->title }}</h4>
+                                <h4 class="font-semibold text-fg dark:text-white text-base leading-snug">{{ $plan->title }}</h4>
 
                                 @if($isMemberPlan)
                                     <div class="flex items-center gap-2 mt-2">
@@ -173,34 +173,34 @@
                                             {{ $plan->member->full_name }}
                                         </a>
                                         @if($plan->member->phone)
-                                            <span class="text-xs text-slate-400 dark:text-slate-500 tabular-nums">· {{ $plan->member->phone }}</span>
+                                            <span class="text-xs text-fg-muted dark:text-fg-muted tabular-nums">· {{ $plan->member->phone }}</span>
                                         @endif
                                     </div>
                                 @endif
                             </div>
 
                             @if($plan->goal)
-                                <span class="self-start px-2.5 py-1 rounded-lg text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-medium shrink-0">
+                                <span class="self-start px-2.5 py-1 rounded-lg text-xs bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted border border-line dark:border-line font-medium shrink-0">
                                     {{ $formattedGoal }}
                                 </span>
                             @endif
                         </div>
 
                         @if($plan->trainer)
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">Coach: <strong class="text-slate-800 dark:text-slate-200 font-medium">{{ $plan->trainer->full_name }}</strong></p>
+                            <p class="text-xs text-fg-muted dark:text-fg-muted mt-3">Coach: <strong class="text-fg dark:text-fg font-medium">{{ $plan->trainer->full_name }}</strong></p>
                         @endif
 
                         <!-- Exercises List -->
                         <div class="pt-4 mt-1">
                             <div class="flex items-center justify-between mb-2.5">
-                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Exercises ({{ $plan->exercises->count() }})</span>
+                                <span class="text-xs font-medium text-fg-muted dark:text-fg-muted">Exercises ({{ $plan->exercises->count() }})</span>
                             </div>
                             <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
                                 @forelse($plan->exercises as $ex)
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 text-xs">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line text-xs">
                                         <div class="min-w-0 flex-1">
-                                            <div class="font-medium text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
-                                                <span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold shrink-0">
+                                            <div class="font-medium text-fg dark:text-white flex items-center gap-2 flex-wrap">
+                                                <span class="text-xs px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-raised text-fg-muted dark:text-fg-muted font-semibold shrink-0">
                                                     {{ ucwords(str_replace('_', ' ', $ex->day ?? 'Day 1')) }}
                                                 </span>
                                                 <span class="font-semibold truncate">{{ $ex->exercise_name }}</span>
@@ -212,7 +212,7 @@
                                                             data-video-equipment="Demo"
                                                             data-video-notes="{{ $ex->notes ?? '' }}"
                                                             onclick="openExerciseVideoFromTrigger(this)"
-                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 shrink-0 transition-colors cursor-pointer"
+                                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20 shrink-0 transition-colors cursor-pointer"
                                                             title="Watch form demonstration video">
                                                         <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                                         <span>Video</span>
@@ -220,10 +220,10 @@
                                                 @endif
                                             </div>
                                             @if($ex->notes)
-                                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">{{ $ex->notes }}</p>
+                                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-1 line-clamp-1">{{ $ex->notes }}</p>
                                             @endif
                                         </div>
-                                        <div class="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center text-right shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-slate-800 tabular-nums">
+                                        <div class="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center text-right shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-line dark:border-line tabular-nums">
                                             @php
                                                 $isTimedEx = ($ex->tracking_type ?? 'reps') === 'time';
                                                 $durSecEx = (int) ($ex->duration_seconds ?? 0);
@@ -235,7 +235,7 @@
                                                     : ($ex->sets . ' × ' . $ex->reps);
                                             @endphp
                                             <span class="text-amber-600 dark:text-amber-400 font-semibold text-xs">{{ $targetDisplayEx }}</span>
-                                            <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                                            <div class="text-xs text-fg-muted dark:text-fg-muted">
                                                 @if($ex->weight)<span>{{ $ex->weight }}</span>@endif
                                                 @if($ex->weight && $ex->rest_seconds)<span> · </span>@endif
                                                 @if($ex->rest_seconds)<span>{{ $ex->rest_seconds }}s rest</span>@endif
@@ -243,7 +243,7 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="p-4 text-center rounded-xl bg-slate-50 dark:bg-slate-950/40 text-slate-400 text-xs">
+                                    <div class="p-4 text-center rounded-xl bg-raised dark:bg-slate-950/40 text-fg-muted text-xs">
                                         No exercises added to this routine yet.
                                     </div>
                                 @endforelse
@@ -251,19 +251,19 @@
                         </div>
 
                         @if($plan->notes)
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
-                                <span class="font-semibold text-slate-800 dark:text-slate-200 block mb-0.5">Program Notes</span>
+                            <div class="p-3 rounded-xl bg-raised dark:bg-slate-950/80 border border-line dark:border-line text-xs text-fg-muted dark:text-fg-muted mt-3 leading-relaxed">
+                                <span class="font-semibold text-fg dark:text-fg block mb-0.5">Program Notes</span>
                                 {{ $plan->notes }}
                             </div>
                         @endif
                     </div>
 
                     <!-- Footer Actions -->
-                    <div class="border-t border-slate-100 dark:border-slate-800 pt-4 mt-4 flex flex-wrap items-center justify-between gap-2.5">
+                    <div class="border-t border-line dark:border-line pt-4 mt-4 flex flex-wrap items-center justify-between gap-2.5">
                         @if($isMemberPlan && $plan->member?->phone)
                             <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $plan->member->phone) }}?text={{ urlencode($whatsappWorkoutText) }}"
                                target="_blank"
-                               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm">
+                               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors">
                                 <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                                 <span>Share on WhatsApp</span>
                             </a>
@@ -278,7 +278,7 @@
                               data-confirm-type="danger">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-950/60 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5">
+                            <button type="submit" class="px-3.5 py-2 rounded-xl bg-raised hover:bg-rose-50 text-fg-muted hover:text-rose-600 dark:bg-raised dark:hover:bg-rose-950/60 dark:text-fg-muted dark:hover:text-rose-400 border border-line dark:border-line text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 <span>Delete</span>
                             </button>
@@ -286,13 +286,13 @@
                     </div>
                 </div>
             @empty
-                <div class="col-span-full p-12 sm:p-16 text-center bg-white dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm">
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-3">
+                <div class="col-span-full p-12 sm:p-16 text-center bg-surface dark:bg-surface border border-dashed border-line dark:border-line rounded-xl">
+                    <div class="w-14 h-14 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto mb-3">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <h3 class="text-base font-semibold text-slate-900 dark:text-white mb-1">No Workout Routines Yet</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-5">Build a custom routine from scratch or add exercises directly from the video library.</p>
-                    <button type="button" onclick="openWorkoutModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
+                    <h3 class="text-base font-semibold text-fg dark:text-white mb-1">No Workout Routines Yet</h3>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted max-w-sm mx-auto mb-5">Build a custom routine from scratch or add exercises directly from the video library.</p>
+                    <button type="button" onclick="openWorkoutModal()" class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                         Create Workout Routine
                     </button>
                 </div>
@@ -308,33 +308,33 @@
 
     <!-- ==================== CREATE WORKOUT ROUTINE MODAL ==================== -->
     <div id="workoutModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/70 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
+        <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl w-full max-w-5xl overflow-hidden relative my-auto max-h-[92vh] flex flex-col text-fg dark:text-fg">
             <form id="workoutPlanForm" method="POST" action="{{ route('app.workouts.store') }}" class="flex flex-col max-h-[92vh]">
                 @csrf
-                <div class="px-6 py-4 bg-slate-50/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <div class="px-6 py-4 bg-raised dark:bg-slate-950/90 border-b border-line dark:border-line flex items-center justify-between shrink-0">
                     <div class="flex items-center gap-3.5">
                         <div class="w-10 h-10 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white leading-tight">Create Workout Routine</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Build a completely custom workout or insert exercises from the video library.</p>
+                            <h3 class="text-base sm:text-lg font-semibold text-fg dark:text-white leading-tight">Create Workout Routine</h3>
+                            <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Build a completely custom workout or insert exercises from the video library.</p>
                         </div>
                     </div>
-                    <button type="button" onclick="closeWorkoutModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Close">✕</button>
+                    <button type="button" onclick="closeWorkoutModal()" class="w-8 h-8 rounded-lg bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Close">✕</button>
                 </div>
 
                 <div class="p-5 sm:p-7 space-y-6 overflow-y-auto flex-1">
                     <!-- Section 1: Routine Overview -->
-                    <div class="p-5 sm:p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-5">
+                    <div class="p-5 sm:p-6 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line space-y-5">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
-                                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Routine Details</h4>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Set the routine name, goal, difficulty, and optional member assignment.</p>
+                                <h4 class="text-sm font-semibold text-fg dark:text-white">Routine Details</h4>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Set the routine name, goal, difficulty, and optional member assignment.</p>
                             </div>
 
                             <div class="flex items-center gap-2 flex-wrap">
-                                <button type="button" onclick="startBlankWorkout()" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer">
+                                <button type="button" onclick="startBlankWorkout()" class="px-3 py-1.5 rounded-lg bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg text-xs font-medium border border-line dark:border-line transition-colors cursor-pointer">
                                     Start Blank
                                 </button>
                                 <button type="button" onclick="loadWorkoutPreset('push')" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-xs font-medium border border-indigo-500/20 transition-colors cursor-pointer">
@@ -351,14 +351,14 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2 space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Routine Title <span class="text-rose-500">*</span></label>
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Routine Title <span class="text-rose-500">*</span></label>
                                 <input type="text" name="title" id="workoutTitleInput" required placeholder="e.g. Custom 4-Day Upper / Lower Split"
-                                       class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-medium placeholder-slate-400 focus:outline-none focus:border-indigo-500">
+                                       class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm font-medium placeholder-fg-subtle focus:outline-none focus:border-accent">
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Target Goal</label>
-                                <select name="goal" id="workoutGoalInput" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Target Goal</label>
+                                <select name="goal" id="workoutGoalInput" class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                                     <option value="general_fitness">General Fitness</option>
                                     <option value="muscle_gain">Muscle Gain (Hypertrophy)</option>
                                     <option value="weight_loss">Fat Loss &amp; Conditioning</option>
@@ -370,8 +370,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Experience Level</label>
-                                <select name="level" id="workoutLevelInput" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Experience Level</label>
+                                <select name="level" id="workoutLevelInput" class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                                     <option value="beginner">Beginner</option>
                                     <option value="intermediate">Intermediate</option>
                                     <option value="advanced">Advanced</option>
@@ -379,8 +379,8 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Assign to Member</label>
-                                <select name="member_id" id="workoutMemberInput" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Assign to Member</label>
+                                <select name="member_id" id="workoutMemberInput" class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                                     <option value="">Reusable Template (No Member)</option>
                                     @foreach($members as $m)
                                         <option value="{{ $m->id }}">{{ $m->full_name }}</option>
@@ -389,8 +389,8 @@
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Assigned Coach</label>
-                                <select name="trainer_id" id="workoutTrainerInput" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-indigo-500">
+                                <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Assigned Coach</label>
+                                <select name="trainer_id" id="workoutTrainerInput" class="w-full px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg text-sm focus:outline-none focus:border-accent">
                                     <option value="">Optional coach</option>
                                     @foreach($trainers as $t)
                                         <option value="{{ $t->id }}">{{ $t->full_name }}</option>
@@ -405,22 +405,22 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                                 <div class="flex items-center gap-2.5">
-                                    <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Exercises Schedule</h4>
-                                    <span id="workoutExercisesSummary" class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium tabular-nums">0 exercises</span>
+                                    <h4 class="text-sm font-semibold text-fg dark:text-white">Exercises Schedule</h4>
+                                    <span id="workoutExercisesSummary" class="px-2 py-0.5 rounded-md bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted text-xs font-medium tabular-nums">0 exercises</span>
                                 </div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Add your own custom movements or pick exercises with demo videos from the library.</p>
+                                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Add your own custom movements or pick exercises with demo videos from the library.</p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
                                 <button type="button" onclick="addExerciseRow()"
-                                        class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                                        class="px-3.5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-colors cursor-pointer ops-primary">
                                     + Custom Exercise
                                 </button>
                                 <button type="button" onclick="addExerciseRow('day_1', '', 1, '', '', 0, '', '', '', '', '', 'time', 15, 'minutes')"
-                                        class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                                        class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
                                     + Cardio / Timed
                                 </button>
                                 <button type="button" onclick="openWorkoutExercisePicker()"
-                                        class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold shadow-sm transition-colors cursor-pointer">
+                                        class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold transition-colors cursor-pointer">
                                     Pick from Exercise Library
                                 </button>
                             </div>
@@ -433,17 +433,17 @@
 
                     <!-- Section 3: Program Notes -->
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300">Program Notes &amp; Progression Rules</label>
+                        <label class="block text-xs font-medium text-fg-muted dark:text-fg-muted">Program Notes &amp; Progression Rules</label>
                         <textarea name="notes" id="workoutNotesInput" rows="2" placeholder="Optional warm-up guidance, progressive overload notes, or weekly progression reminders..."
-                                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 leading-relaxed"></textarea>
+                                  class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-sm focus:outline-none focus:border-accent leading-relaxed"></textarea>
                     </div>
                 </div>
 
-                <div class="px-6 py-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-                    <button type="button" onclick="closeWorkoutModal()" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold border border-slate-200 dark:border-slate-800 transition-colors cursor-pointer">
+                <div class="px-6 py-4 bg-raised dark:bg-surface border-t border-line dark:border-line flex items-center justify-between gap-3 shrink-0">
+                    <button type="button" onclick="closeWorkoutModal()" class="px-4 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg-muted text-xs font-semibold border border-line dark:border-line transition-colors cursor-pointer">
                         Cancel
                     </button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm shadow-indigo-600/20 transition-all cursor-pointer">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                         Save Workout Routine
                     </button>
                 </div>
@@ -453,40 +453,40 @@
 
     <!-- ==================== 1. DEDICATED EXERCISE VIDEO PLAYER MODAL ==================== -->
     <div id="exerciseVideoModal" class="fixed inset-0 z-[70] flex items-center justify-center hidden bg-black/85 backdrop-blur-md p-2 sm:p-4 overflow-y-auto">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative my-auto flex flex-col text-white">
-            <div class="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+        <div class="bg-surface border border-line rounded-xl sm:rounded-xl w-full max-w-2xl overflow-hidden relative my-auto flex flex-col text-fg">
+            <div class="p-4 bg-slate-950/80 border-b border-line flex items-center justify-between">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </div>
                     <div class="min-w-0">
                         <h3 id="videoModalTitle" class="text-sm font-semibold text-white leading-tight truncate">Exercise Video</h3>
-                        <div class="flex items-center gap-2 mt-1 text-xs text-slate-400 flex-wrap">
-                            <span id="videoModalCategory" class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium text-[11px]">Category</span>
-                            <span id="videoModalEquipment" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[11px]">Equipment</span>
+                        <div class="flex items-center gap-2 mt-1 text-xs text-fg-muted flex-wrap">
+                            <span id="videoModalCategory" class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-medium text-xs">Category</span>
+                            <span id="videoModalEquipment" class="px-2 py-0.5 rounded-md bg-raised text-fg-muted text-xs">Equipment</span>
                         </div>
                     </div>
                 </div>
-                <button type="button" onclick="closeExerciseVideoModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors text-xs font-semibold cursor-pointer shrink-0">✕</button>
+                <button type="button" onclick="closeExerciseVideoModal()" class="w-8 h-8 rounded-lg bg-raised hover:bg-slate-700 text-fg-muted hover:text-white flex items-center justify-center transition-colors text-xs font-semibold cursor-pointer shrink-0">✕</button>
             </div>
 
             <div class="relative bg-black flex items-center justify-center aspect-video w-full max-h-[55vh] sm:max-h-[60vh]">
                 <video id="modalVideoPlayer" controls autoplay loop playsinline class="w-full h-full object-contain"></video>
             </div>
 
-            <div class="p-4 bg-slate-950/90 border-t border-slate-800/80 space-y-3">
-                <p id="videoModalNotes" class="text-xs text-slate-300 bg-slate-900 p-3 rounded-xl border border-slate-800 leading-relaxed hidden">
+            <div class="p-4 bg-slate-950/90 border-t border-line space-y-3">
+                <p id="videoModalNotes" class="text-xs text-fg-muted bg-surface p-3 rounded-xl border border-line leading-relaxed hidden">
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-1">
                     <button type="button" id="videoModalCopyBtn" onclick="copyCurrentModalVideoLink()"
-                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            class="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-raised hover:bg-slate-700 text-fg text-xs font-semibold border border-line flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <svg class="w-4 h-4 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                         <span id="videoModalCopyText">Copy Video Link</span>
                     </button>
 
                     <button type="button" id="videoModalAddBtn" onclick="addCurrentModalVideoToRoutine()"
-                            class="w-full sm:w-auto px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            class="w-full sm:w-auto px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ops-primary">
                         <span>Add to Routine</span>
                     </button>
                 </div>
@@ -496,54 +496,54 @@
 
     <!-- ==================== 2. EXERCISE VIDEO LIBRARY MODAL ==================== -->
     <div id="exerciseLibraryModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black/80 backdrop-blur-md p-2 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-6xl overflow-hidden shadow-2xl relative my-auto max-h-[94vh] flex flex-col text-slate-900 dark:text-slate-200">
-            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl w-full max-w-6xl overflow-hidden relative my-auto max-h-[94vh] flex flex-col text-fg dark:text-fg">
+            <div class="p-4 sm:p-5 bg-raised dark:bg-surface border-b border-line dark:border-line flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-base font-semibold text-slate-900 dark:text-white truncate">Exercise Video Library</h3>
+                            <h3 class="text-base font-semibold text-fg dark:text-white truncate">Exercise Video Library</h3>
                             <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-semibold tabular-nums shrink-0">
                                 {{ count($exercises ?? []) }} Videos
                             </span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">Form demonstration videos grouped by muscle group and equipment.</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5 truncate">Form demonstration videos grouped by muscle group and equipment.</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeExerciseLibraryModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs font-semibold shrink-0">✕</button>
+                <button type="button" onclick="closeExerciseLibraryModal()" class="w-8 h-8 rounded-lg bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs font-semibold shrink-0">✕</button>
             </div>
 
-            <div class="p-3.5 sm:p-4 bg-slate-50/70 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
+            <div class="p-3.5 sm:p-4 bg-raised dark:bg-slate-950/70 border-b border-line dark:border-line shrink-0 space-y-3">
                 <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                     <div class="relative w-full md:w-80 shrink-0">
                         <input type="text" id="libSearchInput" oninput="debounceLibFilter()"
                                placeholder="Search exercises by title, muscle, or equipment..."
-                               class="w-full pl-9 pr-8 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500">
-                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <button type="button" onclick="clearLibSearch()" id="libClearSearchBtn" class="hidden absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer">✕</button>
+                               class="w-full pl-9 pr-8 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                        <svg class="w-4 h-4 text-fg-muted absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        <button type="button" onclick="clearLibSearch()" id="libClearSearchBtn" class="hidden absolute right-2.5 top-2 text-xs text-fg-muted hover:text-fg-muted font-semibold cursor-pointer">✕</button>
                     </div>
 
                     <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto text-xs pb-1 md:pb-0">
-                        <span class="text-xs text-slate-400 font-medium shrink-0">Equipment:</span>
+                        <span class="text-xs text-fg-muted font-medium shrink-0">Equipment:</span>
                         <button type="button" onclick="setLibEquipment('all')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-semibold bg-amber-500 text-slate-950 shrink-0 cursor-pointer" data-equip="all">All</button>
-                        <button type="button" onclick="setLibEquipment('Dumbbell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Dumbbell">Dumbbell</button>
-                        <button type="button" onclick="setLibEquipment('Barbell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Barbell">Barbell</button>
-                        <button type="button" onclick="setLibEquipment('Cable')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Cable">Cable</button>
-                        <button type="button" onclick="setLibEquipment('Machine')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Machine">Machine</button>
-                        <button type="button" onclick="setLibEquipment('Bodyweight')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Bodyweight">Bodyweight</button>
-                        <button type="button" onclick="setLibEquipment('Kettlebell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-equip="Kettlebell">Kettlebell</button>
+                        <button type="button" onclick="setLibEquipment('Dumbbell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Dumbbell">Dumbbell</button>
+                        <button type="button" onclick="setLibEquipment('Barbell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Barbell">Barbell</button>
+                        <button type="button" onclick="setLibEquipment('Cable')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Cable">Cable</button>
+                        <button type="button" onclick="setLibEquipment('Machine')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Machine">Machine</button>
+                        <button type="button" onclick="setLibEquipment('Bodyweight')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Bodyweight">Bodyweight</button>
+                        <button type="button" onclick="setLibEquipment('Kettlebell')" class="lib-equip-btn px-2.5 py-1 rounded-lg font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-equip="Kettlebell">Kettlebell</button>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                    <button type="button" onclick="setLibCategory('all')" class="lib-cat-btn px-3 py-1.5 rounded-xl font-semibold bg-indigo-600 text-white shrink-0 shadow-xs transition-all cursor-pointer" data-cat="all">
+                    <button type="button" onclick="setLibCategory('all')" class="lib-cat-btn px-3 py-1.5 rounded-xl font-semibold bg-accent text-accent-on shrink-0 transition-all cursor-pointer ops-primary" data-cat="all">
                         All ({{ count($exercises ?? []) }})
                     </button>
                     @foreach($exerciseCategories ?? [] as $cName => $cMeta)
                         @if($cName !== 'All')
-                            <button type="button" onclick="setLibCategory('{{ $cName }}')" class="lib-cat-btn px-3 py-1.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 transition-colors cursor-pointer" data-cat="{{ $cName }}">
+                            <button type="button" onclick="setLibCategory('{{ $cName }}')" class="lib-cat-btn px-3 py-1.5 rounded-xl font-medium text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white hover:bg-slate-200 dark:hover:bg-raised shrink-0 transition-colors cursor-pointer" data-cat="{{ $cName }}">
                                 {{ $cName }} ({{ $cMeta['count'] ?? 0 }})
                             </button>
                         @endif
@@ -551,16 +551,16 @@
                 </div>
             </div>
 
-            <div class="px-4 py-2 bg-slate-100/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0 flex-wrap gap-1">
+            <div class="px-4 py-2 bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line flex items-center justify-between text-xs text-fg-muted dark:text-fg-muted shrink-0 flex-wrap gap-1">
                 <span id="libCounterText" class="font-medium tabular-nums">Showing {{ count($exercises ?? []) }} videos</span>
-                <span class="text-xs text-slate-400 hidden sm:inline">Hover a card to preview · Click to watch full video</span>
+                <span class="text-xs text-fg-muted hidden sm:inline">Hover a card to preview · Click to watch full video</span>
             </div>
 
             <div class="p-4 sm:p-5 overflow-y-auto flex-1" id="libGridScrollContainer">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="libExercisesGrid"></div>
 
                 <div id="libLoadMoreContainer" class="mt-6 text-center pb-2 hidden">
-                    <button type="button" onclick="loadMoreLibExercises()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer">
+                    <button type="button" onclick="loadMoreLibExercises()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg dark:text-fg text-xs font-semibold border border-line dark:border-line transition-all cursor-pointer">
                         Load More (<span id="libLoadMoreRemaining">0</span> remaining)
                     </button>
                 </div>
@@ -570,60 +570,60 @@
 
     <!-- ==================== 3. WORKOUT EXERCISE PICKER MODAL (LIBRARY + CUSTOM) ==================== -->
     <div id="workoutExercisePickerModal" class="fixed inset-0 z-[60] flex items-center justify-center hidden bg-black/75 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl relative my-auto max-h-[92vh] flex flex-col text-slate-900 dark:text-slate-200">
-            <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 gap-3">
+        <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl w-full max-w-4xl overflow-hidden relative my-auto max-h-[92vh] flex flex-col text-fg dark:text-fg">
+            <div class="p-4 sm:p-5 bg-raised dark:bg-surface border-b border-line dark:border-line flex items-center justify-between shrink-0 gap-3">
                 <div class="min-w-0">
-                    <h4 class="text-sm sm:text-base font-semibold text-slate-900 dark:text-white truncate">Add Exercises to Routine</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">Pick from the exercise library or add your own custom movement.</p>
+                    <h4 class="text-sm sm:text-base font-semibold text-fg dark:text-white truncate">Add Exercises to Routine</h4>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted truncate mt-0.5">Pick from the exercise library or add your own custom movement.</p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button type="button" onclick="togglePickerCustomExerciseForm()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors cursor-pointer">
+                    <button type="button" onclick="togglePickerCustomExerciseForm()" class="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-colors cursor-pointer ops-primary">
                         + Custom Exercise
                     </button>
-                    <button type="button" onclick="closeWorkoutExercisePicker()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center text-xs font-semibold cursor-pointer">✕</button>
+                    <button type="button" onclick="closeWorkoutExercisePicker()" class="w-8 h-8 rounded-lg bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted hover:text-fg dark:hover:text-white flex items-center justify-center text-xs font-semibold cursor-pointer">✕</button>
                 </div>
             </div>
 
             <!-- Inline Custom Exercise Form inside Picker -->
-            <div id="pickerCustomExerciseBox" class="hidden p-4 sm:p-5 bg-indigo-50/40 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+            <div id="pickerCustomExerciseBox" class="hidden p-4 sm:p-5 bg-indigo-50/40 dark:bg-slate-950/90 border-b border-line dark:border-line space-y-3 shrink-0">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Add Custom Exercise to Selected Day</span>
-                    <button type="button" onclick="togglePickerCustomExerciseForm(false)" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer">Close</button>
+                    <button type="button" onclick="togglePickerCustomExerciseForm(false)" class="text-xs text-fg-muted hover:text-fg dark:hover:text-fg cursor-pointer">Close</button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-                    <input type="text" id="pickerCustomExName" placeholder="e.g. Treadmill Walk / Heavy Sled Push" class="sm:col-span-2 w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                    <select id="pickerCustomExType" onchange="togglePickerCustomTrackingMode()" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="pickerCustomExName" placeholder="e.g. Treadmill Walk / Heavy Sled Push" class="sm:col-span-2 w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
+                    <select id="pickerCustomExType" onchange="togglePickerCustomTrackingMode()" class="w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-medium text-fg dark:text-fg focus:outline-none focus:border-accent">
                         <option value="reps">Strength (Sets × Reps)</option>
                         <option value="time">Cardio / Timed (min / sec)</option>
                     </select>
-                    <input type="text" id="pickerCustomExWeight" placeholder="Load / Speed (e.g. 40 kg / 6.5 km/h)" class="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="pickerCustomExWeight" placeholder="Load / Speed (e.g. 40 kg / 6.5 km/h)" class="w-full px-3 py-2 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-6 gap-2.5 items-end">
                     <div>
-                        <label id="pickerCustomExSetsLabel" class="block text-[11px] font-medium text-slate-500 mb-1">Sets</label>
-                        <input type="number" id="pickerCustomExSets" min="1" value="3" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label id="pickerCustomExSetsLabel" class="block text-xs font-medium text-fg-muted mb-1">Sets</label>
+                        <input type="number" id="pickerCustomExSets" min="1" value="3" class="w-full px-2.5 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div id="pickerCustomExRepsWrap">
-                        <label class="block text-[11px] font-medium text-slate-500 mb-1">Reps</label>
-                        <input type="text" id="pickerCustomExReps" value="10-12" placeholder="10-12" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Reps</label>
+                        <input type="text" id="pickerCustomExReps" value="10-12" placeholder="10-12" class="w-full px-2.5 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div id="pickerCustomExDurationWrap" class="hidden">
-                        <label class="block text-[11px] font-medium text-slate-500 mb-1">Duration</label>
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Duration</label>
                         <div class="flex items-center gap-1">
-                            <input type="number" id="pickerCustomExDuration" min="1" value="15" class="w-full px-2 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
-                            <select id="pickerCustomExUnit" class="px-1.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                            <input type="number" id="pickerCustomExDuration" min="1" value="15" class="w-full px-2 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
+                            <select id="pickerCustomExUnit" class="px-1.5 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-medium text-fg dark:text-fg focus:outline-none focus:border-accent">
                                 <option value="minutes">min</option>
                                 <option value="seconds">sec</option>
                             </select>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-medium text-slate-500 mb-1">Rest (sec)</label>
-                        <input type="number" id="pickerCustomExRest" min="0" value="60" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold tabular-nums text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Rest (sec)</label>
+                        <input type="number" id="pickerCustomExRest" min="0" value="60" class="w-full px-2.5 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold tabular-nums text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-medium text-slate-500 mb-1">Form Cues / Notes</label>
-                        <input type="text" id="pickerCustomExNotes" placeholder="Optional incline, pace, or form cues" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-fg-muted mb-1">Form Cues / Notes</label>
+                        <input type="text" id="pickerCustomExNotes" placeholder="Optional incline, pace, or form cues" class="w-full px-2.5 py-1.5 rounded-lg bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                     </div>
                     <button type="button" onclick="submitPickerCustomExercise()" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer">
                         Add to Day
@@ -631,11 +631,11 @@
                 </div>
             </div>
 
-            <div class="p-3.5 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800 shrink-0 space-y-2.5">
+            <div class="p-3.5 bg-raised dark:bg-slate-950/50 border-b border-line dark:border-line shrink-0 space-y-2.5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div class="flex items-center gap-2">
-                        <label class="text-xs font-medium text-slate-700 dark:text-slate-300 shrink-0">Target Day:</label>
-                        <select id="pickerTargetDay" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500">
+                        <label class="text-xs font-medium text-fg-muted dark:text-fg-muted shrink-0">Target Day:</label>
+                        <select id="pickerTargetDay" class="px-3 py-1.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs font-semibold text-fg dark:text-fg focus:outline-none focus:border-accent">
                             <option value="day_1">Day 1</option>
                             <option value="day_2">Day 2</option>
                             <option value="day_3">Day 3</option>
@@ -656,7 +656,7 @@
                     <div class="relative w-full sm:w-72">
                         <input type="text" id="pickerSearchInput" oninput="debouncePickerFilter()"
                                placeholder="Search exercise library..."
-                               class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-amber-500">
+                               class="w-full px-3.5 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-xs text-fg dark:text-fg placeholder-fg-subtle focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
 
@@ -664,7 +664,7 @@
                     <button type="button" onclick="setPickerCategory('all')" class="picker-cat-btn px-2.5 py-1 rounded-md font-semibold bg-amber-500 text-slate-950 shrink-0 cursor-pointer" data-cat="all">All ({{ count($exercises ?? []) }})</button>
                     @foreach($exerciseCategories ?? [] as $cName => $cMeta)
                         @if($cName !== 'All')
-                            <button type="button" onclick="setPickerCategory('{{ $cName }}')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 shrink-0 cursor-pointer" data-cat="{{ $cName }}">
+                            <button type="button" onclick="setPickerCategory('{{ $cName }}')" class="picker-cat-btn px-2.5 py-1 rounded-md font-medium text-fg-muted dark:text-fg-muted hover:bg-slate-200 dark:hover:bg-raised shrink-0 cursor-pointer" data-cat="{{ $cName }}">
                                 {{ $cName }}
                             </button>
                         @endif
@@ -674,11 +674,11 @@
 
             <div class="p-4 overflow-y-auto flex-1 space-y-2.5" id="pickerExercisesList"></div>
 
-            <div class="p-3.5 bg-slate-100 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 gap-2">
-                <div class="text-xs font-medium text-slate-700 dark:text-slate-300 truncate tabular-nums" id="pickerAddedSummary">
+            <div class="p-3.5 bg-raised dark:bg-surface border-t border-line dark:border-line flex items-center justify-between shrink-0 gap-2">
+                <div class="text-xs font-medium text-fg-muted dark:text-fg-muted truncate tabular-nums" id="pickerAddedSummary">
                     Click <strong>+ Add</strong> or use <strong>+ Custom Exercise</strong> above
                 </div>
-                <button type="button" onclick="closeWorkoutExercisePicker()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer shrink-0">
+                <button type="button" onclick="closeWorkoutExercisePicker()" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer shrink-0 ops-primary">
                     Done
                 </button>
             </div>
