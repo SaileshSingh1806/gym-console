@@ -394,9 +394,9 @@
         <!-- Quick Filter Status Tabs -->
         <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 text-xs font-semibold no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
             <a href="{{ route('app.members.index') }}" 
-               class="shrink-0 px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1.5 whitespace-nowrap {{ !request('status') && !request('filter') ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' }}">
+               class="shrink-0 px-3.5 py-2 rounded-xl border transition-all flex items-center gap-1.5 whitespace-nowrap {{ !request('status') && !request('filter') ? 'bg-accent text-accent-on border-accent' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm' }}">
                 <span>All Members</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ !request('status') && !request('filter') ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">{{ $totalMembers }}</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ !request('status') && !request('filter') ? 'bg-black/10 text-accent-on font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300' }}">{{ $totalMembers }}</span>
             </a>
 
             <a href="{{ route('app.members.index', ['status' => 'ACTIVE']) }}" 
