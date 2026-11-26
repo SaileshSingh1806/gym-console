@@ -5,7 +5,7 @@
     }
 
     .workspace-shell :is(a, button, input, select, textarea):focus-visible {
-        outline: 2px solid var(--theme-accent, #10b981);
+        outline: 2px solid var(--theme-accent, #F5A524);
         outline-offset: 3px;
     }
 
@@ -119,9 +119,7 @@
     .operations-workspace :is(.shadow-sm,.shadow-md,.shadow-lg,.shadow-xl,.shadow-2xl,.shadow-inner) { box-shadow:none; }
     .operations-workspace :is(.uppercase,.tracking-widest,.tracking-wider,.tracking-wide) { text-transform:none; letter-spacing:normal; }
     .operations-workspace :is(.animate-ping,.animate-pulse) { animation:none; }
-    .operations-workspace :is(.bg-white,.bg-slate-900,.bg-slate-950,.bg-gray-900,.bg-gray-950,.dark\:bg-slate-900,.dark\:bg-slate-950,.dark\:bg-gray-900,.dark\:bg-gray-950) { background-color:rgb(var(--c-surface)); }
-    .operations-workspace :is(.bg-slate-50,.bg-slate-100,.bg-gray-50,.bg-gray-100,.bg-slate-800,.bg-gray-800,.dark\:bg-slate-800,.dark\:bg-gray-800) { background-color:rgb(var(--c-raised)); }
-    .operations-workspace :is(.border-slate-200,.border-slate-300,.border-slate-700,.border-slate-800,.border-gray-200,.border-gray-700,.border-gray-800,.dark\:border-slate-700,.dark\:border-slate-800,.dark\:border-gray-700,.dark\:border-gray-800) { border-color:rgb(var(--c-line)); }
+    .operations-workspace .bg-white { background-color:rgb(var(--c-surface)); }
     .operations-workspace :is(.text-slate-900,.text-slate-800,.text-gray-900,.text-gray-800,.dark\:text-white,.dark\:text-slate-100,.dark\:text-slate-200) { color:rgb(var(--c-fg)); }
     .operations-workspace :is(.text-slate-500,.text-slate-600,.text-slate-400,.text-gray-500,.text-gray-600,.dark\:text-slate-300,.dark\:text-slate-400,.dark\:text-gray-400) { color:rgb(var(--c-fg-muted)); }
     .operations-workspace :is(.text-emerald-400,.dark\:text-emerald-400,.text-emerald-500,.dark\:text-emerald-500,.text-emerald-600,.dark\:text-emerald-600,.text-emerald-700,.dark\:text-emerald-700,.text-emerald-800,.dark\:text-emerald-800) { color:rgb(var(--c-success)); }
