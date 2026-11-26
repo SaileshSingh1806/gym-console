@@ -1,8 +1,7 @@
 <x-app-layout header="Memberships">
     @push('styles')
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
-            .membership-workspace { font-family: Inter, system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
+            .membership-workspace { font-family: inherit; font-size: 14px; line-height: 1.5; }
             .membership-workspace .membership-plan { min-width: 0; }
             .membership-workspace table { font-variant-numeric: tabular-nums; }
             .membership-workspace input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]),
@@ -13,12 +12,12 @@
             .membership-workspace .membership-plan button { white-space: nowrap; }
             .membership-workspace .membership-plan > div:last-child { flex-wrap: wrap; }
             .membership-workspace {
-                --mw-surface: #ffffff; --mw-text: #202b36; --mw-muted: #63717e; --mw-line: #e0e6eb; --mw-hover: #f5f7fa; --mw-accent: #345b79; --mw-soft: #edf3f8;
-                --mw-button: #345b79; --mw-button-text: #fff; --mw-active: #23734e;
+                --mw-surface: #ffffff; --mw-text: #18181b; --mw-muted: #63717e; --mw-line: #e4e4e7; --mw-hover: #f7f8fa; --mw-accent: var(--theme-accent, #f59e0b); --mw-soft: #f4f4f5;
+                --mw-button: var(--theme-accent, #f59e0b); --mw-button-text: #151618; --mw-active: #23734e;
             }
             .dark .membership-workspace {
-                --mw-surface: #1b222b; --mw-text: #e8edf2; --mw-muted: #a5b2c0; --mw-line: #35404d; --mw-hover: #232d38; --mw-accent: #a8c9e5; --mw-soft: #26394a;
-                --mw-button: #a8c9e5; --mw-button-text: #182938; --mw-active: #8bcba8;
+                --mw-surface: #151618; --mw-text: #f1f3f5; --mw-muted: #a1a8b0; --mw-line: #292c30; --mw-hover: #1c1e21; --mw-accent: var(--theme-accent, #f59e0b); --mw-soft: #202225;
+                --mw-button: var(--theme-accent, #f59e0b); --mw-button-text: #151618; --mw-active: #8bcba8;
             }
             .membership-workspace .membership-panel { background: var(--mw-surface); color: var(--mw-text); border: 1px solid var(--mw-line); border-radius: 6px; }
             .membership-workspace .membership-plan-row { display: grid; grid-template-columns: minmax(135px,2fr) minmax(85px,1fr) minmax(75px,.85fr) minmax(105px,1.1fr) minmax(70px,.75fr) minmax(190px,1.5fr); gap: 12px; align-items: center; padding: 11px 16px; border-bottom: 1px solid var(--mw-line); font-size: 13px; }
@@ -111,7 +110,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-0">
             <div class="flex items-center gap-3">
                 <div>
-                    <h3 class="text-xl font-semibold tracking-tight" style="color:var(--mw-text)">Membership plans</h3>
+                    <h3 class="text-lg font-semibold tracking-tight" style="color:var(--mw-text)">Membership plans</h3>
                     <p class="text-sm membership-muted mt-1">Manage membership pricing, duration and availability.</p>
                 </div>
             </div>
