@@ -1,7 +1,46 @@
 <x-app-layout header="Gym Memberships & Plans">
-    <div class="space-y-4" x-data="{ 
+
+    @push('styles')
+    <style>
+        .membership-workspace { min-width:0; font-variant-numeric:tabular-nums; }
+        .membership-workspace .mp-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+        .membership-workspace .mp-tabs { display:flex; gap:20px; border-bottom:1px solid rgb(var(--c-line)); }
+        .membership-workspace .mp-tab { display:flex; align-items:center; gap:8px; padding:10px 2px; border-bottom:2px solid transparent; color:rgb(var(--c-fg-muted)); font-size:13px; font-weight:500; cursor:pointer; }
+        .membership-workspace .mp-tab[aria-selected="true"] { color:rgb(var(--c-accent-fg)); border-bottom-color:rgb(var(--c-accent)); }
+        .membership-workspace .mp-grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:12px; align-items:start; }
+        .membership-workspace .mp-panel { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; min-width:0; overflow:hidden; }
+        .membership-workspace .mp-panel-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgb(var(--c-line)); }
+        .membership-workspace .mp-row { width:100%; display:flex; align-items:center; gap:10px; padding:13px 14px; text-align:left; border-bottom:1px solid rgb(var(--c-line)); border-left:2px solid transparent; cursor:pointer; }
+        .membership-workspace .mp-row:last-child { border-bottom:0; }
+        .membership-workspace .mp-row:hover { background:rgb(var(--c-raised)); }
+        .membership-workspace .mp-row[aria-pressed="true"] { border-left-color:rgb(var(--c-accent)); background:rgb(var(--c-accent)/.06); }
+        .membership-workspace .mp-row-icon { display:grid; place-items:center; width:34px; height:34px; flex-shrink:0; border-radius:8px; background:rgb(var(--c-raised)); color:rgb(var(--c-fg-muted)); }
+        .membership-workspace .mp-row-title { font-size:14px; font-weight:500; overflow-wrap:anywhere; }
+        .membership-workspace .mp-detail { padding:16px; min-width:0; }
+        .membership-workspace .mp-detail h4 { font-size:16px; line-height:1.4; }
+        .membership-workspace .mp-detail .mp-price { font-size:24px; font-weight:600; color:rgb(var(--c-fg)); }
+        .membership-workspace .mp-detail .mp-actions { display:flex; flex-wrap:wrap; gap:8px; padding-top:12px; border-top:1px solid rgb(var(--c-line)); }
+        .membership-workspace .mp-action { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:7px 12px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; border:1px solid rgb(var(--action-tone)/.24); color:rgb(var(--action-tone)); background:rgb(var(--action-tone)/.10); }
+        .membership-workspace .mp-action:hover { background:rgb(var(--action-tone)/.18); }
+        .membership-workspace .mp-pause { --action-tone:var(--c-warning); }
+        .membership-workspace .mp-resume { --action-tone:var(--c-success); }
+        .membership-workspace .mp-delete { --action-tone:var(--c-danger); }
+        .membership-workspace .mp-contracts table th { font-size:12px; padding:10px 12px; white-space:nowrap; }
+        .membership-workspace .mp-contracts table td { padding:12px; font-size:13px; }
+        .membership-workspace .mp-contracts table :is(th,td):nth-child(4),.membership-workspace .mp-contracts table :is(th,td):nth-child(5) { text-align:right; }
+        .membership-workspace .mp-contracts thead { background:rgb(var(--c-raised)); }
+        .membership-workspace .mp-contracts .mp-scroll { overflow:auto; max-height:min(70vh,760px); }
+        .membership-workspace .mp-contracts thead { position:sticky; top:0; z-index:1; }
+        @media(max-width:900px) { .membership-workspace .mp-grid { grid-template-columns:minmax(0,1fr); } }
+        @media(max-width:640px) { .membership-workspace .mp-header .ds-btn { width:100%; } .membership-workspace .mp-tabs { gap:14px; } .membership-workspace .mp-detail { padding:12px; } }
+    </style>
+    @endpush
+
+    <div class="space-y-4 membership-workspace" x-data="{ 
         showNewModal: {{ $errors->any() ? 'true' : 'false' }}, 
-        editPlan: null, 
+        editPlan: null,
+        workspaceTab: {{ request()->has($memberships->getPageName()) ? "'subscriptions'" : "'plans'" }},
+        selectedPlanId: {{ (int) ($plans->first()?->id ?? 0) }}, 
         newPlanType: 'single', 
         newMaxMembers: 1, 
         newPrice: '', 
@@ -37,33 +76,42 @@
             </div>
         @endif
 
-        <!-- Top Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-4">
-            <div class="flex items-center gap-3">
-                <span class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center font-semibold shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                </span>
-                <div>
-                    <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight leading-none">Gym Membership Packages</h3>
-                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-1">Configure packages for Single, Duo (2 Persons), Family, and Custom Groups (e.g. ₹35,000 for 5 People).</p>
-                </div>
-            </div>
+        <div class="mp-header">
+            <div><h1 class="ds-title">Memberships</h1><p class="ds-caption mt-1">Manage membership plans and member subscriptions.</p></div>
             @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('memberships.create') || auth()->user()->hasPermission('memberships.manage'))
-                <button @click="showNewModal = true; setNewPlanType('single'); newPrice = ''; newDurationValue = 1; newDurationType = 'months'" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer">
+                <button @click="showNewModal = true; setNewPlanType('single'); newPrice = ''; newDurationValue = 1; newDurationType = 'months'" class="ds-btn ds-btn-primary">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    <span>Create Membership Plan</span>
+                    <span>Create plan</span>
                 </button>
             @endif
         </div>
-
-        <!-- Membership Plans Available -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
-            @forelse($plans as $plan)
-                <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border {{ $plan->is_active ? 'border-slate-200 dark:border-slate-800 hover:border-amber-500/50 dark:hover:border-amber-500/40' : 'border-amber-300/40 dark:border-amber-500/30 bg-amber-500/[0.02] dark:bg-amber-500/[0.03]' }} flex flex-col justify-between transition shadow-sm group">
+        <div class="mp-tabs" role="tablist" aria-label="Membership workspace">
+            <button type="button" role="tab" class="mp-tab" :aria-selected="workspaceTab === 'plans'" @click="workspaceTab = 'plans'">Membership plans <span class="ds-badge ds-badge-neutral">{{ $plans->count() }}</span></button>
+            <button type="button" role="tab" class="mp-tab" :aria-selected="workspaceTab === 'subscriptions'" @click="workspaceTab = 'subscriptions'">Member subscriptions <span class="ds-badge ds-badge-neutral">{{ $memberships->total() }}</span></button>
+        </div>
+        <div x-show="workspaceTab === 'plans'" x-cloak>
+            @if($plans->isNotEmpty())
+            <div class="mp-grid">
+                <section class="mp-panel" aria-label="Plan catalogue">
+                    <div class="mp-panel-header"><h2 class="ds-heading">Plan catalogue</h2><span class="ds-caption">{{ $plans->count() }} plans</span></div>
+                    @foreach($plans as $cataloguePlan)
+                    <button type="button" class="mp-row" :aria-pressed="selectedPlanId === {{ (int) $cataloguePlan->id }}" @click="selectedPlanId = {{ (int) $cataloguePlan->id }}">
+                        <span class="mp-row-icon"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span>
+                        <span class="flex-1 min-w-0"><span class="mp-row-title block">{{ $cataloguePlan->name }}</span><span class="ds-caption block capitalize">{{ $cataloguePlan->duration_value }} {{ $cataloguePlan->duration_type }} · {{ $cataloguePlan->plan_type ?? 'single' }} · {{ $cataloguePlan->max_members ?? 1 }} member(s)</span></span>
+                        <span class="text-right shrink-0"><span class="block text-sm font-semibold text-fg">{{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($cataloguePlan->price, 0) }}</span><span class="ds-caption {{ $cataloguePlan->is_active ? 'text-success' : 'text-warning' }}">{{ $cataloguePlan->is_active ? 'Active' : 'Paused' }}</span></span>
+                        <svg class="w-4 h-4 text-fg-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                    @endforeach
+                </section>
+                <section class="mp-panel" aria-label="Selected plan details">
+                    <div class="mp-panel-header"><h2 class="ds-heading">Plan details</h2></div>
+                    @foreach($plans as $plan)
+                    
+                <div class="mp-detail" x-show="selectedPlanId === {{ (int) $plan->id }}" x-cloak>
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <div class="min-w-0">
-                                <h4 class="font-semibold text-fg dark:text-white text-sm leading-tight truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{{ $plan->name }}</h4>
+                                <h4 class="font-semibold text-fg dark:text-white text-sm leading-tight ">{{ $plan->name }}</h4>
                                 <div class="mt-1 flex items-center gap-1.5 flex-wrap">
                                     @if($plan->plan_type === 'duo' || $plan->max_members === 2)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30">
@@ -100,7 +148,7 @@
                                 </span>
                             @endif
                         </div>
-                        <p class="text-xs text-fg-muted dark:text-fg-muted mb-2 line-clamp-2 min-h-[32px]">{{ $plan->description ?? 'Standard full gym floor access membership plan.' }}</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mb-2 ">{{ $plan->description ?? 'Standard full gym floor access membership plan.' }}</p>
 
                         @if(! $plan->is_active)
                             <div class="mb-3 px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
@@ -109,11 +157,11 @@
                             </div>
                         @endif
 
-                        <div class="p-3 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line mb-3 space-y-1.5 text-xs text-fg-muted dark:text-fg-muted">
+                        <div class="p-3 rounded-xl bg-raised border border-line dark:border-line mb-3 space-y-1.5 text-xs text-fg-muted dark:text-fg-muted">
                             <div class="flex justify-between items-baseline">
                                 <span class="text-xs text-fg-muted dark:text-fg-muted font-semibold">Total Fee:</span>
                                 <div class="text-right">
-                                    <span class="text-lg font-semibold text-amber-600 dark:text-amber-400 leading-none">
+                                    <span class="mp-price">
                                         {{ auth()->user()->tenant?->currency_symbol ?? '₹' }}{{ number_format($plan->price, 0) }}
                                     </span>
                                 </div>
@@ -142,7 +190,7 @@
                     </div>
 
                     @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('plans.edit') || auth()->user()->hasPermission('memberships.edit') || auth()->user()->hasPermission('plans.create') || auth()->user()->hasPermission('memberships.manage'))
-                        <div class="flex items-center gap-2 pt-2 border-t border-line dark:border-line">
+                        <div class="mp-actions">
                             <button @click="editPlan = {{ json_encode([
                                 'id' => $plan->id,
                                 'name' => $plan->name,
@@ -154,8 +202,8 @@
                                 'price' => (float)$plan->price,
                                 'tax_rate' => (float)$plan->tax_rate,
                                 'is_active' => (bool)$plan->is_active,
-                            ]) }}" class="flex-1 py-1.5 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg dark:border-line text-xs font-semibold transition cursor-pointer text-center">
-                                Edit Plan
+                            ]) }}" class="ds-btn ds-btn-primary flex-1">
+                                Edit plan
                             </button>
 
                             <!-- Pause / Resume Toggle Button -->
@@ -164,14 +212,14 @@
                                 @if($plan->is_active)
                                     <button type="submit" 
                                             title="Pause this membership package (hide from new enrollments)" 
-                                            class="px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 text-xs font-semibold transition flex items-center gap-1 cursor-pointer">
+                                            class="mp-action mp-pause">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         <span>Pause</span>
                                     </button>
                                 @else
                                     <button type="submit" 
                                             title="Resume this membership package (show in new enrollments)" 
-                                            class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 dark:text-emerald-300 dark:border-emerald-500/30 text-xs font-semibold transition flex items-center gap-1 cursor-pointer">
+                                            class="mp-action mp-resume">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         <span>Resume</span>
                                     </button>
@@ -187,7 +235,7 @@
                                   class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-1.5 rounded-xl bg-red-50 hover:bg-red-500 hover:text-white text-red-600 border border-red-200 dark:bg-red-500/10 dark:hover:bg-red-500 dark:text-red-400 dark:border-red-500/20 text-xs font-semibold transition cursor-pointer" title="Delete Plan">
+                                <button type="submit" class="mp-action mp-delete" title="Delete Plan">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                             </form>
@@ -195,7 +243,12 @@
                         </div>
                     @endif
                 </div>
-            @empty
+            
+                    @endforeach
+                </section>
+            </div>
+            @else
+                
                 <div class="col-span-full p-8 text-center bg-surface dark:bg-surface border border-line dark:border-line rounded-xl space-y-3">
                     <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center font-semibold">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
@@ -210,13 +263,13 @@
                         </button>
                     @endif
                 </div>
-            @endforelse
+            
+            @endif
         </div>
-
         <!-- Active Member Contracts: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
-        <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
-            <div class="p-3.5 border-b border-line dark:border-line bg-raised dark:bg-slate-950/60 flex items-center justify-between">
-                <h3 class="text-xs font-semibold text-fg dark:text-white">Member Subscribed Contracts</h3>
+        <div x-show="workspaceTab === 'subscriptions'" x-cloak class="mp-panel mp-contracts">
+            <div class="mp-panel-header">
+                <h3 class="ds-heading">Member subscriptions</h3>
                 <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">{{ $memberships->total() }} total</span>
             </div>
 
@@ -245,7 +298,7 @@
                             </span>
                         </div>
 
-                        <div class="p-2.5 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line text-xs space-y-1.5">
+                        <div class="p-2.5 rounded-xl bg-raised dark:bg-raised border border-line dark:border-line text-xs space-y-1.5">
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-fg-muted dark:text-fg-muted">Validity:</span>
                                 <span class="font-medium text-fg dark:text-fg">{{ $ms->start_date ? $ms->start_date->format('M d, Y') : '—' }} → {{ $ms->end_date ? $ms->end_date->format('M d, Y') : '—' }}</span>
@@ -272,7 +325,7 @@
             </div>
 
             <!-- Desktop Table View (hidden md:block) -->
-            <div class="hidden md:block overflow-x-auto">
+            <div class="hidden md:block mp-scroll">
                 <table class="w-full text-left text-xs min-w-[650px]">
                     <thead class="bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
                         <tr>
