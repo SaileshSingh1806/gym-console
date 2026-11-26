@@ -568,7 +568,7 @@
                             <span class="text-xl sm:text-2xl font-semibold text-fg tabular-nums" x-text="formatMoney(trendsByPeriod[trendPeriod]?.total_revenue ?? {{ (float) ($metrics['month_revenue'] ?? 0) }})">{{ $currency }}{{ number_format($metrics['month_revenue'], 2) }}</span>
                         </div>
                         <span class="px-2 py-0.5 rounded-full bg-raised text-fg-muted border border-line text-xs font-semibold">
-                            Live revenue
+                            <span x-text="({'30d':'Last 30 days','90d':'Last 90 days','6m':'Last 6 months','1y':'Last 12 months'})[trendPeriod]"></span>
                         </span>
                     </div>
                     <div class="owner-chart-plot">
@@ -618,11 +618,11 @@
                 <div class="owner-chart space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-fg-muted block">Revenue vs expenses</span>
-                            <span class="text-xl sm:text-2xl font-semibold text-fg">{{ $currency }}{{ number_format($metrics['net_profit'], 2) }}</span>
+                            <span class="text-xs font-semibold text-fg-muted block">Revenue vs expenses · Last 6 months</span><span class="text-xs text-fg-muted block">Net collections after recorded expenses</span>
+                            <span class="text-xl sm:text-2xl font-semibold text-fg">{{ $currency }}{{ number_format(array_sum($metrics['chart']['profit'] ?? []), 2) }}</span>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full {{ $metrics['net_profit'] >= 0 ? 'bg-raised text-fg-muted border border-line ' : 'bg-raised text-fg-muted border border-line ' }} text-xs font-semibold">
-                            {{ $metrics['net_profit'] >= 0 ? 'Profitable' : 'Deficit' }}
+                        <span class="px-2 py-0.5 rounded-full {{ array_sum($metrics['chart']['profit'] ?? []) >= 0 ? 'bg-raised text-fg-muted border border-line ' : 'bg-raised text-fg-muted border border-line ' }} text-xs font-semibold">
+                            {{ array_sum($metrics['chart']['profit'] ?? []) >= 0 ? 'Profitable' : 'Deficit' }}
                         </span>
                     </div>
                     <div class="owner-chart-plot">
@@ -1469,6 +1469,9 @@ WhatsApp
                 }
             };
 
+            const money = value => {{ Js::from($currency) }} + new Intl.NumberFormat('en-IN', {maximumFractionDigits: 2}).format(value);
+            const compactMoney = value => {{ Js::from($currency) }} + new Intl.NumberFormat('en-IN', {notation: 'compact', maximumFractionDigits: 1}).format(value);
+            const financialOptions = { ...chartConfig, interaction: {mode: 'index', intersect: false}, plugins: {legend: {display: true, labels: {color: token('--c-fg-muted'), usePointStyle: true}}, tooltip: {callbacks: {label: context => context.dataset.label + ': ' + money(context.parsed.y)}}}, scales: {...chartConfig.scales, y: {...chartConfig.scales.y, ticks: {...chartConfig.scales.y.ticks, callback: compactMoney}}} };
             const trendsByPeriod = {{ Js::from($metrics['trends_by_period'] ?? []) }};
             const trendData = trendsByPeriod['30d'] || {{ Js::from($metrics['trends'] ?? ['labels' => [], 'revenue' => [], 'prev_revenue' => [], 'joins' => [], 'attendance' => []]) }};
             const monthlyChartData = {{ Js::from($metrics['chart'] ?? ['labels' => [], 'income' => [], 'expenses' => [], 'profit' => []]) }};
@@ -1483,27 +1486,29 @@ WhatsApp
                         labels: trendData.labels || [],
                         datasets: [
                             {
-                                label: 'Current Revenue',
+                                label: 'Current revenue',
                                 data: trendData.revenue || [],
                                 borderColor: token('--c-accent'),
                                 backgroundColor: token('--c-accent', 0.08),
                                 fill: false,
-                                tension: 0.4,
+                                tension: 0,
                                 borderWidth: 2.5,
                                 pointRadius: 0
                             },
                             {
-                                label: 'Previous Period',
+                                label: 'Previous period (click to compare)',
+                                hidden: true,
                                 data: trendData.prev_revenue || [],
+                                periodLabels: trendData.prev_labels || [],
                                 borderColor: token('--c-fg-subtle'),
                                 borderDash: [4, 4],
-                                tension: 0.4,
+                                tension: 0,
                                 borderWidth: 1.5,
                                 pointRadius: 0
                             }
                         ]
                     },
-                    options: chartConfig
+                    options: {...financialOptions, plugins: {...financialOptions.plugins, tooltip: {callbacks: {...financialOptions.plugins.tooltip.callbacks, label: context => { const dates = context.chart.data.datasets[context.datasetIndex].periodLabels || []; return context.dataset.label + (dates[context.dataIndex] ? ' (' + dates[context.dataIndex] + ')' : '') + ': ' + money(context.parsed.y); }}}}}
                 });
             }
 
@@ -1557,6 +1562,7 @@ WhatsApp
                     window._dashCharts.revenue.data.labels = next.labels || [];
                     window._dashCharts.revenue.data.datasets[0].data = next.revenue || [];
                     window._dashCharts.revenue.data.datasets[1].data = next.prev_revenue || [];
+                    window._dashCharts.revenue.data.datasets[1].periodLabels = next.prev_labels || [];
                     window._dashCharts.revenue.update();
                 }
                 if (window._dashCharts.growth) {
@@ -1593,7 +1599,7 @@ WhatsApp
                             }
                         ]
                     },
-                    options: chartConfig
+                    options: financialOptions
                 });
             }
         });
