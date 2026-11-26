@@ -1,185 +1,115 @@
 <x-app-layout header="Agreement & Legal Settings">
-    <div x-data="agreementSettingsManager({{ json_encode($activeTemplate->terms_sections ?? []) }}, {{ $activeTemplate->open_terrace_enabled ? 'true' : 'false' }})" class="space-y-6">
 
-        <!-- Breadcrumbs & Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2 text-xs font-semibold text-fg-muted mb-1">
-                    <a href="{{ route('app.agreements.index') }}" class="hover:text-indigo-600 transition-colors flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        Agreements
-                    </a>
-                    <span>/</span>
-                    <span class="text-fg dark:text-fg">Legal & Terms Configuration</span>
-                </div>
-                <h1 class="text-2xl font-semibold tracking-tight text-fg dark:text-white flex items-center gap-2.5">
-                    <span class="p-2 bg-indigo-600/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 rounded-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </span>
-                    Agreement & Safety Policy Settings
-                </h1>
-                <p class="text-sm text-fg-muted dark:text-fg-muted mt-1">
-                    Configure gym membership agreements, terrace safety clauses, and publish legally immutable document versions.
-                </p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <a href="{{ route('app.agreements.index') }}" class="px-4 py-2.5 rounded-xl bg-raised hover:bg-slate-200 dark:bg-raised dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted font-semibold text-xs transition-colors">
-                    Back to Agreements
-                </a>
-            </div>
+    @push('styles')
+    <style>
+    .agreement-builder { min-width:0; }
+    .agreement-builder .ab-panel { background:rgb(var(--c-surface));border:1px solid rgb(var(--c-line));border-radius:12px;min-width:0; }
+    .agreement-builder .ab-layout { display:grid;grid-template-columns:minmax(180px, .75fr) minmax(0,2fr);gap:12px;align-items:start; }
+    .agreement-builder .ab-nav { padding:8px; }
+    .agreement-builder .ab-row { width:100%;display:flex;align-items:center;gap:8px;padding:10px;text-align:left;border-radius:8px;color:rgb(var(--c-fg-muted)); }
+    .agreement-builder .ab-row[aria-pressed="true"] { background:rgb(var(--c-accent)/.10);color:rgb(var(--c-accent-fg)); }
+    .agreement-builder .ab-row:hover { background:rgb(var(--c-raised)); }
+    .agreement-builder .ab-input { width:100%;border:1px solid rgb(var(--c-line-strong));border-radius:8px;background:rgb(var(--c-canvas));color:rgb(var(--c-fg));padding:9px 11px;font-size:14px; }
+    .agreement-builder .ab-input:focus { outline:2px solid rgb(var(--c-accent)/.4);border-color:rgb(var(--c-accent)); }
+    .agreement-builder .ab-label { display:block;color:rgb(var(--c-fg-muted));font-size:12px;font-weight:500;margin-bottom:5px; }
+    .agreement-builder .ab-actions { display:flex;flex-wrap:wrap;gap:8px;align-items:center; }
+    .agreement-builder .ab-clause { padding:12px;border:1px solid rgb(var(--c-line));border-radius:8px; }
+    .agreement-builder .ab-preview { background:#fff;color:#17181b;padding:24px;border-radius:8px;overflow-wrap:anywhere; }
+    .agreement-builder .ab-preview p { white-space:pre-wrap; }
+    @media(max-width:760px){.agreement-builder .ab-layout{grid-template-columns:minmax(0,1fr);}.agreement-builder .ab-nav{max-height:250px;overflow:auto;}}
+    </style>
+    @endpush
+    @php
+        $initialSections = old('terms_sections', $builderDraft['terms_sections'] ?? $activeTemplate->terms_sections ?? []);
+        $starterSections = \App\Models\TenantAgreementTemplate::getDefaultTermsSections(false);
+        $terraceSection = collect(\App\Models\TenantAgreementTemplate::getDefaultTermsSections(true))->firstWhere('key', 'open_terrace_rules');
+    @endphp
+    <div x-data="agreementBuilder({{ \Illuminate\Support\Js::from($initialSections) }}, {{ \Illuminate\Support\Js::from($starterSections) }}, {{ \Illuminate\Support\Js::from($terraceSection) }}, {{ \Illuminate\Support\Js::from(old('title', $builderDraft['title'] ?? $activeTemplate->title)) }}, {{ \Illuminate\Support\Js::from((bool) old('open_terrace_enabled', $builderDraft['open_terrace_enabled'] ?? $activeTemplate->open_terrace_enabled)) }})" class="agreement-builder space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div><a href="{{ route('app.agreements.index') }}" class="ds-caption">Agreements / Settings</a><h1 class="ds-title mt-1">Agreement builder</h1><p class="ds-caption mt-1">Create and publish your gym's membership policies.</p></div>
+            <a href="{{ route('app.agreements.index') }}" class="ds-btn ds-btn-secondary">Back to agreements</a>
         </div>
-
-        <!-- Currently Active Version Card -->
-        <div class="text-white rounded-xl p-6 border border-indigo-800/40 relative overflow-hidden">
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 mb-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        LIVE & ACTIVE
-                    </div>
-                    <h2 class="text-xl font-semibold">{{ $activeTemplate->title }} (Version {{ $activeTemplate->version }})</h2>
-                    <p class="text-xs text-indigo-200/80 mt-1 max-w-xl">
-                        Published on {{ $activeTemplate->created_at->format('d M Y, h:i A') }} {{ $activeTemplate->publisher ? 'by ' . $activeTemplate->publisher->name : '' }}.
-                        Existing members who signed this agreement stay locked to this exact version for legal compliance.
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="text-right">
-                        <div class="text-xs text-indigo-200">Open Terrace Rules</div>
-                        <div class="font-bold text-sm {{ $activeTemplate->open_terrace_enabled ? 'text-emerald-400' : 'text-slate-400' }}">
-                            {{ $activeTemplate->open_terrace_enabled ? 'Included (Strict Access)' : 'Disabled' }}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        @if($errors->any())
+            <div class="ab-panel p-4 text-danger" role="alert"><strong>Please review your agreement.</strong><ul class="list-disc pl-5 mt-2">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+        @endif
+        <div class="ab-panel p-4 flex flex-wrap items-center justify-between gap-3">
+            <div><span class="ds-badge ds-badge-success">Active · v{{ $activeTemplate->version }}.0</span><h2 class="ds-heading mt-2">{{ $activeTemplate->title }}</h2><p class="ds-caption mt-1">Published {{ $activeTemplate->created_at->format('d M Y, h:i A') }}. Previously signed documents remain unchanged.</p></div>
+            @if($builderDraft)<span class="ds-badge ds-badge-neutral">Session draft loaded</span>@endif
         </div>
-
-        <!-- Form: Publish New Immutable Version -->
-        <form action="{{ route('app.agreements.settings.save') }}" method="POST" class="space-y-6">
+        <form action="{{ route('app.agreements.settings.save') }}" method="POST" class="space-y-4" @submit="if (!valid()) { $event.preventDefault(); error = 'Enter a title and complete every section and clause.'; } else if ($event.submitter?.value === 'publish' && !window.confirm('Publish a new agreement version? Existing signed agreements will remain unchanged.')) { $event.preventDefault(); }">
             @csrf
-
-            <!-- Section 1: Facility & Open Terrace Configuration -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-6 space-y-5">
-                <div class="flex items-center gap-2.5 pb-3 border-b border-line dark:border-line">
-                    <span class="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    </span>
-                    <div>
-                        <h3 class="text-base font-semibold text-fg dark:text-white">Open Terrace Workout Facility</h3>
-                        <p class="text-xs text-fg-muted">Configure elevated outdoor terrace access safety rules</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line gap-4">
-                    <div class="space-y-1">
-                        <label class="text-sm font-semibold text-fg dark:text-white flex items-center gap-2">
-                            <span>Open Terrace Facility Available in Gym?</span>
-                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full" :class="terraceEnabled ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'" x-text="terraceEnabled ? 'Enabled' : 'Disabled'"></span>
-                        </label>
-                        <p class="text-xs text-fg-muted max-w-2xl leading-relaxed">
-                            When enabled, strict safety clauses (Clauses 27–30) and the terrace declaration paragraph are automatically incorporated into published agreements.
-                            <br>
-                            <span class="text-amber-600 dark:text-amber-400 font-semibold">Note: Enabling does NOT automatically grant terrace access to members. Access remains strictly restricted and requires explicit authorization from Gym Management.</span>
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-3 shrink-0">
-                        <input type="hidden" name="open_terrace_enabled" :value="terraceEnabled ? 1 : 0">
-                        <button type="button" @click="terraceEnabled = !terraceEnabled"
-                                class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                                :class="terraceEnabled ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'">
-                            <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-surface ring-0 transition duration-200 ease-in-out"
-                                  :class="terraceEnabled ? 'translate-x-5' : 'translate-x-0'"></span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Preview of Terrace Clauses when enabled -->
-                <div x-show="terraceEnabled" class="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-800 space-y-2.5">
-                    <div class="text-xs font-semibold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        Terrace Safety Clauses (Clauses 27-30 Included in Agreement):
-                    </div>
-                    <ul class="text-xs text-emerald-800 dark:text-emerald-300 space-y-1.5 pl-4 list-disc">
-                        <li><strong>27. Prior Authorization Required:</strong> Access is strictly restricted and permitted only with prior management authorization. Members are not entitled to automatic terrace access.</li>
-                        <li><strong>28. Strict Prohibition:</strong> Unauthorized entry, use without permission, or during restricted hours is strictly prohibited and may result in immediate membership termination.</li>
-                        <li><strong>29. Safety & Conduct:</strong> Strict adherence to safety instructions. Climbing or leaning on railings, dangerous activities, or misusing equipment is strictly prohibited.</li>
-                        <li><strong>30. Revocation Right:</strong> Management reserves the right to restrict, suspend, or revoke terrace access at any time due to safety, weather, or operational needs.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Section 2: Agreement Document Title & Sections -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-6 space-y-5">
-                <div class="flex items-center gap-2.5 pb-3 border-b border-line dark:border-line">
-                    <span class="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 rounded-xl">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </span>
-                    <div>
-                        <h3 class="text-base font-semibold text-fg dark:text-white">Agreement Terms & Conditions Sections</h3>
-                        <p class="text-xs text-fg-muted">Organized into readable, expandable sections for quick member review</p>
-                    </div>
-                </div>
-
+            <input type="hidden" name="builder_payload" value="1">
+            <input type="hidden" name="open_terrace_enabled" :value="terraceEnabled ? 1 : 0">
+            <template x-for="(sec, i) in sections" :key="sec.uid">
                 <div>
-                    <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1.5">Official Document Title</label>
-                    <input type="text" name="title" value="{{ old('title', $activeTemplate->title) }}" required
-                           class="w-full text-xs rounded-xl border border-line dark:border-line bg-raised dark:bg-surface p-2.5 text-fg dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                </div>
-
-                <!-- Accordion of Sections -->
-                <div class="space-y-3">
-                    <template x-for="(sec, sIdx) in sections" :key="sIdx">
-                        <div class="border border-line dark:border-line rounded-xl overflow-hidden bg-raised dark:bg-slate-950/50">
-                            <input type="hidden" :name="'terms_sections[' + sIdx + '][title]'" :value="sec.title">
-                            <input type="hidden" :name="'terms_sections[' + sIdx + '][summary]'" :value="sec.summary">
-                            
-                            <div class="p-4 flex items-center justify-between cursor-pointer select-none" @click="sec.expanded = !sec.expanded">
-                                <div class="flex items-center gap-3">
-                                    <span class="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 text-xs font-semibold flex items-center justify-center shrink-0" x-text="sIdx + 1"></span>
-                                    <div>
-                                        <div class="text-xs font-semibold text-fg dark:text-white" x-text="sec.title"></div>
-                                        <div class="text-xs text-fg-muted" x-text="sec.summary"></div>
-                                    </div>
-                                </div>
-                                <svg class="w-4 h-4 text-fg-muted transition-transform" :class="sec.expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </div>
-
-                            <div x-show="sec.expanded" class="p-4 pt-0 border-t border-line dark:border-line space-y-2">
-                                <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Clauses:</div>
-                                <div class="space-y-1.5 pl-2">
-                                    <template x-for="(clause, cIdx) in (sec.clauses || [])" :key="cIdx">
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted p-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line" x-text="clause">
-                                            <input type="hidden" :name="'terms_sections[' + sIdx + '][clauses][' + cIdx + ']'" :value="clause">
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
+                    <input type="hidden" :name="'terms_sections['+i+'][title]'" :value="sec.title">
+                    <input type="hidden" :name="'terms_sections['+i+'][summary]'" :value="sec.summary">
+                    <template x-for="(clause,j) in sec.clauses" :key="clause.uid">
+                        <input type="hidden" :name="'terms_sections['+i+'][clauses]['+j+']'" :value="clause.text">
                     </template>
                 </div>
-
-                <!-- Publish Action Warning Banner -->
-                <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800 flex items-start gap-3">
-                    <svg class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <div class="text-xs text-indigo-900 dark:text-indigo-200">
-                        <strong class="font-semibold">Immutable Legal Versioning:</strong> When you publish, a new version (v{{ $activeTemplate->version + 1 }}.0) will be created. All newly enrolled members will sign this new version. Existing signed member documents remain permanently sealed to the exact version they signed.
+            </template>
+            <div class="ab-panel p-4 space-y-3">
+                <div class="ab-actions justify-between">
+                    <h2 class="ds-heading">Document editor</h2>
+                    <div class="ab-actions">
+                        <button type="button" class="ds-btn ds-btn-secondary" @click="if(confirm('Replace unsaved sections with the default template?')) resetSections(starter)">Default template</button>
+                        <button type="button" class="ds-btn ds-btn-secondary" @click="if(confirm('Replace unsaved sections with a blank agreement?')) resetSections([{title:'New section',summary:'',clauses:['']}])">Start from scratch</button>
+                        <button type="button" class="ds-btn ds-btn-secondary" @click="preview = !preview" x-text="preview ? 'Edit document' : 'Preview'"></button>
                     </div>
                 </div>
-
-                <div class="flex items-center justify-end gap-3 pt-2">
-                    <a href="{{ route('app.agreements.index') }}" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-fg-muted hover:bg-raised dark:text-fg-muted dark:hover:bg-raised">
-                        Cancel
-                    </a>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs transition-all hover:scale-[1.01] ops-primary">
-                        Publish New Agreement Version (v{{ $activeTemplate->version + 1 }}.0)
-                    </button>
+                <label class="ab-label" for="agreement-title">Document title</label>
+                <input id="agreement-title" name="title" class="ab-input" maxlength="150" required x-model="title">
+            </div>
+            <div class="ab-layout" x-show="!preview">
+                <aside class="ab-panel ab-nav space-y-2">
+                    <div class="flex justify-between items-center px-2 py-1"><h2 class="ds-heading">Sections</h2><span class="ds-caption" x-text="sections.length"></span></div>
+                    <template x-for="(sec,i) in sections" :key="sec.uid">
+                        <button type="button" class="ab-row" :aria-pressed="selected === i" @click="selected = i"><span x-text="i+1"></span><span class="flex-1 min-w-0"><span class="block font-medium break-words" x-text="sec.title || 'Untitled section'"></span><span class="ds-caption" x-text="sec.clauses.length+' clauses'"></span></span></button>
+                    </template>
+                    <button type="button" class="ds-btn ds-btn-secondary w-full" :disabled="sections.length >= 29" @click="addSection()">+ Add section</button>
+                </aside>
+                <section class="ab-panel p-4 space-y-4">
+                    <template x-if="sections[selected]">
+                        <div class="space-y-4">
+                            <div class="ab-actions justify-between"><h2 class="ds-heading" x-text="'Section '+(selected+1)"></h2><div class="ab-actions"><button type="button" class="ds-btn ds-btn-secondary" :disabled="selected===0" @click="moveSection(-1)">Move up</button><button type="button" class="ds-btn ds-btn-secondary" :disabled="selected===sections.length-1" @click="moveSection(1)">Move down</button></div></div>
+                            <label class="ab-label">Section heading<input class="ab-input mt-1" maxlength="150" x-model="sections[selected].title"></label>
+                            <label class="ab-label">Section summary (optional)<textarea class="ab-input mt-1" rows="2" maxlength="1000" x-model="sections[selected].summary"></textarea></label>
+                            <h3 class="ds-heading">Terms &amp; conditions</h3>
+                            <template x-for="(clause,j) in sections[selected].clauses" :key="clause.uid">
+                                <div class="ab-clause space-y-2">
+                                    <div class="ab-actions justify-between"><span class="ds-caption" x-text="'Clause '+(j+1)"></span><div class="ab-actions"><button type="button" class="ds-btn ds-btn-secondary" :disabled="j===0" @click="moveClause(j,-1)">↑</button><button type="button" class="ds-btn ds-btn-secondary" :disabled="j===sections[selected].clauses.length-1" @click="moveClause(j,1)">↓</button><button type="button" class="text-danger text-xs" :disabled="sections[selected].clauses.length<=1" @click="sections[selected].clauses.splice(j,1)">Remove</button></div></div>
+                                    <textarea class="ab-input" rows="3" maxlength="3000" :aria-label="'Clause '+(j+1)" x-model="clause.text"></textarea>
+                                </div>
+                            </template>
+                            <button type="button" class="ds-btn ds-btn-secondary w-full" :disabled="sections[selected].clauses.length>=30" @click="addClause()">+ Add clause</button>
+                            <button type="button" class="text-danger text-xs" :disabled="sections.length<=1" @click="removeSection()">Remove section</button>
+                        </div>
+                    </template>
+                </section>
+            </div>
+            <div class="ab-panel p-4 space-y-3">
+                <h2 class="ds-heading">Facility-specific policies</h2>
+                <label class="flex items-center gap-2 text-sm"><input type="checkbox" x-model="terraceEnabled"> Include open terrace safety rules</label>
+                <p class="ds-caption">Access requires management authorization. System-managed terrace clauses are appended automatically.</p>
+                <div x-show="terraceEnabled" class="space-y-2"><template x-for="clause in terrace.clauses" :key="clause"><p class="text-xs text-fg-muted" x-text="clause"></p></template></div>
+            </div>
+            <div x-show="preview" x-cloak class="ab-panel p-4">
+                <div class="ab-preview space-y-4">
+                    <h2 class="text-lg font-semibold text-center">{{ $tenant->name }}</h2><h3 class="text-base font-semibold text-center" x-text="title"></h3>
+                    <template x-for="(sec,i) in sections" :key="sec.uid">
+                        <div class="space-y-2"><h4 class="font-semibold" x-text="(i+1)+'. '+sec.title"></h4><p class="text-sm" x-text="sec.summary"></p><template x-for="clause in sec.clauses" :key="clause.uid"><p class="text-sm" x-text="clause.text"></p></template></div>
+                    </template>
+                    <div x-show="terraceEnabled" class="space-y-2"><h4 class="font-semibold" x-text="terrace.title"></h4><template x-for="clause in terrace.clauses" :key="clause"><p class="text-sm" x-text="clause"></p></template></div>
+                    <p class="text-xs">Preview of terms only. The existing health declaration and signing steps remain separate.</p>
                 </div>
             </div>
+            <div class="ab-panel p-4 space-y-3">
+                <p class="ds-caption">Publishing creates a new immutable version. Review your terms before publishing. Drafts are saved in your current login session only.</p>
+                <p x-show="error" x-text="error" class="text-danger text-sm" role="alert"></p>
+                <div class="ab-actions justify-end"><button type="submit" name="intent" value="draft" class="ds-btn ds-btn-secondary">Save draft</button><button type="submit" name="intent" value="publish" class="ds-btn ds-btn-primary">Publish version {{ $activeTemplate->version + 1 }}.0</button></div>
+            </div>
         </form>
-
         <!-- Section 3: Version History Table -->
         <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-6 space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-line dark:border-line">
@@ -251,15 +181,25 @@
 
     </div>
 
+
     <script>
-        function agreementSettingsManager(sectionsData, initialTerraceEnabled) {
-            return {
-                terraceEnabled: initialTerraceEnabled,
-                sections: (sectionsData || []).map(sec => ({
-                    ...sec,
-                    expanded: false
-                }))
-            };
-        }
+    function agreementBuilder(initial, starter, terrace, title, enabled) {
+        let nextId = 0;
+        const normalize = data => (Array.isArray(data) ? data : []).filter(s => s.key !== 'open_terrace_rules').map(s => ({
+            uid: ++nextId, title: s.title || '', summary: s.summary || '',
+            clauses: (Array.isArray(s.clauses) && s.clauses.length ? s.clauses : ['']).map(text => ({uid: ++nextId, text: String(text ?? '')}))
+        }));
+        return {
+            title, starter, terrace, terraceEnabled: enabled, sections: normalize(initial), selected: 0, preview: false, error: '',
+            init() { if (!this.sections.length) this.addSection(); },
+            resetSections(data) { this.sections = normalize(data); this.selected = 0; this.error = ''; },
+            addSection() { this.sections.push(...normalize([{title:'New section',summary:'',clauses:['']} ])); this.selected=this.sections.length-1; },
+            removeSection() { if(this.sections.length>1 && confirm('Remove this section and its clauses?')) { this.sections.splice(this.selected,1);this.selected=Math.max(0,this.selected-1); } },
+            moveSection(delta) { const i=this.selected, j=i+delta; if(j<0||j>=this.sections.length)return; const item=this.sections.splice(i,1)[0];this.sections.splice(j,0,item);this.selected=j; },
+            addClause() { this.sections[this.selected].clauses.push({uid:++nextId,text:''}); },
+            moveClause(i,delta) { const list=this.sections[this.selected].clauses,j=i+delta;if(j<0||j>=list.length)return;const item=list.splice(i,1)[0];list.splice(j,0,item); },
+            valid() { return this.title.trim() && this.sections.length>0 && this.sections.every(s=>s.title.trim() && s.clauses.length>0 && s.clauses.every(c=>c.text.trim())); }
+        };
+    }
     </script>
 </x-app-layout>

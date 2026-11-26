@@ -292,6 +292,48 @@ class MemberAgreementTest extends TestCase
         $this->assertEquals($v1Number + 1, $activeTemplate->version);
     }
 
+    public function test_custom_agreement_draft_and_publish_preserve_original_terms(): void
+    {
+        $original = $this->agreementService->getOrCreateActiveTemplate($this->tenantA);
+        $originalSections = $original->terms_sections;
+        $other = $this->agreementService->getOrCreateActiveTemplate($this->tenantB);
+        $this->actingAs($this->ownerA);
+        $payload = [
+            'builder_payload' => 1,
+            'title' => 'Custom gym rules',
+            'open_terrace_enabled' => 0,
+            'terms_sections' => [
+                ['title' => 'Equipment', 'summary' => 'Safety', 'clauses' => ['Return weights after use.']],
+            ],
+        ];
+        $this->post(route('app.agreements.settings.save'), $payload + ['intent' => 'draft'])
+            ->assertRedirect(route('app.agreements.settings'))
+            ->assertSessionHasNoErrors();
+        $this->assertTrue($original->fresh()->is_active);
+        $this->get(route('app.agreements.settings'))->assertOk()->assertViewHas('builderDraft');
+        $this->post(route('app.agreements.settings.save'), $payload + ['intent' => 'publish'])
+            ->assertRedirect(route('app.agreements.settings'))
+            ->assertSessionHasNoErrors();
+        $current = $this->agreementService->getOrCreateActiveTemplate($this->tenantA);
+        $this->assertEquals($original->version + 1, $current->version);
+        $this->assertSame($payload['terms_sections'], $current->terms_sections);
+        $this->assertSame($originalSections, $original->fresh()->terms_sections);
+        $this->assertFalse($original->fresh()->is_active);
+        $this->assertTrue($other->fresh()->is_active);
+        $this->assertSame($original->health_questions, $current->health_questions);
+    }
+
+    public function test_builder_rejects_blank_clauses(): void
+    {
+        $this->actingAs($this->ownerA);
+        $this->post(route('app.agreements.settings.save'), [
+            'builder_payload' => 1,
+            'title' => 'Invalid agreement',
+            'intent' => 'publish',
+            'terms_sections' => [['title' => 'Rules', 'clauses' => ['']]],
+        ])->assertSessionHasErrors('terms_sections.0.clauses.0');
+    }
+
     public function test_tenant_isolation_prevents_cross_tenant_agreement_access(): void
     {
         $agreementA = $this->agreementService->getOrCreateAgreementForMember($this->memberA);

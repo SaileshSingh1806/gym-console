@@ -183,6 +183,49 @@
         .sheet { box-shadow:none; border:0}
         body { background:white}
         }
+    
+        /* Mobile-first agreement reader: long custom clauses and narrow devices. */
+        .page,.sheet,.document,.member>div,.facts>div,.sectionintro,.terms-heading h3 { min-width:0; }
+        .brand span,.member h2,.membermeta,.sectionintro,.terms-heading h3,.terms-clauses li,.receipt,.notice { overflow-wrap:anywhere; }
+        .terms-clauses li { white-space:pre-wrap; }
+        .signature { height:clamp(150px,28vw,240px); max-width:100%; }
+        .continue-to-sign-btn.is-ready { background:#252b33; border-color:#252b33; box-shadow:none; }
+        .continue-to-sign-btn.is-ready:hover { background:#39414b; transform:none; box-shadow:none; }
+        .signed-actions { display:flex; flex-wrap:wrap; gap:10px; }
+        @media screen and (max-width:600px) {
+            body { font-size:15px; }
+            .page { width:100%; margin:16px auto; padding:0 10px; }
+            .sheethead,.document { padding:18px 14px; }
+            .pageintro { margin-bottom:16px; }
+            .steps { padding:0 12px; gap:6px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+            .step { font-size:11px; overflow-wrap:anywhere; }
+            .facts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 12px; }
+            .question { padding:18px 0; }
+            .answers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .answer { min-width:0; min-height:48px; padding:10px; }
+            .check { font-size:14px; min-height:44px; }
+            .check input { width:20px; height:20px; }
+            .actions,.terms-actions,.signed-actions { flex-direction:column; align-items:stretch; gap:10px; }
+            .actions .primary,.terms-actions button,.signed-actions a { width:100%; min-height:48px; }
+            .terms-heading { padding:12px; gap:8px; }
+            .terms-heading h3 { min-width:0; }
+            .terms-clauses { padding:4px 12px 8px; }
+            .terms-clauses li { font-size:15px; line-height:1.7; padding-left:14px; }
+            .terms-acceptance-card,.declaration,.reading-tools { padding:12px; }
+            .browser-translation-help { min-width:0; flex-basis:100%; }
+            .signaturetools { gap:8px; flex-wrap:wrap; }
+            .signaturetools button { min-height:44px; }
+            input,textarea,select { font-size:16px; }
+            .footer { flex-wrap:wrap; }
+        }
+        @media screen and (max-width:360px) {
+            .facts { grid-template-columns:minmax(0,1fr); }
+            .sheethead,.document { padding:14px 10px; }
+            .member { gap:10px; }
+            .portrait { width:48px; height:60px; }
+            .member h2 { font-size:19px; }
+            .step { font-size:10px; }
+        }
     </style>
 </head>
 <body>
