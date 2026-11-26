@@ -288,6 +288,15 @@
             .terrace-box { break-inside:avoid; }
             p,li,td { orphans:2; widows:2; }
         }
+    
+        .member-photo { grid-column:2; grid-row:1 / span 3; justify-self:end; align-self:start; width:96px; max-width:100%; text-align:center; break-inside:avoid; }
+        .member-photo img,.member-photo-placeholder { width:100%; aspect-ratio:3 / 4; border:1px solid #cbd5e1; border-radius:5px; background:#f1f5f9; }
+        .member-photo img { display:block; object-fit:contain; }
+        .member-photo img[hidden],.member-photo-placeholder[hidden] { display:none!important; }
+        .member-photo-placeholder { display:grid; place-items:center; padding:5px; color:#64748b; font-size:10px; }
+        .member-photo-caption { display:block; font-size:9px; color:#64748b; margin-top:4px; }
+        @media screen and (max-width:360px) { .member-photo { grid-column:1; grid-row:auto; justify-self:center; } }
+        @media print { .member-photo { width:26mm; } .member-photo img,.member-photo-placeholder { height:34mm; } }
     </style>
 </head>
 <body>
@@ -352,6 +361,15 @@
         <!-- Member Identity & Membership Details -->
         <div class="section-title">1. Member Profile &amp; Enrollment Details</div>
         <div class="info-grid">
+            <div class="member-photo">
+                @if($member->avatar_url)
+                    <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }} — Member photograph" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                    <span class="member-photo-placeholder" hidden>Photo unavailable</span>
+                @else
+                    <span class="member-photo-placeholder">Photo not provided</span>
+                @endif
+                <span class="member-photo-caption">Member photograph</span>
+            </div>
             <div class="info-item">
                 <label>Member Full Name</label>
                 <span>{{ $member->full_name }}</span>
