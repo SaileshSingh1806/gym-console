@@ -102,8 +102,23 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
     <x-workspace-ui-styles />
+    <style>
+        .admin-shell { --shell-canvas:#f7f8fa; --shell-surface:#fff; --shell-border:#e4e4e7; --shell-hover:#f1f2f4; --shell-text:#18181b; --shell-muted:#646b75; background:var(--shell-canvas); }
+        .dark .admin-shell { --shell-canvas:#101113; --shell-surface:#151618; --shell-border:#292c30; --shell-hover:#1c1e21; --shell-text:#f1f3f5; --shell-muted:#a1a8b0; }
+        .admin-shell > aside, .admin-shell > aside > div, .admin-shell > div.flex-1 > header, .admin-shell > div.flex-1 > footer, .admin-shell > nav { background:var(--shell-surface); border-color:var(--shell-border); backdrop-filter:none; }
+        .admin-shell > div.flex-1 { background:var(--shell-canvas); }
+        .admin-shell > aside nav > a { min-height:36px; padding:8px 10px; border-radius:6px; font-size:13px; font-weight:500; color:var(--shell-muted); }
+        .admin-shell > aside nav > a:hover { background:var(--shell-hover); color:var(--shell-text); }
+        .admin-shell > aside nav > a.admin-nav-active { background:var(--shell-hover); color:var(--shell-text); font-weight:600; box-shadow:none; }
+        .admin-shell > aside nav > a.admin-nav-active svg { color:var(--theme-accent,#f5a623); }
+        .admin-shell > aside nav > div[class*="uppercase"] { font-size:11px; font-weight:500; letter-spacing:0; text-transform:none; color:var(--shell-muted); padding-top:14px; padding-bottom:5px; }
+        .admin-shell > div.flex-1 > header { height:60px; }
+        .admin-shell > aside > div:first-child { height:60px; }
+        .admin-shell > div.flex-1 > footer { padding-top:10px; padding-bottom:10px; }
+        .admin-shell > div.flex-1 > header > div:last-child > span { background:var(--shell-hover)!important; color:var(--shell-muted)!important; border-color:var(--shell-border)!important; font-weight:500; border-radius:6px; }
+    </style>
 </head>
-<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-red-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell admin-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-red-500/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile Sidebar Backdrop -->
     <div x-show="sidebarOpen" 
@@ -119,7 +134,7 @@
 
     <!-- Super Admin Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full lg:translate-x-0'" 
-           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
+           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] lg:w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0">
         <!-- Logo -->
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center min-w-0 group focus:outline-none">
@@ -136,42 +151,42 @@
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="flex-grow px-3 py-4 space-y-1.5 text-xs font-semibold overflow-y-auto">
-            <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Main Core</div>
+        <nav class="flex-grow px-3 py-4 space-y-1 text-xs font-medium overflow-y-auto">
+            <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Platform</div>
 
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.dashboard') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Platform Dashboard
+                Dashboard
             </a>
 
-            <a href="{{ route('admin.gyms') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.gyms*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.gyms') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.gyms*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Gyms & Tenants
+                Gyms & tenants
             </a>
 
-            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Billing & Plans</div>
+            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Billing & plans</div>
 
-            <a href="{{ route('admin.plans') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.plans*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.plans') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.plans*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
-                Subscription Plans & Features
+                Subscription plans
             </a>
 
-            <a href="{{ route('admin.subscriptions') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.subscriptions*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.subscriptions') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.subscriptions*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                Subscriptions & Invoices
+                Subscriptions & invoices
             </a>
 
-            <a href="{{ route('admin.coupons') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.coupons*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.coupons') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.coupons*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                Coupons & Discounts
+                Coupons & discounts
             </a>
 
-            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Helpdesk & Support</div>
+            <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Support</div>
 
-            <a href="{{ route('admin.tickets.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.tickets*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.tickets.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.tickets*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <div class="flex items-center gap-3">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <span>Support Tickets</span>
+                    <span>Support tickets</span>
                 </div>
                 @php
                     $pendingTicketsCount = \App\Models\SupportTicket::withoutGlobalScopes()->whereIn('status', ['open', 'in_progress'])->count();
@@ -183,19 +198,19 @@
 
             <div class="pt-4 px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Administration</div>
 
-            <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.users*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.users*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                Platform Users
+                Platform users
             </a>
 
-            <a href="{{ route('admin.logs') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.logs*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.logs') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.logs*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                Activity Audit Logs
+                Activity logs
             </a>
 
-            <a href="{{ route('admin.settings') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.settings*') ? 'bg-red-500 text-white shadow-lg shadow-red-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
+            <a href="{{ route('admin.settings') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.settings*') ? 'admin-nav-active' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Platform Settings
+                Settings
             </a>
         </nav>
 
@@ -222,7 +237,7 @@
                 <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
                     <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Platform Control' }}</h1>
+                <h1 class="text-xs sm:text-sm md:text-base font-semibold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Platform Control' }}</h1>
             </div>
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <x-theme-customizer />
@@ -257,7 +272,7 @@
             </div>
         @endif
 
-        <main class="flex-1 p-3.5 sm:p-5 md:p-8 pb-28 lg:pb-8 w-full max-w-full overflow-x-hidden">
+        <main class="flex-1 p-3.5 sm:p-5 md:p-6 pb-28 lg:pb-6 w-full max-w-full overflow-x-hidden">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
@@ -271,9 +286,9 @@
             </div>
             <div class="flex items-center gap-3 text-[11px]">
                 <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 font-mono font-bold text-slate-700 dark:text-slate-300">v{{ config('app.version', '2.5.0') }}</span>
-                <span class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Systems Operational
+                <span class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    Health not monitored
                 </span>
             </div>
         </footer>
