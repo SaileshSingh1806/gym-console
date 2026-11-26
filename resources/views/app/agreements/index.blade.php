@@ -93,7 +93,7 @@
         .agreement-workspace .ag-record-actions a[title="Share via WhatsApp"] { background:rgb(37 211 102/.10); border-color:rgb(37 211 102/.24); color:#128C4B; }
         html.dark .agreement-workspace .ag-record-actions a[title="Share via WhatsApp"] { color:#25D366; }
         .agreement-workspace .ag-details-toggle { background:rgb(var(--c-surface)); color:rgb(var(--c-fg-muted)); }
-        .agreement-workspace .ag-record-details { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:14px; border-top:1px solid rgb(var(--c-line)); background:rgb(var(--c-raised)/.55); font-size:13px; }
+        .agreement-workspace .ag-record-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:14px; border-top:1px solid rgb(var(--c-line)); background:rgb(var(--c-raised)/.55); font-size:13px; }
         .agreement-workspace .ag-detail-label { display:block; margin-bottom:6px; font-size:12px; color:rgb(var(--c-fg-muted)); }
         .agreement-workspace .ag-pagination { padding:12px 16px; border-top:1px solid rgb(var(--c-line)); }
         @media(max-width:1100px) { .agreement-workspace .ag-layout { grid-template-columns:180px minmax(0,1fr); } .agreement-workspace .ag-record-main { grid-template-columns:minmax(0,1fr) auto; } .agreement-workspace .ag-record-actions { grid-column:1/-1; justify-content:flex-start; } }
@@ -203,10 +203,10 @@
                                         Pending
                                     </span>
                                 @endif
-                            </div>
+                            @if($ag->has_medical_conditions)<span class="ds-caption text-danger">Health disclosure</span>@elseif($ag->health_declaration_accepted_at)<span class="ds-caption text-success">No conditions reported</span>@else<span class="ds-caption">Health not completed</span>@endif</div>
                             <div class="ag-record-actions">
                                 
-                                <div class="ag-record-actions">
+                                
                                     @if($ag->isCompleted())
                                         <!-- View / Download PDF Document -->
                                         <a href="{{ route('app.agreements.pdf', $ag->id) }}" target="_blank"
@@ -246,7 +246,6 @@
                                         <span>WhatsApp</span>
                                         </a>
                                     @endif
-                                </div>
                             
                                 <button type="button" class="ag-details-toggle" @click="detailsOpen = !detailsOpen" :aria-expanded="detailsOpen" :aria-label="detailsOpen ? 'Hide agreement details' : 'Show agreement details'">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" :class="detailsOpen ? 'rotate-90' : ''"><path d="m9 18 6-6-6-6"/></svg>
