@@ -1,8 +1,56 @@
 <x-app-layout header="Dashboard">
+    @push('styles')
+    <style>
+        .dashboard-overview { container-type: inline-size; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+        .dashboard-overview .dashboard-actions { display:flex; flex-wrap:wrap; overflow:visible; margin-inline:0; padding-inline:0; }
+        .dashboard-overview .dashboard-actions .ds-btn { min-height:36px; height:36px; font-size:14px; font-weight:500; }
+        .dashboard-overview .ds-stat-grid > :is(a,button,div) { min-width:0; min-height:76px; padding:12px 14px; border-radius:0; box-shadow:none; }
+        .dashboard-overview .ds-caption, .dashboard-overview .ds-caption .truncate { white-space:normal; overflow:visible; text-overflow:clip; letter-spacing:0; text-transform:none; font-size:12px; }
+        .dashboard-overview .ds-kpi { font-size:24px; font-weight:600; letter-spacing:-.02em; line-height:1.35; white-space:normal; overflow-wrap:anywhere; }
+        .dashboard-overview .ds-badge { border-radius:999px; }
+        .dashboard-overview .ds-select { height:36px; }
+        .dashboard-overview .ds-select:focus-visible { outline:none; border-color:rgb(var(--c-accent)); }
+        .dashboard-overview .owner-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .dashboard-overview .owner-finance { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .dashboard-overview .owner-charts, .dashboard-overview .owner-lists { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
+        .dashboard-overview .owner-charts > *, .dashboard-overview .owner-lists > * { min-width:0; }
+        .dashboard-overview .owner-chart { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:16px; }
+        .dashboard-overview .owner-chart-plot { height:210px; position:relative; }
+        .dashboard-overview .owner-list { padding:14px 16px; }
+        .dashboard-overview .owner-list h4 { font-size:14px; font-weight:600; color:rgb(var(--c-fg)); }
+        .dashboard-overview .owner-list-rows { max-height:252px; overflow-y:auto; }
+        .dashboard-overview .owner-list-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 0; border-bottom:1px solid rgb(var(--c-line)); font-size:14px; }
+        .dashboard-overview .owner-list-row:last-child { border-bottom:0; }
+        .dashboard-overview .owner-list-row:hover { background:rgb(var(--c-raised)); }
+        .dashboard-overview .owner-list a:not([href^="https://wa.me"]) { color:rgb(var(--c-accent-fg)); }
+        .dashboard-overview .owner-list a:not([href^="https://wa.me"]):hover { text-decoration:underline; }
+        .dashboard-overview .owner-list .owner-list-rows > div:only-child { border-bottom:0; }
+        .dashboard-overview .owner-finance > div { padding:12px 14px; }
+        .dashboard-overview .owner-finance .ds-caption { white-space:normal; }
+        .dashboard-overview .owner-dues { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .dashboard-overview svg[stroke-width="2"], .dashboard-overview svg [stroke-width="2"], .dashboard-overview svg [stroke-width="2.5"] { stroke-width:1.75; }
+        @container (min-width:600px) {
+            .dashboard-overview .owner-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+            .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
+            .dashboard-overview .owner-charts, .dashboard-overview .owner-lists { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+        @container (min-width:1050px) {
+            .dashboard-overview .owner-members { grid-template-columns:repeat(6,minmax(0,1fr)); }
+            .dashboard-overview .owner-sales { grid-template-columns:repeat(5,minmax(0,1fr)); }
+            .dashboard-overview .owner-finance { grid-template-columns:repeat(6,minmax(0,1fr)); }
+            .dashboard-overview .owner-dues { grid-template-columns:repeat(4,minmax(0,1fr)); }
+            .dashboard-overview .owner-lists { grid-template-columns:repeat(3,minmax(0,1fr)); }
+        }
+        @container (max-width:400px) {
+            .dashboard-overview .dashboard-actions .ds-btn { flex:1 1 calc(50% - 8px); white-space:normal; padding-inline:8px; font-size:12px; }
+            .dashboard-overview .owner-chart-plot { height:180px; }
+        }
+    </style>
+    @endpush
     @php
         $currency = auth()->user()->tenant?->currency_symbol ?? '₹';
-        $tenantName = $tenant->name ?? 'PowerFit Gym';
-        $greeting = (now()->hour < 12 ? 'Good Morning' : (now()->hour < 17 ? 'Good Afternoon' : 'Good Evening'));
+        $tenantName = $tenant->name ?? 'GymDeskHub';
+        $greeting = (now()->hour < 12 ? 'Good morning' : (now()->hour < 17 ? 'Good afternoon' : 'Good evening'));
     @endphp
 
     <div x-data="{ 
@@ -34,7 +82,7 @@
                 } else if (this.finScope === 'gym') {
                     return 'Gym Memberships Only';
                 } else if (this.finScope === 'pt') {
-                    return 'Personal Training (PT) Only';
+                    return 'Personal training Only';
                 }
                 return null;
             },
@@ -64,7 +112,7 @@
             },
             formatShort(v) {
                 const n = Number(v || 0);
-                if (n >= 100000) return '₹' + (n / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
+                if (n >= 100000) return this.currency + (n / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
                 if (n >= 1000) return '₹' + (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
                 return '₹' + n;
             },
@@ -79,7 +127,7 @@
                 }
             }
          }" 
-         class="dashboard-overview space-y-8 pb-12">
+         class="dashboard-overview space-y-5 pb-8">
 
         <!-- Header -->
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
@@ -157,7 +205,7 @@
         @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->isGymOwner())
         <section class="dashboard-metrics space-y-3" aria-label="Members">
             <h2 class="ds-heading">Members</h2>
-            <div class="ds-stat-grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-6">
+            <div class="ds-stat-grid owner-metrics owner-members">
                 <x-stat label="Active members" :value="$metrics['active_members']" :href="route('app.members.index', ['status' => 'ACTIVE'])" />
                 <x-stat label="Expired members" :value="$metrics['expired_members']" :href="route('app.members.index', ['status' => 'EXPIRED'])" />
                 <x-stat label="Churn risk" :value="$metrics['churn_risk']" :flag="$metrics['churn_risk'] > 0" tone="danger" @click="showChurnModal = true" />
@@ -172,7 +220,7 @@
         @if(auth()->user()->hasFeature('personal_training') && auth()->user()->hasPermission('pt.view'))
         <section class="space-y-3" aria-label="Personal training">
             <h2 class="ds-heading">Personal training</h2>
-            <div class="ds-stat-grid grid-cols-1 sm:grid-cols-3">
+            <div class="ds-stat-grid owner-metrics">
                 <x-stat label="Active packages" :value="$metrics['active_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'ACTIVE'])" />
                 <x-stat label="Expired packages" :value="$metrics['expired_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'EXPIRED'])" />
                 <x-stat label="Exhausted packages" :value="$metrics['exhausted_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'COMPLETED'])" />
@@ -184,7 +232,7 @@
         @if(auth()->user()->hasFeature('crm_leads') && auth()->user()->hasPermission('crm.view'))
         <section class="space-y-3" aria-label="Sales and CRM">
             <h2 class="ds-heading">Sales &amp; CRM</h2>
-            <div class="ds-stat-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            <div class="ds-stat-grid owner-metrics owner-sales">
                 <x-stat label="Active leads" :value="$metrics['active_leads']" :href="route('app.leads.index')" />
                 <x-stat label="Today's enquiries" :value="$metrics['today_enquiries']" :href="route('app.leads.index')" />
                 <x-stat label="Follow-ups today" :value="$metrics['today_followups']" :href="route('app.leads.index')" />
@@ -217,7 +265,7 @@
                                     class="px-3 h-7 rounded-md border transition-colors cursor-pointer">PT</button>
                         </div>
 
-                        <select x-model="finPeriod" aria-label="Financial overview period" class="ds-select !h-8 !w-auto !text-xs cursor-pointer">
+                        <select x-model="finPeriod" aria-label="Financial overview period" class="ds-select !w-auto !text-sm cursor-pointer">
                             <option value="mtd">This month</option>
                             <option value="today">Today</option>
                             <option value="yesterday">Yesterday</option>
@@ -231,7 +279,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-line rounded-b-xl overflow-hidden">
+                <div class="grid owner-finance gap-px bg-line rounded-b-xl overflow-hidden">
                     <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
                         <div class="min-w-0">
                             <div class="ds-caption truncate">Billed (<span x-text="getFin('billed_count')" class="tabular-nums">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
@@ -288,7 +336,7 @@
             <!-- Dues -->
             <div class="space-y-3">
                 <h2 class="ds-heading">Dues</h2>
-                <div class="ds-stat-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="ds-stat-grid owner-dues">
                     @php
                         $dueCells = [
                             ['All dues',          $metrics['all_dues_remaining'],               $metrics['due_members_count'],        null],
@@ -339,7 +387,7 @@
                         <div class="w-8 h-8 rounded-lg bg-raised text-fg-muted border border-line flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         </div>
-                        <h3 class="font-semibold text-fg text-sm sm:text-base">Personal Training (PT)</h3>
+                        <h3 class="font-semibold text-fg text-sm sm:text-base">Personal training</h3>
                     </div>
 
                     <div class="flex items-center gap-2.5 self-start sm:self-auto">
@@ -400,7 +448,7 @@
                                     <th class="px-3 py-2 text-center">Clients</th>
                                     <th class="px-3 py-2 text-right">Collection</th>
                                     <th class="px-3 py-2 text-right">Payout</th>
-                                    <th class="px-3 py-2 text-right">Gym Profit</th>
+                                    <th class="px-3 py-2 text-right">Gym profit</th>
                                     <th class="px-3 py-2 text-center">Sessions</th>
                                 </tr>
                             </thead>
@@ -443,33 +491,33 @@
             $canSeeAnyTrends = $canSeeRevTrends || $canSeeGrowthTrends || $canSeeAttTrends;
         @endphp
         @if($canSeeAnyTrends)
-        <div class="p-3.5 sm:p-6 rounded-xl bg-surface border border-line space-y-4 sm:space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-line pb-3 sm:pb-4">
+        <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-2 sm:gap-2.5">
                     <svg class="w-5 h-5 text-fg-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-                    <h3 class="font-semibold text-fg text-sm sm:text-base">Trends & Insights</h3>
-                    <span class="px-1.5 py-0.2 rounded bg-raised text-fg-muted text-xs font-semibold border border-line">NEW</span>
+                    <h3 class="font-semibold text-fg text-sm sm:text-base">Trends and insights</h3>
+                    
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                     <div class="flex items-center bg-raised p-0.5 sm:p-1 rounded-xl border border-line text-xs font-semibold">
-                        <button type="button" @click="setTrendPeriod('30d')" :class="trendPeriod === '30d' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">30D</button>
-                        <button type="button" @click="setTrendPeriod('90d')" :class="trendPeriod === '90d' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90D</button>
-                        <button type="button" @click="setTrendPeriod('6m')" :class="trendPeriod === '6m' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6M</button>
-                        <button type="button" @click="setTrendPeriod('1y')" :class="trendPeriod === '1y' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1Y</button>
+                        <button type="button" @click="setTrendPeriod('30d')" :class="trendPeriod === '30d' ? 'bg-surface text-fg border border-line-strong' : 'text-fg-muted hover:text-fg border border-transparent'" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">30 days</button>
+                        <button type="button" @click="setTrendPeriod('90d')" :class="trendPeriod === '90d' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">90 days</button>
+                        <button type="button" @click="setTrendPeriod('6m')" :class="trendPeriod === '6m' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">6 months</button>
+                        <button type="button" @click="setTrendPeriod('1y')" :class="trendPeriod === '1y' ? 'bg-accent text-accent-on ' : 'text-fg-muted hover:text-fg '" class="px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer text-xs">1 year</button>
                     </div>
                     <button type="button" @click="showAiSummaryModal = true" class="px-3 py-1.5 rounded-xl text-fg font-semibold text-xs flex items-center gap-1.5 hover:opacity-95 cursor-pointer">
-                        <span>AI Summary</span>
+                        <span>AI summary</span>
                     </button>
                 </div>
             </div>
 
             <!-- 4 Charts Grid (Responsive layout based on role) -->
-            <div class="grid grid-cols-1 {{ (auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) ? 'lg:grid-cols-2' : 'md:grid-cols-3' }} gap-4 sm:gap-6">
+            <div class="owner-charts">
 
                 <!-- Chart 1: Revenue -->
                 @if($canSeeRevTrends)
-                <div class="p-3.5 sm:p-5 rounded-xl bg-raised border border-line space-y-3">
+                <div class="owner-chart space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-xs font-semibold text-fg-muted block">Revenue</span>
@@ -479,61 +527,61 @@
                             Live revenue
                         </span>
                     </div>
-                    <div class="h-44 relative">
+                    <div class="owner-chart-plot">
                         <canvas id="chartRevenue"></canvas>
                     </div>
                 </div>
                 @endif
 
-                <!-- Chart 2: Member Growth -->
+                <!-- Chart 2: Member growth -->
                 @if($canSeeGrowthTrends)
-                <div class="p-3.5 sm:p-5 rounded-xl bg-raised border border-line space-y-3">
+                <div class="owner-chart space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-fg-muted block">Member Growth</span>
+                            <span class="text-xs font-semibold text-fg-muted block">Member growth</span>
                             <span class="text-xl sm:text-2xl font-semibold text-fg">{{ $metrics['active_members'] }} active</span>
                         </div>
                         <span class="px-2 py-0.5 rounded-full bg-raised text-fg-muted border border-line text-xs font-semibold tabular-nums">
                             <span x-text="trendsByPeriod[trendPeriod]?.total_joins ?? {{ (int) ($metrics['new_clients_count'] ?? 0) }}">{{ $metrics['new_clients_count'] }}</span> joins
                         </span>
                     </div>
-                    <div class="h-44 relative">
+                    <div class="owner-chart-plot">
                         <canvas id="chartGrowth"></canvas>
                     </div>
                 </div>
                 @endif
 
-                <!-- Chart 3: Daily Attendance -->
+                <!-- Chart 3: Daily attendance -->
                 @if($canSeeAttTrends)
-                <div class="p-3.5 sm:p-5 rounded-xl bg-raised border border-line space-y-3">
+                <div class="owner-chart space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-fg-muted block">Daily Attendance</span>
+                            <span class="text-xs font-semibold text-fg-muted block">Daily attendance</span>
                             <span class="text-xl sm:text-2xl font-semibold text-fg">{{ $metrics['today_attendance'] }}/day</span>
                         </div>
                         <span class="px-2 py-0.5 rounded-full bg-raised text-fg-muted border border-line text-xs font-semibold tabular-nums">
                             {{ !empty($metrics['avg_attendance_minutes']) ? 'Avg: ' . $metrics['avg_attendance_minutes'] . ' min' : 'Avg: —' }}
                         </span>
                     </div>
-                    <div class="h-44 relative">
+                    <div class="owner-chart-plot">
                         <canvas id="chartAttendance"></canvas>
                     </div>
                 </div>
                 @endif
 
                 @if((auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin()) && $canSeeRevTrends)
-                <!-- Chart 4: Revenue vs Expenses (Gym Owner Only) -->
-                <div class="p-3.5 sm:p-5 rounded-xl bg-raised border border-line space-y-3">
+                <!-- Chart 4: Revenue vs expenses (Gym Owner Only) -->
+                <div class="owner-chart space-y-3">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-fg-muted block">Revenue vs Expenses</span>
+                            <span class="text-xs font-semibold text-fg-muted block">Revenue vs expenses</span>
                             <span class="text-xl sm:text-2xl font-semibold text-fg">{{ $currency }}{{ number_format($metrics['net_profit'], 2) }}</span>
                         </div>
                         <span class="px-2 py-0.5 rounded-full {{ $metrics['net_profit'] >= 0 ? 'bg-raised text-fg-muted border border-line ' : 'bg-raised text-fg-muted border border-line ' }} text-xs font-semibold">
                             {{ $metrics['net_profit'] >= 0 ? 'Profitable' : 'Deficit' }}
                         </span>
                     </div>
-                    <div class="h-44 relative">
+                    <div class="owner-chart-plot">
                         <canvas id="chartRevVsExp"></canvas>
                     </div>
                 </div>
@@ -544,28 +592,28 @@
         @endif
 
         <!-- ROW 6: LIVE OPERATIONAL WIDGET CARDS (3x2 Grid) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div class="owner-lists">
 
-            <!-- Widget 1: Expiring This Week (with WhatsApp buttons) -->
+            <!-- Widget 1: Expiring this week (with WhatsApp buttons) -->
             @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->hasPermission('members.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Expiring This Week</span>
+                            <span> Expiring this week</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['expiring_members_list']) }})</span>
                         </h4>
                         <div class="flex items-center gap-1.5">
-                            <button type="button" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-accent hover:text-accent-on text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer">
-                                <span> Send All</span>
+                            <button type="button" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer">
+                                <span> Send all</span>
                             </button>
-                            <a href="{{ route('app.members.index', ['filter' => 'expiring']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                            <a href="{{ route('app.members.index', ['filter' => 'expiring']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                         </div>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['expiring_members_list'] as $exp)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="flex items-center gap-2.5 min-w-0">
                                     @if($exp->member?->avatar_url)
                                         <img src="{{ $exp->member->avatar_url }}" alt="{{ $exp->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-line shrink-0">
@@ -590,7 +638,7 @@
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text=Hi%20{{ urlencode($exp->member->first_name) }},%20your%20gym%20membership%20at%20{{ urlencode($tenantName) }}%20is%20expiring%20on%20{{ $exp->end_date }}.%20Please%20renew%20to%20continue%20your%20workouts!"
                                            target="_blank"
                                            title="Send WhatsApp Reminder"
-                                           class="w-7 h-7 rounded-lg bg-raised hover:bg-accent text-fg-muted hover:text-accent-on flex items-center justify-center transition-colors">
+                                           class="w-7 h-7 rounded-lg bg-raised hover:bg-surface text-fg-muted hover:text-fg flex items-center justify-center transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.971.53 1.771.815 2.796.815 3.18 0 5.767-2.587 5.768-5.766 0-3.18-2.586-5.768-5.768-5.768zm3.393 8.167c-.145.408-.839.774-1.208.825-.331.045-.764.08-2.222-.524-1.865-.772-3.056-2.677-3.149-2.8-.093-.124-.754-.999-.754-1.905s.475-1.353.644-1.539c.169-.187.369-.234.492-.234.124 0 .247.001.355.006.113.005.263-.043.411.314.153.37.524 1.28.57 1.373.046.093.077.201.015.324-.062.124-.093.201-.185.308-.093.108-.195.241-.278.324-.093.093-.19.195-.082.38.108.186.48 1.012 1.031 1.503.711.633 1.311.83 1.496.922.185.093.293.078.401-.046.108-.124.463-.54.587-.725.124-.185.247-.154.416-.093.169.062 1.076.507 1.261.6.185.093.308.139.354.216.046.077.046.447-.099.855z"/></svg>
                                         </a>
                                     @endif
@@ -606,21 +654,21 @@
             </div>
             @endif
 
-            <!-- Widget 2: Today's Birthdays -->
+            <!-- Widget 2: Birthdays today -->
             @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->hasPermission('members.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Today's Birthdays</span>
+                            <span> Birthdays today</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['birthday_members_list']) }})</span>
                         </h4>
                         <button type="button" class="text-xs font-semibold text-fg-muted hover:text-fg cursor-pointer"> Templates</button>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['birthday_members_list'] as $bday)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="flex items-center gap-2.5 min-w-0">
                                     <div class="w-7 h-7 rounded-full bg-raised text-fg-muted flex items-center justify-center font-semibold text-xs shrink-0">
 
@@ -631,7 +679,7 @@
                                     </div>
                                 </div>
                                 @if($bday->phone)
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bday->phone) }}?text=Happy%20Birthday%20{{ urlencode($bday->first_name) }}!%20Wishing%20you%20a%20healthy%20and%20fit%20year%20ahead%20from%20{{ urlencode($tenantName) }}!%20" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-accent hover:text-accent-on text-xs font-semibold flex items-center gap-1 transition-all shrink-0">
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bday->phone) }}?text=Happy%20Birthday%20{{ urlencode($bday->first_name) }}!%20Wishing%20you%20a%20healthy%20and%20fit%20year%20ahead%20from%20{{ urlencode($tenantName) }}!%20" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold flex items-center gap-1 transition-all shrink-0">
                                         <span>Wish</span>
                                     </a>
                                 @endif
@@ -647,23 +695,23 @@
             </div>
             @endif
 
-            <!-- Widget 3: Recently Expired -->
+            <!-- Widget 3: Recently expired -->
             @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->hasPermission('members.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Recently Expired</span>
+                            <span> Recently expired</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['recently_expired_list']) }})</span>
                         </h4>
                         <div class="flex items-center gap-1.5">
-                            <a href="{{ route('app.members.index', ['status' => 'EXPIRED']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                            <a href="{{ route('app.members.index', ['status' => 'EXPIRED']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                         </div>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['recently_expired_list'] as $recExp)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="flex items-center gap-2.5 min-w-0">
                                     @if($recExp->member?->avatar_url)
                                         <img src="{{ $recExp->member->avatar_url }}" alt="{{ $recExp->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-line shrink-0">
@@ -677,7 +725,7 @@
                                         <div class="text-xs text-fg-muted truncate">{{ $recExp->plan?->name ?? 'Membership' }}</div>
                                     </div>
                                 </div>
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $recExp->member?->phone ?? '') }}?text=Hi%20{{ urlencode($recExp->member?->first_name ?? 'there') }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Get%20special%20renewal%20offers%20today." target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-accent hover:text-accent-on text-xs font-semibold transition-all shrink-0">
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $recExp->member?->phone ?? '') }}?text=Hi%20{{ urlencode($recExp->member?->first_name ?? 'there') }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Get%20special%20renewal%20offers%20today." target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold transition-all shrink-0">
                                     Reach Out
                                 </a>
                             </div>
@@ -694,20 +742,20 @@
             </div>
             @endif
 
-            <!-- Widget 4: Recent Payments -->
+            <!-- Widget 4: Recent payments -->
             @if(auth()->user()->hasPermission('dashboard.financials') || auth()->user()->hasPermission('payments.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span>₹ Recent Payments</span>
+                            <span>₹ Recent payments</span>
                         </h4>
-                        <a href="{{ route('app.payments.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.payments.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['recent_payments'] as $pay)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg-muted leading-tight truncate">{{ $pay->member?->full_name ?? 'Member Payment' }}</div>
                                     <div class="text-xs text-fg-muted truncate">{{ $pay->membership?->plan?->name ?? 'Plan Fee' }}</div>
@@ -725,20 +773,20 @@
             </div>
             @endif
 
-            <!-- Widget 5: Recent Members -->
+            <!-- Widget 5: Recent members -->
             @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->hasPermission('members.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Recent Members</span>
+                            <span> Recent members</span>
                         </h4>
-                        <a href="{{ route('app.members.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.members.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['recent_members_list'] as $rm)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg-muted leading-tight truncate">{{ $rm->full_name }}</div>
                                     <div class="text-xs text-fg-muted truncate">{{ $rm->phone }}</div>
@@ -756,23 +804,23 @@
             </div>
             @endif
 
-            <!-- Widget 6: Lead Follow-ups -->
+            <!-- Widget 6: Lead follow-ups -->
             @if(auth()->user()->hasFeature('crm_leads') && (auth()->user()->hasPermission('crm.view') || auth()->user()->isGymOwner()))
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Lead Follow-ups</span>
+                            <span> Lead follow-ups</span>
                             @if($metrics['overdue_followups'] > 0)
                                 <span class="px-1.5 py-0.2 rounded bg-raised text-fg-muted text-xs font-semibold">1 overdue</span>
                             @endif
                         </h4>
-                        <a href="{{ route('app.leads.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.leads.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['lead_followups_list'] as $lead)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg-muted leading-tight truncate">{{ $lead->name }}</div>
                                     <div class="text-xs text-fg-muted truncate">{{ $lead->phone }}</div>
@@ -800,21 +848,21 @@
             </div>
             @endif
 
-            <!-- Widget 7: Due Payments (Pending Balance) -->
+            <!-- Widget 7: Due payments (Pending Balance) -->
             @if(auth()->user()->hasPermission('dashboard.financials') || auth()->user()->hasPermission('payments.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Due Payments</span>
+                            <span> Due payments</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['due_members_list']) }})</span>
                         </h4>
-                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.members.index', ['filter' => 'due']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['due_members_list'] as $dm)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg leading-tight truncate">{{ $dm->member?->full_name }}</div>
                                     <div class="text-xs text-fg-muted truncate">{{ $dm->plan?->name ?? 'Membership' }}</div>
@@ -825,7 +873,7 @@
                                         <div class="text-xs font-medium text-fg-muted">Pending</div>
                                     </div>
                                     @if($dm->member?->phone)
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dm->member->phone) }}?text=Hi%20{{ urlencode($dm->member->first_name) }},%20this%20is%20a%20gentle%20reminder%20that%20your%20membership%20fee%20balance%20of%20{{ $currency }}{{ number_format($dm->due_amount ?? 0, 2) }}%20is%20pending%20at%20{{ urlencode($tenantName) }}.%20Please%20clear%20it%20at%20your%20earliest%20convenience." target="_blank" title="Send WhatsApp Reminder" class="p-1.5 rounded bg-raised hover:bg-accent hover:text-accent-on text-fg-muted transition-colors">
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dm->member->phone) }}?text=Hi%20{{ urlencode($dm->member->first_name) }},%20this%20is%20a%20gentle%20reminder%20that%20your%20membership%20fee%20balance%20of%20{{ $currency }}{{ number_format($dm->due_amount ?? 0, 2) }}%20is%20pending%20at%20{{ urlencode($tenantName) }}.%20Please%20clear%20it%20at%20your%20earliest%20convenience." target="_blank" title="Send WhatsApp Reminder" class="p-1.5 rounded bg-raised hover:bg-raised hover:text-fg text-fg-muted transition-colors">
                                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.971.53 1.771.815 2.796.815 3.18 0 5.767-2.587 5.768-5.766 0-3.18-2.586-5.768-5.768-5.768zm3.393 8.167c-.145.408-.839.774-1.208.825-.331.045-.764.08-2.222-.524-1.865-.772-3.056-2.677-3.149-2.8-.093-.124-.754-.999-.754-1.905s.475-1.353.644-1.539c.169-.187.369-.234.492-.234.124 0 .247.001.355.006.113.005.263-.043.411.314.153.37.524 1.28.57 1.373.046.093.077.201.015.324-.062.124-.093.201-.185.308-.093.108-.195.241-.278.324-.093.093-.19.195-.082.38.108.186.48 1.012 1.031 1.503.711.633 1.311.83 1.496.922.185.093.293.078.401-.046.108-.124.463-.54.587-.725.124-.185.247-.154.416-.093.169.062 1.076.507 1.261.6.185.093.308.139.354.216.046.077.046.447-.099.855z"/></svg>
                                         </a>
                                     @endif
@@ -844,21 +892,21 @@
             </div>
             @endif
 
-            <!-- Widget 8: Recent Renewals -->
+            <!-- Widget 8: Recent renewals -->
             @if(auth()->user()->hasPermission('dashboard.financials') || auth()->user()->hasPermission('memberships.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Recent Renewals</span>
+                            <span> Recent renewals</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['recent_renewals_list']) }})</span>
                         </h4>
-                        <a href="{{ route('app.memberships.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.memberships.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['recent_renewals_list'] as $rn)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg-muted leading-tight truncate">{{ $rn->member?->full_name }}</div>
                                     <div class="text-xs text-fg-muted truncate">{{ $rn->plan?->name ?? 'Standard Plan' }}</div>
@@ -876,21 +924,21 @@
             </div>
             @endif
 
-            <!-- Widget 9: Today's Live Attendance -->
+            <!-- Widget 9: Live attendance -->
             @if(auth()->user()->hasPermission('dashboard.attendance_stats') || auth()->user()->hasPermission('attendance.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
                             <span> Today's Check-ins</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ $metrics['today_attendance'] }})</span>
                         </h4>
-                        <a href="{{ route('app.attendance.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.attendance.index') }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['recent_attendance'] as $att)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="flex items-center gap-2.5 min-w-0">
                                     @if($att->member?->avatar_url)
                                         <img src="{{ $att->member->avatar_url }}" alt="{{ $att->member->full_name }}" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-line shrink-0">
@@ -920,27 +968,27 @@
             </div>
             @endif
 
-            <!-- Widget 10: Dormant Members (>14 Days Absent) -->
+            <!-- Widget 10: Dormant members (>14 Days Absent) -->
             @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->hasPermission('members.view') || auth()->user()->isGymOwner())
-            <div class="p-4 sm:p-5 rounded-xl bg-surface border border-line flex flex-col justify-between">
+            <div class="ds-card owner-list flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-line">
                         <h4 class="font-semibold text-xs text-fg-muted flex items-center gap-1.5">
-                            <span> Dormant Members</span>
+                            <span> Dormant members</span>
                             <span class="px-1.5 py-0.2 rounded-full bg-raised text-fg-muted text-xs">({{ count($metrics['dormant_members_list']) }})</span>
                         </h4>
-                        <a href="{{ route('app.members.index', ['status' => 'ACTIVE']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View All</a>
+                        <a href="{{ route('app.members.index', ['status' => 'ACTIVE']) }}" class="text-xs font-semibold text-fg-muted hover:text-fg">View all</a>
                     </div>
 
-                    <div class="space-y-2 max-h-56 overflow-y-auto">
+                    <div class="owner-list-rows">
                         @forelse($metrics['dormant_members_list'] as $dmMember)
-                            <div class="p-2.5 rounded-xl bg-raised border border-line flex items-center justify-between text-xs gap-2">
+                            <div class="owner-list-row">
                                 <div class="min-w-0">
                                     <div class="font-semibold text-fg-muted leading-tight truncate">{{ $dmMember->full_name }}</div>
                                     <div class="text-xs text-fg-muted font-medium truncate">>14 days inactive</div>
                                 </div>
                                 @if($dmMember->phone)
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dmMember->phone) }}?text=Hi%20{{ urlencode($dmMember->first_name) }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Keep%20up%20your%20fitness%20streak%20and%20come%20in%20for%20a%20workout%20today!" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-accent hover:text-accent-on text-xs font-semibold transition-all shrink-0">
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dmMember->phone) }}?text=Hi%20{{ urlencode($dmMember->first_name) }},%20we%20miss%20you%20at%20{{ urlencode($tenantName) }}!%20Keep%20up%20your%20fitness%20streak%20and%20come%20in%20for%20a%20workout%20today!" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg text-xs font-semibold transition-all shrink-0">
                                         Re-engage
                                     </a>
                                 @endif
@@ -1034,13 +1082,13 @@
                                                     <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $crm->member->phone) }}?text={{ urlencode('Hi ' . ($crm->member?->full_name ?? 'there') . ', we missed you at ' . ($tenantName ?? 'the gym') . '! Your membership expires on ' . \Carbon\Carbon::parse($crm->end_date)->format('d M') . '. Renew today for an exclusive loyalty discount!') }}"
                                                        target="_blank"
                                                        title="WhatsApp Outreach"
-                                                       class="px-2.5 py-1.5 rounded-xl bg-raised text-fg-muted hover:bg-accent hover:text-accent-on font-semibold text-xs transition-all inline-flex items-center gap-1.5">
+                                                       class="px-2.5 py-1.5 rounded-xl bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all inline-flex items-center gap-1.5">
                                                         <span> WhatsApp</span>
                                                     </a>
                                                 @endif
                                                 <a href="{{ route('app.members.show', $crm->member_id) }}"
                                                    title="View Profile"
-                                                   class="p-1.5 rounded-xl bg-raised text-fg-muted hover:bg-accent hover:text-accent-on transition-all inline-flex items-center">
+                                                   class="p-1.5 rounded-xl bg-raised text-fg-muted hover:bg-raised hover:text-fg transition-all inline-flex items-center">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                                 </a>
                                             </div>
@@ -1122,7 +1170,7 @@
                                     </td>
                                     <td class="py-2.5 px-3">
                                         @if($exp->member?->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-accent hover:text-accent-on font-semibold text-xs transition-all">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}" target="_blank" class="px-2 py-1 rounded bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all">
                                                 WhatsApp
                                             </a>
                                         @endif
@@ -1190,7 +1238,7 @@
                                     <td class="py-2.5 px-3 text-fg-muted">{{ $bm->dob ? \Carbon\Carbon::parse($bm->dob)->format('d M') : 'Today' }}</td>
                                     <td class="py-2.5 px-3">
                                         @if($bm->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'GymDeskHub') . '!  Stay fit and healthy!') }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-raised text-fg-muted hover:bg-accent hover:text-accent-on font-semibold text-xs transition-all inline-flex items-center gap-1">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $bm->phone) }}?text={{ urlencode('Wishing you a very Happy Birthday from all of us at ' . ($tenantName ?? 'GymDeskHub') . '!  Stay fit and healthy!') }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-raised text-fg-muted hover:bg-raised hover:text-fg font-semibold text-xs transition-all inline-flex items-center gap-1">
                                                 <span> Send Wish</span>
                                             </a>
                                         @endif
@@ -1350,10 +1398,10 @@
                                 data: trendData.revenue || [],
                                 borderColor: token('--c-accent'),
                                 backgroundColor: token('--c-accent', 0.08),
-                                fill: true,
+                                fill: false,
                                 tension: 0.4,
                                 borderWidth: 2.5,
-                                pointRadius: 3
+                                pointRadius: 0
                             },
                             {
                                 label: 'Previous Period',
@@ -1370,19 +1418,22 @@
                 });
             }
 
-            // 2. Member Growth Chart
+            // 2. Member growth Chart
             const ctxGrowth = document.getElementById('chartGrowth');
             if (ctxGrowth) {
                 window._dashCharts.growth = new Chart(ctxGrowth, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: trendData.labels || [],
                         datasets: [
                             {
-                                label: 'New Joins',
+                                label: 'New joins',
                                 data: trendData.joins || [],
-                                backgroundColor: token('--c-accent'),
-                                borderRadius: 4
+                                borderColor: token('--c-accent'),
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: .25,
+                                fill: false
                             }
                         ]
                     },
@@ -1390,23 +1441,20 @@
                 });
             }
 
-            // 3. Daily Attendance Chart
+            // 3. Daily attendance Chart
             const ctxAtt = document.getElementById('chartAttendance');
             if (ctxAtt) {
                 window._dashCharts.attendance = new Chart(ctxAtt, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: trendData.labels || [],
                         datasets: [
                             {
                                 label: 'Attendance',
                                 data: trendData.attendance || [],
-                                borderColor: token('--c-accent'),
-                                backgroundColor: token('--c-accent', 0.08),
-                                fill: true,
-                                tension: 0.3,
-                                borderWidth: 2,
-                                pointRadius: 3
+                                backgroundColor: token('--c-accent', 0.8),
+                                borderRadius: 3,
+                                maxBarThickness: 24
                             }
                         ]
                     },
@@ -1434,7 +1482,7 @@
                 }
             };
 
-            // 4. Revenue vs Expenses Chart (6 Months)
+            // 4. Revenue vs expenses Chart (6 Months)
             const ctxRevExp = document.getElementById('chartRevVsExp');
             if (ctxRevExp) {
                 new Chart(ctxRevExp, {
@@ -1445,13 +1493,13 @@
                             {
                                 label: 'Revenue',
                                 data: monthlyChartData.income || [],
-                                backgroundColor: token('--c-success'),
+                                backgroundColor: token('--c-accent', 0.85),
                                 borderRadius: 4
                             },
                             {
                                 label: 'Expenses',
                                 data: monthlyChartData.expenses || [],
-                                backgroundColor: token('--c-danger'),
+                                backgroundColor: token('--c-fg-subtle', 0.65),
                                 borderRadius: 4
                             }
                         ]
