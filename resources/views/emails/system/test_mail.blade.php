@@ -17,7 +17,7 @@
     </div>
 
     <!-- Diagnostic Info Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+    <div style="background-color: #151618; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 13px;">
             <tr>
                 <td style="padding: 6px 0; color: #94a3b8; width: 40%;">Mailer Driver:</td>
