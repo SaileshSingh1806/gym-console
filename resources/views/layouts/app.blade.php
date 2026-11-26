@@ -37,75 +37,19 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    screens: {
-                        'xs': '420px',
-                    }
-                }
-            }
-        };
-    </script>
+    <x-tailwind-config />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <x-design-system />
     <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        body { -webkit-tap-highlight-color: transparent; }
         [x-cloak] { display: none !important; }
-
-        /* Mobile Touch & Scroll Fixes */
-        html {
-            -webkit-text-size-adjust: 100%;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* Sleek Transparent Scrollbar */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.25);
-            border-radius: 9999px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(148, 163, 184, 0.45);
-        }
-        ::-webkit-scrollbar-corner {
-            background: transparent;
-        }
-
-        .light * {
-            scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
-        }
-        .light ::-webkit-scrollbar-thumb {
-            background: rgba(100, 116, 139, 0.3);
-        }
-        .light ::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 0.5);
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 
     @if(!empty($platformSettings['custom_header_scripts']))
@@ -113,721 +57,334 @@
     @endif
     <x-workspace-ui-styles />
 </head>
-<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115]' : 'bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100' }} selection:bg-[#C5A880]/30" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg' }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
 
     @if(!$authUser?->isMember() && !$isPureTrainer)
-    <!-- Mobile Sidebar Backdrop -->
-    <div x-show="sidebarOpen" 
-         x-transition:enter="transition-opacity ease-linear duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[100] bg-slate-950/75 backdrop-blur-xs lg:hidden" 
-         @click="sidebarOpen = false" 
+    @php
+        $user = auth()->user();
+        $is = fn (string ...$patterns) => request()->routeIs(...$patterns);
+
+        $tenant = $user->tenant ?? null;
+        $gymLogo = $tenant?->logo_url;
+        $gymName = $tenant?->name ?? ($platformSettings['app_name'] ?? 'GymDeskHub');
+
+        $canGymOps = $user->isGymOwner()
+            || ($user->hasPermission('members.view') && $user->hasFeature('members_management'))
+            || (($user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
+            || ($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
+            || ($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'))
+            || ($user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']));
+
+        $canFitness = ($user->hasPermission('classes.view') && $user->hasFeature('group_classes'))
+            || ($user->hasPermission('trainers.view') && $user->hasFeature('trainers_management'))
+            || ($user->hasPermission('pt.view') && $user->hasFeature('personal_training'))
+            || ($user->hasPermission('workouts.view') && $user->hasFeature('workout_plans'))
+            || ($user->hasPermission('diets.view') && $user->hasFeature('diet_nutrition'))
+            || ($user->hasPermission('services.view') && $user->hasFeature('gym_services'));
+
+        $canBiz = ($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
+            || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) && $user->hasFeature('reports_finance'))
+            || ($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
+
+        $canAdmin = ($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
+            || (($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
+            || $user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories'])
+            || $user->isGymOwner()
+            || $user->isSuperAdmin()
+            || $user->hasPermission('settings.manage');
+
+        $expensePerms = ['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories'];
+        $crmPerms = ['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports'];
+
+        $tenantBranches = $user->tenant ? $user->tenant->branches : collect();
+        $allowedBranchIds = $user->tenant ? $user->tenant->allowedBranches()->pluck('id')->toArray() : [];
+        $currentActiveBranch = $user->currentBranch();
+    @endphp
+
+    <!-- Mobile sidebar backdrop -->
+    <div x-show="sidebarOpen"
+         x-transition.opacity.duration.200ms
+         class="fixed inset-0 z-[100] bg-black/60 lg:hidden"
+         @click="sidebarOpen = false"
          x-cloak></div>
 
-    <!-- Sidebar Navigation (Drawer on Mobile, Fixed Column on Desktop) -->
-    <aside :class="sidebarOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full lg:translate-x-0'" 
-           class="fixed inset-y-0 left-0 z-[101] w-72 max-w-[85vw] lg:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:inset-auto lg:h-screen lg:shrink-0 lg:z-auto">
-        <!-- Brand Header -->
-        <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/50 backdrop-blur">
-            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0 group focus:outline-none">
-                @php
-                    $tenant = auth()->user()->tenant ?? null;
-                    $gymLogo = $tenant?->logo_url;
-                    $gymName = $tenant?->name ?? ($platformSettings['app_name'] ?? 'GymDeskHub');
-                @endphp
+    <!-- Sidebar: drawer on mobile, fixed column on desktop -->
+    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+           class="fixed inset-y-0 left-0 z-[101] w-72 max-w-[85vw] lg:w-64 bg-surface border-r border-line flex flex-col transition-transform duration-200 ease-out lg:static lg:inset-auto lg:h-screen lg:shrink-0 lg:z-auto">
+
+        <!-- Brand -->
+        <div class="h-16 shrink-0 flex items-center justify-between px-5 border-b border-line">
+            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0 focus:outline-none">
                 @if(!empty($gymLogo))
-                    <img src="{{ $gymLogo }}"
-                         alt="{{ $gymName }}"
-                         class="h-8 w-auto max-w-[120px] rounded-lg object-contain">
-                    <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight truncate max-w-[130px]">{{ $gymName }}</span>
+                    <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[120px] rounded-md object-contain">
+                    <span class="text-sm font-semibold text-fg truncate max-w-[130px]">{{ $gymName }}</span>
                 @else
-                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
-                         alt="{{ $gymName }}"
-                         class="h-8 w-auto max-w-[170px] object-contain hidden dark:block transition-opacity group-hover:opacity-90">
-                    <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}"
-                         alt="{{ $gymName }}"
-                         class="h-8 w-auto max-w-[170px] object-contain block dark:hidden transition-opacity group-hover:opacity-90">
+                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain hidden dark:block">
+                    <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain block dark:hidden">
                 @endif
             </a>
-            <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden ds-btn ds-btn-ghost !h-8 !w-8 !p-0">
+                <x-icon name="x" :size="16" />
             </button>
         </div>
 
-        <!-- Navigation Links -->
-        <nav class="flex-grow px-3 py-3 space-y-1.5 overflow-y-auto text-xs font-semibold">
-            @if(auth()->user()->role === 'member')
-            <!-- Member Self-Service Portal Navigation -->
-            <a href="{{ route('app.portal') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ (request()->routeIs('app.portal') && !request()->has('tab')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span>MY PORTAL</span>
-                </div>
-            </a>
-
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">My Gym Hub</div>
-
-            <a href="{{ route('app.portal', ['tab' => 'memberships']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'memberships' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>MEMBERSHIP & BILLING</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'workouts']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'workouts' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span>WORKOUT PLANS</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'diets']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'diets' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    <span>DIET & NUTRITION</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'pt']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'pt' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <span>PERSONAL TRAINING</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'services']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'services' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                    <span>SERVICES & LOCKERS</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'classes']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'classes' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span>CLASSES</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'measurements']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'measurements' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span>MEASUREMENTS</span>
-                </div>
-            </a>
-
-            <a href="{{ route('app.portal', ['tab' => 'attendance']) }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->query('tab') === 'attendance' ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>ATTENDANCE</span>
-                </div>
-            </a>
-            @else
-            <!-- Dashboard -->
-            <a href="{{ route('app.dashboard') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl {{ request()->routeIs('app.dashboard') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span>DASHBOARD</span>
-                </div>
-            </a>
-
-            @php
-                $user = auth()->user();
-                $canGymOps = $user->isGymOwner()
-                    || ($user->hasPermission('members.view') && $user->hasFeature('members_management'))
-                    || (($user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
-                    || ($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
-                    || ($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'))
-                    || ($user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']));
-            @endphp
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto px-3 pb-4 pt-3" aria-label="Main">
+            <div class="space-y-0.5">
+                <x-nav-item :href="route('app.dashboard')" icon="home" :active="$is('app.dashboard')">Dashboard</x-nav-item>
+            </div>
 
             @if($canGymOps)
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gym Operations</div>
+            <div class="ds-nav-section">Gym operations</div>
+            <div class="space-y-0.5">
+                @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']))
+                    <x-nav-item :href="route('app.crm.enquiries')" icon="chat" :active="$is('app.crm.enquiries', 'app.enquiries.*')">Enquiries</x-nav-item>
+                @endif
 
-            <!-- Enquiries (Front Desk / Reception Walk-Ins) -->
-            @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.leads.create', 'crm.view']))
-            <a href="{{ route('app.crm.enquiries') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ (request()->routeIs('app.crm.enquiries') || request()->routeIs('app.enquiries.*')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                    <span>ENQUIRIES</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
+                @if($user->hasPermission('members.view') && $user->hasFeature('members_management'))
+                    <x-nav-item :href="route('app.members.index')" icon="users" :active="$is('app.members.*')">Members</x-nav-item>
 
-            <!-- Members -->
-            @if($user->hasPermission('members.view') && $user->hasFeature('members_management'))
-            <a href="{{ route('app.members.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.members.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <span>MEMBERS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
+                    @if($user->isGymOwner() || $user->hasPermission('agreements.view'))
+                        <x-nav-item :href="route('app.agreements.index')" icon="document" :active="$is('app.agreements.*')">Agreements &amp; health</x-nav-item>
+                    @endif
+                @endif
 
-            <!-- Agreements & Health Declarations -->
-            @if($user->isGymOwner() || $user->hasPermission('agreements.view'))
-            <a href="{{ route('app.agreements.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.agreements.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>AGREEMENTS & HEALTH</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-            @endif
+                @if(($user->isGymOwner() || $user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
+                    <x-nav-item :href="route('app.memberships.index')" icon="ticket" :active="$is('app.memberships.*', 'app.membership-plans.*')">Memberships</x-nav-item>
+                @endif
 
-            <!-- Memberships -->
-            @if(($user->isGymOwner() || $user->hasPermission('memberships.view') || $user->hasPermission('plans.view') || $user->hasPermission('plans.create') || $user->hasPermission('plans.edit') || $user->hasPermission('memberships.create') || $user->hasPermission('memberships.edit') || $user->hasPermission('memberships.manage')) && $user->hasFeature('memberships_billing'))
-            <a href="{{ route('app.memberships.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ (request()->routeIs('app.memberships.*') || request()->routeIs('app.membership-plans.*')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span>MEMBERSHIPS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
+                @if($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
+                    <x-nav-item :href="route('app.attendance.index')" icon="clock" :active="$is('app.attendance.*')">Attendance</x-nav-item>
+                @endif
 
-            <!-- Attendance -->
-            @if($user->hasPermission('attendance.view') && $user->hasFeature('attendance_checkin'))
-            <a href="{{ route('app.attendance.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.attendance.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>ATTENDANCE</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
+                @if($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'))
+                    <x-nav-item :href="route('app.payments.index')" icon="wallet" :active="$is('app.payments.*')">Payments &amp; POS</x-nav-item>
+                @endif
+            </div>
             @endif
-
-            <!-- Payments & POS -->
-            @if($user->hasPermission('payments.view') && $user->hasFeature('payments_pos'))
-            <a href="{{ route('app.payments.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.payments.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span>PAYMENTS & POS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-            @endif
-
-            @php
-                $canFitness = ($user->hasPermission('classes.view') && $user->hasFeature('group_classes'))
-                    || ($user->hasPermission('trainers.view') && $user->hasFeature('trainers_management'))
-                    || ($user->hasPermission('pt.view') && $user->hasFeature('personal_training'))
-                    || ($user->hasPermission('workouts.view') && $user->hasFeature('workout_plans'))
-                    || ($user->hasPermission('diets.view') && $user->hasFeature('diet_nutrition'))
-                    || ($user->hasPermission('services.view') && $user->hasFeature('gym_services'));
-            @endphp
 
             @if($canFitness)
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Fitness & Coaching</div>
-
-            <!-- Training -->
-            @if($user->hasPermission('classes.view') && $user->hasFeature('group_classes'))
-            <a href="{{ route('app.classes.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.classes.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span>TRAINING & CLASSES</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Trainers -->
-            @if($user->hasPermission('trainers.view') && $user->hasFeature('trainers_management'))
-            <a href="{{ route('app.trainers.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.trainers.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span>TRAINERS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Personal Training -->
-            @if($user->hasPermission('pt.view') && $user->hasFeature('personal_training'))
-            <a href="{{ route('app.pt.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ (request()->routeIs('app.pt.*') || request()->routeIs('app.pt-plans.*')) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <span>PERSONAL TRAINING</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Workout Plans -->
-            @if($user->hasPermission('workouts.view') && $user->hasFeature('workout_plans'))
-            <a href="{{ route('app.workouts.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.workouts.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span>WORKOUT PLANS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Diet & Nutrition -->
-            @if($user->hasPermission('diets.view') && $user->hasFeature('diet_nutrition'))
-            <a href="{{ route('app.diets.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.diets.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                    <span>DIET & NUTRITION</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Services -->
-            @if($user->hasPermission('services.view') && $user->hasFeature('gym_services'))
-            <a href="{{ route('app.services.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.services.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                    <span>SERVICES</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Member Feedback Desk -->
-            @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.view', 'members.view']))
-            @php
-                $pendingFeedbacksCount = \App\Models\CrmFeedback::where('tenant_id', $user->tenant_id)->whereIn('status', ['new', 'pending', 'open'])->count();
-            @endphp
-            <a href="{{ route('app.feedback.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.feedback.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                    <span>MEMBER FEEDBACK</span>
-                </div>
-                @if($pendingFeedbacksCount > 0)
-                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 font-mono">{{ $pendingFeedbacksCount }}</span>
-                @else
-                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <div class="ds-nav-section">Fitness &amp; coaching</div>
+            <div class="space-y-0.5">
+                @if($user->hasPermission('classes.view') && $user->hasFeature('group_classes'))
+                    <x-nav-item :href="route('app.classes.index')" icon="calendar" :active="$is('app.classes.*')">Training &amp; classes</x-nav-item>
                 @endif
-            </a>
-            @endif
-            @endif
 
-            @php
-                $canBiz = ($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
-                    || ($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) && $user->hasFeature('reports_finance'))
-                    || ($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']));
-            @endphp
+                @if($user->hasPermission('trainers.view') && $user->hasFeature('trainers_management'))
+                    <x-nav-item :href="route('app.trainers.index')" icon="team" :active="$is('app.trainers.*')">Trainers</x-nav-item>
+                @endif
+
+                @if($user->hasPermission('pt.view') && $user->hasFeature('personal_training'))
+                    <x-nav-item :href="route('app.pt.index')" icon="user" :active="$is('app.pt.*', 'app.pt-plans.*')">Personal training</x-nav-item>
+                @endif
+
+                @if($user->hasPermission('workouts.view') && $user->hasFeature('workout_plans'))
+                    <x-nav-item :href="route('app.workouts.index')" icon="bolt" :active="$is('app.workouts.*')">Workout plans</x-nav-item>
+                @endif
+
+                @if($user->hasPermission('diets.view') && $user->hasFeature('diet_nutrition'))
+                    <x-nav-item :href="route('app.diets.index')" icon="book" :active="$is('app.diets.*')">Diet &amp; nutrition</x-nav-item>
+                @endif
+
+                @if($user->hasPermission('services.view') && $user->hasFeature('gym_services'))
+                    <x-nav-item :href="route('app.services.index')" icon="grid" :active="$is('app.services.*')">Services</x-nav-item>
+                @endif
+
+                @if($user->isGymOwner() || $user->hasAnyPermission(['crm.leads.view', 'crm.view', 'members.view']))
+                    @php
+                        $pendingFeedbacksCount = \App\Models\CrmFeedback::where('tenant_id', $user->tenant_id)->whereIn('status', ['new', 'pending', 'open'])->count();
+                    @endphp
+                    <x-nav-item :href="route('app.feedback.index')" icon="message" :active="$is('app.feedback.*')" :count="$pendingFeedbacksCount ?: null">Member feedback</x-nav-item>
+                @endif
+            </div>
+            @endif
 
             @if($canBiz)
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Business & Growth</div>
+            <div class="ds-nav-section">Business &amp; growth</div>
+            <div class="space-y-0.5">
+                {{-- CRM --}}
+                @if($user->hasAnyPermission($crmPerms) && $user->hasFeature('crm_leads'))
+                    <x-nav-group label="CRM & leads" icon="trending-up" :active="$is('app.crm.*', 'app.leads.*', 'app.trials.*')">
+                        @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
+                            <x-nav-sub :href="route('app.crm.dashboard')" :active="$is('app.crm.dashboard', 'app.crm.index')">CRM dashboard</x-nav-sub>
+                        @endif
+                        @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create']))
+                            <x-nav-sub :href="route('app.leads.index')" :active="$is('app.leads.*', 'app.crm.leads')">Leads</x-nav-sub>
+                        @endif
+                        @if($user->hasAnyPermission(['crm.view', 'crm.trials']))
+                            <x-nav-sub :href="route('app.crm.trials')" :active="$is('app.crm.trials', 'app.trials.*')">Trials</x-nav-sub>
+                        @endif
+                        @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.reports']))
+                            <x-nav-sub :href="route('app.crm.conversions')" :active="$is('app.crm.conversions')">Conversions</x-nav-sub>
+                        @endif
+                        @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
+                            <x-nav-sub :href="route('app.crm.reports') . '#targets'" :active="$is('app.crm.reports') && request()->has('targets')">Sales targets</x-nav-sub>
+                            <x-nav-sub :href="route('app.crm.reports')" :active="$is('app.crm.reports') && !request()->has('targets')">CRM reports</x-nav-sub>
+                        @endif
+                    </x-nav-group>
+                @endif
 
-            <!-- CRM & Leads Expandable Section -->
-            @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create', 'crm.trials', 'crm.reports']) && $user->hasFeature('crm_leads'))
-            @php
-                $isCrmActive = request()->routeIs('app.crm.*') || request()->routeIs('app.leads.*') || request()->routeIs('app.trials.*');
-            @endphp
-            <div x-data="{ open: {{ $isCrmActive ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 rounded-xl {{ $isCrmActive ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors cursor-pointer">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                        <span>CRM & LEADS</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 text-[9px] font-black tracking-wider uppercase border border-amber-500/30">NEW</span>
-                        <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </div>
-                </button>
+                {{-- WhatsApp --}}
+                @if($user->hasFeature('whatsapp_marketing') && $user->hasAnyPermission(['whatsapp.view', 'whatsapp.contacts', 'whatsapp.campaigns', 'whatsapp.templates', 'whatsapp.inbox', 'whatsapp.settings']))
+                    <x-nav-group label="WhatsApp" icon="message" :active="$is('app.whatsapp.*')">
+                        @if($user->hasPermission('whatsapp.view'))
+                            <x-nav-sub :href="route('app.whatsapp.dashboard')" :active="$is('app.whatsapp.dashboard')">Dashboard</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('whatsapp.contacts'))
+                            <x-nav-sub :href="route('app.whatsapp.contacts.index')" :active="$is('app.whatsapp.contacts.index')">Contacts</x-nav-sub>
+                            <x-nav-sub :href="route('app.whatsapp.contacts.import')" :active="$is('app.whatsapp.contacts.import')">Import contacts</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('whatsapp.templates'))
+                            <x-nav-sub :href="route('app.whatsapp.templates.index')" :active="$is('app.whatsapp.templates.*')">Message templates</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('whatsapp.campaigns'))
+                            <x-nav-sub :href="route('app.whatsapp.campaigns.index')" :active="$is('app.whatsapp.campaigns.index')">Bulk campaigns</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('whatsapp.inbox'))
+                            <x-nav-sub :href="route('app.whatsapp.inbox')" :active="$is('app.whatsapp.inbox')">Inbox</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('whatsapp.settings'))
+                            <x-nav-sub :href="route('app.whatsapp.automations.index')" :active="$is('app.whatsapp.automations.*')">Automations</x-nav-sub>
+                            <x-nav-sub :href="route('app.whatsapp.settings')" :active="$is('app.whatsapp.settings')">Settings</x-nav-sub>
+                        @endif
+                    </x-nav-group>
+                @endif
 
-                <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
-                    <!-- CRM Dashboard -->
-                    @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
-                    <a href="{{ route('app.crm.dashboard') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.dashboard') || request()->routeIs('app.crm.index')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.crm.dashboard') || request()->routeIs('app.crm.index')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>CRM Dashboard</span>
-                    </a>
-                    @endif
+                {{-- Reports & finance --}}
+                @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', ...$expensePerms]) && $user->hasFeature('reports_finance'))
+                    <x-nav-group label="Reports & finance" icon="calculator" :active="$is('app.finance.*', 'app.reports.*', 'app.expenses.*', 'app.balance-sheet.*')">
+                        @if($user->hasPermission('reports.member_report'))
+                            <x-nav-sub :href="route('app.finance.expense-report')" :active="$is('app.finance.expense-report', 'app.finance.member-report', 'app.reports.*')">Member report</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('reports.balance_sheet'))
+                            <x-nav-sub :href="route('app.finance.balance-sheet')" :active="$is('app.finance.balance-sheet', 'app.balance-sheet.*')">Balance sheet</x-nav-sub>
+                        @endif
+                        @if($user->hasAnyPermission($expensePerms))
+                            <x-nav-sub :href="route('app.expenses.index')" :active="$is('app.expenses.*')">Expenses</x-nav-sub>
+                        @endif
+                    </x-nav-group>
+                @endif
 
-                    <!-- Leads -->
-                    @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.leads.create']))
-                    <a href="{{ route('app.leads.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.leads.*') || request()->routeIs('app.crm.leads')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.leads.*') || request()->routeIs('app.crm.leads')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Leads</span>
-                    </a>
-                    @endif
-
-                    <!-- Trial -->
-                    @if($user->hasAnyPermission(['crm.view', 'crm.trials']))
-                    <a href="{{ route('app.crm.trials') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.trials') || request()->routeIs('app.trials.*')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.crm.trials') || request()->routeIs('app.trials.*')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Trial</span>
-                    </a>
-                    @endif
-
-                    <!-- Conversions -->
-                    @if($user->hasAnyPermission(['crm.view', 'crm.leads.view', 'crm.reports']))
-                    <a href="{{ route('app.crm.conversions') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.conversions') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.conversions') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Conversions</span>
-                    </a>
-                    @endif
-
-                    <!-- Sales Targets -->
-                    @if($user->hasAnyPermission(['crm.view', 'crm.reports']))
-                    <a href="{{ route('app.crm.reports') }}#targets" class="flex items-center justify-between px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.crm.reports') && request()->has('targets')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            <span>Sales Targets</span>
-                        </div>
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500/15 text-amber-600 dark:text-amber-400 font-mono">KPI</span>
-                    </a>
-
-                    <!-- CRM Reports -->
-                    <a href="{{ route('app.crm.reports') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.crm.reports') && !request()->has('targets') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.crm.reports') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>CRM Reports</span>
-                    </a>
-                    @endif
-                </div>
+                {{-- Inventory --}}
+                @if($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']))
+                    <x-nav-item :href="route('app.inventory.index')" icon="cube" :active="$is('app.inventory.*')">Inventory &amp; assets</x-nav-item>
+                @endif
             </div>
             @endif
-
-            <!-- WhatsApp Management Section -->
-            @if($user->hasFeature('whatsapp_marketing') && $user->hasAnyPermission(['whatsapp.view', 'whatsapp.contacts', 'whatsapp.campaigns', 'whatsapp.templates', 'whatsapp.inbox', 'whatsapp.settings']))
-            @php
-                $isWhatsAppActive = request()->routeIs('app.whatsapp.*');
-            @endphp
-            <div x-data="{ open: {{ $isWhatsAppActive ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 rounded-xl {{ $isWhatsAppActive ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors cursor-pointer">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <svg class="w-4 h-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                        </svg>
-                        <span class="whitespace-nowrap tracking-wide">WHATSAPP</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[9px] font-black tracking-wider uppercase border border-emerald-500/30">META</span>
-                        <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </div>
-                </button>
-
-                <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
-                    <!-- Dashboard -->
-                    @if($user->hasPermission('whatsapp.view'))
-                    <a href="{{ route('app.whatsapp.dashboard') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.dashboard') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.dashboard') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Dashboard</span>
-                    </a>
-                    @endif
-
-                    <!-- Contacts -->
-                    @if($user->hasPermission('whatsapp.contacts'))
-                    <a href="{{ route('app.whatsapp.contacts.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.contacts.index') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.contacts.index') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Contacts</span>
-                    </a>
-
-                    <!-- Import Contacts -->
-                    <a href="{{ route('app.whatsapp.contacts.import') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.contacts.import') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.contacts.import') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Import Contacts</span>
-                    </a>
-                    @endif
-
-                    <!-- Message Templates -->
-                    @if($user->hasPermission('whatsapp.templates'))
-                    <a href="{{ route('app.whatsapp.templates.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.templates.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.templates.*') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Message Templates</span>
-                    </a>
-                    @endif
-
-                    <!-- Bulk Campaigns -->
-                    @if($user->hasPermission('whatsapp.campaigns'))
-                    <a href="{{ route('app.whatsapp.campaigns.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.campaigns.index') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.campaigns.index') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Bulk Campaigns</span>
-                    </a>
-                    @endif
-
-                    <!-- WhatsApp Inbox -->
-                    @if($user->hasPermission('whatsapp.inbox'))
-                    <a href="{{ route('app.whatsapp.inbox') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.inbox') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.inbox') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>WhatsApp Inbox</span>
-                    </a>
-                    @endif
-
-                    <!-- Automations -->
-                    @if($user->hasPermission('whatsapp.settings'))
-                    <a href="{{ route('app.whatsapp.automations.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.automations.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.automations.*') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Automations</span>
-                    </a>
-
-                    <!-- Settings -->
-                    <a href="{{ route('app.whatsapp.settings') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.whatsapp.settings') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.whatsapp.settings') ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Settings</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
-            @endif
-
-
-            <!-- Report & Finance -->
-            @if($user->hasAnyPermission(['reports.member_report', 'reports.balance_sheet', 'expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) && $user->hasFeature('reports_finance'))
-            @php
-                $isFinanceActive = request()->routeIs('app.finance.*') || request()->routeIs('app.reports.*') || request()->routeIs('app.expenses.*') || request()->routeIs('app.balance-sheet.*');
-            @endphp
-            <div x-data="{ open: {{ $isFinanceActive ? 'true' : 'false' }} }">
-                <button @click="open = !open" type="button" class="w-full flex items-center justify-between px-3 py-2 rounded-xl {{ $isFinanceActive ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        <span>REPORT & FINANCE</span>
-                    </div>
-                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-
-                <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
-                    <!-- Member Report -->
-                    @if($user->hasPermission('reports.member_report'))
-                    <a href="{{ route('app.finance.expense-report') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.finance.expense-report') || request()->routeIs('app.finance.member-report') || request()->routeIs('app.reports.*')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.finance.expense-report') || request()->routeIs('app.finance.member-report') || request()->routeIs('app.reports.*')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Member Report</span>
-                    </a>
-                    @endif
-
-                    <!-- Balance Sheet -->
-                    @if($user->hasPermission('reports.balance_sheet'))
-                    <a href="{{ route('app.finance.balance-sheet') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ (request()->routeIs('app.finance.balance-sheet') || request()->routeIs('app.balance-sheet.*')) ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ (request()->routeIs('app.finance.balance-sheet') || request()->routeIs('app.balance-sheet.*')) ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Balance Sheet</span>
-                    </a>
-                    @endif
-
-                    <!-- Expenses -->
-                    @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']))
-                    <a href="{{ route('app.expenses.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.expenses.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Expenses</span>
-                    </a>
-                    @endif
-                </div>
-            </div>
-            @endif
-
-            <!-- Inventory & Equipment Maintenance -->
-            @if($user->hasAnyPermission(['inventory.view', 'equipment.maintenance']) && $user->hasAnyFeature(['inventory_stock', 'equipment_maintenance']))
-            <a href="{{ route('app.inventory.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.inventory.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3 min-w-0">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    <span class="whitespace-nowrap tracking-wide">INVENTORY & ASSETS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-            @endif
-
-            @php
-                $canAdmin = ($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
-                    || (($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
-                    || $user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories'])
-                    || $user->isGymOwner()
-                    || $user->isSuperAdmin()
-                    || $user->hasPermission('settings.manage');
-            @endphp
 
             @if($canAdmin)
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Administration</div>
+            <div class="ds-nav-section">Administration</div>
+            <div class="space-y-0.5">
+                @if($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
+                    <x-nav-group label="Staff & roles" icon="team" :active="$is('app.staff.*', 'app.roles.*')">
+                        @if($user->hasAnyPermission(['staff.view', 'staff.create', 'staff.edit']))
+                            <x-nav-sub :href="route('app.staff.index')" :active="$is('app.staff.*')">Staff members</x-nav-sub>
+                        @endif
+                        @if($user->hasPermission('roles.manage'))
+                            <x-nav-sub :href="route('app.roles.index')" :active="$is('app.roles.*')">Roles &amp; permissions</x-nav-sub>
+                        @endif
+                    </x-nav-group>
+                @endif
 
-            <!-- Staff & Team Management Expandable -->
-            @if($user->hasAnyPermission(['staff.view', 'staff.create', 'roles.manage']) && $user->hasFeature('staff_roles'))
-            @php
-                $isStaffActive = request()->routeIs('app.staff.*') || request()->routeIs('app.roles.*');
-            @endphp
-            <div x-data="{ open: {{ $isStaffActive ? 'true' : 'false' }} }" class="space-y-0.5">
-                <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-3 py-2 rounded-xl {{ $isStaffActive ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors cursor-pointer">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        <span>STAFF & ROLES</span>
-                    </div>
-                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
+                @if($user->hasAnyPermission($expensePerms) || $user->isGymOwner())
+                    <x-nav-item :href="route('app.expenses.index')" icon="receipt" :active="$is('app.expenses.*')">Expenses</x-nav-item>
+                @endif
 
-                <div x-show="open" x-cloak class="pl-4 pr-1 py-1 space-y-0.5 text-xs">
-                    <!-- Staff Members List -->
-                    @if($user->hasAnyPermission(['staff.view', 'staff.create', 'staff.edit']))
-                    <a href="{{ route('app.staff.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.staff.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.staff.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Staff Members</span>
-                    </a>
-                    @endif
+                @if(($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
+                    <x-nav-item :href="route('app.devices.index')" icon="fingerprint" :active="$is('app.devices.*')">Biometric devices</x-nav-item>
+                @endif
 
-                    <!-- Roles & Permissions -->
-                    @if($user->hasPermission('roles.manage'))
-                    <a href="{{ route('app.roles.index') }}" class="flex items-center gap-2.5 px-3 py-1.5 rounded-lg {{ request()->routeIs('app.roles.*') ? 'text-slate-950 dark:text-white bg-slate-200/80 dark:bg-slate-800 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 font-semibold' }} transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full {{ request()->routeIs('app.roles.*') ? 'bg-slate-900 dark:bg-white' : 'bg-slate-400 dark:bg-slate-600' }}"></span>
-                        <span>Roles & Permissions</span>
-                    </a>
-                    @endif
-                </div>
+                @if($user->isGymOwner() || $user->isSuperAdmin())
+                    <x-nav-item :href="route('app.subscription.index')" icon="ticket" :active="$is('app.subscription.*')">Subscription &amp; billing</x-nav-item>
+                @endif
+
+                @if($user->hasPermission('settings.manage') || $user->isGymOwner())
+                    <x-nav-item :href="route('app.settings.index')" icon="cog" :active="$is('app.settings.*')">Settings</x-nav-item>
+                @endif
             </div>
             @endif
 
-            <!-- Expenses (Operational Overhead Tracker) in Administration -->
-            @if($user->hasAnyPermission(['expenses.view', 'expenses.create', 'expenses.edit', 'expenses.delete', 'expenses.categories']) || $user->isGymOwner())
-            <a href="{{ route('app.expenses.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.expenses.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
-                    <span>EXPENSES</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Biometric IoT Devices -->
-            @if(($user->hasPermission('devices.view') || $user->hasPermission('devices.manage')) && $user->hasFeature('biometric_devices'))
-            <a href="{{ route('app.devices.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.devices.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004.07 7.07"/></svg>
-                    <span>BIOMETRIC DEVICES</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Subscription & Billing -->
-            @if($user->isGymOwner() || $user->isSuperAdmin())
-            <a href="{{ route('app.subscription.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.subscription.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-                    <span>SUBSCRIPTION & BILLING</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-
-            <!-- Settings -->
-            @if($user->hasPermission('settings.manage') || $user->isGymOwner())
-            <a href="{{ route('app.settings.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.settings.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span>SETTINGS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
-            @endif
-
-            <!-- Helpdesk & Support Tickets -->
-            <div class="pt-2.5 pb-1 px-3 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Help & Support</div>
-            <a href="{{ route('app.support.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl {{ request()->routeIs('app.support.*') ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-black shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-bold' }} transition-colors">
-                <div class="flex items-center gap-3">
-                    <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <span>SUPPORT TICKETS</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </a>
-            @endif
+            <div class="ds-nav-section">Help</div>
+            <div class="space-y-0.5">
+                <x-nav-item :href="route('app.support.index')" icon="lifebuoy" :active="$is('app.support.*')">Support tickets</x-nav-item>
+            </div>
         </nav>
 
-        <!-- User Profile & Branch Switcher Footer -->
-        <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 space-y-2.5">
-            @php
-                $user = auth()->user();
-                $tenantBranches = $user->tenant ? $user->tenant->branches : collect();
-                $allowedBranchIds = $user->tenant ? $user->tenant->allowedBranches()->pluck('id')->toArray() : [];
-                $currentActiveBranch = $user->currentBranch();
-            @endphp
-
+        <!-- Branch switcher + account -->
+        <div class="shrink-0 border-t border-line p-3 space-y-2">
             @if($tenantBranches->count() > 1)
-            <!-- Multi-Branch Switching Popover -->
             <div class="relative" x-data="{ branchDropdownOpen: false }">
-                <!-- Trigger Button with Pulse -->
-                <button type="button" @click="branchDropdownOpen = !branchDropdownOpen" 
-                        class="w-full flex items-center justify-between p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 dark:bg-slate-950/60 dark:hover:bg-slate-800 dark:border-slate-800 transition-all text-xs cursor-pointer group">
-                    <div class="flex items-center gap-2 truncate">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <div class="truncate text-left">
-                            <span class="font-extrabold text-slate-900 dark:text-white block text-[11px] truncate">{{ $currentActiveBranch->name ?? 'Main Branch' }}</span>
-                            <span class="text-[9px] text-slate-500 dark:text-slate-400 font-mono font-normal block">{{ $currentActiveBranch->code ?? 'MAIN' }}</span>
-                        </div>
-                    </div>
-                    <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300 shrink-0 transition-transform duration-200" :class="{ 'rotate-180': branchDropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                <button type="button"
+                        @click="branchDropdownOpen = !branchDropdownOpen"
+                        class="w-full flex items-center justify-between gap-2 min-h-[40px] px-3 py-1.5 rounded-lg bg-raised border border-line hover:border-line-strong text-left cursor-pointer transition-colors">
+                    <span class="min-w-0">
+                        <span class="block text-[13px] font-medium text-fg truncate">{{ $currentActiveBranch->name ?? 'Main Branch' }}</span>
+                        <span class="block text-xs text-fg-subtle truncate">{{ $currentActiveBranch->code ?? 'MAIN' }}</span>
+                    </span>
+                    <span class="text-fg-subtle transition-transform duration-150" :class="branchDropdownOpen ? 'rotate-180' : ''">
+                        <x-icon name="chevron-down" :size="14" />
+                    </span>
                 </button>
 
-                <!-- Popover Dropdown (Opens upward above the button) -->
-                <div x-show="branchDropdownOpen" @click.away="branchDropdownOpen = false" x-cloak 
-                     class="absolute bottom-full left-0 mb-2 w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-1.5 z-50 space-y-1.5 text-xs max-h-64 overflow-y-auto">
-                    <div class="px-2.5 py-1.5 text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400 tracking-wider flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-1.5">
-                        <span>Select Branch</span>
-                        <span class="text-[9px] text-slate-500 dark:text-slate-400 font-mono">{{ count($allowedBranchIds) }}/{{ $tenantBranches->count() }} Available</span>
+                <div x-show="branchDropdownOpen" @click.away="branchDropdownOpen = false" x-cloak
+                     class="absolute bottom-full left-0 mb-2 w-full rounded-xl bg-surface border border-line-strong p-1.5 z-50 space-y-0.5 max-h-64 overflow-y-auto">
+                    <div class="px-2.5 py-1.5 flex items-center justify-between text-xs text-fg-subtle">
+                        <span>Switch branch</span>
+                        <span class="tabular-nums">{{ count($allowedBranchIds) }}/{{ $tenantBranches->count() }}</span>
                     </div>
 
                     @foreach($tenantBranches as $tb)
-                    @php
-                        $isAllowed = in_array($tb->id, $allowedBranchIds, true);
-                    @endphp
-                    @if($isAllowed)
-                    <form action="{{ route('app.branches.switch', $tb->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full text-left px-2.5 py-2 rounded-xl flex items-center justify-between {{ ($currentActiveBranch && $currentActiveBranch->id === $tb->id) ? 'bg-slate-900 text-white dark:bg-slate-800 dark:text-white font-bold border border-slate-700 shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white' }} transition-colors cursor-pointer">
-                            <div class="truncate">
-                                <div class="truncate font-semibold flex items-center gap-1.5">
-                                    @if($tb->is_main)
-                                        <span class="text-amber-500 text-[10px]">★</span>
+                        @php $isAllowed = in_array($tb->id, $allowedBranchIds, true); @endphp
+                        @if($isAllowed)
+                            @php $isCurrentBranch = $currentActiveBranch && $currentActiveBranch->id === $tb->id; @endphp
+                            <form action="{{ route('app.branches.switch', $tb->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-left cursor-pointer transition-colors {{ $isCurrentBranch ? 'bg-raised text-fg' : 'text-fg-muted hover:bg-raised hover:text-fg' }}">
+                                    <span class="min-w-0">
+                                        <span class="block text-[13px] font-medium truncate">{{ $tb->name }}@if($tb->is_main) <span class="text-xs font-normal text-fg-subtle">(main)</span>@endif</span>
+                                        <span class="block text-xs text-fg-subtle truncate">{{ $tb->code ?? 'MAIN' }}{{ $tb->city ? ' · '.$tb->city : '' }}</span>
+                                    </span>
+                                    @if($isCurrentBranch)
+                                        <x-icon name="check" :size="14" class="text-accent-fg" />
                                     @endif
-                                    <span>{{ $tb->name }}</span>
-                                </div>
-                                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">{{ $tb->code ?? 'MAIN' }} {{ $tb->city ? '• '.$tb->city : '' }}</div>
-                            </div>
-                            @if($currentActiveBranch && $currentActiveBranch->id === $tb->id)
-                                <svg class="w-3.5 h-3.5 text-white dark:text-slate-200 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                            @endif
-                        </button>
-                    </form>
-                    @else
-                    <a href="{{ route('app.subscription.index') }}" class="w-full text-left px-2.5 py-2 rounded-xl flex items-center justify-between bg-slate-100 dark:bg-slate-950/40 opacity-70 hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800/60 transition-all cursor-pointer group" title="Upgrade your plan to unlock this branch">
-                        <div class="truncate">
-                            <div class="truncate font-semibold flex items-center gap-1.5 text-slate-500 dark:text-slate-400 group-hover:text-amber-600 dark:group-hover:text-amber-300">
-                                <svg class="w-3 h-3 text-amber-500/80 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-                                <span>{{ $tb->name }}</span>
-                            </div>
-                            <div class="text-[9px] text-amber-600 dark:text-amber-400/90 font-medium">Upgrade to Unlock</div>
-                        </div>
-                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">LOCKED</span>
-                    </a>
-                    @endif
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('app.subscription.index') }}" title="Upgrade your plan to use this branch"
+                               class="w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-fg-subtle hover:bg-raised transition-colors">
+                                <span class="min-w-0">
+                                    <span class="block text-[13px] font-medium truncate">{{ $tb->name }}</span>
+                                    <span class="block text-xs truncate">Upgrade to use</span>
+                                </span>
+                                <x-icon name="lock" :size="14" />
+                            </a>
+                        @endif
                     @endforeach
 
-                    <div class="pt-1 border-t border-slate-200 dark:border-slate-800">
-                        <a href="{{ route('app.settings.index', ['tab' => 'branches']) }}" class="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-slate-900 dark:text-white hover:underline font-bold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            <span>Manage Branches</span>
+                    <div class="pt-1 mt-1 border-t border-line">
+                        <a href="{{ route('app.settings.index', ['tab' => 'branches']) }}" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-[13px] font-medium text-fg-muted hover:bg-raised hover:text-fg transition-colors">
+                            <x-icon name="plus" :size="14" />
+                            <span>Manage branches</span>
                         </a>
                     </div>
                 </div>
             </div>
             @endif
 
-            <div class="flex items-center justify-between pt-1">
-                <div class="flex items-center gap-2 overflow-hidden">
-                    <div class="w-7 h-7 rounded-full bg-slate-900 dark:bg-slate-800 border border-slate-700 flex items-center justify-center font-extrabold text-white text-[11px] shadow-sm">
-                        {{ substr(auth()->user()->name, 0, 1) }}
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 shrink-0 rounded-full bg-raised border border-line flex items-center justify-center text-xs font-semibold text-fg-muted">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
                     </div>
-                    <div class="truncate">
-                        <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-[9px] text-slate-500 dark:text-slate-400 capitalize font-medium">{{ str_replace('_', ' ', auth()->user()->role) }}</p>
+                    <div class="min-w-0">
+                        <p class="text-[13px] font-medium text-fg truncate">{{ $user->name }}</p>
+                        <p class="text-xs text-fg-subtle capitalize truncate">{{ str_replace('_', ' ', $user->role) }}</p>
                     </div>
                 </div>
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" title="Sign out" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <button type="submit" title="Sign out" aria-label="Sign out" class="ds-btn ds-btn-ghost !h-8 !w-8 !p-0 hover:!text-danger cursor-pointer">
+                        <x-icon name="logout" :size="16" />
                     </button>
                 </form>
             </div>
@@ -836,29 +393,22 @@
     @endif
 
     <!-- Main Content Shell -->
-    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto bg-slate-100 dark:bg-slate-950 transition-colors duration-200">
+    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto {{ $isStealthApp ? 'bg-[#0F1115]' : 'bg-canvas' }}">
         @php
             $currentTenant = auth()->user()->tenant;
         @endphp
         @if($currentTenant && $currentTenant->isSubscriptionExpired())
-            <div class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white px-4 sm:px-6 py-2.5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-b border-red-500/30">
-                <div class="flex items-center gap-2.5">
-                    <span class="flex h-2.5 w-2.5 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-200"></span>
-                    </span>
-                    <span class="font-bold tracking-tight">⚠️ Subscription Expired:</span>
-                    <span class="text-white/90 hidden md:inline">Your gym operations are locked. Please renew or select a plan to restore full access immediately.</span>
-                </div>
-                <a href="{{ route('app.subscription.index') }}" class="px-3.5 py-1 rounded-lg bg-white text-slate-950 font-bold hover:bg-amber-100 transition-all shadow-sm flex items-center gap-1.5 whitespace-nowrap">
-                    <span>⚡ Renew / Choose Plan</span>
-                    <span>&rarr;</span>
+            <div class="bg-danger/10 border-b border-danger/30 px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                <p class="text-fg-muted"><span class="font-semibold text-danger">Subscription expired.</span> Gym operations are locked until you renew or choose a plan.</p>
+                <a href="{{ route('app.subscription.index') }}" class="ds-btn ds-btn-primary !h-8 shrink-0">
+                    <span>Renew plan</span>
+                    <x-icon name="arrow-right" :size="14" />
                 </a>
             </div>
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 {{ $isStealthApp ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4]' : 'bg-white/95 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800' }} backdrop-blur-md px-3 sm:px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200 shrink-0">
+        <header class="h-16 {{ $isStealthApp ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4] backdrop-blur-md' : 'bg-surface border-b border-line' }} px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @if(request()->routeIs('trainer.*') || $isPureTrainer)
                     @php
@@ -889,12 +439,10 @@
                         </div>
                     </a>
                 @elseif(!auth()->user()->isMember())
-                    <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer">
-                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    <button @click="sidebarOpen = true" type="button" aria-label="Open navigation menu" class="lg:hidden ds-btn ds-btn-ghost !h-9 !w-9 !p-0 -ml-1 shrink-0 cursor-pointer">
+                        <x-icon name="menu" :size="20" />
                     </button>
-                    <div class="flex items-center gap-2 min-w-0">
-                        <h1 class="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] xs:max-w-[170px] sm:max-w-none tracking-tight">{{ $header ?? 'Dashboard' }}</h1>
-                    </div>
+                    <h1 class="text-base font-semibold text-fg truncate">{{ $header ?? 'Dashboard' }}</h1>
                 @else
                     @php
                         $memberTenant = $tenant ?? (auth()->user()->tenant ?? \App\Services\TenantContext::getTenant());
@@ -921,263 +469,144 @@
             <!-- Right Telemetry & Widget Badges -->
             <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                 
-                <!-- Staff / Admin Backoffice Telemetry Widgets -->
+                <!-- Staff / admin telemetry -->
                 @if(!$authUser?->isMember() && !$isPureTrainer)
                     @php
                         $todayInsideCount = \App\Models\Attendance::where('date', now()->toDateString())->whereNull('check_out')->count();
                         $todayTotalAttendance = \App\Models\Attendance::where('date', now()->toDateString())->count();
                     @endphp
-                    <div class="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-xs font-semibold">
-                        <span class="flex items-center gap-1 text-slate-700 dark:text-slate-300">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-slate-900 dark:text-white font-bold">{{ $todayInsideCount }}</span> In Gym
-                        </span>
-                        <span class="text-slate-300 dark:text-slate-600">|</span>
-                        <span class="text-slate-500 dark:text-slate-400">{{ $todayTotalAttendance }} Today</span>
+                    <div class="hidden xl:flex items-center gap-2 mr-2 text-xs text-fg-muted">
+                        <span><span class="font-semibold text-fg tabular-nums">{{ $todayInsideCount }}</span> in gym</span>
+                        <span class="text-line-strong" aria-hidden="true">/</span>
+                        <span><span class="font-semibold text-fg tabular-nums">{{ $todayTotalAttendance }}</span> check-ins today</span>
                     </div>
 
-                    <!-- Live Date Pill -->
-                    <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 text-xs font-bold shadow-sm">
-                        <svg class="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span>{{ now()->format('D, j M Y') }}</span>
-                    </div>
-
-                    <!-- Live Digital Ticking Clock -->
-                    <div x-data="{ 
-                            time: '',
-                            init() {
-                                const update = () => {
-                                    const d = new Date();
-                                    let h = d.getHours();
-                                    const m = String(d.getMinutes()).padStart(2, '0');
-                                    const s = String(d.getSeconds()).padStart(2, '0');
-                                    const ampm = h >= 12 ? 'PM' : 'AM';
-                                    h = h % 12 || 12;
-                                    this.time = `${String(h).padStart(2, '0')} : ${m} : ${s} ${ampm}`;
-                                };
-                                update();
-                                setInterval(update, 1000);
-                            }
-                         }" 
-                         class="hidden lg:flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-amber-700 dark:text-amber-400 font-mono text-xs font-bold tracking-wider shadow-inner">
-                        <span x-text="time">--:--:-- --</span>
-                    </div>
+                    <div x-data="{ stamp: '', init() { const f = () => { this.stamp = new Date().toLocaleString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }); }; f(); setInterval(f, 30000); } }"
+                         class="hidden lg:block mr-2 text-xs text-fg-muted tabular-nums" x-text="stamp"></div>
 
                     <x-theme-customizer />
 
                     @if(auth()->user()->isSuperAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition-all">
-                            ⚙️ Super Admin
-                        </a>
+                        <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex ds-btn ds-btn-secondary !h-8">Super admin</a>
                     @endif
 
-                <!-- Interactive Notification Center -->
+                <!-- Notification centre -->
                 <div x-data="notificationCenter()" x-init="init()" @click.outside="isOpen = false" @keydown.escape.window="isOpen = false" class="relative">
-                    <!-- Bell Button -->
-                    <button type="button" 
-                            @click="toggleDropdown()" 
-                            title="Notifications & Operational Alerts" 
-                            class="relative p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700/60 transition-all cursor-pointer focus:outline-none">
-                        <svg class="w-4 h-4 text-current transition-transform duration-200" :class="{ 'scale-110 rotate-12': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-
-                        <!-- Dynamic Pulsating Unread Badge -->
+                    <button type="button"
+                            @click="toggleDropdown()"
+                            title="Notifications"
+                            aria-label="Notifications"
+                            class="relative ds-btn ds-btn-ghost !h-9 !w-9 !p-0 cursor-pointer">
+                        <x-icon name="bell" :size="18" />
                         <template x-if="unreadCount > 0">
-                            <span class="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full px-1 py-0.2 bg-rose-600 text-white text-[9px] font-black leading-none shadow-sm" x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
-                            </span>
+                            <span class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-accent-on text-xs font-semibold leading-[18px] text-center tabular-nums"
+                                  x-text="unreadCount > 9 ? '9+' : unreadCount"></span>
                         </template>
                     </button>
 
-                    <!-- Dropdown Panel -->
-                    <div x-show="isOpen" 
+                    <div x-show="isOpen"
                          x-cloak
                          style="display: none;"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 sm:mt-2.5 w-[calc(100vw-1.25rem)] max-w-sm sm:max-w-none sm:w-[400px] md:w-[440px] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden font-sans">
-                        
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 translate-y-1"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="fixed right-3 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.5rem)] sm:w-[400px] rounded-xl bg-surface border border-line-strong shadow-lg z-50 overflow-hidden">
+
                         <!-- Header -->
-                        <div class="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-950/50">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">
-                                    🔔
-                                </div>
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Alert Center</h4>
-                                    <p class="text-[10px] text-slate-500 dark:text-slate-400">Gym Operations & WhatsApp Insights</p>
-                                </div>
+                        <div class="px-4 py-3 border-b border-line flex items-center justify-between gap-3">
+                            <div>
+                                <h4 class="ds-heading">Notifications</h4>
+                                <p class="text-xs text-fg-muted tabular-nums" x-text="unreadCount + ' unread'"></p>
                             </div>
-
-                            <div class="flex items-center gap-2">
-                                <template x-if="unreadCount > 0">
-                                    <button type="button" 
-                                            @click="markAllAsRead()" 
-                                            class="text-[10px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold hover:underline cursor-pointer">
-                                        Mark all read
-                                    </button>
-                                </template>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300" 
-                                      x-text="unreadCount + ' unread'"></span>
-                            </div>
+                            <template x-if="unreadCount > 0">
+                                <button type="button" @click="markAllAsRead()" class="text-xs font-medium text-accent-fg hover:underline cursor-pointer">Mark all as read</button>
+                            </template>
                         </div>
 
-                        <!-- Filter Chips Row -->
-                        <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 flex items-center gap-1.5 overflow-x-auto text-[10px] font-bold">
-                            <button type="button" 
-                                    @click="activeFilter = 'all'" 
-                                    :class="activeFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" 
-                                    class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                All (<span x-text="counts.all"></span>)
+                        <!-- Filters -->
+                        <div class="px-3 py-2 border-b border-line flex items-center gap-1 overflow-x-auto no-scrollbar text-xs font-medium">
+                            <button type="button"
+                                    @click="activeFilter = 'all'"
+                                    :class="activeFilter === 'all' ? 'bg-raised text-fg' : 'text-fg-muted hover:text-fg'"
+                                    class="px-2.5 h-7 rounded-md whitespace-nowrap cursor-pointer transition-colors">
+                                All <span class="tabular-nums text-fg-subtle" x-text="counts.all"></span>
                             </button>
-                            <template x-if="counts.whatsapp > 0">
-                                <button type="button" 
-                                        @click="activeFilter = 'whatsapp'" 
-                                        :class="activeFilter === 'whatsapp' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'" 
-                                        class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                    WhatsApp (<span x-text="counts.whatsapp"></span>)
-                                </button>
-                            </template>
-                            <template x-if="counts.renewal > 0">
-                                <button type="button" 
-                                        @click="activeFilter = 'renewal'" 
-                                        :class="activeFilter === 'renewal' ? 'bg-amber-600 text-white shadow-sm' : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400'" 
-                                        class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                    Renewals (<span x-text="counts.renewal"></span>)
-                                </button>
-                            </template>
-                            <template x-if="counts.payment > 0">
-                                <button type="button" 
-                                        @click="activeFilter = 'payment'" 
-                                        :class="activeFilter === 'payment' ? 'bg-rose-600 text-white shadow-sm' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400'" 
-                                        class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                    Dues (<span x-text="counts.payment"></span>)
-                                </button>
-                            </template>
-                            <template x-if="counts.birthday > 0">
-                                <button type="button" 
-                                        @click="activeFilter = 'birthday'" 
-                                        :class="activeFilter === 'birthday' ? 'bg-purple-600 text-white shadow-sm' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400'" 
-                                        class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                    Birthdays (<span x-text="counts.birthday"></span>)
-                                </button>
-                            </template>
-                            <template x-if="counts.lead > 0">
-                                <button type="button" 
-                                        @click="activeFilter = 'lead'" 
-                                        :class="activeFilter === 'lead' ? 'bg-sky-600 text-white shadow-sm' : 'bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400'" 
-                                        class="px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer">
-                                    Leads (<span x-text="counts.lead"></span>)
+                            <template x-for="f in [['whatsapp', 'WhatsApp'], ['renewal', 'Renewals'], ['payment', 'Dues'], ['birthday', 'Birthdays'], ['lead', 'Leads']]" :key="f[0]">
+                                <button type="button"
+                                        x-show="counts[f[0]] > 0"
+                                        @click="activeFilter = f[0]"
+                                        :class="activeFilter === f[0] ? 'bg-raised text-fg' : 'text-fg-muted hover:text-fg'"
+                                        class="px-2.5 h-7 rounded-md whitespace-nowrap cursor-pointer transition-colors">
+                                    <span x-text="f[1]"></span> <span class="tabular-nums text-fg-subtle" x-text="counts[f[0]]"></span>
                                 </button>
                             </template>
                         </div>
 
-                        <!-- Notification Items List -->
-                        <div class="max-h-[380px] sm:max-h-[420px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 bg-white dark:bg-slate-900">
-                            <!-- Loading Skeleton -->
+                        <!-- List -->
+                        <div class="max-h-[380px] overflow-y-auto divide-y divide-line">
                             <template x-if="isLoading && notifications.length === 0">
-                                <div class="p-6 text-center space-y-3">
-                                    <div class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-indigo-500 border-t-transparent"></div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Checking live alerts...</p>
+                                <div class="p-8 text-center space-y-3">
+                                    <div class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-accent border-t-transparent"></div>
+                                    <p class="text-xs text-fg-muted">Loading notifications…</p>
                                 </div>
                             </template>
 
-                            <!-- Empty State -->
                             <template x-if="!isLoading && filteredNotifications().length === 0">
-                                <div class="p-8 text-center space-y-2.5">
-                                    <div class="w-10 h-10 mx-auto rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
-                                        ✓
+                                <div class="p-8 text-center space-y-2">
+                                    <div class="w-9 h-9 mx-auto rounded-full bg-raised text-fg-muted flex items-center justify-center">
+                                        <x-icon name="check" :size="16" />
                                     </div>
-                                    <h5 class="text-xs font-bold text-slate-900 dark:text-white">All Caught Up!</h5>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs mx-auto">No pending operational alerts or unread messages right now.</p>
+                                    <h5 class="text-sm font-medium text-fg">You're all caught up</h5>
+                                    <p class="text-xs text-fg-muted max-w-xs mx-auto">No pending alerts or unread messages.</p>
                                 </div>
                             </template>
 
-                            <!-- Notification Cards -->
                             <template x-for="item in filteredNotifications()" :key="item.id">
-                                <div class="p-3 sm:p-3.5 transition-colors relative group"
-                                     :class="item.is_read ? 'hover:bg-slate-50 dark:hover:bg-slate-800/40 opacity-80 hover:opacity-100' : 'bg-indigo-50/30 dark:bg-slate-800/40 hover:bg-indigo-50/60 dark:hover:bg-slate-800/70 border-l-2 border-indigo-500'">
-                                    
-                                    <div class="flex items-start gap-2.5 sm:gap-3">
-                                        <!-- Category Icon Avatar -->
-                                        <div class="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-xs"
-                                             :class="{
-                                                 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400': item.type === 'whatsapp',
-                                                 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400': item.type === 'renewal',
-                                                 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400': item.type === 'payment',
-                                                 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400': item.type === 'birthday',
-                                                 'bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400': item.type === 'lead',
-                                                 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400': !['whatsapp', 'renewal', 'payment', 'birthday', 'lead'].includes(item.type)
-                                             }">
-                                            <template x-if="item.type === 'whatsapp'"><span>💬</span></template>
-                                            <template x-if="item.type === 'renewal'"><span>⏳</span></template>
-                                            <template x-if="item.type === 'payment'"><span>💰</span></template>
-                                            <template x-if="item.type === 'birthday'"><span>🎂</span></template>
-                                            <template x-if="item.type === 'lead'"><span>👥</span></template>
-                                            <template x-if="!['whatsapp', 'renewal', 'payment', 'birthday', 'lead'].includes(item.type)"><span>🔔</span></template>
+                                <div class="relative px-4 py-3 transition-colors hover:bg-raised/60" :class="item.is_read ? 'opacity-70 hover:opacity-100' : ''">
+                                    <span x-show="!item.is_read" class="absolute left-1.5 top-5 w-1.5 h-1.5 rounded-full bg-accent"></span>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-raised text-fg-muted flex items-center justify-center shrink-0">
+                                            <template x-if="item.type === 'whatsapp'"><x-icon name="message" :size="16" /></template>
+                                            <template x-if="item.type === 'renewal'"><x-icon name="refresh" :size="16" /></template>
+                                            <template x-if="item.type === 'payment'"><x-icon name="currency" :size="16" /></template>
+                                            <template x-if="item.type === 'birthday'"><x-icon name="calendar" :size="16" /></template>
+                                            <template x-if="item.type === 'lead'"><x-icon name="user-add" :size="16" /></template>
+                                            <template x-if="!['whatsapp', 'renewal', 'payment', 'birthday', 'lead'].includes(item.type)"><x-icon name="bell" :size="16" /></template>
                                         </div>
 
-                                        <!-- Content -->
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex items-center justify-between gap-1">
-                                                <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate" x-text="item.title"></h5>
-                                                <span class="text-[9px] text-slate-400 dark:text-slate-500 font-semibold whitespace-nowrap" x-text="item.time_ago"></span>
+                                            <div class="flex items-center justify-between gap-2">
+                                                <h5 class="text-[13px] font-medium text-fg truncate" x-text="item.title"></h5>
+                                                <span class="text-xs text-fg-subtle whitespace-nowrap" x-text="item.time_ago"></span>
                                             </div>
-                                            <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 line-clamp-2 leading-relaxed" x-text="item.message"></p>
+                                            <p class="text-xs text-fg-muted mt-0.5 line-clamp-2 leading-relaxed" x-text="item.message"></p>
 
-                                            <!-- Bottom Action Row -->
                                             <div class="mt-2 flex items-center justify-between gap-2">
-                                                <a :href="item.link" 
+                                                <a :href="item.link"
                                                    :target="item.is_external ? '_blank' : '_self'"
                                                    @click="markAsRead(item.id)"
-                                                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-white transition-all shadow-sm cursor-pointer"
-                                                   :class="{
-                                                       'bg-emerald-600 hover:bg-emerald-500': item.type === 'whatsapp',
-                                                       'bg-amber-600 hover:bg-amber-500': item.type === 'renewal',
-                                                       'bg-rose-600 hover:bg-rose-500': item.type === 'payment',
-                                                       'bg-purple-600 hover:bg-purple-500': item.type === 'birthday',
-                                                       'bg-sky-600 hover:bg-sky-500': item.type === 'lead',
-                                                       'bg-indigo-600 hover:bg-indigo-500': !['whatsapp', 'renewal', 'payment', 'birthday', 'lead'].includes(item.type)
-                                                   }">
+                                                   class="ds-btn ds-btn-secondary !h-7 !px-2.5 !text-xs">
                                                     <span x-text="item.action_label"></span>
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                                    <x-icon name="chevron-right" :size="12" />
                                                 </a>
-
                                                 <template x-if="!item.is_read">
-                                                    <button type="button" 
-                                                            @click="markAsRead(item.id)" 
-                                                            title="Mark as read"
-                                                            class="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-semibold transition-colors cursor-pointer">
-                                                        Dismiss
-                                                    </button>
+                                                    <button type="button" @click="markAsRead(item.id)" class="text-xs text-fg-subtle hover:text-fg transition-colors cursor-pointer">Dismiss</button>
                                                 </template>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </template>
                         </div>
 
                         <!-- Footer -->
-                        <div class="p-2.5 px-3.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/70 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>Live Operations Feed</span>
-                            </span>
-                            <div class="flex items-center gap-2 font-bold">
-                                <a href="{{ route('app.crm.leads') }}" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Leads</a>
-                                <span>•</span>
-                                <a href="{{ route('app.whatsapp.inbox') }}" class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">WhatsApp</a>
-                            </div>
+                        <div class="px-4 py-2.5 border-t border-line flex items-center justify-between text-xs font-medium text-fg-muted">
+                            <a href="{{ route('app.crm.leads') }}" class="hover:text-fg transition-colors">Leads</a>
+                            <a href="{{ route('app.whatsapp.inbox') }}" class="hover:text-fg transition-colors">WhatsApp inbox</a>
                         </div>
-
                     </div>
                 </div>
                 @endif
@@ -1210,15 +639,13 @@
                             <svg class="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#C5A880] transition-transform duration-200 hidden sm:block" :class="{ 'rotate-180': userMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     @else
-                        <!-- Staff/Admin Profile Button -->
-                        <button @click="userMenuOpen = !userMenuOpen" 
-                                type="button" 
-                                class="group relative flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-indigo-500/50 focus:outline-none transition-all cursor-pointer"
-                                title="Account Profile & Settings">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white border border-white/20 shadow-md shadow-indigo-500/20 font-black text-xs flex items-center justify-center group-hover:scale-105 transition-transform">
-                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                            </div>
-                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
+                        <!-- Staff / admin profile button -->
+                        <button @click="userMenuOpen = !userMenuOpen"
+                                type="button"
+                                class="w-8 h-8 rounded-full bg-raised border border-line hover:border-line-strong text-xs font-semibold text-fg flex items-center justify-center cursor-pointer transition-colors"
+                                title="Account"
+                                aria-label="Account menu">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </button>
                     @endif
 
@@ -1233,92 +660,78 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-2xl {{ $isStealthApp ? 'bg-[#171A22] border border-neutral-800 text-[#F4EDE4] divide-neutral-800' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 divide-slate-100 dark:divide-slate-800' }} shadow-2xl z-[9999] overflow-hidden divide-y">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-xl {{ $isStealthApp ? 'bg-[#171A22] border border-neutral-800 text-[#F4EDE4] divide-neutral-800' : 'bg-surface border border-line-strong divide-line' }} shadow-lg z-[9999] overflow-hidden divide-y">
                         
                         <!-- Account Summary Header -->
-                        <div class="p-4 {{ $isStealthApp ? 'bg-[#0F1115]/80' : 'bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-indigo-950/20' }}">
+                        <div class="p-4 {{ $isStealthApp ? 'bg-[#0F1115]/80' : 'bg-surface' }}">
                             <div class="flex items-start gap-3">
-                                <div class="w-11 h-11 rounded-2xl {{ $isStealthApp ? 'bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black shadow-lg shadow-[#C5A880]/25' : 'bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 border border-white/20' }} font-black text-base flex items-center justify-center shrink-0">
+                                <div class="w-11 h-11 rounded-full {{ $isStealthApp ? 'bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black' : 'bg-accent text-accent-on font-semibold' }} text-base flex items-center justify-center shrink-0">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ auth()->user()->name }}</h4>
+                                        <h4 class="text-sm font-semibold text-fg truncate">{{ auth()->user()->name }}</h4>
                                     </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{{ auth()->user()->email }}</p>
+                                    <p class="text-xs text-fg-muted truncate mt-0.5">{{ auth()->user()->email }}</p>
                                     
                                     <div class="flex items-center gap-2 mt-2 flex-wrap">
                                         @php
                                             $role = auth()->user()->role;
-                                            $roleBadgeClass = match($role) {
-                                                'super_admin' => 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
-                                                'gym_owner'   => 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-                                                'trainer'     => 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-                                                'staff'       => 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-                                                default       => ($isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border-[#C5A880]/30 font-bold' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'),
-                                            };
+                                            $roleBadgeClass = $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880]' : 'ds-badge-neutral';
                                         @endphp
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border capitalize {{ $roleBadgeClass }}">
-                                            {{ str_replace('_', ' ', $role) }}
-                                        </span>
+                                        <span class="ds-badge capitalize {{ $roleBadgeClass }}">{{ str_replace('_', ' ', $role) }}</span>
 
                                         @if(auth()->user()->tenant)
-                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 max-w-[130px] truncate" title="{{ auth()->user()->tenant->name }}">
-                                                <svg class="w-2.5 h-2.5 text-indigo-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"/></svg>
-                                                <span class="truncate">{{ auth()->user()->tenant->name }}</span>
-                                            </span>
+                                            <span class="ds-badge ds-badge-neutral max-w-[150px] truncate" title="{{ auth()->user()->tenant->name }}">{{ auth()->user()->tenant->name }}</span>
                                         @endif
                                     </div>
                                 </div>
                             </div>
 
                             @if(!auth()->user()->isMember() && auth()->user()->tenant && auth()->user()->tenant->activeSubscription)
-                                <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/80 flex items-center justify-between text-[11px]">
-                                    <span class="text-slate-500 dark:text-slate-400">Current Plan:</span>
-                                    <span class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        {{ auth()->user()->tenant->activeSubscription->plan?->name ?? 'Standard' }}
-                                    </span>
+                                <div class="mt-3 pt-3 border-t border-line flex items-center justify-between text-xs">
+                                    <span class="text-fg-muted">Current plan</span>
+                                    <span class="font-medium text-fg">{{ auth()->user()->tenant->activeSubscription->plan?->name ?? 'Standard' }}</span>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Navigation Shortcuts -->
-                        <div class="py-1.5 text-xs">
+                        <div class="py-1.5">
                             @if(!$authUser?->isMember() && !$isPureTrainer)
                                 @if(auth()->user()->isSuperAdmin())
                                     <a href="{{ route('admin.dashboard') }}" 
-                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors font-medium">
-                                        <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                       class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
+                                        <svg class="w-4 h-4 text-fg-subtle shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                         <span>Super Admin Portal</span>
                                     </a>
                                 @endif
 
                                 @if(auth()->user()->isSuperAdmin() || auth()->user()->isGymOwner())
                                     <a href="{{ route('app.settings.index') }}" 
-                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                       class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                         <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                        <span>Gym Settings</span>
+                                        <span>Gym settings</span>
                                     </a>
 
                                     <a href="{{ route('app.subscription.index') }}" 
-                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                       class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                         <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                                        <span>Subscription & Billing</span>
+                                        <span>Subscription &amp; billing</span>
                                     </a>
 
                                     <a href="{{ route('app.roles.index') }}" 
-                                       class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                       class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                         <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                                        <span>Roles & Permissions</span>
+                                        <span>Roles &amp; permissions</span>
                                     </a>
                                 @endif
 
                                 @if(auth()->user()->hasFeature('whatsapp_marketing') && auth()->user()->hasPermission('whatsapp.view'))
                                 <a href="{{ route('app.whatsapp.dashboard') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors font-medium">
-                                    <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                    <span>WhatsApp Marketing Hub</span>
+                                   class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
+                                    <svg class="w-4 h-4 text-fg-subtle shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    <span>WhatsApp</span>
                                 </a>
                                 @endif
                             @endif
@@ -1333,42 +746,42 @@
                                 </a>
                             @else
                                 <a href="{{ route('app.feedback.index') }}" 
-                                   class="flex items-center justify-between px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                   class="flex items-center justify-between px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                                        <span>Member Feedbacks</span>
+                                        <svg class="w-4 h-4 text-fg-subtle shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        <span>Member feedback</span>
                                     </div>
                                     @php
                                         $newFeedbackCount = \App\Models\CrmFeedback::where('tenant_id', auth()->user()->tenant_id)->whereIn('status', ['new', 'pending', 'open'])->count();
                                     @endphp
                                     @if($newFeedbackCount > 0)
-                                        <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950 font-mono">{{ $newFeedbackCount }}</span>
+                                        <span class="ds-nav-count !ml-0">{{ $newFeedbackCount }}</span>
                                     @endif
                                 </a>
 
                                 <a href="{{ route('app.support.index') }}" 
-                                   class="flex items-center gap-2.5 px-4 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors font-medium">
+                                   class="flex items-center gap-2.5 px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                     <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                                    <span>Platform Support</span>
+                                    <span>Platform support</span>
                                 </a>
                             @endif
                         </div>
 
                         <!-- Account Actions (Change Password & Logout) -->
-                        <div class="p-2 space-y-1 text-xs">
+                        <div class="p-2 space-y-0.5">
                             <button @click="userMenuOpen = false; showPasswordModal = true"
                                     type="button"
-                                    class="w-full flex items-center gap-2.5 px-3 py-2 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-[#C5A880] hover:bg-slate-100 dark:hover:bg-slate-800/70 rounded-xl transition-colors font-medium text-left cursor-pointer">
+                                    class="w-full flex items-center gap-2.5 px-3 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised rounded-lg transition-colors text-left cursor-pointer">
                                 <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                <span>Change Password</span>
+                                <span>Change password</span>
                             </button>
 
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" 
-                                        class="w-full flex items-center gap-2.5 px-3 py-2 text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors font-semibold text-left cursor-pointer">
+                                        class="w-full flex items-center gap-2.5 px-3 h-9 text-[13px] font-medium text-danger hover:bg-danger/10 rounded-lg transition-colors text-left cursor-pointer">
                                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                    <span>Sign Out</span>
+                                    <span>Sign out</span>
                                 </button>
                             </form>
                         </div>
@@ -1378,7 +791,7 @@
                     <div x-show="showPasswordModal" 
                          x-cloak
                          @keydown.escape.window="showPasswordModal = false"
-                         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+                         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
@@ -1387,7 +800,7 @@
                          x-transition:leave-end="opacity-0">
                         
                         <div @click.away="showPasswordModal = false"
-                             class="w-full max-w-md {{ $isMemberUser ? 'bg-[#171A22] text-[#F4EDE4] border-neutral-800' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800' }} rounded-3xl border shadow-2xl overflow-hidden relative"
+                             class="w-full max-w-md {{ $isMemberUser ? 'bg-[#171A22] text-[#F4EDE4] border-neutral-800' : 'bg-surface border-line-strong' }} rounded-xl border shadow-xl overflow-hidden relative"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -1396,17 +809,17 @@
                              x-transition:leave-end="opacity-0 scale-95">
                             
                             <!-- Modal Header -->
-                            <div class="px-6 pt-6 pb-4 border-b {{ $isMemberUser ? 'border-neutral-800' : 'border-slate-100 dark:border-slate-800' }} flex items-start justify-between">
+                            <div class="px-6 pt-6 pb-4 border-b {{ $isMemberUser ? 'border-neutral-800' : 'border-line' }} flex items-start justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-2xl {{ $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20' }} flex items-center justify-center shrink-0">
+                                    <div class="w-10 h-10 rounded-lg {{ $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30' : 'bg-raised text-fg-muted border border-line' }} flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     </div>
                                     <div>
-                                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Change Password</h3>
-                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Secure your account with a strong new password.</p>
+                                        <h3 class="text-base font-semibold text-fg">Change password</h3>
+                                        <p class="text-xs text-fg-muted mt-0.5">Use a strong password you don't use anywhere else.</p>
                                     </div>
                                 </div>
-                                <button @click="showPasswordModal = false" type="button" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <button @click="showPasswordModal = false" type="button" class="text-fg-subtle hover:text-fg p-1 rounded-lg hover:bg-raised transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </div>
@@ -1416,7 +829,7 @@
                                 @csrf
 
                                 @if ($errors->any())
-                                    <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs space-y-1">
+                                    <div class="p-3 rounded-lg bg-danger/10 border border-danger/25 text-danger text-sm space-y-1">
                                         @foreach ($errors->all() as $error)
                                             <p class="flex items-center gap-1.5 font-medium">
                                                 <span>•</span> {{ $error }}
@@ -1427,16 +840,16 @@
 
                                 <!-- Current Password -->
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Current Password</label>
+                                    <label class="ds-label">Current password</label>
                                     <div class="relative">
                                         <input :type="showCurrentPass ? 'text' : 'password'" 
                                                name="current_password" 
                                                required 
                                                placeholder="Enter current password"
-                                               class="w-full pl-3.5 pr-10 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                                               class="ds-input !pr-10">
                                         <button type="button" 
                                                 @click="showCurrentPass = !showCurrentPass"
-                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg">
                                             <svg x-show="!showCurrentPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             <svg x-show="showCurrentPass" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                         </button>
@@ -1445,36 +858,36 @@
 
                                 <!-- New Password -->
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
+                                    <label class="ds-label">New password</label>
                                     <div class="relative">
                                         <input :type="showNewPass ? 'text' : 'password'" 
                                                name="password" 
                                                required 
                                                minlength="8"
                                                placeholder="Minimum 8 characters"
-                                               class="w-full pl-3.5 pr-10 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                                               class="ds-input !pr-10">
                                         <button type="button" 
                                                 @click="showNewPass = !showNewPass"
-                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg">
                                             <svg x-show="!showNewPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             <svg x-show="showNewPass" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                         </button>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-1">Must be at least 8 characters long and different from current password.</p>
+                                    <p class="text-xs text-fg-subtle mt-1.5">At least 8 characters, different from your current password.</p>
                                 </div>
 
                                 <!-- Confirm Password -->
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Confirm New Password</label>
+                                    <label class="ds-label">Confirm new password</label>
                                     <div class="relative">
                                         <input :type="showConfirmPass ? 'text' : 'password'" 
                                                name="password_confirmation" 
                                                required 
                                                placeholder="Repeat new password"
-                                               class="w-full pl-3.5 pr-10 py-2.5 text-xs rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                                               class="ds-input !pr-10">
                                         <button type="button" 
                                                 @click="showConfirmPass = !showConfirmPass"
-                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none">
+                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg">
                                             <svg x-show="!showConfirmPass" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             <svg x-show="showConfirmPass" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
                                         </button>
@@ -1485,12 +898,12 @@
                                 <div class="pt-3 flex items-center justify-end gap-2.5">
                                     <button type="button" 
                                             @click="showPasswordModal = false"
-                                            class="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                            class="ds-btn ds-btn-secondary">
                                         Cancel
                                     </button>
                                     <button type="submit" 
-                                            class="px-5 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25 hover:from-indigo-700 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer">
-                                        Update Password
+                                            class="ds-btn ds-btn-primary">
+                                        Update password
                                     </button>
                                 </div>
                             </form>
@@ -1570,7 +983,7 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-white/95 dark:bg-slate-900/95 border-t border-slate-200/90 dark:border-slate-800/90' }} backdrop-blur-lg px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] transition-all"
+         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
          style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 40 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
@@ -1684,63 +1097,39 @@
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Profile</span>
                 </button>
             @else
-                <!-- Admin / Owner / Staff Navigation -->
-                <!-- 1. Home / Dashboard -->
-                <a href="{{ route('app.dashboard') }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.dashboard') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        @if(request()->routeIs('app.dashboard'))
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-                        @endif
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Home</span>
+                <!-- Admin / owner / staff navigation -->
+                <a href="{{ route('app.dashboard') }}"
+                   @if(request()->routeIs('app.dashboard')) aria-current="page" @endif
+                   class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-xs transition-colors {{ request()->routeIs('app.dashboard') ? 'text-accent-fg font-semibold' : 'text-fg-muted hover:text-fg' }}">
+                    <x-icon name="home" :size="20" />
+                    <span class="truncate">Home</span>
                 </a>
 
-                <!-- 2. Members -->
-                <a href="{{ route('app.members.index') }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.members.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        @if(request()->routeIs('app.members.*'))
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-                        @endif
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Members</span>
+                <a href="{{ route('app.members.index') }}"
+                   @if(request()->routeIs('app.members.*')) aria-current="page" @endif
+                   class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-xs transition-colors {{ request()->routeIs('app.members.*') ? 'text-accent-fg font-semibold' : 'text-fg-muted hover:text-fg' }}">
+                    <x-icon name="users" :size="20" />
+                    <span class="truncate">Members</span>
                 </a>
 
-                <!-- 3. Attendance -->
-                <a href="{{ route('app.attendance.index') }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.attendance.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        @if(request()->routeIs('app.attendance.*'))
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-                        @endif
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Attendance</span>
+                <a href="{{ route('app.attendance.index') }}"
+                   @if(request()->routeIs('app.attendance.*')) aria-current="page" @endif
+                   class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-xs transition-colors {{ request()->routeIs('app.attendance.*') ? 'text-accent-fg font-semibold' : 'text-fg-muted hover:text-fg' }}">
+                    <x-icon name="clock" :size="20" />
+                    <span class="truncate">Attendance</span>
                 </a>
 
-                <!-- 4. WhatsApp / POS -->
-                <a href="{{ route('app.whatsapp.inbox') }}" 
-                   class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all {{ request()->routeIs('app.whatsapp.*') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200' }}">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                        @if(request()->routeIs('app.whatsapp.*'))
-                            <span class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"></span>
-                        @endif
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">WhatsApp</span>
+                <a href="{{ route('app.whatsapp.inbox') }}"
+                   @if(request()->routeIs('app.whatsapp.*')) aria-current="page" @endif
+                   class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-xs transition-colors {{ request()->routeIs('app.whatsapp.*') ? 'text-accent-fg font-semibold' : 'text-fg-muted hover:text-fg' }}">
+                    <x-icon name="message" :size="20" />
+                    <span class="truncate">WhatsApp</span>
                 </a>
 
-                <!-- 5. Menu / Drawer Toggle (Staff Only) -->
-                <button type="button" 
-                        @click="sidebarOpen = true" 
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer">
-                    <div class="relative p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Menu</span>
+                <button type="button" @click="sidebarOpen = true"
+                        class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-xs text-fg-muted hover:text-fg transition-colors cursor-pointer">
+                    <x-icon name="menu" :size="20" />
+                    <span>Menu</span>
                 </button>
             @endif
         </div>

@@ -70,11 +70,7 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
         },
 
         get currentAccentHex() {
-            if (this.theme.isCustom && this.theme.customHex) {
-                return this.theme.customHex;
-            }
-            const preset = this.colorPresets.find(c => c.id === this.theme.accent);
-            return preset ? preset.hex : '#10b981';
+            return '#F5A524';
         },
 
         get pickerBaseColor() {
@@ -155,8 +151,9 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
 
         showToast(message) {
             const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 right-6 z-[999999] bg-emerald-500 text-slate-950 font-bold px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2 transform transition-all duration-300 translate-y-0 opacity-100';
-            toast.innerHTML = `<span>✓</span> <span>${message}</span>`;
+            toast.className = 'fixed bottom-6 right-6 z-[999999] bg-surface text-fg border border-line-strong text-sm font-medium px-4 py-3 rounded-xl flex items-center gap-2 transition-all duration-300 opacity-100';
+            toast.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-success"><path d="M5 13l4 4L19 7"/></svg><span></span>';
+            toast.querySelector('span').textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -362,137 +359,11 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
         },
 
         applyAccent() {
-            const hex = this.currentAccentHex;
-            const rgb = this.hexToRgb(hex);
-            const rgbStr = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
-            const root = document.documentElement;
-
-            root.style.setProperty('--theme-accent', hex);
-            root.style.setProperty('--theme-accent-rgb', rgbStr);
-
-            let styleTag = document.getElementById('theme-accent-dynamic-style');
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'theme-accent-dynamic-style';
-                document.head.appendChild(styleTag);
-            }
-
-            const isLight = root.classList.contains('light');
-
-            styleTag.setAttribute('data-hex', hex);
-            styleTag.innerHTML = `
-                :root {
-                    --theme-accent: ${hex} !important;
-                    --theme-accent-light: rgba(${rgbStr}, 0.15) !important;
-                    --theme-accent-border: rgba(${rgbStr}, 0.3) !important;
-                    --theme-accent-glow: rgba(${rgbStr}, 0.35) !important;
-                }
-
-                .theme-save-btn,
-                .btn-primary,
-                .theme-btn-primary,
-                .bg-amber-500,
-                .bg-red-500,
-                .bg-emerald-500,
-                .bg-emerald-600 {
-                    background-color: ${hex} !important;
-                    color: #ffffff !important;
-                }
-
-                .hover\\:bg-emerald-600:hover,
-                .hover\\:bg-emerald-500:hover,
-                .hover\\:bg-amber-600:hover,
-                .hover\\:bg-red-600:hover {
-                    background-color: ${hex} !important;
-                    filter: brightness(0.9);
-                }
-
-                aside nav a.bg-amber-500,
-                aside nav a.bg-red-500,
-                aside nav a.bg-emerald-500,
-                aside nav a[class*="bg-amber-500"],
-                aside nav a[class*="bg-red-500"],
-                aside nav a[class*="bg-emerald-500"] {
-                    background-color: ${hex} !important;
-                    color: #ffffff !important;
-                    box-shadow: 0 4px 14px 0 rgba(${rgbStr}, 0.35) !important;
-                }
-
-                html.light aside nav a.bg-amber-500,
-                html.light aside nav a.bg-red-500,
-                html.light aside nav a.bg-emerald-500,
-                html.light aside nav a[class*="bg-amber-500"],
-                html.light aside nav a[class*="bg-red-500"],
-                html.light aside nav a[class*="bg-emerald-500"] {
-                    background-color: rgba(${rgbStr}, 0.12) !important;
-                    color: ${hex} !important;
-                    border: 1px solid rgba(${rgbStr}, 0.25) !important;
-                    box-shadow: none !important;
-                    font-weight: 700 !important;
-                }
-
-                .text-amber-400,
-                .text-amber-500,
-                .text-red-400,
-                .text-emerald-400,
-                .text-emerald-500,
-                .text-emerald-600,
-                .text-cyan-400,
-                .theme-accent-text {
-                    color: ${hex} !important;
-                }
-
-                .hover\\:text-emerald-400:hover,
-                .hover\\:text-emerald-300:hover,
-                .hover\\:text-emerald-600:hover,
-                .hover\\:text-amber-400:hover {
-                    color: ${hex} !important;
-                }
-
-                .bg-amber-500\\/5,
-                .bg-emerald-500\\/5,
-                .bg-amber-500\\/10,
-                .bg-red-500\\/10,
-                .bg-emerald-500\\/10,
-                .bg-amber-500\\/15,
-                .bg-red-500\\/15,
-                .bg-emerald-500\\/15,
-                .bg-emerald-500\\/20,
-                .bg-emerald-100,
-                .bg-emerald-50,
-                .bg-emerald-50\\/50 {
-                    background-color: rgba(${rgbStr}, 0.14) !important;
-                    color: ${hex} !important;
-                }
-
-                .border-amber-500,
-                .border-red-500,
-                .border-emerald-500,
-                .border-amber-500\\/20,
-                .border-red-500\\/20,
-                .border-emerald-500\\/15,
-                .border-emerald-500\\/20,
-                .border-emerald-500\\/25,
-                .border-emerald-500\\/30,
-                .border-emerald-500\\/40,
-                .border-emerald-200 {
-                    border-color: rgba(${rgbStr}, 0.35) !important;
-                }
-
-                .focus\\:ring-amber-500:focus,
-                .focus\\:ring-emerald-500:focus,
-                .focus\\:border-amber-500:focus,
-                .focus\\:border-emerald-500:focus,
-                .ring-emerald-500\\/30,
-                .ring-emerald-500\\/50 {
-                    --tw-ring-color: ${hex} !important;
-                    border-color: ${hex} !important;
-                }
-            `;
+            // Brand accent is fixed (components/design-system.blade.php). Nothing to apply per user.
         },
 
         applySidebarCaption() {
-            const captions = document.querySelectorAll('aside nav div[class*="uppercase"]');
+            const captions = document.querySelectorAll('aside nav .ds-nav-section');
             captions.forEach(el => {
                 el.style.display = this.theme.sidebarCaption ? '' : 'none';
             });
@@ -514,17 +385,7 @@ function themeManager(serverSettings = null, storageKey = 'admin') {
         },
 
         applyFont() {
-            const font = this.theme.fontFamily;
-            const fontSlug = font.replace(/ /g, '+');
-            let linkEl = document.getElementById('dynamic-google-font');
-            if (!linkEl) {
-                linkEl = document.createElement('link');
-                linkEl.id = 'dynamic-google-font';
-                linkEl.rel = 'stylesheet';
-                document.head.appendChild(linkEl);
-            }
-            linkEl.href = `https://fonts.googleapis.com/css2?family=${fontSlug}:wght@300;400;500;600;700;800&display=swap`;
-            document.body.style.fontFamily = `'${font}', sans-serif`;
+            // Typeface is fixed (Inter). Nothing to apply per user.
         },
 
         applyFontSize() {
@@ -713,188 +574,6 @@ document.addEventListener('alpine:init', () => {
                             </div>
                         </div>
 
-                        <!-- 2. Accent Color Palette -->
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">ACCENT COLOR</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Choose your primary theme color</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Preset Circles Grid (5 on top, 2 on bottom) -->
-                            <div class="grid grid-cols-5 gap-3 pt-1">
-                                <!-- Row 1, Col 1 -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[0])"
-                                        :title="colorPresets[0].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[0].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[0].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 1, Col 2 -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[1])"
-                                        :title="colorPresets[1].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[1].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[1].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 1, Col 3 -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[2])"
-                                        :title="colorPresets[2].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[2].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[2].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 1, Col 4 -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[3])"
-                                        :title="colorPresets[3].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[3].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[3].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 1, Col 5 -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[4])"
-                                        :title="colorPresets[4].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[4].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[4].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 2, Col 1: Mint-Emerald -->
-                                <button type="button"
-                                        @click="setAccent(colorPresets[5])"
-                                        :title="colorPresets[5].name"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105"
-                                        :style="`background: ${colorPresets[5].gradient};`">
-                                    <div x-show="theme.accent === colorPresets[5].id && !theme.isCustom" class="w-6 h-6 rounded-full bg-black/40 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                </button>
-
-                                <!-- Row 2, Col 2: Custom Color Circle with checkmark -->
-                                <button type="button"
-                                        @click="toggleCustomPicker()"
-                                        title="Pick Custom Color"
-                                        class="w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer relative shadow-md hover:scale-105 border-2 bg-slate-100 dark:bg-slate-950"
-                                        :class="theme.isCustom ? 'border-emerald-500 ring-2 ring-emerald-500/50' : 'border-slate-300 dark:border-slate-700'"
-                                        :style="theme.isCustom ? `background-color: ${theme.customHex};` : ''">
-                                    <div x-show="theme.isCustom" class="w-6 h-6 rounded-full bg-black/50 backdrop-blur-xs flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-white drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </div>
-                                    <div x-show="!theme.isCustom" class="text-slate-800 dark:text-white font-bold text-sm">
-                                        ✓
-                                    </div>
-                                </button>
-                            </div>
-
-                            <!-- Integrated Inline Color Picker Panel -->
-                            <div x-show="showCustomPicker"
-                                 x-cloak
-                                 x-transition
-                                 class="mt-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-800 space-y-3.5 w-full">
-                                
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-extrabold uppercase tracking-wide text-slate-800 dark:text-slate-200">Custom Color</span>
-                                    <button @click="showCustomPicker = false" class="text-slate-400 hover:text-slate-800 dark:hover:text-white text-sm font-bold cursor-pointer">✕</button>
-                                </div>
-
-                                <!-- Spectrum / Gradient Canvas Area -->
-                                <div class="h-28 w-full rounded-xl relative overflow-hidden shadow-inner cursor-crosshair border border-slate-200 dark:border-slate-700"
-                                     :style="`background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${pickerBaseColor});`"
-                                     @click="pickCanvasColor($event)">
-                                    <div class="absolute w-4 h-4 rounded-full border-2 border-white shadow-md pointer-events-none -translate-x-1/2 -translate-y-1/2"
-                                         :style="`background-color: ${theme.customHex}; left: ${pickerDotX}%; top: ${pickerDotY}%;`"></div>
-                                </div>
-
-                                <!-- Controls Row: Eyedropper + Color Swatch Circle + Hue Bar -->
-                                <div class="flex items-center gap-2.5">
-                                    <!-- Eyedropper -->
-                                    <button type="button"
-                                            @click="triggerEyeDropper()"
-                                            title="Eyedropper"
-                                            class="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer shrink-0">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                    </button>
-
-                                    <!-- Swatch Circle -->
-                                    <div class="w-7 h-7 rounded-full shadow-inner border border-slate-300 dark:border-slate-600 shrink-0"
-                                         :style="`background-color: ${theme.customHex};`"></div>
-
-                                    <!-- Rainbow Hue Slider -->
-                                    <div class="flex-1 relative flex items-center">
-                                        <input type="range"
-                                               min="0"
-                                               max="360"
-                                               x-model="pickerHue"
-                                               @input="updateFromHue()"
-                                               class="w-full h-3.5 rounded-lg appearance-none cursor-pointer"
-                                               style="background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);">
-                                    </div>
-
-                                    <!-- Native picker icon -->
-                                    <label class="p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shrink-0" title="Native Color Picker">
-                                        <input type="color" :value="theme.customHex" @input="setCustomHex($event.target.value)" class="sr-only">
-                                        🎨
-                                    </label>
-                                </div>
-
-                                <!-- R, G, B Inputs Row -->
-                                <div class="grid grid-cols-4 gap-2 text-center text-xs font-semibold">
-                                    <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.r" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">R</span>
-                                    </div>
-                                    <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.g" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">G</span>
-                                    </div>
-                                    <div>
-                                        <input type="number" min="0" max="255" x-model.number="rgb.b" @input="updateFromRgb()" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">B</span>
-                                    </div>
-                                    <div>
-                                        <input type="text" x-model="theme.customHex" @input="setCustomHex(theme.customHex)" class="w-full px-1 py-1.5 text-center font-mono rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs uppercase focus:ring-1 focus:ring-slate-900 dark:focus:ring-white focus:outline-none">
-                                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mt-1 block">HEX</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- 3. Sidebar Option (Caption Hide / Show) -->
                         <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
                             <div class="flex items-center justify-between mb-2">
@@ -1008,22 +687,6 @@ document.addEventListener('alpine:init', () => {
                     <!-- TAB 2: TYPOGRAPHY & FONTS -->
                     <div x-show="activeTab === 'typography'" class="space-y-6">
 
-                        <!-- Font Family -->
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">FONT FAMILY</h4>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <template x-for="font in fontFamilies" :key="font.name">
-                                    <button type="button"
-                                            @click="setFontFamily(font.name)"
-                                            class="p-3 rounded-xl border text-left transition-all cursor-pointer"
-                                            :class="theme.fontFamily === font.name ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-500/15 text-emerald-900 dark:text-emerald-400 font-bold' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0e162c] text-slate-800 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'">
-                                        <div class="font-bold text-xs" :style="`font-family: '${font.name}', sans-serif;`" x-text="font.name"></div>
-                                        <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5" x-text="font.preview"></div>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-
                         <!-- Font Size Scaling -->
                         <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
                             <h4 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">FONT SIZE</h4>
@@ -1061,9 +724,8 @@ document.addEventListener('alpine:init', () => {
                     <button @click="saveSettingsToServer()"
                             type="button"
                             :disabled="saving"
-                            class="w-full py-3 px-4 rounded-xl text-white font-extrabold text-sm transition-all shadow-xl hover:opacity-95 active:scale-[0.99] text-center cursor-pointer flex items-center justify-center gap-2 theme-save-btn"
-                            :style="`background-color: ${currentAccentHex};`">
-                        <svg x-show="saving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            class="ds-btn ds-btn-primary w-full">
+                        <svg x-show="saving" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                         </svg>
