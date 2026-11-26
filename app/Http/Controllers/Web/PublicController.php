@@ -118,37 +118,11 @@ class PublicController extends Controller
             ->orWhere('id', is_numeric($slug) ? (int) $slug : 0)
             ->firstOrFail();
 
-        $user = auth()->user();
+        // A public QR page must never record attendance merely by being opened.
         $member = null;
         $attendance = null;
         $status = null;
         $message = null;
-
-        if ($user) {
-            $cleanUserPhone = preg_replace('/[^0-9]/', '', $user->phone ?? '');
-            $suffix10 = strlen($cleanUserPhone) >= 10 ? substr($cleanUserPhone, -10) : $cleanUserPhone;
-
-            $member = Member::where('tenant_id', $tenant->id)
-                ->where(function ($q) use ($user, $suffix10) {
-                    $q->where('user_id', $user->id)
-                      ->orWhere('email', $user->email);
-                    if (! empty($suffix10)) {
-                        $q->orWhere('phone', $user->phone)
-                          ->orWhere('phone', 'like', "%{$suffix10}");
-                    }
-                })->first();
-
-            if ($member) {
-                if (! $member->isMembershipActive()) {
-                    $status = 'expired';
-                    $message = "Membership Expired: Your membership at {$tenant->name} has expired. Please renew at the reception.";
-                } else {
-                    $attendance = $attendanceService->checkIn($member, 'qr');
-                    $status = 'success';
-                    $message = "Welcome, {$member->full_name}! Check-in recorded at ".now()->format('h:i A').'.';
-                }
-            }
-        }
 
         return view('public.gym_checkin', compact('tenant', 'member', 'attendance', 'status', 'message', 'slug'));
     }
@@ -159,25 +133,56 @@ class PublicController extends Controller
             ->orWhere('id', is_numeric($slug) ? (int) $slug : 0)
             ->firstOrFail();
 
-        $input = trim($request->input('identifier', ''));
-        $action = $request->input('action', 'check_in');
+        $validated = $request->validate([
+            'identifier' => ['required', 'string', 'max:255'],
+            'action' => ['nullable', 'in:check_in,check_out'],
+        ]);
 
-        if (empty($input)) {
-            return back()->with('error', 'Please enter your Mobile Number or Member ID.');
+        $input = trim($validated['identifier']);
+        $action = $validated['action'] ?? 'check_in';
+
+        if ($input === '') {
+            return back()->with('error', 'Please enter your mobile number or member ID.');
         }
 
-        $cleanDigits = preg_replace('/[^0-9]/', '', $input);
-        $suffix10 = strlen($cleanDigits) >= 10 ? substr($cleanDigits, -10) : $cleanDigits;
+        // Member codes always take precedence, including numeric codes.
+        $members = Member::where('tenant_id', $tenant->id)
+            ->where('member_code', $input)
+            ->limit(2)->get();
 
-        $member = Member::where('tenant_id', $tenant->id)
-            ->where(function ($q) use ($input, $suffix10) {
-                $q->where('member_code', $input)
-                  ->orWhere('email', $input);
-                if (! empty($suffix10)) {
-                    $q->orWhere('phone', $input)
-                      ->orWhere('phone', 'like', "%{$suffix10}");
+        // Only complete phone numbers may enter the phone lookup path.
+        // Never extract a partial number from an alphanumeric member code.
+        if ($members->isEmpty() && preg_match('/^[+0-9 ()-]+$/D', $input)) {
+            $digits = preg_replace('/[^0-9]/', '', $input);
+
+            if (strlen($digits) >= 10 && strlen($digits) <= 15) {
+                $phones = [$input, $digits, '+'.$digits];
+
+                // Indian local and international representations are equivalent.
+                if ($tenant->currency === 'INR') {
+                    $local = strlen($digits) === 12 && str_starts_with($digits, '91')
+                        ? substr($digits, 2)
+                        : $digits;
+                    if (strlen($local) === 10) {
+                        $phones = array_merge($phones, [$local, '91'.$local, '+91'.$local, '+91 '.$local]);
+                    }
                 }
-            })->first();
+
+                $members = Member::where('tenant_id', $tenant->id)
+                    ->whereIn('phone', array_unique($phones))
+                    ->limit(2)->get();
+            }
+        } elseif ($members->isEmpty() && filter_var($input, FILTER_VALIDATE_EMAIL)) {
+            $members = Member::where('tenant_id', $tenant->id)
+                ->where('email', $input)
+                ->limit(2)->get();
+        }
+
+        if ($members->count() > 1) {
+            return back()->with('error', 'Multiple member profiles match. Please contact reception or use your unique member ID.')->withInput();
+        }
+
+        $member = $members->first();
 
         if (! $member) {
             return back()->with('error', "No member profile found for '{$input}' at {$tenant->name}. Please contact reception.")->withInput();

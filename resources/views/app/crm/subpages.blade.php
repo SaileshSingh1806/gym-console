@@ -1,4 +1,4 @@
-<x-app-layout header="{{ $title ?? 'CRM' }}">
+<x-app-layout :header="$title ?? 'CRM'">
     @php
         $currency = $tenant->currency_symbol ?? '₹';
         $stats = $enquiryStats ?? ['total' => 0, 'new' => 0, 'today' => 0, 'converted' => 0];
