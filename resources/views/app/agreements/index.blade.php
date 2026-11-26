@@ -1,8 +1,7 @@
 <x-app-layout header="Digital Member Agreements & Health Declarations">
     @push('styles')
     <style>
-        .agreement-workspace { --ag-text:#172235; --ag-muted:#65748a; --ag-line:#e2e7ed; --ag-surface:#fff; --ag-soft:#f7f9fb; }
-        .dark .agreement-workspace { --ag-text:#eef2f7; --ag-muted:#9ba9bc; --ag-line:#2a3648; --ag-surface:#0f172a; --ag-soft:#151f31; }
+        .agreement-workspace { --ag-surface:rgb(var(--c-surface)); --ag-line:rgb(var(--c-line)); --ag-muted:rgb(var(--c-fg-muted)); --ag-text:rgb(var(--c-fg)); --ag-soft:rgb(var(--c-raised)); }
         .agreement-page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; padding:8px 0 6px; }
         .agreement-eyebrow { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ag-muted); margin-bottom:8px; }
         .agreement-page-header h1 { font-size:clamp(23px,2.4vw,30px); font-weight:600; letter-spacing:-.8px; line-height:1.25; color:var(--ag-text); }
