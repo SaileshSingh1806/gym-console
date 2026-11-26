@@ -9,29 +9,29 @@
     }">
         <!-- Notifications -->
         @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
             </div>
         @endif
 
         <!-- ==================== HEADER & TOP CONTROLS ==================== -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                <h1 class="text-2xl font-semibold text-fg dark:text-white tracking-tight flex items-center gap-2">
                     <span>{{ $periodLabel }}</span>
                 </h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Financial Overview</p>
+                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Financial Overview</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
                 <!-- Period Toggles (This Month, This Quarter, This Year) -->
-                <div class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1">
+                <div class="inline-flex rounded-xl bg-raised dark:bg-surface border border-line dark:border-line p-1">
                     <a href="{{ route('app.finance.balance-sheet', ['period' => 'month', 'year' => $year, 'branch_id' => $branchId ?: 'all']) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $period === 'month' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white' }}">
                         This Month
                     </a>
@@ -47,7 +47,7 @@
                 <form action="{{ route('app.finance.balance-sheet') }}" method="GET" class="inline-flex">
                     <input type="hidden" name="period" value="{{ $period }}">
                     <input type="hidden" name="branch_id" value="{{ $branchId ?: 'all' }}">
-                    <select name="year" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                    <select name="year" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                         @for($y = now()->year; $y >= now()->year - 4; $y--)
                             <option value="{{ $y }}" {{ $year === $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
@@ -55,7 +55,7 @@
                 </form>
 
                 <!-- Gym Badge -->
-                <div class="px-3 py-1.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 dark:border-indigo-500/25 text-indigo-600 dark:text-indigo-400 text-xs font-bold flex items-center gap-1.5">
+                <div class="px-3 py-1.5 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 dark:border-indigo-500/25 text-indigo-600 dark:text-indigo-400 text-xs font-semibold flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     <span>{{ $tenant->name ?? 'PowerFit Gym' }}</span>
                 </div>
@@ -64,7 +64,7 @@
                 <form action="{{ route('app.finance.balance-sheet') }}" method="GET" class="inline-flex">
                     <input type="hidden" name="period" value="{{ $period }}">
                     <input type="hidden" name="year" value="{{ $year }}">
-                    <select name="branch_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold focus:border-indigo-500 focus:outline-none cursor-pointer">
+                    <select name="branch_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs font-semibold focus:border-accent focus:outline-none cursor-pointer">
                         <option value="all" {{ empty($branchId) ? 'selected' : '' }}>🌐 All Branches</option>
                         @foreach($branches as $b)
                             <option value="{{ $b->id }}" {{ $branchId === $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
@@ -73,7 +73,7 @@
                 </form>
 
                 <!-- Download PDF / Print -->
-                <a href="{{ route('app.finance.balance-sheet.pdf', ['period' => $period, 'year' => $year, 'branch_id' => $branchId ?: 'all', 'month' => request('month')]) }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/25 transition-all cursor-pointer">
+                <a href="{{ route('app.finance.balance-sheet.pdf', ['period' => $period, 'year' => $year, 'branch_id' => $branchId ?: 'all', 'month' => request('month')]) }}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>Download PDF</span>
                 </a>
@@ -83,84 +83,84 @@
         <!-- ==================== 4 TOP KPI METRIC CARDS ==================== -->
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <!-- 1. Total Income -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="flex items-center gap-1.5 sm:gap-2 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-bold mb-1">
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-emerald-600 dark:text-emerald-400 text-xs sm:text-xs font-semibold mb-1">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
                     <span class="truncate">Total Income</span>
                 </div>
-                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight truncate">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-semibold text-emerald-600 dark:text-emerald-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($totalIncome, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-1 truncate">
                     Memberships: {{ $currency }}{{ number_format($membershipIncome, 2) }} | PT: {{ $currency }}{{ number_format($ptIncome ?? 0, 2) }}
                 </div>
             </div>
 
             <!-- 2. Total Expenses -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="flex items-center gap-1.5 sm:gap-2 text-rose-600 dark:text-red-400 text-[11px] sm:text-xs font-bold mb-1">
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-rose-600 dark:text-red-400 text-xs sm:text-xs font-semibold mb-1">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
                     <span class="truncate">Total Expenses</span>
                 </div>
-                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-rose-600 dark:text-red-400 tracking-tight truncate">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-semibold text-rose-600 dark:text-red-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($totalExpenses, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-1 truncate">
                     {{ $categoryCount }} categories
                 </div>
             </div>
 
             <!-- 3. Net Profit -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="text-[11px] sm:text-xs font-bold text-sky-600 dark:text-sky-400 mb-1 truncate">
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden">
+                <div class="text-xs sm:text-xs font-semibold text-sky-600 dark:text-sky-400 mb-1 truncate">
                     Net Profit
                 </div>
-                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-sky-600 dark:text-sky-400 tracking-tight truncate">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-semibold text-sky-600 dark:text-sky-400 tracking-tight truncate">
                     {{ $currency }}{{ number_format($netProfit, 2) }}
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-1 truncate">
                     {{ number_format($marginPercent, 1) }}% margin
                 </div>
             </div>
 
             <!-- 4. Expense Ratio -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 relative overflow-hidden shadow-sm">
-                <div class="text-[11px] sm:text-xs font-bold text-purple-600 dark:text-purple-400 mb-1 truncate">
+            <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden">
+                <div class="text-xs sm:text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1 truncate">
                     % Expense Ratio
                 </div>
-                <div class="text-xl sm:text-2xl lg:text-3xl font-black text-purple-600 dark:text-purple-400 tracking-tight truncate">
+                <div class="text-xl sm:text-2xl lg:text-3xl font-semibold text-purple-600 dark:text-purple-400 tracking-tight truncate">
                     {{ number_format($expenseRatio, 1) }}%
                 </div>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-1 truncate">
                     of total income
                 </div>
             </div>
         </div>
 
         <!-- ==================== RECEIVABLES & OUTSTANDING DUES ==================== -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div class="p-4 sm:p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line dark:border-line pb-3">
                 <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold shrink-0">
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center font-semibold shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div class="min-w-0">
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider truncate">Outstanding Receivables & Dues</h3>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Separated tracking for General Memberships and Personal Training (PT) packages</p>
+                        <h3 class="text-xs font-semibold text-fg dark:text-white truncate">Outstanding Receivables & Dues</h3>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted truncate">Separated tracking for General Memberships and Personal Training (PT) packages</p>
                     </div>
                 </div>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 self-start sm:self-auto">
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0 self-start sm:self-auto">
                     Total Due: {{ $currency }}{{ number_format($totalDues, 2) }}
                 </span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <!-- 1. General Membership Dues -->
-                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="p-4 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line flex items-center justify-between">
                     <div>
-                        <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">General Membership Dues</div>
-                        <div class="text-lg font-black text-slate-900 dark:text-white mt-0.5">{{ $currency }}{{ number_format($membershipDues, 2) }}</div>
-                        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Pending standard subscriptions</div>
+                        <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted">General Membership Dues</div>
+                        <div class="text-lg font-semibold text-fg dark:text-white mt-0.5">{{ $currency }}{{ number_format($membershipDues, 2) }}</div>
+                        <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Pending standard subscriptions</div>
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -168,11 +168,11 @@
                 </div>
 
                 <!-- 2. Personal Training Dues -->
-                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="p-4 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line flex items-center justify-between">
                     <div>
-                        <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Personal Training (PT) Dues</div>
-                        <div class="text-lg font-black text-slate-900 dark:text-white mt-0.5">{{ $currency }}{{ number_format($ptDues, 2) }}</div>
-                        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Pending PT package payments</div>
+                        <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Personal Training (PT) Dues</div>
+                        <div class="text-lg font-semibold text-fg dark:text-white mt-0.5">{{ $currency }}{{ number_format($ptDues, 2) }}</div>
+                        <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Pending PT package payments</div>
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -182,11 +182,11 @@
                 <!-- 3. Total Outstanding Gym Receivables -->
                 <div class="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-between">
                     <div>
-                        <div class="text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">Total Gym Receivables</div>
-                        <div class="text-lg font-black text-indigo-700 dark:text-indigo-300 mt-0.5">{{ $currency }}{{ number_format($totalDues, 2) }}</div>
-                        <div class="text-[10px] text-indigo-500 dark:text-indigo-400 mt-0.5">Combined uncollected revenue</div>
+                        <div class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">Total Gym Receivables</div>
+                        <div class="text-lg font-semibold text-indigo-700 dark:text-indigo-300 mt-0.5">{{ $currency }}{{ number_format($totalDues, 2) }}</div>
+                        <div class="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">Combined uncollected revenue</div>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/30">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>
@@ -196,26 +196,26 @@
         <!-- ==================== 2-COLUMN BREAKDOWN: INCOME & EXPENSES ==================== -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- Income Breakdown -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+            <div class="p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col justify-between space-y-4">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Income Breakdown</h3>
+                        <h3 class="text-xs font-semibold text-fg dark:text-white">Income Breakdown</h3>
                     </div>
-                    <span class="text-sm font-black text-emerald-600 dark:text-emerald-400">{{ $currency }}{{ number_format($totalIncome, 2) }}</span>
+                    <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{{ $currency }}{{ number_format($totalIncome, 2) }}</span>
                 </div>
 
                 <div class="space-y-4 text-xs">
                     <!-- Membership Fees -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-medium">
+                            <span class="flex items-center gap-2 text-fg-muted dark:text-fg-muted font-medium">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
                                 Membership Subscriptions
                             </span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($membershipIncome, 2) }}</span>
+                            <span class="font-semibold text-fg dark:text-white">{{ $currency }}{{ number_format($membershipIncome, 2) }}</span>
                         </div>
-                        <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-raised dark:bg-raised overflow-hidden">
                             <div class="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full" style="width: {{ $membershipPercent }}%"></div>
                         </div>
                     </div>
@@ -223,13 +223,13 @@
                     <!-- Gym Services & Amenities (Lockers, Spa, Steam) -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-medium">
+                            <span class="flex items-center gap-2 text-fg-muted dark:text-fg-muted font-medium">
                                 <span class="w-2 h-2 rounded-full bg-sky-500 dark:bg-sky-400"></span>
                                 Gym Services & Amenities (Lockers, Spa)
                             </span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($serviceIncome ?? 0, 2) }}</span>
+                            <span class="font-semibold text-fg dark:text-white">{{ $currency }}{{ number_format($serviceIncome ?? 0, 2) }}</span>
                         </div>
-                        <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-raised dark:bg-raised overflow-hidden">
                             <div class="h-full bg-sky-500 dark:bg-sky-400 rounded-full" style="width: {{ $servicePercent ?? 0 }}%"></div>
                         </div>
                     </div>
@@ -237,13 +237,13 @@
                     <!-- Personal Training Packages -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-medium">
+                            <span class="flex items-center gap-2 text-fg-muted dark:text-fg-muted font-medium">
                                 <span class="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400"></span>
                                 Personal Training (PT) Packages
                             </span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($ptIncome ?? 0, 2) }}</span>
+                            <span class="font-semibold text-fg dark:text-white">{{ $currency }}{{ number_format($ptIncome ?? 0, 2) }}</span>
                         </div>
-                        <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-raised dark:bg-raised overflow-hidden">
                             <div class="h-full bg-amber-500 dark:bg-amber-400 rounded-full" style="width: {{ $ptPercent ?? 0 }}%"></div>
                         </div>
                     </div>
@@ -251,13 +251,13 @@
                     <!-- POS Sales -->
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
-                            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-medium">
+                            <span class="flex items-center gap-2 text-fg-muted dark:text-fg-muted font-medium">
                                 <span class="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"></span>
                                 POS / Store Sales
                             </span>
-                            <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($posSales, 2) }}</span>
+                            <span class="font-semibold text-fg dark:text-white">{{ $currency }}{{ number_format($posSales, 2) }}</span>
                         </div>
-                        <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-raised dark:bg-raised overflow-hidden">
                             <div class="h-full bg-purple-500 dark:bg-purple-400 rounded-full" style="width: {{ $posPercent }}%"></div>
                         </div>
                     </div>
@@ -265,13 +265,13 @@
             </div>
 
             <!-- Expense Breakdown -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+            <div class="p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col justify-between space-y-4">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-rose-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Expense Breakdown</h3>
+                        <h3 class="text-xs font-semibold text-fg dark:text-white">Expense Breakdown</h3>
                     </div>
-                    <span class="text-sm font-black text-rose-600 dark:text-red-400">{{ $currency }}{{ number_format($totalExpenses, 2) }}</span>
+                    <span class="text-sm font-semibold text-rose-600 dark:text-red-400">{{ $currency }}{{ number_format($totalExpenses, 2) }}</span>
                 </div>
 
                 @if($totalExpenses > 0 && count($itemizedExpenses) > 0)
@@ -282,18 +282,18 @@
                             @endphp
                             <div class="space-y-1.5">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-slate-600 dark:text-slate-300 font-medium">{{ $expName }}</span>
-                                    <span class="font-bold text-slate-900 dark:text-white">{{ $currency }}{{ number_format($expAmt, 2) }} ({{ $catPct }}%)</span>
+                                    <span class="text-fg-muted dark:text-fg-muted font-medium">{{ $expName }}</span>
+                                    <span class="font-semibold text-fg dark:text-white">{{ $currency }}{{ number_format($expAmt, 2) }} ({{ $catPct }}%)</span>
                                 </div>
-                                <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                <div class="w-full h-2 rounded-full bg-raised dark:bg-raised overflow-hidden">
                                     <div class="h-full bg-rose-500 dark:bg-red-400 rounded-full" style="width: {{ $catPct }}%"></div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <div class="py-8 flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 space-y-2">
-                        <svg class="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    <div class="py-8 flex flex-col items-center justify-center text-center text-fg-muted dark:text-fg-muted space-y-2">
+                        <svg class="w-10 h-10 text-fg-muted dark:text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                         <span class="text-xs font-medium">No expenses recorded</span>
                     </div>
                 @endif
@@ -303,11 +303,11 @@
         <!-- ==================== 2-COLUMN BOTTOM: 6-MONTH TREND & TOP SUPPLIERS ==================== -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <!-- 6-Month Trend Chart -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+            <div class="p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line space-y-4">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">6-Month Trend</h3>
+                        <h3 class="text-xs font-semibold text-fg dark:text-white">6-Month Trend</h3>
                     </div>
                 </div>
 
@@ -317,32 +317,32 @@
             </div>
 
             <!-- Top Suppliers -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+            <div class="p-5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col justify-between space-y-4">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-amber-500 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
-                        <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Top Suppliers</h3>
+                        <h3 class="text-xs font-semibold text-fg dark:text-white">Top Suppliers</h3>
                     </div>
-                    <a href="{{ route('app.expenses.index') }}" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">View All</a>
+                    <a href="{{ route('app.expenses.index') }}" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">View All</a>
                 </div>
 
                 @if($topSuppliers->count() > 0)
-                    <div class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    <div class="divide-y divide-line dark:divide-line text-xs">
                         @foreach($topSuppliers as $sup)
                             <div class="py-2.5 flex items-center justify-between">
                                 <div>
-                                    <div class="font-bold text-slate-900 dark:text-white">{{ $sup->title }}</div>
-                                    <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ $sup->category->name ?? 'General' }} • {{ $sup->count }} invoices</div>
+                                    <div class="font-semibold text-fg dark:text-white">{{ $sup->title }}</div>
+                                    <div class="text-xs text-fg-muted dark:text-fg-muted">{{ $sup->category->name ?? 'General' }} • {{ $sup->count }} invoices</div>
                                 </div>
-                                <span class="font-black text-rose-600 dark:text-red-400">{{ $currency }}{{ number_format($sup->total_amount, 2) }}</span>
+                                <span class="font-semibold text-rose-600 dark:text-red-400">{{ $currency }}{{ number_format($sup->total_amount, 2) }}</span>
                             </div>
                         @endforeach
                     </div>
                 @else
-                    <div class="py-8 flex flex-col items-center justify-center text-center text-slate-400 dark:text-slate-500 space-y-3">
-                        <svg class="w-10 h-10 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                    <div class="py-8 flex flex-col items-center justify-center text-center text-fg-muted dark:text-fg-muted space-y-3">
+                        <svg class="w-10 h-10 text-fg-muted dark:text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
                         <span class="text-xs font-medium">No supplier expenses</span>
-                        <button type="button" @click="showExpenseModal = true" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all cursor-pointer">
+                        <button type="button" @click="showExpenseModal = true" class="px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all cursor-pointer ops-primary">
                             + Add Supplier Expense
                         </button>
                     </div>
@@ -352,35 +352,35 @@
 
         <!-- ==================== MODAL: ADD EXPENSE ==================== -->
         <div x-show="showExpenseModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 shadow-2xl space-y-4" @click.away="showExpenseModal = false">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">Record Operational Expense</h3>
-                    <button type="button" @click="showExpenseModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl sm:rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4" @click.away="showExpenseModal = false">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
+                    <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight">Record Operational Expense</h3>
+                    <button type="button" @click="showExpenseModal = false" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
                 </div>
 
                 <form action="{{ route('app.expenses.store') }}" method="POST" class="space-y-3">
                     @csrf
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Expense Title / Vendor *</label>
-                        <input type="text" name="title" required placeholder="e.g. Rent, Electricity, Dumbbells" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Expense Title / Vendor *</label>
+                        <input type="text" name="title" required placeholder="e.g. Rent, Electricity, Dumbbells" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Amount ({{ $currency }}) *</label>
-                            <input type="number" step="0.01" name="amount" required placeholder="0.00" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Amount ({{ $currency }}) *</label>
+                            <input type="number" step="0.01" name="amount" required placeholder="0.00" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Expense Date *</label>
-                            <input type="date" name="expense_date" value="{{ now()->toDateString() }}" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Expense Date *</label>
+                            <input type="date" name="expense_date" value="{{ now()->toDateString() }}" required class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
-                            <select name="expense_category_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Category</label>
+                            <select name="expense_category_id" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="">Select Category</option>
                                 @foreach($allCategories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
@@ -389,8 +389,8 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Payment Method</label>
-                            <select name="payment_method" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Payment Method</label>
+                            <select name="payment_method" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="cash">Cash</option>
                                 <option value="upi">UPI</option>
                                 <option value="bank_transfer">Bank Transfer</option>
@@ -401,8 +401,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Branch</label>
-                        <select name="branch_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Branch</label>
+                        <select name="branch_id" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                             @foreach($branches as $b)
                                 <option value="{{ $b->id }}">{{ $b->name }}</option>
                             @endforeach
@@ -410,13 +410,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Notes / Description</label>
-                        <textarea name="notes" rows="2" placeholder="Optional notes..." class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none"></textarea>
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Notes / Description</label>
+                        <textarea name="notes" rows="2" placeholder="Optional notes..." class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none"></textarea>
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <button type="button" @click="showExpenseModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:border-slate-700 text-xs font-bold">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25">Record Expense</button>
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-line dark:border-line">
+                        <button type="button" @click="showExpenseModal = false" class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:border-line text-xs font-semibold">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold ops-primary">Record Expense</button>
                     </div>
                 </form>
             </div>

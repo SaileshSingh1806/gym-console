@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>Membership Agreement — {{ $member->full_name }} ({{ $member->member_code }})</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -238,6 +240,63 @@
                 page-break-before: always;
             }
         }
+    
+        @page { size: A4 portrait; margin: 14mm 14mm 16mm; }
+        .container, .header, .info-grid, .signature-box, .signature-box > div, .info-item { min-width:0; }
+        .container { overflow-wrap:anywhere; }
+        .clause-list li { white-space:pre-wrap; }
+        .audit-table { table-layout:fixed; overflow-wrap:anywhere; }
+        .signature-box { gap:18px; }
+        .signature-box > div:first-child { flex:1; }
+        .signature-box > div:last-child { flex:0 1 32%; }
+        .btn-print { background:#252b33; min-height:44px; }
+        @media screen and (max-width:640px) {
+            body { padding:10px; }
+            .container { padding:16px 12px; border-radius:8px; }
+            .gym-identity { gap:10px; width:100%; }
+            .gym-logo-frame { width:58px; height:58px; padding:5px; }
+            .gym-details h2 { font-size:18px; }
+            .info-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; padding:10px; }
+            .signature-box { flex-direction:column; align-items:stretch; }
+            .signature-box > div { width:100%; max-width:100%!important; }
+            .sig-image-container { margin-left:auto; }
+            .no-print-bar { align-items:stretch; }
+            .no-print-bar button { width:100%; }
+            .clause-list li { font-size:13px; line-height:1.65; }
+            .audit-table td { padding:5px; }
+        }
+        @media screen and (max-width:360px) { .info-grid { grid-template-columns:minmax(0,1fr); } }
+        @media print {
+            html,body { width:auto; height:auto; margin:0; padding:0; background:#fff; color:#17202b; font-size:10pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .container { width:100%; max-width:none; margin:0; padding:0; border:0; border-radius:0; box-shadow:none; }
+            .header { gap:12px; padding-bottom:12px; margin-bottom:12px; }
+            .gym-logo-frame { width:66px; height:66px; border-radius:6px; box-shadow:none; }
+            .gym-details h2 { font-size:17pt; }
+            .document-meta { flex-basis:140px; }
+            .section-title,.printed-terms-heading { break-after:avoid; page-break-after:avoid; }
+            .section-title { margin-top:16px; margin-bottom:8px; }
+            .info-grid { padding:10px; gap:8px 12px; break-inside:avoid; }
+            .printed-terms { break-inside:auto; margin-bottom:12px; }
+            .printed-terms .clause-list li { font-size:10pt; line-height:1.55; margin-bottom:5px; padding-bottom:5px; break-inside:avoid; orphans:2; widows:2; }
+            table { max-width:100%; }
+            thead { display:table-header-group; }
+            tr { break-inside:avoid; page-break-inside:avoid; }
+            .signature-box { break-inside:avoid; page-break-inside:avoid; margin-top:16px; padding-top:12px; }
+            .sig-image { max-height:65px; }
+            .document-footer { margin-top:16px; padding-top:12px; }
+            .page-break { break-before:auto; page-break-before:auto; }
+            .terrace-box { break-inside:avoid; }
+            p,li,td { orphans:2; widows:2; }
+        }
+    
+        .member-photo { grid-column:2; grid-row:1 / span 3; justify-self:end; align-self:start; width:96px; max-width:100%; text-align:center; break-inside:avoid; }
+        .member-photo img,.member-photo-placeholder { width:100%; aspect-ratio:3 / 4; border:1px solid #cbd5e1; border-radius:5px; background:#f1f5f9; }
+        .member-photo img { display:block; object-fit:contain; }
+        .member-photo img[hidden],.member-photo-placeholder[hidden] { display:none!important; }
+        .member-photo-placeholder { display:grid; place-items:center; padding:5px; color:#64748b; font-size:10px; }
+        .member-photo-caption { display:block; font-size:9px; color:#64748b; margin-top:4px; }
+        @media screen and (max-width:360px) { .member-photo { grid-column:1; grid-row:auto; justify-self:center; } }
+        @media print { .member-photo { width:26mm; } .member-photo img,.member-photo-placeholder { height:34mm; } }
     </style>
 </head>
 <body>
@@ -247,7 +306,7 @@
         <span style="font-size: 12px; color: #64748b; font-weight: 600;">
             Official Digital Record &bull; Reference: <code>{{ $agreement->signature_reference ?? 'GDH-AGR' }}</code>
         </span>
-        <button type="button" class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+        <button type="button" class="btn-print" onclick="window.print()">Print / Save A4 PDF</button>
     </div>
 
     <div class="container">
@@ -296,12 +355,21 @@
         </header>
 
         <h1 style="font-size: 16px; font-weight: 900; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
-            Member Agreement &amp; Health Declaration
+            {{ $template->title ?? "Member Agreement & Health Declaration" }}
         </h1>
 
         <!-- Member Identity & Membership Details -->
         <div class="section-title">1. Member Profile &amp; Enrollment Details</div>
         <div class="info-grid">
+            <div class="member-photo">
+                @if($member->avatar_url)
+                    <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }} — Member photograph" onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                    <span class="member-photo-placeholder" hidden>Photo unavailable</span>
+                @else
+                    <span class="member-photo-placeholder">Photo not provided</span>
+                @endif
+                <span class="member-photo-caption">Member photograph</span>
+            </div>
             <div class="info-item">
                 <label>Member Full Name</label>
                 <span>{{ $member->full_name }}</span>

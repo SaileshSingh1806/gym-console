@@ -101,43 +101,43 @@
 
         <!-- Notifications -->
         @if(session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between shadow-sm">
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     </div>
                     <span class="text-xs font-semibold">{{ session('success') }}</span>
                 </div>
-                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
             </div>
         @endif
 
         <!-- ==================== TOP ACTION HEADER ==================== -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center shadow-inner">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
                 <div>
-                    <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                    <h2 class="text-xl font-semibold text-fg dark:text-white tracking-tight flex items-center gap-2">
                         <span>CRM Leads</span>
                     </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $totalLeadsCount }} total leads registered in pipeline</p>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">{{ $totalLeadsCount }} total leads registered in pipeline</p>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5">
-                <button type="button" @click="showImportModal = true" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-300 dark:hover:text-white dark:border-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">
-                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <button type="button" @click="showImportModal = true" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-raised text-fg-muted hover:text-fg border border-line dark:bg-surface dark:hover:bg-raised dark:text-fg-muted dark:hover:text-fg dark:border-line text-xs font-semibold flex items-center gap-1.5 transition-all">
+                    <svg class="w-3.5 h-3.5 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     <span>Import</span>
                 </button>
 
-                <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:text-slate-300 dark:hover:text-white dark:border-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">
+                <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" class="px-3.5 py-2 rounded-xl bg-surface hover:bg-raised text-fg-muted hover:text-fg border border-line dark:bg-surface dark:hover:bg-raised dark:text-fg-muted dark:hover:text-fg dark:border-line text-xs font-semibold flex items-center gap-1.5 transition-all">
                     <svg class="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     <span>Export All</span>
                 </a>
 
-                <a href="{{ route('app.leads.create') }}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 flex items-center gap-1.5 transition-all">
+                <a href="{{ route('app.leads.create') }}" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold flex items-center gap-1.5 transition-all ops-primary">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Add Lead</span>
                 </a>
@@ -145,15 +145,15 @@
         </div>
 
         <!-- ==================== SEARCH & MULTI-FILTER TOOLBAR ==================== -->
-        <form method="GET" action="{{ route('app.leads.index') }}" class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center gap-2.5">
+        <form method="GET" action="{{ route('app.leads.index') }}" class="p-3.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-wrap items-center gap-2.5">
             <!-- Search -->
             <div class="relative flex-1 min-w-[220px]">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, phone, email..." class="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-all">
-                <svg class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, phone, email..." class="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs placeholder-fg-subtle dark:placeholder-fg-subtle focus:border-accent focus:outline-none transition-all">
+                <svg class="w-4 h-4 text-fg-muted dark:text-fg-muted absolute left-3 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </div>
 
             <!-- Stages Filter -->
-            <select name="stage" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+            <select name="stage" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs focus:border-accent focus:outline-none">
                 <option value="all" {{ request('stage') === 'all' || !request('stage') ? 'selected' : '' }}>All Stages</option>
                 <option value="NEW_LEAD" {{ request('stage') === 'NEW_LEAD' ? 'selected' : '' }}>New Lead</option>
                 <option value="CONTACTED" {{ request('stage') === 'CONTACTED' ? 'selected' : '' }}>Contacted</option>
@@ -166,7 +166,7 @@
             </select>
 
             <!-- Sources Filter -->
-            <select name="source" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+            <select name="source" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs focus:border-accent focus:outline-none">
                 <option value="all" {{ request('source') === 'all' || !request('source') ? 'selected' : '' }}>All Sources</option>
                 <option value="website" {{ request('source') === 'website' ? 'selected' : '' }}>Website</option>
                 <option value="walk_in" {{ request('source') === 'walk_in' ? 'selected' : '' }}>Walk In</option>
@@ -181,7 +181,7 @@
             </select>
 
             <!-- Staff Filter -->
-            <select name="staff_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+            <select name="staff_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs focus:border-accent focus:outline-none">
                 <option value="all" {{ request('staff_id') === 'all' || !request('staff_id') ? 'selected' : '' }}>All Staff</option>
                 @foreach($staffMembers as $stf)
                     <option value="{{ $stf->id }}" {{ request('staff_id') == $stf->id ? 'selected' : '' }}>{{ $stf->name }}</option>
@@ -189,7 +189,7 @@
             </select>
 
             <!-- Branches Filter -->
-            <select name="branch_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+            <select name="branch_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs focus:border-accent focus:outline-none">
                 <option value="all">All Branches</option>
                 @foreach($branches as $b)
                     <option value="{{ $b->id }}">{{ $b->name }}</option>
@@ -197,27 +197,27 @@
             </select>
 
             <!-- Remarks Filter -->
-            <select name="remarks_filter" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs focus:border-indigo-500 focus:outline-none">
+            <select name="remarks_filter" onchange="this.form.submit()" class="px-3 py-1.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs focus:border-accent focus:outline-none">
                 <option value="all" {{ request('remarks_filter') === 'all' || !request('remarks_filter') ? 'selected' : '' }}>All Remarks</option>
                 <option value="with_remarks" {{ request('remarks_filter') === 'with_remarks' ? 'selected' : '' }}>With Remarks</option>
                 <option value="no_remarks" {{ request('remarks_filter') === 'no_remarks' ? 'selected' : '' }}>No Remarks</option>
             </select>
 
             @if(request('search') || request('stage') || request('source') || request('staff_id') || request('remarks_filter'))
-                <a href="{{ route('app.leads.index') }}" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white text-xs font-bold transition-all">
+                <a href="{{ route('app.leads.index') }}" class="px-3 py-1.5 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white text-xs font-semibold transition-all">
                     Reset
                 </a>
             @endif
         </form>
 
         <!-- ==================== LEADS DATA TABLE ==================== -->
-        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                    <thead class="bg-raised dark:bg-slate-950/70 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs font-semibold">
                         <tr>
                             <th class="py-3 px-3.5 w-8">
-                                <input type="checkbox" class="rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-0">
+                                <input type="checkbox" class="rounded bg-raised dark:bg-surface border-line dark:border-line text-indigo-600 focus:ring-0">
                             </th>
                             <th class="py-3 px-3.5">Name</th>
                             <th class="py-3 px-3.5">Stage</th>
@@ -229,7 +229,7 @@
                             <th class="py-3 px-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-slate-700 dark:text-slate-300">
+                    <tbody class="divide-y divide-line dark:divide-line text-fg-muted dark:text-fg-muted">
                         @forelse($leads as $lead)
                             @php
                                 $st = strtoupper(str_replace(' ', '_', $lead->effective_stage));
@@ -244,19 +244,19 @@
                                     default => 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30',
                                 };
                             @endphp
-                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                            <tr class="hover:bg-raised dark:hover:bg-raised transition-colors">
                                 <td class="py-3 px-3.5">
-                                    <input type="checkbox" class="rounded bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-0">
+                                    <input type="checkbox" class="rounded bg-raised dark:bg-surface border-line dark:border-line text-indigo-600 focus:ring-0">
                                 </td>
 
                                 <!-- Name & Phone & Remarks -->
                                 <td class="py-3 px-3.5">
-                                    <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <div class="font-semibold text-fg dark:text-white flex items-center gap-2">
                                         <span>{{ $lead->name }}</span>
-                                        <span class="text-slate-500 dark:text-slate-400 font-normal font-mono text-[11px]">{{ $lead->phone }}</span>
+                                        <span class="text-fg-muted dark:text-fg-muted font-normal font-mono text-xs">{{ $lead->phone }}</span>
                                     </div>
                                     @if($lead->remarks)
-                                        <div class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{{ $lead->remarks }}</div>
+                                        <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">{{ $lead->remarks }}</div>
                                     @endif
                                 </td>
 
@@ -280,44 +280,44 @@
                                  <!-- Conversion Amount / Plan -->
                                 <td class="py-3 px-3.5 font-mono">
                                     @if($lead->membershipPlan)
-                                        <div class="text-[11px] font-bold text-slate-800 dark:text-slate-200">
+                                        <div class="text-xs font-semibold text-fg dark:text-fg">
                                             {{ $lead->membershipPlan->name }}
                                         </div>
                                     @endif
                                     @if($lead->estimated_value > 0)
-                                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 inline-block mt-0.5">
+                                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20 inline-block mt-0.5">
                                             {{ $currency }}{{ number_format((float) $lead->estimated_value) }}
                                         </span>
                                     @elseif(!$lead->membershipPlan)
-                                        <span class="text-slate-400 dark:text-slate-600">--</span>
+                                        <span class="text-fg-muted dark:text-fg-muted">--</span>
                                     @endif
                                 </td>
 
                                 <!-- Source -->
                                 <td class="py-3 px-3.5">
-                                    <span class="text-slate-700 dark:text-slate-300 font-medium capitalize">{{ str_replace('_', ' ', $lead->source ?? 'walk in') }}</span>
+                                    <span class="text-fg-muted dark:text-fg-muted font-medium capitalize">{{ str_replace('_', ' ', $lead->source ?? 'walk in') }}</span>
                                 </td>
 
                                 <!-- Assigned To -->
                                 <td class="py-3 px-3.5">
                                     @if($lead->assignedTo)
-                                        <span class="text-slate-800 dark:text-slate-200 font-medium">{{ $lead->assignedTo->name }}</span>
+                                        <span class="text-fg dark:text-fg font-medium">{{ $lead->assignedTo->name }}</span>
                                     @else
-                                        <span class="text-slate-400 dark:text-slate-600 font-mono">--</span>
+                                        <span class="text-fg-muted dark:text-fg-muted font-mono">--</span>
                                     @endif
                                 </td>
 
                                 <!-- Next Action -->
                                 <td class="py-3 px-3.5">
                                     @if($lead->next_action || $lead->follow_up_date)
-                                        <span class="text-slate-700 dark:text-slate-300">{{ $lead->next_action ?? $lead->follow_up_date->format('d M') }}</span>
+                                        <span class="text-fg-muted dark:text-fg-muted">{{ $lead->next_action ?? $lead->follow_up_date->format('d M') }}</span>
                                     @else
-                                        <span class="text-slate-400 dark:text-slate-600 font-mono">--</span>
+                                        <span class="text-fg-muted dark:text-fg-muted font-mono">--</span>
                                     @endif
                                 </td>
 
                                 <!-- Created -->
-                                <td class="py-3 px-3.5 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+                                <td class="py-3 px-3.5 text-fg-muted dark:text-fg-muted font-mono text-xs">
                                     {{ $lead->created_at ? $lead->created_at->format('d M y') : '--' }}
                                 </td>
 
@@ -328,7 +328,7 @@
                                         @if($lead->converted_member_id)
                                             <a href="{{ route('app.members.show', $lead->converted_member_id) }}" 
                                                title="View Joined Member Profile" 
-                                               class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 text-[10.5px] font-bold flex items-center gap-1 transition-all">
+                                               class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 text-xs font-semibold flex items-center gap-1 transition-all">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                 <span>Member ↗</span>
                                             </a>
@@ -336,13 +336,13 @@
 
                                         <!-- WhatsApp -->
                                         @if($lead->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $lead->phone) }}?text=Hello%20{{ urlencode($lead->name) }},%20greeting%20from%20{{ urlencode($tenant->name ?? 'GymDeskHub') }}" target="_blank" title="Send WhatsApp Message" class="p-1.5 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200 dark:bg-slate-950 dark:hover:bg-emerald-500/20 dark:text-slate-400 dark:hover:text-emerald-400 dark:border-slate-800 transition-all">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $lead->phone) }}?text=Hello%20{{ urlencode($lead->name) }},%20greeting%20from%20{{ urlencode($tenant->name ?? 'GymDeskHub') }}" target="_blank" title="Send WhatsApp Message" class="p-1.5 rounded-lg bg-raised hover:bg-emerald-50 text-fg-muted hover:text-emerald-600 border border-line dark:bg-surface dark:hover:bg-emerald-500/20 dark:text-fg-muted dark:hover:text-emerald-400 dark:border-line transition-all">
                                                 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z"/></svg>
                                             </a>
                                         @endif
 
                                         <!-- Edit -->
-                                        <a href="{{ route('app.leads.edit', $lead->id) }}" title="Edit Lead" class="p-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 dark:bg-slate-950 dark:hover:bg-indigo-500/20 dark:text-slate-400 dark:hover:text-indigo-400 dark:border-slate-800 transition-all">
+                                        <a href="{{ route('app.leads.edit', $lead->id) }}" title="Edit Lead" class="p-1.5 rounded-lg bg-raised hover:bg-indigo-50 text-fg-muted hover:text-indigo-600 border border-line dark:bg-surface dark:hover:bg-indigo-500/20 dark:text-fg-muted dark:hover:text-indigo-400 dark:border-line transition-all">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                         </a>
 
@@ -355,7 +355,7 @@
                                               class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" title="Delete Lead" class="p-1.5 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 dark:bg-slate-950 dark:hover:bg-rose-500/20 dark:text-slate-500 dark:hover:text-rose-400 dark:border-slate-800 transition-all cursor-pointer">
+                                            <button type="submit" title="Delete Lead" class="p-1.5 rounded-lg bg-raised hover:bg-rose-50 text-fg-muted hover:text-rose-600 border border-line dark:bg-surface dark:hover:bg-rose-500/20 dark:text-fg-muted dark:hover:text-rose-400 dark:border-line transition-all cursor-pointer">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </form>
@@ -364,7 +364,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="py-10 text-center text-slate-400 dark:text-slate-500 text-xs">
+                                <td colspan="9" class="py-10 text-center text-fg-muted dark:text-fg-muted text-xs">
                                     No prospect leads found matching the filters.
                                 </td>
                             </tr>
@@ -374,52 +374,52 @@
             </div>
 
             <!-- Pagination -->
-            <div class="p-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
+            <div class="p-3.5 border-t border-line dark:border-line bg-raised dark:bg-slate-950/40">
                 {{ $leads->links() }}
             </div>
         </div>
 
         <!-- ==================== MODAL: ADD LEAD ==================== -->
         <div x-show="showAddLeadModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4" @click.away="showAddLeadModal = false">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-lg w-full p-6 space-y-4" @click.away="showAddLeadModal = false">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
+                    <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight flex items-center gap-2">
                         <span>Add New Lead</span>
                     </h3>
-                    <button type="button" @click="showAddLeadModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                    <button type="button" @click="showAddLeadModal = false" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
                 </div>
 
                 <form action="{{ route('app.leads.store') }}" method="POST" class="space-y-3.5">
                     @csrf
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">First Name *</label>
-                            <input type="text" name="first_name" required placeholder="e.g. Rahul" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">First Name *</label>
+                            <input type="text" name="first_name" required placeholder="e.g. Rahul" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Last Name *</label>
-                            <input type="text" name="last_name" required placeholder="e.g. Sharma" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Last Name *</label>
+                            <input type="text" name="last_name" required placeholder="e.g. Sharma" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Phone Number *</label>
                             <div class="relative flex items-center">
-                                <span class="absolute left-3 text-xs font-bold text-slate-400 dark:text-slate-500">+91</span>
-                                <input type="tel" name="phone" required placeholder="9876543210" class="w-full pl-12 pr-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                                <span class="absolute left-3 text-xs font-semibold text-fg-muted dark:text-fg-muted">+91</span>
+                                <input type="tel" name="phone" required placeholder="9876543210" class="w-full pl-12 pr-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                            <input type="email" name="email" placeholder="rahul@example.com" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Email Address</label>
+                            <input type="email" name="email" placeholder="rahul@example.com" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lead Stage</label>
-                            <select name="stage" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Lead Stage</label>
+                            <select name="stage" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="NEW_LEAD">New Lead</option>
                                 <option value="CONTACTED">Contacted</option>
                                 <option value="DEMO_BOOKED">Demo Booked</option>
@@ -431,8 +431,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lead Source</label>
-                            <select name="source" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Lead Source</label>
+                            <select name="source" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="website">Website</option>
                                 <option value="walk_in">Walk In</option>
                                 <option value="facebook">Facebook</option>
@@ -450,12 +450,12 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned Staff</label>
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Assigned Staff</label>
                             @php
                                 $cUser = auth()->user();
                                 $defQuickStaffId = ($cUser && !$cUser->isGymOwner() && !$cUser->isSuperAdmin() && $cUser->isStaff()) ? $cUser->id : null;
                             @endphp
-                            <select name="assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <select name="assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="">-- Unassigned --</option>
                                 @foreach($staffMembers as $staff)
                                     <option value="{{ $staff->id }}" {{ $defQuickStaffId == $staff->id ? 'selected' : '' }}>
@@ -466,15 +466,15 @@
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Pitched Membership</label>
-                                <span x-show="quickEstimatedValue > 0" x-cloak class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <label class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Pitched Membership</label>
+                                <span x-show="quickEstimatedValue > 0" x-cloak class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                     {{ $currency }}<span x-text="Number(quickEstimatedValue).toLocaleString('en-IN')"></span>
                                 </span>
                             </div>
                             <select name="membership_plan_id" 
                                     x-model="quickSelectedPlanId" 
                                     @change="onQuickPlanChange($event)"
-                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                    class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none cursor-pointer">
                                 <option value="" data-price="">-- Select Pitched Package --</option>
                                 @foreach($membershipPlans ?? [] as $plan)
                                     <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
@@ -487,13 +487,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Remarks / Note</label>
-                        <input type="text" name="remarks" placeholder="e.g. Call later, Interested in annual PT" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Remarks / Note</label>
+                        <input type="text" name="remarks" placeholder="e.g. Call later, Interested in annual PT" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showAddLeadModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all">Create Lead</button>
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-line dark:border-line">
+                        <button type="button" @click="showAddLeadModal = false" class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted text-xs font-semibold transition-all">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all ops-primary">Create Lead</button>
                     </div>
                 </form>
             </div>
@@ -501,36 +501,36 @@
 
         <!-- ==================== MODAL: EDIT LEAD ==================== -->
         <div x-show="showEditLeadModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4" @click.away="showEditLeadModal = false">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-lg w-full p-6 space-y-4" @click.away="showEditLeadModal = false">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
+                    <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight flex items-center gap-2">
                         <span>✏️ Edit Lead</span>
                     </h3>
-                    <button type="button" @click="showEditLeadModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                    <button type="button" @click="showEditLeadModal = false" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
                 </div>
 
                 <form :action="'/app/leads/' + editLeadData.id" method="POST" class="space-y-3.5">
                     @csrf
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
-                        <input type="text" name="name" required x-model="editLeadData.name" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Full Name *</label>
+                        <input type="text" name="name" required x-model="editLeadData.name" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Phone Number *</label>
-                            <input type="text" name="phone" required x-model="editLeadData.phone" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Phone Number *</label>
+                            <input type="text" name="phone" required x-model="editLeadData.phone" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
-                            <input type="email" name="email" x-model="editLeadData.email" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Email Address</label>
+                            <input type="email" name="email" x-model="editLeadData.email" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lead Stage</label>
-                            <select name="stage" x-model="editLeadData.stage" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Lead Stage</label>
+                            <select name="stage" x-model="editLeadData.stage" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="NEW_LEAD">New Lead</option>
                                 <option value="CONTACTED">Contacted</option>
                                 <option value="DEMO_BOOKED">Demo Booked</option>
@@ -542,8 +542,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lead Source</label>
-                            <select name="source" x-model="editLeadData.source" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Lead Source</label>
+                            <select name="source" x-model="editLeadData.source" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="website">Website</option>
                                 <option value="walk_in">Walk In</option>
                                 <option value="facebook">Facebook</option>
@@ -561,8 +561,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Assigned Staff</label>
-                            <select name="assigned_to_user_id" x-model="editLeadData.assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none">
+                            <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Assigned Staff</label>
+                            <select name="assigned_to_user_id" x-model="editLeadData.assigned_to_user_id" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none">
                                 <option value="">-- Unassigned --</option>
                                 @foreach($staffMembers as $staff)
                                     <option value="{{ $staff->id }}">{{ $staff->name }}</option>
@@ -571,15 +571,15 @@
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Pitched Membership</label>
-                                <span x-show="editLeadData.estimated_value > 0" x-cloak class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <label class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Pitched Membership</label>
+                                <span x-show="editLeadData.estimated_value > 0" x-cloak class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                     {{ $currency }}<span x-text="Number(editLeadData.estimated_value).toLocaleString('en-IN')"></span>
                                 </span>
                             </div>
                             <select name="membership_plan_id" 
                                     x-model="editLeadData.membership_plan_id" 
                                     @change="onEditPlanChange($event)"
-                                    class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white text-xs focus:border-indigo-500 focus:outline-none cursor-pointer">
+                                    class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-accent focus:outline-none cursor-pointer">
                                 <option value="" data-price="">-- Select Pitched Package --</option>
                                 @foreach($membershipPlans ?? [] as $plan)
                                     <option value="{{ $plan->id }}" data-price="{{ $plan->price }}">
@@ -592,13 +592,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Remarks</label>
-                        <input type="text" name="remarks" x-model="editLeadData.remarks" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs focus:border-indigo-500 focus:outline-none">
+                        <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Remarks</label>
+                        <input type="text" name="remarks" x-model="editLeadData.remarks" class="w-full px-3.5 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-accent focus:outline-none">
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                        <button type="button" @click="showEditLeadModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all">Cancel</button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/25 transition-all">Save Changes</button>
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-line dark:border-line">
+                        <button type="button" @click="showEditLeadModal = false" class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted text-xs font-semibold transition-all">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent text-accent-on text-xs font-semibold transition-all ops-primary">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -606,67 +606,67 @@
 
         <!-- ==================== MODAL: IMPORT LEADS ==================== -->
         <div x-show="showImportModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4" @click.away="showImportModal = false">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-md w-full p-6 space-y-4" @click.away="showImportModal = false">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
+                    <h3 class="text-base font-semibold text-fg dark:text-white tracking-tight flex items-center gap-2">
                         <span>📤 Import Leads (CSV)</span>
                     </h3>
-                    <button type="button" @click="showImportModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                    <button type="button" @click="showImportModal = false" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
                 </div>
 
-                <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+                <div class="space-y-3 text-xs text-fg-muted dark:text-fg-muted">
                     <p>Upload a standard CSV file with headers: <code class="text-indigo-600 dark:text-indigo-400 font-mono">name, phone, email, source, remarks</code></p>
-                    <div class="p-4 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center space-y-2">
-                        <svg class="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                        <input type="file" accept=".csv" class="text-xs text-slate-600 dark:text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white cursor-pointer">
+                    <div class="p-4 rounded-xl border-2 border-dashed border-line dark:border-line bg-raised dark:bg-surface text-center space-y-2">
+                        <svg class="w-8 h-8 text-fg-muted dark:text-fg-muted mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <input type="file" accept=".csv" class="text-xs text-fg-muted dark:text-fg-muted file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white cursor-pointer">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <button type="button" @click="showImportModal = false" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all">Close</button>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-line dark:border-line">
+                    <button type="button" @click="showImportModal = false" class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted text-xs font-semibold transition-all">Close</button>
                 </div>
             </div>
         </div>
 
         <!-- ==================== MODAL: RECORD CONVERSION AMOUNT ==================== -->
         <div x-show="showPaidModal" class="fixed inset-0 z-50 overflow-y-auto bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" x-cloak>
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5" @click.away="cancelPaidModal()">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div class="bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-fg rounded-xl max-w-md w-full p-6 space-y-5" @click.away="cancelPaidModal()">
+                <div class="flex items-center justify-between border-b border-line dark:border-line pb-3">
                     <div class="flex items-center gap-2.5">
                         <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-black text-slate-900 dark:text-white tracking-tight">Record Conversion Amount</h3>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Mark lead as converted & won</p>
+                            <h3 class="text-sm font-semibold text-fg dark:text-white tracking-tight">Record Conversion Amount</h3>
+                            <p class="text-xs text-fg-muted dark:text-fg-muted">Mark lead as converted & won</p>
                         </div>
                     </div>
-                    <button type="button" @click="cancelPaidModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold p-1">✕</button>
+                    <button type="button" @click="cancelPaidModal()" class="text-fg-muted hover:text-fg-muted dark:hover:text-white text-xs font-semibold p-1">✕</button>
                 </div>
 
                 <div class="space-y-4">
-                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80">
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Lead Name</div>
-                        <div class="text-sm font-bold text-slate-900 dark:text-white mt-0.5" x-text="paidModalData.leadName"></div>
+                    <div class="p-3.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line">
+                        <div class="text-xs text-fg-muted dark:text-fg-muted font-medium">Lead Name</div>
+                        <div class="text-sm font-semibold text-fg dark:text-white mt-0.5" x-text="paidModalData.leadName"></div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1.5">
+                        <label class="block text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1.5">
                             Conversion Amount ({{ $currency }}) <span class="text-rose-500 dark:text-rose-400">*</span>
                         </label>
                         <div class="relative">
-                            <span class="absolute left-3.5 top-2.5 font-bold text-slate-400 dark:text-slate-500 text-sm">{{ $currency }}</span>
-                            <input type="number" step="0.01" min="0" x-model="paidModalData.paidAmount" placeholder="e.g. 5000" autofocus class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-emerald-500/50 text-slate-900 dark:text-white font-bold text-sm focus:border-emerald-500 focus:outline-none transition-all">
+                            <span class="absolute left-3.5 top-2.5 font-semibold text-fg-muted dark:text-fg-muted text-sm">{{ $currency }}</span>
+                            <input type="number" step="0.01" min="0" x-model="paidModalData.paidAmount" placeholder="e.g. 5000" autofocus class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-emerald-500/50 text-fg dark:text-white font-semibold text-sm focus:border-emerald-500 focus:outline-none transition-all">
                         </div>
-                        <p class="text-[10.5px] text-slate-500 dark:text-slate-400 mt-1.5">This conversion amount will be added to your CRM Won Revenue & Conversion metrics.</p>
+                        <p class="text-xs text-fg-muted dark:text-fg-muted mt-1.5">This conversion amount will be added to your CRM Won Revenue & Conversion metrics.</p>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
-                    <button type="button" @click="cancelPaidModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 text-xs font-bold transition-all">
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-line dark:border-line">
+                    <button type="button" @click="cancelPaidModal()" class="px-4 py-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted text-xs font-semibold transition-all">
                         Cancel
                     </button>
-                    <button type="button" @click="confirmPaidModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/25 flex items-center gap-1.5 transition-all cursor-pointer">
+                    <button type="button" @click="confirmPaidModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span>Confirm Conversion Amount</span>
                     </button>

@@ -69,6 +69,17 @@
                 min-height: 920px;
             }
         }
+    
+        .standee-qr { width:min(256px,100%); aspect-ratio:1; background:#fff; border:1px solid #e2e8f0; margin:auto; display:grid; place-items:center; }
+        #qrcode-render { width:100%; min-width:0; }
+        #qrcode-render svg { display:block; width:100%; height:auto; }
+        @media screen and (max-width:480px) {
+            .standee-a4-page { min-height:0; padding:18px 12px; gap:16px; }
+            .standee-a4-page .relative.inline-block { width:100%; max-width:300px; padding:12px; }
+            .no-print.w-full { flex-wrap:wrap; gap:8px; }
+            .standee-qr { width:100%; max-width:256px; }
+        }
+        @media print { .standee-qr { width:70mm; height:70mm; } }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-900 min-h-screen flex flex-col items-center justify-start p-3 sm:p-8 font-sans antialiased">
@@ -165,13 +176,10 @@
                 <div class="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-slate-900"></div>
 
                 <!-- QR Container -->
-                <div id="qrcode-wrapper" class="w-60 h-60 sm:w-64 sm:h-64 mx-auto flex items-center justify-center bg-white p-2.5 rounded-2xl shadow-inner border border-slate-200 [&_img]:mx-auto [&_canvas]:mx-auto [&_img]:rounded-lg [&_canvas]:rounded-lg">
-                    <img id="fallback-qr" 
-                         src="https://quickchart.io/qr?size=300&margin=1&text={{ urlencode($checkinUrl) }}" 
-                         alt="Gym Checkin QR Code" 
-                         class="w-full h-full object-contain rounded-lg"
-                         onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={{ urlencode($checkinUrl) }}';">
+                <div id="qrcode-wrapper" class="standee-qr">
+                    <div id="qrcode-render">{!! $qrSvg !!}</div>
                 </div>
+                <a class="no-print text-xs underline block mt-2" href="{{ $checkinUrl }}">Open check-in link</a>
 
                 <!-- Live Camera Indicator Badge -->
                 <div class="mt-2.5 flex items-center justify-center gap-1.5 text-[11px] font-black text-slate-900 uppercase tracking-wider">
@@ -239,35 +247,5 @@
         <p>💡 Tip: For best results, select <strong>A4 Paper</strong> and set Margins to <strong>None / Default</strong> in your print dialog.</p>
     </div>
 
-    <!-- Client-side QR generator with instant fallback -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var qrWrapper = document.getElementById("qrcode-wrapper");
-            var fallbackQr = document.getElementById("fallback-qr");
-            if (typeof QRCode !== "undefined" && qrWrapper) {
-                try {
-                    var tempDiv = document.createElement("div");
-                    new QRCode(tempDiv, {
-                        text: {!! json_encode($checkinUrl) !!},
-                        width: 256,
-                        height: 256,
-                        colorDark: "#151618",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                    setTimeout(function() {
-                        var qrImg = tempDiv.querySelector("img") || tempDiv.querySelector("canvas");
-                        if (qrImg) {
-                            qrWrapper.innerHTML = "";
-                            qrWrapper.appendChild(qrImg);
-                        }
-                    }, 50);
-                } catch (e) {
-                    console.warn("Client QRCode fallback to QuickChart:", e);
-                }
-            }
-        });
-    </script>
 </body>
 </html>

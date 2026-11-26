@@ -104,7 +104,9 @@ class AgreementController extends Controller
             ->latest('version')
             ->get();
 
-        return view('app.agreements.settings', compact('activeTemplate', 'templateHistory', 'tenant'));
+        $builderDraft = $request->session()->get('agreement_builder_draft.'.$tenant->id.'.'.auth()->id());
+
+        return view('app.agreements.settings', compact('activeTemplate', 'templateHistory', 'tenant', 'builderDraft'));
     }
 
     /**
@@ -114,41 +116,62 @@ class AgreementController extends Controller
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
 
+        // The builder submits structured sections; the legacy publish endpoint also
+        // accepts requests without sections to retain its default-template behavior.
         $validated = $request->validate([
             'title' => 'required|string|max:150',
             'open_terrace_enabled' => 'nullable|boolean',
-            'terms_sections' => 'nullable|array',
-            'terms_sections.*.title' => 'required|string',
-            'terms_sections.*.summary' => 'nullable|string',
-            'terms_sections.*.clauses' => 'required|array',
+            'terms_sections' => 'nullable|array|min:1|max:30',
+            'terms_sections.*' => 'array:title,summary,clauses,key',
+            'terms_sections.*.title' => 'required|string|max:150',
+            'terms_sections.*.summary' => 'nullable|string|max:1000',
+            'terms_sections.*.key' => 'nullable|string|max:100',
+            'terms_sections.*.clauses' => 'required|array|min:1|max:30',
+            'terms_sections.*.clauses.*' => 'required|string|max:3000',
+            'builder_payload' => 'nullable|boolean',
+            'intent' => 'nullable|in:draft,publish',
         ]);
 
-        $terraceEnabled = $request->boolean('open_terrace_enabled');
-        $sections = $validated['terms_sections'] ?? TenantAgreementTemplate::getDefaultTermsSections($terraceEnabled);
+        if ($request->boolean('builder_payload') && empty($validated['terms_sections'])) {
+            return back()->withErrors(['terms_sections' => 'Add at least one section with a clause.'])->withInput();
+        }
 
-        // Ensure terrace clauses are included if terrace is enabled
+        $terraceEnabled = $request->boolean('open_terrace_enabled');
+        $sections = $validated['terms_sections'] ?? TenantAgreementTemplate::getDefaultTermsSections(false);
+        // Facility-specific rules are maintained by the system, not editable clauses.
+        $sections = collect($sections)->reject(fn ($section) => ($section['key'] ?? null) === 'open_terrace_rules')
+            ->map(fn ($section) => [
+                'title' => trim($section['title']),
+                'summary' => trim($section['summary'] ?? ''),
+                'clauses' => array_values(array_map('trim', $section['clauses'])),
+            ])->values()->all();
+
+        if (empty($sections)) {
+            return back()->withErrors(['terms_sections' => 'Add at least one custom agreement section.'])->withInput();
+        }
+
+        if (($validated['intent'] ?? 'publish') === 'draft') {
+            $request->session()->put('agreement_builder_draft.'.$tenant->id.'.'.auth()->id(), [
+                'title' => $validated['title'],
+                'open_terrace_enabled' => $terraceEnabled,
+                'terms_sections' => $sections,
+            ]);
+
+            return redirect()->route('app.agreements.settings')->with('success', 'Agreement draft saved for this session. The published agreement is unchanged.');
+        }
+
         if ($terraceEnabled) {
-            $hasTerrace = collect($sections)->contains('key', 'open_terrace_rules');
-            if (! $hasTerrace) {
-                $sections[] = [
-                    'key' => 'open_terrace_rules',
-                    'title' => 'Open Terrace Access & Safety Rules',
-                    'summary' => 'Strict authorization requirements, weather protocols, safety restrictions, and management discretion for elevated terrace workout zones.',
-                    'clauses' => [
-                        '27. Access to the Open Terrace Workout Area is strictly restricted and permitted only with prior authorization from Gym Management. Members are not entitled to automatic terrace access as part of their membership.',
-                        '28. Unauthorized entry, use of terrace facilities without permission, or entry during restricted hours is strictly prohibited and may result in immediate suspension or termination of membership.',
-                        '29. Members must strictly follow all safety instructions. Climbing or leaning on railings, entering restricted areas, performing dangerous activities, or misusing equipment is strictly prohibited.',
-                        '30. Gym Management reserves the right to restrict, suspend, or revoke terrace access at any time due to safety concerns, weather conditions, maintenance, misconduct, or operational requirements. Members must immediately comply with such instructions.',
-                    ],
-                ];
-            }
+            $sections[] = collect(TenantAgreementTemplate::getDefaultTermsSections(true))->firstWhere('key', 'open_terrace_rules');
         }
 
         $newTemplate = $this->agreementService->publishNewTemplateVersion($tenant, [
             'title' => $validated['title'],
             'open_terrace_enabled' => $terraceEnabled,
             'terms_sections' => $sections,
+            'health_questions' => $this->agreementService->getOrCreateActiveTemplate($tenant)->health_questions ?? TenantAgreementTemplate::getDefaultHealthQuestions(),
         ], auth()->user());
+
+        $request->session()->forget('agreement_builder_draft.'.$tenant->id.'.'.auth()->id());
 
         return redirect()->route('app.agreements.settings')->with('success', "Agreement Version {$newTemplate->version} published successfully! Existing signed agreements remain safely locked to their original version.");
     }
