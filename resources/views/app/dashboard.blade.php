@@ -11,7 +11,7 @@
         .dashboard-overview .ds-select { height:36px; }
         .dashboard-overview .ds-select:focus-visible { outline:none; border-color:rgb(var(--c-accent)); }
         .dashboard-overview .owner-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
-        .dashboard-overview .owner-finance { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .dashboard-overview .owner-finance { grid-template-columns:minmax(0,1fr); }
         .dashboard-overview .owner-charts, .dashboard-overview .owner-lists { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; }
         .dashboard-overview .owner-charts > *, .dashboard-overview .owner-lists > * { min-width:0; }
         .dashboard-overview .owner-chart { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:16px; }
@@ -29,6 +29,26 @@
         .dashboard-overview .owner-finance .ds-caption { white-space:normal; }
         .dashboard-overview .owner-dues { grid-template-columns:repeat(2,minmax(0,1fr)); }
         .dashboard-overview svg[stroke-width="2"], .dashboard-overview svg [stroke-width="2"], .dashboard-overview svg [stroke-width="2.5"] { stroke-width:1.75; }
+        .dashboard-overview .owner-status-grid { display:grid; gap:10px; }
+        .dashboard-overview .owner-status-card { --metric-tone:var(--c-fg-muted); display:flex; flex-direction:column; align-items:stretch; justify-content:center; gap:5px; min-width:0; min-height:104px; padding:12px 14px; text-align:left; background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-top:2px solid rgb(var(--metric-tone)); border-radius:12px; cursor:pointer; }
+        .dashboard-overview .owner-status-card:hover { background:rgb(var(--c-raised)); border-color:rgb(var(--metric-tone) / .7); }
+        .dashboard-overview .owner-tone-success { --metric-tone:var(--c-success); }
+        .dashboard-overview .owner-tone-danger { --metric-tone:var(--c-danger); }
+        .dashboard-overview .owner-tone-warning { --metric-tone:var(--c-warning); }
+        .dashboard-overview .owner-tone-info { --metric-tone:var(--c-info); }
+        .dashboard-overview .owner-status-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; color:rgb(var(--c-fg-muted)); font-size:12px; font-weight:500; }
+        .dashboard-overview .owner-status-icon { color:rgb(var(--metric-tone)); }
+        .dashboard-overview .owner-status-value { color:rgb(var(--metric-tone)); }
+        .dashboard-overview .owner-tone-neutral .owner-status-value { color:rgb(var(--c-fg)); }
+        .dashboard-overview .owner-status-description { font-size:12px; color:rgb(var(--c-fg-muted)); }
+        .dashboard-overview .owner-finance > div { padding:14px 16px; gap:10px; }
+        .dashboard-overview .owner-finance .finance-label { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; color:rgb(var(--c-fg-muted)); }
+        .dashboard-overview .owner-finance .finance-label svg { flex-shrink:0; }
+        .dashboard-overview .owner-finance .finance-link { display:inline-flex; align-items:center; gap:5px; align-self:flex-start; }
+        .dashboard-overview .owner-finance .finance-secondary .ds-kpi { font-size:20px; }
+        .dashboard-overview .owner-finance .finance-collected .ds-kpi { color:rgb(var(--c-success)); }
+        .dashboard-overview .owner-finance .finance-pending .ds-kpi { color:rgb(var(--c-warning)); }
+        .dashboard-overview .owner-finance .finance-count { font-size:12px; color:rgb(var(--c-fg-muted)); margin-top:3px; }
         @container (min-width:600px) {
             .dashboard-overview .owner-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
             .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -37,7 +57,7 @@
         @container (min-width:1050px) {
             .dashboard-overview .owner-members { grid-template-columns:repeat(6,minmax(0,1fr)); }
             .dashboard-overview .owner-sales { grid-template-columns:repeat(5,minmax(0,1fr)); }
-            .dashboard-overview .owner-finance { grid-template-columns:repeat(6,minmax(0,1fr)); }
+            .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
             .dashboard-overview .owner-dues { grid-template-columns:repeat(4,minmax(0,1fr)); }
             .dashboard-overview .owner-lists { grid-template-columns:repeat(3,minmax(0,1fr)); }
         }
@@ -79,10 +99,6 @@
                     if (pt > 0) {
                         return 'Gym ' + this.formatShort(g) + ' • PT ' + this.formatShort(pt);
                     }
-                } else if (this.finScope === 'gym') {
-                    return 'Gym Memberships Only';
-                } else if (this.finScope === 'pt') {
-                    return 'Personal training Only';
                 }
                 return null;
             },
@@ -205,13 +221,37 @@
         @if(auth()->user()->hasPermission('dashboard.member_stats') || auth()->user()->isGymOwner())
         <section class="dashboard-metrics space-y-3" aria-label="Members">
             <h2 class="ds-heading">Members</h2>
-            <div class="ds-stat-grid owner-metrics owner-members">
-                <x-stat label="Active members" :value="$metrics['active_members']" :href="route('app.members.index', ['status' => 'ACTIVE'])" />
-                <x-stat label="Expired members" :value="$metrics['expired_members']" :href="route('app.members.index', ['status' => 'EXPIRED'])" />
-                <x-stat label="Churn risk" :value="$metrics['churn_risk']" :flag="$metrics['churn_risk'] > 0" tone="danger" @click="showChurnModal = true" />
-                <x-stat label="Expiring soon" :value="$metrics['expiring_soon']" :flag="$metrics['expiring_soon'] > 0" tone="warning" @click="showExpiringModal = true" />
-                <x-stat label="Dormant members" :value="$metrics['dormant_members']" :href="route('app.members.index', ['filter' => 'dormant'])" />
-                <x-stat label="Birthdays today" :value="$metrics['birthdays_today']" @click="showBirthdayModal = true" />
+            <div class="owner-status-grid owner-metrics owner-members">
+                <a href="{{ route('app.members.index', ['status' => 'ACTIVE']) }}" class="owner-status-card owner-tone-success">
+                    <span class="owner-status-heading"><span>Active members</span><x-icon name="check" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['active_members'] }}</span>
+                    <span class="owner-status-description">Membership active</span>
+                </a>
+                <a href="{{ route('app.members.index', ['status' => 'EXPIRED']) }}" class="owner-status-card owner-tone-danger">
+                    <span class="owner-status-heading"><span>Expired members</span><x-icon name="x" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['expired_members'] }}</span>
+                    <span class="owner-status-description">Renewal required</span>
+                </a>
+                <button type="button" @click="showChurnModal = true" class="owner-status-card owner-tone-danger">
+                    <span class="owner-status-heading"><span>Churn risk</span><x-icon name="alert" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['churn_risk'] }}</span>
+                    <span class="owner-status-description">Needs attention</span>
+                </button>
+                <button type="button" @click="showExpiringModal = true" class="owner-status-card owner-tone-warning">
+                    <span class="owner-status-heading"><span>Expiring soon</span><x-icon name="calendar" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['expiring_soon'] }}</span>
+                    <span class="owner-status-description">Upcoming renewals</span>
+                </button>
+                <a href="{{ route('app.members.index', ['filter' => 'dormant']) }}" class="owner-status-card owner-tone-neutral">
+                    <span class="owner-status-heading"><span>Dormant members</span><x-icon name="user" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['dormant_members'] }}</span>
+                    <span class="owner-status-description">Inactive attendance</span>
+                </a>
+                <button type="button" @click="showBirthdayModal = true" class="owner-status-card owner-tone-info">
+                    <span class="owner-status-heading"><span>Birthdays today</span><x-icon name="calendar" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['birthdays_today'] }}</span>
+                    <span class="owner-status-description">Member engagement</span>
+                </button>
             </div>
         </section>
         @endif
@@ -220,10 +260,22 @@
         @if(auth()->user()->hasFeature('personal_training') && auth()->user()->hasPermission('pt.view'))
         <section class="space-y-3" aria-label="Personal training">
             <h2 class="ds-heading">Personal training</h2>
-            <div class="ds-stat-grid owner-metrics">
-                <x-stat label="Active packages" :value="$metrics['active_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'ACTIVE'])" />
-                <x-stat label="Expired packages" :value="$metrics['expired_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'EXPIRED'])" />
-                <x-stat label="Exhausted packages" :value="$metrics['exhausted_pt']" :href="route('app.pt.index', ['tab' => 'packages', 'status' => 'COMPLETED'])" />
+            <div class="owner-status-grid owner-metrics">
+                <a href="{{ route('app.pt.index', ['tab' => 'packages', 'status' => 'ACTIVE']) }}" class="owner-status-card owner-tone-success">
+                    <span class="owner-status-heading"><span>Active packages</span><x-icon name="check" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['active_pt'] }}</span>
+                    <span class="owner-status-description">Currently active</span>
+                </a>
+                <a href="{{ route('app.pt.index', ['tab' => 'packages', 'status' => 'EXPIRED']) }}" class="owner-status-card owner-tone-danger">
+                    <span class="owner-status-heading"><span>Expired packages</span><x-icon name="x" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['expired_pt'] }}</span>
+                    <span class="owner-status-description">Renewal required</span>
+                </a>
+                <a href="{{ route('app.pt.index', ['tab' => 'packages', 'status' => 'COMPLETED']) }}" class="owner-status-card owner-tone-warning">
+                    <span class="owner-status-heading"><span>Exhausted packages</span><x-icon name="clock" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['exhausted_pt'] }}</span>
+                    <span class="owner-status-description">Sessions exhausted</span>
+                </a>
             </div>
         </section>
         @endif
@@ -232,12 +284,32 @@
         @if(auth()->user()->hasFeature('crm_leads') && auth()->user()->hasPermission('crm.view'))
         <section class="space-y-3" aria-label="Sales and CRM">
             <h2 class="ds-heading">Sales &amp; CRM</h2>
-            <div class="ds-stat-grid owner-metrics owner-sales">
-                <x-stat label="Active leads" :value="$metrics['active_leads']" :href="route('app.leads.index')" />
-                <x-stat label="Today's enquiries" :value="$metrics['today_enquiries']" :href="route('app.leads.index')" />
-                <x-stat label="Follow-ups today" :value="$metrics['today_followups']" :href="route('app.leads.index')" />
-                <x-stat label="Overdue follow-ups" :value="$metrics['overdue_followups']" :flag="$metrics['overdue_followups'] > 0" tone="danger" :href="route('app.leads.index')" />
-                <x-stat label="Upcoming trials" :value="$metrics['upcoming_trials']" :href="route('app.leads.index')" />
+            <div class="owner-status-grid owner-metrics owner-sales">
+                <a href="{{ route('app.leads.index') }}" class="owner-status-card owner-tone-success">
+                    <span class="owner-status-heading"><span>Active leads</span><x-icon name="users" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['active_leads'] }}</span>
+                    <span class="owner-status-description">Open leads</span>
+                </a>
+                <a href="{{ route('app.leads.index') }}" class="owner-status-card owner-tone-neutral">
+                    <span class="owner-status-heading"><span>Today's enquiries</span><x-icon name="message" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['today_enquiries'] }}</span>
+                    <span class="owner-status-description">New enquiries</span>
+                </a>
+                <a href="{{ route('app.leads.index') }}" class="owner-status-card owner-tone-warning">
+                    <span class="owner-status-heading"><span>Follow-ups today</span><x-icon name="clock" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['today_followups'] }}</span>
+                    <span class="owner-status-description">Scheduled today</span>
+                </a>
+                <a href="{{ route('app.leads.index') }}" class="owner-status-card owner-tone-danger">
+                    <span class="owner-status-heading"><span>Overdue follow-ups</span><x-icon name="alert" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['overdue_followups'] }}</span>
+                    <span class="owner-status-description">Needs attention</span>
+                </a>
+                <a href="{{ route('app.leads.index') }}" class="owner-status-card owner-tone-info">
+                    <span class="owner-status-heading"><span>Upcoming trials</span><x-icon name="calendar" :size="18" class="owner-status-icon" /></span>
+                    <span class="ds-kpi owner-status-value">{{ $metrics['upcoming_trials'] }}</span>
+                    <span class="owner-status-description">Scheduled trials</span>
+                </a>
             </div>
         </section>
         @endif
@@ -280,55 +352,53 @@
                 </div>
 
                 <div class="grid owner-finance gap-px bg-line rounded-b-xl overflow-hidden">
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-billed">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">Billed (<span x-text="getFin('billed_count')" class="tabular-nums">{{ $metrics['total_billed_count'] ?? 0 }}</span>)</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('total_billed'))">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
-                            <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('billed')" x-text="getFinBreakdown('billed')"></div>
+                            <div class="finance-label"><x-icon name="receipt" :size="18" /> <span>Billed</span></div>
+                            <div class="ds-kpi mt-1" x-text="formatMoney(getFin('total_billed'))">{{ $currency }}{{ number_format($metrics['month_billed_total'] ?? $metrics['total_billed_amount'] ?? 0, 0) }}</div>
+                            <div class="finance-count"><span class="tabular-nums" x-text="getFin('billed_count')">{{ $metrics['total_billed_count'] ?? 0 }}</span> billing records</div>
+                            <div class="finance-count" x-show="getFinBreakdown('billed')" x-text="getFinBreakdown('billed')"></div>
                         </div>
-                        <a :href="getBilledUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a :href="getBilledUrl()" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
-
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-collected">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">Product sales</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('product_sales'))">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
+                            <div class="finance-label"><x-icon name="check" :size="18" class="text-success" /> <span>Collected</span></div>
+                            <div class="ds-kpi mt-1" x-text="formatMoney(getFin('collected'))">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
+                            <div class="finance-count"><span class="tabular-nums" x-text="getFin('collected_count')">{{ $metrics['total_payments_count'] ?? 0 }}</span> payments</div>
+                            <div class="finance-count" x-show="getFinBreakdown('collected')" x-text="getFinBreakdown('collected')"></div>
                         </div>
-                        <a href="{{ route('app.inventory.index') }}" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a :href="getCollectedUrl()" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
-
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-pending">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">Collected (<span x-text="getFin('collected_count')" class="tabular-nums">{{ $metrics['total_payments_count'] ?? 0 }}</span>)</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="formatMoney(getFin('collected'))">{{ $currency }}{{ number_format($metrics['month_revenue'] ?? 0, 0) }}</div>
-                            <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('collected')" x-text="getFinBreakdown('collected')"></div>
+                            <div class="finance-label"><x-icon name="clock" :size="18" class="text-warning" /> <span>Pending</span></div>
+                            <div class="ds-kpi mt-1" x-text="formatMoney(getFin('pending_dues'))">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
+                            <div class="finance-count"><span class="tabular-nums" x-text="getFin('pending_count')">{{ $metrics['due_members_count'] }}</span> members with dues</div>
+                            <div class="finance-count" x-show="getFinBreakdown('pending')" x-text="getFinBreakdown('pending')"></div>
                         </div>
-                        <a :href="getCollectedUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a :href="getPendingUrl()" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
-
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-product finance-secondary">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">Pending (<span x-text="getFin('pending_count')" class="tabular-nums">{{ $metrics['due_members_count'] }}</span> due)</div>
-                            <div class="ds-kpi mt-1 truncate !text-warning" x-text="formatMoney(getFin('pending_dues'))">{{ $currency }}{{ number_format($metrics['all_dues_remaining'], 0) }}</div>
-                            <div class="text-xs text-fg-subtle mt-1 truncate" x-show="getFinBreakdown('pending')" x-text="getFinBreakdown('pending')"></div>
+                            <div class="finance-label"><x-icon name="cart" :size="18" /> <span>Product sales</span></div>
+                            <div class="ds-kpi mt-1" x-text="formatMoney(getFin('product_sales'))">{{ $currency }}{{ number_format($metrics['product_sales_mtd'] ?? 0, 0) }}</div>
                         </div>
-                        <a :href="getPendingUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a href="{{ route('app.inventory.index') }}" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
-
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-clients finance-secondary">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">New clients</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
+                            <div class="finance-label"><x-icon name="user-add" :size="18" /> <span>New clients</span></div>
+                            <div class="ds-kpi mt-1" x-text="getFin('new_clients')">{{ $metrics['new_clients_count'] }}</div>
                         </div>
-                        <a :href="getNewClientsUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a :href="getNewClientsUrl()" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
-
-                    <div class="bg-surface p-4 flex flex-col justify-between gap-3 min-w-0">
+                    <div class="bg-surface flex flex-col justify-between min-w-0 finance-renewals finance-secondary">
                         <div class="min-w-0">
-                            <div class="ds-caption truncate">Renewals</div>
-                            <div class="ds-kpi mt-1 truncate" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
+                            <div class="finance-label"><x-icon name="refresh" :size="18" /> <span>Renewals</span></div>
+                            <div class="ds-kpi mt-1" x-text="getFin('renewals')">{{ $metrics['renewals_count'] }}</div>
                         </div>
-                        <a :href="getRenewalsUrl()" class="text-xs font-medium text-accent-fg hover:underline">View details</a>
+                        <a :href="getRenewalsUrl()" class="finance-link text-xs font-medium text-accent-fg hover:underline">View details <x-icon name="arrow-right" :size="13" /></a>
                     </div>
                 </div>
             </div>
