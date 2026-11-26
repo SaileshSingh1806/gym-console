@@ -11,6 +11,7 @@ use App\Services\WhatsApp\WhatsAppCloudApiService;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -49,33 +50,36 @@ class MemberAgreementService
      */
     public function publishNewTemplateVersion(Tenant $tenant, array $data, ?User $user = null): TenantAgreementTemplate
     {
-        $latest = TenantAgreementTemplate::where('tenant_id', $tenant->id)->latest('version')->first();
-        $nextVersion = $latest ? ($latest->version + 1) : 1;
+        return DB::transaction(function () use ($tenant, $data, $user) {
+            $tenant = Tenant::query()->whereKey($tenant->id)->lockForUpdate()->firstOrFail();
+            $latest = TenantAgreementTemplate::where('tenant_id', $tenant->id)->latest('version')->first();
+            $nextVersion = $latest ? ($latest->version + 1) : 1;
 
-        // Mark existing templates as inactive
-        TenantAgreementTemplate::where('tenant_id', $tenant->id)->update(['is_active' => false]);
+            // Mark existing templates as inactive
+            TenantAgreementTemplate::where('tenant_id', $tenant->id)->update(['is_active' => false]);
 
-        $terraceEnabled = isset($data['open_terrace_enabled']) 
-            ? (bool) $data['open_terrace_enabled'] 
-            : (bool) ($tenant->settings['open_terrace_enabled'] ?? false);
+            $terraceEnabled = isset($data['open_terrace_enabled']) 
+                ? (bool) $data['open_terrace_enabled'] 
+                : (bool) ($tenant->settings['open_terrace_enabled'] ?? false);
 
-        // Also persist open_terrace_enabled in tenant settings
-        $settings = $tenant->settings ?? [];
-        $settings['open_terrace_enabled'] = $terraceEnabled;
-        $tenant->settings = $settings;
-        $tenant->save();
+            // Also persist open_terrace_enabled in tenant settings
+            $settings = $tenant->settings ?? [];
+            $settings['open_terrace_enabled'] = $terraceEnabled;
+            $tenant->settings = $settings;
+            $tenant->save();
 
-        return TenantAgreementTemplate::create([
-            'tenant_id' => $tenant->id,
-            'version' => $nextVersion,
-            'title' => $data['title'] ?? "{$tenant->name} — Membership Agreement & Health Declaration",
-            'is_active' => true,
-            'open_terrace_enabled' => $terraceEnabled,
-            'terms_sections' => $data['terms_sections'] ?? TenantAgreementTemplate::getDefaultTermsSections($terraceEnabled),
-            'health_questions' => $data['health_questions'] ?? TenantAgreementTemplate::getDefaultHealthQuestions(),
-            'published_at' => now(),
-            'published_by' => $user?->id ?? auth()->id(),
-        ]);
+            return TenantAgreementTemplate::create([
+                'tenant_id' => $tenant->id,
+                'version' => $nextVersion,
+                'title' => $data['title'] ?? "{$tenant->name} — Membership Agreement & Health Declaration",
+                'is_active' => true,
+                'open_terrace_enabled' => $terraceEnabled,
+                'terms_sections' => $data['terms_sections'] ?? TenantAgreementTemplate::getDefaultTermsSections($terraceEnabled),
+                'health_questions' => $data['health_questions'] ?? TenantAgreementTemplate::getDefaultHealthQuestions(),
+                'published_at' => now(),
+                'published_by' => $user?->id ?? auth()->id(),
+            ]);
+        });
     }
 
     /**
