@@ -475,7 +475,7 @@
                                 }
                             },
                             tooltip: {
-                                backgroundColor: isDark ? '#0f172a' : '#1e293b',
+                                backgroundColor: isDark ? '#151618' : '#1e293b',
                                 titleColor: '#ffffff',
                                 bodyColor: '#cbd5e1',
                                 borderColor: isDark ? '#334155' : '#475569',
