@@ -13,7 +13,7 @@
     </p>
 
     <!-- Ticket Summary Box -->
-    <div style="background-color: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+    <div style="background-color: #151618; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 13px;">
             <tr>
                 <td style="padding: 6px 0; color: #94a3b8; width: 35%;">Ticket ID:</td>
