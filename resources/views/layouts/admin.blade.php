@@ -36,7 +36,7 @@
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: {}
+                extend: { colors: { slate: { 900: '#151618' } },}
             }
         };
     </script>
