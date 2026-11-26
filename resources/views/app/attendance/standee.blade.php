@@ -10,6 +10,7 @@
             theme: {
                 extend: {
                     colors: {
+                        slate: { 900: '#151618' },
                         brand: {
                             50: '#fffbeb',
                             100: '#fef3c7',
