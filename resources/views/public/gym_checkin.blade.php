@@ -25,20 +25,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 <span>GymDeskHub</span>
             </a>
-
-            @auth
-                <a href="{{ route('app.portal') }}" class="text-[#f5a524] hover:underline font-medium flex items-center gap-1">
-                    <span>Member portal</span> &rarr;
-                </a>
-            @else
-                <a href="{{ route('login', ['role' => 'member']) }}" class="text-[#a0a4ab] hover:text-[#f5a524] transition-colors font-medium">
-                    Member login &rarr;
-                </a>
-            @endauth
         </header>
 
         <!-- Centered Attendance Card -->
-        <main class="w-full max-w-[440px] my-auto py-8" x-data="{ action: 'check_in', submitting: false }">
+        <main class="w-full max-w-[440px] my-auto py-8" x-data="{ submitting: false }">
             <div class="checkin-card p-5 sm:p-7 space-y-5">
                 
                 <!-- Gym Branding -->
@@ -118,11 +108,6 @@
                             @endif
                         </div>
 
-                        <div class="pt-2 space-y-2">
-                            <a href="{{ route('app.portal') }}" class="checkin-button checkin-primary w-full">
-                                <span>Open member portal</span> &rarr;
-                            </a>
-                        </div>
                     </div>
 
                 @elseif($status === 'checkout' && $member)
@@ -158,10 +143,10 @@
                     </div>
 
                 @else
-                    <!-- INPUT FORM: Check In / Check Out -->
+                    <!-- Member check-in form -->
                     <form action="{{ route('gym.checkin.process', ['slug' => $slug]) }}" method="POST" @submit="submitting = true" class="space-y-4">
                         @csrf
-                        <input type="hidden" name="action" :value="action">
+                        <input type="hidden" name="action" value="check_in">
 
                         <div class="space-y-1.5">
                             <label for="identifier" class="block text-sm font-medium text-[#ecedef]">
@@ -182,35 +167,15 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-3 pt-1">
-                            <button type="submit" 
-                                    @click="action = 'check_in'"
-                                    :disabled="submitting"
-                                    class="checkin-button checkin-primary">
-                                <span x-cloak x-show="submitting && action === 'check_in'">Recording…</span>
-                                <span x-show="!submitting || action !== 'check_in'">Check in</span>
-                            </button>
-
-                            <button type="submit" 
-                                    @click="action = 'check_out'"
-                                    :disabled="submitting"
-                                    class="checkin-button checkin-secondary">
-                                <span x-cloak x-show="submitting && action === 'check_out'">Recording…</span>
-                                <span x-show="!submitting || action !== 'check_out'">Check out</span>
+                        <div class="pt-1">
+                            <button type="submit" :disabled="submitting" class="checkin-button checkin-primary w-full">
+                                <span x-cloak x-show="submitting">Recording…</span>
+                                <span x-show="!submitting">Check in</span>
                             </button>
                         </div>
                     </form>
                 @endif
 
-                <!-- Bottom Links -->
-                <div class="pt-4 border-t border-[#26282d] text-center space-y-2">
-                    <p class="text-xs text-[#a0a4ab]">
-                        View your membership, workouts and invoices.
-                    </p>
-                    <a href="{{ route('login', ['role' => 'member']) }}" class="inline-flex items-center gap-1.5 text-xs text-[#f5a524] hover:underline font-medium">
-                        <span>Sign in to member portal</span> &rarr;
-                    </a>
-                </div>
             </div>
         </main>
 
