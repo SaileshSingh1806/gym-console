@@ -669,7 +669,26 @@
                                         {{ $daysLeft }}d
                                     </span>
                                     @if($exp->member?->phone)
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text=Hi%20{{ urlencode($exp->member->first_name) }},%20your%20gym%20membership%20at%20{{ urlencode($tenantName) }}%20is%20expiring%20on%20{{ $exp->end_date }}.%20Please%20renew%20to%20continue%20your%20workouts!"
+                                        @php
+                                            $expiryReminder = implode("\n", [
+                                                'Dear ' . ($exp->member->full_name ?: 'Member') . ',',
+                                                '',
+                                                'This is a friendly reminder that your gym membership is approaching its expiry date.',
+                                                '',
+                                                '*Membership details*',
+                                                'Gym: ' . $tenantName,
+                                                'Plan: ' . ($exp->plan?->name ?? 'Membership'),
+                                                'Expiry date: ' . \Carbon\Carbon::parse($exp->end_date)->format('d M Y'),
+                                                '',
+                                                'Please contact our front desk to renew your membership and avoid any interruption to your access.',
+                                                '',
+                                                'Thank you for being a valued member.',
+                                                '',
+                                                'Regards,',
+                                                $tenantName . ' Management',
+                                            ]);
+                                        @endphp
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text={{ rawurlencode($expiryReminder) }}"
                                            target="_blank"
                                            title="Send WhatsApp reminder" aria-label="Send WhatsApp reminder" rel="noopener noreferrer" class="owner-whatsapp-action">
                                             <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
@@ -906,7 +925,26 @@
                                         <div class="text-xs font-medium text-fg-muted">Pending</div>
                                     </div>
                                     @if($dm->member?->phone)
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dm->member->phone) }}?text=Hi%20{{ urlencode($dm->member->first_name) }},%20this%20is%20a%20gentle%20reminder%20that%20your%20membership%20fee%20balance%20of%20{{ $currency }}{{ number_format($dm->due_amount ?? 0, 2) }}%20is%20pending%20at%20{{ urlencode($tenantName) }}.%20Please%20clear%20it%20at%20your%20earliest%20convenience." target="_blank" title="Send WhatsApp reminder" aria-label="Send WhatsApp reminder" rel="noopener noreferrer" class="owner-whatsapp-action">
+                                        @php
+                                            $paymentReminder = implode("\n", [
+                                                'Dear ' . ($dm->member->full_name ?: 'Member') . ',',
+                                                '',
+                                                'This is a courteous reminder regarding your outstanding gym membership payment.',
+                                                '',
+                                                '*Payment details*',
+                                                'Gym: ' . $tenantName,
+                                                'Plan: ' . ($dm->plan?->name ?? 'Membership'),
+                                                'Outstanding amount: ' . $currency . number_format($dm->due_amount ?? 0, 2),
+                                                '',
+                                                'Kindly arrange payment of the outstanding balance at your earliest convenience. For payment assistance, please contact our front desk.',
+                                                '',
+                                                'If you have already made the payment, please disregard this reminder.',
+                                                '',
+                                                'Regards,',
+                                                $tenantName . ' Management',
+                                            ]);
+                                        @endphp
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $dm->member->phone) }}?text={{ rawurlencode($paymentReminder) }}" target="_blank" title="Send WhatsApp reminder" aria-label="Send WhatsApp reminder" rel="noopener noreferrer" class="owner-whatsapp-action">
                                             <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
                                         </a>
                                     @endif
