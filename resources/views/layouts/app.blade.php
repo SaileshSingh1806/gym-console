@@ -48,6 +48,13 @@
     <style>
         body { -webkit-tap-highlight-color: transparent; }
         [x-cloak] { display: none !important; }
+        /* Stable closed state before Alpine or Tailwind initialize. */
+        @media (max-width:1023px) {
+            #workspace-sidebar { position:fixed; top:0; bottom:0; left:0; width:min(288px,85vw); z-index:101; transform:translateX(-100%); visibility:hidden; transition:none; }
+            #workspace-sidebar[data-open="true"] { transform:translateX(0); visibility:visible; }
+        }
+        @media (min-width:1024px) { #workspace-sidebar { transform:none; visibility:visible; } }
+        @media (max-width:1023px) and (prefers-reduced-motion:no-preference) { #workspace-sidebar[data-ready="true"] { transition:transform 200ms ease-out, visibility 200ms; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -58,7 +65,7 @@
     <x-workspace-ui-styles />
     @stack('styles')
 </head>
-<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg' }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }">
+<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg' }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
 
     @if(!$authUser?->isMember() && !$isPureTrainer)
     @php
@@ -110,8 +117,8 @@
          x-cloak></div>
 
     <!-- Sidebar: drawer on mobile, fixed column on desktop -->
-    <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-           class="fixed inset-y-0 left-0 z-[101] w-72 max-w-[85vw] lg:w-64 bg-surface border-r border-line flex flex-col transition-transform duration-200 ease-out lg:static lg:inset-auto lg:h-screen lg:shrink-0 lg:z-auto">
+    <aside id="workspace-sidebar" data-open="false" :data-open="sidebarOpen ? 'true' : 'false'" x-init="$nextTick(() => requestAnimationFrame(() => requestAnimationFrame(() => $el.dataset.ready = 'true')))"
+           class="fixed inset-y-0 left-0 z-[101] w-72 max-w-[85vw] lg:w-64 bg-surface border-r border-line flex flex-col lg:static lg:inset-auto lg:h-screen lg:shrink-0 lg:z-auto">
 
         <!-- Brand -->
         <div class="h-16 shrink-0 flex items-center justify-between px-5 border-b border-line">

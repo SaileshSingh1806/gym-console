@@ -181,7 +181,6 @@
             <div>
                 <div class="attendance-heading">
                     <h1 class="ds-title">Attendance</h1>
-                    <span class="ds-badge ds-badge-success"><span class="ds-dot"></span>Live gate active</span>
                 </div>
                 <p class="ds-caption mt-1">Manage member access, check-ins and live gym occupancy.</p>
             </div>
@@ -225,7 +224,6 @@
                     <h2 class="ds-heading flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V4h4m8 0h4v4m0 8v4h-4m-8 0H4v-4M4 12h16"/></svg> Member check-in</h2>
                     <p class="ds-caption mt-1">Search for a member or scan their membership pass.</p>
                 </div>
-                <span class="attendance-policy"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2m7-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg> 60-minute auto-checkout</span>
             </div>
             <div class="attendance-terminal">
             {{-- Main Search Bar with Autocomplete Dropdown --}}
