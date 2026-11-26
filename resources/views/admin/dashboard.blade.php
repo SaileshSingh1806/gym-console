@@ -1,15 +1,26 @@
 <x-admin-layout header="Platform overview">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        .gdh-admin { --ad-surface:#fff; --ad-muted:#647180; --ad-text:#18181b; --ad-line:#e4e4e7; --ad-hover:#f7f8fa; font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-size:13px; line-height:1.5; }
+        .gdh-admin { --ad-surface:#fff; --ad-muted:#647180; --ad-text:#18181b; --ad-line:#e4e4e7; --ad-hover:#f7f8fa; font-family:inherit; font-size:14px; line-height:1.5; }
         .dark .gdh-admin { --ad-surface:#151618; --ad-muted:#a1a8b0; --ad-text:#f1f3f5; --ad-line:#292c30; --ad-hover:#1c1e21; }
         .gdh-admin .ad-panel,.gdh-admin .ad-metrics,.gdh-admin .ad-vitals { background:var(--ad-surface); border:1px solid var(--ad-line); border-radius:8px; color:var(--ad-text); }
         .gdh-admin .ad-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; background:transparent; border:0; }
-        .gdh-admin .ad-metrics>a { min-width:0; padding:12px 14px; border:1px solid var(--ad-line); border-top:1px solid #87919c; border-radius:10px; background:var(--ad-surface); color:var(--ad-text); }
+        .gdh-admin .ad-metrics>a { min-width:0; padding:13px 14px; border:1px solid var(--ad-line); border-top:1px solid #87919c; border-radius:10px; background:var(--ad-surface); color:var(--ad-text); }
         .gdh-admin .ad-metrics>a:nth-child(1) { border-top-color:#34b88a; } .gdh-admin .ad-metrics>a:nth-child(2) { border-top-color:#87919c; } .gdh-admin .ad-metrics>a:nth-child(3) { border-top-color:#e05b5b; } .gdh-admin .ad-metrics>a:nth-child(4) { border-top-color:#e6ae30; }
+        .gdh-admin .ad-metrics>a:nth-child(1) .ad-value { color:#16865d; }
+        .dark .gdh-admin .ad-metrics>a:nth-child(1) .ad-value { color:#34b88a; }
+        .gdh-admin .ad-metrics>a:nth-child(3) .ad-value.has-urgent { color:#b42318; }
+        .dark .gdh-admin .ad-metrics>a:nth-child(3) .ad-value.has-urgent { color:#f87171; }
+        .gdh-admin .ad-metrics>a:nth-child(4) .ad-value { color:var(--ad-text); }
+        .gdh-admin .ad-panel a.ad-link { color:var(--ad-text); }
+        .gdh-admin .ad-panel .ad-link:hover { color:var(--theme-accent,#f5a623); }
+        .gdh-admin .ad-panel .ad-invoice { color:var(--ad-text); font-weight:500; }
+        .gdh-admin .ad-panel .ad-plan { color:var(--ad-muted); border:1px solid var(--ad-line); border-radius:4px; padding:2px 6px; font-size:11px; background:transparent; }
+        .gdh-admin .ad-panel .ad-inner { background:var(--ad-surface); border-color:var(--ad-line); }
+        .gdh-admin .ad-panel .ad-inner:hover { background:var(--ad-hover); }
+        .gdh-admin .ad-panel .ad-section-footer { background:var(--ad-surface); border-color:var(--ad-line); }
         .gdh-admin .ad-metrics>a:hover { background:var(--ad-hover); }
         .gdh-admin .ad-label { color:var(--ad-muted); font-size:12px; font-weight:500; }
-        .gdh-admin .ad-value { font-size:23px; font-weight:600; line-height:1.3; letter-spacing:-.035em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin:6px 0; }
+        .gdh-admin .ad-value { font-size:24px; font-weight:600; line-height:1.3; letter-spacing:-.035em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin:6px 0; }
         .gdh-admin .ad-meta { font-size:12px; color:var(--ad-muted); }
         .gdh-admin .ad-vitals { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
         .gdh-admin .ad-vitals>div { padding:10px 16px; border-right:1px solid var(--ad-line); }
@@ -22,7 +33,7 @@
         .gdh-admin .ad-link:hover { text-decoration:underline; color:var(--theme-accent,#f59e0b); }
         .gdh-admin .ad-primary,.gdh-admin .ad-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:36px; border-radius:6px; padding:8px 13px; font-size:13px; font-weight:500; cursor:pointer; }
         .gdh-admin .ad-primary { background:var(--theme-accent,#f59e0b); color:#10151c; }
-        @supports(color:color-contrast(white vs black,white)) { .gdh-admin .ad-primary { color:color-contrast(var(--theme-accent) vs #10151c,#fff); } }
+        @supports(color:contrast-color(red)) { .gdh-admin .ad-primary { color:contrast-color(var(--theme-accent,#f59e0b)); } }
         .gdh-admin .ad-primary:hover { filter:brightness(.92); }
         .gdh-admin .ad-secondary { border:1px solid var(--ad-line); color:var(--ad-text); background:var(--ad-surface); }
         .gdh-admin .ad-secondary:hover { background:var(--ad-hover); }
@@ -39,7 +50,7 @@
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h2 class="text-lg font-semibold tracking-tight">Platform overview</h2>
+                <h2 class="text-lg font-semibold tracking-tight">Overview</h2>
                 <p class="ad-meta mt-1">Monitor gym accounts, subscriptions and support activity.</p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -60,7 +71,7 @@
             </a>
             <a href="{{ route('admin.tickets.index') }}">
                 <div class="ad-label">Open support tickets</div>
-                <div class="ad-value">{{ $openTicketsCount }}</div>
+                <div class="ad-value {{ $urgentTicketsCount > 0 ? 'has-urgent' : '' }}">{{ $openTicketsCount }}</div>
                 <div class="ad-meta">@if($urgentTicketsCount > 0)<span class="ad-status is-bad">{{ $urgentTicketsCount }} urgent</span> · @endif {{ $totalTicketsCount }} total</div>
             </a>
             <a href="{{ route('admin.subscriptions') }}">
@@ -92,7 +103,7 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Subscription payments and renewals</p>
                             </div>
                         </div>
-                        <a href="{{ route('admin.subscriptions') }}" class="text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
+                        <a href="{{ route('admin.subscriptions') }}" class="text-xs font-medium ad-link hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
                             <span>View subscriptions</span>
                             <span>&rarr;</span>
                         </a>
@@ -116,7 +127,7 @@
                                         $owner = $inv->tenant?->users?->firstWhere('role', 'gym_owner') ?? $inv->tenant?->users?->first();
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                        <td class="py-2.5 px-3 font-mono font-medium text-red-600 dark:text-red-400">
+                                        <td class="py-2.5 px-3 ad-invoice">
                                              {{ $inv->invoice_number }}
                                         </td>
                                         <td class="py-2.5 px-3">
@@ -127,7 +138,7 @@
                                             </span>
                                         </td>
                                         <td class="py-2.5 px-3">
-                                            <span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium text-xs">
+                                            <span class="ad-plan">
                                                 {{ $inv->subscription?->plan?->name ?? 'Subscription Plan' }}
                                             </span>
                                             <span class="text-xs text-slate-400 block mt-0.5 font-medium">
@@ -158,7 +169,7 @@
                         </table>
                     </div>
 
-                    <div class="p-3 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <div class="p-3 ad-section-footer border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                         <span>Showing latest {{ count($recentInvoices) }} transaction records</span>
                         <a href="{{ route('admin.subscriptions') }}" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold">Reconcile All &rarr;</a>
                     </div>
@@ -174,7 +185,7 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400">Recently registered gym accounts</p>
                             </div>
                         </div>
-                        <a href="{{ route('admin.gyms') }}" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
+                        <a href="{{ route('admin.gyms') }}" class="text-xs font-medium ad-link hover:underline transition-colors flex items-center gap-1 self-start sm:self-auto">
                             <span>View all gyms</span>
                             <span>&rarr;</span>
                         </a>
@@ -189,7 +200,7 @@
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <span class="font-semibold text-slate-900 dark:text-white text-sm">{{ $gym->name }}</span>
-                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium {{ $gym->status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' }}">
+                                        <span class="ad-status {{ $gym->status === 'ACTIVE' ? 'is-good' : ($gym->status === 'SUSPENDED' ? 'is-bad' : '') }}">
                                             {{ $gym->status }}
                                         </span>
                                     </div>
@@ -200,7 +211,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 self-end sm:self-auto">
-                                    <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-amber-600 dark:text-amber-400 font-medium text-xs">
+                                    <span class="ad-plan">
                                         {{ $gym->activeSubscription?->plan?->name ?? 'Free / Trial' }}
                                     </span>
                                     <a href="{{ route('admin.gyms.impersonate', $gym->id) }}" class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-transparent font-medium text-xs transition-all">
@@ -226,8 +237,8 @@
                             
                             <h3 class="text-xs font-medium text-slate-900 dark:text-white ">Support tickets</h3>
                         </div>
-                        <a href="{{ route('admin.tickets.index') }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">
-                            View All ({{ $totalTicketsCount }}) &rarr;
+                        <a href="{{ route('admin.tickets.index') }}" class="text-xs ad-link hover:underline font-medium">
+                            View all ({{ $totalTicketsCount }}) &rarr;
                         </a>
                     </div>
 
@@ -236,7 +247,7 @@
                             <div>
                                 <span class="text-xs font-medium text-slate-400 dark:text-slate-500  block mb-2">Active Tickets</span>
                                 @foreach($openSupportTickets as $tck)
-                                    <a href="{{ route('admin.tickets.show', $tck->id) }}" class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 block transition-all mb-2">
+                                    <a href="{{ route('admin.tickets.show', $tck->id) }}" class="p-3 rounded-md ad-inner border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 block transition-all mb-2">
                                         <div class="flex items-center justify-between mb-1">
                                             <span class="font-medium text-slate-900 dark:text-white text-xs truncate">{{ $tck->subject }}</span>
                                             <span class="px-1.5 py-0.5 rounded text-xs font-medium uppercase {{ $tck->priority === 'urgent' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' }}">
@@ -265,7 +276,7 @@
                                     @php
                                         $dLeft = (int) now()->diffInDays($expSub->ends_at, false);
                                     @endphp
-                                    <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs mb-2">
+                                    <div class="p-3 rounded-md ad-inner border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs mb-2">
                                         <div>
                                             <span class="font-medium text-slate-900 dark:text-white block">{{ $expSub->tenant->name }}</span>
                                             <span class="text-xs text-slate-500 dark:text-slate-400">{{ $expSub->plan?->name }} • Annual</span>
@@ -291,7 +302,7 @@
                     </div>
 
                     <div class="space-y-2.5 text-xs">
-                        <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                        <div class="p-3 rounded-md ad-inner border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
                             <span class="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
                                 
                                 <span>Gemini AI Engine</span>
@@ -301,7 +312,7 @@
                             </span>
                         </div>
 
-                        <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                        <div class="p-3 rounded-md ad-inner border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
                             <span class="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
                                 
                                 <span>SMTP Mail Gateway</span>
@@ -311,7 +322,7 @@
                             </span>
                         </div>
 
-                        <div class="p-3 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+                        <div class="p-3 rounded-md ad-inner border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
                             <span class="text-slate-700 dark:text-slate-300 flex items-center gap-2 font-medium">
                                 
                                 <span>Payment Reconciliation</span>
