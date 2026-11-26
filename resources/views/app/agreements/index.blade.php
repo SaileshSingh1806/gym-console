@@ -54,13 +54,59 @@
         @media(max-width:1200px) { .agreement-page-header { flex-direction:column; align-items:flex-start; gap:18px; } }
         @media(max-width:640px) { .agreement-overview { grid-template-columns:repeat(2,minmax(0,1fr)); } .agreement-metric { padding:18px; border-bottom:1px solid var(--ag-line); } .agreement-metric:nth-child(2) { border-right:1px solid var(--ag-line); } .agreement-metric:nth-child(n+3) { border-bottom:1px solid var(--ag-line); } .agreement-header-actions { width:100%; } .agreement-header-actions .agreement-button-primary { flex:1; } .agreement-records { padding:12px; } }
         @media(max-width:640px) { .agreement-overview { gap:10px; } .agreement-metric { padding:16px; } .metric-all { padding-top:14px; } .metric-label { font-size:12px; } .agreement-metric strong { font-size:32px; } .agreement-summary-heading>span { display:none; } }
+    
+        /* Document workspace: status navigation, compact summary and contextual record details. */
+        .agreement-workspace .agreement-page-header { padding:0; align-items:center; flex-direction:row; flex-wrap:wrap; gap:12px; }
+        .agreement-workspace .agreement-page-header h1 { font-size:20px; line-height:28px; letter-spacing:normal; }
+        .agreement-workspace .agreement-description { margin-top:3px; font-size:12px; }
+        .agreement-workspace .agreement-button { min-height:36px; padding:7px 12px; border-radius:8px; font-size:13px; font-weight:500; }
+        .agreement-workspace .ag-summary { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; padding:14px 16px; }
+        .agreement-workspace .ag-summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+        .agreement-workspace .ag-stat { min-width:0; border-right:1px solid rgb(var(--c-line)); padding-right:12px; }
+        .agreement-workspace .ag-stat:last-child { border:0; }
+        .agreement-workspace .ag-stat-value { font-size:24px; line-height:1.3; font-weight:600; font-variant-numeric:tabular-nums; margin-top:5px; }
+        .agreement-workspace .ag-progress { display:flex; height:5px; background:rgb(var(--c-raised)); border-radius:4px; overflow:hidden; margin-top:14px; }
+        .agreement-workspace .ag-progress-fill { background:rgb(var(--c-success)); }
+        .agreement-workspace .ag-layout { display:grid; grid-template-columns:220px minmax(0,1fr); gap:12px; align-items:start; }
+        .agreement-workspace .ag-panel { background:rgb(var(--c-surface)); border:1px solid rgb(var(--c-line)); border-radius:12px; min-width:0; }
+        .agreement-workspace .ag-nav { padding:8px; }
+        .agreement-workspace .ag-nav-link { display:flex; align-items:center; gap:8px; min-height:38px; padding:8px; border-radius:8px; color:rgb(var(--c-fg-muted)); font-size:13px; text-decoration:none; }
+        .agreement-workspace .ag-nav-link:hover { background:rgb(var(--c-raised)); }
+        .agreement-workspace .ag-nav-link[aria-current="page"] { color:rgb(var(--c-accent-fg)); background:rgb(var(--c-accent)/.10); }
+        .agreement-workspace .ag-nav-link svg { width:16px; height:16px; flex-shrink:0; }
+        .agreement-workspace .ag-nav-count { margin-left:auto; font-size:12px; font-variant-numeric:tabular-nums; }
+        .agreement-workspace .ag-register-header { padding:14px 16px; border-bottom:1px solid rgb(var(--c-line)); }
+        .agreement-workspace .ag-search { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+        .agreement-workspace .ag-search .relative { flex:1; min-width:140px; }
+        .agreement-workspace .ag-search input { height:36px; border-radius:8px; }
+        .agreement-workspace .ag-record { border-bottom:1px solid rgb(var(--c-line)); }
+        .agreement-workspace .ag-record:last-child { border-bottom:0; }
+        .agreement-workspace .ag-record-main { padding:12px 14px; display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto; align-items:center; gap:10px; }
+        .agreement-workspace .ag-record-main:hover { background:rgb(var(--c-raised)/.45); }
+        .agreement-workspace .ag-member { min-width:0; }
+        .agreement-workspace .ag-member a { overflow-wrap:anywhere; }
+        .agreement-workspace .ag-member .ag-avatar { background:rgb(var(--c-raised)); color:rgb(var(--c-fg-muted)); border:1px solid rgb(var(--c-line)); }
+        .agreement-workspace .ag-status { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+        .agreement-workspace .ag-record-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:6px; }
+        .agreement-workspace .ag-record-actions :is(a,button),.agreement-workspace .ag-details-toggle { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; border:1px solid rgb(var(--c-line-strong)); border-radius:8px; padding:6px 8px; font-size:12px; font-weight:500; white-space:nowrap; cursor:pointer; }
+        .agreement-workspace .ag-record-actions :is(a,button) svg { width:15px; height:15px; flex-shrink:0; }
+        .agreement-workspace .ag-record-actions a[title="Share via WhatsApp"] { background:rgb(37 211 102/.10); border-color:rgb(37 211 102/.24); color:#128C4B; }
+        html.dark .agreement-workspace .ag-record-actions a[title="Share via WhatsApp"] { color:#25D366; }
+        .agreement-workspace .ag-details-toggle { background:rgb(var(--c-surface)); color:rgb(var(--c-fg-muted)); }
+        .agreement-workspace .ag-record-details { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:14px; border-top:1px solid rgb(var(--c-line)); background:rgb(var(--c-raised)/.55); font-size:13px; }
+        .agreement-workspace .ag-detail-label { display:block; margin-bottom:6px; font-size:12px; color:rgb(var(--c-fg-muted)); }
+        .agreement-workspace .ag-pagination { padding:12px 16px; border-top:1px solid rgb(var(--c-line)); }
+        @media(max-width:1100px) { .agreement-workspace .ag-layout { grid-template-columns:180px minmax(0,1fr); } .agreement-workspace .ag-record-main { grid-template-columns:minmax(0,1fr) auto; } .agreement-workspace .ag-record-actions { grid-column:1/-1; justify-content:flex-start; } }
+        @media(max-width:760px) { .agreement-workspace .ag-layout { grid-template-columns:minmax(0,1fr); } .agreement-workspace .ag-nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; } .agreement-workspace .ag-nav-heading { grid-column:1/-1; } .agreement-workspace .ag-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .agreement-workspace .ag-stat:nth-child(2) { border:0; } .agreement-workspace .ag-record-details { grid-template-columns:minmax(0,1fr); } }
+        @media(max-width:420px) { .agreement-workspace .ag-record-main { grid-template-columns:minmax(0,1fr); } .agreement-workspace .ag-record-actions { grid-column:auto; } .agreement-workspace .agreement-header-actions { width:100%; } .agreement-workspace .agreement-header-actions>* { flex:1; } }
+
     </style>
     @endpush
 
     <div @keydown.escape.window="openQuickGenerateModal = false; openBulkModal = false; openHealthModal = false; openAuditModal = false" x-data="agreementManager()" class="agreement-workspace space-y-6">
 
         <header class="agreement-page-header">
-            <div><p class="agreement-eyebrow">Member records</p><h1>Agreements &amp; health declarations</h1><p class="agreement-description">Track signatures, review health responses and manage member documents.</p></div>
+            <div><h1>Agreements &amp; health</h1><p class="agreement-description">Manage member agreements, signatures and health declarations.</p></div>
             <div class="agreement-header-actions">
                 @if(auth()->user()->isGymOwner() || auth()->user()->hasPermission('agreements.manage'))
                     <a href="{{ route('app.agreements.settings') }}" class="agreement-button">Manage terms</a>
@@ -70,47 +116,31 @@
             </div>
         </header>
         <div x-cloak x-show="feedback" class="agreement-feedback" :class="{ 'is-error': feedbackError }" role="status"><span x-text="feedback"></span><button type="button" @click="feedback = ''" aria-label="Dismiss notification">&times;</button></div>
-        <div class="agreement-summary-heading"><h2>Agreement overview</h2><span>Across all member records</span></div>
-        <section class="agreement-overview" aria-label="Agreement overview">
-            @foreach([
-                ['label' => 'Total agreements', 'value' => $stats['total'] ?? 0, 'detail' => 'Generated member records', 'filter' => 'all'],
-                ['label' => 'Signed', 'value' => $stats['completed'] ?? 0, 'detail' => ($stats['completion_rate'] ?? 0).'% of agreements', 'filter' => 'completed'],
-                ['label' => 'Awaiting signature', 'value' => $stats['pending'] ?? 0, 'detail' => 'Follow up with members', 'filter' => 'pending'],
-                ['label' => 'Health disclosures', 'value' => $stats['medical_review'] ?? 0, 'detail' => 'Includes reviewed declarations', 'filter' => null],
-            ] as $metric)
-                <div class="agreement-metric metric-{{ $metric['filter'] ?? 'health' }}"><div class="metric-label"><span>{{ $metric['label'] }}</span><span class="metric-indicator" aria-hidden="true"></span></div><strong>{{ number_format($metric['value']) }}</strong><p>{{ $metric['detail'] }}</p>
-                    @if($metric['filter'] === 'completed')<progress class="metric-progress" max="100" value="{{ max(0, min(100, $stats['completion_rate'] ?? 0)) }}" aria-label="Signed agreements percentage"></progress>@endif
-                    @if($metric['filter'])<a href="{{ route('app.agreements.index', ['status' => $metric['filter']]) }}" aria-label="View {{ strtolower($metric['label']) }}">View records <span aria-hidden="true">&rarr;</span></a>@endif
-                </div>
-            @endforeach
+        <section class="ag-summary" aria-label="Agreement overview">
+            <div class="ag-summary-grid">
+                <div class="ag-stat"><span class="ds-caption">Total records</span><div class="ag-stat-value text-fg">{{ number_format($stats['total'] ?? 0) }}</div></div>
+                <div class="ag-stat"><span class="ds-caption">Signed</span><div class="ag-stat-value text-success">{{ number_format($stats['completed'] ?? 0) }}</div></div>
+                <div class="ag-stat"><span class="ds-caption">Awaiting signature</span><div class="ag-stat-value text-warning">{{ number_format($stats['pending'] ?? 0) }}</div></div>
+                <div class="ag-stat"><span class="ds-caption">Health disclosures</span><div class="ag-stat-value text-danger">{{ number_format($stats['medical_review'] ?? 0) }}</div><span class="ds-caption">Includes reviewed declarations</span></div>
+            </div>
+            <div class="ag-progress" role="progressbar" aria-label="Signed agreements" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ max(0, min(100, $stats['completion_rate'] ?? 0)) }}"><span class="ag-progress-fill" style="width:{{ max(0, min(100, $stats['completion_rate'] ?? 0)) }}%"></span></div>
+            <p class="ds-caption mt-2">{{ $stats['completion_rate'] ?? 0 }}% agreements signed</p>
         </section>
-        <!-- Filter Tabs & Search -->
-        <div class="agreement-records bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-4 space-y-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <!-- Status Tabs -->
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs font-semibold">
-                    <a href="{{ route('app.agreements.index', ['status' => 'all', 'search' => request('search')]) }}"
-                       class="px-3.5 py-2 rounded-xl transition-colors whitespace-nowrap {{ $statusFilter === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
-                        All ({{ $stats['total'] ?? 0 }})
-                    </a>
-                    <a href="{{ route('app.agreements.index', ['status' => 'pending', 'search' => request('search')]) }}"
-                       class="px-3.5 py-2 rounded-xl transition-colors whitespace-nowrap {{ $statusFilter === 'pending' ? 'bg-amber-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
-                        Pending Signature ({{ $stats['pending'] ?? 0 }})
-                    </a>
-                    <a href="{{ route('app.agreements.index', ['status' => 'completed', 'search' => request('search')]) }}"
-                       class="px-3.5 py-2 rounded-xl transition-colors whitespace-nowrap {{ $statusFilter === 'completed' ? 'bg-emerald-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
-                        Completed ({{ $stats['completed'] ?? 0 }})
-                    </a>
-                    <a href="{{ route('app.agreements.index', ['status' => 'medical_review', 'search' => request('search')]) }}"
-                       class="px-3.5 py-2 rounded-xl transition-colors whitespace-nowrap {{ $statusFilter === 'medical_review' ? 'bg-rose-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300' }}">
-                        Medical Review ({{ $stats['medical_review'] ?? 0 }})
-                    </a>
-                </div>
-
-                <!-- Search Input -->
-                <form method="GET" action="{{ route('app.agreements.index') }}" class="flex items-center gap-2">
+        <div class="ag-layout">
+            <aside class="ag-panel ag-nav" aria-label="Agreement status filters">
+                <div class="ag-nav-heading ds-caption px-2 py-2">Workspace</div>
+                    <a href="{{ route('app.agreements.index', ['status' => 'all', 'search' => request('search')]) }}" class="ag-nav-link" @if($statusFilter === 'all') aria-current="page" @endif><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h11l5 5v11H4zM15 4v5h5"/></svg><span>All agreements</span><span class="ag-nav-count">{{ $stats['total'] ?? 0 }}</span></a>
+                    <a href="{{ route('app.agreements.index', ['status' => 'pending', 'search' => request('search')]) }}" class="ag-nav-link" @if($statusFilter === 'pending') aria-current="page" @endif><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2m7-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg><span>Pending signature</span><span class="ag-nav-count">{{ $stats['pending'] ?? 0 }}</span></a>
+                    <a href="{{ route('app.agreements.index', ['status' => 'completed', 'search' => request('search')]) }}" class="ag-nav-link" @if($statusFilter === 'completed') aria-current="page" @endif><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4m7 2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z"/></svg><span>Completed</span><span class="ag-nav-count">{{ $stats['completed'] ?? 0 }}</span></a>
+                    <a href="{{ route('app.agreements.index', ['status' => 'medical_review', 'search' => request('search')]) }}" class="ag-nav-link" @if($statusFilter === 'medical_review') aria-current="page" @endif><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg><span>Medical review</span><span class="ag-nav-count">{{ $stats['medical_review'] ?? 0 }}</span></a>
+            </aside>
+            <section class="ag-panel" aria-label="Agreement register">
+                <div class="ag-register-header">
+                    <h2 class="ds-heading">{{ ['all' => 'All agreements', 'pending' => 'Pending signatures', 'completed' => 'Completed agreements', 'medical_review' => 'Medical review'][$statusFilter] ?? 'Agreement register' }}</h2>
+                    <p class="ds-caption mt-1">{{ $agreements->total() }} records</p>
+                    <form method="GET" action="{{ route('app.agreements.index') }}" class="ag-search">
                     <input type="hidden" name="status" value="{{ $statusFilter }}">
-                    <div class="relative w-full md:w-72">
+                    <div class="relative">
                         <svg class="w-4 h-4 text-fg-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         <input type="text" name="search" value="{{ request('search') }}" aria-label="Search agreements by member, phone or ID" placeholder="Search name, phone or member ID"
                                class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-line dark:border-line bg-raised dark:bg-surface text-fg dark:text-white placeholder-fg-subtle focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -122,29 +152,13 @@
                     </a>
                     @endif
                 </form>
-            </div>
-
-            <!-- Agreements Table -->
-            <div class="overflow-x-auto rounded-xl border border-line dark:border-line">
-                <table class="agreement-table w-full text-left text-sm">
-                    <thead class="bg-raised dark:bg-raised text-fg-muted font-semibold text-xs border-b border-line dark:border-line">
-                        <tr>
-                            <th class="py-3 px-4">Member</th>
-                            <th class="py-3 px-3">Plan & Dates</th>
-                            <th class="py-3 px-3">Version & Rules</th>
-                            <th class="py-3 px-3">Agreement Status</th>
-                            <th class="py-3 px-3">Health PAR-Q</th>
-                            <th class="py-3 px-3">Timeline</th>
-                            <th class="py-3 px-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-line dark:divide-line font-medium">
-                        @forelse($agreements as $ag)
-                        <tr class="hover:bg-raised dark:hover:bg-raised transition-colors">
-                            <!-- Member Profile -->
-                            <td class="py-3 px-4">
+                </div>
+                @forelse($agreements as $ag)
+                    <article class="ag-record" x-data="{ detailsOpen: false }">
+                        <div class="ag-record-main">
+                            <div class="ag-member">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold flex items-center justify-center shrink-0 border border-indigo-200/50 overflow-hidden">
+                                    <div class="w-9 h-9 rounded-full ag-avatar font-semibold flex items-center justify-center shrink-0 overflow-hidden">
                                         @if($ag->member?->avatar_url)
                                             <img src="{{ $ag->member->avatar_url }}" alt="{{ $ag->member->full_name }}" class="w-full h-full object-cover">
                                         @else
@@ -156,41 +170,14 @@
                                             {{ $ag->member?->full_name ?? 'Member #' . $ag->member_id }}
                                         </a>
                                         <div class="text-xs text-fg-muted flex items-center gap-2">
-                                            <span class="font-mono text-indigo-600 dark:text-indigo-400 font-semibold">{{ $ag->member?->member_code ?? 'ID' }}</span>
+                                            <span class="text-fg-muted font-medium">{{ $ag->member?->member_code ?? 'ID' }}</span>
                                             <span>•</span>
                                             <span>{{ $ag->member?->phone }}</span>
                                         </div>
                                     </div>
                                 </div>
-                            </td>
-
-                            <!-- Membership Plan -->
-                            <td class="py-3 px-3">
-                                @if($ag->member?->activeMembership?->plan)
-                                    <div class="font-semibold text-fg dark:text-fg">{{ $ag->member->activeMembership->plan->name }}</div>
-                                    <div class="text-xs text-fg-muted">
-                                        Expires: {{ $ag->member->activeMembership->end_date ? \Carbon\Carbon::parse($ag->member->activeMembership->end_date)->format('d M Y') : 'Ongoing' }}
-                                    </div>
-                                @else
-                                    <span class="text-fg-muted italic">No Active Plan</span>
-                                @endif
-                            </td>
-
-                            <!-- Version & Terrace Rules -->
-                            <td class="py-3 px-3">
-                                <div class="font-mono font-semibold text-fg-muted dark:text-fg-muted">v{{ $ag->version }}</div>
-                                @if($ag->terrace_rules_included)
-                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
-                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        Terrace Clauses
-                                    </span>
-                                @else
-                                    <span class="text-xs text-fg-muted">Standard</span>
-                                @endif
-                            </td>
-
-                            <!-- Agreement Status -->
-                            <td class="py-3 px-3">
+                            </div>
+                            <div class="ag-status">
                                 @if($ag->isCompleted())
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
                                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
@@ -216,41 +203,10 @@
                                         Pending
                                     </span>
                                 @endif
-                            </td>
-
-                            <!-- Health PAR-Q Flag -->
-                            <td class="py-3 px-3">
-                                @if($ag->has_medical_conditions)
-                                    <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/60 transition-colors">
-                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                        Health disclosure
-                                    </button>
-                                @elseif($ag->health_declaration_accepted_at)
-                                    <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 transition-colors">
-                                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                        No conditions reported
-                                    </button>
-                                @else
-                                    <span class="text-fg-muted text-xs italic">Not completed</span>
-                                @endif
-                            </td>
-
-                            <!-- Timeline -->
-                            <td class="py-3 px-3 text-fg-muted">
-                                @if($ag->signed_at)
-                                    <div class="font-semibold text-fg dark:text-fg">Signed</div>
-                                    <div class="text-xs">{{ $ag->signed_at->format('d M Y, h:i A') }}</div>
-                                @elseif($ag->link_sent_at)
-                                    <div>Sent via {{ ucfirst($ag->link_sent_channel ?? 'link') }}</div>
-                                    <div class="text-xs">{{ $ag->link_sent_at->format('d M Y, h:i A') }}</div>
-                                @else
-                                    <div>Created {{ $ag->created_at->format('d M Y') }}</div>
-                                @endif
-                            </td>
-
-                            <!-- Action Buttons -->
-                            <td class="py-3 px-4 text-right">
-                                <div class="agreement-row-actions">
+                            </div>
+                            <div class="ag-record-actions">
+                                
+                                <div class="ag-record-actions">
                                     @if($ag->isCompleted())
                                         <!-- View / Download PDF Document -->
                                         <a href="{{ route('app.agreements.pdf', $ag->id) }}" target="_blank"
@@ -291,29 +247,78 @@
                                         </a>
                                     @endif
                                 </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="py-12 text-center text-fg-muted">
+                            
+                                <button type="button" class="ag-details-toggle" @click="detailsOpen = !detailsOpen" :aria-expanded="detailsOpen" :aria-label="detailsOpen ? 'Hide agreement details' : 'Show agreement details'">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true" :class="detailsOpen ? 'rotate-90' : ''"><path d="m9 18 6-6-6-6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ag-record-details" x-show="detailsOpen" x-cloak>
+                            <div><span class="ag-detail-label">Membership plan</span>
+                                @if($ag->member?->activeMembership?->plan)
+                                    <div class="font-semibold text-fg dark:text-fg">{{ $ag->member->activeMembership->plan->name }}</div>
+                                    <div class="text-xs text-fg-muted">
+                                        Expires: {{ $ag->member->activeMembership->end_date ? \Carbon\Carbon::parse($ag->member->activeMembership->end_date)->format('d M Y') : 'Ongoing' }}
+                                    </div>
+                                @else
+                                    <span class="text-fg-muted italic">No Active Plan</span>
+                                @endif
+                            </div>
+                            <div><span class="ag-detail-label">Version &amp; rules</span>
+                                <div class="font-mono font-semibold text-fg-muted dark:text-fg-muted">v{{ $ag->version }}</div>
+                                @if($ag->terrace_rules_included)
+                                    <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        Terrace Clauses
+                                    </span>
+                                @else
+                                    <span class="text-xs text-fg-muted">Standard</span>
+                                @endif
+                            </div>
+                            <div><span class="ag-detail-label">Health PAR-Q</span>
+                                @if($ag->has_medical_conditions)
+                                    <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200/60 transition-colors">
+                                        <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        Health disclosure
+                                    </button>
+                                @elseif($ag->health_declaration_accepted_at)
+                                    <button type="button" @click="viewHealthDetails({{ json_encode($ag) }})" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 transition-colors">
+                                        <svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        No conditions reported
+                                    </button>
+                                @else
+                                    <span class="text-fg-muted text-xs italic">Not completed</span>
+                                @endif
+                            </div>
+                            <div><span class="ag-detail-label">Timeline</span>
+                                @if($ag->signed_at)
+                                    <div class="font-semibold text-fg dark:text-fg">Signed</div>
+                                    <div class="text-xs">{{ $ag->signed_at->format('d M Y, h:i A') }}</div>
+                                @elseif($ag->link_sent_at)
+                                    <div>Sent via {{ ucfirst($ag->link_sent_channel ?? 'link') }}</div>
+                                    <div class="text-xs">{{ $ag->link_sent_at->format('d M Y, h:i A') }}</div>
+                                @else
+                                    <div>Created {{ $ag->created_at->format('d M Y') }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <div class="py-12 px-4 text-center text-fg-muted">
                                 <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-raised dark:bg-raised flex items-center justify-center text-fg-muted">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 </div>
                                 <div class="font-semibold text-fg-muted dark:text-fg-muted">No member agreements found</div>
                                 <p class="text-xs text-fg-muted mt-1">Generate a digital agreement link for new or existing members above.</p>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
+                            </div>
+                @endforelse
             <!-- Pagination -->
             @if($agreements->hasPages())
-            <div class="pt-2">
+            <div class="ag-pagination">
                 {{ $agreements->links() }}
             </div>
             @endif
+            </section>
         </div>
 
         <!-- 1. Quick Generate Modal with Real-time Search -->
