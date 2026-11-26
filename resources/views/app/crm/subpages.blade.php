@@ -6,8 +6,7 @@
 
     @push('styles')
     <style>
-        .enquiry-workspace { --eq-surface:#fff; --eq-line:#e2e8f0; --eq-muted:#64748b; --eq-text:#172235; --eq-soft:#f8fafc; }
-        .dark .enquiry-workspace { --eq-surface:#101a2b; --eq-line:#273449; --eq-muted:#9aaabe; --eq-text:#edf2f8; --eq-soft:#152035; }
+        .enquiry-workspace { --eq-surface:rgb(var(--c-surface)); --eq-line:rgb(var(--c-line)); --eq-muted:rgb(var(--c-fg-muted)); --eq-text:rgb(var(--c-fg)); --eq-soft:rgb(var(--c-raised)); }
         .enquiry-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:4px 0; }
         .enquiry-kicker { color:var(--eq-muted); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:7px; font-weight:600; }
         .enquiry-heading h1 { font-size:28px; line-height:1.3; letter-spacing:-.8px; font-weight:650; color:var(--eq-text); }
