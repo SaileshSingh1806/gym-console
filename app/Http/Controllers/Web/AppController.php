@@ -1300,6 +1300,9 @@ class AppController extends Controller
     public function deleteMember(int $id): RedirectResponse
     {
         $member = Member::findOrFail($id);
+        if (\App\Services\MembershipCreditService::protectedMember($member)) {
+            return back()->with('error', 'This member has allocated payment credits and cannot be deleted.');
+        }
         $name = $member->full_name;
 
         // Cascade delete associated payments and memberships
@@ -1602,9 +1605,57 @@ class AppController extends Controller
             'payment_method' => 'nullable|string|max:50',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
+            'credit_mode' => 'nullable|in:none,full,partial',
+            'credit_ids' => 'nullable|array|max:100',
+            'credit_ids.*' => 'integer|distinct',
+            'credit_amount' => 'nullable|numeric|min:0|max:999999999|decimal:0,2',
+            'credit_reason' => 'nullable|string|max:500',
+            'credit_request_id' => 'nullable|uuid',
         ]);
 
         try {
+            $mode = $validated['credit_mode'] ?? 'none';
+            if ($mode !== 'none') {
+                $user = $request->user();
+                abort_unless($user->isGymOwner() || $user->isSuperAdmin() ||
+                    ($user->hasPermission('payments.record') && $user->hasPermission('memberships.edit')), 403);
+                $request->validate([
+                    'credit_ids' => 'required|array|min:1|max:100',
+                    'credit_reason' => 'required|string|max:500',
+                    'credit_amount' => 'required_if:credit_mode,partial|nullable|numeric|min:0.01|decimal:0,2',
+                    'credit_request_id' => 'required|uuid',
+                    'initial_payment_amount' => 'nullable|numeric|min:0|decimal:0,2',
+                ]);
+                return DB::transaction(function () use ($member, $validated, $mode) {
+                    $member = Member::where('tenant_id', $member->tenant_id)->lockForUpdate()->findOrFail($member->id);
+                    $plan = MembershipPlan::where('tenant_id', $member->tenant_id)->where('is_active', true)->findOrFail($validated['membership_plan_id']);
+                    if (DB::table('membership_payment_credits')->where('tenant_id', $member->tenant_id)->where('member_id', $member->id)
+                        ->where('request_id', $validated['credit_request_id'])->exists()) {
+                        return back()->with('success', 'This membership adjustment has already been recorded.');
+                    }
+                    $membership = $this->membershipService->assignMembership($member, $plan, [
+                        'start_date' => $validated['start_date'] ?? now()->toDateString(),
+                        'discount' => (float) ($validated['discount'] ?? 0),
+                        'notes' => $validated['notes'] ?? 'Added from member profile',
+                    ]);
+                    $credit = \App\Services\MembershipCreditService::apply($member, $membership,
+                        $validated['credit_ids'], $mode,
+                        \App\Services\MembershipCreditService::cents($validated['credit_amount'] ?? 0),
+                        trim($validated['credit_reason']), $validated['credit_request_id']);
+                    $received = \App\Services\MembershipCreditService::cents($validated['initial_payment_amount'] ?? 0);
+                    if ($received > \App\Services\MembershipCreditService::cents($membership->final_amount) - $credit) {
+                        throw \Illuminate\Validation\ValidationException::withMessages(['initial_payment_amount' => 'Payment exceeds the balance after credit adjustment.']);
+                    }
+                    if ($received > 0) {
+                        $this->paymentService->recordPayment($member, $received / 100, $validated['payment_method'] ?? 'cash',
+                            $membership, $validated['transaction_reference'] ?? null, $validated['notes'] ?? null);
+                    }
+                    ActivityLog::log('membership_credit_applied', 'Previous payment credit applied: ' . number_format($credit / 100, 2), $membership, [
+                        'credit_cents' => $credit, 'source_payment_ids' => $validated['credit_ids'], 'reason' => $validated['credit_reason'],
+                    ]);
+                    return back()->with('success', 'Membership assigned and previous payment credit applied.');
+                });
+            }
             $plan = MembershipPlan::findOrFail($validated['membership_plan_id']);
             $membershipOptions = [
                 'start_date' => $validated['start_date'] ?? now()->toDateString(),
@@ -1626,6 +1677,8 @@ class AppController extends Controller
             }
 
             return back()->with('success', "New subscription '{$plan->name}' assigned to '{$member->full_name}' successfully!");
+        } catch (\Illuminate\Validation\ValidationException | \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         }
@@ -1643,6 +1696,9 @@ class AppController extends Controller
 
         if (! $membership) {
             return back()->with('error', 'No membership subscription found to cancel.');
+        }
+        if (\App\Services\MembershipCreditService::protectedMembership($membership)) {
+            return back()->with('error', 'This membership has allocated payment credits and cannot be cancelled.');
         }
 
         $reason = trim($request->input('reason', 'Membership cancelled by gym administrator'));
@@ -2819,6 +2875,9 @@ class AppController extends Controller
     {
         $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
         $payment = MemberPayment::with('membership')->findOrFail($id);
+        if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
+            return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
+        }
 
         if ($payment->notes && str_contains($payment->notes, '[REVERSED]')) {
             return back()->with('error', 'This payment receipt is already marked as reversed.');
@@ -2850,6 +2909,9 @@ class AppController extends Controller
         }
 
         $payment = MemberPayment::with('membership')->where('tenant_id', $tenant->id)->findOrFail($id);
+        if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
+            return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
+        }
 
         if ($payment->membership && ! str_contains($payment->notes ?? '', '[REVERSED]')) {
             $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
