@@ -83,6 +83,9 @@ class MembershipCreditService
         if (! Schema::hasTable('membership_payment_credits')) {
             throw ValidationException::withMessages(['credit_mode' => 'Credit adjustment is not available until the database migration is applied.']);
         }
+        if (! in_array($mode, ['full', 'partial'], true) || trim($reason) === '' || empty($ids)) {
+            throw ValidationException::withMessages(['credit_mode' => 'Select receipts and provide an adjustment reason.']);
+        }
         $payments = $member->payments()->where('tenant_id', $member->tenant_id)->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
         if ($payments->count() !== count($ids)) {
             throw ValidationException::withMessages(['credit_ids' => 'One or more receipts are unavailable.']);
