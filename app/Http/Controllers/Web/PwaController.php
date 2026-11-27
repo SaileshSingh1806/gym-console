@@ -44,7 +44,7 @@ class PwaController extends Controller
 
     private function version(Tenant $tenant): string
     {
-        return substr(hash('sha256', json_encode([$tenant->logo_url, $tenant->settings['pwa_icon_path'] ?? null, $tenant->updated_at?->timestamp])), 0, 20);
+        return substr(hash('sha256', json_encode(['icon-v3', $tenant->logo_url, $tenant->settings['pwa_icon_path'] ?? null, $tenant->updated_at?->timestamp])), 0, 20);
     }
 
     private function localLogo(Tenant $tenant): ?string
@@ -70,32 +70,47 @@ class PwaController extends Controller
         abort_unless(in_array($size, [180, 192, 512], true) && ($purpose !== 'maskable' || $size === 512), 404);
         $tenant = $this->tenant($slug);
         $fallback = base_path('public/pwa/icons/'.$role.'-'.($purpose === 'maskable' ? 'maskable-' : '').$size.'.png');
-        if (!is_file($fallback)) $fallback = base_path('public/pwa/icons/'.$role.'-512.png');
-        $path = $this->localLogo($tenant);
-        $disk = Storage::disk('public');
-        if (!$path || !function_exists('imagecreatefromstring') || !$disk->exists($path) || $disk->size($path) > 10485760) {
-            return response()->file($fallback, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=300']);
+        $headers = ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=300', 'X-Content-Type-Options' => 'nosniff'];
+        $fallbackResponse = static function () use ($fallback, $headers) {
+            abort_unless(is_file($fallback), 503, 'PWA fallback icon unavailable');
+            return response(file_get_contents($fallback), 200, $headers);
+        };
+        try {
+            $path = $this->localLogo($tenant);
+            $disk = Storage::disk('public');
+            if (!$path || !function_exists('imagecreatefromstring') || !$disk->exists($path) || $disk->size($path) > 10485760) {
+                return $fallbackResponse();
+            }
+            $source = $disk->get($path);
+            if (!is_string($source) || $source === '') return $fallbackResponse();
+            $info = @getimagesizefromstring($source);
+            if (!$info || $info[0] * $info[1] > 16000000 || !in_array($info['mime'], ['image/png', 'image/jpeg', 'image/webp'], true)) {
+                return $fallbackResponse();
+            }
+            $image = @imagecreatefromstring($source);
+            if (!$image) return $fallbackResponse();
+            $canvas = imagecreatetruecolor($size, $size);
+            if (!$canvas) return $fallbackResponse();
+            imagefill($canvas, 0, 0, imagecolorallocate($canvas, 13, 14, 16));
+            $limit = (int) floor($size * ($purpose === 'maskable' ? 0.65 : 0.9));
+            $scale = min($limit / imagesx($image), $limit / imagesy($image), 1);
+            $width = max(1, (int) round(imagesx($image) * $scale));
+            $height = max(1, (int) round(imagesy($image) * $scale));
+            if (!imagecopyresampled($canvas, $image, (int) (($size-$width)/2), (int) (($size-$height)/2), 0, 0, $width, $height, imagesx($image), imagesy($image))) return $fallbackResponse();
+            ob_start();
+            try {
+                $ok = imagepng($canvas, null, 6);
+                $png = ob_get_contents();
+            } finally {
+                ob_end_clean();
+            }
+            $actual = is_string($png) ? @getimagesizefromstring($png) : false;
+            if (!$ok || !$actual || $actual[0] !== $size || $actual[1] !== $size || $actual['mime'] !== 'image/png') return $fallbackResponse();
+            return response($png, 200, $headers);
+        } catch (\Throwable $e) {
+            report($e);
+            return $fallbackResponse();
         }
-        $source = $disk->get($path);
-        $info = @getimagesizefromstring($source);
-        if (!$info || $info[0] * $info[1] > 16000000 || !in_array($info['mime'], ['image/png', 'image/jpeg', 'image/webp'], true)) {
-            return response()->file($fallback, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=300']);
-        }
-        $image = @imagecreatefromstring($source);
-        if (!$image) return response()->file($fallback, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=300']);
-        $canvas = imagecreatetruecolor($size, $size);
-        imagefill($canvas, 0, 0, imagecolorallocate($canvas, 13, 14, 16));
-        $limit = (int) floor($size * ($purpose === 'maskable' ? 0.65 : 0.9));
-        $scale = min($limit / imagesx($image), $limit / imagesy($image), 1);
-        $width = max(1, (int) round(imagesx($image) * $scale));
-        $height = max(1, (int) round(imagesy($image) * $scale));
-        imagecopyresampled($canvas, $image, (int) (($size-$width)/2), (int) (($size-$height)/2), 0, 0, $width, $height, imagesx($image), imagesy($image));
-        ob_start();
-        imagepng($canvas, null, 6);
-        $png = ob_get_clean();
-        imagedestroy($canvas);
-        imagedestroy($image);
-        return response($png, 200, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=3600', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     public function launch(Request $request, string $slug, string $role)
