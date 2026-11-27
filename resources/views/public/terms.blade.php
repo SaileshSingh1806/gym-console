@@ -17,10 +17,12 @@
     {{-- Content --}}
     <section class="marketing-section py-12 pb-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
+            <div class="grid lg:grid-cols-[220px_minmax(0,720px)] gap-8 justify-center items-start">
+<nav aria-label="On this page" class="lg:sticky lg:top-24 border-b lg:border-b-0 border-slate-800 pb-4 text-sm"><p class="font-medium text-white mb-3">On this page</p><ul class="space-y-2"><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-1">1. Agreement to Terms</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-2">2. SaaS Description & Platform Services</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-3">3. Account Registration & Security</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-4">4. Subscriptions, Pricing & Payment Terms</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-5">5. Member Data & Tenant Data Isolation</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-6">6. Biometric Hardware & Third-Party Integrations</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-7">7. Intellectual Property Rights</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-8">8. Termination & Suspension</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-9">9. Governing Law & Dispute Resolution</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-10">10. Contact & Queries</a></li></ul></nav>
+<div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">1. Agreement to Terms</h2>
+                    <h2 id="policy-1" class="text-lg font-bold text-white mb-2 scroll-mt-24">1. Agreement to Terms</h2>
                     <p>
                         These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("Gym Owner", "Subscriber", or "User"), and <strong>GymDeskHub</strong> (an individual business owned and operated by <strong>Sailesh Singh</strong>, "we", "us", or "our"), concerning your access to and use of the <strong>gymdeskhub.com</strong> website, cloud dashboard, member portals, and desktop biometric agent sync tools (collectively, the "Platform" or "Service").
                     </p>
@@ -30,14 +32,14 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">2. SaaS Description & Platform Services</h2>
+                    <h2 id="policy-2" class="text-lg font-bold text-white mb-2 scroll-mt-24">2. SaaS Description & Platform Services</h2>
                     <p>
                         GymDeskHub provides a Software-as-a-Service (SaaS) cloud operating platform for fitness centers, gym operators, sports clubs, and personal trainers. Features include member onboarding, automated membership expiration tracking, biometric access control synchronization, WhatsApp messaging automations, Point-of-Sale (POS) and GST-compliant invoicing, trainer scheduling, workout routines, and member self-service portals.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">3. Account Registration & Security</h2>
+                    <h2 id="policy-3" class="text-lg font-bold text-white mb-2 scroll-mt-24">3. Account Registration & Security</h2>
                     <p>
                         To use the Platform, you must register a workspace and provide accurate, current, and complete business information. You are solely responsible for maintaining the confidentiality of your account credentials (including passwords and API keys) and for all activities that occur under your account.
                     </p>
@@ -47,7 +49,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">4. Subscriptions, Pricing & Payment Terms</h2>
+                    <h2 id="policy-4" class="text-lg font-bold text-white mb-2 scroll-mt-24">4. Subscriptions, Pricing & Payment Terms</h2>
                     <p>
                         Access to paid tiers of GymDeskHub is billed in advance on a recurring monthly or annual basis as displayed on our <a href="{{ route('pricing') }}" class="text-amber-400 hover:underline">Pricing page</a>. All pricing is quoted in <strong>Indian Rupees (INR ₹)</strong> unless explicitly stated otherwise.
                     </p>
@@ -59,42 +61,42 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">5. Member Data & Tenant Data Isolation</h2>
+                    <h2 id="policy-5" class="text-lg font-bold text-white mb-2 scroll-mt-24">5. Member Data & Tenant Data Isolation</h2>
                     <p>
                         You retain full ownership of all data, records, member contact information, and membership logs uploaded by your gym ("Tenant Data"). We implement strict multi-tenant database isolation to prevent cross-tenant data leakage. We do not sell or monetize your gym member lists or customer data to any third party.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">6. Biometric Hardware & Third-Party Integrations</h2>
+                    <h2 id="policy-6" class="text-lg font-bold text-white mb-2 scroll-mt-24">6. Biometric Hardware & Third-Party Integrations</h2>
                     <p>
                         GymDeskHub provides software integration interfaces for biometric hardware turnstiles and WhatsApp messaging APIs. While we strive for 99.9% platform availability, we do not warrant that third-party hardware devices, local network routers, or Meta WhatsApp cloud APIs will operate without interruptions or errors outside our direct control.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">7. Intellectual Property Rights</h2>
+                    <h2 id="policy-7" class="text-lg font-bold text-white mb-2 scroll-mt-24">7. Intellectual Property Rights</h2>
                     <p>
                         The Platform, including source code, UI designs, graphics, branding, software algorithms, and trademarks, is the proprietary property of GymDeskHub and protected by copyright and intellectual property laws of India. You are granted a limited, revocable, non-exclusive license to use the Platform strictly for managing your fitness business.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">8. Termination & Suspension</h2>
+                    <h2 id="policy-8" class="text-lg font-bold text-white mb-2 scroll-mt-24">8. Termination & Suspension</h2>
                     <p>
                         We reserve the right to suspend or terminate your account without liability if you violate these Terms, engage in fraudulent transactions, use the platform for unlawful activities, or fail to pay subscription dues after grace notice. Upon termination, you may request an export of your gym member data within 30 days.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">9. Governing Law & Dispute Resolution</h2>
+                    <h2 id="policy-9" class="text-lg font-bold text-white mb-2 scroll-mt-24">9. Governing Law & Dispute Resolution</h2>
                     <p>
                         These Terms shall be governed by and construed in accordance with the laws of <strong>India</strong>. Any disputes arising out of or related to these Terms or the Platform shall be subject to the exclusive jurisdiction of the competent courts in <strong>Ahmedabad, Gujarat, India</strong>.
                     </p>
                 </div>
 
                 <div class="pt-4 border-t border-slate-800">
-                    <h2 class="text-lg font-bold text-white mb-2">10. Contact & Queries</h2>
+                    <h2 id="policy-10" class="text-lg font-bold text-white mb-2 scroll-mt-24">10. Contact & Queries</h2>
                     <p>
                         For any legal inquiries or questions regarding these Terms, contact:
                     </p>
@@ -108,6 +110,7 @@
 
             </div>
         </div>
-    </section>
+    </div>
+</section>
 </x-guest-layout>
 
