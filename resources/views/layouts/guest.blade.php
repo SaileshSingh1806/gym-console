@@ -147,7 +147,9 @@
     @if($marketingPage)
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     @endif
+    @unless($marketingPage)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+    @endunless
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { theme: { extend: { colors: { slate: { 900: "#151618" } } } } };</script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -220,6 +222,20 @@
         .marketing-site header { background:#0D0E10 !important; border-color:#26282D !important; backdrop-filter:none !important; }
         .marketing-site footer { background:#141518 !important; border-color:#26282D !important; }
         .marketing-site main > section { scroll-margin-top:80px; }
+        .marketing-site { --brand:#F5A524; }
+        .marketing-site [class~="bg-amber-500"] { background-color:var(--brand); }
+        .marketing-site [class~="text-amber-400"] { color:var(--brand); }
+        .marketing-site [class~="border-amber-500"] { border-color:var(--brand); }
+        .marketing-site [class~="bg-slate-900"] { background-color:#141518; }
+        .marketing-site [class~="bg-slate-800"] { background-color:#1B1D21; }
+        .marketing-site [class~="border-slate-800"] { border-color:#26282D; }
+        .marketing-site [class~="border-slate-700"] { border-color:#373A41; }
+        .marketing-site [class~="text-slate-300"] { color:#C7C9CD; }
+        .marketing-site [class~="text-slate-400"] { color:#A0A4AB; }
+        .marketing-site [class~="text-slate-500"] { color:#92969E; }
+        .marketing-site header nav a[aria-current="page"] { color:#F5A524; background:transparent; }
+        .marketing-site main a[class~="bg-amber-500"]:hover, .marketing-site header a[class~="bg-amber-500"]:hover { background-color:#E09414; }
+
         .marketing-site main h1, .marketing-site main h2, .marketing-site main h3 { letter-spacing:-.035em; font-weight:600; }
         .marketing-site main h1 { font-size:clamp(2.25rem,5vw,4rem); line-height:1.08; }
         .marketing-site main h2 { font-size:clamp(1.6rem,3vw,2.5rem); line-height:1.18; }
@@ -297,7 +313,7 @@
                         ];
                     @endphp
                     @foreach($navLinks as $link)
-                        <a href="{{ route($link['route']) }}"
+                        <a href="{{ route($link['route']) }}" @if(request()->routeIs($link['route'])) aria-current="page" @endif
                            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs($link['route']) ? 'text-white bg-slate-800/80 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/40' }}">
                             {{ $link['label'] }}
                         </a>
@@ -358,7 +374,7 @@
              class="lg:hidden border-t border-slate-800/80 bg-[#090d16] px-4 py-5 space-y-4 shadow-2xl">
             <nav class="flex flex-col gap-1">
                 @foreach($navLinks ?? [['route'=>'home','label'=>'Home'],['route'=>'features','label'=>'Features'],['route'=>'pricing','label'=>'Pricing'],['route'=>'about','label'=>'About'],['route'=>'contact','label'=>'Contact']] as $link)
-                    <a href="{{ route($link['route']) }}"
+                    <a href="{{ route($link['route']) }}" @if(request()->routeIs($link['route'])) aria-current="page" @endif
                        class="px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs($link['route']) ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-900 hover:text-white' }}">
                         {{ $link['label'] }}
                     </a>
