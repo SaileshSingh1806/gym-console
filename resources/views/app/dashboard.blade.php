@@ -635,6 +635,29 @@
         </div>
         @endif
 
+        @php
+            $buildExpiryReminder = static function ($exp) use ($tenantName) {
+                return implode("\n", [
+                '*' . $tenantName . '*',
+                '*Membership Renewal Reminder*',
+                '',
+                'Dear ' . ($exp->member->full_name ?: 'Member') . ',',
+                '',
+                'Your gym membership is due for renewal.',
+                '',
+                '*Membership Plan:* ' . ($exp->plan?->name ?? 'Membership'),
+                '*Expiry Date:* ' . \Carbon\Carbon::parse($exp->end_date)->format('d F Y'),
+                '*Status:* Expiring Soon',
+                '',
+                'Please renew your membership before the expiry date to ensure uninterrupted access to the gym.',
+                '',
+                'For renewal assistance, please contact our front desk.',
+                '',
+                '*Team ' . $tenantName . '*',
+            ]);
+            };
+        @endphp
+
         <!-- ROW 6: LIVE OPERATIONAL WIDGET CARDS (3x2 Grid) -->
         <div class="owner-lists">
 
@@ -680,24 +703,7 @@
                                     </span>
                                     @if($exp->member?->phone)
                                         @php
-                                            $expiryReminder = implode("\n", [
-                                                '*' . $tenantName . '*',
-                                                '*Membership Renewal Reminder*',
-                                                '',
-                                                'Dear ' . ($exp->member->full_name ?: 'Member') . ',',
-                                                '',
-                                                'Your gym membership is due for renewal.',
-                                                '',
-                                                '*Membership Plan:* ' . ($exp->plan?->name ?? 'Membership'),
-                                                '*Expiry Date:* ' . \Carbon\Carbon::parse($exp->end_date)->format('d F Y'),
-                                                '*Status:* Expiring Soon',
-                                                '',
-                                                'Please renew your membership before the expiry date to ensure uninterrupted access to the gym.',
-                                                '',
-                                                'For renewal assistance, please contact our front desk.',
-                                                '',
-                                                '*Team ' . $tenantName . '*',
-                                            ]);
+                                            $expiryReminder = $buildExpiryReminder($exp);
                                         @endphp
                                         <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text={{ rawurlencode($expiryReminder) }}"
                                            target="_blank"
@@ -1257,7 +1263,7 @@ Re-engage
                                     </td>
                                     <td class="py-2.5 px-3">
                                         @if($exp->member?->phone)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $exp->member->phone) }}?text={{ rawurlencode($buildExpiryReminder($exp)) }}" target="_blank" rel="noopener noreferrer" class="owner-cta owner-cta-whatsapp">
 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2a9.92 9.92 0 0 0-8.56 14.94L2 22l5.22-1.37A9.95 9.95 0 1 0 12.04 2Zm0 1.72a8.23 8.23 0 0 1 0 16.46 8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.23 8.23 0 0 1 6.95-12.62Z"/><path d="M9.1 7.3c-.17-.4-.34-.41-.51-.42h-.44c-.16 0-.41.06-.63.3-.22.24-.83.81-.83 1.97s.85 2.29.97 2.45c.12.16 1.67 2.67 4.12 3.63 2.04.8 2.45.64 2.89.6.44-.04 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28l-1.67-.81c-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42L9.1 7.3Z"/></svg>
 WhatsApp
                                             </a>
