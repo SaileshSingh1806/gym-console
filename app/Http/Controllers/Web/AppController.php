@@ -1163,6 +1163,9 @@ class AppController extends Controller
                         'end_date' => $endDate->toDateString(),
                     ];
 
+                    if ($planChanged && \App\Services\MembershipCreditService::protectedMembership($membership)) {
+                        return back()->with('error', 'The plan of a membership linked to payment credit cannot be changed.');
+                    }
                     if ($planChanged) {
                         $membershipData['price'] = (float) $plan->price;
                         $discount = (float) ($membership->discount ?? 0);
@@ -1626,12 +1629,18 @@ class AppController extends Controller
                     'credit_request_id' => 'required|uuid',
                     'initial_payment_amount' => 'nullable|numeric|min:0|decimal:0,2',
                 ]);
+                if (! \Illuminate\Support\Facades\Schema::hasTable('membership_payment_credits')) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['credit_mode' => 'Payment credit migration is required.']);
+                }
                 return DB::transaction(function () use ($member, $validated, $mode) {
                     $member = Member::where('tenant_id', $member->tenant_id)->lockForUpdate()->findOrFail($member->id);
                     $plan = MembershipPlan::where('tenant_id', $member->tenant_id)->where('is_active', true)->findOrFail($validated['membership_plan_id']);
                     if (DB::table('membership_payment_credits')->where('tenant_id', $member->tenant_id)->where('member_id', $member->id)
                         ->where('request_id', $validated['credit_request_id'])->exists()) {
                         return back()->with('success', 'This membership adjustment has already been recorded.');
+                    }
+                    if ($plan->duration_type === 'days' && (int) $plan->duration_value <= 7) {
+                        throw \Illuminate\Validation\ValidationException::withMessages(['membership_plan_id' => 'Select a longer membership plan when converting a short-term pass.']);
                     }
                     $membership = $this->membershipService->assignMembership($member, $plan, [
                         'start_date' => $validated['start_date'] ?? now()->toDateString(),
