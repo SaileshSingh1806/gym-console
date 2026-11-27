@@ -1371,31 +1371,31 @@
         }
     }" 
     x-on:trainer-tab-changed.window="setTab($event.detail)"
-    class="min-h-screen pb-24 lg:pb-12 text-[#F4EDE4] bg-[#0F1115] transition-colors">
+    class="trainer-portal min-h-screen pb-24 lg:pb-12 text-[#ECEDEF] bg-[#0D0E10] transition-colors">
 
-        <div class="max-w-2xl mx-auto space-y-3.5 px-3 sm:px-0 pt-2 sm:pt-4">
+        <div class="max-w-3xl mx-auto space-y-4 px-0 pt-2 sm:pt-4 min-w-0">
             
             <!-- Sleek App Bar / Top Identity Card (Hidden on profile tab to avoid duplicate name card) -->
-            <div x-show="tab !== 'profile'" class="p-3.5 sm:p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs flex items-center justify-between gap-3">
+            <div x-show="tab !== 'profile'" class="p-3.5 sm:p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0">
                     @if(!empty($resolvedLogo))
-                        <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-[#0F1115] p-1 border border-neutral-800 flex items-center justify-center shrink-0">
+                        <div class="h-11 w-11 sm:h-12 sm:w-12 rounded-[10px] bg-[#0D0E10] p-1 border border-[#26282D] flex items-center justify-center shrink-0">
                             <img src="{{ $resolvedLogo }}" alt="{{ $tenant->name }}" class="h-full w-full object-contain rounded-lg">
                         </div>
                     @else
-                        <div class="w-11 h-11 sm:h-12 sm:w-12 rounded-xl bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 font-bold text-sm sm:text-base flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 sm:h-12 sm:w-12 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 font-semibold text-sm sm:text-base flex items-center justify-center shrink-0">
                             {{ $initialsOf($tenant->name ?: 'G') }}
                         </div>
                     @endif
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs sm:text-sm font-semibold text-neutral-400 truncate">{{ $tenant->name }}</span>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                                 <span>Coach</span>
                             </span>
                         </div>
-                        <h1 class="text-base sm:text-lg font-extrabold text-white truncate mt-0.5 leading-snug">
+                        <h1 class="text-base sm:text-lg font-semibold text-white truncate mt-0.5 leading-snug">
                             {{ $trainer?->full_name ?? $user->name }}
                         </h1>
                     </div>
@@ -1403,22 +1403,22 @@
 
                 <div class="text-right shrink-0">
                     <span class="text-xs sm:text-[13px] text-neutral-400 block">{{ $trainer?->branch?->name ?? 'Main Branch' }}</span>
-                    <span class="text-xs sm:text-sm font-bold text-[#C5A880]">{{ $assignedCount }} {{ \Illuminate\Support\Str::plural('Client', $assignedCount) }}</span>
+                    <span class="text-xs sm:text-sm font-semibold text-[#F5A524]">{{ $assignedCount }} {{ \Illuminate\Support\Str::plural('Client', $assignedCount) }}</span>
                 </div>
             </div>
 
             <!-- Desktop Segmented Tabs (Screens >= sm) -->
-            <div class="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-[#171A22] border border-neutral-800 text-xs sm:text-sm font-semibold">
-                <button type="button" @click="setTab('today')" :class="tab === 'today' ? 'bg-[#0F1115] text-[#C5A880] border border-neutral-800 shadow-xs font-bold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
+            <div class="hidden sm:flex items-center gap-1 p-1 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs sm:text-sm font-semibold">
+                <button type="button" @click="setTab('today')" :class="tab === 'today' ? 'bg-[#0D0E10] text-[#F5A524] border border-[#26282D]  font-semibold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
                     Today
                 </button>
-                <button type="button" @click="setTab('members')" :class="tab === 'members' ? 'bg-[#0F1115] text-[#C5A880] border border-neutral-800 shadow-xs font-bold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
+                <button type="button" @click="setTab('members')" :class="tab === 'members' ? 'bg-[#0D0E10] text-[#F5A524] border border-[#26282D]  font-semibold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
                     Members ({{ $assignedCount }})
                 </button>
-                <button type="button" @click="setTab('sessions')" :class="tab === 'sessions' ? 'bg-[#0F1115] text-[#C5A880] border border-neutral-800 shadow-xs font-bold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
+                <button type="button" @click="setTab('sessions')" :class="tab === 'sessions' ? 'bg-[#0D0E10] text-[#F5A524] border border-[#26282D]  font-semibold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
                     Sessions
                 </button>
-                <button type="button" @click="setTab('profile')" :class="tab === 'profile' ? 'bg-[#0F1115] text-[#C5A880] border border-neutral-800 shadow-xs font-bold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
+                <button type="button" @click="setTab('profile')" :class="tab === 'profile' ? 'bg-[#0D0E10] text-[#F5A524] border border-[#26282D]  font-semibold' : 'text-neutral-400 hover:text-white'" class="flex-1 py-2 px-3 rounded-lg transition-all text-center cursor-pointer">
                     Profile
                 </button>
             </div>
@@ -1426,28 +1426,28 @@
             <!-- ========================================================= -->
             <!-- SCREEN 1: TODAY (Live Coach Briefing & Daily Flow)       -->
             <!-- ========================================================= -->
-            <div x-show="tab === 'today'" x-cloak class="space-y-3.5">
+            <div x-show="tab === 'today'" x-cloak class="space-y-4">
                 
                 <!-- 1. Coach Daily Briefing & Progress Card -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#171A22] via-[#14171E] to-[#0F1115] text-white border border-[#C5A880]/30 shadow-lg relative overflow-hidden">
-                    <div class="absolute -top-12 -right-12 w-40 h-40 bg-[#C5A880]/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="p-4 sm:p-5 rounded-[10px] bg-[#141518] text-white border border-[#26282D] relative overflow-hidden">
+                    
                     <div class="relative z-10 space-y-3">
                         <div class="flex items-center justify-between gap-3">
                             <div class="min-w-0">
-                                <span class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#C5A880] block">
+                                <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-[#F5A524] block">
                                     {{ \Carbon\Carbon::now()->format('l, d F') }}
                                 </span>
-                                <h2 class="text-lg sm:text-xl font-bold text-white mt-0.5 truncate">
+                                <h2 class="text-lg sm:text-xl font-semibold text-white mt-0.5 truncate">
                                     @php
                                         $hour = (int) now()->format('H');
                                         $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
                                         $firstName = explode(' ', trim($trainer?->full_name ?? $user->name))[0];
                                     @endphp
-                                    {{ $greeting }}, {{ $firstName }} 👋
+                                    {{ $greeting }}, {{ $firstName }}
                                 </h2>
                             </div>
                             <div class="text-right">
-                                <span class="text-xl sm:text-2xl font-black text-[#C5A880] font-mono leading-none block">{{ $todayCompletedCount }}/{{ max(1, $todayCount) }}</span>
+                                <span class="text-xl sm:text-2xl font-semibold text-[#F5A524] font-mono leading-none block">{{ $todayCompletedCount }}/{{ $todayCount }}</span>
                                 <span class="text-[10px] text-neutral-400">Sessions done</span>
                             </div>
                         </div>
@@ -1456,27 +1456,27 @@
                         @php
                             $todayPct = $todayCount > 0 ? min(100, round(($todayCompletedCount / $todayCount) * 100)) : 0;
                         @endphp
-                        <div class="w-full h-1.5 rounded-full bg-[#0F1115] border border-neutral-800 overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-[#D4B995] to-[#C5A880] transition-all duration-500" style="width: {{ $todayPct }}%"></div>
+                        <div class="w-full h-1.5 rounded-full bg-[#0D0E10] border border-[#26282D] overflow-hidden">
+                            <div class="h-full rounded-full bg-[#F5A524] transition-all duration-500" style="width: {{ $todayPct }}%"></div>
                         </div>
 
                         <!-- 4 Daily Metric Chips -->
-                        <div class="grid grid-cols-4 gap-1.5 pt-2 border-t border-neutral-800/80 text-center">
-                            <div class="p-1.5 sm:p-2 rounded-xl bg-[#0F1115]/80 border border-neutral-800">
-                                <span class="text-[9px] sm:text-[10px] text-neutral-400 block truncate">Done</span>
-                                <span class="text-xs font-bold text-emerald-400 mt-0.5 block truncate">{{ $todayCompletedCount }}</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-[#26282D] text-left">
+                            <div class="p-3 rounded-[10px] bg-[#1B1D21] border border-[#26282D]">
+                                <span class="text-xs text-neutral-400 block truncate">Completed</span>
+                                <span class="text-xl font-semibold text-emerald-400 mt-1 block tabular-nums">{{ $todayCompletedCount }}</span>
                             </div>
-                            <div class="p-1.5 sm:p-2 rounded-xl bg-[#0F1115]/80 border border-neutral-800">
-                                <span class="text-[9px] sm:text-[10px] text-neutral-400 block truncate">Booked</span>
-                                <span class="text-xs mt-0.5 block truncate {{ $todayScheduledCount > 0 ? 'text-emerald-300 font-black' : 'text-emerald-400 font-bold' }}">{{ $todayScheduledCount }}</span>
+                            <div class="p-3 rounded-[10px] bg-[#1B1D21] border border-[#26282D]">
+                                <span class="text-xs text-neutral-400 block truncate">Booked</span>
+                                <span class="text-xl mt-1 block tabular-nums {{ $todayScheduledCount > 0 ? 'text-emerald-300 font-semibold' : 'text-emerald-400 font-semibold' }}">{{ $todayScheduledCount }}</span>
                             </div>
-                            <div class="p-1.5 sm:p-2 rounded-xl bg-[#0F1115]/80 border border-neutral-800">
-                                <span class="text-[9px] sm:text-[10px] text-neutral-400 block truncate">Scan</span>
-                                <span class="text-xs font-bold mt-0.5 block truncate {{ $pendingCount > 0 ? 'text-[#C5A880] animate-pulse' : 'text-neutral-400' }}">{{ $pendingCount }}</span>
+                            <div class="p-3 rounded-[10px] bg-[#1B1D21] border border-[#26282D]">
+                                <span class="text-xs text-neutral-400 block truncate">Pending</span>
+                                <span class="text-xl font-semibold mt-1 block tabular-nums {{ $pendingCount > 0 ? 'text-[#F5A524] ' : 'text-neutral-400' }}">{{ $pendingCount }}</span>
                             </div>
-                            <div class="p-1.5 sm:p-2 rounded-xl bg-[#0F1115]/80 border border-neutral-800">
-                                <span class="text-[9px] sm:text-[10px] text-neutral-400 block truncate">Rating</span>
-                                <span class="text-xs font-bold text-[#C5A880] mt-0.5 block truncate">★ {{ $averageRating }}</span>
+                            <div class="p-3 rounded-[10px] bg-[#1B1D21] border border-[#26282D]">
+                                <span class="text-xs text-neutral-400 block truncate">Rating</span>
+                                <span class="text-xl font-semibold text-white mt-1 block tabular-nums">★ {{ $averageRating }}</span>
                             </div>
                         </div>
                     </div>
@@ -1486,35 +1486,35 @@
                 <div class="grid grid-cols-2 gap-2.5">
                     <button type="button" 
                             @click="openLogger()" 
-                            class="py-3.5 px-3 rounded-2xl bg-[#C5A880] hover:bg-[#b5966d] active:scale-[0.98] text-neutral-950 font-black text-xs sm:text-sm shadow-lg shadow-[#C5A880]/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            class="min-h-11 py-3.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs sm:text-sm   transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                         <svg class="w-4 h-4 sm:w-5 sm:h-5 text-neutral-950 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span class="truncate">Log PT &amp; QR</span>
                     </button>
                     <button type="button" 
                             @click="openScheduleModal()" 
-                            class="py-3.5 px-3 rounded-2xl bg-[#171A22] hover:bg-neutral-800/80 active:scale-[0.98] text-[#C5A880] border border-[#C5A880]/40 font-black text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span>📅</span>
+                            class="min-h-11 py-3.5 px-3 rounded-[10px] bg-[#141518] hover:bg-neutral-800/80  text-[#F5A524] border border-[#F5A524]/40 font-semibold text-xs sm:text-sm  transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>
                         <span class="truncate">Book Slot</span>
                     </button>
                 </div>
 
                 <!-- Upcoming Scheduled Slots (Today & Future) -->
                 @if(isset($upcomingScheduledSessions) && $upcomingScheduledSessions->isNotEmpty())
-                    <div class="p-3.5 rounded-2xl bg-[#171A22] border border-neutral-800 space-y-2.5">
-                        <div class="flex items-center justify-between text-xs font-bold text-[#C5A880]">
+                    <div class="p-3.5 rounded-[10px] bg-[#141518] border border-[#26282D] space-y-2.5">
+                        <div class="flex items-center justify-between text-xs font-semibold text-[#F5A524]">
                             <span class="flex items-center gap-1.5">
-                                <span>📅</span>
+                                <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>
                                 <span>Upcoming Booked Slots ({{ $upcomingScheduledSessions->count() }})</span>
                             </span>
-                            <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'scheduled']) }}" class="text-[10px] text-neutral-400 hover:text-[#C5A880] font-semibold">View all &rarr;</a>
+                            <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'scheduled']) }}" class="text-[10px] text-neutral-400 hover:text-[#F5A524] font-semibold">View all &rarr;</a>
                         </div>
                         <div class="space-y-2">
                             @foreach($upcomingScheduledSessions->take(4) as $upSlot)
-                                <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 flex items-center justify-between gap-2">
+                                <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] flex items-center justify-between gap-2">
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5 flex-wrap">
-                                            <h4 class="font-bold text-xs text-white truncate">{{ $upSlot->member?->full_name }}</h4>
-                                            <span class="px-1.5 py-0.5 rounded bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/25 text-[9px] font-bold">
+                                            <h4 class="font-semibold text-xs text-white truncate">{{ $upSlot->member?->full_name }}</h4>
+                                            <span class="px-1.5 py-0.5 rounded bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/25 text-[10px] font-semibold">
                                                 {{ $upSlot->session_date->isToday() ? 'Today' : ($upSlot->session_date->isTomorrow() ? 'Tomorrow' : $upSlot->session_date->format('d M')) }}
                                             </span>
                                         </div>
@@ -1525,7 +1525,7 @@
                                     <div class="flex items-center gap-1.5 shrink-0">
                                         <button type="button"
                                                 @click="openLogger({{ $upSlot->member_id }}, {{ $upSlot->member_pt_package_id }})"
-                                                class="px-2.5 py-1 rounded-lg bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-[10px] cursor-pointer transition-all">
+                                                class="px-2.5 py-1 rounded-lg bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[10px] cursor-pointer transition-all">
                                             Start
                                         </button>
                                         <button type="button"
@@ -1543,8 +1543,8 @@
 
                 <!-- PT Package Renewal Alert Banner (Client Retention Booster) -->
                 @if(isset($renewalAlerts) && $renewalAlerts->isNotEmpty())
-                    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 space-y-2">
-                        <div class="flex items-center justify-between text-xs font-bold text-amber-500">
+                    <div class="p-3.5 rounded-[10px] bg-amber-500/10 border border-amber-500/30 space-y-2">
+                        <div class="flex items-center justify-between text-xs font-semibold text-amber-500">
                             <span class="flex items-center gap-1.5">
                                 <span class="text-sm">⚠️</span>
                                 <span>PT Renewal Due ({{ $renewalAlerts->count() }})</span>
@@ -1559,9 +1559,9 @@
                                     $cleanPhone = preg_replace('/[^0-9]/', '', (string)$alertMember->phone);
                                     $waMsg = urlencode("Hi {$alertMember->first_name}, you have only {$rem} PT session(s) left in your package. Please connect with the front desk to renew your package so we keep your training streak uninterrupted!");
                                 @endphp
-                                <div class="p-2.5 rounded-xl bg-[#171A22] border border-amber-500/20 shadow-xs flex items-center justify-between gap-2">
+                                <div class="p-2.5 rounded-[10px] bg-[#141518] border border-amber-500/20  flex items-center justify-between gap-2">
                                     <div class="min-w-0">
-                                        <h4 class="font-bold text-xs text-white truncate">{{ $alertMember->full_name }}</h4>
+                                        <h4 class="font-semibold text-xs text-white truncate">{{ $alertMember->full_name }}</h4>
                                         <span class="text-[10px] text-amber-500 font-semibold block">
                                             {{ $rem == 0 ? 'Exhausted (0 sessions left)' : "{$rem} session(s) remaining" }}
                                         </span>
@@ -1569,8 +1569,8 @@
                                     @if(!empty($cleanPhone))
                                         <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waMsg }}" 
                                            target="_blank"
-                                           class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs transition-all shrink-0">
-                                            <span>💬 Nudge</span>
+                                           class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] flex items-center gap-1  transition-all shrink-0">
+                                            <span>Remind</span>
                                         </a>
                                     @endif
                                 </div>
@@ -1581,8 +1581,8 @@
 
                 <!-- 3. Pending Confirmation Alert Card (If any awaiting member scan) -->
                 @if($pendingSessions->isNotEmpty())
-                    <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2.5">
-                        <div class="flex items-center justify-between text-xs font-bold text-[#C5A880]">
+                    <div class="p-3.5 rounded-[10px] bg-amber-500/10 border border-amber-500/30 space-y-2.5">
+                        <div class="flex items-center justify-between text-xs font-semibold text-[#F5A524]">
                             <span class="flex items-center gap-1.5">
                                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
                                 <span>Awaiting Member Scan ({{ $pendingSessions->count() }})</span>
@@ -1592,11 +1592,11 @@
 
                         <div class="space-y-2">
                             @foreach($pendingSessions as $pending)
-                                <div class="p-3 rounded-xl bg-[#171A22] border border-amber-500/20 shadow-xs flex items-center justify-between gap-3">
+                                <div class="p-3 rounded-[10px] bg-[#141518] border border-amber-500/20  flex items-center justify-between gap-3">
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5">
-                                            <h4 class="font-bold text-white text-xs truncate">{{ $pending->member?->full_name }}</h4>
-                                            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-[#C5A880]">Pending</span>
+                                            <h4 class="font-semibold text-white text-xs truncate">{{ $pending->member?->full_name }}</h4>
+                                            <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-[#F5A524]">Pending</span>
                                         </div>
                                         <p class="text-[11px] text-neutral-400 truncate mt-0.5">
                                             {{ $pending->memberPtPackage?->package_name }} &bull; {{ $pending->duration_minutes }}m &bull; Logged {{ $pending->created_at?->diffForHumans() }}
@@ -1606,7 +1606,7 @@
                                     <div class="flex items-center gap-1.5 shrink-0">
                                         <button type="button" 
                                                 @click="showExistingQr({{ $pending->id }}, '{{ $pending->confirmation_token }}', '{{ route('pt-session.confirm', ['token' => $pending->confirmation_token]) }}', '{{ addslashes($pending->member?->full_name ?? '') }}', '{{ addslashes($pending->memberPtPackage?->package_name ?? '') }}', {{ $pending->duration_minutes }}, '{{ $pending->otp_code }}', 'PENDING')"
-                                                class="px-3 py-1.5 rounded-lg bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-xs shadow-xs transition-all flex items-center gap-1 cursor-pointer">
+                                                class="px-3 py-1.5 rounded-lg bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs  transition-all flex items-center gap-1 cursor-pointer">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                                             <span>Show QR</span>
                                         </button>
@@ -1623,9 +1623,9 @@
                 <!-- 4. Quick-Start 1-Tap Client Strip ("Quick Train Client") -->
                 @if($assignedMembers->isNotEmpty())
                     <div class="space-y-2">
-                        <div class="flex items-center justify-between text-xs font-bold text-neutral-300">
+                        <div class="flex items-center justify-between text-xs font-semibold text-neutral-300">
                             <span>Quick Train Client</span>
-                            <button type="button" @click="setTab('members')" class="text-[#C5A880] font-semibold hover:underline">
+                            <button type="button" @click="setTab('members')" class="text-[#F5A524] font-semibold hover:underline">
                                 View all ({{ $assignedCount }})
                             </button>
                         </div>
@@ -1636,14 +1636,14 @@
                                     $pkg = $m->memberPtPackages->first();
                                     $hasRem = $pkg && $pkg->remaining_sessions > 0;
                                 @endphp
-                                <div class="p-3 rounded-xl bg-[#171A22] border border-neutral-800 shadow-xs flex items-center justify-between gap-2.5">
+                                <div class="p-3 rounded-[10px] bg-[#141518] border border-[#26282D]  flex items-center justify-between gap-2.5">
                                     <div class="flex items-center gap-2.5 min-w-0">
-                                        <div class="w-9 h-9 rounded-lg bg-[#0F1115] text-neutral-300 font-bold text-xs flex items-center justify-center shrink-0 border border-neutral-800">
+                                        <div class="w-9 h-9 rounded-lg bg-[#0D0E10] text-neutral-300 font-semibold text-xs flex items-center justify-center shrink-0 border border-[#26282D]">
                                             {{ $initialsOf($m->first_name, $m->last_name ?? '') }}
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="font-bold text-white text-xs truncate">{{ $m->full_name }}</h4>
-                                            <span class="text-[10px] text-[#C5A880] font-semibold block truncate">
+                                            <h4 class="font-semibold text-white text-xs truncate">{{ $m->full_name }}</h4>
+                                            <span class="text-[10px] text-[#F5A524] font-semibold block truncate">
                                                 @if($hasRem)
                                                     {{ $pkg->remaining_sessions }} sessions left
                                                 @else
@@ -1656,7 +1656,7 @@
                                     @if($hasRem)
                                         <button type="button" 
                                                 @click="openLogger({{ $m->id }}, {{ $pkg->id }})" 
-                                                class="px-2.5 py-1.5 rounded-lg bg-[#C5A880]/15 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] font-bold text-[11px] border border-amber-500/20 transition-all shrink-0 cursor-pointer flex items-center gap-1">
+                                                class="px-2.5 py-1.5 rounded-lg bg-[#F5A524]/15 hover:bg-[#F5A524] hover:text-neutral-950 text-[#F5A524] font-semibold text-[11px] border border-amber-500/20 transition-all shrink-0 cursor-pointer flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                             <span>Train</span>
                                         </button>
@@ -1669,7 +1669,7 @@
 
                 <!-- 5. Today's Appointment Schedule / Timeline -->
                 <div class="space-y-2 pt-1">
-                    <div class="flex items-center justify-between text-xs font-bold text-neutral-300">
+                    <div class="flex items-center justify-between text-xs font-semibold text-neutral-300">
                         <span>Today's Appointments &bull; {{ \Carbon\Carbon::today()->format('d M') }}</span>
                         <span class="text-[11px] font-normal text-slate-500">{{ $todaySessions->count() }} booked</span>
                     </div>
@@ -1680,13 +1680,13 @@
                                 $isDone = in_array($session->status, ['CONFIRMED', 'COMPLETED']);
                                 $isScheduled = $session->status === 'SCHEDULED';
                             @endphp
-                            <div class="p-3.5 rounded-2xl bg-[#171A22] border {{ $isScheduled ? 'border-amber-500/40 bg-amber-500/5' : 'border-neutral-800' }} shadow-xs flex items-center justify-between gap-3">
+                            <div class="p-3.5 rounded-[10px] bg-[#141518] border {{ $isScheduled ? 'border-amber-500/40 bg-amber-500/5' : 'border-[#26282D]' }}  flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-3 min-w-0">
                                     <div class="w-12 text-center shrink-0">
-                                        <span class="text-xs font-black {{ $isScheduled ? 'text-amber-500' : 'text-neutral-300' }} block">
+                                        <span class="text-xs font-semibold {{ $isScheduled ? 'text-amber-500' : 'text-neutral-300' }} block">
                                             {{ \Carbon\Carbon::parse($session->start_time)->format('g:i') }}
                                         </span>
-                                        <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">
+                                        <span class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block">
                                             {{ \Carbon\Carbon::parse($session->start_time)->format('A') }}
                                         </span>
                                     </div>
@@ -1695,11 +1695,11 @@
 
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5">
-                                            <h4 class="font-bold text-white text-xs truncate">{{ $session->member?->full_name }}</h4>
+                                            <h4 class="font-semibold text-white text-xs truncate">{{ $session->member?->full_name }}</h4>
                                             @if($isDone)
-                                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Done</span>
+                                                <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Done</span>
                                             @elseif($isScheduled)
-                                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">Up Next</span>
+                                                <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">Up Next</span>
                                             @endif
                                         </div>
                                         <p class="text-[11px] text-neutral-400 truncate mt-0.5">
@@ -1712,7 +1712,7 @@
                                     @if($isScheduled)
                                         <button type="button" 
                                                 @click="openLogger({{ $session->member_id }}, {{ $session->member_pt_package_id }})" 
-                                                class="px-3 py-1.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-xs transition-all cursor-pointer">
+                                                class="px-3 py-1.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all cursor-pointer">
                                             Start PT
                                         </button>
                                     @else
@@ -1724,9 +1724,9 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="p-6 text-center bg-[#171A22] border border-dashed border-neutral-800 rounded-2xl text-neutral-400 space-y-1.5">
-                                <span class="text-lg">🕒</span>
-                                <h4 class="text-xs font-bold text-neutral-200">No scheduled appointments for today</h4>
+                            <div class="p-6 text-center bg-[#141518] border border-dashed border-[#26282D] rounded-[10px] text-neutral-400 space-y-1.5">
+                                <span class="text-lg"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                                <h4 class="text-xs font-semibold text-neutral-200">No scheduled appointments for today</h4>
                                 <p class="text-[11px] text-slate-400 max-w-xs mx-auto">
                                     Tap <strong>Train</strong> on any client above or <strong>Log PT Session</strong> whenever a client arrives at the gym.
                                 </p>
@@ -1748,7 +1748,7 @@
                     <input type="text" 
                            x-model="memberSearch" 
                            placeholder="Search members by name or code..." 
-                           class="w-full pl-10 pr-4 py-3 rounded-xl bg-[#171A22] border border-neutral-800 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-[#C5A880] transition-colors">
+                           class="w-full pl-10 pr-4 py-3 rounded-[10px] bg-[#141518] border border-[#26282D] text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-[#F5A524] transition-colors">
                 </div>
 
                 <!-- Members List -->
@@ -1829,24 +1829,24 @@
                             ];
                         @endphp
                         <div x-show="!memberSearch || '{{ strtolower(addslashes($member->full_name . ' ' . $member->member_code)) }}'.includes(memberSearch.toLowerCase().trim())" 
-                             class="p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-3 hover:border-[#C5A880]/40 transition-all cursor-pointer"
+                             class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-3 hover:border-[#F5A524]/40 transition-all cursor-pointer"
                              @click="openMemberDetail({{ Js::from($memberPayload) }})">
                             
                             <!-- Member Header Row -->
                             <div class="flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[#0F1115] text-neutral-300 font-bold text-xs sm:text-sm flex items-center justify-center shrink-0 border border-neutral-800">
+                                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-[10px] bg-[#0D0E10] text-neutral-300 font-semibold text-xs sm:text-sm flex items-center justify-center shrink-0 border border-[#26282D]">
                                         {{ $initialsOf($member->first_name, $member->last_name ?? '') }}
                                     </div>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-1.5 flex-wrap">
-                                            <h3 class="font-bold text-white text-sm sm:text-base truncate leading-snug">{{ $member->full_name }}</h3>
-                                            <span class="px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-mono bg-[#0F1115] text-slate-400">{{ $member->member_code }}</span>
+                                            <h3 class="font-semibold text-white text-sm sm:text-base truncate leading-snug">{{ $member->full_name }}</h3>
+                                            <span class="px-1.5 py-0.5 rounded text-[11px] sm:text-xs font-mono bg-[#0D0E10] text-slate-400">{{ $member->member_code }}</span>
                                             @if($hasRenewalDue)
-                                                <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30">Renewal Due</span>
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30">Renewal Due</span>
                                             @endif
                                             @if($latestWeight)
-                                                <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-[#0F1115] text-slate-300">⚖️ {{ $latestWeight }}kg</span>
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-[#0D0E10] text-slate-300">⚖️ {{ $latestWeight }}kg</span>
                                             @endif
                                         </div>
                                         <p class="text-xs sm:text-[13px] text-slate-400 mt-0.5 truncate">
@@ -1865,7 +1865,7 @@
                                     @if($hasRemaining)
                                         <button type="button" 
                                                 @click="openLogger({{ $member->id }}, {{ $activePkg->id }})" 
-                                                class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1">
+                                                class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                             <span>Log</span>
                                         </button>
@@ -1878,13 +1878,13 @@
 
                             <!-- Package Progress Bar -->
                             @if($activePkg)
-                                <div class="p-3 rounded-xl bg-[#0F1115]/90 border border-neutral-800 space-y-1.5">
+                                <div class="p-3 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D] space-y-1.5">
                                     <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
                                         <span class="font-semibold text-neutral-200 truncate">{{ $activePkg->package_name }}</span>
-                                        <span class="font-bold text-[#C5A880] text-xs sm:text-[13px] shrink-0">{{ $activePkg->remaining_sessions }} left</span>
+                                        <span class="font-semibold text-[#F5A524] text-xs sm:text-[13px] shrink-0">{{ $activePkg->remaining_sessions }} left</span>
                                     </div>
                                     <div class="w-full h-1.5 rounded-full bg-neutral-800 overflow-hidden">
-                                        <div class="h-full rounded-full bg-gradient-to-r from-[#D4B995] to-[#C5A880] transition-all duration-300" style="width: {{ $pkgPct }}%"></div>
+                                        <div class="h-full rounded-full bg-[#F5A524] transition-all duration-300" style="width: {{ $pkgPct }}%"></div>
                                     </div>
                                     <div class="flex items-center justify-between text-[11px] sm:text-xs text-slate-400">
                                         <span>Used: {{ $activePkg->used_sessions }}/{{ $activePkg->total_sessions }}</span>
@@ -1892,7 +1892,7 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="p-2.5 rounded-xl bg-[#0F1115]/70 text-center text-xs text-slate-400 italic">
+                                <div class="p-2.5 rounded-[10px] bg-[#0D0E10]/70 text-center text-xs text-slate-400 italic">
                                     No active PT package currently assigned.
                                 </div>
                             @endif
@@ -1900,21 +1900,21 @@
                             @if($member->activeWorkoutPlan || $member->activeDietPlan)
                                 <div class="flex items-center gap-1.5 pt-1 text-[11px] sm:text-xs font-medium text-neutral-400 flex-wrap">
                                     @if($member->activeWorkoutPlan)
-                                        <span class="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 truncate max-w-[165px] sm:max-w-[230px]">🏋️ {{ $member->activeWorkoutPlan->title }}</span>
+                                        <span class="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 truncate max-w-[165px] sm:max-w-[230px]">{{ $member->activeWorkoutPlan->title }}</span>
                                     @endif
                                     @if($member->activeDietPlan)
-                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 truncate max-w-[165px] sm:max-w-[230px]">🥗 {{ $member->activeDietPlan->title }}</span>
+                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 truncate max-w-[165px] sm:max-w-[230px]">{{ $member->activeDietPlan->title }}</span>
                                     @endif
                                 </div>
                             @endif
 
                         </div>
                     @empty
-                        <div class="p-8 text-center bg-[#171A22] border border-neutral-800 rounded-2xl text-neutral-400 space-y-2">
-                            <div class="w-10 h-10 rounded-xl bg-[#0F1115] text-slate-400 flex items-center justify-center mx-auto text-lg">
-                                👥
+                        <div class="p-8 text-center bg-[#141518] border border-[#26282D] rounded-[10px] text-neutral-400 space-y-2">
+                            <div class="w-10 h-10 rounded-[10px] bg-[#0D0E10] text-slate-400 flex items-center justify-center mx-auto text-lg">
+                                <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2m2-15a3 3 0 0 1 0 6m4 9v-2a6 6 0 0 0-4-5"/></svg>
                             </div>
-                            <h4 class="text-sm font-bold text-neutral-200">No members assigned yet</h4>
+                            <h4 class="text-sm font-semibold text-neutral-200">No members assigned yet</h4>
                             <p class="text-xs sm:text-[13px] text-slate-400 max-w-xs mx-auto">
                                 Once the gym assigns members or PT packages to your coaching profile, they will appear here automatically.
                             </p>
@@ -1932,23 +1932,23 @@
                 <!-- Filter Pills -->
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                     <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'all']) }}" 
-                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ !request('session_status') || request('session_status') === 'all' ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#171A22] border border-neutral-800 text-neutral-400' }}">
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ !request('session_status') || request('session_status') === 'all' ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#141518] border border-[#26282D] text-neutral-400' }}">
                         All
                     </a>
                     <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'pending']) }}" 
-                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'pending' ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#171A22] border border-neutral-800 text-[#C5A880]' }}">
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'pending' ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#141518] border border-[#26282D] text-[#F5A524]' }}">
                         Pending @if($pendingCount > 0)({{ $pendingCount }})@endif
                     </a>
                     <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'confirmed']) }}" 
-                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'confirmed' ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#171A22] border border-neutral-800 text-neutral-400' }}">
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'confirmed' ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#141518] border border-[#26282D] text-neutral-400' }}">
                         Confirmed
                     </a>
                     <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'issue_reported']) }}" 
-                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'issue_reported' ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#171A22] border border-neutral-800 text-neutral-400' }}">
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'issue_reported' ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#141518] border border-[#26282D] text-neutral-400' }}">
                         Issue reported @if($issueReportedCount > 0)({{ $issueReportedCount }})@endif
                     </a>
                     <a href="{{ route('trainer.workspace', ['tab' => 'sessions', 'session_status' => 'scheduled']) }}" 
-                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'scheduled' ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#171A22] border border-neutral-800 text-neutral-400' }}">
+                       class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ request('session_status') === 'scheduled' ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#141518] border border-[#26282D] text-neutral-400' }}">
                         Scheduled
                     </a>
                 </div>
@@ -1956,12 +1956,12 @@
                 <!-- Sessions List -->
                 <div class="space-y-2">
                     @forelse($allSessions as $sess)
-                        <div x-data="{ openDetail: false }" class="p-3.5 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-2">
+                        <div x-data="{ openDetail: false }" class="p-3.5 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-2">
                             
                             <!-- Main Row -->
                             <div class="flex items-center justify-between gap-3">
                                 <div class="min-w-0">
-                                    <h4 class="font-bold text-white text-xs truncate">{{ $sess->member?->full_name }}</h4>
+                                    <h4 class="font-semibold text-white text-xs truncate">{{ $sess->member?->full_name }}</h4>
                                     <p class="text-[11px] text-neutral-400 mt-0.5 truncate">
                                         {{ $sess->session_date->format('d M Y') }} &bull; {{ $sess->duration_minutes }}m &bull; {{ $sess->memberPtPackage?->package_name ?? 'PT Session' }}
                                     </p>
@@ -1970,7 +1970,7 @@
                                 <div class="flex items-center gap-2 shrink-0">
                                     <!-- Status Badges -->
                                     @if($sess->status === 'PENDING')
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-[#C5A880] border border-amber-500/20">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-[#F5A524] border border-amber-500/20">
                                             Pending
                                         </span>
                                     @elseif(in_array($sess->status, ['CONFIRMED', 'COMPLETED']))
@@ -1986,7 +1986,7 @@
                                             Scheduled
                                         </span>
                                     @else
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#0F1115] text-slate-500">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#0D0E10] text-slate-500">
                                             {{ $sess->status }}
                                         </span>
                                     @endif
@@ -1995,13 +1995,13 @@
                                     @if($sess->status === 'PENDING')
                                         <button type="button" 
                                                 @click="showExistingQr({{ $sess->id }}, '{{ $sess->confirmation_token }}', '{{ route('pt-session.confirm', ['token' => $sess->confirmation_token]) }}', '{{ addslashes($sess->member?->full_name ?? '') }}', '{{ addslashes($sess->memberPtPackage?->package_name ?? '') }}', {{ $sess->duration_minutes }}, '{{ $sess->otp_code }}', 'PENDING')"
-                                                class="px-2.5 py-1 rounded-lg bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-[10px] transition-all cursor-pointer">
+                                                class="px-2.5 py-1 rounded-lg bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[10px] transition-all cursor-pointer">
                                             Show QR
                                         </button>
                                     @elseif($sess->status === 'SCHEDULED')
                                         <button type="button" 
                                                 @click="openLogger({{ $sess->member_id }}, {{ $sess->member_pt_package_id }})"
-                                                class="px-2.5 py-1 rounded-lg bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-[10px] transition-all cursor-pointer">
+                                                class="px-2.5 py-1 rounded-lg bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[10px] transition-all cursor-pointer">
                                             Start PT
                                         </button>
                                         <button type="button" 
@@ -2020,7 +2020,7 @@
                             </div>
 
                             <!-- Expandable Audit Trail -->
-                            <div x-show="openDetail" x-cloak class="pt-2 border-t border-neutral-800 text-[11px] text-neutral-400 space-y-1">
+                            <div x-show="openDetail" x-cloak class="pt-2 border-t border-[#26282D] text-[11px] text-neutral-400 space-y-1">
                                 <div class="flex items-center justify-between">
                                     <span>Session Time:</span>
                                     <span class="font-medium text-neutral-200">{{ \Carbon\Carbon::parse($sess->start_time)->format('g:i A') }}</span>
@@ -2044,7 +2044,7 @@
                                 @if($sess->rating)
                                     <div class="flex items-center justify-between">
                                         <span>Client Rating:</span>
-                                        <span class="font-bold text-amber-500 flex items-center gap-1">
+                                        <span class="font-semibold text-amber-500 flex items-center gap-1">
                                             <span>{{ str_repeat('★', $sess->rating) }}{{ str_repeat('☆', 5 - $sess->rating) }}</span>
                                             <span class="text-[10px]">({{ $sess->rating }}/5)</span>
                                         </span>
@@ -2053,7 +2053,7 @@
                                 @if($sess->member_feedback)
                                     <div class="flex items-center justify-between">
                                         <span>Client Feedback:</span>
-                                        <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 font-bold text-[10px]">{{ $sess->member_feedback }}</span>
+                                        <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 font-semibold text-[10px]">{{ $sess->member_feedback }}</span>
                                     </div>
                                 @endif
                                 @if($sess->issue_notes)
@@ -2064,7 +2064,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="p-8 text-center bg-[#171A22] border border-neutral-800 rounded-2xl text-neutral-400">
+                        <div class="p-8 text-center bg-[#141518] border border-[#26282D] rounded-[10px] text-neutral-400">
                             No PT sessions found matching this filter.
                         </div>
                     @endforelse
@@ -2081,28 +2081,29 @@
             <!-- ========================================================= -->
             <!-- SCREEN 4: PROFILE (Account, Security & Sign Out)          -->
             <!-- ========================================================= -->
-            <div x-show="tab === 'profile'" x-cloak class="space-y-3.5">
+            <div x-show="tab === 'profile'" x-cloak class="space-y-4">
+                <h1 class="text-2xl font-semibold tracking-tight text-white">Profile</h1>
                 
                 <!-- Trainer Identity Card -->
-                <div class="p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-3">
+                <div class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black text-base flex items-center justify-center shrink-0 shadow-lg shadow-[#C5A880]/20">
+                        <div class="w-12 h-12 rounded-[10px] bg-[#F5A524] text-neutral-950 font-semibold text-base flex items-center justify-center shrink-0  ">
                             {{ $initialsOf($trainer?->full_name ?? $user->name) }}
                         </div>
                         <div class="min-w-0">
-                            <h2 class="text-sm font-bold text-white truncate">{{ $trainer?->full_name ?? $user->name }}</h2>
+                            <h2 class="text-sm font-semibold text-white truncate">{{ $trainer?->full_name ?? $user->name }}</h2>
                             <p class="text-xs text-neutral-400">{{ $trainer?->branch?->name ?? 'Main Branch' }} &bull; {{ $trainer?->specialization ?? 'Personal Trainer' }}</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800 text-xs">
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-center">
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-[#26282D] text-xs">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-center">
                             <span class="text-[10px] text-slate-400 uppercase font-semibold block">Completed</span>
-                            <span class="text-base font-bold text-white block mt-0.5">{{ $completedTotalCount }}</span>
+                            <span class="text-base font-semibold text-white block mt-0.5">{{ $completedTotalCount }}</span>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-center">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-center">
                             <span class="text-[10px] text-slate-400 uppercase font-semibold block">Clients</span>
-                            <span class="text-base font-black text-[#C5A880] block mt-0.5">{{ $assignedCount }}</span>
+                            <span class="text-base font-semibold text-[#F5A524] block mt-0.5">{{ $assignedCount }}</span>
                         </div>
                     </div>
                 </div>
@@ -2111,66 +2112,66 @@
                 @php
                     $monthDelta = $thisMonthCompletedCount - $lastMonthCompletedCount;
                 @endphp
-                <div class="p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-3">
+                <div class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-3">
                     <div class="flex items-center justify-between gap-2">
                         <div>
-                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Monthly Coaching Performance</h3>
+                            <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Monthly Coaching Performance</h3>
                             <p class="text-[11px] text-neutral-400 mt-0.5">{{ now()->format('F Y') }} summary</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 text-[10px] font-bold shrink-0">
+                        <span class="px-2.5 py-1 rounded-lg bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold shrink-0">
                             ★ {{ number_format($averageRating, 1) }} ({{ $totalRatingsCount }})
                         </span>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                             <span class="text-[10px] text-neutral-400 uppercase font-semibold block">This Month</span>
-                            <span class="text-lg font-black text-emerald-400 block mt-0.5">{{ $thisMonthCompletedCount }}</span>
-                            <span class="text-[9px] font-semibold block mt-0.5 {{ $monthDelta >= 0 ? 'text-emerald-400/90' : 'text-amber-400' }}">
+                            <span class="text-lg font-semibold text-emerald-400 block mt-0.5">{{ $thisMonthCompletedCount }}</span>
+                            <span class="text-[10px] font-semibold block mt-0.5 {{ $monthDelta >= 0 ? 'text-emerald-400/90' : 'text-amber-400' }}">
                                 {{ $monthDelta >= 0 ? '+' . $monthDelta : $monthDelta }} vs last mo ({{ $lastMonthCompletedCount }})
                             </span>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                             <span class="text-[10px] text-neutral-400 uppercase font-semibold block">Month Hours</span>
-                            <span class="text-lg font-black text-[#C5A880] block mt-0.5">{{ number_format($thisMonthHours, 1) }}h</span>
-                            <span class="text-[9px] text-neutral-500 block mt-0.5">Logged coaching</span>
+                            <span class="text-lg font-semibold text-[#F5A524] block mt-0.5">{{ number_format($thisMonthHours, 1) }}h</span>
+                            <span class="text-xs text-neutral-400 block mt-0.5">Logged coaching</span>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                             <span class="text-[10px] text-neutral-400 uppercase font-semibold block">All-Time Hours</span>
-                            <span class="text-lg font-black text-white block mt-0.5">{{ number_format($totalCoachingHours, 1) }}h</span>
-                            <span class="text-[9px] text-neutral-500 block mt-0.5">{{ $completedTotalCount }} sessions total</span>
+                            <span class="text-lg font-semibold text-white block mt-0.5">{{ number_format($totalCoachingHours, 1) }}h</span>
+                            <span class="text-xs text-neutral-400 block mt-0.5">{{ $completedTotalCount }} sessions total</span>
                         </div>
-                        <div class="p-2.5 rounded-xl bg-[#0F1115] border border-neutral-800">
+                        <div class="p-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                             <span class="text-[10px] text-neutral-400 uppercase font-semibold block">Saved Plans</span>
-                            <span class="text-lg font-black text-violet-300 block mt-0.5" x-text="(workoutTemplates.length + dietTemplates.length)"></span>
-                            <span class="text-[9px] text-neutral-500 block mt-0.5">Reusable templates</span>
+                            <span class="text-lg font-semibold text-violet-300 block mt-0.5" x-text="(workoutTemplates.length + dietTemplates.length)"></span>
+                            <span class="text-xs text-neutral-400 block mt-0.5">Reusable templates</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Client Feedback & Ratings (#4) -->
-                <div class="p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-3">
+                <div class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-3">
                     <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-white uppercase tracking-wider">Recent Client Feedback</h3>
+                        <h3 class="text-xs font-semibold text-white uppercase tracking-wider">Recent Client Feedback</h3>
                         <span class="text-[10px] text-neutral-400">Latest {{ $recentFeedbackSessions->count() }} reviews</span>
                     </div>
 
                     @if($recentFeedbackSessions->isNotEmpty())
                         <div class="space-y-2">
                             @foreach($recentFeedbackSessions as $fb)
-                                <div class="p-3 rounded-xl bg-[#0F1115] border border-neutral-800 space-y-1.5">
+                                <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-1.5">
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center gap-2 min-w-0">
-                                            <div class="w-7 h-7 rounded-lg bg-[#C5A880]/15 text-[#C5A880] font-bold text-[10px] flex items-center justify-center shrink-0">
+                                            <div class="w-7 h-7 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-semibold text-[10px] flex items-center justify-center shrink-0">
                                                 {{ $initialsOf($fb->member?->first_name ?? 'M', $fb->member?->last_name ?? '') }}
                                             </div>
                                             <div class="min-w-0">
-                                                <p class="text-xs font-bold text-white truncate">{{ $fb->member?->full_name ?? 'Client' }}</p>
+                                                <p class="text-xs font-semibold text-white truncate">{{ $fb->member?->full_name ?? 'Client' }}</p>
                                                 <p class="text-[10px] text-neutral-400 truncate">{{ $fb->session_date?->format('d M Y') }}{{ $fb->focus_area ? ' • ' . $fb->focus_area : '' }}</p>
                                             </div>
                                         </div>
                                         @if($fb->rating)
-                                            <span class="px-2 py-0.5 rounded-md bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 text-[10px] font-black shrink-0">
+                                            <span class="px-2 py-0.5 rounded-md bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold shrink-0">
                                                 ★ {{ $fb->rating }}/5
                                             </span>
                                         @endif
@@ -2182,34 +2183,34 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="p-4 rounded-xl bg-[#0F1115] border border-dashed border-neutral-800 text-center">
+                        <div class="p-4 rounded-[10px] bg-[#0D0E10] border border-dashed border-[#26282D] text-center">
                             <p class="text-xs text-neutral-400">No client ratings or feedback submitted yet.</p>
-                            <p class="text-[10px] text-neutral-500 mt-0.5">Ratings appear here automatically once members confirm &amp; rate their PT sessions.</p>
+                            <p class="text-xs text-neutral-400 mt-0.5">Ratings appear here automatically once members confirm &amp; rate their PT sessions.</p>
                         </div>
                     @endif
                 </div>
 
                 <!-- Change Password Form -->
-                <div class="p-4 rounded-2xl bg-[#171A22] border border-neutral-800 shadow-xs space-y-3">
-                    <h3 class="text-xs font-bold text-white">Change Password</h3>
+                <div class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D]  space-y-3">
+                    <h3 class="text-xs font-semibold text-white">Change Password</h3>
 
                     <form action="{{ route('trainer.profile.update-password') }}" method="POST" class="space-y-2.5">
                         @csrf
                         <div>
                             <label class="block text-[11px] font-medium text-neutral-400 mb-1">Current Password</label>
-                            <input type="password" name="current_password" required class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                            <input type="password" name="current_password" required class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[11px] font-medium text-neutral-400 mb-1">New Password</label>
-                                <input type="password" name="password" required minlength="6" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                                <input type="password" name="password" required minlength="6" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-medium text-neutral-400 mb-1">Confirm</label>
-                                <input type="password" name="password_confirmation" required minlength="6" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                                <input type="password" name="password_confirmation" required minlength="6" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             </div>
                         </div>
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-black text-xs transition-all cursor-pointer">
+                        <button type="submit" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all cursor-pointer">
                             Update password
                         </button>
                     </form>
@@ -2219,7 +2220,7 @@
                 <div>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full py-3 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-bold text-xs border border-rose-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <button type="submit" class="min-h-11 w-full py-3 rounded-[10px] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 font-semibold text-xs border border-rose-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                             <span>Sign out</span>
                         </button>
@@ -2233,20 +2234,20 @@
         <!-- ========================================================= -->
         <!-- MEMBER DETAIL SHEET (Slide-Up Drawer)                     -->
         <!-- ========================================================= -->
-        <div x-show="showMemberSheet" @click.self="showMemberSheet = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div @click.stop class="bg-[#171A22] border border-neutral-800 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[88vh] overflow-y-auto p-4 sm:p-5 pb-24 sm:pb-5 shadow-xl space-y-4">
+        <div x-show="showMemberSheet" @click.self="showMemberSheet = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div @click.stop class="bg-[#141518] border border-[#26282D] rounded-t-3xl sm:rounded-[10px] max-w-md w-full max-h-[88vh] overflow-y-auto p-4 sm:p-5 pb-24 sm:pb-5  space-y-4">
                 
                 <!-- Drawer Top Handle on Mobile -->
                 <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto sm:hidden"></div>
 
                 <!-- Header -->
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-11 h-11 rounded-xl bg-[#0F1115] text-neutral-300 font-bold text-sm flex items-center justify-center shrink-0">
+                        <div class="w-11 h-11 rounded-[10px] bg-[#0D0E10] text-neutral-300 font-semibold text-sm flex items-center justify-center shrink-0">
                             <span x-text="selectedMember?.initials"></span>
                         </div>
                         <div class="min-w-0">
-                            <h3 class="text-base sm:text-lg font-bold text-white truncate" x-text="selectedMember?.name"></h3>
+                            <h3 class="text-base sm:text-lg font-semibold text-white truncate" x-text="selectedMember?.name"></h3>
                             <p class="text-xs sm:text-[13px] text-slate-400 truncate" x-text="selectedMember?.code + (selectedMember?.phone ? ' • ' + selectedMember?.phone : '')"></p>
                         </div>
                     </div>
@@ -2257,12 +2258,12 @@
 
                 <!-- Active Package Breakdown -->
                 <div class="space-y-2">
-                    <span class="text-xs sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider">Active PT Package</span>
+                    <span class="text-xs sm:text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Active PT Package</span>
                     <template x-if="selectedMember?.active_packages?.length > 0">
-                        <div class="p-3.5 rounded-xl bg-[#0F1115] border border-neutral-800 space-y-2.5">
+                        <div class="p-3.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-2.5">
                             <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
-                                <span class="font-bold text-white truncate" x-text="selectedMember?.active_packages[0]?.name"></span>
-                                <span class="font-bold text-[#C5A880] shrink-0" x-text="selectedMember?.active_packages[0]?.remaining + ' sessions left'"></span>
+                                <span class="font-semibold text-white truncate" x-text="selectedMember?.active_packages[0]?.name"></span>
+                                <span class="font-semibold text-[#F5A524] shrink-0" x-text="selectedMember?.active_packages[0]?.remaining + ' sessions left'"></span>
                             </div>
                             <div class="flex items-center justify-between gap-2 text-xs text-slate-400">
                                 <span x-text="'Used: ' + selectedMember?.active_packages[0]?.used + ' of ' + selectedMember?.active_packages[0]?.total"></span>
@@ -2279,32 +2280,32 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">Weight &amp; Measurements</span>
+                            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider truncate">Weight &amp; Measurements</span>
                             <template x-if="selectedMember?.measurements?.length > 0">
-                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-amber-500 font-mono shrink-0" x-text="selectedMember.measurements.length + ' logs'"></span>
+                                <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-500 font-mono shrink-0" x-text="selectedMember.measurements.length + ' logs'"></span>
                             </template>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
                             <template x-if="selectedMember?.measurements?.length > 0">
                                 <button type="button" 
                                         @click="showMeasHistory = !showMeasHistory" 
-                                        class="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold transition-all cursor-pointer">
+                                        class="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-semibold transition-all cursor-pointer">
                                     <span x-text="showMeasHistory ? 'Hide History' : 'View History'"></span>
                                 </button>
                             </template>
                             <button type="button" 
                                     @click="openMeasurementModal(selectedMember)" 
-                                    class="px-2.5 py-1 rounded-lg bg-[#C5A880]/15 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] border border-amber-500/20 text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-lg bg-[#F5A524]/15 hover:bg-[#F5A524] hover:text-neutral-950 text-[#F5A524] border border-amber-500/20 text-[10px] font-semibold transition-all cursor-pointer flex items-center gap-1">
                                 <span>Log Stats</span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="p-3.5 rounded-xl bg-[#0F1115] border border-neutral-800 space-y-2.5">
+                    <div class="p-3.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-2.5">
                         <div class="flex items-center justify-between text-xs">
                             <span class="text-slate-400">Current Weight:</span>
                             <div class="flex items-center gap-2">
-                                <span class="font-black text-white" x-text="selectedMember?.latest_weight ? selectedMember.latest_weight + ' kg' : 'Not recorded'"></span>
+                                <span class="font-semibold text-white" x-text="selectedMember?.latest_weight ? selectedMember.latest_weight + ' kg' : 'Not recorded'"></span>
                                 <template x-if="selectedMember?.measurements?.[0]?.date">
                                     <span class="text-[10px] text-slate-400 font-mono" x-text="'(' + selectedMember.measurements[0].date + ')'"></span>
                                 </template>
@@ -2313,36 +2314,36 @@
 
                         <template x-if="selectedMember?.measurements?.length > 0">
                             <div class="space-y-2">
-                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 pt-1 border-t border-neutral-800 text-center">
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Waist</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.waist ? selectedMember.measurements[0].waist + ' in' : '--'"></span>
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 pt-1 border-t border-[#26282D] text-center">
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Waist</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.waist ? selectedMember.measurements[0].waist + ' in' : '--'"></span>
                                     </div>
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Chest</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.chest ? selectedMember.measurements[0].chest + ' in' : '--'"></span>
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Chest</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.chest ? selectedMember.measurements[0].chest + ' in' : '--'"></span>
                                     </div>
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Arms</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.bicep ? selectedMember.measurements[0].bicep + ' in' : '--'"></span>
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Arms</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.bicep ? selectedMember.measurements[0].bicep + ' in' : '--'"></span>
                                     </div>
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Body Fat</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.body_fat ? selectedMember.measurements[0].body_fat + '%' : '--'"></span>
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Body Fat</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.body_fat ? selectedMember.measurements[0].body_fat + '%' : '--'"></span>
                                     </div>
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Hips</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.hips ? selectedMember.measurements[0].hips + ' in' : '--'"></span>
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Hips</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.hips ? selectedMember.measurements[0].hips + ' in' : '--'"></span>
                                     </div>
-                                    <div class="p-1.5 rounded-lg bg-[#171A22] border border-neutral-800">
-                                        <span class="text-[8px] text-slate-400 block font-bold uppercase">Thighs</span>
-                                        <span class="text-[11px] font-bold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.thighs ? selectedMember.measurements[0].thighs + ' in' : '--'"></span>
+                                    <div class="p-1.5 rounded-lg bg-[#141518] border border-[#26282D]">
+                                        <span class="text-[8px] text-slate-400 block font-semibold uppercase">Thighs</span>
+                                        <span class="text-[11px] font-semibold text-neutral-200 block truncate" x-text="selectedMember?.measurements[0]?.thighs ? selectedMember.measurements[0].thighs + ' in' : '--'"></span>
                                     </div>
                                 </div>
 
                                 <template x-if="selectedMember?.measurements[0]?.notes">
                                     <div class="p-2 rounded-lg bg-amber-500/5 border border-amber-500/20 text-[10px] text-amber-500 dark:text-amber-400/90 leading-relaxed">
-                                        <span class="font-bold">Latest Note:</span> <span x-text="selectedMember.measurements[0].notes"></span>
+                                        <span class="font-semibold">Latest Note:</span> <span x-text="selectedMember.measurements[0].notes"></span>
                                     </div>
                                 </template>
                             </div>
@@ -2356,92 +2357,92 @@
                         <template x-if="showMeasHistory && selectedMember?.measurements?.length > 0">
                             <div class="pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2.5">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                                        <span>📅 Measurement Timeline History</span>
-                                        <span class="px-1.5 py-0.2 rounded text-[9px] bg-slate-200/70 dark:bg-slate-800 font-bold" x-text="selectedMember.measurements.length + ' logs'"></span>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                        <span>Measurement history</span>
+                                        <span class="px-1.5 py-0.2 rounded text-[10px] bg-slate-200/70 dark:bg-slate-800 font-semibold" x-text="selectedMember.measurements.length + ' logs'"></span>
                                     </span>
-                                    <span class="text-[9px] text-slate-400">Chronological • Newest First</span>
+                                    <span class="text-[10px] text-slate-400">Chronological • Newest First</span>
                                 </div>
 
                                 <div class="max-h-[500px] overflow-y-auto space-y-3 pr-1">
                                     <template x-for="(m, mIdx) in selectedMember.measurements" :key="m.id || m.date + mIdx">
-                                        <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#0c121e] border border-neutral-800 shadow-xs space-y-3">
+                                        <div class="p-3.5 sm:p-4 rounded-[10px] bg-white dark:bg-[#1B1D21] border border-[#26282D]  space-y-3">
                                             <!-- Entry Header Bar (Responsive: pins delete button top-right, chips wrap naturally) -->
                                             <div class="flex items-start justify-between gap-2">
                                                 <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-                                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/25 flex items-center gap-1 shrink-0">
-                                                        <span>📅</span>
+                                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/25 flex items-center gap-1 shrink-0">
+                                                        <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>
                                                         <span x-text="m.date"></span>
                                                     </span>
                                                     <template x-if="m.weight">
-                                                        <span class="px-2 py-0.5 rounded-lg text-[11px] font-black bg-[#0F1115]/90 text-white border border-slate-200/60 dark:border-slate-700/60 flex items-center gap-1 shrink-0">
+                                                        <span class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-[#0D0E10]/90 text-white border border-slate-200/60 dark:border-slate-700/60 flex items-center gap-1 shrink-0">
                                                             <span>⚖️</span>
                                                             <span x-text="m.weight + ' kg'"></span>
                                                         </span>
                                                     </template>
                                                     <template x-if="m.body_fat">
-                                                        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0" x-text="m.body_fat + '% Fat'"></span>
+                                                        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0" x-text="m.body_fat + '% Fat'"></span>
                                                     </template>
                                                     <template x-if="m.logged_by">
-                                                        <span class="text-[9px] text-slate-400 hidden sm:inline" x-text="'By ' + m.logged_by"></span>
+                                                        <span class="text-[10px] text-slate-400 hidden sm:inline" x-text="'By ' + m.logged_by"></span>
                                                     </template>
                                                 </div>
                                                 <button type="button" 
                                                         @click="deleteMeasurement(m.id)" 
                                                         class="p-1 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer text-xs shrink-0 self-start" 
                                                         title="Delete this check-in">
-                                                    🗑️
+                                                    <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></svg>
                                                 </button>
                                             </div>
 
                                             <!-- Body Metrics Grid (Organized cleanly in structured mini-tiles) -->
                                             <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-center">
                                                 <template x-if="m.waist">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Waist</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.waist + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Waist</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.waist + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.chest">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Chest</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.chest + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Chest</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.chest + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.bicep">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Arms</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.bicep + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Arms</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.bicep + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.hips">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Hips</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.hips + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Hips</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.hips + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.thighs">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Thighs</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.thighs + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Thighs</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.thighs + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.shoulders">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Shoulders</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.shoulders + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Shoulders</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.shoulders + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.calves">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Calves</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.calves + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Calves</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.calves + ' in'"></span>
                                                     </div>
                                                 </template>
                                                 <template x-if="m.neck">
-                                                    <div class="p-2 rounded-xl bg-[#0F1115]/90 border border-neutral-800">
-                                                        <span class="text-[8px] font-black uppercase tracking-wider text-slate-400 block">Neck</span>
-                                                        <span class="text-[11px] font-black text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.neck + ' in'"></span>
+                                                    <div class="p-2 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D]">
+                                                        <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Neck</span>
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100 block mt-0.5" x-text="m.neck + ' in'"></span>
                                                     </div>
                                                 </template>
                                             </div>
@@ -2457,8 +2458,8 @@
 
                                             <!-- Coach Observation Note -->
                                             <template x-if="m.notes">
-                                                <div class="p-2.5 rounded-xl bg-[#0F1115]/70 border border-neutral-800 text-[11px] text-slate-600 dark:text-slate-300 italic flex items-start gap-2">
-                                                    <span class="text-xs shrink-0">💬</span>
+                                                <div class="p-2.5 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] text-[11px] text-slate-600 dark:text-slate-300 italic flex items-start gap-2">
+                                                    <span class="text-xs shrink-0"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H5l2-4a8 8 0 1 1 14-4z"/></svg></span>
                                                     <span x-text="'&ldquo;' + m.notes + '&rdquo;'"></span>
                                                 </div>
                                             </template>
@@ -2472,19 +2473,19 @@
 
                 <!-- Workout & Nutrition Plans Card -->
                 <div class="space-y-2">
-                    <span class="text-xs sm:text-[13px] font-bold text-slate-400 uppercase tracking-wider">Workout &amp; Diet Coaching</span>
+                    <span class="text-xs sm:text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Workout &amp; Diet Coaching</span>
                     <div class="space-y-2.5">
                         <!-- Workout Plan -->
-                        <div class="p-3.5 rounded-xl bg-[#0F1115] border border-neutral-800 space-y-2.5">
+                        <div class="p-3.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-2.5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="text-[11px] sm:text-xs text-sky-400 font-bold block uppercase tracking-wider">Workout Plan</span>
+                                        <span class="text-[11px] sm:text-xs text-sky-400 font-semibold block uppercase tracking-wider">Workout Plan</span>
                                         <template x-if="selectedMember?.active_workout?.exercises_count">
                                             <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-sky-500/15 text-sky-400" x-text="selectedMember.active_workout.exercises_count + ' Exercises'"></span>
                                         </template>
                                     </div>
-                                    <h4 class="text-sm sm:text-[15px] font-bold text-white truncate mt-0.5" x-text="selectedMember?.active_workout?.title || 'None assigned yet'"></h4>
+                                    <h4 class="text-sm sm:text-[15px] font-semibold text-white truncate mt-0.5" x-text="selectedMember?.active_workout?.title || 'None assigned yet'"></h4>
                                 </div>
                                 <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
                                     <template x-if="selectedMember?.active_workout?.exercises?.length > 0">
@@ -2496,26 +2497,26 @@
                                     </template>
                                     <button type="button" 
                                             @click="openWorkoutAssignModal()" 
-                                            class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500 hover:text-white text-sky-400 border border-sky-500/20 text-[11px] sm:text-xs font-bold transition-all cursor-pointer">
+                                            class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500 hover:text-white text-sky-400 border border-sky-500/20 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer">
                                         <span x-text="selectedMember?.active_workout ? 'Change' : 'Assign'"></span>
                                     </button>
                                     <template x-if="selectedMember?.active_workout">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             <button type="button" 
                                                     @click.stop="openCloneModal('workout')" 
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500 hover:text-white text-violet-300 border border-violet-500/25 text-[11px] sm:text-xs font-bold transition-all cursor-pointer" title="Clone to another client">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500 hover:text-white text-violet-300 border border-violet-500/25 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer" title="Clone to another client">
                                                 Clone
                                             </button>
                                             <button type="button" 
                                                     @click.stop="savePlanAsTemplate('workout')" 
                                                     :disabled="templateSubmitting"
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[#C5A880]/10 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] border border-[#C5A880]/30 text-[11px] sm:text-xs font-bold transition-all cursor-pointer disabled:opacity-50" title="Save as reusable template">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[#F5A524]/10 hover:bg-[#F5A524] hover:text-neutral-950 text-[#F5A524] border border-[#F5A524]/30 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer disabled:opacity-50" title="Save as reusable template">
                                                 Save Template
                                             </button>
                                             <button type="button" 
                                                     @click.stop="removeWorkoutPlan()" 
                                                     :disabled="planSubmitting"
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 border border-rose-500/20 text-[11px] sm:text-xs font-bold transition-all cursor-pointer" title="Remove Workout Routine">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 border border-rose-500/20 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer" title="Remove Workout Routine">
                                                 Remove
                                             </button>
                                         </div>
@@ -2525,15 +2526,15 @@
 
                             <!-- Expandable Routine Details -->
                             <template x-if="showWorkoutDetails && selectedMember?.active_workout?.exercises?.length > 0">
-                                <div class="pt-2 border-t border-neutral-800 space-y-1.5">
+                                <div class="pt-2 border-t border-[#26282D] space-y-1.5">
                                     <template x-for="ex in selectedMember.active_workout.exercises" :key="ex.name + ex.day">
-                                        <div class="p-2.5 rounded-lg bg-[#171A22] border border-neutral-800 text-xs sm:text-[13px] flex items-center justify-between gap-2">
+                                        <div class="p-2.5 rounded-lg bg-[#141518] border border-[#26282D] text-xs sm:text-[13px] flex items-center justify-between gap-2">
                                             <div class="min-w-0">
-                                                <span class="text-[10px] sm:text-[11px] text-sky-400 font-bold block" x-text="workoutWeekday(ex.day)"></span>
+                                                <span class="text-[10px] sm:text-[11px] text-sky-400 font-semibold block" x-text="workoutWeekday(ex.day)"></span>
                                                 <span class="font-semibold text-neutral-200 truncate block text-xs sm:text-[13px]" x-text="ex.name"></span>
                                             </div>
                                             <div class="text-right shrink-0">
-                                                <span class="font-mono text-[11px] sm:text-xs text-neutral-300 font-bold block" x-text="(ex.tracking_type === 'time' ? ex.sets + ' rounds / ' + ex.duration_seconds + ' sec' : ex.sets + ' sets / ' + ex.reps)"></span>
+                                                <span class="font-mono text-[11px] sm:text-xs text-neutral-300 font-semibold block" x-text="(ex.tracking_type === 'time' ? ex.sets + ' rounds / ' + ex.duration_seconds + ' sec' : ex.sets + ' sets / ' + ex.reps)"></span>
                                                 <span class="text-[10px] sm:text-[11px] text-slate-400 block" x-text="ex.rest ? ex.rest + 's rest' : ''"></span>
                                             </div>
                                         </div>
@@ -2543,16 +2544,16 @@
                         </div>
 
                         <!-- Diet Plan -->
-                        <div class="p-3.5 rounded-xl bg-[#0F1115] border border-neutral-800 space-y-2.5">
+                        <div class="p-3.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-2.5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="text-[11px] sm:text-xs text-emerald-400 font-bold block uppercase tracking-wider">Diet / Nutrition Plan</span>
+                                        <span class="text-[11px] sm:text-xs text-emerald-400 font-semibold block uppercase tracking-wider">Diet / Nutrition Plan</span>
                                         <template x-if="selectedMember?.active_diet?.calories">
                                             <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-semibold bg-emerald-500/15 text-emerald-400" x-text="selectedMember.active_diet.calories + ' kcal • ' + selectedMember.active_diet.protein + 'g P'"></span>
                                         </template>
                                     </div>
-                                    <h4 class="text-sm sm:text-[15px] font-bold text-white truncate mt-0.5" x-text="selectedMember?.active_diet?.title || 'None assigned yet'"></h4>
+                                    <h4 class="text-sm sm:text-[15px] font-semibold text-white truncate mt-0.5" x-text="selectedMember?.active_diet?.title || 'None assigned yet'"></h4>
                                 </div>
                                 <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
                                     <template x-if="selectedMember?.active_diet?.meals?.length > 0">
@@ -2564,26 +2565,26 @@
                                     </template>
                                     <button type="button" 
                                             @click="openDietAssignModal()" 
-                                            class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-emerald-500/20 text-[11px] sm:text-xs font-bold transition-all cursor-pointer">
+                                            class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-400 border border-emerald-500/20 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer">
                                         <span x-text="selectedMember?.active_diet ? 'Change' : 'Assign'"></span>
                                     </button>
                                     <template x-if="selectedMember?.active_diet">
                                         <div class="flex items-center gap-1.5 flex-wrap">
                                             <button type="button" 
                                                     @click.stop="openCloneModal('diet')" 
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500 hover:text-white text-violet-300 border border-violet-500/25 text-[11px] sm:text-xs font-bold transition-all cursor-pointer" title="Clone to another client">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500 hover:text-white text-violet-300 border border-violet-500/25 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer" title="Clone to another client">
                                                 Clone
                                             </button>
                                             <button type="button" 
                                                     @click.stop="savePlanAsTemplate('diet')" 
                                                     :disabled="templateSubmitting"
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[#C5A880]/10 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] border border-[#C5A880]/30 text-[11px] sm:text-xs font-bold transition-all cursor-pointer disabled:opacity-50" title="Save as reusable template">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-[#F5A524]/10 hover:bg-[#F5A524] hover:text-neutral-950 text-[#F5A524] border border-[#F5A524]/30 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer disabled:opacity-50" title="Save as reusable template">
                                                 Save Template
                                             </button>
                                             <button type="button" 
                                                     @click.stop="removeDietPlan()" 
                                                     :disabled="planSubmitting"
-                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 border border-rose-500/20 text-[11px] sm:text-xs font-bold transition-all cursor-pointer" title="Remove Diet Plan">
+                                                    class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 border border-rose-500/20 text-[11px] sm:text-xs font-semibold transition-all cursor-pointer" title="Remove Diet Plan">
                                                 Remove
                                             </button>
                                         </div>
@@ -2593,21 +2594,21 @@
 
                             <!-- Expandable Meals Details -->
                             <template x-if="showDietDetails && selectedMember?.active_diet?.meals?.length > 0">
-                                <div class="pt-2 border-t border-neutral-800 space-y-2">
+                                <div class="pt-2 border-t border-[#26282D] space-y-2">
                                     <template x-for="(ml, mIdx) in selectedMember.active_diet.meals" :key="mIdx + (ml.name || '')">
-                                        <div class="p-2.5 rounded-xl bg-[#171A22] border border-neutral-800 text-xs space-y-1.5">
+                                        <div class="p-2.5 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs space-y-1.5">
                                             <div class="flex items-center justify-between gap-2">
                                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400" x-text="ml.type ? ml.type.replace('_', ' ') : 'MEAL'"></span>
+                                                    <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400" x-text="ml.type ? ml.type.replace('_', ' ') : 'MEAL'"></span>
                                                     <span class="text-[10px] text-slate-400 font-mono" x-text="ml.time"></span>
-                                                    <span class="font-bold text-white" x-text="ml.name"></span>
+                                                    <span class="font-semibold text-white" x-text="ml.name"></span>
                                                 </div>
                                                 <template x-if="ml.calories">
-                                                    <span class="font-bold text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 shrink-0" x-text="ml.calories + ' kcal'"></span>
+                                                    <span class="font-semibold text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 shrink-0" x-text="ml.calories + ' kcal'"></span>
                                                 </template>
                                             </div>
                                             <!-- Macros Pills -->
-                                            <div class="flex items-center gap-1 flex-wrap text-[9px] font-bold">
+                                            <div class="flex items-center gap-1 flex-wrap text-[10px] font-semibold">
                                                 <template x-if="ml.protein">
                                                     <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400" x-text="ml.protein + 'g Protein'"></span>
                                                 </template>
@@ -2619,7 +2620,7 @@
                                                 </template>
                                             </div>
                                             <!-- Foods List -->
-                                            <div class="p-2 rounded-lg bg-[#0F1115]/60 border border-neutral-800 text-[11px] text-neutral-300 whitespace-pre-line leading-relaxed" x-text="ml.description"></div>
+                                            <div class="p-2 rounded-lg bg-[#0D0E10]/60 border border-[#26282D] text-[11px] text-neutral-300 whitespace-pre-line leading-relaxed" x-text="ml.description"></div>
                                         </div>
                                     </template>
                                 </div>
@@ -2630,11 +2631,11 @@
 
                 <!-- Recent Sessions Timeline -->
                 <div class="space-y-2">
-                    <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Recent Workout History</span>
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Recent Workout History</span>
                     <template x-if="selectedMember?.recent_sessions?.length > 0">
                         <div class="space-y-1.5">
                             <template x-for="s in selectedMember.recent_sessions" :key="s.date + s.duration">
-                                <div class="flex items-center justify-between text-xs p-2.5 rounded-lg bg-[#0F1115] border border-neutral-800">
+                                <div class="flex items-center justify-between text-xs p-2.5 rounded-lg bg-[#0D0E10] border border-[#26282D]">
                                     <div>
                                         <span class="font-medium text-neutral-200 block" x-text="s.focus + ' (' + s.duration + 'm)'"></span>
                                         <span class="text-[10px] text-slate-400" x-text="s.date"></span>
@@ -2653,14 +2654,14 @@
                 <div class="pt-2 grid grid-cols-2 gap-2.5">
                     <button type="button" 
                             @click="openLogger(selectedMember?.id, selectedMember?.active_packages?.[0]?.id)"
-                            class="py-3.5 px-3 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs">
+                            class="min-h-11 py-3.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer ">
                         <svg class="w-4 h-4 text-neutral-950 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                         <span class="truncate">Log Session</span>
                     </button>
                     <button type="button" 
                             @click="openScheduleModal(selectedMember?.id, selectedMember?.active_packages?.[0]?.id)"
-                            class="py-3.5 px-3 rounded-xl bg-[#0F1115] hover:bg-neutral-800 border border-[#C5A880]/40 text-[#C5A880] font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        <span>📅</span>
+                            class="min-h-11 py-3.5 px-3 rounded-[10px] bg-[#0D0E10] hover:bg-neutral-800 border border-[#F5A524]/40 text-[#F5A524] font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>
                         <span class="truncate">Book Slot</span>
                     </button>
                 </div>
@@ -2670,14 +2671,14 @@
         <!-- ========================================================= -->
         <!-- SCHEDULE UPCOMING PT SESSION MODAL (Slot Booking)         -->
         <!-- ========================================================= -->
-        <div x-show="showScheduleModal" @click.self="showScheduleModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div @click.stop class="bg-[#171A22] border border-neutral-800 text-[#F4EDE4] rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-2xl space-y-4">
+        <div x-show="showScheduleModal" @click.self="showScheduleModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div @click.stop class="bg-[#141518] border border-[#26282D] text-[#ECEDEF] rounded-t-3xl sm:rounded-[10px] max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6  space-y-4">
                 
                 <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto sm:hidden"></div>
 
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div>
-                        <h3 class="text-sm font-black text-white">📅 Book Upcoming PT Slot</h3>
+                        <h3 class="text-sm font-semibold text-white">Book PT session</h3>
                         <p class="text-[11px] text-neutral-400 mt-0.5">Reserve a coaching slot on client &amp; trainer calendar</p>
                     </div>
                     <button type="button" @click="showScheduleModal = false" class="p-1 rounded-lg text-neutral-400 hover:text-white cursor-pointer">
@@ -2686,19 +2687,19 @@
                 </div>
 
                 <template x-if="scheduleError">
-                    <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-1.5">
+                    <div class="p-2.5 rounded-[10px] bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-1.5">
                         <span>⚠️</span>
                         <span x-text="scheduleError"></span>
                     </div>
                 </template>
 
-                <div class="space-y-3.5">
+                <div class="space-y-4">
                     <!-- Client Selector -->
                     <div>
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">
                             Assigned Member <span class="text-rose-500">*</span>
                         </label>
-                        <select x-model="scheduleForm.member_id" @change="onScheduleMemberSelect()" class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <select x-model="scheduleForm.member_id" @change="onScheduleMemberSelect()" class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             <option value="">Select assigned client</option>
                             @foreach($assignedMembers as $m)
                                 @php
@@ -2717,7 +2718,7 @@
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">
                             Active PT Package <span class="text-rose-500">*</span>
                         </label>
-                        <select x-model="scheduleForm.member_pt_package_id" class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <select x-model="scheduleForm.member_pt_package_id" class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             <option value="">Select package</option>
                             @foreach($eligiblePackages as $pkg)
                                 <option value="{{ $pkg->id }}">
@@ -2731,24 +2732,24 @@
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-neutral-300 mb-1">Date <span class="text-rose-500">*</span></label>
-                            <input type="date" x-model="scheduleForm.session_date" min="{{ now()->toDateString() }}" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                            <input type="date" x-model="scheduleForm.session_date" min="{{ now()->toDateString() }}" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-neutral-300 mb-1">Start Time <span class="text-rose-500">*</span></label>
-                            <input type="time" x-model="scheduleForm.start_time" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                            <input type="time" x-model="scheduleForm.start_time" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                         </div>
                     </div>
 
                     <!-- Quick Date & Time Chips -->
                     <div class="space-y-1.5">
                         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10px]">
-                            <button type="button" @click="scheduleForm.session_date = '{{ now()->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->toDateString() }}' ? 'bg-[#C5A880]/20 text-[#C5A880] border-[#C5A880]/40' : 'bg-[#0F1115] text-neutral-400 border-neutral-800'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">Today</button>
-                            <button type="button" @click="scheduleForm.session_date = '{{ now()->addDay()->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->addDay()->toDateString() }}' ? 'bg-[#C5A880]/20 text-[#C5A880] border-[#C5A880]/40' : 'bg-[#0F1115] text-neutral-400 border-neutral-800'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">Tomorrow</button>
-                            <button type="button" @click="scheduleForm.session_date = '{{ now()->addDays(2)->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->addDays(2)->toDateString() }}' ? 'bg-[#C5A880]/20 text-[#C5A880] border-[#C5A880]/40' : 'bg-[#0F1115] text-neutral-400 border-neutral-800'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">+2 Days</button>
+                            <button type="button" @click="scheduleForm.session_date = '{{ now()->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->toDateString() }}' ? 'bg-[#F5A524]/20 text-[#F5A524] border-[#F5A524]/40' : 'bg-[#0D0E10] text-neutral-400 border-[#26282D]'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">Today</button>
+                            <button type="button" @click="scheduleForm.session_date = '{{ now()->addDay()->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->addDay()->toDateString() }}' ? 'bg-[#F5A524]/20 text-[#F5A524] border-[#F5A524]/40' : 'bg-[#0D0E10] text-neutral-400 border-[#26282D]'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">Tomorrow</button>
+                            <button type="button" @click="scheduleForm.session_date = '{{ now()->addDays(2)->toDateString() }}'" :class="scheduleForm.session_date === '{{ now()->addDays(2)->toDateString() }}' ? 'bg-[#F5A524]/20 text-[#F5A524] border-[#F5A524]/40' : 'bg-[#0D0E10] text-neutral-400 border-[#26282D]'" class="px-2.5 py-1 rounded-lg border font-semibold shrink-0 cursor-pointer">+2 Days</button>
                         </div>
                         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-[10px]">
                             <template x-for="slot in ['07:00', '08:00', '09:00', '17:00', '18:00', '19:00']" :key="slot">
-                                <button type="button" @click="scheduleForm.start_time = slot" :class="scheduleForm.start_time === slot ? 'bg-[#C5A880]/20 text-[#C5A880] border-[#C5A880]/40' : 'bg-[#0F1115] text-neutral-400 border-neutral-800'" class="px-2.5 py-1 rounded-lg border font-mono shrink-0 cursor-pointer" x-text="slot"></button>
+                                <button type="button" @click="scheduleForm.start_time = slot" :class="scheduleForm.start_time === slot ? 'bg-[#F5A524]/20 text-[#F5A524] border-[#F5A524]/40' : 'bg-[#0D0E10] text-neutral-400 border-[#26282D]'" class="px-2.5 py-1 rounded-lg border font-mono shrink-0 cursor-pointer" x-text="slot"></button>
                             </template>
                         </div>
                     </div>
@@ -2758,7 +2759,7 @@
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">Duration</label>
                         <div class="grid grid-cols-4 gap-2 text-xs">
                             <template x-for="d in [30, 45, 60, 90]" :key="d">
-                                <button type="button" @click="scheduleForm.duration_minutes = d" :class="scheduleForm.duration_minutes == d ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#0F1115] text-neutral-300 border border-neutral-800'" class="py-2 rounded-xl transition-all cursor-pointer" x-text="d + 'm'"></button>
+                                <button type="button" @click="scheduleForm.duration_minutes = d" :class="scheduleForm.duration_minutes == d ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#0D0E10] text-neutral-300 border border-[#26282D]'" class="py-2 rounded-[10px] transition-all cursor-pointer" x-text="d + 'm'"></button>
                             </template>
                         </div>
                     </div>
@@ -2766,10 +2767,10 @@
                     <!-- Workout Focus -->
                     <div>
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">Workout Focus</label>
-                        <input type="text" x-model="scheduleForm.focus_area" placeholder="e.g. Strength Training, Upper Body" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none mb-1.5">
+                        <input type="text" x-model="scheduleForm.focus_area" placeholder="e.g. Strength Training, Upper Body" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none mb-1.5">
                         <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
                             <template x-for="tag in focusTags" :key="tag">
-                                <button type="button" @click="scheduleForm.focus_area = tag" class="px-2.5 py-1 rounded-lg bg-[#0F1115] border border-neutral-800 text-[10px] text-neutral-300 hover:border-[#C5A880]/60 shrink-0 cursor-pointer" x-text="tag"></button>
+                                <button type="button" @click="scheduleForm.focus_area = tag" class="px-2.5 py-1 rounded-lg bg-[#0D0E10] border border-[#26282D] text-[10px] text-neutral-300 hover:border-[#F5A524]/60 shrink-0 cursor-pointer" x-text="tag"></button>
                             </template>
                         </div>
                     </div>
@@ -2779,7 +2780,7 @@
                         <button type="button" 
                                 @click="submitScheduleSession()" 
                                 :disabled="scheduleSubmitting"
-                                class="w-full py-3.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#C5A880]/20 disabled:opacity-50">
+                                class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer   disabled:opacity-50">
                             <span x-text="scheduleSubmitting ? 'Booking Slot...' : 'Confirm & Book PT Slot'"></span>
                         </button>
                     </div>
@@ -2790,15 +2791,15 @@
         <!-- ========================================================= -->
         <!-- TWO-SCREEN PT SESSION LOGGER (Compact Sheet & QR View)    -->
         <!-- ========================================================= -->
-        <div x-show="showLoggerModal" @click.self="showLoggerModal = false; stopPolling()" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div @click.stop class="bg-[#171A22] border border-neutral-800 text-[#F4EDE4] rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4">
+        <div x-show="showLoggerModal" @click.self="showLoggerModal = false; stopPolling()" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div @click.stop class="bg-[#141518] border border-[#26282D] text-[#ECEDEF] rounded-t-3xl sm:rounded-[10px] max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6  space-y-4">
                 
                 <!-- Drag handle on mobile -->
                 <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto sm:hidden"></div>
 
                 <!-- Modal Top Bar -->
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
-                    <h3 class="text-sm font-bold text-white" x-text="loggerStep === 'form' ? 'Log PT session' : 'Waiting for member confirmation'"></h3>
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
+                    <h3 class="text-sm font-semibold text-white" x-text="loggerStep === 'form' ? 'Log PT session' : 'Waiting for member confirmation'"></h3>
                     <button type="button" @click="showLoggerModal = false; stopPolling()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -2806,7 +2807,7 @@
 
                 <!-- Error Alert in Modal -->
                 <template x-if="loggerError">
-                    <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-1.5">
+                    <div class="p-2.5 rounded-[10px] bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs flex items-center gap-1.5">
                         <span>⚠️</span>
                         <span x-text="loggerError"></span>
                     </div>
@@ -2815,14 +2816,14 @@
                 <!-- ===================================================== -->
                 <!-- SCREEN 1: COMPACT LOGGING FORM                        -->
                 <!-- ===================================================== -->
-                <div x-show="loggerStep === 'form'" class="space-y-3.5">
+                <div x-show="loggerStep === 'form'" class="space-y-4">
                     
                     <!-- Member Selector -->
                     <div>
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">
                             Assigned Member <span class="text-rose-500">*</span>
                         </label>
-                        <select x-model="loggerForm.member_id" @change="onMemberSelect()" class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <select x-model="loggerForm.member_id" @change="onMemberSelect()" class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             <option value="">Select assigned client</option>
                             @foreach($assignedMembers as $m)
                                 @php
@@ -2841,7 +2842,7 @@
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">
                             Active PT Package <span class="text-rose-500">*</span>
                         </label>
-                        <select x-model="loggerForm.member_pt_package_id" class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <select x-model="loggerForm.member_pt_package_id" class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             <option value="">Select package</option>
                             @foreach($eligiblePackages as $pkg)
                                 <option value="{{ $pkg->id }}">
@@ -2857,10 +2858,10 @@
                             Duration
                         </label>
                         <div class="grid grid-cols-4 gap-2 text-xs">
-                            <button type="button" @click="loggerForm.duration_minutes = 30" :class="loggerForm.duration_minutes == 30 ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#0F1115] text-neutral-300 border border-neutral-800'" class="py-2 rounded-xl transition-all cursor-pointer">30m</button>
-                            <button type="button" @click="loggerForm.duration_minutes = 45" :class="loggerForm.duration_minutes == 45 ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#0F1115] text-neutral-300 border border-neutral-800'" class="py-2 rounded-xl transition-all cursor-pointer">45m</button>
-                            <button type="button" @click="loggerForm.duration_minutes = 60" :class="loggerForm.duration_minutes == 60 ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#0F1115] text-neutral-300 border border-neutral-800'" class="py-2 rounded-xl transition-all cursor-pointer">60m</button>
-                            <button type="button" @click="loggerForm.duration_minutes = 90" :class="loggerForm.duration_minutes == 90 ? 'bg-[#C5A880] text-neutral-950 font-bold' : 'bg-[#0F1115] text-neutral-300 border border-neutral-800'" class="py-2 rounded-xl transition-all cursor-pointer">90m</button>
+                            <button type="button" @click="loggerForm.duration_minutes = 30" :class="loggerForm.duration_minutes == 30 ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#0D0E10] text-neutral-300 border border-[#26282D]'" class="py-2 rounded-[10px] transition-all cursor-pointer">30m</button>
+                            <button type="button" @click="loggerForm.duration_minutes = 45" :class="loggerForm.duration_minutes == 45 ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#0D0E10] text-neutral-300 border border-[#26282D]'" class="py-2 rounded-[10px] transition-all cursor-pointer">45m</button>
+                            <button type="button" @click="loggerForm.duration_minutes = 60" :class="loggerForm.duration_minutes == 60 ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#0D0E10] text-neutral-300 border border-[#26282D]'" class="py-2 rounded-[10px] transition-all cursor-pointer">60m</button>
+                            <button type="button" @click="loggerForm.duration_minutes = 90" :class="loggerForm.duration_minutes == 90 ? 'bg-[#F5A524] text-neutral-950 font-semibold' : 'bg-[#0D0E10] text-neutral-300 border border-[#26282D]'" class="py-2 rounded-[10px] transition-all cursor-pointer">90m</button>
                         </div>
                     </div>
 
@@ -2869,14 +2870,14 @@
                         <label class="block text-xs font-semibold text-neutral-300 mb-1">
                             Workout Focus
                         </label>
-                        <input type="text" x-model="loggerForm.focus_area" placeholder="e.g. Strength Training, Core, Leg Day" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none mb-1.5">
+                        <input type="text" x-model="loggerForm.focus_area" placeholder="e.g. Strength Training, Core, Leg Day" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none mb-1.5">
                         
                         <!-- Quick Suggestion Chips -->
                         <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
                             <template x-for="tag in focusTags" :key="tag">
                                 <button type="button" 
                                         @click="loggerForm.focus_area = tag" 
-                                        :class="loggerForm.focus_area === tag ? 'bg-[#C5A880]/20 text-[#C5A880] border-[#C5A880]/40' : 'bg-[#0F1115] text-neutral-400 border-neutral-800'" 
+                                        :class="loggerForm.focus_area === tag ? 'bg-[#F5A524]/20 text-[#F5A524] border-[#F5A524]/40' : 'bg-[#0D0E10] text-neutral-400 border-[#26282D]'" 
                                         class="px-2 py-1 rounded-lg text-[10px] font-medium border transition-colors shrink-0 cursor-pointer" 
                                         x-text="tag">
                                 </button>
@@ -2889,7 +2890,7 @@
                         <button type="button" 
                                 @click="submitLogger()" 
                                 :disabled="loggerSubmitting || !loggerForm.member_id || !loggerForm.member_pt_package_id" 
-                                class="w-full py-3.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] active:scale-[0.98] text-neutral-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-lg shadow-[#C5A880]/20">
+                                class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50  ">
                             <template x-if="loggerSubmitting">
                                 <svg class="w-4 h-4 animate-spin text-neutral-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                             </template>
@@ -2905,7 +2906,7 @@
                     
                     <!-- Member & Session Summary -->
                     <div class="space-y-0.5">
-                        <h2 class="text-base font-bold text-white" x-text="loggerSession.memberName"></h2>
+                        <h2 class="text-base font-semibold text-white" x-text="loggerSession.memberName"></h2>
                         <p class="text-xs text-neutral-400">
                             <span x-text="loggerSession.packageName"></span> &bull; 
                             <span x-text="loggerSession.duration + ' mins'"></span>
@@ -2914,17 +2915,17 @@
 
                     <!-- RESULT A: CONFIRMED -->
                     <template x-if="loggerSession.status === 'CONFIRMED' || loggerSession.status === 'COMPLETED'">
-                        <div class="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-3">
-                            <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto text-xl font-bold">
+                        <div class="p-5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/30 space-y-3">
+                            <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto text-xl font-semibold">
                                 ✓
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold text-emerald-600 dark:text-emerald-400">Session confirmed!</h3>
+                                <h3 class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Session confirmed!</h3>
                                 <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                                     1 session deducted from member's balance.
                                 </p>
                             </div>
-                            <button type="button" @click="showLoggerModal = false; window.location.reload()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all cursor-pointer">
+                            <button type="button" @click="showLoggerModal = false; window.location.reload()" class="min-h-11 w-full py-2.5 rounded-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all cursor-pointer">
                                 Done
                             </button>
                         </div>
@@ -2932,17 +2933,17 @@
 
                     <!-- RESULT B: ISSUE REPORTED -->
                     <template x-if="loggerSession.status === 'ISSUE_REPORTED'">
-                        <div class="p-5 rounded-2xl bg-rose-500/10 border border-rose-500/30 space-y-3">
-                            <div class="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto text-xl font-bold">
+                        <div class="p-5 rounded-[10px] bg-rose-500/10 border border-rose-500/30 space-y-3">
+                            <div class="w-12 h-12 rounded-full bg-rose-500 text-white flex items-center justify-center mx-auto text-xl font-semibold">
                                 ⚠️
                             </div>
                             <div>
-                                <h3 class="text-sm font-bold text-rose-600 dark:text-rose-400">Issue reported</h3>
+                                <h3 class="text-sm font-semibold text-rose-600 dark:text-rose-400">Issue reported</h3>
                                 <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                                     The session has been sent to the manager for review. No sessions deducted.
                                 </p>
                             </div>
-                            <button type="button" @click="showLoggerModal = false; window.location.reload()" class="w-full py-2.5 rounded-xl bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer">
+                            <button type="button" @click="showLoggerModal = false; window.location.reload()" class="min-h-11 w-full py-2.5 rounded-[10px] bg-slate-800 text-white font-semibold text-xs transition-all cursor-pointer">
                                 Done
                             </button>
                         </div>
@@ -2952,22 +2953,22 @@
                     <template x-if="loggerSession.status === 'PENDING'">
                         <div class="space-y-3">
                             <!-- High Contrast QR Code -->
-                            <div class="inline-block p-3 rounded-2xl bg-white border-2 border-slate-900 shadow-sm">
+                            <div class="inline-block p-3 rounded-[10px] bg-white border-2 border-slate-900 ">
                                 <img :src="'https://quickchart.io/qr?size=240&margin=2&text=' + encodeURIComponent(loggerSession.confirmUrl)"
                                      x-on:error="$event.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=4&data=' + encodeURIComponent(loggerSession.confirmUrl)" 
                                      alt="PT Session QR" 
                                      class="w-52 h-52 sm:w-60 sm:h-60 mx-auto object-contain">
                                 
                                 <div class="mt-2 pt-2 border-t border-slate-100 text-center">
-                                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Session PIN</span>
-                                    <div class="text-base font-mono font-black text-slate-900 tracking-widest mt-0.5" x-text="loggerSession.otpCode"></div>
+                                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Session PIN</span>
+                                    <div class="text-base font-mono font-semibold text-slate-900 tracking-widest mt-0.5" x-text="loggerSession.otpCode"></div>
                                 </div>
                             </div>
 
                             <!-- Explanatory note -->
                             <div class="space-y-1">
-                                <div class="flex items-center justify-center gap-1.5 text-xs font-semibold text-[#C5A880]">
-                                    <span class="w-2 h-2 rounded-full bg-[#C5A880] animate-pulse"></span>
+                                <div class="flex items-center justify-center gap-1.5 text-xs font-semibold text-[#F5A524]">
+                                    <span class="w-2 h-2 rounded-full bg-[#F5A524] "></span>
                                     <span>Waiting for member confirmation...</span>
                                 </div>
                                 <p class="text-[11px] text-neutral-400 max-w-xs mx-auto">
@@ -2977,10 +2978,10 @@
 
                             <!-- Secondary Actions -->
                             <div class="flex items-center justify-center gap-2 pt-1 text-xs">
-                                <button type="button" @click="refreshQr()" :disabled="loggerSubmitting" class="px-3 py-1.5 rounded-lg bg-[#0F1115] hover:bg-neutral-800 hover:text-white text-neutral-300 font-medium transition-all border border-neutral-800 cursor-pointer">
+                                <button type="button" @click="refreshQr()" :disabled="loggerSubmitting" class="px-3 py-1.5 rounded-lg bg-[#0D0E10] hover:bg-neutral-800 hover:text-white text-neutral-300 font-medium transition-all border border-[#26282D] cursor-pointer">
                                     Refresh QR
                                 </button>
-                                <button type="button" @click="copyLink()" class="px-3 py-1.5 rounded-lg bg-[#0F1115] hover:bg-neutral-800 hover:text-white text-neutral-300 font-medium transition-all border border-neutral-800 cursor-pointer">
+                                <button type="button" @click="copyLink()" class="px-3 py-1.5 rounded-lg bg-[#0D0E10] hover:bg-neutral-800 hover:text-white text-neutral-300 font-medium transition-all border border-[#26282D] cursor-pointer">
                                     Copy Link
                                 </button>
                                 <button type="button" @click="cancelSession(loggerSession.id)" class="px-3 py-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 font-medium transition-all cursor-pointer">
@@ -2998,14 +2999,14 @@
         <!-- ========================================================= -->
         <!-- MODAL 1: QUICK MEASUREMENTS LOGGING                       -->
         <!-- ========================================================= -->
-        <div x-show="showMeasurementModal" @click.self="showMeasurementModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div @click.stop class="bg-[#171A22] border border-neutral-800 text-[#F4EDE4] rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4">
+        <div x-show="showMeasurementModal" @click.self="showMeasurementModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div @click.stop class="bg-[#141518] border border-[#26282D] text-[#ECEDEF] rounded-t-3xl sm:rounded-[10px] max-w-lg w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6  space-y-4">
                 <!-- Mobile drag bar -->
                 <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto sm:hidden"></div>
 
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div>
-                        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                        <h3 class="text-sm font-semibold text-white flex items-center gap-1.5">
                             <span>⚖️ Log Body Measurements</span>
                         </h3>
                         <p class="text-[11px] text-slate-400" x-text="'For ' + selectedMember?.name"></p>
@@ -3015,92 +3016,92 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="submitMeasurement()" class="space-y-3.5">
+                <form @submit.prevent="submitMeasurement()" class="space-y-4">
                     
                     <!-- Date Picker (Select Date for measurement) -->
-                    <div class="p-2.5 rounded-xl bg-[#C5A880]/10 border border-[#C5A880]/25 flex items-center justify-between gap-3">
+                    <div class="p-2.5 rounded-[10px] bg-[#F5A524]/10 border border-[#F5A524]/25 flex items-center justify-between gap-3">
                         <div class="flex items-center gap-2">
-                            <span class="text-base">📅</span>
-                            <label class="text-[11px] font-bold text-neutral-200">Measurement Date *</label>
+                            <span class="text-base"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg></span>
+                            <label class="text-[11px] font-semibold text-neutral-200">Measurement Date *</label>
                         </div>
-                        <input type="date" required x-model="measurementForm.date" class="px-3 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white font-mono font-bold focus:outline-none focus:border-[#C5A880]">
+                        <input type="date" required x-model="measurementForm.date" class="px-3 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white font-mono font-semibold focus:outline-none focus:border-[#F5A524]">
                     </div>
 
                     <!-- Core Metrics: Weight & Body Fat -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-300 mb-1">Weight (kg) *</label>
-                            <input type="number" step="0.1" required x-model="measurementForm.weight" placeholder="e.g. 74.5" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                            <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Weight (kg) *</label>
+                            <input type="number" step="0.1" required x-model="measurementForm.weight" placeholder="e.g. 74.5" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-neutral-300 mb-1">Body Fat %</label>
-                            <input type="number" step="0.1" x-model="measurementForm.body_fat" placeholder="e.g. 17.5" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                            <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Body Fat %</label>
+                            <input type="number" step="0.1" x-model="measurementForm.body_fat" placeholder="e.g. 17.5" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                         </div>
                     </div>
 
                     <!-- Upper Body Metrics -->
                     <div class="space-y-1">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Upper Body (inches)</span>
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Upper Body (inches)</span>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Waist (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.waist" placeholder="e.g. 32" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Waist (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.waist" placeholder="e.g. 32" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Chest (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.chest" placeholder="e.g. 39" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Chest (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.chest" placeholder="e.g. 39" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Bicep / Arms (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.bicep" placeholder="e.g. 14.5" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Bicep / Arms (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.bicep" placeholder="e.g. 14.5" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                         </div>
                     </div>
 
                     <!-- Hips & Lower Body Metrics -->
                     <div class="space-y-1">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Hips &amp; Lower Body (inches)</span>
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Hips &amp; Lower Body (inches)</span>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Hips (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.hips" placeholder="e.g. 38" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Hips (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.hips" placeholder="e.g. 38" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Thighs (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.thighs" placeholder="e.g. 23" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Thighs (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.thighs" placeholder="e.g. 23" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Shoulders (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.shoulders" placeholder="e.g. 44" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Shoulders (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.shoulders" placeholder="e.g. 44" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2 pt-1">
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Calves (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.calves" placeholder="e.g. 15" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Calves (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.calves" placeholder="e.g. 15" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-neutral-300 mb-0.5">Neck (in)</label>
-                                <input type="number" step="0.1" x-model="measurementForm.neck" placeholder="e.g. 15.5" class="w-full px-2.5 py-1.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <label class="block text-[10px] font-semibold text-neutral-300 mb-0.5">Neck (in)</label>
+                                <input type="number" step="0.1" x-model="measurementForm.neck" placeholder="e.g. 15.5" class="w-full px-2.5 py-1.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                             </div>
                         </div>
                     </div>
 
                     <!-- Dynamic Custom Metrics (+ Add Custom Metric) -->
-                    <div class="p-2.5 rounded-xl bg-[#0F1115]/70 border border-neutral-800 space-y-2">
+                    <div class="p-2.5 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-neutral-400">Custom Metrics / Parameters</span>
+                            <span class="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">Custom Metrics / Parameters</span>
                             <button type="button" 
                                     @click="addCustomMetric()" 
-                                    class="px-2 py-0.5 rounded-lg bg-[#C5A880]/15 hover:bg-[#C5A880] hover:text-neutral-950 text-[#C5A880] text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                    class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 hover:bg-[#F5A524] hover:text-neutral-950 text-[#F5A524] text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer">
                                 <span>Add Custom Metric</span>
                             </button>
                         </div>
 
                         <template x-for="(cm, cIdx) in measurementForm.custom_metrics" :key="cIdx">
                             <div class="flex items-center gap-2">
-                                <input type="text" x-model="cm.name" placeholder="Metric Name (e.g. Forearms)" class="flex-1 px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
-                                <input type="text" x-model="cm.value" placeholder="Value (e.g. 12 in)" class="w-28 px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880]">
+                                <input type="text" x-model="cm.name" placeholder="Metric Name (e.g. Forearms)" class="flex-1 px-2.5 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
+                                <input type="text" x-model="cm.value" placeholder="Value (e.g. 12 in)" class="w-28 px-2.5 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
                                 <button type="button" @click="removeCustomMetric(cIdx)" class="p-1 rounded text-rose-400 hover:bg-rose-500/10 cursor-pointer">✕</button>
                             </div>
                         </template>
@@ -3111,12 +3112,12 @@
 
                     <!-- Coach Notes -->
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-300 mb-1">Coach Notes &amp; Observations</label>
-                        <textarea x-model="measurementForm.notes" rows="2" placeholder="e.g. Looking leaner, waist down 0.5 in, muscle definition improving" class="w-full px-3 py-2 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#C5A880] resize-none"></textarea>
+                        <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Coach Notes &amp; Observations</label>
+                        <textarea x-model="measurementForm.notes" rows="2" placeholder="e.g. Looking leaner, waist down 0.5 in, muscle definition improving" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524] resize-none"></textarea>
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" :disabled="measurementSubmitting" class="w-full py-3.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs disabled:opacity-50">
+                        <button type="submit" :disabled="measurementSubmitting" class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2  disabled:opacity-50">
                             <span x-text="measurementSubmitting ? 'Saving Stats...' : 'Save Measurements for ' + (measurementForm.date || 'Today')"></span>
                         </button>
                     </div>
@@ -3127,14 +3128,14 @@
         <!-- ========================================================= -->
         <!-- MODAL 2: ASSIGN WORKOUT OR DIET PLAN                      -->
         <!-- ========================================================= -->
-        <div x-show="showAssignModal" @click.self="showAssignModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
-            <div @click.stop class="bg-[#171A22] border border-neutral-800 text-[#F4EDE4] rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6 shadow-xl space-y-4">
+        <div x-show="showAssignModal" @click.self="showAssignModal = false" class="fixed inset-0 z-[100000] overflow-y-auto bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4" x-cloak>
+            <div @click.stop class="bg-[#141518] border border-[#26282D] text-[#ECEDEF] rounded-t-3xl sm:rounded-[10px] max-w-md w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 pb-28 sm:pb-6  space-y-4">
                 <!-- Mobile drag bar -->
                 <div class="w-10 h-1 bg-neutral-700 rounded-full mx-auto sm:hidden"></div>
 
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div>
-                        <h3 class="text-sm font-bold text-white" x-text="assignType === 'workout' ? 'Assign Workout Plan' : 'Assign Diet Plan'"></h3>
+                        <h3 class="text-sm font-semibold text-white" x-text="assignType === 'workout' ? 'Assign Workout Plan' : 'Assign Diet Plan'"></h3>
                         <p class="text-[11px] text-slate-400" x-text="'For ' + selectedMember?.name"></p>
                     </div>
                     <button type="button" @click="showAssignModal = false" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
@@ -3143,9 +3144,9 @@
                 </div>
 
                 <!-- Type Switcher -->
-                <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-[#0F1115] text-xs font-bold">
-                    <button type="button" @click="assignType = 'workout'" :class="assignType === 'workout' ? 'bg-[#171A22] text-sky-500 shadow-xs' : 'text-slate-500'" class="py-1.5 rounded-lg transition-all">🏋️ Workout Plan</button>
-                    <button type="button" @click="assignType = 'diet'" :class="assignType === 'diet' ? 'bg-[#171A22] text-emerald-500 shadow-xs' : 'text-slate-500'" class="py-1.5 rounded-lg transition-all">🥗 Diet Plan</button>
+                <div class="grid grid-cols-2 gap-1.5 p-1 rounded-[10px] bg-[#0D0E10] text-xs font-semibold">
+                    <button type="button" @click="assignType = 'workout'" :class="assignType === 'workout' ? 'bg-[#141518] text-sky-500 ' : 'text-slate-500'" class="py-1.5 rounded-lg transition-all">Workout Plan</button>
+                    <button type="button" @click="assignType = 'diet'" :class="assignType === 'diet' ? 'bg-[#141518] text-emerald-500 ' : 'text-slate-500'" class="py-1.5 rounded-lg transition-all">Diet Plan</button>
                 </div>
 
                 <!-- WORKOUT FORM -->
@@ -3153,23 +3154,23 @@
                     <form @submit.prevent="submitAssignWorkout()" class="space-y-4">
                         <!-- Presets Selector -->
                         <div class="space-y-1.5">
-                            <label class="block text-[11px] font-bold text-neutral-300">Choose Split or Start Custom</label>
+                            <label class="block text-[11px] font-semibold text-neutral-300">Choose Split or Start Custom</label>
                             <div class="grid grid-cols-2 gap-1.5">
                                 <template x-for="p in workoutPresets" :key="p.id">
                                     <button type="button" 
                                             @click="selectWorkoutPreset(p.id)"
-                                            class="p-2 rounded-xl border text-left transition-all"
-                                            :class="workoutBuilder.preset_id === p.id ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-slate-300'">
-                                        <span class="font-bold text-[11px] block truncate" x-text="p.title"></span>
-                                        <span class="text-[9px] text-slate-400 block mt-0.5" x-text="p.badge"></span>
+                                            class="p-2 rounded-[10px] border text-left transition-all"
+                                            :class="workoutBuilder.preset_id === p.id ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-slate-300'">
+                                        <span class="font-semibold text-[11px] block truncate" x-text="p.title"></span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5" x-text="p.badge"></span>
                                     </button>
                                 </template>
                                 <button type="button" 
                                         @click="selectWorkoutPreset('custom')"
-                                        class="p-2 rounded-xl border text-left transition-all"
-                                        :class="workoutBuilder.preset_id === 'custom' ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-slate-300'">
-                                    <span class="font-bold text-[11px] block truncate">✏️ Custom Routine</span>
-                                    <span class="text-[9px] text-slate-400 block mt-0.5">Start blank</span>
+                                        class="p-2 rounded-[10px] border text-left transition-all"
+                                        :class="workoutBuilder.preset_id === 'custom' ? 'bg-sky-500/10 border-sky-500 text-sky-400' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-slate-300'">
+                                    <span class="font-semibold text-[11px] block truncate">✏️ Custom Routine</span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">Start blank</span>
                                 </button>
                             </div>
                         </div>
@@ -3177,15 +3178,15 @@
                         <!-- Saved Custom Workout Templates -->
                         <template x-if="workoutTemplates.length > 0">
                             <div class="space-y-1.5">
-                                <label class="block text-[11px] font-bold text-[#C5A880]">My Saved Workout Templates (<span x-text="workoutTemplates.length"></span>)</label>
+                                <label class="block text-[11px] font-semibold text-[#F5A524]">My Saved Workout Templates (<span x-text="workoutTemplates.length"></span>)</label>
                                 <div class="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto pr-0.5">
                                     <template x-for="tpl in workoutTemplates" :key="'wtpl-' + tpl.id">
                                         <button type="button"
                                                 @click="loadWorkoutTemplate(tpl.id)"
-                                                class="p-2 rounded-xl border text-left transition-all cursor-pointer"
-                                                :class="workoutBuilder.preset_id === ('tpl_' + tpl.id) ? 'bg-[#C5A880]/15 border-[#C5A880] text-[#C5A880]' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-[#C5A880]/50'">
-                                            <span class="font-bold text-[11px] block truncate" x-text="tpl.title"></span>
-                                            <span class="text-[9px] text-neutral-400 block mt-0.5" x-text="(tpl.exercises?.length || 0) + ' exercises • ' + (tpl.level || 'custom')"></span>
+                                                class="p-2 rounded-[10px] border text-left transition-all cursor-pointer"
+                                                :class="workoutBuilder.preset_id === ('tpl_' + tpl.id) ? 'bg-[#F5A524]/15 border-[#F5A524] text-[#F5A524]' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-[#F5A524]/50'">
+                                            <span class="font-semibold text-[11px] block truncate" x-text="tpl.title"></span>
+                                            <span class="text-[10px] text-neutral-400 block mt-0.5" x-text="(tpl.exercises?.length || 0) + ' exercises • ' + (tpl.level || 'custom')"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -3193,15 +3194,15 @@
                         </template>
 
                         <!-- Plan Title & Goal -->
-                        <div class="space-y-2 p-3 rounded-xl bg-[#0F1115]/70 border border-neutral-800">
+                        <div class="space-y-2 p-3 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D]">
                             <div>
-                                <label class="block text-[11px] font-bold text-neutral-300 mb-1">Plan Title *</label>
-                                <input type="text" x-model="workoutBuilder.title" required placeholder="e.g. 4-Day Push/Pull/Legs Split" class="w-full px-3 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-sky-500">
+                                <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Plan Title *</label>
+                                <input type="text" x-model="workoutBuilder.title" required placeholder="e.g. 4-Day Push/Pull/Legs Split" class="w-full px-3 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-sky-500">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[11px] font-bold text-neutral-300 mb-1">Goal Focus</label>
-                                    <select x-model="workoutBuilder.goal" class="w-full px-2.5 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-sky-500">
+                                    <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Goal Focus</label>
+                                    <select x-model="workoutBuilder.goal" class="w-full px-2.5 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-sky-500">
                                         <option value="muscle_gain">Muscle Gain</option>
                                         <option value="weight_loss">Weight / Fat Loss</option>
                                         <option value="endurance">Endurance</option>
@@ -3210,8 +3211,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-bold text-neutral-300 mb-1">Level</label>
-                                    <select x-model="workoutBuilder.level" class="w-full px-2.5 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-sky-500">
+                                    <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Level</label>
+                                    <select x-model="workoutBuilder.level" class="w-full px-2.5 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-sky-500">
                                         <option value="beginner">Beginner</option>
                                         <option value="intermediate">Intermediate</option>
                                         <option value="advanced">Advanced</option>
@@ -3223,9 +3224,9 @@
                         <!-- Exercises List Section -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <label class="text-[11px] font-bold text-neutral-300 flex items-center gap-1.5">
-                                    <span>🏋️ Exercises In Routine</span>
-                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-sky-500/15 text-sky-400" x-text="workoutBuilder.exercises.length"></span>
+                                <label class="text-[11px] font-semibold text-neutral-300 flex items-center gap-1.5">
+                                    <span>Exercises In Routine</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-sky-500/15 text-sky-400" x-text="workoutBuilder.exercises.length"></span>
                                 </label>
                                 <span class="text-[10px] text-slate-400">Add or remove below</span>
                             </div>
@@ -3245,11 +3246,11 @@
                             <!-- List -->
                             <div class="max-h-56 overflow-y-auto space-y-1.5 pr-1">
                                 <template x-for="(ex, idx) in workoutBuilder.exercises" :key="idx + ex.name">
-                                    <div x-show="workoutWeekday(ex.day) === workoutBuilder.newDay" class="p-2 rounded-xl bg-[#171A22] border border-neutral-800 flex items-center justify-between gap-2 text-xs">
+                                    <div x-show="workoutWeekday(ex.day) === workoutBuilder.newDay" class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D] flex items-center justify-between gap-2 text-xs">
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-1.5">
-                                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-[#0F1115] text-sky-400" x-text="workoutWeekday(ex.day)"></span>
-                                                <span class="font-bold text-white truncate" x-text="ex.name"></span>
+                                                <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase tracking-wider bg-[#0D0E10] text-sky-400" x-text="workoutWeekday(ex.day)"></span>
+                                                <span class="font-semibold text-white truncate" x-text="ex.name"></span>
                                             </div>
                                             <span class="text-[10px] text-slate-400 mt-0.5 block" x-text="(ex.tracking_type === 'time' ? ex.sets + ' rounds / ' + ex.duration_seconds + ' sec' : ex.sets + ' sets / ' + ex.reps) + (ex.rest ? ' • ' + ex.rest + 's rest' : '') + (ex.notes ? ' • ' + ex.notes : '')"></span>
                                         </div>
@@ -3262,18 +3263,18 @@
                                 </template>
 
                                 <template x-if="workoutBuilder.exercises.length === 0">
-                                    <div class="p-4 rounded-xl bg-[#0F1115]/70 border border-dashed border-neutral-800 text-center text-xs text-slate-400">
+                                    <div class="p-4 rounded-[10px] bg-[#0D0E10]/70 border border-dashed border-[#26282D] text-center text-xs text-slate-400">
                                         No exercises in this plan yet. Use the quick form below to add exercises.
                                     </div>
                                 </template>
                             </div>
 
                             <!-- Compact Add Exercise Box -->
-                            <div class="p-3 rounded-xl bg-sky-500/5 border border-sky-500/20 space-y-2">
-                                <span class="text-[10px] font-bold text-sky-400 uppercase tracking-wider block">+ Add New Exercise</span>
+                            <div class="p-3 rounded-[10px] bg-sky-500/5 border border-sky-500/20 space-y-2">
+                                <span class="text-[10px] font-semibold text-sky-400 uppercase tracking-wider block">+ Add New Exercise</span>
                                 <div class="grid grid-cols-3 gap-2">
                                     <div class="col-span-1">
-                                        <select x-model="workoutBuilder.newDay" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500">
+                                        <select x-model="workoutBuilder.newDay" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-sky-500">
                                             <option value="monday">Monday</option>
                                             <option value="tuesday">Tuesday</option>
                                             <option value="wednesday">Wednesday</option>
@@ -3284,7 +3285,7 @@
                                         </select>
                                     </div>
                                     <div class="col-span-2">
-                                        <input type="text" x-model="workoutBuilder.newName" @keydown.enter.prevent="addExerciseToBuilder()" placeholder="Exercise name (e.g. Incline DB Flyes)" class="w-full px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500">
+                                        <input type="text" x-model="workoutBuilder.newName" @keydown.enter.prevent="addExerciseToBuilder()" placeholder="Exercise name (e.g. Incline DB Flyes)" class="w-full px-2.5 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-sky-500">
                                     </div>
                                 </div>
                             <div class="grid grid-cols-2 gap-2">
@@ -3299,13 +3300,13 @@
                             </div>
                                 <div class="grid grid-cols-3 gap-2 items-center">
                                     <div>
-                                        <label class="text-xs text-slate-300" x-text="workoutBuilder.newType === 'time' ? 'Rounds' : 'Sets'"></label><input min="1" max="100" type="number" x-model="workoutBuilder.newSets" placeholder="Sets (3)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
+                                        <label class="text-xs text-slate-300" x-text="workoutBuilder.newType === 'time' ? 'Rounds' : 'Sets'"></label><input min="1" max="100" type="number" x-model="workoutBuilder.newSets" placeholder="Sets (3)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
                                     </div>
                                     <div>
-                                        <label x-show="workoutBuilder.newType === 'reps'" class="block text-xs text-slate-300">Reps</label><input x-show="workoutBuilder.newType === 'reps'" aria-label="Repetitions" type="text" x-model="workoutBuilder.newReps" placeholder="Reps (10-12)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
+                                        <label x-show="workoutBuilder.newType === 'reps'" class="block text-xs text-slate-300">Reps</label><input x-show="workoutBuilder.newType === 'reps'" aria-label="Repetitions" type="text" x-model="workoutBuilder.newReps" placeholder="Reps (10-12)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-sky-500 text-center">
                                     </div>
                                     <div>
-                                        <button type="button" @click="addExerciseToBuilder()" class="w-full py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-[11px] transition-all cursor-pointer">
+                                        <button type="button" @click="addExerciseToBuilder()" class="w-full py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-[11px] transition-all cursor-pointer">
                                             + Add
                                         </button>
                                     </div>
@@ -3314,15 +3315,15 @@
                         </div>
 
                         <div class="pt-2 space-y-2">
-                            <button type="submit" :disabled="planSubmitting" class="w-full py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs disabled:opacity-50">
+                            <button type="submit" :disabled="planSubmitting" class="min-h-11 w-full py-3.5 rounded-[10px] bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2  disabled:opacity-50">
                                 <span x-text="planSubmitting ? 'Saving Workout Plan...' : 'Save & Assign Workout Plan (' + workoutBuilder.exercises.length + ' Exercises)'"></span>
                             </button>
                             <template x-if="selectedMember?.active_workout">
                                 <button type="button" 
                                         @click="removeWorkoutPlan()" 
                                         :disabled="planSubmitting"
-                                        class="w-full py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50">
-                                    🗑️ Remove Active Workout Routine from Client
+                                        class="min-h-11 w-full py-2.5 rounded-[10px] border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5  disabled:opacity-50">
+                                    Remove assigned workout
                                 </button>
                             </template>
                         </div>
@@ -3334,23 +3335,23 @@
                     <form @submit.prevent="submitAssignDiet()" class="space-y-4">
                         <!-- Presets Selector -->
                         <div class="space-y-1.5">
-                            <label class="block text-[11px] font-bold text-neutral-300">Choose Nutrition Blueprint or Custom</label>
+                            <label class="block text-[11px] font-semibold text-neutral-300">Choose Nutrition Blueprint or Custom</label>
                             <div class="grid grid-cols-2 gap-1.5">
                                 <template x-for="p in dietPresets" :key="p.id">
                                     <button type="button" 
                                             @click="selectDietPreset(p.id)"
-                                            class="p-2 rounded-xl border text-left transition-all"
-                                            :class="dietBuilder.preset_id === p.id ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-slate-300'">
-                                        <span class="font-bold text-[11px] block truncate" x-text="p.title"></span>
-                                        <span class="text-[9px] text-slate-400 block mt-0.5" x-text="p.daily_calories + ' kcal • ' + p.protein_grams + 'g P'"></span>
+                                            class="p-2 rounded-[10px] border text-left transition-all"
+                                            :class="dietBuilder.preset_id === p.id ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-slate-300'">
+                                        <span class="font-semibold text-[11px] block truncate" x-text="p.title"></span>
+                                        <span class="text-[10px] text-slate-400 block mt-0.5" x-text="p.daily_calories + ' kcal • ' + p.protein_grams + 'g P'"></span>
                                     </button>
                                 </template>
                                 <button type="button" 
                                         @click="selectDietPreset('custom')"
-                                        class="p-2 rounded-xl border text-left transition-all"
-                                        :class="dietBuilder.preset_id === 'custom' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-slate-300'">
-                                    <span class="font-bold text-[11px] block truncate">✏️ Custom Nutrition</span>
-                                    <span class="text-[9px] text-slate-400 block mt-0.5">Start blank</span>
+                                        class="p-2 rounded-[10px] border text-left transition-all"
+                                        :class="dietBuilder.preset_id === 'custom' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-slate-300'">
+                                    <span class="font-semibold text-[11px] block truncate">✏️ Custom Nutrition</span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">Start blank</span>
                                 </button>
                             </div>
                         </div>
@@ -3358,15 +3359,15 @@
                         <!-- Saved Custom Diet Templates -->
                         <template x-if="dietTemplates.length > 0">
                             <div class="space-y-1.5">
-                                <label class="block text-[11px] font-bold text-[#C5A880]">My Saved Diet Templates (<span x-text="dietTemplates.length"></span>)</label>
+                                <label class="block text-[11px] font-semibold text-[#F5A524]">My Saved Diet Templates (<span x-text="dietTemplates.length"></span>)</label>
                                 <div class="grid grid-cols-2 gap-1.5 max-h-28 overflow-y-auto pr-0.5">
                                     <template x-for="tpl in dietTemplates" :key="'dtpl-' + tpl.id">
                                         <button type="button"
                                                 @click="loadDietTemplate(tpl.id)"
-                                                class="p-2 rounded-xl border text-left transition-all cursor-pointer"
-                                                :class="dietBuilder.preset_id === ('tpl_' + tpl.id) ? 'bg-[#C5A880]/15 border-[#C5A880] text-[#C5A880]' : 'bg-[#0F1115] border-neutral-800 text-neutral-300 hover:border-[#C5A880]/50'">
-                                            <span class="font-bold text-[11px] block truncate" x-text="tpl.title"></span>
-                                            <span class="text-[9px] text-neutral-400 block mt-0.5" x-text="(tpl.daily_calories || 2000) + ' kcal • ' + (tpl.meals?.length || 0) + ' meals'"></span>
+                                                class="p-2 rounded-[10px] border text-left transition-all cursor-pointer"
+                                                :class="dietBuilder.preset_id === ('tpl_' + tpl.id) ? 'bg-[#F5A524]/15 border-[#F5A524] text-[#F5A524]' : 'bg-[#0D0E10] border-[#26282D] text-neutral-300 hover:border-[#F5A524]/50'">
+                                            <span class="font-semibold text-[11px] block truncate" x-text="tpl.title"></span>
+                                            <span class="text-[10px] text-neutral-400 block mt-0.5" x-text="(tpl.daily_calories || 2000) + ' kcal • ' + (tpl.meals?.length || 0) + ' meals'"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -3374,67 +3375,67 @@
                         </template>
 
                         <!-- Plan Title & Macros Target -->
-                        <div class="space-y-2 p-3 rounded-xl bg-[#0F1115]/70 border border-neutral-800">
+                        <div class="space-y-2 p-3 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D]">
                             <div>
-                                <label class="block text-[11px] font-bold text-neutral-300 mb-1">Diet Plan Title *</label>
-                                <input type="text" x-model="dietBuilder.title" required placeholder="e.g. High Protein Deficit 2000 kcal" class="w-full px-3 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Diet Plan Title *</label>
+                                <input type="text" x-model="dietBuilder.title" required placeholder="e.g. High Protein Deficit 2000 kcal" class="w-full px-3 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-emerald-500">
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-neutral-300 mb-1">Target Calories</label>
+                                    <label class="block text-[10px] font-semibold text-neutral-300 mb-1">Target Calories</label>
                                     <div class="relative">
-                                        <input type="number" x-model="dietBuilder.daily_calories" placeholder="2400" class="w-full pl-2.5 pr-8 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500">
-                                        <span class="absolute right-2 top-2.5 text-[9px] text-slate-400 font-bold">kcal</span>
+                                        <input type="number" x-model="dietBuilder.daily_calories" placeholder="2400" class="w-full pl-2.5 pr-8 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <span class="absolute right-2 top-2.5 text-[10px] text-slate-400 font-semibold">kcal</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-neutral-300 mb-1">Protein</label>
+                                    <label class="block text-[10px] font-semibold text-neutral-300 mb-1">Protein</label>
                                     <div class="relative">
-                                        <input type="number" x-model="dietBuilder.protein_grams" placeholder="160" class="w-full pl-2.5 pr-6 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500">
-                                        <span class="absolute right-2 top-2.5 text-[9px] text-blue-400 font-bold">g</span>
+                                        <input type="number" x-model="dietBuilder.protein_grams" placeholder="160" class="w-full pl-2.5 pr-6 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <span class="absolute right-2 top-2.5 text-[10px] text-blue-400 font-semibold">g</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-neutral-300 mb-1">Carbs</label>
+                                    <label class="block text-[10px] font-semibold text-neutral-300 mb-1">Carbs</label>
                                     <div class="relative">
-                                        <input type="number" x-model="dietBuilder.carbs_grams" placeholder="260" class="w-full pl-2.5 pr-6 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500">
-                                        <span class="absolute right-2 top-2.5 text-[9px] text-amber-400 font-bold">g</span>
+                                        <input type="number" x-model="dietBuilder.carbs_grams" placeholder="260" class="w-full pl-2.5 pr-6 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <span class="absolute right-2 top-2.5 text-[10px] text-amber-400 font-semibold">g</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-neutral-300 mb-1">Fat</label>
+                                    <label class="block text-[10px] font-semibold text-neutral-300 mb-1">Fat</label>
                                     <div class="relative">
-                                        <input type="number" x-model="dietBuilder.fat_grams" placeholder="65" class="w-full pl-2.5 pr-6 py-2 rounded-xl bg-[#171A22] border border-neutral-800 text-xs text-white focus:outline-none focus:border-emerald-500">
-                                        <span class="absolute right-2 top-2.5 text-[9px] text-rose-400 font-bold">g</span>
+                                        <input type="number" x-model="dietBuilder.fat_grams" placeholder="65" class="w-full pl-2.5 pr-6 py-2 rounded-[10px] bg-[#141518] border border-[#26282D] text-xs text-white focus:outline-none focus:border-emerald-500">
+                                        <span class="absolute right-2 top-2.5 text-[10px] text-rose-400 font-semibold">g</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Live Macro Progress Tracker -->
-                        <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-white space-y-1.5">
+                        <div class="p-2.5 rounded-[10px] bg-slate-900/90 border border-slate-800 text-white space-y-1.5">
                             <div class="flex items-center justify-between text-[10px]">
-                                <span class="font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                                <span class="font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1">
                                     <span>⚡ Scheduled Total vs Target</span>
                                 </span>
-                                <span class="font-mono text-emerald-400 font-bold" x-text="dietBuilder.meals.length + ' Meals Planned'"></span>
+                                <span class="font-mono text-emerald-400 font-semibold" x-text="dietBuilder.meals.length + ' Meals Planned'"></span>
                             </div>
                             <div class="grid grid-cols-4 gap-1.5 text-center">
                                 <div class="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                                    <span class="text-[9px] text-slate-400 block font-semibold">Calories</span>
-                                    <span class="text-[11px] font-black text-amber-400 block" x-text="dietTotals.calories + ' / ' + (dietBuilder.daily_calories || 0)"></span>
+                                    <span class="text-[10px] text-slate-400 block font-semibold">Calories</span>
+                                    <span class="text-[11px] font-semibold text-amber-400 block" x-text="dietTotals.calories + ' / ' + (dietBuilder.daily_calories || 0)"></span>
                                 </div>
                                 <div class="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                                    <span class="text-[9px] text-slate-400 block font-semibold">Protein</span>
-                                    <span class="text-[11px] font-black text-blue-400 block" x-text="dietTotals.protein + ' / ' + (dietBuilder.protein_grams || 0) + 'g'"></span>
+                                    <span class="text-[10px] text-slate-400 block font-semibold">Protein</span>
+                                    <span class="text-[11px] font-semibold text-blue-400 block" x-text="dietTotals.protein + ' / ' + (dietBuilder.protein_grams || 0) + 'g'"></span>
                                 </div>
                                 <div class="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                                    <span class="text-[9px] text-slate-400 block font-semibold">Carbs</span>
-                                    <span class="text-[11px] font-black text-amber-300 block" x-text="dietTotals.carbs + ' / ' + (dietBuilder.carbs_grams || 0) + 'g'"></span>
+                                    <span class="text-[10px] text-slate-400 block font-semibold">Carbs</span>
+                                    <span class="text-[11px] font-semibold text-amber-300 block" x-text="dietTotals.carbs + ' / ' + (dietBuilder.carbs_grams || 0) + 'g'"></span>
                                 </div>
                                 <div class="p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50">
-                                    <span class="text-[9px] text-slate-400 block font-semibold">Fat</span>
-                                    <span class="text-[11px] font-black text-rose-400 block" x-text="dietTotals.fat + ' / ' + (dietBuilder.fat_grams || 0) + 'g'"></span>
+                                    <span class="text-[10px] text-slate-400 block font-semibold">Fat</span>
+                                    <span class="text-[11px] font-semibold text-rose-400 block" x-text="dietTotals.fat + ' / ' + (dietBuilder.fat_grams || 0) + 'g'"></span>
                                 </div>
                             </div>
                         </div>
@@ -3442,22 +3443,22 @@
                         <!-- Meals List -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
-                                <label class="text-[11px] font-bold text-neutral-300 flex items-center gap-1.5">
-                                    <span>🥗 Meals in this Plan</span>
-                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-400" x-text="dietBuilder.meals.length"></span>
+                                <label class="text-[11px] font-semibold text-neutral-300 flex items-center gap-1.5">
+                                    <span>Meals in this Plan</span>
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-500/15 text-emerald-400" x-text="dietBuilder.meals.length"></span>
                                 </label>
                                 <span class="text-[10px] text-slate-400">Click ✏️ on any meal to edit items or macros</span>
                             </div>
 
                             <div class="max-h-56 overflow-y-auto space-y-2 pr-1">
                                 <template x-for="(m, idx) in dietBuilder.meals" :key="idx + (m.name || '') + (m.time || '')">
-                                    <div class="p-2.5 rounded-xl bg-[#171A22] border text-xs space-y-1.5 transition-all"
-                                         :class="dietBuilder.editingIndex === idx ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-neutral-800'">
+                                    <div class="p-2.5 rounded-[10px] bg-[#141518] border text-xs space-y-1.5 transition-all"
+                                         :class="dietBuilder.editingIndex === idx ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-[#26282D]'">
                                         <div class="flex items-center justify-between gap-2">
                                             <div class="flex items-center gap-1.5 flex-wrap">
-                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-[#0F1115] text-emerald-500" x-text="m.type ? m.type.replace('_', ' ') : 'MEAL'"></span>
+                                                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-[#0D0E10] text-emerald-500" x-text="m.type ? m.type.replace('_', ' ') : 'MEAL'"></span>
                                                 <span class="text-[10px] text-slate-400 font-mono" x-text="m.time"></span>
-                                                <span class="font-bold text-white" x-text="m.name"></span>
+                                                <span class="font-semibold text-white" x-text="m.name"></span>
                                             </div>
                                             <div class="flex items-center gap-1">
                                                 <button type="button" 
@@ -3474,7 +3475,7 @@
                                         </div>
 
                                         <!-- Macros Breakdown -->
-                                        <div class="flex items-center gap-1.5 flex-wrap text-[9px] font-bold">
+                                        <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-semibold">
                                             <template x-if="m.calories">
                                                 <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400" x-text="m.calories + ' kcal'"></span>
                                             </template>
@@ -3490,21 +3491,21 @@
                                         </div>
 
                                         <!-- Multiple Food Items in this Meal -->
-                                        <div class="p-2 rounded-lg bg-[#0F1115]/70 border border-neutral-800 text-[11px] text-neutral-300 leading-relaxed whitespace-pre-line" x-text="m.description"></div>
+                                        <div class="p-2 rounded-lg bg-[#0D0E10]/70 border border-[#26282D] text-[11px] text-neutral-300 leading-relaxed whitespace-pre-line" x-text="m.description"></div>
                                     </div>
                                 </template>
 
                                 <template x-if="dietBuilder.meals.length === 0">
-                                    <div class="p-4 rounded-xl bg-[#0F1115]/70 border border-dashed border-neutral-800 text-center text-xs text-slate-400">
+                                    <div class="p-4 rounded-[10px] bg-[#0D0E10]/70 border border-dashed border-[#26282D] text-center text-xs text-slate-400">
                                         No meals added yet. Use the form below to configure Meal 1, Meal 2, etc.
                                     </div>
                                 </template>
                             </div>
 
                             <!-- Add / Edit Meal Builder Form -->
-                            <div class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/25 space-y-2.5">
+                            <div class="p-3 rounded-[10px] bg-emerald-500/5 border border-emerald-500/25 space-y-2.5">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                                         <span x-text="dietBuilder.editingIndex !== -1 ? '✏️ EDITING ' + (dietBuilder.newName || 'MEAL') : '+ ADD MEAL WITH FOOD ITEMS &amp; MACROS'"></span>
                                     </span>
                                     <template x-if="dietBuilder.editingIndex !== -1">
@@ -3516,7 +3517,7 @@
                                 <div class="grid grid-cols-3 gap-2">
                                     <div class="col-span-2">
                                         <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Meal Slot</label>
-                                        <select x-model="dietBuilder.newType" @change="onMealTypeChange()" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500">
+                                        <select x-model="dietBuilder.newType" @change="onMealTypeChange()" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500">
                                             <option value="breakfast">Breakfast</option>
                                             <option value="morning_snack">Morning Snack</option>
                                             <option value="lunch">Lunch</option>
@@ -3527,23 +3528,23 @@
                                     </div>
                                     <div class="col-span-1">
                                         <label class="block text-[10px] font-semibold text-slate-400 mb-0.5 text-center">Time</label>
-                                        <input type="text" x-model="dietBuilder.newTime" placeholder="08:00" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center font-mono">
+                                        <input type="text" x-model="dietBuilder.newTime" placeholder="08:00" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center font-mono">
                                     </div>
                                 </div>
 
                                 <!-- Meal Label / Name -->
                                 <div>
                                     <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Meal Name / Title</label>
-                                    <input type="text" x-model="dietBuilder.newName" placeholder="e.g. Meal 1: Breakfast" class="w-full px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500">
+                                    <input type="text" x-model="dietBuilder.newName" placeholder="e.g. Meal 1: Breakfast" class="w-full px-2.5 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500">
                                 </div>
 
                                 <!-- Food items (allows multiple items like 4 Boiled Eggs, 4 Wheat Bread, 1 Glass Milk) -->
                                 <div>
                                     <div class="flex items-center justify-between mb-0.5">
                                         <label class="block text-[10px] font-semibold text-slate-400">Food Items in this Meal *</label>
-                                        <span class="text-[9px] text-slate-400">Type all items (separated by comma or newline)</span>
+                                        <span class="text-[10px] text-slate-400">Type all items (separated by comma or newline)</span>
                                     </div>
-                                    <textarea x-model="dietBuilder.newDesc" rows="2" placeholder="e.g. 4 Boiled Eggs, 4 Wheat Bread slices, 1 Glass Milk, 1 Banana" class="w-full px-2.5 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                                    <textarea x-model="dietBuilder.newDesc" rows="2" placeholder="e.g. 4 Boiled Eggs, 4 Wheat Bread slices, 1 Glass Milk, 1 Banana" class="w-full px-2.5 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 resize-none"></textarea>
                                 </div>
 
                                 <!-- 4 Macros Side-by-Side: Calories, Protein, Carbs, Fat -->
@@ -3551,27 +3552,27 @@
                                     <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Meal Macros Breakdown</label>
                                     <div class="grid grid-cols-4 gap-1.5">
                                         <div>
-                                            <input type="number" x-model="dietBuilder.newCalories" placeholder="Kcal (450)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
-                                            <span class="text-[8px] text-slate-400 block text-center mt-0.5 font-bold">Kcal</span>
+                                            <input type="number" x-model="dietBuilder.newCalories" placeholder="Kcal (450)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
+                                            <span class="text-[8px] text-slate-400 block text-center mt-0.5 font-semibold">Kcal</span>
                                         </div>
                                         <div>
-                                            <input type="number" x-model="dietBuilder.newProtein" placeholder="Protein (32)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
-                                            <span class="text-[8px] text-blue-400 block text-center mt-0.5 font-bold">Protein (g)</span>
+                                            <input type="number" x-model="dietBuilder.newProtein" placeholder="Protein (32)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
+                                            <span class="text-[8px] text-blue-400 block text-center mt-0.5 font-semibold">Protein (g)</span>
                                         </div>
                                         <div>
-                                            <input type="number" x-model="dietBuilder.newCarbs" placeholder="Carbs (45)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
-                                            <span class="text-[8px] text-amber-400 block text-center mt-0.5 font-bold">Carbs (g)</span>
+                                            <input type="number" x-model="dietBuilder.newCarbs" placeholder="Carbs (45)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
+                                            <span class="text-[8px] text-amber-400 block text-center mt-0.5 font-semibold">Carbs (g)</span>
                                         </div>
                                         <div>
-                                            <input type="number" x-model="dietBuilder.newFat" placeholder="Fat (12)" class="w-full px-2 py-1.5 rounded-lg bg-[#171A22] border border-neutral-800 text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
-                                            <span class="text-[8px] text-rose-400 block text-center mt-0.5 font-bold">Fat (g)</span>
+                                            <input type="number" x-model="dietBuilder.newFat" placeholder="Fat (12)" class="w-full px-2 py-1.5 rounded-lg bg-[#141518] border border-[#26282D] text-[11px] text-white focus:outline-none focus:border-emerald-500 text-center">
+                                            <span class="text-[8px] text-rose-400 block text-center mt-0.5 font-semibold">Fat (g)</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Add / Update Meal Button -->
                                 <div>
-                                    <button type="button" @click="saveMealToBuilder()" class="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm">
+                                    <button type="button" @click="saveMealToBuilder()" class="min-h-11 w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ">
                                         <span x-text="dietBuilder.editingIndex !== -1 ? '✓ Update ' + (dietBuilder.newName || 'Meal') : '+ Save Meal to Plan'"></span>
                                     </button>
                                 </div>
@@ -3579,15 +3580,15 @@
                         </div>
 
                         <div class="pt-2 space-y-2">
-                            <button type="submit" :disabled="planSubmitting" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs disabled:opacity-50">
+                            <button type="submit" :disabled="planSubmitting" class="min-h-11 w-full py-3.5 rounded-[10px] bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-2  disabled:opacity-50">
                                 <span x-text="planSubmitting ? 'Saving Diet Plan...' : 'Save & Assign Diet Plan (' + dietBuilder.meals.length + ' Meals • ' + dietTotals.calories + ' kcal)'"></span>
                             </button>
                             <template x-if="selectedMember?.active_diet">
                                 <button type="button" 
                                         @click="removeDietPlan()" 
                                         :disabled="planSubmitting"
-                                        class="w-full py-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50">
-                                    🗑️ Remove Active Diet Plan from Client
+                                        class="min-h-11 w-full py-2.5 rounded-[10px] border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5  disabled:opacity-50">
+                                    Remove assigned diet
                                 </button>
                             </template>
                         </div>
@@ -3599,11 +3600,11 @@
         <!-- ========================================================= -->
         <!-- MODAL: CLONE WORKOUT / DIET PLAN TO ANOTHER CLIENT (#7)   -->
         <!-- ========================================================= -->
-        <div x-show="showCloneModal" x-cloak @click.self="showCloneModal = false" class="fixed inset-0 z-[100020] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs">
-            <div @click.stop class="w-full max-w-md bg-[#171A22] border border-neutral-800 rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5 shadow-2xl space-y-4">
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div x-show="showCloneModal" x-cloak @click.self="showCloneModal = false" class="fixed inset-0 z-[100020] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 ">
+            <div @click.stop class="w-full max-w-md bg-[#141518] border border-[#26282D] rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5  space-y-4">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div>
-                        <h3 class="text-sm font-bold text-white" x-text="cloneForm.plan_type === 'workout' ? 'Clone Workout Plan' : 'Clone Diet Plan'"></h3>
+                        <h3 class="text-sm font-semibold text-white" x-text="cloneForm.plan_type === 'workout' ? 'Clone Workout Plan' : 'Clone Diet Plan'"></h3>
                         <p class="text-[11px] text-neutral-400" x-text="'From: ' + (selectedMember?.name || 'Client')"></p>
                     </div>
                     <button type="button" @click="showCloneModal = false" class="p-1 rounded-lg text-neutral-400 hover:text-white cursor-pointer">
@@ -3611,29 +3612,29 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="submitClonePlan()" class="space-y-3.5">
-                    <div class="p-3 rounded-xl bg-[#0F1115] border border-neutral-800">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-violet-300 block">Source Plan</span>
-                        <p class="text-xs font-bold text-white mt-0.5" x-text="cloneForm.source_title"></p>
+                <form @submit.prevent="submitClonePlan()" class="space-y-4">
+                    <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
+                        <span class="text-[10px] font-semibold uppercase tracking-wider text-violet-300 block">Source Plan</span>
+                        <p class="text-xs font-semibold text-white mt-0.5" x-text="cloneForm.source_title"></p>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-300 mb-1">Select Target Client *</label>
-                        <select x-model="cloneForm.target_member_id" required class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Select Target Client *</label>
+                        <select x-model="cloneForm.target_member_id" required class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                             <option value="">Choose assigned client...</option>
                             <template x-for="m in assignedMembersList.filter(x => String(x.id) !== String(selectedMember?.id))" :key="'clone-m-' + m.id">
                                 <option :value="m.id" x-text="m.name + (m.code ? ' (' + m.code + ')' : '')"></option>
                             </template>
                         </select>
-                        <p class="text-[10px] text-neutral-500 mt-1">This will assign a full copy to the selected client.</p>
+                        <p class="text-xs text-neutral-400 mt-1">This will assign a full copy to the selected client.</p>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-300 mb-1">Plan Title for Client</label>
-                        <input type="text" x-model="cloneForm.custom_title" required class="w-full px-3 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <label class="block text-[11px] font-semibold text-neutral-300 mb-1">Plan Title for Client</label>
+                        <input type="text" x-model="cloneForm.custom_title" required class="w-full px-3 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                     </div>
 
-                    <button type="submit" :disabled="cloneSubmitting || !cloneForm.target_member_id" class="w-full py-3 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-black text-xs transition-all cursor-pointer disabled:opacity-50">
+                    <button type="submit" :disabled="cloneSubmitting || !cloneForm.target_member_id" class="min-h-11 w-full py-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all cursor-pointer disabled:opacity-50">
                         <span x-text="cloneSubmitting ? 'Cloning Plan...' : 'Clone Plan to Selected Client'"></span>
                     </button>
                 </form>
@@ -3643,15 +3644,15 @@
         <!-- ========================================================= -->
         <!-- MODAL: SAVE PLAN AS REUSABLE TEMPLATE (REPLACES PROMPT)   -->
         <!-- ========================================================= -->
-        <div x-show="templateModal.open" x-cloak @click.self="if (!templateModal.submitting) templateModal.open = false" class="fixed inset-0 z-[100030] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs">
-            <div @click.stop class="w-full max-w-md bg-[#171A22] border border-neutral-800 rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5 shadow-2xl space-y-4">
-                <div class="flex items-center justify-between border-b border-neutral-800 pb-3">
+        <div x-show="templateModal.open" x-cloak @click.self="if (!templateModal.submitting) templateModal.open = false" class="fixed inset-0 z-[100030] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 ">
+            <div @click.stop class="w-full max-w-md bg-[#141518] border border-[#26282D] rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5  space-y-4">
+                <div class="flex items-center justify-between border-b border-[#26282D] pb-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-xl bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30 flex items-center justify-center shrink-0">
+                        <div class="w-9 h-9 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex items-center justify-center shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-sm font-bold text-white" x-text="templateModal.planType === 'workout' ? 'Save Workout Template' : 'Save Diet Template'"></h3>
+                            <h3 class="text-sm font-semibold text-white" x-text="templateModal.planType === 'workout' ? 'Save Workout Template' : 'Save Diet Template'"></h3>
                             <p class="text-[11px] text-neutral-400">Reuse anytime across your clients</p>
                         </div>
                     </div>
@@ -3660,17 +3661,17 @@
                     </button>
                 </div>
 
-                <form @submit.prevent="submitSaveTemplate()" class="space-y-3.5">
+                <form @submit.prevent="submitSaveTemplate()" class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-neutral-300 mb-1.5">Template Name *</label>
-                        <input type="text" x-model="templateModal.title" required maxlength="120" placeholder="e.g. Lean Cut 2000 kcal Blueprint" class="w-full px-3.5 py-2.5 rounded-xl bg-[#0F1115] border border-neutral-800 text-xs text-white focus:border-[#C5A880] focus:outline-none">
+                        <label class="block text-[11px] font-semibold text-neutral-300 mb-1.5">Template Name *</label>
+                        <input type="text" x-model="templateModal.title" required maxlength="120" placeholder="e.g. Lean Cut 2000 kcal Blueprint" class="w-full px-3.5 py-2.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:border-[#F5A524] focus:outline-none">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button type="button" @click="templateModal.open = false" :disabled="templateModal.submitting" class="py-2.5 rounded-xl bg-[#0F1115] hover:bg-neutral-800 text-neutral-300 border border-neutral-800 font-bold text-xs transition-all cursor-pointer disabled:opacity-50">
+                        <button type="button" @click="templateModal.open = false" :disabled="templateModal.submitting" class="min-h-11 py-2.5 rounded-[10px] bg-[#0D0E10] hover:bg-neutral-800 text-neutral-300 border border-[#26282D] font-semibold text-xs transition-all cursor-pointer disabled:opacity-50">
                             Cancel
                         </button>
-                        <button type="submit" :disabled="templateModal.submitting" class="py-2.5 rounded-xl bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950 font-black text-xs transition-all cursor-pointer disabled:opacity-50">
+                        <button type="submit" :disabled="templateModal.submitting" class="min-h-11 py-2.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs transition-all cursor-pointer disabled:opacity-50">
                             <span x-text="templateModal.submitting ? 'Saving...' : 'Save Template'"></span>
                         </button>
                     </div>
@@ -3681,16 +3682,16 @@
         <!-- ========================================================= -->
         <!-- MODAL: PROFESSIONAL CONFIRMATION DIALOG                   -->
         <!-- ========================================================= -->
-        <div x-show="confirmDialog.open" x-cloak @click.self="if (!confirmDialog.loading) confirmDialog.open = false" class="fixed inset-0 z-[100040] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs">
-            <div @click.stop class="w-full max-w-sm bg-[#171A22] border border-neutral-800 rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5 shadow-2xl space-y-4">
+        <div x-show="confirmDialog.open" x-cloak @click.self="if (!confirmDialog.loading) confirmDialog.open = false" class="fixed inset-0 z-[100040] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 ">
+            <div @click.stop class="w-full max-w-sm bg-[#141518] border border-[#26282D] rounded-t-3xl sm:rounded-3xl p-5 pb-24 sm:pb-5  space-y-4">
                 <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border"
-                         :class="confirmDialog.danger ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' : 'bg-[#C5A880]/15 text-[#C5A880] border-[#C5A880]/30'">
+                    <div class="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 border"
+                         :class="confirmDialog.danger ? 'bg-rose-500/15 text-rose-400 border-rose-500/30' : 'bg-[#F5A524]/15 text-[#F5A524] border-[#F5A524]/30'">
                         <svg x-show="confirmDialog.danger" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         <svg x-show="!confirmDialog.danger" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <h3 class="text-sm font-bold text-white" x-text="confirmDialog.title"></h3>
+                        <h3 class="text-sm font-semibold text-white" x-text="confirmDialog.title"></h3>
                         <p class="text-xs text-neutral-300 leading-relaxed mt-1" x-text="confirmDialog.message"></p>
                     </div>
                 </div>
@@ -3699,14 +3700,14 @@
                     <button type="button"
                             @click="confirmDialog.open = false"
                             :disabled="confirmDialog.loading"
-                            class="py-2.5 rounded-xl bg-[#0F1115] hover:bg-neutral-800 text-neutral-300 border border-neutral-800 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                            class="min-h-11 py-2.5 rounded-[10px] bg-[#0D0E10] hover:bg-neutral-800 text-neutral-300 border border-[#26282D] font-semibold text-xs transition-all cursor-pointer disabled:opacity-50"
                             x-text="confirmDialog.cancelLabel || 'Cancel'">
                     </button>
                     <button type="button"
                             @click="runConfirmDialog()"
                             :disabled="confirmDialog.loading"
-                            class="py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-                            :class="confirmDialog.danger ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-[#C5A880] hover:bg-[#b5966d] text-neutral-950'">
+                            class="min-h-11 py-2.5 rounded-[10px] font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                            :class="confirmDialog.danger ? 'bg-rose-500 hover:bg-rose-400 text-white' : 'bg-[#F5A524] hover:bg-[#E09414] text-neutral-950'">
                         <span x-text="confirmDialog.loading ? 'Processing...' : (confirmDialog.confirmLabel || 'Confirm')"></span>
                     </button>
                 </div>
@@ -3725,17 +3726,17 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-3"
              class="fixed top-4 left-1/2 -translate-x-1/2 z-[100050] w-[92%] max-w-md pointer-events-auto">
-            <div class="p-3.5 rounded-2xl bg-[#171A22]/95 backdrop-blur-md shadow-2xl border flex items-center gap-3"
+            <div class="p-3.5 rounded-[10px] bg-[#141518]/95  border flex items-center gap-3"
                  :class="{
                     'border-emerald-500/40 shadow-emerald-500/10': toastState.type === 'success',
                     'border-rose-500/40 shadow-rose-500/10': toastState.type === 'error',
-                    'border-[#C5A880]/40 shadow-[#C5A880]/10': toastState.type === 'warning'
+                    'border-[#F5A524]/40 ': toastState.type === 'warning'
                  }">
-                <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border"
+                <div class="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 border"
                      :class="{
                         'bg-emerald-500/15 text-emerald-400 border-emerald-500/30': toastState.type === 'success',
                         'bg-rose-500/15 text-rose-400 border-rose-500/30': toastState.type === 'error',
-                        'bg-[#C5A880]/15 text-[#C5A880] border-[#C5A880]/30': toastState.type === 'warning'
+                        'bg-[#F5A524]/15 text-[#F5A524] border-[#F5A524]/30': toastState.type === 'warning'
                      }">
                     <svg x-show="toastState.type === 'success'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     <svg x-show="toastState.type === 'error'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
