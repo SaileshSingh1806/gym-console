@@ -1302,20 +1302,23 @@ class AppController extends Controller
 
     public function deleteMember(int $id): RedirectResponse
     {
-        $member = Member::findOrFail($id);
-        if (\App\Services\MembershipCreditService::protectedMember($member)) {
-            return back()->with('error', 'This member has allocated payment credits and cannot be deleted.');
-        }
-        $name = $member->full_name;
-
-        // Cascade delete associated payments and memberships
-        MemberPayment::where('member_id', $member->id)->delete();
-        Membership::where('member_id', $member->id)->delete();
-        $member->delete();
-
-        ActivityLog::log('member_deleted', "Deleted member {$name}");
-
-        return back()->with('success', "Member '{$name}' deleted successfully.");
+        return DB::transaction(function () use ($id) {
+            Member::where('id', $id)->lockForUpdate()->firstOrFail();
+            $member = Member::findOrFail($id);
+            if (\App\Services\MembershipCreditService::protectedMember($member)) {
+                return back()->with('error', 'This member has allocated payment credits and cannot be deleted.');
+            }
+            $name = $member->full_name;
+    
+            // Cascade delete associated payments and memberships
+            MemberPayment::where('member_id', $member->id)->delete();
+            Membership::where('member_id', $member->id)->delete();
+            $member->delete();
+    
+            ActivityLog::log('member_deleted', "Deleted member {$name}");
+    
+            return back()->with('success', "Member '{$name}' deleted successfully.");
+        });
     }
 
     public function editMember(int $id): RedirectResponse
@@ -1695,66 +1698,69 @@ class AppController extends Controller
 
     public function cancelMembership(Request $request, int $id): RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $member = Member::where('tenant_id', $tenant->id)->findOrFail($id);
-
-        $membershipId = $request->input('membership_id');
-        $membership = $membershipId
-            ? Membership::where('tenant_id', $tenant->id)->where('member_id', $member->id)->findOrFail($membershipId)
-            : ($member->activeMembership ?? $member->memberships()->latest()->first());
-
-        if (! $membership) {
-            return back()->with('error', 'No membership subscription found to cancel.');
-        }
-        if (\App\Services\MembershipCreditService::protectedMembership($membership)) {
-            return back()->with('error', 'This membership has allocated payment credits and cannot be cancelled.');
-        }
-
-        $reason = trim($request->input('reason', 'Membership cancelled by gym administrator'));
-        $voidFee = $request->boolean('void_fee', true);
-
-        // Update Membership
-        $auditNote = sprintf(
-            '[CANCELLED on %s by %s | Reason: %s]',
-            now()->format('d/m/Y H:i'),
-            auth()->user()->name,
-            $reason
-        );
-        $existingNotes = $membership->notes ? trim($membership->notes) : '';
-        $membership->update([
-            'status' => 'CANCELLED',
-            'notes' => $existingNotes ? ($existingNotes . "\n" . $auditNote) : $auditNote,
-        ]);
-
-        // If member has no other active memberships, set member status to INACTIVE
-        $otherActive = Membership::where('tenant_id', $tenant->id)
-            ->where('member_id', $member->id)
-            ->where('id', '!=', $membership->id)
-            ->where('status', 'ACTIVE')
-            ->exists();
-
-        if (! $otherActive) {
-            $member->update(['status' => 'INACTIVE']);
-        }
-
-        // Void or transfer fee from dashboard revenue
-        if ($voidFee) {
-            foreach ($membership->payments as $pay) {
-                $payNote = sprintf('[TRANSFERRED / CANCELLED on %s by %s | %s]', now()->format('d/m/Y H:i'), auth()->user()->name, $reason);
-                $existPayNotes = $pay->notes ? trim($pay->notes) : '';
-                $pay->update([
-                    'notes' => $existPayNotes ? ($existPayNotes . "\n" . $payNote) : $payNote,
-                ]);
+        return DB::transaction(function () use ($request, $id) {
+            Member::where('id', $id)->lockForUpdate()->firstOrFail();
+            $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+            $member = Member::where('tenant_id', $tenant->id)->findOrFail($id);
+    
+            $membershipId = $request->input('membership_id');
+            $membership = $membershipId
+                ? Membership::where('tenant_id', $tenant->id)->where('member_id', $member->id)->findOrFail($membershipId)
+                : ($member->activeMembership ?? $member->memberships()->latest()->first());
+    
+            if (! $membership) {
+                return back()->with('error', 'No membership subscription found to cancel.');
             }
-        }
-
-        ActivityLog::log(
-            'membership_cancelled',
-            "Cancelled membership for {$member->full_name} ({$membership->plan?->name}) - Reason: {$reason}",
-            $membership
-        );
-
-        return back()->with('success', "Membership for '{$member->full_name}' has been cancelled and excluded from active dashboard revenue.");
+            if (\App\Services\MembershipCreditService::protectedMembership($membership)) {
+                return back()->with('error', 'This membership has allocated payment credits and cannot be cancelled.');
+            }
+    
+            $reason = trim($request->input('reason', 'Membership cancelled by gym administrator'));
+            $voidFee = $request->boolean('void_fee', true);
+    
+            // Update Membership
+            $auditNote = sprintf(
+                '[CANCELLED on %s by %s | Reason: %s]',
+                now()->format('d/m/Y H:i'),
+                auth()->user()->name,
+                $reason
+            );
+            $existingNotes = $membership->notes ? trim($membership->notes) : '';
+            $membership->update([
+                'status' => 'CANCELLED',
+                'notes' => $existingNotes ? ($existingNotes . "\n" . $auditNote) : $auditNote,
+            ]);
+    
+            // If member has no other active memberships, set member status to INACTIVE
+            $otherActive = Membership::where('tenant_id', $tenant->id)
+                ->where('member_id', $member->id)
+                ->where('id', '!=', $membership->id)
+                ->where('status', 'ACTIVE')
+                ->exists();
+    
+            if (! $otherActive) {
+                $member->update(['status' => 'INACTIVE']);
+            }
+    
+            // Void or transfer fee from dashboard revenue
+            if ($voidFee) {
+                foreach ($membership->payments as $pay) {
+                    $payNote = sprintf('[TRANSFERRED / CANCELLED on %s by %s | %s]', now()->format('d/m/Y H:i'), auth()->user()->name, $reason);
+                    $existPayNotes = $pay->notes ? trim($pay->notes) : '';
+                    $pay->update([
+                        'notes' => $existPayNotes ? ($existPayNotes . "\n" . $payNote) : $payNote,
+                    ]);
+                }
+            }
+    
+            ActivityLog::log(
+                'membership_cancelled',
+                "Cancelled membership for {$member->full_name} ({$membership->plan?->name}) - Reason: {$reason}",
+                $membership
+            );
+    
+            return back()->with('success', "Membership for '{$member->full_name}' has been cancelled and excluded from active dashboard revenue.");
+        });
     }
 
     public function addPtPackage(Request $request, int $id): RedirectResponse
@@ -2882,59 +2888,67 @@ class AppController extends Controller
 
     public function reversePayment(int $id): RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $payment = MemberPayment::with('membership')->findOrFail($id);
-        if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
-            return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
-        }
-
-        if ($payment->notes && str_contains($payment->notes, '[REVERSED]')) {
-            return back()->with('error', 'This payment receipt is already marked as reversed.');
-        }
-
-        if ($payment->membership) {
-            $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
-            $payment->membership->update(['paid_amount' => $newPaid]);
-        }
-
-        $payment->update([
-            'notes' => '[REVERSED] '.($payment->notes ?? ''),
-        ]);
-
-        $currency = $tenant->currency_symbol ?? '₹';
-        ActivityLog::log('payment_reversed', "Reversed payment receipt {$payment->invoice_number} of {$currency}".number_format($payment->amount, 2), $payment);
-
-        return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
+        return DB::transaction(function () use ($id) {
+            $payment = MemberPayment::where('id', $id)->firstOrFail();
+            Member::where('tenant_id', $payment->tenant_id)->lockForUpdate()->findOrFail($payment->member_id);
+            $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+            $payment = MemberPayment::with('membership')->findOrFail($id);
+            if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
+                return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
+            }
+    
+            if ($payment->notes && str_contains($payment->notes, '[REVERSED]')) {
+                return back()->with('error', 'This payment receipt is already marked as reversed.');
+            }
+    
+            if ($payment->membership) {
+                $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
+                $payment->membership->update(['paid_amount' => $newPaid]);
+            }
+    
+            $payment->update([
+                'notes' => '[REVERSED] '.($payment->notes ?? ''),
+            ]);
+    
+            $currency = $tenant->currency_symbol ?? '₹';
+            ActivityLog::log('payment_reversed', "Reversed payment receipt {$payment->invoice_number} of {$currency}".number_format($payment->amount, 2), $payment);
+    
+            return back()->with('success', "Receipt {$payment->invoice_number} reversed successfully.");
+        });
     }
 
     public function deletePayment(int $id): RedirectResponse
     {
-        $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
-        $user = auth()->user();
-
-        // Strict Authorization: Gym Owner / Super Admin only
-        if (! $user->isGymOwner() && ! $user->isSuperAdmin() && ! $user->hasPermission('payments.refund')) {
-            return back()->with('error', 'Unauthorized. Only Gym Owners can delete payment receipts.');
-        }
-
-        $payment = MemberPayment::with('membership')->where('tenant_id', $tenant->id)->findOrFail($id);
-        if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
-            return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
-        }
-
-        if ($payment->membership && ! str_contains($payment->notes ?? '', '[REVERSED]')) {
-            $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
-            $payment->membership->update(['paid_amount' => $newPaid]);
-        }
-
-        $invNo = $payment->invoice_number;
-        $amount = $payment->amount;
-        $payment->delete();
-
-        $currency = $tenant->currency_symbol ?? '₹';
-        ActivityLog::log('payment_deleted', "Deleted payment receipt {$invNo} of {$currency}".number_format($amount, 2), $payment);
-
-        return back()->with('success', "Payment receipt '{$invNo}' deleted successfully.");
+        return DB::transaction(function () use ($id) {
+            $payment = MemberPayment::where('id', $id)->firstOrFail();
+            Member::where('tenant_id', $payment->tenant_id)->lockForUpdate()->findOrFail($payment->member_id);
+            $tenant = TenantContext::getTenant() ?? auth()->user()->tenant;
+            $user = auth()->user();
+    
+            // Strict Authorization: Gym Owner / Super Admin only
+            if (! $user->isGymOwner() && ! $user->isSuperAdmin() && ! $user->hasPermission('payments.refund')) {
+                return back()->with('error', 'Unauthorized. Only Gym Owners can delete payment receipts.');
+            }
+    
+            $payment = MemberPayment::with('membership')->where('tenant_id', $tenant->id)->findOrFail($id);
+            if (\App\Services\MembershipCreditService::protectedPayment($payment)) {
+                return back()->with('error', 'This receipt is linked to a membership credit and cannot be reversed or deleted.');
+            }
+    
+            if ($payment->membership && ! str_contains($payment->notes ?? '', '[REVERSED]')) {
+                $newPaid = max(0, (float) $payment->membership->paid_amount - (float) $payment->amount);
+                $payment->membership->update(['paid_amount' => $newPaid]);
+            }
+    
+            $invNo = $payment->invoice_number;
+            $amount = $payment->amount;
+            $payment->delete();
+    
+            $currency = $tenant->currency_symbol ?? '₹';
+            ActivityLog::log('payment_deleted', "Deleted payment receipt {$invNo} of {$currency}".number_format($amount, 2), $payment);
+    
+            return back()->with('success', "Payment receipt '{$invNo}' deleted successfully.");
+        });
     }
 
     public function updatePaymentMethod(Request $request, int $id): RedirectResponse
