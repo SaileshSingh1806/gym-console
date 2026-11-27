@@ -411,7 +411,13 @@
                     <div class="flex flex-wrap gap-5 items-start">
                         @foreach(['member', 'trainer'] as $brandRole)
                             <div class="text-center space-y-2">
-                                <img src="{{ route('pwa.icon', [$tenant->slug, $brandRole, 192, 'any', 'v' => $tenant->updated_at?->timestamp]) }}" alt="{{ ucfirst($brandRole) }} app icon" width="88" height="88" class="rounded-xl mx-auto border border-line">
+                                @php
+                                    $uploadedPwaPath = $tenantSettings['pwa_icon_path'] ?? null;
+                                    $previewLogo = $uploadedPwaPath ? asset('storage/'.$uploadedPwaPath) : $tenant->logo_url;
+                                    if ($previewLogo && !\Illuminate\Support\Str::startsWith($previewLogo, ['https://', 'http://', '/'])) $previewLogo = asset('storage/'.$previewLogo);
+                                    $fallbackPwaIcon = asset('pwa/icons/'.$brandRole.'-192.png');
+                                @endphp
+                                <img src="{{ $previewLogo ?: $fallbackPwaIcon }}" data-fallback="{{ $fallbackPwaIcon }}" onerror="this.onerror=null;this.src=this.dataset.fallback" alt="{{ ucfirst($brandRole) }} app logo preview" width="88" height="88" class="rounded-xl mx-auto border border-line object-contain bg-[#0D0E10]">
                                 <p class="text-xs font-medium text-fg">{{ ucfirst($brandRole) }} app</p>
                                 <a href="{{ route('pwa.launch', [$tenant->slug, $brandRole]) }}" target="_blank" rel="noopener" class="text-xs text-accent" onclick="event.preventDefault(); navigator.clipboard.writeText(this.href).then(()=>{this.textContent='Link copied';}).catch(()=>{window.prompt('Copy installation link',this.href);});">Copy launch link</a>
                             </div>
