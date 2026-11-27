@@ -42,6 +42,34 @@ class PublicController extends Controller
         return view('public.contact');
     }
 
+    public function submitContact(Request $request): RedirectResponse
+    {
+        if ($request->filled('website')) {
+            abort(422);
+        }
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'gym_name' => ['required', 'string', 'max:150'],
+            'phone' => ['required', 'string', 'regex:/^\+?[0-9 ()-]{10,20}$/'],
+            'city' => ['required', 'string', 'max:100'],
+            'message' => ['required', 'string', 'max:1500'],
+        ]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::raw(
+                "GymDeskHub website inquiry\n\n" .
+                "Name: {$data['name']}\nGym: {$data['gym_name']}\nPhone: {$data['phone']}\nCity: {$data['city']}\n\n{$data['message']}",
+                fn ($mail) => $mail->to('sales@gymdeskhub.in')->subject('GymDeskHub website inquiry')
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+            return back()->withInput()->with('contact_error', 'We could not send your inquiry. Please try again or contact us directly on WhatsApp.');
+        }
+
+        return redirect()->route('contact')->with('contact_success', 'Your inquiry has been sent.');
+    }
+
     public function terms(): View
     {
         return view('public.terms');

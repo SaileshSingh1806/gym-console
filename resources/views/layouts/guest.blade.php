@@ -150,8 +150,12 @@
     @unless($marketingPage)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
     @endunless
+    @if($marketingPage)
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { theme: { extend: { colors: { slate: { 900: "#151618" } } } } };</script>
+    @endif
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -249,6 +253,52 @@
         .marketing-site .marketing-legal h2 { font-size:1.125rem; letter-spacing:-.015em; }
         .marketing-site .marketing-legal ul { padding-left:1.25rem; }
         @media(prefers-reduced-motion:reduce) { .marketing-site *, .marketing-site *::before, .marketing-site *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+        .marketing-site main > section > div:first-child { max-width:1200px; padding-inline:20px; }
+        .marketing-site .marketing-hero, .marketing-site .marketing-section { padding-block:64px; }
+        .marketing-site main h1 { font-size:44px; line-height:1.05; }
+        .marketing-site main h2 { font-size:32px; line-height:1.15; }
+        .marketing-site main h3 { font-size:20px; }
+        .marketing-site main p { line-height:1.6; }
+        .marketing-site main [class~="font-bold"], .marketing-site main [class~="font-black"] { font-weight:600; }
+        .marketing-site main [class~="uppercase"] { text-transform:none; }
+        .marketing-site main a[class~="bg-amber-500"], .marketing-site main button[class~="bg-amber-500"] { min-height:48px; border-radius:8px; }
+        .marketing-site main input:not([type="checkbox"]):not([type="radio"]), .marketing-site main select { min-height:48px; border-radius:8px; }
+        .marketing-site .marketing-light { background:#F6F6F4 !important; color:#17181B; }
+        .marketing-site .marketing-light :is(h1,h2,h3,h4,[class~="text-white"],[class~="text-slate-200"]) { color:#17181B; }
+        .marketing-site .marketing-light :is([class~="text-slate-300"],[class~="text-slate-400"],[class~="text-slate-500"]) { color:#5C6068; }
+        .marketing-site .marketing-light :is([class~="bg-[#1B1D21]"],[class~="bg-[#141518]"],[class~="bg-[#0D0E10]"],[class~="bg-slate-900"],[class~="bg-slate-800"]) { background:#FFFFFF; }
+        .marketing-site .marketing-light [class~="border-slate-800"] { border-color:#E4E4DF; }
+        .marketing-site .marketing-light [class~="text-amber-400"] { color:#875000; }
+        .marketing-site .marketing-light a[class~="bg-amber-500"] { color:#16130B; }
+        .marketing-site .marketing-light [class~="border-slate-700"] { border-color:#BFC1C5; }
+        .marketing-site .marketing-light .divide-slate-800 > * + * { border-color:#E4E4DF; }
+        .marketing-site main .marketing-legal { width:100%; }
+        .marketing-site .marketing-hero:has(.marketing-legal), .marketing-site:has(.marketing-legal) .marketing-hero { padding-block:48px; }
+        .marketing-site main a:focus-visible, .marketing-site main summary:focus-visible { outline:2px solid #F5A524; outline-offset:3px; }
+        .marketing-site main summary { list-style:none; position:relative; padding-right:28px; }
+        .marketing-site main summary::-webkit-details-marker { display:none; }
+        .marketing-site main summary::after { content:'+'; position:absolute; right:0; top:0; }
+        .marketing-site main details[open] summary::after { content:'−'; }
+        .marketing-site main .marketing-section, .marketing-site main .marketing-hero { scroll-margin-top:80px; }
+        .marketing-site .marketing-light :is([class~="text-emerald-400"],[class~="text-rose-400"]) { color:#5C6068; }
+        .marketing-site header > div:first-child > div { height:72px; transition:height .2s cubic-bezier(.2,.7,.2,1); }
+        .marketing-site header.is-scrolled > div:first-child > div { height:64px; }
+        .marketing-site .marketing-legal { max-width:720px; }
+        .marketing-site .marketing-legal h2 { font-size:20px; }
+        .marketing-site [data-parallax] { transform:translate3d(0,0,0); }
+        .marketing-site .marketing-reveal-ready { opacity:0; transform:translateY(16px); transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1); }
+        .marketing-site .marketing-reveal-ready.is-in { opacity:1; transform:none; }
+        @media(min-width:768px) {
+            .marketing-site main > section > div:first-child { padding-inline:32px; }
+            .marketing-site .marketing-hero, .marketing-site .marketing-section { padding-block:96px; }
+            .marketing-site main h1 { font-size:clamp(44px,5.4vw,72px); }
+            .marketing-site main h2 { font-size:48px; }
+            .marketing-site main h3 { font-size:24px; }
+            .marketing-site .marketing-legal h2 { font-size:20px; }
+        }
+        @media(prefers-reduced-motion:reduce) {
+            .marketing-site [data-parallax], .marketing-site .marketing-reveal-ready { opacity:1!important; transform:none!important; transition:none!important; }
+        }
     </style>
 
     @if(!empty($platformSettings['google_analytics_id']))
@@ -407,7 +457,20 @@
     <!-- ═══════════════════════════════════════════════════
          PROFESSIONAL B2B FOOTER
     ═══════════════════════════════════════════════════ -->
-    <footer class="bg-[#070a10] border-t border-slate-800/80">
+    @if($marketingPage)
+<footer class="border-t border-slate-800 bg-[#141518]">
+<div class="max-w-[1200px] mx-auto px-5 lg:px-8 py-12">
+<a href="{{ route('home') }}" class="inline-block mb-8"><img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="GymDeskHub" class="h-9 w-auto"></a>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
+@foreach(['Product'=>['features'=>'Features','pricing'=>'Pricing','register'=>'Start free','login'=>'Log in'],'Company'=>['about'=>'About','contact'=>'Contact'],'Legal'=>['terms'=>'Terms & conditions','privacy'=>'Privacy policy','refund-policy'=>'Refund & cancellation','shipping-policy'=>'Shipping & delivery']] as $heading=>$links)
+<div><h4 class="font-semibold text-white mb-4">{{ $heading }}</h4><ul class="space-y-3">@foreach($links as $route=>$label)<li><a href="{{ route($route) }}" class="text-slate-400 hover:text-white hover:underline">{{ $label }}</a></li>@endforeach</ul></div>
+@endforeach
+<div><h4 class="font-semibold text-white mb-4">Contact</h4><ul class="space-y-3 text-slate-400"><li><a href="{{ route('contact') }}" class="hover:underline">WhatsApp &amp; phone</a></li><li><a href="mailto:support@gymdeskhub.in" class="break-all hover:underline">support@gymdeskhub.in</a></li><li><a href="mailto:grievance@gymdeskhub.in" class="hover:underline">Grievance contact</a></li><li>Ahmedabad, India</li></ul></div>
+</div>
+<div class="mt-10 pt-6 border-t border-slate-800 text-xs text-slate-400 space-y-2"><p>{{ $platformSettings['footer_copyright'] ?? ('© '.date('Y').' GymDeskHub. All rights reserved.') }}</p><p>GymDeskHub is an individual enterprise owned and operated by Sailesh Singh.</p></div>
+</div></footer>
+@else
+<footer class="bg-[#070a10] border-t border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-8">
 
@@ -506,7 +569,6 @@
                 </div>
             </div>
         </div>
-        </div>
 
         <!-- Footer Bottom -->
         <div class="border-t border-slate-800/60">
@@ -525,10 +587,54 @@
             </div>
         </div>
     </footer>
+@endif
     @endif
 
     @if(!empty($platformSettings['custom_footer_scripts']))
         {!! $platformSettings['custom_footer_scripts'] !!}
     @endif
+@if($marketingPage)
+<script>
+(() => {
+    const root = document.querySelector('.marketing-site');
+    if (!root) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const header = root.querySelector('header');
+    const layers = [...root.querySelectorAll('[data-parallax]')];
+    let ticking = false;
+    const update = () => {
+        header?.classList.toggle('is-scrolled', scrollY > 24);
+        const mobile = innerWidth < 768 ? .4 : 1;
+        for (const el of layers) {
+            if (reduce.matches) { el.style.transform = ''; continue; }
+            const r = el.parentElement.getBoundingClientRect();
+            if (r.bottom < -200 || r.top > innerHeight + 200) continue;
+            const travel = Math.max(-60, Math.min(60, -(r.top + r.height / 2 - innerHeight / 2) * Number(el.dataset.speed || .08) * mobile));
+            el.style.transform = 'translate3d(0,' + travel.toFixed(1) + 'px,0)';
+        }
+        ticking = false;
+    };
+    const schedule = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    addEventListener('scroll', schedule, {passive:true});
+    addEventListener('resize', schedule, {passive:true});
+    reduce.addEventListener?.('change', schedule);
+    update();
+    if (!reduce.matches && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('is-in'); observer.unobserve(entry.target); }
+            });
+        }, {threshold:.2});
+        root.querySelectorAll('[data-reveal]').forEach((el,i) => {
+            el.style.transitionDelay = (i % 4) * 60 + 'ms';
+            if (el.getBoundingClientRect().top > innerHeight) {
+                el.classList.add('marketing-reveal-ready');
+                observer.observe(el);
+            }
+        });
+    }
+})();
+</script>
+@endif
 </body>
 </html>

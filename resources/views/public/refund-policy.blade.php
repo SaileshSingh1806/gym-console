@@ -17,17 +17,19 @@
     {{-- Content --}}
     <section class="marketing-section py-12 pb-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
+            <div class="grid lg:grid-cols-[220px_minmax(0,720px)] gap-8 justify-center items-start">
+<nav aria-label="On this page" class="lg:sticky lg:top-24 border-b lg:border-b-0 border-slate-800 pb-4 text-sm"><p class="font-medium text-white mb-3">On this page</p><ul class="space-y-2"><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-1">1. Free Plan &amp; Risk-Free Trial</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-2">2. Subscription Cancellation</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-3">3. 7-Day Money-Back Guarantee (Refund Eligibility)</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-4">4. Refund Processing Timeline &amp; Method</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-5">5. Non-Refundable Items</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-6">6. Contact Support for Billing Inquiries</a></li></ul></nav>
+<div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">1. Free Plan &amp; Risk-Free Trial</h2>
+                    <h2 id="policy-1" class="text-lg font-bold text-white mb-2 scroll-mt-24">1. Free Plan &amp; Risk-Free Trial</h2>
                     <p>
                         We believe in total transparency. GymDeskHub offers a generous <strong>Free Forever Tier (up to 75 active members)</strong> and access to our demo system so gym owners can thoroughly explore biometric sync, WhatsApp billing, and POS features before paying any subscription fee.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">2. Subscription Cancellation</h2>
+                    <h2 id="policy-2" class="text-lg font-bold text-white mb-2 scroll-mt-24">2. Subscription Cancellation</h2>
                     <p>
                         You can cancel your GymDeskHub subscription at any time without penalty or hidden cancellation fees:
                     </p>
@@ -39,7 +41,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">3. 7-Day Money-Back Guarantee (Refund Eligibility)</h2>
+                    <h2 id="policy-3" class="text-lg font-bold text-white mb-2 scroll-mt-24">3. 7-Day Money-Back Guarantee (Refund Eligibility)</h2>
                     <p>
                         If you upgrade to a paid plan (Starter, Pro, or Enterprise) and find that GymDeskHub does not meet your business requirements, you are eligible for a <strong>100% full refund</strong> subject to the following condition:
                     </p>
@@ -55,7 +57,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">4. Refund Processing Timeline &amp; Method</h2>
+                    <h2 id="policy-4" class="text-lg font-bold text-white mb-2 scroll-mt-24">4. Refund Processing Timeline &amp; Method</h2>
                     <p>
                         Once your refund request is received and verified:
                     </p>
@@ -67,7 +69,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">5. Non-Refundable Items</h2>
+                    <h2 id="policy-5" class="text-lg font-bold text-white mb-2 scroll-mt-24">5. Non-Refundable Items</h2>
                     <p>The following charges are non-refundable:</p>
                     <ul class="list-disc pl-5 mt-2 space-y-1.5 text-slate-400">
                         <li>Subscription renewals requested after the initial 7-day money-back guarantee window has passed.</li>
@@ -77,7 +79,7 @@
                 </div>
 
                 <div class="pt-4 border-t border-slate-800">
-                    <h2 class="text-lg font-bold text-white mb-2">6. Contact Support for Billing Inquiries</h2>
+                    <h2 id="policy-6" class="text-lg font-bold text-white mb-2 scroll-mt-24">6. Contact Support for Billing Inquiries</h2>
                     <p>
                         If you have questions regarding an invoice, pending refund, or billing dispute:
                     </p>
@@ -91,6 +93,7 @@
 
             </div>
         </div>
-    </section>
+    </div>
+</section>
 </x-guest-layout>
 
