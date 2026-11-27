@@ -6,7 +6,7 @@
     $isStealthApp = $isMemberUser || $isPureTrainer || request()->routeIs('trainer.*');
     $pwaRole = $isMemberUser ? 'member' : ($isPureTrainer ? 'trainer' : null);
     $pwaTenant = $pwaRole ? $authUser->tenant : null;
-    $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode(['icon-v3', $pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
+    $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode(['static-icon-v4', $pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
     $pwaName = $pwaTenant ? ($pwaTenant->settings['pwa_name'] ?? $pwaTenant->name) : 'GymDeskHub';
     $pwaSplashLogo = $pwaTenant?->settings['pwa_icon_path'] ?? null;
     $pwaSplashLogo = $pwaSplashLogo ? asset('storage/'.$pwaSplashLogo) : ($pwaTenant?->logo_url ?: asset('images/gymdeskhub-official-dark.svg'));
