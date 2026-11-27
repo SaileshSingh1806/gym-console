@@ -1898,11 +1898,13 @@ class AppController extends Controller
 
     public function storeMemberMeasurement(Request $request, int $id): RedirectResponse
     {
-        $member = Member::findOrFail($id);
+        $member = Member::where('tenant_id', $request->user()->tenant_id)->findOrFail($id);
+        abort_if($request->user()->isMember(), 403);
 
         $validated = $request->validate([
             'date' => 'required|date',
             'weight' => 'nullable|numeric|min:0',
+            'height_cm' => 'nullable|numeric|min:40|max:260',
             'chest' => 'nullable|numeric|min:0',
             'shoulders' => 'nullable|numeric|min:0',
             'waist' => 'nullable|numeric|min:0',
@@ -1924,6 +1926,8 @@ class AppController extends Controller
             'id' => uniqid(),
             'date' => $validated['date'],
             'weight' => $validated['weight'] ?? null,
+            'height_cm' => $validated['height_cm'] ?? null,
+            'bmi' => !empty($validated['height_cm']) && !empty($validated['weight']) ? round((float) $validated['weight'] / ((float) $validated['height_cm'] / 100) ** 2, 2) : null,
             'chest' => $validated['chest'] ?? null,
             'shoulders' => $validated['shoulders'] ?? null,
             'waist' => $validated['waist'] ?? null,
