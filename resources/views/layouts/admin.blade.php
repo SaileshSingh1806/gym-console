@@ -21,11 +21,9 @@
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
     @else
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=4">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=4">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('images/gymdeskhub-official-icon.svg') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=4">
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
+        <link rel="shortcut icon" href="{{ asset('images/gymdeskhub-official-icon.svg') }}">
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -138,10 +136,10 @@
         <!-- Logo -->
         <div class="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 backdrop-blur">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center min-w-0 group focus:outline-none">
-                <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                <img src="{{ asset('images/gymdeskhub-official-dark.svg') }}"
                      alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
                      class="h-8 w-auto max-w-[170px] object-contain hidden dark:block transition-opacity group-hover:opacity-90">
-                <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}"
+                <img src="{{ asset('images/gymdeskhub-official-light.svg') }}"
                      alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
                      class="h-8 w-auto max-w-[170px] object-contain block dark:hidden transition-opacity group-hover:opacity-90">
             </a>
