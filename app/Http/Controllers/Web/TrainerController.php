@@ -303,6 +303,7 @@ class TrainerController extends Controller
         $validated = $request->validate([
             'date' => 'nullable|date',
             'weight' => 'nullable|numeric|min:20|max:500',
+            'height_cm' => 'nullable|numeric|min:40|max:260',
             'body_fat' => 'nullable|numeric|min:1|max:70',
             'waist' => 'nullable|numeric|min:10|max:200',
             'chest' => 'nullable|numeric|min:10|max:200',
@@ -337,6 +338,8 @@ class TrainerController extends Controller
             'id' => uniqid(),
             'date' => $entryDate,
             'weight' => $validated['weight'] ?? null,
+            'height_cm' => $validated['height_cm'] ?? null,
+            'bmi' => !empty($validated['height_cm']) && !empty($validated['weight']) ? round((float) $validated['weight'] / ((float) $validated['height_cm'] / 100) ** 2, 2) : null,
             'body_fat' => $validated['body_fat'] ?? null,
             'waist' => $validated['waist'] ?? null,
             'chest' => $validated['chest'] ?? null,
