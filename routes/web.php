@@ -7,9 +7,16 @@ use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\PayrollController;
 use App\Http\Controllers\Web\PublicAgreementController;
 use App\Http\Controllers\Web\PublicController;
+use App\Http\Controllers\Web\PwaController;
 use App\Http\Controllers\Web\TrainerController;
 use App\Http\Controllers\Web\WhatsAppController;
 use Illuminate\Support\Facades\Route;
+
+// Public app branding contains no member information; launch validates the signed-in tenant and role.
+Route::get('/pwa/gym/{slug}/{role}/manifest.webmanifest', [PwaController::class, 'manifest'])->whereIn('role', ['member', 'trainer'])->middleware('throttle:120,1')->name('pwa.manifest');
+Route::get('/pwa/gym/{slug}/{role}/icon/{size}/{purpose}.png', [PwaController::class, 'icon'])->whereIn('role', ['member', 'trainer'])->whereIn('size', ['180', '192', '512'])->whereIn('purpose', ['any', 'maskable'])->middleware('throttle:120,1')->name('pwa.icon');
+Route::get('/app/pwa/{slug}/{role}', [PwaController::class, 'launch'])->whereIn('role', ['member', 'trainer'])->name('pwa.launch');
+Route::post('/app/settings/pwa-branding', [PwaController::class, 'saveBranding'])->middleware(['auth', 'tenant', 'subscription.active'])->name('pwa.branding.save');
 
 // Public Marketing Routes
 Route::get('/', [PublicController::class, 'home'])->name('home');
