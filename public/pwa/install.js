@@ -24,7 +24,7 @@
         } else if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
             showStatus('In Safari, tap Share, then Add to Home Screen.');
         } else {
-            showStatus('Open your browser menu and choose Install app or Add to Home screen.');
+            showStatus('Install prompt is not ready. Open this page in Chrome or Edge, refresh once, and use Install app in the browser menu.');
         }
     });
     if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
@@ -35,7 +35,7 @@
         if (!waitingWorker) return;
         reloadOnChange = true; waitingWorker.postMessage('SKIP_WAITING');
     });
-    navigator.serviceWorker.register('/pwa-worker.js', {scope: '/app/'}).then(reg => {
+    navigator.serviceWorker.register('/pwa-worker.js', {scope: '/app/', updateViaCache: 'none'}).then(reg => {
         if (reg.waiting) offerUpdate(reg.waiting);
         reg.addEventListener('updatefound', () => {
             const worker = reg.installing;
