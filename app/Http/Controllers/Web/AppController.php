@@ -307,22 +307,31 @@ class AppController extends Controller
         ));
     }
 
-    public function members(Request $request): View|RedirectResponse
+    public function members(Request $request): View|RedirectResponse|\Illuminate\Http\Response
     {
         $user = auth()->user();
         if ($user && ($user->role === 'trainer' || ($user->isTrainer() && !$user->isGymOwner() && !$user->isSuperAdmin()))) {
             return redirect()->route('trainer.workspace', ['tab' => 'members']);
         }
-        $query = Member::with(['branch', 'activeMembership.plan', 'activeMembership.payments', 'memberships.plan']);
+        $query = Member::with(['branch', 'activeMembership.plan', 'activeMembership.payments', 'latestMembership.plan', 'latestMembership.payments']);
 
-        if ($request->search) {
-            $s = $request->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('first_name', 'like', "%{$s}%")
-                    ->orWhere('last_name', 'like', "%{$s}%")
-                    ->orWhere('phone', 'like', "%{$s}%")
-                    ->orWhere('member_code', 'like', "%{$s}%");
-            });
+        $partial = $request->header('X-Member-Results') === '1';
+        $search = trim((string) $request->input('search', ''));
+        if ($partial && ($search !== '' && mb_strlen($search) < 3 || mb_strlen($search) > 100)) {
+            abort(422, 'Search must contain 3 to 100 characters.');
+        }
+        if ($search !== '') {
+            $terms = preg_split('/\s+/u', mb_substr($search, 0, 100), -1, PREG_SPLIT_NO_EMPTY);
+            foreach ($terms as $term) {
+                $pattern = '%' . str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $term) . '%';
+                $query->where(function ($q) use ($pattern) {
+                    $q->whereRaw("first_name LIKE ? ESCAPE '!'", [$pattern])
+                        ->orWhereRaw("last_name LIKE ? ESCAPE '!'", [$pattern])
+                        ->orWhereRaw("phone LIKE ? ESCAPE '!'", [$pattern])
+                        ->orWhereRaw("member_code LIKE ? ESCAPE '!'", [$pattern])
+                        ->orWhereRaw("email LIKE ? ESCAPE '!'", [$pattern]);
+                });
+            }
         }
 
         if ($request->status) {
@@ -390,6 +399,13 @@ class AppController extends Controller
         } else {
             // Default: Member ID latest to old (descending)
             $query->orderByRaw("CASE WHEN member_code REGEXP '[0-9]+' THEN CAST(REGEXP_REPLACE(member_code, '[^0-9]', '') AS UNSIGNED) ELSE 0 END DESC, id DESC");
+        }
+
+        if ($partial) {
+            $members = $query->simplePaginate(15)->withQueryString();
+            return response()->view('app.members.partials.results', compact('members'))
+                ->header('Cache-Control', 'private, no-store')
+                ->header('Vary', 'X-Member-Results');
         }
 
         $members = $query->paginate(15)->withQueryString();
