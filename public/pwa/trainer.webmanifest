@@ -1,0 +1,19 @@
+{
+  "id": "/pwa/trainer",
+  "name": "GymDeskHub Trainer",
+  "short_name": "GDH Trainer",
+  "start_url": "/app/trainer",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0D0E10",
+  "theme_color": "#0D0E10",
+  "icons": [
+    {
+      "src": "/images/gymdeskhub-official-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
