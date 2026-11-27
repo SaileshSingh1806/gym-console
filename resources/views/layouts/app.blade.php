@@ -58,10 +58,18 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .member-app-shell, .trainer-app-shell { font-family: Inter, system-ui, sans-serif; }
+        .member-portal [class*="text-[10px]"], .member-portal [class*="text-[11px]"], .trainer-portal [class*="text-[10px]"], .trainer-portal [class*="text-[11px]"] { font-size: 12px; line-height: 1.5; }
+        .member-portal input:not([type="checkbox"]):not([type="radio"]), .member-portal select, .trainer-portal input:not([type="checkbox"]):not([type="radio"]), .trainer-portal select { min-height: 44px; }
+        @media (max-width: 639px) {
+            .member-portal input:not([type="checkbox"]):not([type="radio"]), .member-portal select, .member-portal textarea, .trainer-portal input:not([type="checkbox"]):not([type="radio"]), .trainer-portal select, .trainer-portal textarea { font-size: 16px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .member-portal *, .trainer-portal * { transition-duration: 0s !important; animation-duration: 0s !important; }
+        }
         .trainer-app-shell .trainer-portal button:focus-visible { outline: 2px solid #F5A524; outline-offset: 3px; }
         .member-app-shell .member-portal button:focus-visible { outline: 2px solid #F5A524; outline-offset: 3px; }
         @media (min-width: 1024px) {
-            .member-app-shell main { padding-bottom: 96px; }
+            .member-app-shell main, .trainer-app-shell main { padding-bottom: 96px; }
         }
     </style>
 
@@ -688,7 +696,7 @@
                                 </div>
                             </div>
 
-                            @if(!auth()->user()->isMember() && auth()->user()->tenant && auth()->user()->tenant->activeSubscription)
+                            @if(($authUser->isSuperAdmin() || $authUser->isGymOwner()) && $authUser->tenant && $authUser->tenant->activeSubscription)
                                 <div class="mt-3 pt-3 border-t border-line flex items-center justify-between text-xs">
                                     <span class="text-fg-muted">Current plan</span>
                                     <span class="font-medium text-fg">{{ auth()->user()->tenant->activeSubscription->plan?->name ?? 'Standard' }}</span>
@@ -744,7 +752,7 @@
                                         <span>Gym Feedback &amp; Suggestions</span>
                                     </div>
                                 </a>
-                            @else
+                            @elseif(!$isPureTrainer)
                                 <a href="{{ route('app.feedback.index') }}" 
                                    class="flex items-center justify-between px-4 h-9 text-[13px] font-medium text-fg-muted hover:text-fg hover:bg-raised transition-colors">
                                     <div class="flex items-center gap-2.5">
@@ -983,7 +991,7 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#141518] border-t border-neutral-800' : 'lg:hidden bg-[#141518] border-t border-[#26282D]') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#141518] border-t border-neutral-800' : 'bg-[#141518] border-t border-[#26282D]') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
          style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 40 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
