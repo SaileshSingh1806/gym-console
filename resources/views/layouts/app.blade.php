@@ -458,10 +458,9 @@
                     @endif
                     <a href="{{ route('trainer.workspace') }}" aria-label="{{ $tGymName }}" class="flex items-center gap-2.5 min-w-0 group">
                         @if(!empty($resolvedTrainerLogo))
-                            <img src="{{ $resolvedTrainerLogo }}" alt="{{ $tGymName }}" class="h-10 sm:h-11 w-auto max-w-[160px] sm:max-w-[200px] object-contain shrink-0">
-                        @else
-                            <span class="font-semibold text-white text-base sm:text-lg tracking-tight truncate">{{ $tGymName }}</span>
+                            <img src="{{ $resolvedTrainerLogo }}" alt="" class="h-9 w-auto max-w-[64px] sm:h-10 sm:max-w-[92px] object-contain shrink-0">
                         @endif
+                        <span class="min-w-0 font-semibold text-white text-sm sm:text-base tracking-tight truncate" title="{{ $tGymName }}">{{ $tGymName }}</span>
                     </a>
                 @elseif(!auth()->user()->isMember())
                     <button @click="sidebarOpen = true" type="button" aria-label="Open navigation menu" class="lg:hidden ds-btn ds-btn-ghost !h-9 !w-9 !p-0 -ml-1 shrink-0 cursor-pointer">
@@ -477,10 +476,9 @@
                     @endphp
                     <a href="{{ route('app.portal') }}" aria-label="{{ $gymName }}" class="flex items-center gap-2.5 min-w-0 group">
                         @if(!empty($resolvedMemberGymLogo))
-                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-10 sm:h-11 w-auto max-w-[160px] sm:max-w-[200px] object-contain shrink-0">
-                        @else
-                            <span class="font-semibold text-white text-base sm:text-lg tracking-tight truncate">{{ $gymName }}</span>
+                            <img src="{{ $resolvedMemberGymLogo }}" alt="" class="h-9 w-auto max-w-[64px] sm:h-10 sm:max-w-[92px] object-contain shrink-0">
                         @endif
+                        <span class="min-w-0 font-semibold text-white text-sm sm:text-base tracking-tight truncate" title="{{ $gymName }}">{{ $gymName }}</span>
                     </a>
                 @endif
             </div>
