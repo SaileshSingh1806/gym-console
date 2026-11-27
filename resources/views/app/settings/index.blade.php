@@ -393,6 +393,43 @@
         <!-- TAB 4: MEMBER APP -->
         <!-- ========================================================================= -->
         <div x-show="tab === 'member_app'" x-cloak class="space-y-6">
+            @if(auth()->user()->isGymOwner() && (int) auth()->user()->tenant_id === (int) $tenant->id)
+                <form action="{{ route('pwa.branding.save') }}" method="POST" enctype="multipart/form-data" class="p-5 sm:p-6 rounded-xl bg-surface border border-line space-y-5">
+                    @csrf
+                    <div>
+                        <h3 class="text-base font-semibold text-fg">App branding</h3>
+                        <p class="text-sm text-fg-muted mt-1">Your gym name and logo appear on the installed Member and Trainer apps. Invoices and receipts are not affected.</p>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <label class="block text-sm text-fg">App display name
+                            <input name="pwa_name" maxlength="80" value="{{ old('pwa_name', $tenantSettings['pwa_name'] ?? $tenant->name) }}" class="mt-1 w-full px-3 py-2.5 rounded-lg bg-raised border border-line text-fg">
+                        </label>
+                        <label class="block text-sm text-fg">Short app name
+                            <input name="pwa_short_name" maxlength="24" value="{{ old('pwa_short_name', $tenantSettings['pwa_short_name'] ?? \Illuminate\Support\Str::limit($tenant->name, 24, '')) }}" class="mt-1 w-full px-3 py-2.5 rounded-lg bg-raised border border-line text-fg">
+                        </label>
+                    </div>
+                    <div class="flex flex-wrap gap-5 items-start">
+                        @foreach(['member', 'trainer'] as $brandRole)
+                            <div class="text-center space-y-2">
+                                <img src="{{ route('pwa.icon', [$tenant->slug, $brandRole, 192, 'any', 'v' => $tenant->updated_at?->timestamp]) }}" alt="{{ ucfirst($brandRole) }} app icon" width="88" height="88" class="rounded-xl mx-auto border border-line">
+                                <p class="text-xs font-medium text-fg">{{ ucfirst($brandRole) }} app</p>
+                                <a href="{{ route('pwa.launch', [$tenant->slug, $brandRole]) }}" target="_blank" rel="noopener" class="text-xs text-accent" onclick="event.preventDefault(); navigator.clipboard.writeText(this.href).then(()=>{this.textContent='Link copied';}).catch(()=>{window.prompt('Copy installation link',this.href);});">Copy launch link</a>
+                            </div>
+                        @endforeach
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-sm font-medium text-fg">Dedicated HD app logo (optional)
+                                <input type="file" name="pwa_icon" accept="image/png,image/jpeg,image/webp" class="mt-2 block w-full text-sm text-fg-muted">
+                            </label>
+                            <p class="mt-2 text-xs text-fg-muted">Recommended: 1024 × 1024 transparent PNG. Minimum 512 × 512, maximum 4096 × 4096, 10 MB. Original quality is retained. Without an upload, the existing gym logo is used when available locally.</p>
+                            @if(!empty($tenantSettings['pwa_icon_path']))
+                                <label class="flex items-center gap-2 text-sm text-fg mt-3"><input type="checkbox" name="remove_pwa_icon" value="1"> Use existing gym logo instead</label>
+                            @endif
+                        </div>
+                    </div>
+                    <button type="submit" class="min-h-11 px-4 rounded-lg bg-accent text-accent-on font-semibold text-sm">Save app branding</button>
+                </form>
+            @endif
+
             <form action="{{ route('app.settings.update') }}" method="POST" class="space-y-6">
                 @csrf
                 <input type="hidden" name="active_tab" value="member_app">
