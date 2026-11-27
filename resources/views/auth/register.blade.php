@@ -14,7 +14,7 @@
     </style>
     <div class="gdh-register">
     <header class="max-w-6xl mx-auto px-5 sm:px-8 flex items-center justify-between gap-4 min-h-[72px] border-b border-[#292c30]">
-        <a href="{{ route('home') }}" aria-label="Back to website"><img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-8 w-auto object-contain max-w-[180px]"></a>
+        <a href="{{ route('home') }}" aria-label="Back to website"><img src="{{ asset('images/gymdeskhub-official-dark.svg') }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}" class="h-8 w-auto object-contain max-w-[180px]"></a>
         <a href="{{ route('contact') }}" class="text-sm text-[#f5a623] hover:underline">Contact support</a>
     </header>
     <div class="py-8 sm:py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative" x-data="{ 
