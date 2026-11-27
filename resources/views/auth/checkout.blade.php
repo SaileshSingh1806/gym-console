@@ -442,7 +442,7 @@
                     currency: razorpayConfig.currency || 'INR',
                     name: razorpayConfig.name || 'GymDeskHub',
                     description: razorpayConfig.description || 'Platform Subscription Plan',
-                    image: '{{ $platformSettings['logo_url'] ?? '' }}',
+                    image: @js(asset('images/gymdeskhub-official-dark.svg')),
                     prefill: {
                         name: razorpayConfig.prefill?.name || 'Gym Owner',
                         email: razorpayConfig.prefill?.email || '',
