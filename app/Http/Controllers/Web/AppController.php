@@ -225,6 +225,26 @@ class AppController extends Controller
         $activeMembership = $member?->activeMembership ?? $member?->memberships()->latest()->first();
         $daysLeft = $activeMembership && $activeMembership->end_date ? (int) now()->startOfDay()->diffInDays($activeMembership->end_date->startOfDay(), false) : null;
 
+        // Keep the recent history bounded, but calculate dashboard metrics from the full relationship.
+        $attendanceStats = ['today' => null, 'month' => 0, 'total' => 0, 'week_dates' => []];
+        if ($member) {
+            $attendance = $member->attendance();
+            $attendanceStats['total'] = (clone $attendance)->count();
+            $dateRange = static function ($query, $start, $end) {
+                return $query->where(function ($q) use ($start, $end) {
+                    $q->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                        ->orWhere(fn ($fallback) => $fallback->whereNull('date')
+                            ->whereBetween('check_in', [$start->copy()->startOfDay(), $end->copy()->endOfDay()]));
+                });
+            };
+            $attendanceStats['today'] = $dateRange(clone $attendance, now(), now())->latest('check_in')->first();
+            $attendanceStats['month'] = $dateRange(clone $attendance, now()->startOfMonth(), now()->endOfMonth())->count();
+            $attendanceStats['week_dates'] = $dateRange(clone $attendance, now()->startOfWeek(), now()->endOfWeek())
+                ->get(['date', 'check_in'])
+                ->map(fn ($visit) => ($visit->date ?? $visit->check_in)?->toDateString())
+                ->filter()->unique()->values()->all();
+        }
+
         $measurements = $member?->metadata['measurements'] ?? [];
         if (is_array($measurements)) {
             usort($measurements, function ($a, $b) {
@@ -303,7 +323,8 @@ class AppController extends Controller
             'pendingPtSessions',
             'ptSessionsHistory',
             'upcomingPtSessions',
-            'exerciseVideoMatches'
+            'exerciseVideoMatches',
+            'attendanceStats'
         ));
     }
 
