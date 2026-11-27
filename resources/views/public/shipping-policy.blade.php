@@ -17,10 +17,12 @@
     {{-- Content --}}
     <section class="marketing-section py-12 pb-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
+            <div class="grid lg:grid-cols-[220px_minmax(0,720px)] gap-8 justify-center items-start">
+<nav aria-label="On this page" class="lg:sticky lg:top-24 border-b lg:border-b-0 border-slate-800 pb-4 text-sm"><p class="font-medium text-white mb-3">On this page</p><ul class="space-y-2"><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-1">1. Digital Nature of Service (No Physical Shipping)</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-2">2. Electronic Delivery &amp; Turnaround Timeline</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-3">3. Hardware Consultation &amp; On-Site Turnstiles</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-4">4. Non-Delivery or Access Issues</a></li><li><a class="text-slate-400 hover:text-white hover:underline" href="#policy-5">5. Contact Information</a></li></ul></nav>
+<div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">1. Digital Nature of Service (No Physical Shipping)</h2>
+                    <h2 id="policy-1" class="text-lg font-bold text-white mb-2 scroll-mt-24">1. Digital Nature of Service (No Physical Shipping)</h2>
                     <p>
                         <strong>GymDeskHub</strong> (an individual business owned and operated by <strong>Sailesh Singh</strong>, accessible at <strong>gymdeskhub.com</strong>) is an online Software-as-a-Service (SaaS) cloud application providing gym operations management, biometric sync utilities, and billing portals.
                     </p>
@@ -30,7 +32,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">2. Electronic Delivery &amp; Turnaround Timeline</h2>
+                    <h2 id="policy-2" class="text-lg font-bold text-white mb-2 scroll-mt-24">2. Electronic Delivery &amp; Turnaround Timeline</h2>
                     <p>
                         Upon successful completion of payment or subscription checkout:
                     </p>
@@ -42,14 +44,14 @@
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">3. Hardware Consultation &amp; On-Site Turnstiles</h2>
+                    <h2 id="policy-3" class="text-lg font-bold text-white mb-2 scroll-mt-24">3. Hardware Consultation &amp; On-Site Turnstiles</h2>
                     <p>
                         If your gym requests physical biometric hardware (such as facial recognition readers, tripod turnstiles, or RFID cards), hardware is sourced and delivered through authorized local hardware partners and distributors across India. Delivery schedules, tracking numbers, and on-site technician installation timelines (typically 3 to 7 business days) will be provided separately by the hardware fulfillment partner.
                     </p>
                 </div>
 
                 <div>
-                    <h2 class="text-lg font-bold text-white mb-2">4. Non-Delivery or Access Issues</h2>
+                    <h2 id="policy-4" class="text-lg font-bold text-white mb-2 scroll-mt-24">4. Non-Delivery or Access Issues</h2>
                     <p>
                         If you have completed a payment and have not received your account activation credentials or confirmation within 15 minutes:
                     </p>
@@ -61,7 +63,7 @@
                 </div>
 
                 <div class="pt-4 border-t border-slate-800">
-                    <h2 class="text-lg font-bold text-white mb-2">5. Contact Information</h2>
+                    <h2 id="policy-5" class="text-lg font-bold text-white mb-2 scroll-mt-24">5. Contact Information</h2>
                     <div class="mt-2 text-slate-400 text-xs space-y-1">
                         <p><strong class="text-slate-200">Company:</strong> GymDeskHub Technologies</p>
                         <p><strong class="text-slate-200">Email:</strong> <a href="mailto:support@gymdeskhub.com" class="text-amber-400">support@gymdeskhub.com</a></p>
@@ -72,6 +74,7 @@
 
             </div>
         </div>
-    </section>
+    </div>
+</section>
 </x-guest-layout>
 
