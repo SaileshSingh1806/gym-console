@@ -303,10 +303,10 @@
             this.collectNotes = '';
             this.showCollectFeeModal = true;
         }
-    }" id="members-page" class="space-y-6">
+    }" id="members-page" class="space-y-6 min-w-0">
 
         <!-- Top Metrics Header -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div class="grid gap-2.5 sm:gap-4" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr))">
             <div class="p-3 sm:p-4 rounded-xl sm:rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex items-center justify-between">
                 <div>
                     <span class="text-xs sm:text-xs text-fg-muted dark:text-fg-muted font-medium">Total Enrolled</span>
@@ -393,29 +393,29 @@
         </div>
 
         <!-- Action Toolbar -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <form id="member-search-form" action="{{ route('app.members.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-grow max-w-4xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 min-w-0">
+            <form id="member-search-form" action="{{ route('app.members.index') }}" method="GET" class="flex flex-wrap items-stretch gap-2 sm:gap-3 grow min-w-0 basis-[600px]">
                 @if(request('filter'))
                     <input type="hidden" name="filter" value="{{ request('filter') }}">
                 @endif
                 @if(request('date_filter'))
                     <input type="hidden" name="date_filter" value="{{ request('date_filter') }}">
                 @endif
-                <div class="relative flex-grow">
+                <div class="relative grow min-w-0 basis-[220px]">
                     <input type="search" id="member-search-input" name="search" autocomplete="off" maxlength="100" value="{{ request('search') }}" placeholder="Search name, phone, email, code..." class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-amber-500 focus:outline-none">
                     <svg class="w-4 h-4 text-fg-muted dark:text-fg-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 
-                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <div class="flex items-center gap-2 flex-wrap min-w-0 grow">
                     <!-- Sort Selection -->
-                    <select name="sort" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none cursor-pointer">
+                    <select name="sort" class="grow min-w-0 max-w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none cursor-pointer">
                         <option value="member_id_desc" {{ request('sort', 'member_id_desc') === 'member_id_desc' ? 'selected' : '' }}>Member ID: Latest First</option>
                         <option value="member_id_asc" {{ request('sort') === 'member_id_asc' ? 'selected' : '' }}>Member ID: Old First</option>
                         <option value="join_date_desc" {{ request('sort') === 'join_date_desc' ? 'selected' : '' }}>Join Date: Newest First</option>
                         <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
                     </select>
 
-                    <select name="status" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-amber-500 focus:outline-none">
+                    <select name="status" class="grow min-w-0 max-w-full px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs focus:border-amber-500 focus:outline-none">
                         <option value="">All Statuses</option>
                         <option value="ACTIVE" {{ request('status') === 'ACTIVE' ? 'selected' : '' }}>Active</option>
                         <option value="INACTIVE" {{ request('status') === 'INACTIVE' ? 'selected' : '' }}>Inactive</option>
@@ -433,24 +433,24 @@
                 </div>
             </form>
 
-            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <div class="flex flex-wrap items-center gap-2 grow sm:grow-0 min-w-0">
                 @if(auth()->user()?->isGymOwner() || auth()->user()?->isSuperAdmin())
                     <a id="member-export-link" data-export-url="{{ route('app.members.export') }}" href="{{ route('app.members.export', request()->all()) }}" 
-                       class="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+                       class="grow sm:grow-0 justify-center whitespace-nowrap px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
                        title="Export members to CSV with active filters">
                         <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         <span>Export CSV</span>
                     </a>
 
                     <a href="{{ route('app.members.import') }}" 
-                       class="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+                       class="grow sm:grow-0 justify-center whitespace-nowrap px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
                        title="Bulk import members from CSV">
                         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                         <span>Import CSV</span>
                     </a>
                 @endif
 
-                <a href="{{ route('app.members.create') }}" class="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer">
+                <a href="{{ route('app.members.create') }}" class="grow sm:grow-0 justify-center whitespace-nowrap px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                     <span>Enroll Member</span>
                 </a>
@@ -458,7 +458,7 @@
         </div>
 
         <p id="member-search-status" role="status" aria-live="polite" class="text-xs text-fg-muted">Enter at least 3 characters to search members.</p>
-        <div id="member-results" aria-busy="false">
+        <div id="member-results" class="min-w-0" aria-busy="false">
             @include('app.members.partials.results')
         </div>
 
