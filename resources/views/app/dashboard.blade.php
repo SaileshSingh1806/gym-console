@@ -95,8 +95,26 @@
             .dashboard-overview .owner-lists { grid-template-columns:repeat(3,minmax(0,1fr)); }
         }
         @container (max-width:400px) {
-            .dashboard-overview .dashboard-actions .ds-btn { flex:1 1 calc(50% - 8px); white-space:normal; padding-inline:8px; font-size:12px; }
             .dashboard-overview .owner-chart-plot { height:180px; }
+        }
+        @media (max-width:639px) {
+            .dashboard-overview .dashboard-actions {
+                flex-wrap:nowrap; min-width:0; max-width:100%; overflow-x:auto; overflow-y:hidden;
+                justify-content:flex-start; padding:2px 2px 8px; overscroll-behavior-x:contain;
+                -webkit-overflow-scrolling:touch; scrollbar-width:thin;
+            }
+            .dashboard-overview .dashboard-actions .ds-btn {
+                flex:0 0 auto; white-space:nowrap; padding-inline:12px; font-size:13px; min-height:44px; height:44px;
+            }
+            .dashboard-overview .quick-guide-scroll {
+                display:flex; gap:10px; overflow-x:auto; overflow-y:hidden; min-width:0;
+                scroll-snap-type:x proximity; scroll-padding-inline:16px; overscroll-behavior-x:contain;
+                -webkit-overflow-scrolling:touch; scrollbar-width:thin;
+            }
+            .dashboard-overview .quick-guide-scroll > a {
+                flex:0 0 85%; margin-block:0; min-width:0; scroll-snap-align:start;
+                overflow-wrap:anywhere;
+            }
         }
     </style>
     @endpush
@@ -1424,7 +1442,8 @@ WhatsApp
                     </div>
                     <button type="button" @click="showTutorialsModal = false" class="p-1.5 text-fg-subtle hover:text-fg rounded-lg cursor-pointer"></button>
                 </div>
-                <div class="p-4 sm:p-5 space-y-2.5 overflow-y-auto text-xs">
+                <p class="sm:hidden px-4 pt-3 text-xs text-fg-muted">Swipe to explore the quick guide</p>
+                <div class="quick-guide-scroll p-4 sm:p-5 sm:space-y-2.5 overflow-y-auto text-xs" role="region" aria-label="Quick guide workflows" tabindex="0">
                     <a href="{{ route('app.members.create') }}" class="block p-3 rounded-xl bg-raised border border-line hover:border-line transition-colors">
                         <div class="font-semibold text-fg">1. Onboard a New Member &amp; Collect Fee</div>
                         <div class="text-fg-muted mt-0.5">Create member profile, assign plan, discount, and record partial or full payment.</div>
