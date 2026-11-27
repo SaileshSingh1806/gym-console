@@ -1,8 +1,8 @@
 /* No authenticated responses or mutation requests are stored. */
-const CACHE = 'gdh-pwa-offline-v2';
+const CACHE = 'gdh-pwa-offline-v3';
 const OFFLINE = '/pwa/offline.html';
 self.addEventListener('install', event => {
-    event.waitUntil(caches.open(CACHE).then(cache => cache.add(new Request(OFFLINE, {cache: 'reload'}))));
+    event.waitUntil(caches.open(CACHE).then(cache => cache.add(new Request(OFFLINE, {cache: 'reload'}))).catch(error => { console.warn('Offline page unavailable', error); }));
 });
 self.addEventListener('activate', event => {
     event.waitUntil((async () => {
