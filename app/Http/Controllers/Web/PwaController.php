@@ -124,6 +124,16 @@ class PwaController extends Controller
         return redirect($url)->header('Cache-Control', 'no-store');
     }
 
+    public function redirectLegacyLogin(string $slug, string $role)
+    {
+        return redirect()->route('pwa.login', [$slug, $role]);
+    }
+
+    public function redirectLegacyLaunch(string $slug, string $role)
+    {
+        return redirect()->route('pwa.launch', [$slug, $role]);
+    }
+
     public function launch(Request $request, string $slug, string $role)
     {
         $tenant = $this->tenant($slug);
