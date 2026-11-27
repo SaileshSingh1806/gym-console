@@ -82,6 +82,30 @@
             .dashboard-overview .owner-due-card, .dashboard-overview .owner-pt-cell { padding:10px 12px; }
             .dashboard-overview .owner-due-card .ds-kpi, .dashboard-overview .owner-pt-cell .ds-kpi { font-size:20px; }
         }
+        @container (max-width:599px) {
+            .dashboard-overview .owner-finance {
+                grid-template-columns:repeat(2,minmax(0,1fr));
+                gap:8px; padding:10px; background:transparent;
+            }
+            .dashboard-overview .owner-finance > div {
+                border:1px solid rgb(var(--c-line)); border-radius:10px;
+                padding:12px; gap:10px; min-width:0;
+            }
+            .dashboard-overview .owner-finance .finance-label {
+                font-size:12px; gap:6px; align-items:flex-start;
+            }
+            .dashboard-overview .owner-finance .finance-label svg { width:16px; height:16px; }
+            .dashboard-overview .owner-finance .ds-kpi {
+                font-size:clamp(16px,5.2cqi,22px); line-height:1.35;
+                font-variant-numeric:tabular-nums; overflow-wrap:anywhere;
+            }
+            .dashboard-overview .owner-finance .finance-count {
+                font-size:11px; line-height:1.45; overflow-wrap:anywhere;
+            }
+            .dashboard-overview .owner-finance .finance-link {
+                min-height:32px; font-size:11px;
+            }
+        }
         @container (min-width:600px) {
             .dashboard-overview .owner-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
             .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
@@ -654,7 +678,19 @@
         @endif
 
         @php
-            $buildExpiryReminder = static function ($exp) use ($tenantName) {
+            $expiryStatus = static function ($exp): string {
+                $days = (int) round(now()->startOfDay()->diffInDays(
+                    \Carbon\Carbon::parse($exp->end_date)->startOfDay(), false
+                ));
+
+                return match (true) {
+                    $days < 0 => 'Expired',
+                    $days === 0 => 'Expires today',
+                    $days === 1 => 'Expires in 1 day',
+                    default => 'Expires in ' . $days . ' days',
+                };
+            };
+            $buildExpiryReminder = static function ($exp) use ($tenantName, $expiryStatus) {
                 return implode("\n", [
                 '*' . $tenantName . '*',
                 '*Membership Renewal Reminder*',
@@ -665,7 +701,7 @@
                 '',
                 '*Membership Plan:* ' . ($exp->plan?->name ?? 'Membership'),
                 '*Expiry Date:* ' . \Carbon\Carbon::parse($exp->end_date)->format('d F Y'),
-                '*Status:* Expiring Soon',
+                '*Status:* ' . $expiryStatus($exp),
                 '',
                 'Please renew your membership before the expiry date to ensure uninterrupted access to the gym.',
                 '',
@@ -713,11 +749,8 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-1.5 shrink-0">
-                                    @php
-                                        $daysLeft = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay())));
-                                    @endphp
                                     <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line whitespace-nowrap">
-                                        {{ $daysLeft }}d
+                                        {{ $expiryStatus($exp) }}
                                     </span>
                                     @if($exp->member?->phone)
                                         @php
@@ -1260,7 +1293,7 @@ Re-engage
                                 <th class="py-2.5 px-3">Member</th>
                                 <th class="py-2.5 px-3">Plan</th>
                                 <th class="py-2.5 px-3">Expires</th>
-                                <th class="py-2.5 px-3">Days</th>
+                                <th class="py-2.5 px-3">Expiry status</th>
                                 <th class="py-2.5 px-3">Action</th>
                             </tr>
                         </thead>
@@ -1274,9 +1307,8 @@ Re-engage
                                     <td class="py-2.5 px-3 text-fg-muted font-semibold">{{ $exp->plan?->name ?? 'Standard Plan' }}</td>
                                     <td class="py-2.5 px-3 text-fg-muted whitespace-nowrap">{{ \Carbon\Carbon::parse($exp->end_date)->format('d M Y') }}</td>
                                     <td class="py-2.5 px-3 whitespace-nowrap">
-                                        @php $dl = max(0, (int) round(\Carbon\Carbon::parse($exp->end_date)->startOfDay()->diffInDays(now()->startOfDay()))); @endphp
                                         <span class="px-2 py-0.5 rounded text-xs font-semibold bg-raised text-fg-muted whitespace-nowrap inline-block">
-                                            {{ $dl }}d left
+                                            {{ $expiryStatus($exp) }}
                                         </span>
                                     </td>
                                     <td class="py-2.5 px-3">

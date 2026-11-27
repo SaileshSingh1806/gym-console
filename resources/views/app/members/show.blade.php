@@ -651,16 +651,16 @@
     }" class="space-y-4 sm:space-y-6 pb-32 sm:pb-16 max-w-7xl mx-auto">
 
         <!-- Top Bar Navigation -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3">
+        <div class="flex items-center justify-between gap-2 sm:gap-3 min-w-0">
             <a href="{{ route('app.members.index') }}" 
-               class="px-3.5 sm:px-4 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted hover:text-fg dark:text-fg-muted dark:hover:text-white hover:bg-raised dark:hover:bg-raised text-xs font-semibold flex items-center gap-2 transition-all">
+               class="shrink-0 whitespace-nowrap px-2.5 sm:px-4 py-2 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg-muted hover:text-fg dark:text-fg-muted dark:hover:text-white hover:bg-raised dark:hover:bg-raised text-xs font-semibold flex items-center gap-2 transition-all">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 <span>Back to Members</span>
             </a>
 
-            <div class="flex items-center gap-2 text-xs text-fg-muted dark:text-fg-muted font-semibold">
+            <div class="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2 text-right text-xs text-fg-muted dark:text-fg-muted font-semibold">
                 <span class="w-2 h-2 rounded-full shrink-0 {{ $member->status === 'ACTIVE' ? 'bg-emerald-400' : ($member->status === 'SUSPENDED' ? 'bg-rose-400' : 'bg-orange-400') }}"></span>
-                <span>Branch: <strong class="text-fg dark:text-white">{{ $member->branch->name ?? 'Main Branch' }}</strong></span>
+                <span class="min-w-0 break-words">Branch: <strong class="text-fg dark:text-white">{{ $member->branch->name ?? 'Main Branch' }}</strong></span>
             </div>
         </div>
 

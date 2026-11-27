@@ -1,4 +1,4 @@
-<x-app-layout header="Inventory & Equipment Maintenance">
+<x-app-layout header="Inventory & Assets">
     <div x-data="{ 
         activeTab: '{{ $activeTab ?? 'inventory' }}',
         showAddProductModal: false,
@@ -15,113 +15,44 @@
         autoScheduleNext: true
     }" class="space-y-4">
 
-        <!-- Top Header & Action Buttons -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-3.5">
-            <div class="flex items-center gap-2.5">
-                <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                    </svg>
-                </span>
-                <div>
-                    <h1 class="text-base font-semibold text-fg dark:text-white tracking-tight leading-tight">
-                        Inventory & Equipment Maintenance
-                    </h1>
-                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Supplements stock, gym machines, AC servicing, and maintenance schedules.</p>
-                </div>
+        <!-- Inventory overview -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="min-w-0">
+                <h1 class="text-xl sm:text-2xl font-semibold text-fg tracking-tight">Inventory &amp; assets</h1>
+                <p class="text-xs text-fg-muted mt-1">Track stock, equipment and service schedules.</p>
             </div>
-            
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <button @click="showAddProductModal = true" type="button" class="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    <span>Add Product</span>
+            <div class="flex items-center gap-2">
+                <button x-show="activeTab === 'inventory'" @click="showAddProductModal = true" type="button" class="ds-btn bg-accent text-accent-on ops-primary flex-1 sm:flex-none justify-center min-h-10">
+                    <x-icon name="plus" :size="16" /> Add product
                 </button>
-                <button @click="showAddEquipmentModal = true" type="button" class="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span>Add Machine / AC</span>
+                <button x-show="activeTab === 'equipment'" @click="showAddEquipmentModal = true" type="button" class="ds-btn bg-accent text-accent-on ops-primary flex-1 sm:flex-none justify-center min-h-10">
+                    <x-icon name="plus" :size="16" /> Add equipment
                 </button>
             </div>
         </div>
 
-        <!-- KPI Cards Grid (Mobile 2-cols, Desktop 4-cols) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-            <!-- Total Inventory Products -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-3 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted truncate">Total Products</span>
-                    <span class="p-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                    </span>
-                </div>
-                <div class="mt-1.5">
-                    <div class="text-lg sm:text-xl font-semibold text-fg dark:text-white leading-tight">{{ number_format($totalItemsCount) }}</div>
-                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-xs sm:text-xs text-fg-muted dark:text-fg-muted truncate">
-                        <span>{{ number_format($totalStockUnits) }} units</span>
-                        <span>•</span>
-                        <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($totalRetailValue, 0) }}</span>
-                    </div>
-                </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div class="min-w-0 rounded-lg bg-surface border border-line p-3 sm:p-4">
+                <div class="text-xs font-medium text-fg-muted">Products</div>
+                <div class="mt-1 text-2xl font-semibold text-fg tabular-nums">{{ number_format($totalItemsCount) }}</div>
+                <div class="mt-1 text-xs text-fg-muted break-words">{{ number_format($totalStockUnits) }} units</div>
+                <div class="text-xs text-fg-muted break-words">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($totalRetailValue, 0) }} retail value</div>
             </div>
-
-            <!-- Low Stock Alerts -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-3 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted truncate">Low & Out Stock</span>
-                    <span class="p-1 rounded-lg {{ $lowStockCount > 0 ? 'bg-red-500/10 text-red-500 dark:text-red-400 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' }} shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </span>
-                </div>
-                <div class="mt-1.5">
-                    <div class="text-lg sm:text-xl font-bold {{ $lowStockCount > 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-800 dark:text-slate-200' }} leading-tight">{{ $lowStockCount }}</div>
-                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-xs sm:text-xs text-fg-muted dark:text-fg-muted truncate">
-                        <span class="text-red-500 dark:text-red-400 font-medium">{{ $outOfStockCount }} out</span>
-                        <span>•</span>
-                        <span>Reorder</span>
-                    </div>
-                </div>
+            <div class="min-w-0 rounded-lg bg-surface border border-line p-3 sm:p-4">
+                <div class="text-xs font-medium text-fg-muted">Low / out of stock</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums {{ $lowStockCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-fg' }}">{{ $lowStockCount }}</div>
+                <div class="mt-1 text-xs text-fg-muted">{{ $outOfStockCount }} out of stock</div>
             </div>
-
-            <!-- Gym Machines & ACs -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-3 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted truncate">Machines & ACs</span>
-                    <span class="p-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                    </span>
-                </div>
-                <div class="mt-1.5">
-                    <div class="text-lg sm:text-xl font-semibold text-fg dark:text-white leading-tight">{{ number_format($totalEquipmentCount) }}</div>
-                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-xs sm:text-xs text-fg-muted dark:text-fg-muted truncate">
-                        <span class="text-cyan-600 dark:text-cyan-400 font-medium">{{ $acCount }} ACs</span>
-                        <span>•</span>
-                        <span class="text-emerald-600 dark:text-emerald-400 font-semibold">{{ $operationalCount }} OK</span>
-                    </div>
-                </div>
+            <div class="min-w-0 rounded-lg bg-surface border border-line p-3 sm:p-4">
+                <div class="text-xs font-medium text-fg-muted">Equipment</div>
+                <div class="mt-1 text-2xl font-semibold text-fg tabular-nums">{{ number_format($totalEquipmentCount) }}</div>
+                <div class="mt-1 text-xs text-fg-muted">{{ $acCount }} AC units</div>
+                <div class="text-xs text-emerald-700 dark:text-emerald-400">{{ $operationalCount }} operational</div>
             </div>
-
-            <!-- Maintenance Schedule Alerts -->
-            <div class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl p-3 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted truncate">Service Status</span>
-                    <span class="p-1 rounded-lg {{ $overdueMaintenanceCount > 0 ? 'bg-rose-500/10 text-rose-500 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' }} shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </span>
-                </div>
-                <div class="mt-1.5">
-                    <div class="text-lg sm:text-xl font-bold {{ $overdueMaintenanceCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400' }} leading-tight truncate">
-                        {{ $overdueMaintenanceCount > 0 ? $overdueMaintenanceCount . ' Overdue' : 'All OK' }}
-                    </div>
-                    <div class="flex items-center gap-1 sm:gap-1.5 mt-0.5 text-xs sm:text-xs text-fg-muted dark:text-fg-muted truncate">
-                        <span class="text-amber-600 dark:text-amber-400 font-medium">{{ $dueThisMonthCount }} due 30d</span>
-                        <span>•</span>
-                        <span>Auto-tracked</span>
-                    </div>
-                </div>
+            <div class="min-w-0 rounded-lg bg-surface border border-line p-3 sm:p-4">
+                <div class="text-xs font-medium text-fg-muted">Overdue service</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums {{ $overdueMaintenanceCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-fg' }}">{{ $overdueMaintenanceCount }}</div>
+                <div class="mt-1 text-xs {{ $dueThisMonthCount > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-fg-muted' }}">{{ $dueThisMonthCount }} due within 30 days</div>
             </div>
         </div>
 
@@ -129,17 +60,17 @@
         <div class="-mx-3 px-3 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar border-b border-line dark:border-line flex items-center gap-1 whitespace-nowrap">
             <button @click="activeTab = 'inventory'" type="button" 
                 class="px-3.5 py-2 text-xs font-semibold transition border-b-2 flex items-center gap-1.5 shrink-0"
-                :class="activeTab === 'inventory' ? 'border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
+                :class="activeTab === 'inventory' ? 'border-accent text-accent-fg' : 'border-transparent text-fg-muted hover:text-fg'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                Store Inventory & Stock
+                Products & stock
                 <span class="px-1.5 py-0.2 rounded-full text-xs bg-raised dark:bg-raised text-fg-muted dark:text-fg-muted font-semibold">{{ $totalItemsCount }}</span>
             </button>
 
             <button @click="activeTab = 'equipment'" type="button" 
                 class="px-3.5 py-2 text-xs font-semibold transition border-b-2 flex items-center gap-1.5 shrink-0"
-                :class="activeTab === 'equipment' ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
+                :class="activeTab === 'equipment' ? 'border-accent text-accent-fg' : 'border-transparent text-fg-muted hover:text-fg'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
-                Gym Machines & AC
+                Equipment & assets
                 @if($overdueMaintenanceCount > 0)
                     <span class="px-1.5 py-0.2 rounded-full text-xs bg-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold">{{ $overdueMaintenanceCount }} Due</span>
                 @else
@@ -149,9 +80,9 @@
 
             <button @click="activeTab = 'maintenance_logs'" type="button" 
                 class="px-3.5 py-2 text-xs font-semibold transition border-b-2 flex items-center gap-1.5 shrink-0"
-                :class="activeTab === 'maintenance_logs' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5' : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'">
+                :class="activeTab === 'maintenance_logs' ? 'border-accent text-accent-fg' : 'border-transparent text-fg-muted hover:text-fg'">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                Service History
+                Service history
             </button>
         </div>
 
@@ -163,11 +94,11 @@
                 <div class="relative col-span-2 sm:flex-1 w-full">
                     <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" name="item_search" value="{{ request('item_search') }}" placeholder="Search product name, SKU, or brand..." 
-                        class="w-full pl-8 pr-3 py-1.5 bg-raised dark:bg-surface border border-line dark:border-line rounded-lg text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                        class="w-full pl-8 pr-3 py-1.5 bg-raised dark:bg-surface border border-line dark:border-line rounded-lg text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                 </div>
 
                 <div class="col-span-1 sm:w-auto">
-                    <select name="item_category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-amber-500">
+                    <select name="item_category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-accent">
                         <option value="">All Categories</option>
                         <option value="Supplements" {{ request('item_category') === 'Supplements' ? 'selected' : '' }}>Supplements</option>
                         <option value="Apparel & Wear" {{ request('item_category') === 'Apparel & Wear' ? 'selected' : '' }}>Apparel & Wear</option>
@@ -179,7 +110,7 @@
                 </div>
 
                 <div class="col-span-1 sm:w-auto">
-                    <select name="stock_filter" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-amber-500">
+                    <select name="stock_filter" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-accent">
                         <option value="">All Stock</option>
                         <option value="low" {{ request('stock_filter') === 'low' ? 'selected' : '' }}>Low Stock</option>
                         <option value="out" {{ request('stock_filter') === 'out' ? 'selected' : '' }}>Out of Stock</option>
@@ -210,7 +141,7 @@
                         <!-- Top Row: Product Name, SKU & Status -->
                         <div class="flex items-start justify-between gap-2">
                             <div>
-                                <h3 class="font-semibold text-fg dark:text-white text-xs leading-snug">{{ $item->name }}</h3>
+                                <h3 class="font-semibold text-fg dark:text-white text-sm leading-snug">{{ $item->name }}</h3>
                                 <div class="flex items-center gap-1.5 mt-0.5">
                                     <span class="text-xs font-mono text-amber-600 dark:text-amber-400 font-semibold">{{ $item->sku ?? 'NO-SKU' }}</span>
                                     <span class="text-fg-muted">•</span>
@@ -238,7 +169,7 @@
                         </div>
 
                         <!-- Mid Metrics: Price, Margin, Stock -->
-                        <div class="grid grid-cols-3 gap-2 p-2 rounded-lg bg-raised dark:bg-slate-950/70 border border-line dark:border-line text-center">
+                        <div class="grid grid-cols-3 gap-2 p-2 rounded-lg bg-raised border border-line dark:border-line text-center">
                             <div>
                                 <span class="text-xs text-fg-muted dark:text-fg-muted block">Price</span>
                                 <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ $tenant?->currency_symbol ?? '₹' }}{{ number_format($item->selling_price, 2) }}</span>
@@ -260,7 +191,7 @@
                         <!-- Actions Row -->
                         <div class="flex items-center justify-between pt-1 border-t border-line dark:border-line">
                             <button @click="selectedProduct = {{ json_encode($item) }}; showAdjustStockModal = true;" type="button" 
-                                class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/20 transition flex items-center gap-1">
+                                class="px-3 py-2 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs transition flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                 Adjust Stock
                             </button>
@@ -305,7 +236,7 @@
             <div class="hidden md:block rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs min-w-[700px]">
-                        <thead class="bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
+                        <thead class="bg-raised border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
                             <tr>
                                 <th class="py-2.5 px-3.5">Item & SKU</th>
                                 <th class="py-2.5 px-3.5">Category</th>
@@ -376,7 +307,7 @@
                                         <div class="flex items-center justify-end gap-1.5">
                                             <!-- Quick Adjust Stock -->
                                             <button @click="selectedProduct = {{ json_encode($item) }}; showAdjustStockModal = true;" type="button" 
-                                                class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-xs border border-amber-500/20 transition flex items-center gap-1">
+                                                class="px-2.5 py-1 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs transition flex items-center gap-1">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                                                 Adjust Stock
                                             </button>
@@ -434,11 +365,11 @@
                 <div class="relative col-span-2 sm:flex-1 w-full">
                     <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     <input type="text" name="equipment_search" value="{{ request('equipment_search') }}" placeholder="Search machine, AC, serial no, brand..." 
-                        class="w-full pl-8 pr-3 py-1.5 bg-raised dark:bg-surface border border-line dark:border-line rounded-lg text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                        class="w-full pl-8 pr-3 py-1.5 bg-raised dark:bg-surface border border-line dark:border-line rounded-lg text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                 </div>
 
                 <div class="col-span-1 sm:w-auto">
-                    <select name="equipment_category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-cyan-500">
+                    <select name="equipment_category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-accent">
                         <option value="">All Categories</option>
                         <option value="AC & HVAC" {{ request('equipment_category') === 'AC & HVAC' ? 'selected' : '' }}>AC & HVAC</option>
                         <option value="Cardio Machines" {{ request('equipment_category') === 'Cardio Machines' ? 'selected' : '' }}>Cardio</option>
@@ -451,11 +382,11 @@
                 </div>
 
                 <div class="col-span-1 sm:w-auto">
-                    <select name="maintenance_filter" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-cyan-500">
+                    <select name="maintenance_filter" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg-muted dark:text-fg-muted focus:outline-none focus:border-accent">
                         <option value="">Status</option>
-                        <option value="overdue" {{ request('maintenance_filter') === 'overdue' ? 'selected' : '' }}>🔴 Overdue</option>
-                        <option value="due_soon" {{ request('maintenance_filter') === 'due_soon' ? 'selected' : '' }}>⚠️ Due 7d</option>
-                        <option value="this_month" {{ request('maintenance_filter') === 'this_month' ? 'selected' : '' }}>📅 Due 30d</option>
+                        <option value="overdue" {{ request('maintenance_filter') === 'overdue' ? 'selected' : '' }}>Overdue</option>
+                        <option value="due_soon" {{ request('maintenance_filter') === 'due_soon' ? 'selected' : '' }}>Due within 7 days</option>
+                        <option value="this_month" {{ request('maintenance_filter') === 'this_month' ? 'selected' : '' }}>Due within 30 days</option>
                     </select>
                 </div>
 
@@ -477,12 +408,12 @@
                         $isDueSoon = $eq->is_due_soon && ! $isOverdue;
                         $daysLeft = $eq->days_until_maintenance;
                     @endphp
-                    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 shadow-sm space-y-2.5 {{ $isOverdue ? 'ring-1 ring-rose-500/30' : '' }}">
+                    <div class="bg-surface border border-line rounded-lg p-3.5 space-y-2.5 {{ $isOverdue ? 'ring-1 ring-rose-500/30' : '' }}">
                         <!-- Machine Header & Status -->
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-start gap-2">
                                 @if($eq->category === 'AC & HVAC')
-                                    <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0 mt-0.5">
+                                    <span class="p-1.5 rounded-lg bg-raised text-fg-muted border border-line shrink-0 mt-0.5">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     </span>
                                 @else
@@ -491,7 +422,7 @@
                                     </span>
                                 @endif
                                 <div>
-                                    <h3 class="font-semibold text-fg dark:text-white text-xs leading-snug">{{ $eq->name }}</h3>
+                                    <h3 class="font-semibold text-fg dark:text-white text-sm leading-snug">{{ $eq->name }}</h3>
                                     <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5 flex items-center gap-1.5 flex-wrap">
                                         @if($eq->brand)
                                             <span class="text-fg-muted dark:text-fg-muted font-medium">{{ $eq->brand }}</span>
@@ -528,7 +459,7 @@
                         </div>
 
                         <!-- Maintenance Meta Box -->
-                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-raised dark:bg-slate-950/70 border border-line dark:border-line text-xs">
+                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-raised border border-line dark:border-line text-xs">
                             <div>
                                 <span class="text-xs text-fg-muted dark:text-fg-muted block">Next Service</span>
                                 @if($eq->next_service_date)
@@ -551,7 +482,7 @@
                                 <span class="text-xs text-fg-muted dark:text-fg-muted block">Technician</span>
                                 <div class="font-medium text-fg dark:text-fg text-xs truncate">{{ $eq->vendor_name ?? 'Technician' }}</div>
                                 @if($eq->vendor_contact)
-                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $eq->vendor_contact) }}" class="text-xs text-cyan-600 dark:text-cyan-400 font-mono underline block mt-0.5">
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $eq->vendor_contact) }}" class="text-xs text-accent-fg font-mono underline block mt-0.5">
                                         {{ $eq->vendor_contact }}
                                     </a>
                                 @endif
@@ -561,7 +492,7 @@
                         <!-- Actions Row -->
                         <div class="flex items-center justify-between pt-1 border-t border-line dark:border-line">
                             <button @click="selectedEquipment = {{ json_encode($eq) }}; showRecordMaintenanceModal = true;" type="button" 
-                                class="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-semibold text-xs border border-cyan-500/20 transition flex items-center gap-1">
+                                class="px-3 py-2 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs transition flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Log Service
                             </button>
@@ -591,7 +522,7 @@
                     <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line p-8 text-center text-fg-muted dark:text-fg-muted">
                         <svg class="w-8 h-8 text-fg-muted dark:text-fg-muted mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                         <p class="font-medium text-fg-muted dark:text-fg-muted text-xs">No gym equipment or AC units registered.</p>
-                        <p class="text-xs text-fg-muted mt-0.5">Click "Add Machine / AC" to track service schedules and repairs.</p>
+                        <p class="text-xs text-fg-muted mt-0.5">Click "Add equipment" to track service schedules and repairs.</p>
                     </div>
                 @endforelse
 
@@ -606,7 +537,7 @@
             <div class="hidden md:block rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs min-w-[750px]">
-                        <thead class="bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
+                        <thead class="bg-raised border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
                             <tr>
                                 <th class="py-2.5 px-3.5">Machine / AC Name</th>
                                 <th class="py-2.5 px-3.5">Category & Location</th>
@@ -629,7 +560,7 @@
                                     <td class="py-2.5 px-3.5">
                                         <div class="flex items-center gap-2">
                                             @if($eq->category === 'AC & HVAC')
-                                                <span class="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                                                <span class="p-1.5 rounded-lg bg-raised text-fg-muted border border-line">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                                 </span>
                                             @else
@@ -733,7 +664,7 @@
                                         <div class="flex items-center justify-end gap-1.5">
                                             <!-- Record Maintenance Service -->
                                             <button @click="selectedEquipment = {{ json_encode($eq) }}; showRecordMaintenanceModal = true;" type="button" 
-                                                class="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 font-semibold text-xs border border-cyan-500/20 transition flex items-center gap-1">
+                                                class="px-2.5 py-1 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs transition flex items-center gap-1">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 Log Service
                                             </button>
@@ -766,7 +697,7 @@
                                         <div class="flex flex-col items-center justify-center">
                                             <svg class="w-8 h-8 text-fg-muted dark:text-fg-muted mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                                             <p class="font-medium text-fg-muted dark:text-fg-muted text-xs">No gym equipment or AC units registered yet.</p>
-                                            <p class="text-xs text-fg-muted mt-0.5">Click "Add Machine / AC" to track service schedules, AC filter cleaning, and repairs.</p>
+                                            <p class="text-xs text-fg-muted mt-0.5">Click "Add equipment" to track service schedules, AC filter cleaning, and repairs.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -788,7 +719,7 @@
             <!-- MOBILE VIEW: Dedicated Service Log Cards (block md:hidden) -->
             <div class="block md:hidden space-y-2.5">
                 <div class="p-3 bg-surface dark:bg-surface border border-line dark:border-line rounded-xl">
-                    <h2 class="text-xs font-semibold text-fg dark:text-white">Equipment Maintenance History</h2>
+                    <h2 class="text-xs font-semibold text-fg dark:text-white">Service history</h2>
                     <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Complete log of routine maintenance, repairs, and service costs.</p>
                 </div>
 
@@ -799,23 +730,23 @@
                                 <span class="text-xs font-semibold text-fg-muted">
                                     {{ \Carbon\Carbon::parse($log->service_date)->format('d M, Y') }}
                                 </span>
-                                <h3 class="font-semibold text-fg dark:text-white text-xs mt-0.5">
+                                <h3 class="font-semibold text-fg dark:text-white text-sm mt-0.5">
                                     {{ $log->equipment?->name ?? 'Equipment Deleted' }}
                                 </h3>
                                 <div class="text-xs text-fg-muted mt-0.5">{{ $log->equipment?->category }}</div>
                             </div>
 
-                            <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                            <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line">
                                 {{ $log->maintenance_type }}
                             </span>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-raised dark:bg-slate-950/70 border border-line dark:border-line text-xs">
+                        <div class="grid grid-cols-2 gap-2 p-2 rounded-lg bg-raised border border-line dark:border-line text-xs">
                             <div>
                                 <span class="text-xs text-fg-muted dark:text-fg-muted block">Technician</span>
                                 <span class="font-semibold text-fg dark:text-fg">{{ $log->technician_name ?? '—' }}</span>
                                 @if($log->technician_contact)
-                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $log->technician_contact) }}" class="text-xs text-cyan-600 dark:text-cyan-400 font-mono underline block mt-0.5">
+                                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $log->technician_contact) }}" class="text-xs text-accent-fg font-mono underline block mt-0.5">
                                         {{ $log->technician_contact }}
                                     </a>
                                 @endif
@@ -862,14 +793,14 @@
             <div class="hidden md:block rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
                 <div class="p-3.5 border-b border-line dark:border-line flex items-center justify-between">
                     <div>
-                        <h2 class="text-xs font-semibold text-fg dark:text-white">Equipment Maintenance & Service History</h2>
+                        <h2 class="text-xs font-semibold text-fg dark:text-white">Service history</h2>
                         <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Complete log of routine maintenance, repairs, filter replacements, and service costs.</p>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs min-w-[750px]">
-                        <thead class="bg-raised dark:bg-slate-950/80 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
+                        <thead class="bg-raised border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
                             <tr>
                                 <th class="py-2.5 px-3.5">Service Date</th>
                                 <th class="py-2.5 px-3.5">Machine / AC Equipment</th>
@@ -892,7 +823,7 @@
                                         <div class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">{{ $log->equipment?->category }}</div>
                                     </td>
                                     <td class="py-2.5 px-3.5">
-                                        <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                                        <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line">
                                             {{ $log->maintenance_type }}
                                         </span>
                                     </td>
@@ -946,10 +877,10 @@
         <!-- ================= MODALS ================= -->
 
         <!-- 1. ADD PRODUCT MODAL -->
-        <div x-show="showAddProductModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showAddProductModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showAddProductModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
-                    <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                    <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                         <span class="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         </span>
@@ -965,18 +896,18 @@
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Product Name <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" required placeholder="e.g. Optimum Nutrition 100% Whey Gold Standard 2kg"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">SKU / Barcode</label>
                             <input type="text" name="sku" placeholder="Auto-generated"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Category <span class="text-rose-500">*</span></label>
-                            <select name="category" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            <select name="category" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="Supplements">Supplements</option>
                                 <option value="Apparel & Wear">Apparel & Wear</option>
                                 <option value="Beverages & Energy">Beverages & Energy</option>
@@ -991,12 +922,12 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Cost Price ({{ $tenant?->currency_symbol ?? '₹' }}) <span class="text-rose-500">*</span></label>
                             <input type="number" step="0.01" min="0" name="cost_price" required placeholder="0.00"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Selling Price ({{ $tenant?->currency_symbol ?? '₹' }}) <span class="text-rose-500">*</span></label>
                             <input type="number" step="0.01" min="0" name="selling_price" required placeholder="0.00"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1004,19 +935,19 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Stock Units <span class="text-rose-500">*</span></label>
                             <input type="number" min="0" name="stock_quantity" value="10" required
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Alert Threshold <span class="text-rose-500">*</span></label>
                             <input type="number" min="0" name="reorder_threshold" value="3" required
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
                     @if($branches->count() > 1)
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Branch</label>
-                            <select name="branch_id" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            <select name="branch_id" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="">All / Primary Branch</option>
                                 @foreach($branches as $b)
                                     <option value="{{ $b->id }}">{{ $b->name }}</option>
@@ -1029,7 +960,7 @@
                         <button @click="showAddProductModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Save Product
                         </button>
                     </div>
@@ -1038,10 +969,10 @@
         </div>
 
         <!-- 2. EDIT PRODUCT MODAL -->
-        <div x-show="showEditProductModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showEditProductModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showEditProductModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
-                    <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                    <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                         <span class="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </span>
@@ -1057,18 +988,18 @@
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Product Name <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" required x-model="selectedProduct.name"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">SKU</label>
                             <input type="text" name="sku" x-model="selectedProduct.sku"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Category <span class="text-rose-500">*</span></label>
-                            <select name="category" required x-model="selectedProduct.category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            <select name="category" required x-model="selectedProduct.category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="Supplements">Supplements</option>
                                 <option value="Apparel & Wear">Apparel & Wear</option>
                                 <option value="Beverages & Energy">Beverages & Energy</option>
@@ -1083,26 +1014,26 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Cost Price ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="cost_price" required x-model="selectedProduct.cost_price"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Selling Price ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="selling_price" required x-model="selectedProduct.selling_price"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Low Stock Alert Threshold</label>
                         <input type="number" min="0" name="reorder_threshold" required x-model="selectedProduct.reorder_threshold"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                     </div>
 
                     <div class="pt-3 border-t border-line dark:border-line flex items-center justify-end gap-2">
                         <button @click="showEditProductModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Update Product
                         </button>
                     </div>
@@ -1111,11 +1042,11 @@
         </div>
 
         <!-- 3. QUICK STOCK ADJUST MODAL -->
-        <div x-show="showAdjustStockModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showAdjustStockModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showAdjustStockModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-sm max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
                     <div>
-                        <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                        <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                             <span class="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                             </span>
@@ -1164,20 +1095,20 @@
                             <span x-show="adjustType === 'ADJUSTMENT'">Exact Total <span class="text-rose-500">*</span></span>
                         </label>
                         <input type="number" min="1" name="quantity" required x-model="adjustQty"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-amber-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Reason / Note</label>
                         <input type="text" name="notes" placeholder="e.g. New stock arrived"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-amber-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                     </div>
 
                     <div class="pt-3 border-t border-line dark:border-line flex items-center justify-end gap-2">
                         <button @click="showAdjustStockModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Confirm
                         </button>
                     </div>
@@ -1186,10 +1117,10 @@
         </div>
 
         <!-- 4. ADD EQUIPMENT / AC MODAL -->
-        <div x-show="showAddEquipmentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showAddEquipmentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showAddEquipmentModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
-                    <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                    <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                         <span class="p-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
                         </span>
@@ -1206,12 +1137,12 @@
                         <div class="col-span-1 sm:col-span-2">
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Machine / Equipment Name <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" required placeholder="e.g. Main Hall AC Unit 1 - Daikin 2-Ton or Treadmill #1"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Category <span class="text-rose-500">*</span></label>
-                            <select name="category" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="category" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="AC & HVAC">AC & HVAC Units</option>
                                 <option value="Cardio Machines">Cardio Machines</option>
                                 <option value="Strength & Resistance">Strength & Resistance</option>
@@ -1225,19 +1156,19 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Floor / Location</label>
                             <input type="text" name="location" placeholder="e.g. Ground Floor, Studio 1"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Brand / Make</label>
                             <input type="text" name="brand" placeholder="e.g. Daikin, Technogym"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Serial Number</label>
                             <input type="text" name="serial_number" placeholder="e.g. SN-8492048"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1250,7 +1181,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             <div>
                                 <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Service Frequency <span class="text-rose-500">*</span></label>
-                                <select name="maintenance_interval_days" required class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-cyan-500">
+                                <select name="maintenance_interval_days" required class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                                     <option value="30">Monthly (30 Days - AC Filters)</option>
                                     <option value="60">Bi-Monthly (60 Days)</option>
                                     <option value="90" selected>Quarterly (90 Days)</option>
@@ -1261,14 +1192,14 @@
                             <div>
                                 <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Last Service Date</label>
                                 <input type="date" name="last_service_date" value="{{ date('Y-m-d') }}"
-                                    class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-cyan-500">
+                                    class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Next Service Due (Optional - auto calculated)</label>
                             <input type="date" name="next_service_date"
-                                class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-surface dark:bg-surface border border-line dark:border-line rounded-lg px-2.5 py-1.5 text-xs text-fg dark:text-fg focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1276,19 +1207,19 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Technician / Vendor</label>
                             <input type="text" name="vendor_name" placeholder="e.g. Daikin Service"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Vendor Contact</label>
                             <input type="text" name="vendor_contact" placeholder="e.g. +91 9876543210"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Status <span class="text-rose-500">*</span></label>
-                            <select name="status" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="status" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="OPERATIONAL">Operational</option>
                                 <option value="MAINTENANCE_DUE">Maintenance Due</option>
                                 <option value="UNDER_REPAIR">Under Repair</option>
@@ -1298,7 +1229,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Purchase Cost ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="purchase_cost" placeholder="0.00"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1306,7 +1237,7 @@
                         <button @click="showAddEquipmentModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Save Machine
                         </button>
                     </div>
@@ -1315,10 +1246,10 @@
         </div>
 
         <!-- 5. EDIT EQUIPMENT MODAL -->
-        <div x-show="showEditEquipmentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showEditEquipmentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showEditEquipmentModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
-                    <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                    <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                         <span class="p-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         </span>
@@ -1335,12 +1266,12 @@
                         <div class="col-span-1 sm:col-span-2">
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Machine Name <span class="text-rose-500">*</span></label>
                             <input type="text" name="name" required x-model="selectedEquipment.name"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Category <span class="text-rose-500">*</span></label>
-                            <select name="category" required x-model="selectedEquipment.category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="category" required x-model="selectedEquipment.category" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="AC & HVAC">AC & HVAC Units</option>
                                 <option value="Cardio Machines">Cardio Machines</option>
                                 <option value="Strength & Resistance">Strength & Resistance</option>
@@ -1354,19 +1285,19 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Location</label>
                             <input type="text" name="location" x-model="selectedEquipment.location"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Brand</label>
                             <input type="text" name="brand" x-model="selectedEquipment.brand"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
 
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Serial Number</label>
                             <input type="text" name="serial_number" x-model="selectedEquipment.serial_number"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1374,19 +1305,19 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Interval (Days)</label>
                             <input type="number" min="1" name="maintenance_interval_days" required x-model="selectedEquipment.maintenance_interval_days"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Next Due Date</label>
                             <input type="date" name="next_service_date" x-model="selectedEquipment.next_service_date"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Status <span class="text-rose-500">*</span></label>
-                            <select name="status" required x-model="selectedEquipment.status" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="status" required x-model="selectedEquipment.status" class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="OPERATIONAL">Operational</option>
                                 <option value="MAINTENANCE_DUE">Maintenance Due</option>
                                 <option value="UNDER_REPAIR">Under Repair</option>
@@ -1396,7 +1327,7 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Vendor Contact</label>
                             <input type="text" name="vendor_contact" x-model="selectedEquipment.vendor_contact"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1404,7 +1335,7 @@
                         <button @click="showEditEquipmentModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Update Equipment
                         </button>
                     </div>
@@ -1413,11 +1344,11 @@
         </div>
 
         <!-- 6. RECORD MAINTENANCE / SERVICE MODAL -->
-        <div x-show="showRecordMaintenanceModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+        <div x-show="showRecordMaintenanceModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/70 p-3 sm:p-4 flex items-center justify-center">
             <div @click.outside="showRecordMaintenanceModal = false" class="bg-surface dark:bg-surface border border-line dark:border-line rounded-xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden text-fg dark:text-fg">
                 <div class="p-3.5 sm:p-4 border-b border-line dark:border-line flex items-center justify-between shrink-0">
                     <div>
-                        <h3 class="text-xs sm:text-sm font-semibold text-fg dark:text-white flex items-center gap-1.5">
+                        <h3 class="text-base font-semibold text-fg flex items-center gap-1.5">
                             <span class="p-1 rounded-md bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </span>
@@ -1436,11 +1367,11 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Service Date <span class="text-rose-500">*</span></label>
                             <input type="date" name="service_date" required value="{{ date('Y-m-d') }}"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Type <span class="text-rose-500">*</span></label>
-                            <select name="maintenance_type" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="maintenance_type" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="Routine Inspection & Service">Routine Inspection</option>
                                 <option value="AC Filter Cleaning & Deep Wash">AC Filter & Wash</option>
                                 <option value="AC Gas Refill & Leak Repair">AC Gas Refill</option>
@@ -1456,12 +1387,12 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Technician Name</label>
                             <input type="text" name="technician_name" :value="selectedEquipment.vendor_name" placeholder="e.g. Ramesh"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Technician Phone</label>
                             <input type="text" name="technician_contact" :value="selectedEquipment.vendor_contact" placeholder="e.g. +91 9876543210"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                         </div>
                     </div>
 
@@ -1469,11 +1400,11 @@
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Service Cost ({{ $tenant?->currency_symbol ?? '₹' }})</label>
                             <input type="number" step="0.01" min="0" name="cost" value="0.00"
-                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                                class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Status After <span class="text-rose-500">*</span></label>
-                            <select name="status_after_service" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-cyan-500">
+                            <select name="status_after_service" required class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white focus:outline-none focus:border-accent">
                                 <option value="OPERATIONAL" selected>Operational</option>
                                 <option value="UNDER_REPAIR">Under Repair</option>
                                 <option value="MAINTENANCE_DUE">Needs Follow-up</option>
@@ -1484,13 +1415,13 @@
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Work Summary</label>
                         <textarea name="work_summary" rows="2" placeholder="e.g. Cleaned filter, refilled gas"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-1.5 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500"></textarea>
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-1.5 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent"></textarea>
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-fg-muted dark:text-fg-muted mb-1">Replaced Parts (if any)</label>
                         <input type="text" name="replaced_parts" placeholder="e.g. Capacitor 50uF"
-                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-cyan-500">
+                            class="w-full bg-raised dark:bg-surface border border-line dark:border-line rounded-lg px-3 py-2 text-xs text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle focus:outline-none focus:border-accent">
                     </div>
 
                     <div class="p-2.5 rounded-lg bg-raised dark:bg-surface border border-line dark:border-line">
@@ -1507,7 +1438,7 @@
                         <button @click="showRecordMaintenanceModal = false" type="button" class="px-3.5 py-1.5 bg-raised dark:bg-raised hover:bg-slate-200 dark:hover:bg-slate-700 text-fg-muted dark:text-fg-muted border border-line dark:border-line text-xs font-semibold rounded-lg transition">
                             Cancel
                         </button>
-                        <button type="submit" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition">
+                        <button type="submit" class="px-3.5 py-1.5 bg-accent text-accent-on ops-primary text-xs font-semibold rounded-lg transition">
                             Record Service
                         </button>
                     </div>
