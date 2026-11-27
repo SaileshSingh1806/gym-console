@@ -437,21 +437,12 @@
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </button>
                     @endif
-                    <a href="{{ route('trainer.workspace') }}" class="flex items-center gap-2.5 min-w-0 group">
+                    <a href="{{ route('trainer.workspace') }}" aria-label="{{ $tGymName }}" class="flex items-center gap-2.5 min-w-0 group">
                         @if(!empty($resolvedTrainerLogo))
-                            <img src="{{ $resolvedTrainerLogo }}" alt="{{ $tGymName }}" class="h-8 sm:h-9 w-auto max-w-[130px] rounded-lg object-contain">
+                            <img src="{{ $resolvedTrainerLogo }}" alt="{{ $tGymName }}" class="h-10 sm:h-11 w-auto max-w-[160px] sm:max-w-[200px] object-contain shrink-0">
                         @else
-                            <div class="w-9 h-9 rounded-xl bg-[#141518] border border-[#F5A524]/35 flex items-center justify-center text-[#F5A524] font-semibold text-xs  shrink-0">
-                                {{ strtoupper(substr($tGymName, 0, 2)) }}
-                            </div>
+                            <span class="font-semibold text-white text-base sm:text-lg tracking-tight truncate">{{ $tGymName }}</span>
                         @endif
-                        <div class="flex flex-col min-w-0">
-                            <span class="font-semibold text-white text-sm sm:text-base md:text-lg tracking-tight truncate leading-tight">{{ $tGymName }}</span>
-                            <span class="text-[11px] sm:text-xs text-[#F5A524] font-medium uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#F5A524]  shrink-0"></span>
-                                <span class="truncate">Trainer App</span>
-                            </span>
-                        </div>
                     </a>
                 @elseif(!auth()->user()->isMember())
                     <button @click="sidebarOpen = true" type="button" aria-label="Open navigation menu" class="lg:hidden ds-btn ds-btn-ghost !h-9 !w-9 !p-0 -ml-1 shrink-0 cursor-pointer">
@@ -465,18 +456,12 @@
                         $resolvedMemberGymLogo = $gymLogoRaw ? (\Illuminate\Support\Str::startsWith($gymLogoRaw, ['http://', 'https://', '/']) ? $gymLogoRaw : asset('storage/' . $gymLogoRaw)) : null;
                         $gymName = $memberTenant?->name ?? 'GymDeskHub';
                     @endphp
-                    <a href="{{ route('app.portal') }}" class="flex items-center gap-2.5 sm:gap-3 min-w-0 group">
+                    <a href="{{ route('app.portal') }}" aria-label="{{ $gymName }}" class="flex items-center gap-2.5 min-w-0 group">
                         @if(!empty($resolvedMemberGymLogo))
-                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-9 sm:h-10 w-auto max-w-[130px] sm:max-w-[160px] rounded-lg object-contain shrink-0">
+                            <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-10 sm:h-11 w-auto max-w-[160px] sm:max-w-[200px] object-contain shrink-0">
                         @else
-                            <div class="w-10 h-10 rounded-xl bg-[#141518] border border-[#F5A524]/35 text-[#F5A524] font-black text-sm flex items-center justify-center shadow-sm shrink-0">
-                                {{ strtoupper(substr($gymName, 0, 2)) }}
-                            </div>
+                            <span class="font-semibold text-white text-base sm:text-lg tracking-tight truncate">{{ $gymName }}</span>
                         @endif
-                        <div class="flex flex-col min-w-0 justify-center">
-                            <span class="font-extrabold text-white text-base sm:text-lg tracking-tight truncate leading-tight">{{ $gymName }}</span>
-                            <span class="text-[11px] text-neutral-400 font-medium tracking-wide truncate hidden xs:block">{{ $memberTenant?->city ?? 'Club Member' }}</span>
-                        </div>
                     </a>
                 @endif
             </div>
