@@ -35,7 +35,7 @@
 
     // Canonical URL
     $resolvedCanonical = $canonicalUrl ?? url()->current();
-    $faviconUrl = $platformSettings['favicon_url'] ?? asset('favicon.png');
+    $faviconUrl = $platformSettings['favicon_url'] ?? asset('images/gymdeskhub-official-icon.svg');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark h-full bg-[#090d16] text-slate-100">
