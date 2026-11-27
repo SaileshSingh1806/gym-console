@@ -4,20 +4,20 @@
     meta-keywords="gymdeskhub shipping policy, digital delivery saas, service delivery terms"
 >
     {{-- Header --}}
-    <section class="relative pt-12 pb-12 sm:pt-16 sm:pb-16 border-b border-slate-800/80 bg-gradient-to-b from-[#0c121e] to-[#090d16]">
+    <section class="marketing-hero relative pt-12 pb-12 sm:pt-16 sm:pb-16 border-b border-slate-800/80 bg-[#0D0E10]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold mb-4">
                 <span>Fulfillment Policy</span>
             </div>
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Shipping &amp; Delivery Policy</h1>
+            <h1 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Shipping &amp; Delivery Policy</h1>
             <p class="mt-3 text-sm text-slate-400">Last updated: November 2026 • Digital SaaS Electronic Service Delivery</p>
         </div>
     </section>
 
     {{-- Content --}}
-    <section class="py-12 pb-24">
+    <section class="marketing-section py-12 pb-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="p-6 sm:p-10 rounded-3xl bg-[#0c121e]/90 border border-slate-800/80 shadow-2xl space-y-8 text-slate-300 text-sm leading-relaxed">
+            <div class="marketing-legal p-5 sm:p-8 rounded-xl bg-[#141518] border border-slate-800/80  space-y-8 text-slate-300 text-sm leading-relaxed">
 
                 <div>
                     <h2 class="text-lg font-bold text-white mb-2">1. Digital Nature of Service (No Physical Shipping)</h2>
