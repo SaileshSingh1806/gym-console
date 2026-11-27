@@ -541,12 +541,12 @@
                     <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="openPtConfirmModal()" 
-                                class="py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
+                                class="min-h-11 py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
                             <span>✓ Confirm Session</span>
                         </button>
                         <button type="button" 
                                 @click="startPortalScanner('camera')" 
-                                class="py-2.5 px-3 rounded-[10px] bg-[#141518] hover:bg-[#1B1D21] text-white font-semibold text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
+                                class="min-h-11 py-2.5 px-3 rounded-[10px] bg-[#141518] hover:bg-[#1B1D21] text-white font-semibold text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
                             <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span>Scan QR Code</span>
                         </button>
@@ -632,14 +632,14 @@
                 <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                     <button type="button" 
                             @click="startPortalScanner('camera')" 
-                            class="py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Check-in / PT</span>
                     </button>
 
                     <button type="button" 
                             @click="showQrModal = true" 
-                            class="py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                         <span>View Pass</span>
                     </button>
@@ -647,16 +647,16 @@
             </div>
 
             <!-- TODAY'S CHECK-IN STATUS STRIP -->
-            <div class="px-4 py-3 rounded-[10px] {{ $todayCheckin ? 'bg-[#F5A524]/10 border border-[#F5A524]/25 text-[#F5A524]' : 'bg-[#141518] border border-[#26282D] text-slate-300' }} flex items-center justify-between text-xs font-semibold ">
+            <div class="px-4 py-3 rounded-[10px] {{ $todayCheckin ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400' : 'bg-[#141518] border border-[#26282D] text-slate-300' }} flex items-center justify-between text-xs font-semibold ">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full {{ $todayCheckin ? 'bg-[#F5A524] ' : 'bg-slate-500' }}"></span>
+                    <span class="w-2.5 h-2.5 rounded-full {{ $todayCheckin ? 'bg-emerald-400' : 'bg-slate-500' }}"></span>
                     @if($todayCheckin)
                         <span>Checked in today at {{ $todayCheckin->check_in ? \Carbon\Carbon::parse($todayCheckin->check_in)->format('h:i A') : 'Recorded' }}</span>
                     @else
                         <span>Not checked in yet today</span>
                     @endif
                 </div>
-                <button type="button" @click="setPortalTab('attendance')" class="text-[11px] font-semibold text-slate-400 hover:text-[#F5A524] transition-colors">
+                <button type="button" @click="setPortalTab('attendance')" class="min-h-11 text-xs font-medium text-slate-400 hover:text-[#F5A524] transition-colors">
                     {{ $thisMonthCheckins }} visits this month &rarr;
                 </button>
             </div>
@@ -1007,12 +1007,12 @@
                             <!-- Secondary Tape Measurements Grid -->
                             @php
                                 $tapeMetrics = [];
-                                if (!empty($latestMeasurement['chest'])) $tapeMetrics[] = ['label' => 'Chest', 'val' => $latestMeasurement['chest'] . ' in', 'icon' => '🫁'];
-                                if (!empty($latestMeasurement['hips'])) $tapeMetrics[] = ['label' => 'Hips', 'val' => $latestMeasurement['hips'] . ' in', 'icon' => '📐'];
-                                if (!empty($latestMeasurement['thighs'])) $tapeMetrics[] = ['label' => 'Thighs', 'val' => $latestMeasurement['thighs'] . ' in', 'icon' => '🦵'];
-                                if (!empty($latestMeasurement['shoulders'])) $tapeMetrics[] = ['label' => 'Shoulders', 'val' => $latestMeasurement['shoulders'] . ' in', 'icon' => '🥋'];
-                                if (!empty($latestMeasurement['calves'])) $tapeMetrics[] = ['label' => 'Calves', 'val' => $latestMeasurement['calves'] . ' in', 'icon' => '🦶'];
-                                if (!empty($latestMeasurement['neck'])) $tapeMetrics[] = ['label' => 'Neck', 'val' => $latestMeasurement['neck'] . ' in', 'icon' => '🧣'];
+                                if (!empty($latestMeasurement['chest'])) $tapeMetrics[] = ['label' => 'Chest', 'val' => $latestMeasurement['chest'] . ' in'];
+                                if (!empty($latestMeasurement['hips'])) $tapeMetrics[] = ['label' => 'Hips', 'val' => $latestMeasurement['hips'] . ' in'];
+                                if (!empty($latestMeasurement['thighs'])) $tapeMetrics[] = ['label' => 'Thighs', 'val' => $latestMeasurement['thighs'] . ' in'];
+                                if (!empty($latestMeasurement['shoulders'])) $tapeMetrics[] = ['label' => 'Shoulders', 'val' => $latestMeasurement['shoulders'] . ' in'];
+                                if (!empty($latestMeasurement['calves'])) $tapeMetrics[] = ['label' => 'Calves', 'val' => $latestMeasurement['calves'] . ' in'];
+                                if (!empty($latestMeasurement['neck'])) $tapeMetrics[] = ['label' => 'Neck', 'val' => $latestMeasurement['neck'] . ' in'];
                             @endphp
 
                             @if(!empty($tapeMetrics))
@@ -1620,7 +1620,7 @@
                                                         @if($videoPayload)
                                                             <button type="button"
                                                                     @click="openExerciseVideo({{ Js::from($videoPayload) }})"
-                                                                    class="flex-1 min-w-[130px] py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold shadow-none  flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                    class="min-h-11 flex-1 min-w-[130px] py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold shadow-none  flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                                                 <span>▶</span>
                                                                 <span>Watch Form Video</span>
                                                             </button>
@@ -2244,7 +2244,7 @@
                                                 </span>
                                             </template>
                                         </button>
-                                        <button type="button" @click="closeDetail()" class="py-3.5 px-5 rounded-[10px] bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer shrink-0">
+                                        <button type="button" @click="closeDetail()" class="min-h-11 py-3.5 px-5 rounded-[10px] bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer shrink-0">
                                             Close
                                         </button>
                                     </div>
@@ -2350,7 +2350,7 @@
                         <div class="relative z-10 pt-1">
                             <button type="button" 
                                     @click="startPortalScanner('code')" 
-                                    class="w-full py-3.5 px-4 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-none  cursor-pointer">
+                                    class="min-h-11 w-full py-3.5 px-4 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-none  cursor-pointer">
                                 <span>Verify session</span>
                                 <span>&rarr;</span>
                             </button>
@@ -2621,14 +2621,14 @@
                     <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="startPortalScanner()" 
-                                class="py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span>Check-in / PT</span>
                         </button>
 
                         <button type="button" 
                                 @click="showQrModal = true" 
-                                class="py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
                             <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                             <span>View Pass</span>
                         </button>
@@ -2770,7 +2770,7 @@
 
                     <p class="text-xs text-slate-400">Scan this pass at the front desk scanner or turnstile to log your attendance.</p>
 
-                    <button type="button" @click="showQrModal = false" class="w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
+                    <button type="button" @click="showQrModal = false" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
                         Close
                     </button>
                 </div>
@@ -2840,7 +2840,7 @@
                                 <div x-show="cameraError || portalScanMsg" class="p-3 rounded-[10px] bg-[#F5A524]/10 border border-[#F5A524]/30 text-slate-200 text-xs text-left space-y-2">
                                     <p class="text-[11px] leading-relaxed" x-text="portalScanMsg || 'Live camera access may be restricted by browser permissions or require HTTPS.'"></p>
                                     <div class="flex items-center gap-2 pt-1">
-                                        <button type="button" @click="switchScannerTab('code')" class="flex-1 py-2 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[11px] cursor-pointer transition-all text-center">
+                                        <button type="button" @click="switchScannerTab('code')" class="min-h-11 flex-1 py-2 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[11px] cursor-pointer transition-all text-center">
                                             Enter session PIN
                                         </button>
                                         <label for="portal-file-input" class="py-2 px-3 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 border border-slate-700 text-white font-semibold text-[11px] cursor-pointer text-center">
@@ -2892,7 +2892,7 @@
                                 <button type="button" 
                                         @click="submitPinConfirm()" 
                                         :disabled="pinSubmitting"
-                                        class="w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  cursor-pointer transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  cursor-pointer transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                                     <span x-show="!pinSubmitting">✓ Confirm with Session PIN</span>
                                     <span x-show="pinSubmitting" class="flex items-center gap-1.5">
                                         <svg class="animate-spin w-4 h-4 text-neutral-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -2901,7 +2901,7 @@
                                 </button>
                             </div>
 
-                            <button type="button" @click="stopPortalScanner()" class="w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
+                            <button type="button" @click="stopPortalScanner()" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
                                 Cancel
                             </button>
                         </div>
@@ -2992,7 +2992,7 @@
                                 <button type="button" 
                                         @click="submitPtConfirm()" 
                                         :disabled="ptConfirmLoading" 
-                                        class="w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50">
+                                        class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50">
                                     <span x-show="!ptConfirmLoading">✓ Confirm &amp; Deduct 1 Session</span>
                                     <span x-show="ptConfirmLoading" class="flex items-center gap-1.5">
                                         <svg class="animate-spin w-4 h-4 text-neutral-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -3108,7 +3108,7 @@
                             <div class="flex items-center justify-end pt-1">
                                 <button type="button"
                                         @click="closeExerciseVideo()"
-                                        class="w-full sm:w-auto px-6 py-2.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold cursor-pointer transition-colors ">
+                                        class="min-h-11 w-full sm:w-auto px-6 py-2.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold cursor-pointer transition-colors ">
                                     Close Video
                                 </button>
                             </div>
