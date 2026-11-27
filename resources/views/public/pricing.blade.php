@@ -7,18 +7,13 @@
     {{-- ══════════════════════════════════════════════════════════════
          HERO SECTION (MATTE DARK - POPPINS)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 bg-[#090d16] border-b border-slate-800">
+    <section class="marketing-hero relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 bg-[#0D0E10] border-b border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             
             {{-- Category Pill Badge (Matches Home Page Style & Responsive) --}}
-            <div class="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium mb-6 sm:mb-8 max-w-full flex-wrap sm:flex-nowrap justify-center text-center">
-                <span class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shrink-0">ANNUAL PLANS</span>
-                <span class="text-slate-300 font-medium">Simple &bull; Transparent &bull; Zero Hidden Surcharges</span>
-            </div>
 
-            <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.14] max-w-4xl mx-auto mb-6">
-                Fair &amp; Transparent Plans <br class="hidden sm:inline">
-                <span class="text-amber-400">Without Per-Member Penalties</span>
+            <h1 class="text-4xl sm:text-6xl font-semibold text-white tracking-tight leading-[1.14] max-w-4xl mx-auto mb-6">
+                Simple plans for every stage of your gym.
             </h1>
 
             <p class="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8 font-normal">
@@ -26,7 +21,7 @@
             </p>
 
             {{-- Annual Billing Guarantee Strip (Matte) --}}
-            <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 text-xs sm:text-sm font-medium">
+            <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs sm:text-sm font-medium">
                 <span class="flex items-center gap-1.5 text-emerald-400 font-semibold">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span>Annual Billing Only</span>
@@ -42,19 +37,19 @@
     {{-- ══════════════════════════════════════════════════════════════
          3 PRICING TIERS GRID
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-16 sm:py-20 lg:py-24 bg-[#070b14]">
+    <section class="marketing-section py-16 sm:py-20 lg:py-24 bg-[#141518]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto mb-20">
 
                 {{-- 1. FREE FOREVER --}}
-                <div class="p-8 sm:p-9 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div class="p-8 sm:p-9 rounded-xl bg-[#1B1D21] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
                     <div>
                         <div class="flex items-center justify-between mb-5">
-                            <span class="px-3.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-wider">Free Forever</span>
+                            <span class="px-3.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-normal">Free Forever</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹0</span>
+                            <span class="text-4xl sm:text-5xl font-semibold text-white">₹0</span>
                             <span class="text-xs text-slate-400 font-medium">forever</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Up to 75 active members &bull; Single facility</div>
@@ -63,7 +58,7 @@
                             Perfect for boutique fitness studios, independent yoga/crossfit coaches, and personal trainers getting started.
                         </p>
 
-                        <div class="my-5 text-xs font-bold uppercase tracking-wider text-slate-300">Included Capabilities:</div>
+                        <div class="my-5 text-xs font-bold uppercase tracking-normal text-slate-300">Included Capabilities:</div>
                         <ul class="space-y-3.5 text-xs sm:text-sm text-slate-300 mb-8">
                             <li class="flex items-center gap-2.5">
                                 <span class="text-emerald-400 font-bold">✓</span> Up to 75 active member profiles
@@ -96,17 +91,17 @@
                 </div>
 
                 {{-- 2. STARTER (FEATURED - MATTE GOLD BORDER) --}}
-                <div class="p-8 sm:p-9 rounded-3xl bg-[#0c121e] border-2 border-amber-500 flex flex-col justify-between relative shadow-xl lg:-translate-y-2">
-                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black uppercase tracking-wider">
+                <div class="p-8 sm:p-9 rounded-xl bg-[#1B1D21] border-2 border-amber-500 flex flex-col justify-between relative  ">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-semibold uppercase tracking-normal">
                         Most Popular Choice
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-5">
-                            <span class="px-3.5 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider border border-amber-500/20">Starter</span>
+                            <span class="px-3.5 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-normal border border-amber-500/20">Starter</span>
                             <span class="text-xs text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Annual Plan</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹6,000</span>
+                            <span class="text-4xl sm:text-5xl font-semibold text-white">₹6,000</span>
                             <span class="text-xs text-slate-400">/year + GST</span>
                         </div>
                         <div class="text-xs text-amber-400 mt-1 font-semibold">Equivalent to just ₹500 / month &bull; Unlimited Members</div>
@@ -115,7 +110,7 @@
                             The complete operating system for standalone gyms. Automates gate turnstiles, WhatsApp renewals, and attendance.
                         </p>
 
-                        <div class="my-5 text-xs font-bold uppercase tracking-wider text-amber-400">Everything in Free, plus:</div>
+                        <div class="my-5 text-xs font-bold uppercase tracking-normal text-amber-400">Everything in Free, plus:</div>
                         <ul class="space-y-3.5 text-xs sm:text-sm text-slate-200 mb-8">
                             <li class="flex items-center gap-2.5">
                                 <span class="text-amber-400 font-bold">✓</span> <strong class="text-white">Unlimited Members:</strong> Zero caps or per-member charges
@@ -151,14 +146,14 @@
                 </div>
 
                 {{-- 3. PRO (CHAIN) --}}
-                <div class="p-8 sm:p-9 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div class="p-8 sm:p-9 rounded-xl bg-[#1B1D21] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
                     <div>
                         <div class="flex items-center justify-between mb-5">
-                            <span class="px-3.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-wider">Pro Multi-Branch</span>
+                            <span class="px-3.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-normal">Pro Multi-Branch</span>
                             <span class="text-xs text-amber-400 font-semibold px-2 py-0.5 rounded-full bg-amber-500/10">Multi-Location</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹12,000</span>
+                            <span class="text-4xl sm:text-5xl font-semibold text-white">₹12,000</span>
                             <span class="text-xs text-slate-400">/year + GST</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Equivalent to ₹1,000 / month &bull; Multi-branch chains</div>
@@ -167,7 +162,7 @@
                             Built for growing gym chains and premium fitness centers that need centralized management and roaming access.
                         </p>
 
-                        <div class="my-5 text-xs font-bold uppercase tracking-wider text-slate-300">Everything in Starter, plus:</div>
+                        <div class="my-5 text-xs font-bold uppercase tracking-normal text-slate-300">Everything in Starter, plus:</div>
                         <ul class="space-y-3.5 text-xs sm:text-sm text-slate-300 mb-8">
                             <li class="flex items-center gap-2.5">
                                 <span class="text-emerald-400 font-bold">✓</span> <strong class="text-white">Multi-Branch Command:</strong> Central view for all your gym locations
@@ -211,7 +206,7 @@
                     $cleanPricingPhone = '91' . $cleanPricingPhone;
                 }
             @endphp
-            <div class="max-w-4xl mx-auto p-6 sm:p-8 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6 mb-24">
+            <div class="max-w-4xl mx-auto p-6 sm:p-8 rounded-xl bg-[#1B1D21] border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6 mb-24">
                 <div class="space-y-1 text-center sm:text-left">
                     <div class="text-sm font-bold text-white flex items-center justify-center sm:justify-start gap-2">
                         <span>💬</span> Need custom biometric gates or managing 5+ locations?
@@ -232,8 +227,8 @@
             ══════════════════════════════════════════════════════════════ --}}
             <div class="max-w-6xl mx-auto mb-24">
                 <div class="text-center max-w-2xl mx-auto mb-12">
-                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Compare Plans</span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">
+                    <span class="text-xs font-bold uppercase tracking-normal text-amber-400">Compare Plans</span>
+                    <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight mt-2">
                         Detailed Feature Comparison
                     </h2>
                 </div>
@@ -241,10 +236,10 @@
                 <p class="text-center text-xs text-slate-400 mb-3 md:hidden flex items-center justify-center gap-1.5">
                     <span>👉 Swipe horizontally to view all plans</span>
                 </p>
-                <div class="overflow-x-auto rounded-3xl border border-slate-800 bg-[#0c121e]">
+                <div class="overflow-x-auto rounded-xl border border-slate-800 bg-[#1B1D21]">
                     <table class="w-full min-w-[620px] text-left border-collapse text-xs sm:text-sm">
                         <thead>
-                            <tr class="border-b border-slate-800 bg-[#090d16]">
+                            <tr class="border-b border-slate-800 bg-[#0D0E10]">
                                 <th class="p-4 sm:p-5 text-white font-bold w-2/5">Capability</th>
                                 <th class="p-4 sm:p-5 text-slate-300 font-bold text-center w-1/5">Free Forever</th>
                                 <th class="p-4 sm:p-5 text-amber-400 font-bold text-center w-1/5 bg-amber-500/5 border-x border-slate-800">Starter</th>
@@ -322,8 +317,8 @@
             ══════════════════════════════════════════════════════════════ --}}
             <div class="max-w-4xl mx-auto pt-6" x-data="{ open: 0 }">
                 <div class="text-center mb-12">
-                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Answers to Common Questions</span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">
+                    <span class="text-xs font-bold uppercase tracking-normal text-amber-400">Answers to Common Questions</span>
+                    <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight mt-2">
                         Frequently Asked Questions About Pricing
                     </h2>
                 </div>
@@ -356,8 +351,8 @@
                             'a' => 'Our team provides full onboarding support over WhatsApp, Google Meet, or phone call. We will guide you through setting up packages, staff logins, and connecting your attendance devices so your gym is fully operational on day one.'
                         ],
                     ] as $i => $faq)
-                        <div class="rounded-2xl sm:rounded-3xl transition-all duration-200 overflow-hidden"
-                             :class="open === {{ $i }} ? 'bg-[#0c121e] border-2 border-amber-500/70 shadow-lg' : 'bg-[#0c121e] border border-slate-800 hover:border-slate-700'">
+                        <div class="rounded-lg sm:rounded-xl transition-all duration-200 overflow-hidden"
+                             :class="open === {{ $i }} ? 'bg-[#1B1D21] border-2 border-amber-500/70 shadow-lg' : 'bg-[#1B1D21] border border-slate-800 hover:border-slate-700'">
                             
                             <button type="button" 
                                     class="w-full flex items-center justify-between gap-4 sm:gap-6 px-6 sm:px-8 py-5 sm:py-6 text-left transition-colors cursor-pointer group"
@@ -400,9 +395,9 @@
     {{-- ══════════════════════════════════════════════════════════════
          CLOSING CTA BANNER
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 lg:py-24 bg-[#090d16] border-t border-slate-800">
+    <section class="marketing-section py-20 lg:py-24 bg-[#0D0E10] border-t border-slate-800">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight mb-4">
                 Start Saving Time and Stopping Revenue Leaks
             </h2>
             <p class="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
