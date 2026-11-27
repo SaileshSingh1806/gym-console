@@ -16,6 +16,8 @@
             ]];
         });
 
+        $canApplyCredit = auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin() || (auth()->user()->hasPermission('payments.record') && auth()->user()->hasPermission('memberships.edit'));
+        $creditReceipts = $canApplyCredit ? \App\Services\MembershipCreditService::available($member) : [];
         $finalAmt = (float) ($activeMembership?->final_amount ?? 0);
         $paidAmt = (float) ($activeMembership?->paid_amount ?? 0);
         $remainingAmt = max(0, $finalAmt - $paidAmt);
@@ -34,6 +36,7 @@
 
     <script>
         window.__MEMBERSHIP_PLANS__ = {{ Js::from($plansJson) }};
+        window.__MEMBERSHIP_CREDITS__ = {{ Js::from($creditReceipts) }};
     </script>
 
     <div x-data="{
@@ -493,14 +496,24 @@
         newSubDiscount: 0,
         newSubPaidNow: 0,
         newSubPaymentMethod: 'cash',
+        creditMode: 'none',
+        creditIds: [],
+        creditAmount: 0,
+        creditReceipts: window.__MEMBERSHIP_CREDITS__ || [],
+        get availableCredit() { return this.creditReceipts.filter(p => this.creditIds.includes(String(p.id))).reduce((sum,p) => sum + p.available,0) / 100; },
+        get appliedCredit() { return this.creditMode === 'full' ? this.availableCredit : (this.creditMode === 'partial' ? Number(this.creditAmount || 0) : 0); },
+        get creditPayable() { return Math.max(0, Math.round((this.newSubFinalFee - this.appliedCredit)*100)/100); },
+        syncCreditPayment() { this.newSubPaidNow = this.creditPayable; },
         get newSubPrice() {
             return this.newSubPlanId && this.plans[this.newSubPlanId] ? this.plans[this.newSubPlanId].price : 0;
         },
         get newSubFinalFee() {
-            return Math.max(0, this.newSubPrice - Number(this.newSubDiscount || 0));
+            const base = Math.max(0, this.newSubPrice - Number(this.newSubDiscount || 0));
+            const tax = Number(this.plans[this.newSubPlanId]?.tax_rate || 0);
+            return Math.round((base + base * tax / 100)*100)/100;
         },
         onNewSubPlanChange() {
-            this.newSubPaidNow = this.newSubFinalFee;
+            this.syncCreditPayment();
         },
 
         // PT Package Modal State
@@ -3348,6 +3361,7 @@
 
                 <form action="{{ route('app.members.add-subscription', $member->id) }}" method="POST" class="space-y-4 text-xs">
                     @csrf
+                    <input type="hidden" name="credit_request_id" value="{{ (string) \Illuminate\Support\Str::uuid() }}">
                     <div>
                         <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Membership Plan *</label>
                         <select name="membership_plan_id" 
@@ -3369,14 +3383,43 @@
                         </div>
                         <div>
                             <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Discount ({{ $currency }})</label>
-                            <input type="number" name="discount" x-model="newSubDiscount" min="0" placeholder="0" class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white focus:border-accent focus:outline-none">
+                            <input type="number" name="discount" x-model="newSubDiscount" @input.debounce.50ms="syncCreditPayment()" step="0.01" min="0" placeholder="0" class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white focus:border-accent focus:outline-none">
                         </div>
                     </div>
 
+                    @if($canApplyCredit && count($creditReceipts))
+                    <fieldset class="rounded-xl border border-line p-3 space-y-3">
+                        <legend class="font-semibold px-1">Previous payment adjustment</legend>
+                        <select name="credit_mode" x-model="creditMode" @change="syncCreditPayment()" class="w-full rounded-lg bg-raised border border-line p-2">
+                            <option value="none">No adjustment — collect full fee</option>
+                            <option value="full">Full adjustment of selected receipts</option>
+                            <option value="partial">Partial adjustment</option>
+                        </select>
+                        <div x-show="creditMode !== 'none'" class="space-y-3">
+                            @foreach($creditReceipts as $receipt)
+                            <label class="flex items-center gap-2 border-b border-line pb-2">
+                                <input type="checkbox" name="credit_ids[]" value="{{ $receipt['id'] }}" x-model="creditIds" @change="syncCreditPayment()" :disabled="creditMode === 'none'">
+                                <span class="flex-1">{{ $receipt['receipt'] }} · {{ $receipt['plan'] }}<br><span class="text-fg-muted">{{ $receipt['date'] }}</span></span>
+                                <span>{{ $currency }}{{ number_format($receipt['available']/100,2) }}</span>
+                            </label>
+                            @endforeach
+                            <p>Available selected credit: {{ $currency }}<span x-text="availableCredit.toFixed(2)"></span></p>
+                            <div x-show="creditMode === 'partial'"><label class="block mb-1">Custom adjustment</label><input name="credit_amount" type="number" step="0.01" min="0.01" :max="availableCredit" :disabled="creditMode !== 'partial'" :required="creditMode === 'partial'" x-model="creditAmount" @input.debounce.50ms="syncCreditPayment()" class="w-full rounded-lg bg-raised border border-line p-2"></div>
+                            <label class="block">Adjustment reason<textarea name="credit_reason" maxlength="500" :required="creditMode !== 'none'" :disabled="creditMode === 'none'" class="w-full rounded-lg bg-raised border border-line p-2 mt-1"></textarea></label>
+                            <p x-show="appliedCredit > newSubFinalFee || appliedCredit > availableCredit" class="text-red-500">Adjustment cannot exceed the fee or selected credit.</p>
+                        </div>
+                        <div class="border-t border-line pt-2 space-y-1">
+                            <div class="flex justify-between"><span>Membership fee (including tax)</span><span x-text="newSubFinalFee.toFixed(2)"></span></div>
+                            <div class="flex justify-between"><span>Previous payment credit</span><span x-text="appliedCredit.toFixed(2)"></span></div>
+                            <div class="flex justify-between font-semibold"><span>Net payable</span><span x-text="creditPayable.toFixed(2)"></span></div>
+                            <div class="flex justify-between"><span>Remaining due</span><span x-text="Math.max(0,creditPayable - Number(newSubPaidNow || 0)).toFixed(2)"></span></div>
+                        </div>
+                    </fieldset>
+                    @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Paid Now ({{ $currency }})</label>
-                            <input type="number" name="initial_payment_amount" x-model="newSubPaidNow" min="0" placeholder="0" class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white focus:border-accent focus:outline-none">
+                            <input type="number" name="initial_payment_amount" x-model="newSubPaidNow" step="0.01" min="0" placeholder="0" class="w-full px-3.5 py-2.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white focus:border-accent focus:outline-none">
                         </div>
                         <div>
                             <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Payment Method</label>
