@@ -498,7 +498,7 @@
         @else
 
             <!-- APP SEGMENTED TABS (DESKTOP TOP / MOBILE BOTTOM BAR) -->
-            <div class="hidden lg:flex items-center gap-1.5 p-1.5 rounded-xl bg-[#0D0E10]/95 dark:bg-[#0D0E10]/95 backdrop-blur-md border border-neutral-800 shadow-none text-xs font-bold">
+            <div class="{{ auth()->user()->isMember() ? 'hidden' : 'hidden lg:flex' }} items-center gap-1.5 p-1.5 rounded-xl bg-[#0D0E10]/95 dark:bg-[#0D0E10]/95 backdrop-blur-md border border-neutral-800 shadow-none text-xs font-bold">
                 <button type="button" 
                         @click="setPortalTab('overview')" 
                         :class="tab === 'overview' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
@@ -1248,6 +1248,7 @@
 
             <!-- TAB 2: WORKOUT PLANS (CHAMPAGNE STEALTH) -->
             <div x-show="tab === 'workouts'" x-cloak class="space-y-5">
+                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Workout</h1>
                 @if($member->workoutPlans->isNotEmpty())
                     @foreach($member->workoutPlans as $plan)
                         @php
@@ -1400,7 +1401,7 @@
                                  class="rounded-xl bg-[#141518] border border-neutral-800 shadow-none overflow-hidden">
 
                             <!-- Luxury Champagne Stealth Hero Header -->
-                            <header class="relative overflow-hidden border-b border-neutral-800 border-t-2 border-t-[#F5A524] bg-gradient-to-br from-[#1B1F2A] via-[#141518] to-[#111319] p-5 sm:p-6 space-y-5">
+                            <header class="relative overflow-hidden border-b border-neutral-800 border-t-2 border-t-[#F5A524] bg-[#141518] p-5 sm:p-6 space-y-5">
                                 <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#F5A524]/10 blur-3xl"></div>
 
                                 <div class="relative flex flex-wrap items-center justify-between gap-2">
@@ -1482,7 +1483,7 @@
                                             </div>
                                         </div>
                                         <div class="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
-                                            <div class="h-full rounded-full bg-gradient-to-r from-[#F5A524] to-emerald-400 transition-all duration-300"
+                                            <div class="h-full rounded-full bg-[#F5A524] transition-all duration-300"
                                                  :style="'width: ' + activeDayProgressPct + '%'"></div>
                                         </div>
                                     </div>
@@ -1506,7 +1507,7 @@
                                 @endif
 
                                 <!-- Live Rest Timer Countdown Banner -->
-                                <div x-show="restLeft > 0" x-cloak class="rounded-xl border border-[#F5A524]/50 bg-gradient-to-r from-[#F5A524]/15 via-[#141518] to-[#141518] p-4 shadow-none space-y-3">
+                                <div x-show="restLeft > 0" x-cloak class="rounded-xl border border-[#F5A524]/50 bg-[#141518] p-4 shadow-none space-y-3">
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="min-w-0">
                                             <span class="text-[10px] font-semibold uppercase tracking-wide text-[#F5A524] block">⏱ Rest Timer Active</span>
@@ -1710,6 +1711,7 @@
 
             <!-- TAB 3: DIET & MEAL PLAN (REFINED PROFESSIONAL MEMBER INTERFACE) -->
             <div x-show="tab === 'diets'" x-cloak class="space-y-6">
+                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Nutrition</h1>
                 @if($member->dietPlans->isNotEmpty())
                     @foreach($member->dietPlans as $diet)
                         @php
@@ -1965,7 +1967,7 @@
 
                                 <!-- Subtle Progress Bar -->
                                 <div class="w-full bg-neutral-900 rounded-full h-2.5 overflow-hidden border border-neutral-800">
-                                    <div class="h-full rounded-full bg-gradient-to-r from-[#F5A524] to-amber-400 transition-all duration-300 shadow-sm"
+                                    <div class="h-full rounded-full bg-[#F5A524] transition-all duration-300 shadow-sm"
                                          :style="'width: ' + loggedTotals.calsPct + '%'"></div>
                                 </div>
 
@@ -2316,6 +2318,7 @@
             </div>
             <!-- TAB 4: PERSONAL TRAINING & DEDICATED COACH -->
             <div x-show="tab === 'pt'" x-cloak class="space-y-5">
+                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Coaching</h1>
                 @if($activePt)
                     @php
                         $ptUsed = (int) ($activePt->used_sessions ?? 0);
@@ -2341,7 +2344,7 @@
                     @endphp
 
                     <!-- Coach Spotlight Card -->
-                    <div class="rounded-xl bg-gradient-to-br from-[#141518] via-[#14171E] to-[#0D0E10] border border-[#F5A524]/35 p-5 sm:p-7 shadow-none space-y-5 text-white relative overflow-hidden">
+                    <div class="rounded-xl bg-[#141518] border border-[#F5A524]/35 p-5 sm:p-7 shadow-none space-y-5 text-white relative overflow-hidden">
                         
 
                         <!-- Top Row: Badge & Expiry -->
@@ -2359,7 +2362,7 @@
                         <div class="relative z-10 flex items-center justify-between gap-4 pt-1 flex-wrap sm:flex-nowrap">
                             <div class="flex items-center gap-3.5 min-w-0">
                                 <div class="relative shrink-0">
-                                    <div class="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#F5A524] to-[#F5A524] text-neutral-950 font-semibold text-xl flex items-center justify-center shadow-none  border border-white/10">
+                                    <div class="w-14 h-14 rounded-xl bg-[#F5A524] text-neutral-950 font-semibold text-xl flex items-center justify-center shadow-none  border border-white/10">
                                         {{ strtoupper(substr($coachName, 0, 1)) }}
                                     </div>
                                     <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[#141518] flex items-center justify-center text-[10px] text-neutral-950 font-semibold">✓</span>
@@ -2387,7 +2390,7 @@
                                     <div class="w-[35%] h-full border-r border-amber-500/30 bg-amber-500/5"></div>
                                     <div class="w-[25%] h-full bg-emerald-500/5"></div>
                                 </div>
-                                <div class="relative z-10 h-full rounded-full bg-gradient-to-r {{ $ptBarGrad }} {{ $ptBarShadow }} transition-all duration-500" style="width: {{ $ptPct }}%"></div>
+                                <div class="relative z-10 h-full rounded-full bg-[#F5A524] transition-all duration-500" style="width: {{ $ptPct }}%"></div>
                             </div>
                             <div class="flex items-center justify-between text-xs text-slate-300">
                                 <span>Used: <strong class="text-white font-mono">{{ $ptUsed }}</strong> of {{ $ptTotal }} Sessions (<span class="{{ $ptTextColor }} font-bold font-mono">{{ $ptPct }}%</span>)</span>
@@ -2594,6 +2597,7 @@
 
             <!-- TAB 5: MEMBERSHIP, PASS & VISITS -->
             <div x-show="tab === 'memberships' || tab === 'attendance'" x-cloak class="space-y-4">
+                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Membership</h1>
                 <!-- HERO: LUXURY DIGITAL MEMBERSHIP PASS (ATHLETIC STEALTH) -->
                 <div class="relative overflow-hidden rounded-xl bg-[#141518] border border-[#F5A524]/30 shadow-none p-5 sm:p-6 text-white space-y-5">
                     
