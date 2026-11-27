@@ -42,7 +42,6 @@
         });
 
 @endphp
-<script type="application/json" id="member-results-data">{!! json_encode($membersMap, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR) !!}</script>
         <!-- Members List: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
         <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             
@@ -379,3 +378,5 @@
             @endif
         </div>
 
+
+<script type="application/json" id="member-results-data">{!! json_encode($membersMap, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR) !!}</script>
