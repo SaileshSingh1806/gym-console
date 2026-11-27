@@ -10,10 +10,22 @@
   "theme_color": "#0D0E10",
   "icons": [
     {
-      "src": "/images/gymdeskhub-official-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/pwa/icons/member-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/pwa/icons/member-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icons/member-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

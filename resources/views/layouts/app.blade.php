@@ -4,6 +4,7 @@
     $isMemberUser = auth()->check() && $authUser->isMember();
     $isPureTrainer = $authUser && ($authUser->role === 'trainer' || ($authUser->isTrainer() && !$authUser->isGymOwner() && !$authUser->isSuperAdmin()));
     $isStealthApp = $isMemberUser || $isPureTrainer || request()->routeIs('trainer.*');
+    $pwaRole = $isMemberUser ? 'member' : ($isPureTrainer ? 'trainer' : null);
     $serverThemeMode = 'dark';
     if (!empty($savedThemeSettings)) {
         $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
@@ -24,7 +25,16 @@
 
     <title>{{ $title ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}</title>
 
-    @if(!empty($platformSettings['favicon_url']))
+    @if($pwaRole)
+        <link rel="manifest" href="{{ asset('pwa/' . $pwaRole . '.webmanifest') }}?v=2">
+        <meta name="theme-color" content="#0D0E10">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="GDH {{ ucfirst($pwaRole) }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('pwa/icons/' . $pwaRole . '-180.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('pwa/icons/' . $pwaRole . '-192.png') }}">
+    @elseif(!empty($platformSettings['favicon_url']))
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
     @else
@@ -773,6 +783,15 @@
                             @endif
                         </div>
 
+                        @if($pwaRole)
+                            <div data-gdh-pwa class="p-2 space-y-1">
+                                <button data-install type="button" hidden class="w-full min-h-11 px-3 text-left text-sm font-medium text-[#F5A524] hover:bg-neutral-800 rounded-lg">Install {{ ucfirst($pwaRole) }} App</button>
+                                <button data-update type="button" hidden class="w-full min-h-11 px-3 text-left text-sm font-medium text-[#F5A524] hover:bg-neutral-800 rounded-lg">Update app</button>
+                                <p data-status hidden role="status" class="px-3 py-2 text-xs leading-relaxed text-neutral-300"></p>
+                                <p data-connection hidden role="status" class="px-3 py-2 text-xs text-amber-300">You are offline. Reconnect to sync.</p>
+                            </div>
+                        @endif
+
                         <!-- Account Actions (Change Password & Logout) -->
                         <div class="p-2 space-y-0.5">
                             <button @click="userMenuOpen = false; showPasswordModal = true"
@@ -1255,6 +1274,10 @@
     </script>
 
     @stack('scripts')
+    @if($pwaRole)
+        <script defer src="{{ asset('pwa/install.js') }}?v=2"></script>
+        <style>[data-gdh-pwa] [hidden]{display:none!important}</style>
+    @endif
 </body>
 </html>
 
