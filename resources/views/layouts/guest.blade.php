@@ -150,8 +150,12 @@
     @unless($marketingPage)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
     @endunless
+    @if($marketingPage)
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { theme: { extend: { colors: { slate: { 900: "#151618" } } } } };</script>
+    @endif
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -249,6 +253,42 @@
         .marketing-site .marketing-legal h2 { font-size:1.125rem; letter-spacing:-.015em; }
         .marketing-site .marketing-legal ul { padding-left:1.25rem; }
         @media(prefers-reduced-motion:reduce) { .marketing-site *, .marketing-site *::before, .marketing-site *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+        .marketing-site main > section > div:first-child { max-width:1200px; padding-inline:20px; }
+        .marketing-site .marketing-hero, .marketing-site .marketing-section { padding-block:64px; }
+        .marketing-site main h1 { font-size:44px; line-height:1.05; }
+        .marketing-site main h2 { font-size:32px; line-height:1.15; }
+        .marketing-site main h3 { font-size:20px; }
+        .marketing-site main p { line-height:1.6; }
+        .marketing-site main [class~="font-bold"], .marketing-site main [class~="font-black"] { font-weight:600; }
+        .marketing-site main [class~="uppercase"] { text-transform:none; }
+        .marketing-site main a[class~="bg-amber-500"], .marketing-site main button[class~="bg-amber-500"] { min-height:48px; border-radius:8px; }
+        .marketing-site main input:not([type="checkbox"]):not([type="radio"]), .marketing-site main select { min-height:48px; border-radius:8px; }
+        .marketing-site .marketing-light { background:#F6F6F4 !important; color:#17181B; }
+        .marketing-site .marketing-light :is(h1,h2,h3,h4,[class~="text-white"],[class~="text-slate-200"]) { color:#17181B; }
+        .marketing-site .marketing-light :is([class~="text-slate-300"],[class~="text-slate-400"],[class~="text-slate-500"]) { color:#5C6068; }
+        .marketing-site .marketing-light :is([class~="bg-[#1B1D21]"],[class~="bg-[#141518]"],[class~="bg-[#0D0E10]"],[class~="bg-slate-900"],[class~="bg-slate-800"]) { background:#FFFFFF; }
+        .marketing-site .marketing-light [class~="border-slate-800"] { border-color:#E4E4DF; }
+        .marketing-site .marketing-light [class~="text-amber-400"] { color:#875000; }
+        .marketing-site .marketing-light a[class~="bg-amber-500"] { color:#16130B; }
+        .marketing-site .marketing-light :is([class~="text-emerald-400"],[class~="text-rose-400"]) { color:#5C6068; }
+        .marketing-site header > div:first-child > div { height:72px; transition:height .2s cubic-bezier(.2,.7,.2,1); }
+        .marketing-site header.is-scrolled > div:first-child > div { height:64px; }
+        .marketing-site .marketing-legal { max-width:720px; }
+        .marketing-site .marketing-legal h2 { font-size:20px; }
+        .marketing-site [data-parallax] { transform:translate3d(0,0,0); }
+        .marketing-site .marketing-reveal-ready { opacity:0; transform:translateY(16px); transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1); }
+        .marketing-site .marketing-reveal-ready.is-in { opacity:1; transform:none; }
+        @media(min-width:768px) {
+            .marketing-site main > section > div:first-child { padding-inline:32px; }
+            .marketing-site .marketing-hero, .marketing-site .marketing-section { padding-block:96px; }
+            .marketing-site main h1 { font-size:clamp(44px,5.4vw,72px); }
+            .marketing-site main h2 { font-size:48px; }
+            .marketing-site main h3 { font-size:24px; }
+            .marketing-site .marketing-legal h2 { font-size:20px; }
+        }
+        @media(prefers-reduced-motion:reduce) {
+            .marketing-site [data-parallax], .marketing-site .marketing-reveal-ready { opacity:1!important; transform:none!important; transition:none!important; }
+        }
     </style>
 
     @if(!empty($platformSettings['google_analytics_id']))
@@ -530,5 +570,47 @@
     @if(!empty($platformSettings['custom_footer_scripts']))
         {!! $platformSettings['custom_footer_scripts'] !!}
     @endif
+@if($marketingPage)
+<script>
+(() => {
+    const root = document.querySelector('.marketing-site');
+    if (!root) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const header = root.querySelector('header');
+    const layers = [...root.querySelectorAll('[data-parallax]')];
+    let ticking = false;
+    const update = () => {
+        header?.classList.toggle('is-scrolled', scrollY > 24);
+        const mobile = innerWidth < 768 ? .4 : 1;
+        for (const el of layers) {
+            if (reduce.matches) { el.style.transform = ''; continue; }
+            const r = el.parentElement.getBoundingClientRect();
+            if (r.bottom < -200 || r.top > innerHeight + 200) continue;
+            const travel = Math.max(-60, Math.min(60, -(r.top + r.height / 2 - innerHeight / 2) * Number(el.dataset.speed || .08) * mobile));
+            el.style.transform = 'translate3d(0,' + travel.toFixed(1) + 'px,0)';
+        }
+        ticking = false;
+    };
+    const schedule = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    addEventListener('scroll', schedule, {passive:true});
+    addEventListener('resize', schedule, {passive:true});
+    reduce.addEventListener?.('change', schedule);
+    update();
+    if (!reduce.matches && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('is-in'); observer.unobserve(entry.target); }
+            });
+        }, {threshold:.2});
+        root.querySelectorAll('[data-reveal]').forEach(el => {
+            if (el.getBoundingClientRect().top > innerHeight) {
+                el.classList.add('marketing-reveal-ready');
+                observer.observe(el);
+            }
+        });
+    }
+})();
+</script>
+@endif
 </body>
 </html>
