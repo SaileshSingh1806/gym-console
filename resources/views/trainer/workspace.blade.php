@@ -107,6 +107,7 @@
         measurementForm: {
             date: '{{ now()->toDateString() }}',
             weight: '',
+            height_cm: '',
             body_fat: '',
             waist: '',
             chest: '',
@@ -610,6 +611,7 @@
             this.measurementForm = {
                 date: new Date().toISOString().split('T')[0],
                 weight: this.selectedMember?.latest_weight || '',
+                height_cm: '',
                 body_fat: '',
                 waist: '',
                 chest: '',
@@ -662,6 +664,7 @@
                     this.measurementForm = {
                         date: new Date().toISOString().split('T')[0],
                         weight: '',
+                        height_cm: '',
                         body_fat: '',
                         waist: '',
                         chest: '',
@@ -2359,7 +2362,8 @@
                                                             <span x-text="m.weight + ' kg'"></span>
                                                         </span>
                                                     </template>
-                                                    <template x-if="m.body_fat">
+                                                    <template x-if="m.bmi != null"><span class="text-xs text-slate-300" x-text="'BMI ' + m.bmi"></span></template>
+                                                     <template x-if="m.body_fat">
                                                         <span class="px-1.5 py-0.5 rounded-md text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20 shrink-0" x-text="m.body_fat + '% Fat'"></span>
                                                     </template>
                                                     <template x-if="m.logged_by">
@@ -3011,6 +3015,11 @@
                         <div>
                             <label class="block text-xs font-semibold text-neutral-300 mb-1">Weight (kg) *</label>
                             <input type="number" step="0.1" required x-model="measurementForm.weight" placeholder="e.g. 74.5" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524]">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Height (cm)</label>
+                            <input type="number" min="40" max="260" step="0.1" x-model="measurementForm.height_cm" placeholder="175" class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-white">
+                            <p class="text-xs text-slate-400 mt-1" x-text="measurementForm.height_cm > 0 && measurementForm.weight > 0 ? 'BMI: ' + (Number(measurementForm.weight) / (Number(measurementForm.height_cm)/100)**2).toFixed(2) : 'BMI calculated on save'"></p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-neutral-300 mb-1">Body Fat %</label>
