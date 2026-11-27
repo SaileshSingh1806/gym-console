@@ -108,6 +108,7 @@ class MembershipCreditService
             throw ValidationException::withMessages(['credit_amount' => 'Adjustment exceeds available credit or membership fee.']);
         }
         $left = $credit;
+        $sourceMembershipIds = [];
         foreach ($available as $id => $amount) {
             $allocated = min($left, $amount);
             if ($allocated <= 0) continue;
@@ -122,9 +123,17 @@ class MembershipCreditService
                 'created_by_user_id' => auth()->id(),
                 'created_at' => now(),
             ]);
+            $sourceMembershipIds[] = $payments->firstWhere('id', $id)->membership_id;
             $left -= $allocated;
         }
         $target->update(['paid_amount' => number_format($credit / 100, 2, '.', '')]);
+        // End overlapping source passes without modifying their original receipts or billed amounts.
+        // Only expire already-started passes when the replacement starts today or earlier.
+        if ($target->start_date->toDateString() <= now()->toDateString()) {
+            Membership::where('tenant_id', $member->tenant_id)->where('member_id', $member->id)
+                ->whereIn('id', array_unique($sourceMembershipIds))->where('status', 'ACTIVE')
+                ->whereDate('start_date', '<=', now()->toDateString())->update(['status' => 'EXPIRED']);
+        }
         return $credit;
     }
 }
