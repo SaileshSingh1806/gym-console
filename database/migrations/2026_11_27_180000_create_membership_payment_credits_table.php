@@ -17,7 +17,9 @@ return new class extends Migration
             $table->unsignedBigInteger('amount_cents');
             $table->string('reason', 500);
             $table->unsignedBigInteger('created_by_user_id')->nullable();
+            $table->uuid('request_id');
             $table->timestamp('created_at');
+            $table->index(['tenant_id', 'member_id', 'request_id'], 'membership_credit_request_index');
             $table->index(['tenant_id', 'member_id']);
             $table->index('source_payment_id');
             $table->index('target_membership_id');
