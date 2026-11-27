@@ -43,7 +43,7 @@
     <div class="gdh-login">
         <header class="gdh-login-header">
             <a href="{{ route('home') }}" aria-label="Back to website">
-                <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
+                <img src="{{ asset('images/gymdeskhub-official-dark.svg') }}" alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}">
             </a>
             <a href="{{ route('contact') }}">Contact support</a>
         </header>
