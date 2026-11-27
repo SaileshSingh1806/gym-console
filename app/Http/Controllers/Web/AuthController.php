@@ -658,11 +658,15 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        $role = $user && in_array($user->role, ['member', 'trainer'], true) ? $user->role : null;
+        $slug = $role ? $user->tenant?->slug : null;
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         TenantContext::reset();
 
+        if ($slug && $role) return redirect()->route('pwa.login', [$slug, $role]);
         return redirect()->route('login');
     }
 
