@@ -8,9 +8,6 @@
     $pwaTenant = $pwaRole ? $authUser->tenant : null;
     $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode(['static-icon-v4', $pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
     $pwaName = $pwaTenant ? ($pwaTenant->settings['pwa_name'] ?? $pwaTenant->name) : 'GymDeskHub';
-    $pwaSplashLogo = $pwaTenant?->settings['pwa_icon_path'] ?? null;
-    $pwaSplashLogo = $pwaSplashLogo ? asset('storage/'.$pwaSplashLogo) : ($pwaTenant?->logo_url ?: asset('images/gymdeskhub-official-dark.svg'));
-    if (!\Illuminate\Support\Str::startsWith($pwaSplashLogo, ['https://', 'http://', '/'])) $pwaSplashLogo = asset('storage/'.$pwaSplashLogo);
     $serverThemeMode = 'dark';
     if (!empty($savedThemeSettings)) {
         $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
@@ -1281,25 +1278,6 @@
 
     @stack('scripts')
     @if($pwaRole)
-        <div id="gdh-brand-splash" hidden aria-hidden="true" style="position:fixed;inset:0;z-index:100000;background:#0D0E10;display:grid;place-items:center;padding:32px">
-            <img src="{{ $pwaSplashLogo }}" alt="" decoding="async" style="display:block;width:auto;height:auto;max-width:min(76vw,320px);max-height:36vh;object-fit:contain">
-        </div>
-        <script>
-            (() => {
-                const splash = document.getElementById('gdh-brand-splash');
-                const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-                const key = @js('gdh-splash-'.$pwaTenant?->id.'-'.$pwaRole);
-                if (!standalone) return;
-                try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (_) {}
-                splash.hidden = false;
-                const hide = () => { splash.hidden = true; };
-                const img = splash.querySelector('img');
-                if (img.complete && !img.naturalWidth) hide();
-                img.addEventListener('error', hide, {once:true});
-                window.setTimeout(hide, 900);
-            })();
-        </script>
-        <style>#gdh-brand-splash[hidden]{display:none!important}</style>
         <script defer src="{{ asset('pwa/install.js') }}?v=4"></script>
         <style>[data-gdh-pwa] [hidden]{display:none!important}</style>
     @endif
