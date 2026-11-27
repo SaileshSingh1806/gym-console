@@ -98,6 +98,11 @@ class Member extends Model
         return $this->hasMany(PtSession::class);
     }
 
+    public function latestMembership(): HasOne
+    {
+        return $this->hasOne(Membership::class)->latestOfMany('created_at');
+    }
+
     public function activeMembership(): HasOne
     {
         return $this->hasOne(Membership::class)
