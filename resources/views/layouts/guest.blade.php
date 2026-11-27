@@ -270,6 +270,16 @@
         .marketing-site .marketing-light [class~="border-slate-800"] { border-color:#E4E4DF; }
         .marketing-site .marketing-light [class~="text-amber-400"] { color:#875000; }
         .marketing-site .marketing-light a[class~="bg-amber-500"] { color:#16130B; }
+        .marketing-site .marketing-light [class~="border-slate-700"] { border-color:#BFC1C5; }
+        .marketing-site .marketing-light .divide-slate-800 > * + * { border-color:#E4E4DF; }
+        .marketing-site main .marketing-legal { width:100%; }
+        .marketing-site .marketing-hero:has(.marketing-legal), .marketing-site:has(.marketing-legal) .marketing-hero { padding-block:48px; }
+        .marketing-site main a:focus-visible, .marketing-site main summary:focus-visible { outline:2px solid #F5A524; outline-offset:3px; }
+        .marketing-site main summary { list-style:none; position:relative; padding-right:28px; }
+        .marketing-site main summary::-webkit-details-marker { display:none; }
+        .marketing-site main summary::after { content:'+'; position:absolute; right:0; top:0; }
+        .marketing-site main details[open] summary::after { content:'−'; }
+        .marketing-site main .marketing-section, .marketing-site main .marketing-hero { scroll-margin-top:80px; }
         .marketing-site .marketing-light :is([class~="text-emerald-400"],[class~="text-rose-400"]) { color:#5C6068; }
         .marketing-site header > div:first-child > div { height:72px; transition:height .2s cubic-bezier(.2,.7,.2,1); }
         .marketing-site header.is-scrolled > div:first-child > div { height:64px; }
@@ -447,7 +457,20 @@
     <!-- ═══════════════════════════════════════════════════
          PROFESSIONAL B2B FOOTER
     ═══════════════════════════════════════════════════ -->
-    <footer class="bg-[#070a10] border-t border-slate-800/80">
+    @if($marketingPage)
+<footer class="border-t border-slate-800 bg-[#141518]">
+<div class="max-w-[1200px] mx-auto px-5 lg:px-8 py-12">
+<a href="{{ route('home') }}" class="inline-block mb-8"><img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="GymDeskHub" class="h-9 w-auto"></a>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
+@foreach(['Product'=>['features'=>'Features','pricing'=>'Pricing','register'=>'Start free','login'=>'Log in'],'Company'=>['about'=>'About','contact'=>'Contact'],'Legal'=>['terms'=>'Terms & conditions','privacy'=>'Privacy policy','refund-policy'=>'Refund & cancellation','shipping-policy'=>'Shipping & delivery']] as $heading=>$links)
+<div><h4 class="font-semibold text-white mb-4">{{ $heading }}</h4><ul class="space-y-3">@foreach($links as $route=>$label)<li><a href="{{ route($route) }}" class="text-slate-400 hover:text-white hover:underline">{{ $label }}</a></li>@endforeach</ul></div>
+@endforeach
+<div><h4 class="font-semibold text-white mb-4">Contact</h4><ul class="space-y-3 text-slate-400"><li><a href="{{ route('contact') }}" class="hover:underline">WhatsApp &amp; phone</a></li><li><a href="mailto:support@gymdeskhub.in" class="break-all hover:underline">support@gymdeskhub.in</a></li><li><a href="mailto:grievance@gymdeskhub.in" class="hover:underline">Grievance contact</a></li><li>Ahmedabad, India</li></ul></div>
+</div>
+<div class="mt-10 pt-6 border-t border-slate-800 text-xs text-slate-400 space-y-2"><p>{{ $platformSettings['footer_copyright'] ?? ('© '.date('Y').' GymDeskHub. All rights reserved.') }}</p><p>GymDeskHub is an individual enterprise owned and operated by Sailesh Singh.</p></div>
+</div></footer>
+@else
+<footer class="bg-[#070a10] border-t border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-8">
 
@@ -565,6 +588,7 @@
             </div>
         </div>
     </footer>
+@endif
     @endif
 
     @if(!empty($platformSettings['custom_footer_scripts']))
@@ -602,7 +626,8 @@
                 if (entry.isIntersecting) { entry.target.classList.add('is-in'); observer.unobserve(entry.target); }
             });
         }, {threshold:.2});
-        root.querySelectorAll('[data-reveal]').forEach(el => {
+        root.querySelectorAll('[data-reveal]').forEach((el,i) => {
+            el.style.transitionDelay = (i % 4) * 60 + 'ms';
             if (el.getBoundingClientRect().top > innerHeight) {
                 el.classList.add('marketing-reveal-ready');
                 observer.observe(el);
