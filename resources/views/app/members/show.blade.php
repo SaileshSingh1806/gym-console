@@ -2947,6 +2947,11 @@
                                     </p>
                                 </div>
 
+                                <div class="p-2.5 sm:p-3.5 rounded-xl bg-raised border border-line text-center">
+                                    <span class="text-xs font-semibold text-fg-muted block">BMI</span>
+                                    <p class="text-base sm:text-lg font-semibold text-fg mt-1" x-text="current.bmi ?? '—'">{{ $latestMeasurement['bmi'] ?? '—' }}</p>
+                                    <span class="text-xs text-fg-muted" x-text="current.height_cm ? current.height_cm + ' cm' : ''"></span>
+                                </div>
                                 <!-- Metric 2: Body Fat -->
                                 <div class="p-2.5 sm:p-3.5 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-center">
                                     <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted block">BODY FAT</span>
@@ -3080,7 +3085,7 @@
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="py-3 px-3 font-semibold">{{ $m['weight'] ? $m['weight'] . ' kg' : '—' }}</td>
+                                            <td class="py-3 px-3 font-semibold">{{ $m['weight'] ? $m['weight'] . ' kg' : '—' }} @if(isset($m['bmi']))<span class="block text-xs text-fg-muted">BMI {{ $m['bmi'] }}</span>@endif</td>
                                             <td class="py-3 px-3">{{ $m['chest'] ? $m['chest'] . '"' : '—' }}</td>
                                             <td class="py-3 px-3">{{ $m['waist'] ? $m['waist'] . '"' : '—' }}</td>
                                             <td class="py-3 px-3">{{ ($m['bicep_left'] ?? '—') . '" / ' . ($m['bicep_right'] ?? '—') . '"' }}</td>
@@ -3890,6 +3895,11 @@
                         <div>
                             <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Weight (kg)</label>
                             <input type="number" step="0.1" name="weight" placeholder="e.g. 72.5" class="w-full px-3 py-2 rounded-xl bg-raised dark:bg-surface border border-line dark:border-line text-fg dark:text-white focus:border-accent focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-fg-muted mb-1">Height (cm)</label>
+                            <input type="number" name="height_cm" min="40" max="260" step="0.1" value="{{ old('height_cm', $latestMeasurement['height_cm'] ?? '') }}" placeholder="e.g. 175" class="w-full px-3 py-2 rounded-xl bg-raised border border-line text-fg">
+                            <p class="mt-1 text-xs text-fg-muted">BMI is calculated automatically from height and weight.</p>
                         </div>
                         <div>
                             <label class="block font-semibold text-fg-muted dark:text-fg-muted mb-1">Body Fat (%)</label>
