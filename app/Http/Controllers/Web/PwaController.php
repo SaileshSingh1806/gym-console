@@ -18,16 +18,17 @@ class PwaController extends Controller
     public function manifest(string $slug, string $role)
     {
         $tenant = $this->tenant($slug);
-        $version = $this->version($tenant);
         $name = trim($tenant->settings['pwa_name'] ?? '') ?: $tenant->name;
         $short = trim($tenant->settings['pwa_short_name'] ?? '') ?: $name;
         $icons = [];
-        foreach ([192, 512] as $size) {
-            $icons[] = ['src' => route('pwa.icon', [$slug, $role, $size, 'any', 'v' => $version], false),
-                'sizes' => "{$size}x{$size}", 'type' => 'image/png', 'purpose' => 'any'];
+        foreach ([[192, 'any'], [512, 'any'], [512, 'maskable']] as [$size, $purpose]) {
+            $icons[] = [
+                'src' => $this->installIconUrl($tenant, $role, $size, $purpose),
+                'sizes' => "{$size}x{$size}",
+                'type' => 'image/png',
+                'purpose' => $purpose,
+            ];
         }
-        $icons[] = ['src' => route('pwa.icon', [$slug, $role, 512, 'maskable', 'v' => $version], false),
-            'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'];
 
         return response()->json([
             'id' => '/pwa/tenant/'.$tenant->id.'/'.$role,
@@ -44,7 +45,7 @@ class PwaController extends Controller
 
     private function version(Tenant $tenant): string
     {
-        return substr(hash('sha256', json_encode(['icon-v3', $tenant->logo_url, $tenant->settings['pwa_icon_path'] ?? null, $tenant->updated_at?->timestamp])), 0, 20);
+        return substr(hash('sha256', json_encode(['static-icon-v4', $tenant->logo_url, $tenant->settings['pwa_icon_path'] ?? null, $tenant->updated_at?->timestamp])), 0, 20);
     }
 
     private function localLogo(Tenant $tenant): ?string
@@ -65,38 +66,40 @@ class PwaController extends Controller
         return $path;
     }
 
-    public function icon(string $slug, string $role, int $size, string $purpose)
+    /**
+     * Generate a public, versioned PNG once. The browser downloads a real static
+     * image from the same storage path used for gym logos, not a PHP image route.
+     */
+    private function installIconUrl(Tenant $tenant, string $role, int $size, string $purpose): string
     {
-        abort_unless(in_array($size, [180, 192, 512], true) && ($purpose !== 'maskable' || $size === 512), 404);
-        $tenant = $this->tenant($slug);
-        $fallback = base_path('public/pwa/icons/'.$role.'-'.($purpose === 'maskable' ? 'maskable-' : '').$size.'.png');
-        $headers = ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=300', 'X-Content-Type-Options' => 'nosniff'];
-        $fallbackResponse = static function () use ($fallback, $headers) {
-            abort_unless(is_file($fallback), 503, 'PWA fallback icon unavailable');
-            return response(file_get_contents($fallback), 200, $headers);
-        };
+        $filename = $role.'-'.($purpose === 'maskable' ? 'maskable-' : '').$size.'.png';
+        $fallback = '/pwa/icons/'.$filename;
         try {
-            $path = $this->localLogo($tenant);
             $disk = Storage::disk('public');
-            if (!$path || !function_exists('imagecreatefromstring') || !$disk->exists($path) || $disk->size($path) > 10485760) {
-                return $fallbackResponse();
+            $path = $this->localLogo($tenant);
+            if (!$path || !$disk->exists($path) || !function_exists('imagecreatefromstring') || $disk->size($path) > 10485760) {
+                return $fallback;
             }
+
+            $target = 'pwa-generated/'.$tenant->id.'/'.$this->version($tenant).'/'.$filename;
+            if ($disk->exists($target)) {
+                return '/storage/'.$target;
+            }
+
             $source = $disk->get($path);
-            if (!is_string($source) || $source === '') return $fallbackResponse();
+            if (!is_string($source) || $source === '') return $fallback;
             $info = @getimagesizefromstring($source);
-            if (!$info || $info[0] * $info[1] > 16000000 || !in_array($info['mime'], ['image/png', 'image/jpeg', 'image/webp'], true)) {
-                return $fallbackResponse();
-            }
+            if (!$info || $info[0] * $info[1] > 16777216 || !in_array($info['mime'], ['image/png', 'image/jpeg', 'image/webp'], true)) return $fallback;
             $image = @imagecreatefromstring($source);
-            if (!$image) return $fallbackResponse();
+            if (!$image) return $fallback;
             $canvas = imagecreatetruecolor($size, $size);
-            if (!$canvas) return $fallbackResponse();
+            if (!$canvas) return $fallback;
             imagefill($canvas, 0, 0, imagecolorallocate($canvas, 13, 14, 16));
             $limit = (int) floor($size * ($purpose === 'maskable' ? 0.65 : 0.9));
             $scale = min($limit / imagesx($image), $limit / imagesy($image), 1);
             $width = max(1, (int) round(imagesx($image) * $scale));
             $height = max(1, (int) round(imagesy($image) * $scale));
-            if (!imagecopyresampled($canvas, $image, (int) (($size-$width)/2), (int) (($size-$height)/2), 0, 0, $width, $height, imagesx($image), imagesy($image))) return $fallbackResponse();
+            if (!imagecopyresampled($canvas, $image, (int) (($size-$width)/2), (int) (($size-$height)/2), 0, 0, $width, $height, imagesx($image), imagesy($image))) return $fallback;
             ob_start();
             try {
                 $ok = imagepng($canvas, null, 6);
@@ -105,12 +108,20 @@ class PwaController extends Controller
                 ob_end_clean();
             }
             $actual = is_string($png) ? @getimagesizefromstring($png) : false;
-            if (!$ok || !$actual || $actual[0] !== $size || $actual[1] !== $size || $actual['mime'] !== 'image/png') return $fallbackResponse();
-            return response($png, 200, $headers);
+            if (!$ok || !$actual || $actual[0] !== $size || $actual[1] !== $size || $actual['mime'] !== 'image/png') return $fallback;
+            if (!$disk->put($target, $png, ['visibility' => 'public'])) return $fallback;
+            return '/storage/'.$target;
         } catch (\Throwable $e) {
             report($e);
-            return $fallbackResponse();
+            return $fallback;
         }
+    }
+
+    public function icon(string $slug, string $role, int $size, string $purpose)
+    {
+        abort_unless(in_array($size, [180, 192, 512], true) && ($purpose !== 'maskable' || $size === 512), 404);
+        $url = $this->installIconUrl($this->tenant($slug), $role, $size, $purpose);
+        return redirect($url)->header('Cache-Control', 'no-store');
     }
 
     public function launch(Request $request, string $slug, string $role)
@@ -141,7 +152,9 @@ class PwaController extends Controller
         $old = $settings['pwa_icon_path'] ?? null;
         if ($request->hasFile('pwa_icon')) {
             // Preserve original bytes; no WebP conversion or lossy compression.
-            $settings['pwa_icon_path'] = $request->file('pwa_icon')->store('pwa-branding/'.$tenant->id, 'public');
+            $stored = $request->file('pwa_icon')->store('pwa-branding/'.$tenant->id, 'public');
+            if (!$stored) return back()->withErrors(['pwa_icon' => 'Could not save app logo. Please try again.'])->with('active_tab', 'member_app');
+            $settings['pwa_icon_path'] = $stored;
         } elseif ($request->boolean('remove_pwa_icon')) {
             unset($settings['pwa_icon_path']);
         }
