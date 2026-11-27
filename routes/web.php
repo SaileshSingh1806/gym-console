@@ -15,9 +15,13 @@ use Illuminate\Support\Facades\Route;
 // Public app branding contains no member information; launch validates the signed-in tenant and role.
 Route::get('/pwa/gym/{slug}/{role}/manifest', [PwaController::class, 'manifest'])->whereIn('role', ['member', 'trainer'])->middleware('throttle:120,1')->name('pwa.manifest');
 Route::get('/pwa/gym/{slug}/{role}/icon/{size}/{purpose}', [PwaController::class, 'icon'])->whereIn('role', ['member', 'trainer'])->whereIn('size', ['180', '192', '512'])->whereIn('purpose', ['any', 'maskable'])->middleware('throttle:120,1')->name('pwa.icon');
-Route::get('/app/pwa/{slug}/{role}/login', [PwaController::class, 'showLogin'])->whereIn('role', ['member', 'trainer'])->name('pwa.login');
-Route::post('/app/pwa/{slug}/{role}/login', [PwaController::class, 'login'])->whereIn('role', ['member', 'trainer'])->middleware('throttle:6,1')->name('pwa.login.post');
-Route::get('/app/pwa/{slug}/{role}', [PwaController::class, 'launch'])->whereIn('role', ['member', 'trainer'])->name('pwa.launch');
+Route::get('/app/{slug}/{role}/login', [PwaController::class, 'showLogin'])->whereIn('role', ['member', 'trainer'])->name('pwa.login');
+Route::post('/app/{slug}/{role}/login', [PwaController::class, 'login'])->whereIn('role', ['member', 'trainer'])->middleware('throttle:6,1')->name('pwa.login.post');
+Route::get('/app/{slug}/{role}', [PwaController::class, 'launch'])->whereIn('role', ['member', 'trainer'])->name('pwa.launch');
+// Preserve existing installed app launch URLs and old login bookmarks.
+Route::get('/app/pwa/{slug}/{role}/login', [PwaController::class, 'redirectLegacyLogin'])->whereIn('role', ['member', 'trainer']);
+Route::post('/app/pwa/{slug}/{role}/login', [PwaController::class, 'login'])->whereIn('role', ['member', 'trainer'])->middleware('throttle:6,1');
+Route::get('/app/pwa/{slug}/{role}', [PwaController::class, 'redirectLegacyLaunch'])->whereIn('role', ['member', 'trainer']);
 Route::post('/app/settings/pwa-branding', [PwaController::class, 'saveBranding'])->middleware(['auth', 'tenant', 'subscription.active'])->name('pwa.branding.save');
 
 // Public Marketing Routes
