@@ -569,7 +569,6 @@
                 </div>
             </div>
         </div>
-        </div>
 
         <!-- Footer Bottom -->
         <div class="border-t border-slate-800/60">
