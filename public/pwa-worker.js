@@ -1,5 +1,5 @@
 /* No authenticated responses or mutation requests are stored. */
-const CACHE = 'gdh-pwa-offline-v1';
+const CACHE = 'gdh-pwa-offline-v2';
 const OFFLINE = '/pwa/offline.html';
 self.addEventListener('install', event => {
     event.waitUntil(caches.open(CACHE).then(cache => cache.add(new Request(OFFLINE, {cache: 'reload'}))));
@@ -20,7 +20,7 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET' || request.mode !== 'navigate') return;
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
-    if (!/^\/app\/(portal|trainer)(\/|$)/.test(url.pathname)) return;
+    if (!/^\/app\/(portal|trainer|pwa)(\/|$)/.test(url.pathname)) return;
     event.respondWith(fetch(request, {cache: 'no-store'}).catch(async () =>
         (await caches.match(OFFLINE)) || new Response('Connection unavailable. Reconnect and try again.', {status: 503, headers: {'Content-Type': 'text/plain'}})
     ));
