@@ -12,7 +12,7 @@
         }
     }
     $resolvedThemeKey = $themeStorageKey ?? ($isMemberUser ? 'member_portal' : ($isStealthApp ? 'trainer_portal' : 'admin'));
-    $effectiveSavedTheme = $isStealthApp ? ['mode' => 'dark', 'accent' => 'luxury-studio', 'isCustom' => true, 'customHex' => '#C5A880'] : ($savedThemeSettings ?? null);
+    $effectiveSavedTheme = $isStealthApp ? ['mode' => 'dark', 'accent' => 'luxury-studio', 'isCustom' => true, 'customHex' => $isMemberUser ? '#F5A524' : '#C5A880'] : ($savedThemeSettings ?? null);
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $isStealthApp ? 'dark' : $serverThemeMode }} h-full">
 <head>
@@ -57,6 +57,11 @@
         @media (max-width:1023px) and (prefers-reduced-motion:no-preference) { #workspace-sidebar[data-ready="true"] { transition:transform 200ms ease-out, visibility 200ms; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .member-app-shell { font-family: Inter, system-ui, sans-serif; }
+        .member-app-shell .member-portal button:focus-visible { outline: 2px solid #F5A524; outline-offset: 3px; }
+        @media (min-width: 1024px) {
+            .member-app-shell main { padding-bottom: 96px; }
+        }
     </style>
 
     @if(!empty($platformSettings['custom_header_scripts']))
@@ -65,7 +70,7 @@
     <x-workspace-ui-styles />
     @stack('styles')
 </head>
-<body class="workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg' }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
+<body class="{{ $isMemberUser ? 'member-app-shell' : '' }} workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isMemberUser ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : ($isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg') }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
 
     @if(!$authUser?->isMember() && !$isPureTrainer)
     @php
@@ -992,7 +997,7 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#0F1115]/95 border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#141518] border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
          style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 40 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
@@ -1000,61 +1005,61 @@
                 <!-- 1. Home -->
                 <button type="button" 
                         @click="navigate('overview', '{{ route('app.portal') }}')"
-                        :class="activeTab === 'overview' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="activeTab === 'overview' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-0.5 min-w-0 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                        <span x-show="activeTab === 'overview'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="activeTab === 'overview'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Home</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">Home</span>
                 </button>
 
                 <!-- 2. Workouts -->
                 <button type="button" 
                         @click="navigate('workouts', '{{ route('app.portal', ['tab' => 'workouts']) }}')"
-                        :class="activeTab === 'workouts' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="activeTab === 'workouts' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-0.5 min-w-0 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        <span x-show="activeTab === 'workouts'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="activeTab === 'workouts'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Workout</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">Workout</span>
                 </button>
 
                 <!-- 3. Diet -->
                 <button type="button" 
                         @click="navigate('diets', '{{ route('app.portal', ['tab' => 'diets']) }}')"
-                        :class="activeTab === 'diets' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="activeTab === 'diets' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-0.5 min-w-0 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        <span x-show="activeTab === 'diets'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="activeTab === 'diets'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Diet</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">Nutrition</span>
                 </button>
 
                 <!-- 4. PT / Coach (Personal Training) -->
                 <button type="button" 
                         @click="navigate('pt', '{{ route('app.portal', ['tab' => 'pt']) }}')"
-                        :class="activeTab === 'pt' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="activeTab === 'pt' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-0.5 min-w-0 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m-9-9h2m14 0h2"/></svg>
-                        <span x-show="activeTab === 'pt'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="activeTab === 'pt'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Coach PT</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">Coaching</span>
                 </button>
 
                 <!-- 5. Pass & Visits -->
                 <button type="button" 
                         @click="navigate('memberships', '{{ route('app.portal', ['tab' => 'memberships']) }}')"
-                        :class="activeTab === 'memberships' || activeTab === 'attendance' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="activeTab === 'memberships' || activeTab === 'attendance' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-0.5 min-w-0 rounded-xl transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        <span x-show="activeTab === 'memberships' || activeTab === 'attendance'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="activeTab === 'memberships' || activeTab === 'attendance'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
-                    <span class="text-[10px] tracking-tight mt-0.5 truncate">Pass</span>
+                    <span class="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">Membership</span>
                 </button>
             @elseif($isPureTrainer)
                 <!-- Trainer App Mobile Navigation (Champagne Stealth) -->
