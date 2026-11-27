@@ -9,55 +9,39 @@
     ══════════════════════════════════════════════════════════════ --}}
     <section class="marketing-hero relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 overflow-hidden bg-[#0D0E10]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-4xl mx-auto">
-                
-                {{-- Category Pill Badge (Responsive Wrap for Small Screens) --}}
-
-                {{-- Direct, Human Headline --}}
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white leading-[1.14] mb-6">
-                Run your gym. From one workspace.
-            </h1>
-
-                {{-- Grounded, Straightforward Subheadline --}}
-                <p class="text-base sm:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-3xl mx-auto font-normal mb-10">
-                    Manage memberships, attendance, payments and coaching from one connected platform. Give your staff the tools they need and keep your business in view.
-                </p>
-
-                {{-- Direct CTA Buttons --}}
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ route('register') }}"
-                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-colors active:scale-[0.98]">
-                        <span>Start Free Forever</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
-                    <a href="{{ route('contact') }}"
-                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-semibold text-base hover:bg-slate-800 hover:text-white transition-colors">
-                        <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/></svg>
-                        <span>Book a Live Demo</span>
-                    </a>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+                <div class="lg:col-span-7">
+                    <p class="text-xs font-semibold text-amber-400 mb-4">Gym management software</p>
+                    <h1 class="text-white mb-5">Run your gym.<br class="hidden sm:block"> From one workspace.</h1>
+                    <p class="text-base sm:text-lg text-slate-300 leading-relaxed mb-7">Manage memberships, attendance, payments and coaching from one connected platform. Give your staff the tools they need and keep your business in view.</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-amber-500 text-slate-950 font-semibold text-sm">Start free <span aria-hidden="true">&rarr;</span></a>
+                        <a href="{{ route('contact') }}" class="inline-flex items-center justify-center px-5 py-3 rounded-lg border border-slate-700 text-white font-medium text-sm hover:bg-slate-800">Book a demo</a>
+                    </div>
+                    <p class="mt-4 text-xs text-slate-400">Free plan for up to 75 active members. No credit card required.</p>
                 </div>
-
-                {{-- Honest Trust Proof Points --}}
-                <div class="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-slate-400 font-medium">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Free Forever Plan (Up to 75 members)</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>No credit card required to start</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Plug &amp; Play Biometric Integration</span>
-                    </div>
+                <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-slate-800 pt-5 lg:pt-0 lg:pl-8">
+                    <p class="text-xs font-medium text-slate-400 mb-3">One platform, three workspaces</p>
+                    @foreach([
+                        ['01', 'Gym owners', 'Memberships, fees and daily operations'],
+                        ['02', 'Trainers', 'Workouts, diet plans and PT sessions'],
+                        ['03', 'Members', 'Membership details and attendance'],
+                    ] as [$number, $label, $description])
+                        <div class="flex items-start gap-4 py-3 border-b border-slate-800 last:border-b-0">
+                            <span class="text-xs text-slate-500 tabular-nums pt-1">{{ $number }}</span>
+                            <div>
+                                <p class="text-sm font-semibold text-white">{{ $label }}</p>
+                                <p class="text-xs text-slate-400 mt-1">{{ $description }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
             {{-- ══════════════════════════════════════════════════════════
                  THE 3 CORE APPS SHOWCASE (OWNER, TRAINER, MEMBER)
             ══════════════════════════════════════════════════════════════ --}}
-            <div class="mt-16 max-w-6xl mx-auto" x-data="{ activeApp: 'owner' }">
+            <div class="mt-10 sm:mt-14 max-w-7xl mx-auto" x-data="{ activeApp: 'owner' }">
                 
                 {{-- App Switcher Tabs (Responsive Scrollable Container) --}}
                 <div class="flex items-center justify-start sm:justify-center mb-6 overflow-x-auto max-w-full pb-2 scrollbar-none">
