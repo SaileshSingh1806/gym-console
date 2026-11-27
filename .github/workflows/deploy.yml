@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: 📥 Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: 'npm'
@@ -98,6 +98,10 @@ jobs:
             mkdir -p "$WEB_DIR/images"
             cp -r "$APP_DIR/public/images/." "$WEB_DIR/images/"
             cp -f "$APP_DIR/public/favicon.png" "$WEB_DIR/favicon.png"
+            mkdir -p "$WEB_DIR/pwa"
+            cp -r "$APP_DIR/public/pwa/." "$WEB_DIR/pwa/"
+            cp -f "$APP_DIR/public/pwa-worker.js" "$WEB_DIR/pwa-worker.js"
+
 
             echo "=== Step 6: Clear and Rebuild Laravel Caches ==="
             $PHP_BIN artisan optimize:clear
