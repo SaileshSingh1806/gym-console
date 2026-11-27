@@ -12,7 +12,7 @@
         }
     }
     $resolvedThemeKey = $themeStorageKey ?? ($isMemberUser ? 'member_portal' : ($isStealthApp ? 'trainer_portal' : 'admin'));
-    $effectiveSavedTheme = $isStealthApp ? ['mode' => 'dark', 'accent' => 'luxury-studio', 'isCustom' => true, 'customHex' => $isMemberUser ? '#F5A524' : '#C5A880'] : ($savedThemeSettings ?? null);
+    $effectiveSavedTheme = $isStealthApp ? ['mode' => 'dark', 'accent' => 'luxury-studio', 'isCustom' => true, 'customHex' => '#F5A524'] : ($savedThemeSettings ?? null);
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $isStealthApp ? 'dark' : $serverThemeMode }} h-full">
 <head>
@@ -57,7 +57,8 @@
         @media (max-width:1023px) and (prefers-reduced-motion:no-preference) { #workspace-sidebar[data-ready="true"] { transition:transform 200ms ease-out, visibility 200ms; } }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .member-app-shell { font-family: Inter, system-ui, sans-serif; }
+        .member-app-shell, .trainer-app-shell { font-family: Inter, system-ui, sans-serif; }
+        .trainer-app-shell .trainer-portal button:focus-visible { outline: 2px solid #F5A524; outline-offset: 3px; }
         .member-app-shell .member-portal button:focus-visible { outline: 2px solid #F5A524; outline-offset: 3px; }
         @media (min-width: 1024px) {
             .member-app-shell main { padding-bottom: 96px; }
@@ -70,7 +71,7 @@
     <x-workspace-ui-styles />
     @stack('styles')
 </head>
-<body class="{{ $isMemberUser ? 'member-app-shell' : '' }} workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isMemberUser ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : ($isStealthApp ? 'bg-[#0F1115] text-[#F4EDE4] dark:bg-[#0F1115] selection:bg-[#C5A880]/30' : 'ds-body bg-canvas text-fg') }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
+<body class="{{ $isMemberUser ? 'member-app-shell' : ($isStealthApp ? 'trainer-app-shell' : '') }} workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isMemberUser ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : ($isStealthApp ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : 'ds-body bg-canvas text-fg') }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
 
     @if(!$authUser?->isMember() && !$isPureTrainer)
     @php
@@ -407,7 +408,7 @@
     @endif
 
     <!-- Main Content Shell -->
-    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto {{ $isStealthApp ? 'bg-[#0F1115]' : 'bg-canvas' }}">
+    <div class="flex-1 flex flex-col min-w-0 w-full min-h-screen lg:h-screen lg:overflow-y-auto {{ $isStealthApp ? 'bg-[#0D0E10]' : 'bg-canvas' }}">
         @php
             $currentTenant = auth()->user()->tenant;
         @endphp
@@ -422,7 +423,7 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 {{ $isStealthApp ? 'bg-[#0F1115]/90 border-b border-neutral-800/80 text-[#F4EDE4] backdrop-blur-md' : 'bg-surface border-b border-line' }} px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
+        <header class="h-16 {{ $isStealthApp ? 'bg-[#0D0E10] border-b border-[#26282D] text-[#ECEDEF]' : 'bg-surface border-b border-line' }} px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @if(request()->routeIs('trainer.*') || $isPureTrainer)
                     @php
@@ -432,7 +433,7 @@
                         $tGymName = $trainerTenant?->name ?? 'GymDeskHub';
                     @endphp
                     @if(! $isPureTrainer)
-                        <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-neutral-400 hover:text-white hover:bg-[#171A22] transition-colors shrink-0 cursor-pointer">
+                        <button @click="sidebarOpen = true" type="button" aria-label="Open Navigation Menu" class="lg:hidden p-2 -ml-1 rounded-xl text-neutral-400 hover:text-white hover:bg-[#141518] transition-colors shrink-0 cursor-pointer">
                             <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </button>
                     @endif
@@ -440,14 +441,14 @@
                         @if(!empty($resolvedTrainerLogo))
                             <img src="{{ $resolvedTrainerLogo }}" alt="{{ $tGymName }}" class="h-8 sm:h-9 w-auto max-w-[130px] rounded-lg object-contain">
                         @else
-                            <div class="w-9 h-9 rounded-xl bg-[#171A22] border border-[#C5A880]/35 flex items-center justify-center text-[#C5A880] font-black text-xs shadow-sm shrink-0">
+                            <div class="w-9 h-9 rounded-xl bg-[#141518] border border-[#F5A524]/35 flex items-center justify-center text-[#F5A524] font-semibold text-xs  shrink-0">
                                 {{ strtoupper(substr($tGymName, 0, 2)) }}
                             </div>
                         @endif
                         <div class="flex flex-col min-w-0">
-                            <span class="font-extrabold text-white text-sm sm:text-base md:text-lg tracking-tight truncate leading-tight">{{ $tGymName }}</span>
-                            <span class="text-[11px] sm:text-xs text-[#C5A880] font-bold uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#C5A880] animate-pulse shrink-0"></span>
+                            <span class="font-semibold text-white text-sm sm:text-base md:text-lg tracking-tight truncate leading-tight">{{ $tGymName }}</span>
+                            <span class="text-[11px] sm:text-xs text-[#F5A524] font-medium uppercase tracking-wider mt-0.5 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#F5A524]  shrink-0"></span>
                                 <span class="truncate">Trainer App</span>
                             </span>
                         </div>
@@ -468,7 +469,7 @@
                         @if(!empty($resolvedMemberGymLogo))
                             <img src="{{ $resolvedMemberGymLogo }}" alt="{{ $gymName }}" class="h-9 sm:h-10 w-auto max-w-[130px] sm:max-w-[160px] rounded-lg object-contain shrink-0">
                         @else
-                            <div class="w-10 h-10 rounded-xl bg-[#171A22] border border-[#C5A880]/35 text-[#C5A880] font-black text-sm flex items-center justify-center shadow-sm shrink-0">
+                            <div class="w-10 h-10 rounded-xl bg-[#141518] border border-[#F5A524]/35 text-[#F5A524] font-black text-sm flex items-center justify-center shadow-sm shrink-0">
                                 {{ strtoupper(substr($gymName, 0, 2)) }}
                             </div>
                         @endif
@@ -638,19 +639,19 @@
                         <!-- Member / Trainer Profile Pill Button (Champagne Stealth) -->
                         <button @click="userMenuOpen = !userMenuOpen" 
                                 type="button" 
-                                class="group relative flex items-center gap-2 sm:gap-2.5 p-1 sm:pl-3 sm:pr-2.5 sm:py-1 rounded-full bg-[#171A22] hover:bg-neutral-800/90 border border-neutral-800 hover:border-[#C5A880]/40 transition-all cursor-pointer focus:outline-none"
+                                class="group relative flex items-center gap-2 sm:gap-2.5 p-1 sm:pl-3 sm:pr-2.5 sm:py-1 rounded-full bg-[#141518] hover:bg-neutral-800/90 border border-neutral-800 hover:border-[#F5A524]/40 transition-all cursor-pointer focus:outline-none"
                                 title="Account Profile & Settings">
                             <div class="hidden sm:flex flex-col items-end text-right leading-tight">
-                                <span class="text-xs font-bold text-white group-hover:text-[#C5A880] transition-colors truncate max-w-[120px]">{{ auth()->user()->name }}</span>
-                                <span class="text-[9px] font-semibold text-[#C5A880] tracking-wider uppercase">{{ $isMemberUser ? 'Active Member' : 'Personal Coach' }}</span>
+                                <span class="text-xs font-bold text-white group-hover:text-[#F5A524] transition-colors truncate max-w-[120px]">{{ auth()->user()->name }}</span>
+                                <span class="text-[9px] font-semibold text-[#F5A524] tracking-wider uppercase">{{ $isMemberUser ? 'Active Member' : 'Personal Coach' }}</span>
                             </div>
                             <div class="relative shrink-0">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black text-xs flex items-center justify-center shadow-md shadow-[#C5A880]/20 group-hover:scale-105 transition-transform">
+                                <div class="w-8 h-8 rounded-full bg-[#F5A524] text-neutral-950 font-black text-xs flex items-center justify-center shadow-md shadow-[#F5A524]/20 group-hover:scale-105 transition-transform">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#171A22]"></span>
                             </div>
-                            <svg class="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#C5A880] transition-transform duration-200 hidden sm:block" :class="{ 'rotate-180': userMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3.5 h-3.5 text-neutral-400 group-hover:text-[#F5A524] transition-transform duration-200 hidden sm:block" :class="{ 'rotate-180': userMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                     @else
                         <!-- Staff / admin profile button -->
@@ -674,12 +675,12 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-xl {{ $isStealthApp ? 'bg-[#171A22] border border-neutral-800 text-[#F4EDE4] divide-neutral-800' : 'bg-surface border border-line-strong divide-line' }} shadow-lg z-[9999] overflow-hidden divide-y">
+                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-xl {{ $isStealthApp ? 'bg-[#141518] border border-neutral-800 text-[#ECEDEF] divide-neutral-800' : 'bg-surface border border-line-strong divide-line' }} shadow-lg z-[9999] overflow-hidden divide-y">
                         
                         <!-- Account Summary Header -->
-                        <div class="p-4 {{ $isStealthApp ? 'bg-[#0F1115]/80' : 'bg-surface' }}">
+                        <div class="p-4 {{ $isStealthApp ? 'bg-[#0D0E10]/80' : 'bg-surface' }}">
                             <div class="flex items-start gap-3">
-                                <div class="w-11 h-11 rounded-full {{ $isStealthApp ? 'bg-gradient-to-tr from-[#D4B995] to-[#C5A880] text-neutral-950 font-black' : 'bg-accent text-accent-on font-semibold' }} text-base flex items-center justify-center shrink-0">
+                                <div class="w-11 h-11 rounded-full {{ $isStealthApp ? 'bg-[#F5A524] text-neutral-950 font-black' : 'bg-accent text-accent-on font-semibold' }} text-base flex items-center justify-center shrink-0">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0 flex-1">
@@ -691,7 +692,7 @@
                                     <div class="flex items-center gap-2 mt-2 flex-wrap">
                                         @php
                                             $role = auth()->user()->role;
-                                            $roleBadgeClass = $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880]' : 'ds-badge-neutral';
+                                            $roleBadgeClass = $isMemberUser ? 'bg-[#F5A524]/15 text-[#F5A524]' : 'ds-badge-neutral';
                                         @endphp
                                         <span class="ds-badge capitalize {{ $roleBadgeClass }}">{{ str_replace('_', ' ', $role) }}</span>
 
@@ -754,7 +755,7 @@
                                 <a href="{{ route('app.feedback.index') }}" 
                                    class="flex items-center justify-between px-4 py-2.5 text-neutral-300 hover:text-white hover:bg-neutral-800/60 transition-colors font-medium">
                                     <div class="flex items-center gap-2.5">
-                                        <svg class="w-4 h-4 text-[#C5A880] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                        <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                                         <span>Gym Feedback &amp; Suggestions</span>
                                     </div>
                                 </a>
@@ -814,7 +815,7 @@
                          x-transition:leave-end="opacity-0">
                         
                         <div @click.away="showPasswordModal = false"
-                             class="w-full max-w-md {{ $isMemberUser ? 'bg-[#171A22] text-[#F4EDE4] border-neutral-800' : 'bg-surface border-line-strong' }} rounded-xl border shadow-xl overflow-hidden relative"
+                             class="w-full max-w-md {{ $isMemberUser ? 'bg-[#141518] text-[#ECEDEF] border-neutral-800' : 'bg-surface border-line-strong' }} rounded-xl border shadow-xl overflow-hidden relative"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100"
@@ -825,7 +826,7 @@
                             <!-- Modal Header -->
                             <div class="px-6 pt-6 pb-4 border-b {{ $isMemberUser ? 'border-neutral-800' : 'border-line' }} flex items-start justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg {{ $isMemberUser ? 'bg-[#C5A880]/15 text-[#C5A880] border border-[#C5A880]/30' : 'bg-raised text-fg-muted border border-line' }} flex items-center justify-center shrink-0">
+                                    <div class="w-10 h-10 rounded-lg {{ $isMemberUser ? 'bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30' : 'bg-raised text-fg-muted border border-line' }} flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                                     </div>
                                     <div>
@@ -997,7 +998,7 @@
          }"
          x-on:portal-tab-changed.window="activeTab = $event.detail"
          x-on:trainer-tab-changed.window="trainerTab = $event.detail"
-         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#141518] border-t border-neutral-800' : 'lg:hidden bg-[#0F1115]/95 border-t border-neutral-800') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+         class="fixed bottom-0 inset-x-0 z-40 {{ $isStealthApp ? ($isMemberUser ? 'bg-[#141518] border-t border-neutral-800' : 'lg:hidden bg-[#141518] border-t border-[#26282D]') : 'lg:hidden bg-surface border-t border-line' }} px-1 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
          style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 40 !important;">
         <div class="grid {{ $isPureTrainer ? 'grid-cols-4' : 'grid-cols-5' }} items-center gap-1 max-w-lg mx-auto">
             @if(auth()->user()->isMember())
@@ -1066,11 +1067,11 @@
                 <!-- 1. Today -->
                 <button type="button" 
                         @click="navigateTrainer('today', '{{ route('trainer.workspace', ['tab' => 'today']) }}')"
-                        :class="trainerTab === 'today' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="trainerTab === 'today' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-1 rounded-[10px] transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span x-show="trainerTab === 'today'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="trainerTab === 'today'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Today</span>
                 </button>
@@ -1078,11 +1079,11 @@
                 <!-- 2. Members -->
                 <button type="button" 
                         @click="navigateTrainer('members', '{{ route('trainer.workspace', ['tab' => 'members']) }}')"
-                        :class="trainerTab === 'members' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="trainerTab === 'members' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-1 rounded-[10px] transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        <span x-show="trainerTab === 'members'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="trainerTab === 'members'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Members</span>
                 </button>
@@ -1090,11 +1091,11 @@
                 <!-- 3. PT Sessions -->
                 <button type="button" 
                         @click="navigateTrainer('sessions', '{{ route('trainer.workspace', ['tab' => 'sessions']) }}')"
-                        :class="trainerTab === 'sessions' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="trainerTab === 'sessions' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-1 rounded-[10px] transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                        <span x-show="trainerTab === 'sessions'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="trainerTab === 'sessions'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Sessions</span>
                 </button>
@@ -1102,11 +1103,11 @@
                 <!-- 4. Profile -->
                 <button type="button" 
                         @click="navigateTrainer('profile', '{{ route('trainer.workspace', ['tab' => 'profile']) }}')"
-                        :class="trainerTab === 'profile' ? 'text-[#C5A880] font-black' : 'text-neutral-400 hover:text-white'"
-                        class="flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all cursor-pointer">
+                        :class="trainerTab === 'profile' ? 'text-[#F5A524] font-semibold' : 'text-neutral-400 hover:text-white'"
+                        class="flex flex-col items-center justify-center min-h-12 py-1 px-1 rounded-[10px] transition-all cursor-pointer">
                     <div class="relative p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <span x-show="trainerTab === 'profile'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#C5A880]"></span>
+                        <span x-show="trainerTab === 'profile'" class="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#F5A524]"></span>
                     </div>
                     <span class="text-[10px] tracking-tight mt-0.5 truncate">Profile</span>
                 </button>
