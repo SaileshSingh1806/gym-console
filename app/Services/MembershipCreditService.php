@@ -6,6 +6,7 @@ use App\Models\Member;
 use App\Models\Membership;
 use App\Models\MemberPayment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class MembershipCreditService
@@ -20,6 +21,8 @@ class MembershipCreditService
         $membership = $payment->membership;
         $plan = $membership?->plan;
         return $membership && ! $membership->trashed() && $plan
+            && (int) $membership->tenant_id === (int) $payment->tenant_id
+            && (int) $membership->member_id === (int) $payment->member_id
             && $plan->duration_type === 'days' && (int) $plan->duration_value <= 7
             && (int) $plan->duration_value > 0
             && ! in_array($membership->status, ['CANCELLED', 'TRANSFERRED'], true)
@@ -30,11 +33,13 @@ class MembershipCreditService
 
     public static function available(Member $member): array
     {
-        $payments = $member->payments()->with('membership.plan')->whereNotNull('membership_id')->get();
+        if (! Schema::hasTable('membership_payment_credits')) return [];
+        $payments = $member->payments()->where('tenant_id', $member->tenant_id)->with('membership.plan')->whereNotNull('membership_id')->get();
         $used = DB::table('membership_payment_credits')->where('tenant_id', $member->tenant_id)
             ->where('member_id', $member->id)->selectRaw('source_payment_id, SUM(amount_cents) as used')
             ->groupBy('source_payment_id')->pluck('used', 'source_payment_id');
-        return $payments->filter(fn ($p) => self::eligible($p))->map(function ($p) use ($used) {
+        $targets = DB::table('membership_payment_credits')->where('tenant_id', $member->tenant_id)->where('member_id', $member->id)->pluck('target_membership_id')->all();
+        return $payments->filter(fn ($p) => self::eligible($p) && ! in_array($p->membership_id, $targets))->map(function ($p) use ($used) {
             return [
                 'id' => $p->id,
                 'receipt' => $p->receipt_number,
@@ -45,16 +50,46 @@ class MembershipCreditService
         })->filter(fn ($p) => $p['available'] > 0)->values()->all();
     }
 
+    public static function protectedPayment(MemberPayment $payment): bool
+    {
+        return Schema::hasTable('membership_payment_credits') && DB::table('membership_payment_credits')
+            ->where('tenant_id', $payment->tenant_id)->where(function ($q) use ($payment) {
+                $q->where('source_payment_id', $payment->id);
+                if ($payment->membership_id) $q->orWhere('target_membership_id', $payment->membership_id);
+            })->exists();
+    }
+
+    public static function protectedMembership(Membership $membership): bool
+    {
+        return Schema::hasTable('membership_payment_credits') && DB::table('membership_payment_credits')
+            ->where('tenant_id', $membership->tenant_id)->where(function ($q) use ($membership) {
+                $q->where('target_membership_id', $membership->id)
+                  ->orWhereIn('source_payment_id', $membership->payments()->select('id'));
+            })->exists();
+    }
+
+    public static function protectedMember(Member $member): bool
+    {
+        return Schema::hasTable('membership_payment_credits') && DB::table('membership_payment_credits')
+            ->where('tenant_id', $member->tenant_id)->where('member_id', $member->id)->exists();
+    }
+
     public static function apply(Member $member, Membership $target, array $ids, string $mode, int $requested, string $reason): int
     {
         if ($mode === 'none') return 0;
-        $payments = $member->payments()->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
+        if (! Schema::hasTable('membership_payment_credits')) {
+            throw ValidationException::withMessages(['credit_mode' => 'Credit adjustment is not available until the database migration is applied.']);
+        }
+        $payments = $member->payments()->where('tenant_id', $member->tenant_id)->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
         if ($payments->count() !== count($ids)) {
             throw ValidationException::withMessages(['credit_ids' => 'One or more receipts are unavailable.']);
         }
         $available = [];
         foreach ($payments as $payment) {
             $payment->load('membership.plan');
+            if (DB::table('membership_payment_credits')->where('target_membership_id', $payment->membership_id)->exists()) {
+                throw ValidationException::withMessages(['credit_ids' => 'A membership already settled using credit cannot be reused as a credit source.']);
+            }
             if (! self::eligible($payment) || $payment->membership_id === $target->id) {
                 throw ValidationException::withMessages(['credit_ids' => 'Only fully paid, eligible short-duration membership receipts can be adjusted.']);
             }
