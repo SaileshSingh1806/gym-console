@@ -24,51 +24,10 @@
             ->whereBetween('end_date', [now()->toDateString(), now()->addDays(7)->toDateString()])
             ->count();
 
-        $membersMap = $members->getCollection()->mapWithKeys(function ($m) {
-            $meta = is_array($m->metadata) ? $m->metadata : [];
-            $membership = $m->activeMembership ?? $m->memberships()->latest()->first();
-            return [(string) $m->id => [
-                'id' => $m->id,
-                'member_code' => (string) ($m->member_code ?? ''),
-                'join_date' => $m->join_date ? $m->join_date->format('Y-m-d') : '',
-                'first_name' => (string) ($m->first_name ?? ''),
-                'last_name' => (string) ($m->last_name ?? ''),
-                'phone' => (string) ($m->phone ?? ''),
-                'alternate_phone' => (string) ($meta['alternate_phone'] ?? ''),
-                'email' => (string) ($m->email ?? ''),
-                'gender' => (string) ($m->gender ?? 'male'),
-                'dob' => $m->dob ? $m->dob->format('Y-m-d') : '',
-                'blood_group' => (string) ($meta['blood_group'] ?? ''),
-                'city' => (string) ($meta['city'] ?? ''),
-                'address' => (string) ($m->address ?? ''),
-                'height' => (string) ($meta['height'] ?? ''),
-                'height_unit' => (string) ($meta['height_unit'] ?? 'cm'),
-                'weight' => (string) ($meta['weight'] ?? ''),
-                'target_weight' => (string) ($meta['target_weight'] ?? ''),
-                'fitness_goal' => (string) ($meta['fitness_goal'] ?? ''),
-                'medical_history' => (string) ($meta['medical_history'] ?? ''),
-                'emergency_contact_name' => (string) ($m->emergency_contact_name ?? ''),
-                'emergency_contact_phone' => (string) ($m->emergency_contact_phone ?? ''),
-                'emergency_relation' => (string) ($meta['emergency_relation'] ?? ''),
-                'branch_id' => $m->branch_id ?? '',
-                'status' => (string) ($m->status ?? 'ACTIVE'),
-                'membership_plan_id' => $membership?->membership_plan_id ?? '',
-                'membership_start_date' => $membership?->start_date ? $membership->start_date->format('Y-m-d') : '',
-                'membership_end_date' => $membership?->end_date ? $membership->end_date->format('Y-m-d') : '',
-                'notes' => (string) ($m->notes ?? ''),
-                'photo_path' => (string) ($m->photo_path ?? ''),
-                'membership' => $membership ? [
-                    'final_amount' => (float) ($membership->final_amount ?? 0),
-                    'paid_amount' => (float) ($membership->paid_amount ?? 0),
-                    'plan_name' => $membership->plan?->name ?? 'Active Membership',
-                ] : null,
-            ]];
-        });
     @endphp
 
     <script>
         window.__MEMBERSHIP_PLANS__ = {{ Js::from($plansJson) }};
-        window.__MEMBERS_DATA__ = {{ Js::from($membersMap) }};
     </script>
 
     <div x-data="{ 
@@ -76,7 +35,7 @@
         showEditModal: false, 
         showCollectFeeModal: false,
         plans: window.__MEMBERSHIP_PLANS__ || {},
-        membersData: window.__MEMBERS_DATA__ || {},
+        membersData: JSON.parse(document.getElementById('member-results-data').textContent),
         
         // Add Member Form State
         selectedPlanId: '',
@@ -344,7 +303,7 @@
             this.collectNotes = '';
             this.showCollectFeeModal = true;
         }
-    }" class="space-y-6">
+    }" id="members-page" class="space-y-6">
 
         <!-- Top Metrics Header -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
@@ -435,21 +394,21 @@
 
         <!-- Action Toolbar -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <form action="{{ route('app.members.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-grow max-w-4xl">
-                @if(request('status'))
-                    <input type="hidden" name="status" value="{{ request('status') }}">
-                @endif
+            <form id="member-search-form" action="{{ route('app.members.index') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-grow max-w-4xl">
                 @if(request('filter'))
                     <input type="hidden" name="filter" value="{{ request('filter') }}">
                 @endif
+                @if(request('date_filter'))
+                    <input type="hidden" name="date_filter" value="{{ request('date_filter') }}">
+                @endif
                 <div class="relative flex-grow">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, phone, email, code..." class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-amber-500 focus:outline-none">
+                    <input type="search" id="member-search-input" name="search" autocomplete="off" maxlength="100" value="{{ request('search') }}" placeholder="Search name, phone, email, code..." class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white placeholder-fg-subtle dark:placeholder-fg-subtle text-xs focus:border-amber-500 focus:outline-none">
                     <svg class="w-4 h-4 text-fg-muted dark:text-fg-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
                 
                 <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                     <!-- Sort Selection -->
-                    <select name="sort" onchange="this.form.submit()" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none cursor-pointer">
+                    <select name="sort" class="flex-1 sm:flex-none px-3 py-2.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line text-fg dark:text-white text-xs font-semibold focus:border-amber-500 focus:outline-none cursor-pointer">
                         <option value="member_id_desc" {{ request('sort', 'member_id_desc') === 'member_id_desc' ? 'selected' : '' }}>Member ID: Latest First</option>
                         <option value="member_id_asc" {{ request('sort') === 'member_id_asc' ? 'selected' : '' }}>Member ID: Old First</option>
                         <option value="join_date_desc" {{ request('sort') === 'join_date_desc' ? 'selected' : '' }}>Join Date: Newest First</option>
@@ -476,7 +435,7 @@
 
             <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                 @if(auth()->user()?->isGymOwner() || auth()->user()?->isSuperAdmin())
-                    <a href="{{ route('app.members.export', request()->all()) }}" 
+                    <a id="member-export-link" data-export-url="{{ route('app.members.export') }}" href="{{ route('app.members.export', request()->all()) }}" 
                        class="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl bg-surface dark:bg-surface hover:bg-raised dark:hover:bg-raised text-fg-muted dark:text-fg border border-line dark:border-line text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
                        title="Export members to CSV with active filters">
                         <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -498,340 +457,9 @@
             </div>
         </div>
 
-        <!-- Members List: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
-        <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
-            
-            <!-- Mobile Cards View -->
-            <div class="block md:hidden divide-y divide-line dark:divide-line">
-                @forelse($members as $member)
-                    @php
-                        $membership = $member->activeMembership ?? $member->memberships()->latest()->first();
-                        $finalAmt = (float) ($membership?->final_amount ?? 0);
-                        $paidAmt = (float) ($membership?->paid_amount ?? 0);
-                        $remainingAmt = max(0, $finalAmt - $paidAmt);
-                        $daysLeft = $membership ? (int) now()->startOfDay()->diffInDays($membership->end_date->startOfDay(), false) : null;
-                        $statusBadge = match($member->status) {
-                            'ACTIVE' => 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
-                            'SUSPENDED' => 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
-                            'EXPIRED' => 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
-                            default => 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-500/20',
-                        };
-                    @endphp
-                    <div class="p-4 space-y-3">
-                        <!-- Top Row: Member Header + Status -->
-                        <div class="flex items-start justify-between gap-2">
-                            <a href="{{ route('app.members.show', $member->id) }}" class="flex items-center gap-2.5 min-w-0 group">
-                                @if($member->avatar_url)
-                                    <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" loading="lazy" class="w-10 h-10 rounded-xl object-cover border border-amber-200 dark:border-amber-500/30 shrink-0">
-                                @else
-                                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-semibold text-amber-600 dark:text-amber-400 text-sm shrink-0">
-                                        {{ strtoupper(substr($member->first_name, 0, 1)) }}
-                                    </div>
-                                @endif
-                                <div class="min-w-0">
-                                    <div class="font-semibold text-fg dark:text-white text-sm truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                                        {{ $member->full_name }}
-                                    </div>
-                                    <div class="flex items-center gap-1.5 mt-0.5">
-                                        <span class="text-xs text-amber-600 dark:text-amber-400 font-mono font-semibold">{{ $member->member_code }}</span>
-                                        <span class="text-fg-muted dark:text-fg-muted">•</span>
-                                        <span class="text-xs text-fg-muted dark:text-fg-muted">{{ $member->branch?->name ?? 'Main Gym' }}</span>
-                                    </div>
-                                </div>
-                            </a>
-
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border {{ $statusBadge }} shrink-0">
-                                {{ $member->status }}
-                            </span>
-                        </div>
-
-                        <!-- Info Grid -->
-                        <div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-raised dark:bg-slate-950/60 border border-line dark:border-line text-xs">
-                            <!-- Contact -->
-                            <div class="space-y-0.5">
-                                <span class="text-xs text-fg-muted dark:text-fg-muted block font-medium">Contact</span>
-                                <div class="flex items-center gap-1.5">
-                                    <a href="tel:{{ $member->phone }}" class="font-semibold text-fg dark:text-white hover:text-amber-600 dark:hover:text-amber-400">
-                                        {{ $member->phone }}
-                                    </a>
-                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}" target="_blank" title="WhatsApp" class="text-emerald-600 dark:text-emerald-400">
-                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Plan & Expiry -->
-                            <div class="space-y-0.5">
-                                <span class="text-xs text-fg-muted dark:text-fg-muted block font-medium">Plan</span>
-                                @if($membership)
-                                    <div class="font-semibold text-fg dark:text-white truncate">
-                                        {{ $membership->plan?->name ?? 'Active Plan' }}
-                                    </div>
-                                    <div class="text-[10px] {{ $daysLeft !== null && $daysLeft < 7 ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400' }}">
-                                        @if($daysLeft !== null && $daysLeft >= 0)
-                                            {{ $daysLeft }}d left
-                                        @elseif($daysLeft !== null && $daysLeft < 0)
-                                            Expired
-                                        @else
-                                            No end date
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="text-fg-muted text-xs italic">No active plan</span>
-                                @endif
-                            </div>
-
-                            <!-- Fee & Due Status (Spans 2 cols) -->
-                            <div class="col-span-2 pt-1 border-t border-line dark:border-line flex items-center justify-between">
-                                <span class="text-xs text-fg-muted dark:text-fg-muted font-medium">Fee Balance</span>
-                                @if($membership)
-                                    @if($remainingAmt > 0)
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">{{ $currency }}{{ number_format($remainingAmt, 0) }} Due</span>
-                                            <span class="text-xs text-fg-muted font-mono">({{ $currency }}{{ number_format($paidAmt, 0) }}/{{ number_format($finalAmt, 0) }})</span>
-                                        </div>
-                                    @else
-                                        <span class="px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                            Paid in Full ({{ $currency }}{{ number_format($finalAmt, 0) }})
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="text-fg-muted text-xs">—</span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- Actions Bar -->
-                        <div class="flex items-center gap-2 pt-1">
-                            @if($membership && $remainingAmt > 0)
-                                <button type="button" @click="openCollectFeeModal({{ $member->id }})" class="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                    <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
-                                </button>
-                            @endif
-
-                            <a href="{{ route('app.members.show', $member->id) }}" class="{{ ($membership && $remainingAmt > 0) ? 'px-3' : 'flex-1' }} py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                <span>Profile</span>
-                            </a>
-
-                            <button type="button" @click="openEditModal({{ $member->id }})" class="p-2 rounded-xl bg-raised hover:bg-slate-200 text-fg-muted border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:border-line transition-colors cursor-pointer" title="Edit Member">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </button>
-
-                            <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
-                                  data-confirm="Are you sure you want to remove member '{{ addslashes($member->full_name) }}'?" 
-                                  data-confirm-title="Remove Gym Member" 
-                                  data-confirm-btn="Yes, Delete" 
-                                  data-confirm-type="danger" 
-                                  class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 dark:border-rose-500/20 transition-colors cursor-pointer" title="Delete Member">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @empty
-                    <div class="p-8 text-center text-fg-muted dark:text-fg-muted space-y-3">
-                        <p class="text-sm">No gym members found matching your search or filters.</p>
-                        <a href="{{ route('app.members.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-semibold text-xs">Enroll First Member</a>
-                    </div>
-                @endforelse
-            </div>
-
-            <!-- Desktop Table View (hidden md:block) -->
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[750px]">
-                    <thead class="bg-raised dark:bg-slate-950/70 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
-                        <tr>
-                            <th class="py-3 px-3.5 font-semibold">Member</th>
-                            <th class="py-3 px-3.5 font-semibold">Contact</th>
-                            <th class="py-3 px-3.5 font-semibold">Branch</th>
-                            <th class="py-3 px-3.5 font-semibold">Plan & Validity</th>
-                            <th class="py-3 px-3.5 font-semibold">Fee & Balance</th>
-                            <th class="py-3 px-2.5 font-semibold text-center">Status</th>
-                            <th class="py-3 px-3.5 font-semibold text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-line dark:divide-line text-fg-muted dark:text-fg-muted">
-                        @forelse($members as $member)
-                            @php
-                                $membership = $member->activeMembership ?? $member->memberships()->latest()->first();
-                                $finalAmt = (float) ($membership?->final_amount ?? 0);
-                                $paidAmt = (float) ($membership?->paid_amount ?? 0);
-                                $remainingAmt = max(0, $finalAmt - $paidAmt);
-                                $daysLeft = $membership ? (int) now()->startOfDay()->diffInDays($membership->end_date->startOfDay(), false) : null;
-                            @endphp
-                            <tr class="hover:bg-raised dark:hover:bg-raised transition-colors">
-                                <!-- Member info with ID and Joined cleanly stacked -->
-                                <td class="py-3 px-3.5">
-                                    <a href="{{ route('app.members.show', $member->id) }}" class="flex items-center gap-2.5 group">
-                                        @if($member->avatar_url)
-                                            <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" loading="lazy" class="w-8 h-8 rounded-lg object-cover border border-amber-200 dark:border-amber-500/30 shrink-0 group-hover:scale-105 transition-transform">
-                                        @else
-                                            <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center font-semibold text-amber-600 dark:text-amber-400 text-xs shrink-0 group-hover:scale-105 transition-transform">
-                                                {{ strtoupper(substr($member->first_name, 0, 1)) }}
-                                            </div>
-                                        @endif
-                                        <div class="min-w-0">
-                                            <span class="font-semibold text-fg dark:text-white text-xs block leading-tight truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">{{ $member->full_name }}</span>
-                                            <span class="text-xs text-amber-600 dark:text-amber-400 font-mono font-medium block leading-tight mt-0.5">{{ $member->member_code }}</span>
-                                            <span class="text-xs text-fg-muted dark:text-fg-muted block leading-tight mt-0.5">Joined: {{ $member->join_date ? $member->join_date->format('d M Y') : 'N/A' }}</span>
-                                        </div>
-                                    </a>
-                                </td>
-
-                                <!-- Contact -->
-                                <td class="py-3 px-3.5">
-                                    <div class="font-medium text-fg dark:text-white flex items-center gap-1.5 leading-tight text-xs">
-                                        <span>{{ $member->phone }}</span>
-                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $member->phone) }}" target="_blank" title="Send WhatsApp Message" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300">
-                                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-                                        </a>
-                                    </div>
-                                    <div class="text-xs text-fg-muted dark:text-fg-muted leading-tight mt-0.5 truncate max-w-[150px]">{{ $member->email ?? 'No email' }}</div>
-                                </td>
-
-                                <!-- Branch -->
-                                <td class="py-3 px-3 text-fg-muted dark:text-fg-muted">
-                                    <span class="truncate block max-w-[120px]">{{ $member->branch?->name ?? 'Main Gym' }}</span>
-                                </td>
-
-                                <!-- Plan & Validity -->
-                                <td class="py-3 px-3.5">
-                                    @if($membership && $membership->status === 'CANCELLED')
-                                        <div class="font-semibold text-fg-muted dark:text-fg-muted leading-tight flex items-center gap-1.5">
-                                            <span class="line-through">{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
-                                            <span class="px-1.5 py-0.2 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-semibold border border-rose-200 dark:border-rose-500/20">Cancelled</span>
-                                        </div>
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted leading-tight mt-0.5 font-mono">
-                                            Package Cancelled / Transferred
-                                        </div>
-                                    @elseif($membership)
-                                        <div class="font-semibold text-fg dark:text-white leading-tight flex items-center gap-1.5">
-                                            <span>{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
-                                            @if($daysLeft !== null)
-                                                @if($daysLeft > 7)
-                                                    <span class="px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold border border-emerald-200 dark:border-emerald-500/20">{{ $daysLeft }}d left</span>
-                                                @elseif($daysLeft >= 0)
-                                                    <span class="px-1.5 py-0.2 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-500/20">{{ $daysLeft }}d left</span>
-                                                @else
-                                                    <span class="px-1.5 py-0.2 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-semibold border border-rose-200 dark:border-rose-500/20">Expired</span>
-                                                @endif
-                                            @endif
-                                        </div>
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted leading-tight mt-0.5 font-mono">
-                                            {{ $membership->start_date ? $membership->start_date->format('d M') : '—' }} to {{ $membership->end_date ? $membership->end_date->format('d M Y') : '—' }}
-                                        </div>
-                                    @else
-                                        <span class="text-fg-muted italic text-xs">No active package</span>
-                                    @endif
-                                </td>
-
-                                <!-- Fee & Balance with Live Indicators -->
-                                <td class="py-3 px-3.5">
-                                    @if($membership && $membership->status === 'CANCELLED')
-                                        <div class="font-semibold text-fg-muted dark:text-fg-muted leading-tight text-xs">
-                                            <span class="line-through">{{ $currency }}{{ number_format($paidAmt, 0) }}</span>
-                                        </div>
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted font-semibold leading-tight mt-0.5">
-                                            Cancelled / Transferred
-                                        </div>
-                                    @elseif($membership)
-                                        <div class="font-semibold text-fg dark:text-white leading-tight text-xs">
-                                            {{ $currency }}{{ number_format($paidAmt, 0) }} <span class="text-xs text-fg-muted font-normal">/ {{ $currency }}{{ number_format($finalAmt, 0) }}</span>
-                                        </div>
-                                        @if($remainingAmt > 0)
-                                            <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold leading-tight mt-0.5 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                <span>{{ $currency }}{{ number_format($remainingAmt, 0) }} Due</span>
-                                            </div>
-                                        @else
-                                            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold leading-tight mt-0.5">
-                                                ✓ Paid Full
-                                            </div>
-                                        @endif
-                                    @else
-                                        <span class="text-fg-muted italic text-xs">—</span>
-                                    @endif
-                                </td>
-
-                                <!-- Status -->
-                                <td class="py-3 px-2.5 text-center">
-                                    @php
-                                        $statusBadge = match($member->status) {
-                                            'ACTIVE' => 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
-                                            'SUSPENDED' => 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
-                                            'EXPIRED' => 'bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-500/20',
-                                            default => 'bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-200 dark:border-slate-500/20',
-                                        };
-                                    @endphp
-                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold border {{ $statusBadge }} inline-block">
-                                        {{ $member->status }}
-                                    </span>
-                                </td>
-
-                                <!-- Actions Column -->
-                                <td class="py-3 px-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        @if($membership && $remainingAmt > 0)
-                                            <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 transition-all flex items-center gap-1 text-xs font-semibold shrink-0 cursor-pointer">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                                <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
-                                            </button>
-                                        @endif
-
-                                        @php
-                                            $firstPayment = $membership?->payments?->first();
-                                        @endphp
-                                        @if($firstPayment)
-                                            <a href="{{ route('app.invoices.show', $firstPayment->id) }}" target="_blank" title="View / Print Tax Invoice ({{ $firstPayment->receipt_number }})" class="p-1.5 rounded-lg bg-raised hover:bg-amber-50 text-fg-muted hover:text-amber-600 border border-line dark:bg-raised dark:hover:bg-amber-500/20 dark:text-fg-muted dark:hover:text-amber-400 dark:border-line transition-colors">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            </a>
-                                        @endif
-
-                                        <a href="{{ route('app.members.show', $member->id) }}" title="View Member Profile" class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </a>
-
-                                        <button type="button" @click="openEditModal({{ $member->id }})" title="Edit Member" class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </button>
-
-                                        <form action="{{ route('app.members.delete', $member->id) }}" method="POST" 
-                                              data-confirm="Are you sure you want to remove member '{{ addslashes($member->full_name) }}'? This will permanently delete their profile and membership history." 
-                                              data-confirm-title="Remove Gym Member" 
-                                              data-confirm-btn="Yes, Delete Member" 
-                                              data-confirm-type="danger" 
-                                              class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" title="Delete Member" class="p-1.5 rounded-lg bg-raised hover:bg-rose-50 text-fg-muted hover:text-rose-600 border border-line dark:bg-raised dark:hover:bg-rose-500/20 dark:text-fg-muted dark:hover:text-rose-400 dark:border-line transition-colors cursor-pointer">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="py-12 text-center text-fg-muted dark:text-fg-muted">
-                                    <p class="text-sm">No gym members found matching your search or filters.</p>
-                                    <a href="{{ route('app.members.create') }}" class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-semibold text-xs">Enroll First Member</a>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if($members->hasPages())
-                <div class="p-3 sm:p-4 border-t border-line dark:border-line bg-raised dark:bg-slate-950/40">
-                    {{ $members->links() }}
-                </div>
-            @endif
+        <p id="member-search-status" role="status" aria-live="polite" class="text-xs text-fg-muted">Enter at least 3 characters to search members.</p>
+        <div id="member-results" aria-busy="false">
+            @include('app.members.partials.results')
         </div>
 
         <!-- 1. ENROLL NEW MEMBER MODAL (With Live Fee & Remaining Balance Calculator) -->
@@ -1484,4 +1112,104 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('member-search-form');
+            const input = document.getElementById('member-search-input');
+            const results = document.getElementById('member-results');
+            const status = document.getElementById('member-search-status');
+            const root = document.getElementById('members-page');
+            if (!form || !input || !results || !status || !root) return;
+
+            let timer, pending, version = 0;
+            let applied = new URL(location.href);
+            let composing = false;
+
+            const buildUrl = () => {
+                const url = new URL(form.action, location.href);
+                for (const [key, value] of new FormData(form)) {
+                    const clean = String(value).trim();
+                    if (clean) url.searchParams.set(key, clean);
+                }
+                return url;
+            };
+
+            const cancel = () => {
+                clearTimeout(timer);
+                pending?.abort();
+                version++;
+                results.setAttribute('aria-busy', 'false');
+            };
+
+            async function load(url, force = false) {
+                cancel();
+                if (!force && url.searchParams.toString() === applied.searchParams.toString()) {
+                    status.textContent = 'Results are up to date.';
+                    return;
+                }
+                const current = version;
+                const controller = new AbortController();
+                pending = controller;
+                status.textContent = 'Searching members…';
+                results.setAttribute('aria-busy', 'true');
+                try {
+                    const response = await fetch(url, {
+                        headers: {'X-Member-Results': '1', 'Accept': 'text/html'},
+                        credentials: 'same-origin', cache: 'no-store', signal: controller.signal
+                    });
+                    if (!response.ok || response.redirected) throw new Error('Search failed');
+                    const html = await response.text();
+                    if (current !== version) return;
+                    const fragment = new DOMParser().parseFromString(html, 'text/html');
+                    const data = fragment.getElementById('member-results-data');
+                    if (!data || !window.Alpine) throw new Error('Invalid search response');
+                    const members = JSON.parse(data.textContent);
+                    window.Alpine.$data(root).membersData = members;
+                    results.replaceChildren(...Array.from(fragment.body.childNodes).map(node => document.importNode(node, true)));
+                    applied = url;
+                    history.replaceState(history.state, '', url);
+                    const exportLink = document.getElementById('member-export-link');
+                    if (exportLink) {
+                        const exportUrl = new URL(exportLink.dataset.exportUrl, location.href);
+                        exportUrl.search = url.search;
+                        exportUrl.searchParams.delete('page');
+                        exportLink.href = exportUrl.href;
+                    }
+                    status.textContent = Object.keys(members).length ? 'Results updated.' : 'No matching members.';
+                } catch (error) {
+                    if (error.name !== 'AbortError' && current === version) status.textContent = 'Unable to refresh results. Press Search to retry.';
+                } finally {
+                    if (current === version) {
+                        pending = null;
+                        results.setAttribute('aria-busy', 'false');
+                    }
+                }
+            }
+
+            function schedule(immediate = false) {
+                cancel();
+                const term = input.value.trim();
+                if (term.length > 0 && term.length < 3) {
+                    status.textContent = 'Enter at least 3 characters. Showing previous results.';
+                    return;
+                }
+                const url = buildUrl();
+                if (immediate) load(url, true);
+                else timer = setTimeout(() => load(url), 350);
+            }
+
+            input.addEventListener('compositionstart', () => { composing = true; cancel(); });
+            input.addEventListener('compositionend', () => { composing = false; schedule(); });
+            input.addEventListener('input', () => { if (!composing) schedule(); });
+            form.addEventListener('submit', event => { event.preventDefault(); schedule(true); });
+            form.querySelectorAll('select').forEach(select => select.addEventListener('change', () => schedule(true)));
+            results.addEventListener('click', event => {
+                const link = event.target.closest('[data-member-pagination] a');
+                if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                load(new URL(link.href, location.href), true);
+            });
+        });
+    </script>
 </x-app-layout>
