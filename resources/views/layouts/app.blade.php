@@ -6,7 +6,7 @@
     $isStealthApp = $isMemberUser || $isPureTrainer || request()->routeIs('trainer.*');
     $pwaRole = $isMemberUser ? 'member' : ($isPureTrainer ? 'trainer' : null);
     $pwaTenant = $pwaRole ? $authUser->tenant : null;
-    $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode([$pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
+    $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode(['icon-v3', $pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
     $pwaName = $pwaTenant ? ($pwaTenant->settings['pwa_name'] ?? $pwaTenant->name) : 'GymDeskHub';
     $pwaSplashLogo = $pwaTenant?->settings['pwa_icon_path'] ?? null;
     $pwaSplashLogo = $pwaSplashLogo ? asset('storage/'.$pwaSplashLogo) : ($pwaTenant?->logo_url ?: asset('images/gymdeskhub-official-dark.svg'));
@@ -32,14 +32,14 @@
     <title>{{ $title ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}</title>
 
     @if($pwaRole)
-        <link rel="manifest" href="{{ $pwaTenant ? route('pwa.manifest', [$pwaTenant->slug, $pwaRole, 'v' => $pwaVersion]) : asset('pwa/' . $pwaRole . '.webmanifest') }}">
+        <link rel="manifest" href="{{ $pwaTenant ? route('pwa.manifest', [$pwaTenant->slug, $pwaRole, 'v' => $pwaVersion], false) : asset('pwa/' . $pwaRole . '.webmanifest') }}">
         <meta name="theme-color" content="#0D0E10">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="{{ $pwaName }} {{ ucfirst($pwaRole) }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 180, 'any', 'v' => $pwaVersion]) : asset('pwa/icons/' . $pwaRole . '-180.png') }}">
-        <link rel="icon" type="image/png" sizes="192x192" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 192, 'any', 'v' => $pwaVersion]) : asset('pwa/icons/' . $pwaRole . '-192.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 180, 'any', 'v' => $pwaVersion], false) : asset('pwa/icons/' . $pwaRole . '-180.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 192, 'any', 'v' => $pwaVersion], false) : asset('pwa/icons/' . $pwaRole . '-192.png') }}">
     @elseif(!empty($platformSettings['favicon_url']))
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
@@ -1300,7 +1300,7 @@
             })();
         </script>
         <style>#gdh-brand-splash[hidden]{display:none!important}</style>
-        <script defer src="{{ asset('pwa/install.js') }}?v=3"></script>
+        <script defer src="{{ asset('pwa/install.js') }}?v=4"></script>
         <style>[data-gdh-pwa] [hidden]{display:none!important}</style>
     @endif
 </body>
