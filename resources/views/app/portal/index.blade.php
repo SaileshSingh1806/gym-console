@@ -28,37 +28,6 @@
         $goalPercent = min(100, round(($thisMonthCheckins / $monthlyGoal) * 100));
         $sessionsNeeded = max(0, $monthlyGoal - $thisMonthCheckins);
 
-        // Motivational Tier & Badge System (Option 1 Athletic Stealth)
-        if ($thisMonthCheckins >= 20) {
-            $tierName = 'Diamond Legend';
-            $tierIcon = '👑';
-            $tierBadge = 'bg-[#F5A524]/15 text-[#F5A524] border-[#F5A524]/30';
-            $tierBarGrad = 'from-[#F5A524] to-emerald-400';
-            $tierMessage = 'You have reached your monthly goal.';
-            $nextMilestone = 'Maximum Level Achieved! Keep dominating.';
-        } elseif ($thisMonthCheckins >= 12) {
-            $tierName = 'Gold Beast';
-            $tierIcon = '🥇';
-            $tierBadge = 'bg-amber-400/15 text-amber-300 border-amber-400/30';
-            $tierBarGrad = 'from-amber-400 to-[#F5A524]';
-            $tierMessage = 'You are making steady progress.';
-            $nextMilestone = $sessionsNeeded . ' more visits to reach Diamond Legend 👑';
-        } elseif ($thisMonthCheckins >= 5) {
-            $tierName = 'Silver Warrior';
-            $tierIcon = '🥈';
-            $tierBadge = 'bg-slate-300/15 text-slate-200 border-slate-400/30';
-            $tierBarGrad = 'from-slate-300 to-slate-400';
-            $tierMessage = 'Keep building your weekly routine.';
-            $nextMilestone = (12 - $thisMonthCheckins) . ' more visits to unlock Gold Beast 🥇';
-        } else {
-            $tierName = 'Bronze Starter';
-            $tierIcon = '🥉';
-            $tierBadge = 'bg-[#F5A524]/15 text-[#F5A524] border-[#F5A524]/30';
-            $tierBarGrad = 'from-[#F5A524] to-emerald-400';
-            $tierMessage = 'Build a consistent training routine.';
-            $nextMilestone = (5 - $thisMonthCheckins) . ' more visits to unlock Silver Warrior 🥈';
-        }
-
         // Current week (Mon to Sun) checkin timeline
         $currentWeekDays = [];
         $startOfWeek = now()->copy()->startOfWeek(); // Monday
@@ -488,8 +457,8 @@
 
         @if(! $member)
             <!-- Unlinked Account Notice -->
-            <div class="p-8 rounded-xl bg-[#141518] border border-neutral-800 shadow-none text-center space-y-4">
-                <div class="w-16 h-16 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
+            <div class="p-8 rounded-[10px] bg-[#141518] border border-[#26282D] shadow-none text-center space-y-4">
+                <div class="w-16 h-16 rounded-[10px] bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
                 <h2 class="text-xl font-semibold text-white">Welcome, {{ auth()->user()->name }}!</h2>
@@ -498,35 +467,35 @@
         @else
 
             <!-- APP SEGMENTED TABS (DESKTOP TOP / MOBILE BOTTOM BAR) -->
-            <div class="{{ auth()->user()->isMember() ? 'hidden' : 'hidden lg:flex' }} items-center gap-1.5 p-1.5 rounded-xl bg-[#0D0E10]/95 dark:bg-[#0D0E10]/95 backdrop-blur-md border border-neutral-800 shadow-none text-xs font-bold">
+            <div class="{{ auth()->user()->isMember() ? 'hidden' : 'hidden lg:flex' }} items-center gap-1.5 p-1.5 rounded-[10px] bg-[#0D0E10]/95 dark:bg-[#0D0E10]/95 border border-[#26282D] shadow-none text-xs font-semibold">
                 <button type="button" 
                         @click="setPortalTab('overview')" 
                         :class="tab === 'overview' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
-                        class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
+                        class="flex-1 py-2 px-1 text-center rounded-[10px] transition-all cursor-pointer">
                     Home
                 </button>
                 <button type="button" 
                         @click="setPortalTab('workouts')" 
                         :class="tab === 'workouts' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
-                        class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
+                        class="flex-1 py-2 px-1 text-center rounded-[10px] transition-all cursor-pointer">
                     Workout
                 </button>
                 <button type="button" 
                         @click="setPortalTab('diets')" 
                         :class="tab === 'diets' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
-                        class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
+                        class="flex-1 py-2 px-1 text-center rounded-[10px] transition-all cursor-pointer">
                     Nutrition
                 </button>
                 <button type="button" 
                         @click="setPortalTab('pt')" 
                         :class="tab === 'pt' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
-                        class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
+                        class="flex-1 py-2 px-1 text-center rounded-[10px] transition-all cursor-pointer">
                     Coaching
                 </button>
                 <button type="button" 
                         @click="setPortalTab('memberships')" 
                         :class="tab === 'memberships' || tab === 'attendance' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
-                        class="flex-1 py-2 px-1 text-center rounded-xl transition-all cursor-pointer">
+                        class="flex-1 py-2 px-1 text-center rounded-[10px] transition-all cursor-pointer">
                     Membership
                 </button>
             </div>
@@ -535,19 +504,19 @@
             <!-- LIVE PENDING PT SESSION NOTIFICATION BANNER               -->
             <!-- ========================================================= -->
             <template x-if="activePendingPt">
-                <div class="relative overflow-hidden rounded-xl bg-[#141518] border-2 border-[#F5A524]/60 p-4 sm:p-5 shadow-none text-white space-y-3.5 transition-all">
+                <div class="relative overflow-hidden rounded-[10px] bg-[#141518] border-2 border-[#F5A524]/60 p-4 sm:p-5 shadow-none text-white space-y-3.5 transition-all">
                     <!-- Glow background -->
                     
 
                     <div class="relative z-10 flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3 min-w-0">
-                            <div class="w-11 h-11 rounded-xl bg-[#F5A524] text-neutral-950 font-semibold flex items-center justify-center text-xl shrink-0 shadow-none ">
-                                ⚡
+                            <div class="w-11 h-11 rounded-[10px] bg-[#F5A524] text-neutral-950 font-semibold flex items-center justify-center text-xl shrink-0 shadow-none ">
+                                <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg>
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="px-2 py-0.5 rounded-full bg-[#F5A524] text-neutral-950 text-[10px] font-semibold uppercase tracking-wider">Coach Waiting</span>
-                                    <span class="text-[10px] font-bold text-[#F5A524] flex items-center gap-1">
+                                    <span class="text-[10px] font-semibold text-[#F5A524] flex items-center gap-1">
                                         <span class="w-1.5 h-1.5 rounded-full bg-[#F5A524] "></span>
                                         <span>Confirm your workout session</span>
                                     </span>
@@ -562,8 +531,8 @@
                         </div>
 
                         <template x-if="activePendingPt.otp_code">
-                            <div class="text-right shrink-0 bg-[#0D0E10] px-3 py-1.5 rounded-xl border border-[#F5A524]/40 shadow-xs">
-                                <span class="text-[10px] uppercase font-bold text-slate-400 block">Session PIN</span>
+                            <div class="text-right shrink-0 bg-[#0D0E10] px-3 py-1.5 rounded-[10px] border border-[#F5A524]/40 ">
+                                <span class="text-[10px] uppercase font-semibold text-slate-400 block">Session PIN</span>
                                 <span class="text-base font-mono font-semibold text-[#F5A524] tracking-wider" x-text="activePendingPt.otp_code"></span>
                             </div>
                         </template>
@@ -572,12 +541,12 @@
                     <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="openPtConfirmModal()" 
-                                class="py-2.5 px-3 rounded-xl bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
+                                class="min-h-11 py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
                             <span>✓ Confirm Session</span>
                         </button>
                         <button type="button" 
                                 @click="startPortalScanner('camera')" 
-                                class="py-2.5 px-3 rounded-xl bg-[#141518] hover:bg-slate-800 text-white font-bold text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
+                                class="min-h-11 py-2.5 px-3 rounded-[10px] bg-[#141518] hover:bg-[#1B1D21] text-white font-semibold text-xs border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
                             <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span>Scan QR Code</span>
                         </button>
@@ -599,13 +568,13 @@
                             <h1 class="text-lg sm:text-xl font-semibold text-white break-words">{{ $member->full_name }}</h1>
                         </div>
                     </div>
-                    <button type="button" @click="startPortalScanner('camera')" aria-label="Open scanner" class="w-11 h-11 rounded-xl border border-neutral-700 bg-[#141518] text-white flex items-center justify-center shrink-0">
+                    <button type="button" @click="startPortalScanner('camera')" aria-label="Open scanner" class="w-11 h-11 rounded-[10px] border border-neutral-700 bg-[#141518] text-white flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5M8 12h8"/></svg>
                     </button>
                 </div>
 
                 <!-- HERO: LUXURY DIGITAL MEMBERSHIP PASS (ATHLETIC STEALTH) -->
-            <div class="relative overflow-hidden rounded-xl bg-[#141518] border border-[#F5A524]/30 shadow-none p-5 sm:p-6 text-white space-y-5">
+            <div class="relative overflow-hidden rounded-[10px] bg-[#141518] border border-[#F5A524]/30 shadow-none p-5 sm:p-6 text-white space-y-5">
                 <!-- Ambient Glow Elements -->
                 
                 
@@ -639,7 +608,7 @@
                             <p class="text-xs text-slate-400">{{ $member->branch->name }}</p>
                         @endif
                     </div>
-                    <button type="button" @click="showQrModal = true" aria-label="View digital pass" class="w-16 h-16 rounded-xl bg-[#1B1D21] border border-neutral-700 flex items-center justify-center shrink-0 text-[#F5A524]">
+                    <button type="button" @click="showQrModal = true" aria-label="View digital pass" class="w-16 h-16 rounded-[10px] bg-[#1B1D21] border border-neutral-700 flex items-center justify-center shrink-0 text-[#F5A524]">
                         <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h4v4h-7v-4m7-3v1"/></svg>
                     </button>
                 </div>
@@ -649,10 +618,10 @@
                     <div class="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
                         <div>
                             <span class="text-slate-400 text-[11px]">Valid Until:</span>
-                            <span class="font-bold text-white ml-1">{{ $activeMembership->end_date?->format('d M, Y') ?? 'N/A' }}</span>
+                            <span class="font-semibold text-white ml-1">{{ $activeMembership->end_date?->format('d M, Y') ?? 'N/A' }}</span>
                         </div>
                         @if($daysLeft !== null)
-                            <span class="px-3 py-1 rounded-xl text-xs font-semibold {{ $daysLeft > 7 ? 'bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30' : ($daysLeft >= 0 ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30') }}">
+                            <span class="px-3 py-1 rounded-[10px] text-xs font-semibold {{ $daysLeft > 7 ? 'bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30' : ($daysLeft >= 0 ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30') }}">
                                 {{ $daysLeft >= 0 ? ($daysLeft . ' Days Left') : ('Expired ' . abs($daysLeft) . 'd ago') }}
                             </span>
                         @endif
@@ -663,14 +632,14 @@
                 <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                     <button type="button" 
                             @click="startPortalScanner('camera')" 
-                            class="py-3 px-3 rounded-xl bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Check-in / PT</span>
                     </button>
 
                     <button type="button" 
                             @click="showQrModal = true" 
-                            class="py-3 px-3 rounded-xl bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                            class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
                         <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                         <span>View Pass</span>
                     </button>
@@ -678,78 +647,57 @@
             </div>
 
             <!-- TODAY'S CHECK-IN STATUS STRIP -->
-            <div class="px-4 py-3 rounded-xl {{ $todayCheckin ? 'bg-[#F5A524]/10 border border-[#F5A524]/25 text-[#F5A524]' : 'bg-[#141518] border border-neutral-800 text-slate-300' }} flex items-center justify-between text-xs font-bold shadow-xs">
+            <div class="px-4 py-3 rounded-[10px] {{ $todayCheckin ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400' : 'bg-[#141518] border border-[#26282D] text-slate-300' }} flex items-center justify-between text-xs font-semibold ">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full {{ $todayCheckin ? 'bg-[#F5A524] ' : 'bg-slate-500' }}"></span>
+                    <span class="w-2.5 h-2.5 rounded-full {{ $todayCheckin ? 'bg-emerald-400' : 'bg-slate-500' }}"></span>
                     @if($todayCheckin)
-                        <span>Checked in today at {{ $todayCheckin->check_in ? \Carbon\Carbon::parse($todayCheckin->check_in)->format('h:i A') : 'Recorded' }} 🔥</span>
+                        <span>Checked in today at {{ $todayCheckin->check_in ? \Carbon\Carbon::parse($todayCheckin->check_in)->format('h:i A') : 'Recorded' }}</span>
                     @else
                         <span>Not checked in yet today</span>
                     @endif
                 </div>
-                <button type="button" @click="setPortalTab('attendance')" class="text-[11px] font-semibold text-slate-400 hover:text-[#F5A524] transition-colors">
+                <button type="button" @click="setPortalTab('attendance')" class="min-h-11 text-xs font-medium text-slate-400 hover:text-[#F5A524] transition-colors">
                     {{ $thisMonthCheckins }} visits this month &rarr;
                 </button>
             </div>
 
                 <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-3 min-w-0">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-3 min-w-0">
                         <p class="text-xs text-slate-400">Attendance</p>
                         <p class="mt-1 text-lg sm:text-xl font-semibold text-white tabular-nums">{{ $thisMonthCheckins }}</p>
                         <p class="text-xs text-slate-400">This month</p>
                     </div>
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-3 min-w-0">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-3 min-w-0">
                         <p class="text-xs text-slate-400">Goal progress</p>
                         <p class="mt-1 text-lg sm:text-xl font-semibold text-white tabular-nums">{{ $goalPercent }}%</p>
                         <p class="text-xs text-slate-400">Monthly</p>
                     </div>
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-3 min-w-0">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-3 min-w-0">
                         <p class="text-xs text-slate-400">Target</p>
                         <p class="mt-1 text-lg sm:text-xl font-semibold text-white tabular-nums">{{ $monthlyGoal }}</p>
                         <p class="text-xs text-slate-400">Visits</p>
                     </div>
                 </div>
-            <!-- MOTIVATIONAL ATTENDANCE & CONSISTENCY HERO WIDGET -->
-            <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 shadow-none space-y-4 text-white relative overflow-hidden">
-                <!-- Background Accent Glow -->
-                
-
-                <!-- Top Row: Tier Badge & Monthly Progress -->
-                <div class="relative z-10 flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-2.5">
-                        <span class="text-2xl">{{ $tierIcon }}</span>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-semibold text-white tracking-tight">{{ $tierName }}</h3>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider {{ $tierBadge }} border">
-                                    {{ $thisMonthCheckins }} Workouts
-                                </span>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">{{ $tierMessage }}</p>
-                        </div>
+            <!-- Attendance and weekly consistency -->
+            <section class="rounded-[10px] bg-[#141518] border border-[#26282D] p-4 space-y-4 text-white">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 class="text-lg font-semibold">Attendance</h2>
+                    <span class="text-xs text-slate-400">{{ now()->format('F Y') }}</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex flex-wrap items-baseline justify-between gap-2">
+                        <span class="text-sm text-slate-300">{{ $thisMonthCheckins }} of {{ $monthlyGoal }} visits</span>
+                        <span class="text-xs text-slate-400">{{ $sessionsNeeded > 0 ? $sessionsNeeded . ' remaining' : 'Goal reached' }}</span>
                     </div>
-                    <div class="text-right shrink-0">
-                        <div class="text-lg font-semibold text-[#F5A524] font-mono">{{ $goalPercent }}%</div>
-                        <div class="text-[10px] text-slate-400">Monthly Target</div>
+                    <div class="h-2 w-full rounded-full bg-[#26282D] overflow-hidden" role="progressbar" aria-label="Monthly attendance target" aria-valuenow="{{ $goalPercent }}" aria-valuemin="0" aria-valuemax="100">
+                        <div class="h-full rounded-full bg-[#F5A524]" style="width: {{ $goalPercent }}%"></div>
                     </div>
                 </div>
-
-                <!-- Progress Bar toward Monthly Goal -->
-                <div class="relative z-10 space-y-1.5">
-                    <div class="w-full bg-slate-900 rounded-full h-3 p-0.5 overflow-hidden border border-neutral-800 shadow-inner">
-                        <div class="h-full rounded-full bg-[#F5A524] transition-all duration-500 shadow-sm" style="width: {{ $goalPercent }}%"></div>
-                    </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-400">
-                        <span>{{ $thisMonthCheckins }} of {{ $monthlyGoal }} Monthly Workouts</span>
-                        <span class="text-[#F5A524] font-bold">{{ $nextMilestone }}</span>
-                    </div>
-                </div>
-
                 <!-- Weekly Consistency Dots (Mon - Sun Streak) -->
-                <div class="relative z-10 pt-2 border-t border-neutral-800/80">
+                <div class="relative z-10 pt-2 border-t border-[#26282D]/80">
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                            <span>⚡ Weekly Streak</span>
+                            <span>This week</span>
                         </span>
                         <span class="text-[10px] text-slate-400">
                             {{ count(array_filter($currentWeekDays, fn($d) => $d['attended'])) }} / 7 Days Active
@@ -758,16 +706,16 @@
 
                     <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center">
                         @foreach($currentWeekDays as $day)
-                            <div class="py-2 px-1 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all {{ $day['attended'] ? 'bg-[#F5A524]/15 border-[#F5A524]/40 text-[#F5A524] shadow-xs' : ($day['isToday'] ? 'bg-[#F5A524]/10 border-[#F5A524]/30 text-[#F5A524] ring-1 ring-[#F5A524]/25' : 'bg-[#0D0E10]/50 border-neutral-800/80 text-slate-500') }}">
-                                <span class="text-[10px] font-bold uppercase">{{ $day['day'] }}</span>
-                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold {{ $day['attended'] ? 'bg-[#F5A524] text-neutral-950 shadow-sm' : ($day['isToday'] ? 'border-2 border-[#F5A524] text-[#F5A524]' : 'bg-slate-800 text-slate-400') }}">
+                            <div class="py-2 px-1 rounded-[10px] flex flex-col items-center justify-center gap-1 border transition-all {{ $day['attended'] ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : ($day['isToday'] ? 'bg-[#F5A524]/10 border-[#F5A524]/30 text-[#F5A524] ring-1 ring-[#F5A524]/25' : 'bg-[#0D0E10]/50 border-[#26282D]/80 text-slate-500') }}">
+                                <span class="text-[10px] font-semibold uppercase">{{ $day['day'] }}</span>
+                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold {{ $day['attended'] ? 'bg-emerald-500/15 text-emerald-400' : ($day['isToday'] ? 'border-2 border-[#F5A524] text-[#F5A524]' : 'bg-[#1B1D21] text-slate-400') }}">
                                     @if($day['attended'])
                                         ✓
                                     @else
                                         {{ $day['date'] }}
                                     @endif
                                 </div>
-                                <span class="text-[10px] font-bold uppercase tracking-tight">
+                                <span class="text-[10px] font-semibold uppercase tracking-tight">
                                     @if($day['attended'])
                                         Done
                                     @elseif($day['isToday'])
@@ -780,10 +728,10 @@
                         @endforeach
                     </div>
                 </div>
-            </div>
+            </section>
 
                 <!-- TODAY'S ROUTINE: WORKOUT & NUTRITION (BALANCED 2-COL GRID) -->
-                <h2 class="text-base font-semibold text-white">Today's plan</h2>
+                <h2 class="text-lg font-semibold text-white">Today's plan</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Today's Workout Quick Card -->
                     @php
@@ -802,12 +750,12 @@
                             $homeDayExercises = $groupedHomeEx->get($homeDayKey, collect());
                         }
                     @endphp
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5  space-y-3.5 flex flex-col justify-between">
                         <div class="space-y-3.5">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-bold text-base shrink-0 border border-[#F5A524]/30">
-                                        🏋️
+                                    <div class="w-9 h-9 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-semibold text-base shrink-0 border border-[#F5A524]/30">
+                                        <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6m3-8v10m12-10v10m3-8v6M6 12h12"/></svg>
                                     </div>
                                     <div class="min-w-0 space-y-0.5">
                                         <div class="flex items-center gap-1.5 flex-wrap">
@@ -821,7 +769,7 @@
                                         <p class="text-[11px] font-medium text-slate-400 truncate">{{ $activeWorkout ? $activeWorkout->title : 'No Routine Prescribed' }}</p>
                                     </div>
                                 </div>
-                                <button type="button" @click="setPortalTab('workouts')" class="px-2.5 py-1.5 rounded-xl bg-[#F5A524]/10 hover:bg-[#F5A524] text-[#F5A524] hover:text-neutral-950 border border-[#F5A524]/25 text-[11px] font-bold transition-all cursor-pointer shrink-0">Start &rarr;</button>
+                                <button type="button" @click="setPortalTab('workouts')" class="px-2.5 py-1.5 rounded-[10px] bg-[#F5A524]/10 hover:bg-[#F5A524] text-[#F5A524] hover:text-neutral-950 border border-[#F5A524]/25 text-[11px] font-semibold transition-all cursor-pointer shrink-0">Start &rarr;</button>
                             </div>
 
                             @php
@@ -842,7 +790,7 @@
                                                 : (string) ($ex->reps ?: '10-12');
                                             $qSub = $qMatch['category'] ?? ($ex->weight ? 'Load: ' . $ex->weight : (($ex->rest_seconds ?? 0) > 0 ? 'Rest ' . $ex->rest_seconds . 's' : 'Workout'));
                                         @endphp
-                                        <div class="p-3 rounded-xl bg-[#0D0E10]/70 border border-neutral-800/90 hover:border-[#F5A524]/30 transition-colors flex items-center justify-between gap-2">
+                                        <div class="p-3 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D]/90 hover:border-[#F5A524]/30 transition-colors flex items-center justify-between gap-2">
                                             <div class="min-w-0 pr-1">
                                                 <div class="text-xs font-semibold text-white truncate">{{ $ex->exercise_name }}</div>
                                                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -875,13 +823,13 @@
                                     @endforeach
                                 </div>
                                 @if($quickExercises->count() > 4)
-                                    <button type="button" @click="setPortalTab('workouts')" class="w-full py-1.5 rounded-xl bg-[#0D0E10]/50 hover:bg-[#0D0E10] border border-neutral-800/80 text-[11px] font-bold text-[#F5A524] transition-colors cursor-pointer">
+                                    <button type="button" @click="setPortalTab('workouts')" class="w-full py-1.5 rounded-[10px] bg-[#0D0E10]/50 hover:bg-[#0D0E10] border border-[#26282D]/80 text-[11px] font-semibold text-[#F5A524] transition-colors cursor-pointer">
                                         +{{ $quickExercises->count() - 4 }} more exercises in today's split &rarr;
                                     </button>
                                 @endif
                             @else
-                                <div class="py-5 px-4 text-center rounded-xl bg-[#0D0E10]/50 border border-dashed border-neutral-800 space-y-1.5">
-                                    <div class="text-xs font-bold text-slate-300">No workout routine assigned yet</div>
+                                <div class="py-5 px-4 text-center rounded-[10px] bg-[#0D0E10]/50 border border-dashed border-[#26282D] space-y-1.5">
+                                    <div class="text-xs font-semibold text-slate-300">No workout routine assigned yet</div>
                                     <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
                                         Contact your trainer to assign a personalized routine.
                                     </p>
@@ -891,39 +839,39 @@
                     </div>
 
                     <!-- Today's Nutrition / Diet Quick Card -->
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5  space-y-3.5 flex flex-col justify-between">
                         <div class="space-y-3.5">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-bold text-base shrink-0 border border-[#F5A524]/30">
-                                        🥗
+                                    <div class="w-9 h-9 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-semibold text-base shrink-0 border border-[#F5A524]/30">
+                                        <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 9 0 0 1-18 0zm9-2V3m0 6 5-5M12 9 7 4"/></svg>
                                     </div>
                                     <div class="space-y-0.5">
                                         <h3 class="text-sm font-semibold text-white tracking-tight">Nutrition Target</h3>
                                         <p class="text-[11px] font-medium text-slate-400">{{ $activeDiet ? ($activeDiet->daily_calories . ' kcal goal') : 'Custom Nutrition' }}</p>
                                     </div>
                                 </div>
-                                <button type="button" @click="setPortalTab('diets')" class="text-xs font-bold text-[#F5A524] hover:underline cursor-pointer">Details &rarr;</button>
+                                <button type="button" @click="setPortalTab('diets')" class="text-xs font-semibold text-[#F5A524] hover:underline cursor-pointer">Details &rarr;</button>
                             </div>
 
                             @if($activeDiet)
                                 <div class="grid grid-cols-3 gap-2 pt-1 text-center">
-                                    <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                    <div class="p-3 rounded-[10px] bg-blue-500/10 border border-blue-500/20">
                                         <span class="text-[10px] font-semibold uppercase text-blue-400 tracking-wider">Protein</span>
                                         <div class="text-base font-semibold text-white mt-0.5 font-mono">{{ $activeDiet->protein_grams ?? 120 }}g</div>
                                     </div>
-                                    <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                                    <div class="p-3 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20">
                                         <span class="text-[10px] font-semibold uppercase text-emerald-400 tracking-wider">Carbs</span>
                                         <div class="text-base font-semibold text-white mt-0.5 font-mono">{{ $activeDiet->carbs_grams ?? 200 }}g</div>
                                     </div>
-                                    <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20">
+                                    <div class="p-3 rounded-[10px] bg-rose-500/10 border border-rose-500/20">
                                         <span class="text-[10px] font-semibold uppercase text-rose-400 tracking-wider">Fats</span>
                                         <div class="text-base font-semibold text-white mt-0.5 font-mono">{{ $activeDiet->fat_grams ?? 60 }}g</div>
                                     </div>
                                 </div>
                             @else
-                                <div class="py-5 px-4 text-center rounded-xl bg-[#0D0E10]/50 border border-dashed border-neutral-800 space-y-1.5">
-                                    <div class="text-xs font-bold text-slate-300">No diet plan assigned yet</div>
+                                <div class="py-5 px-4 text-center rounded-[10px] bg-[#0D0E10]/50 border border-dashed border-[#26282D] space-y-1.5">
+                                    <div class="text-xs font-semibold text-slate-300">No diet plan assigned yet</div>
                                     <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
                                         Ask your trainer for a customized meal plan.
                                     </p>
@@ -937,23 +885,23 @@
 
                 <!-- Assigned Locker (If assigned) -->
                 @if($assignedLocker)
-                    <div class="p-4 rounded-xl bg-[#141518] border border-neutral-800 flex items-center justify-between text-xs shadow-xs">
+                    <div class="p-4 rounded-[10px] bg-[#141518] border border-[#26282D] flex items-center justify-between text-xs ">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-bold border border-[#F5A524]/20">🔐</div>
+                            <div class="w-9 h-9 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-semibold border border-[#F5A524]/20"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
                             <div>
                                 <span class="text-[10px] font-semibold uppercase tracking-wider text-[#F5A524] block">Assigned Gym Locker</span>
                                 <span class="font-semibold text-slate-900 dark:text-white font-mono text-base">Locker #{{ $assignedLocker->locker_number }}</span>
                             </div>
                         </div>
-                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">Active</span>
+                        <span class="px-2.5 py-1 rounded-[10px] text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">Active</span>
                     </div>
                 @endif
 
                 <!-- BODY MEASUREMENTS & TRANSFORMATION TRACKER -->
-                <div x-data="{ showAllMeasurements: false }" class="rounded-xl bg-[#141518] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
+                <div x-data="{ showAllMeasurements: false }" class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5 sm:p-6  space-y-4">
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-bold text-lg shrink-0 border border-[#F5A524]/30">
+                            <div class="w-10 h-10 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center font-semibold text-lg shrink-0 border border-[#F5A524]/30">
                                 ⚖️
                             </div>
                             <div class="min-w-0">
@@ -969,7 +917,7 @@
                         </div>
 
                         @if(!empty($measurements))
-                            <span class="px-2.5 py-1 rounded-xl text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 shrink-0">
+                            <span class="px-2.5 py-1 rounded-[10px] text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 shrink-0">
                                 {{ count($measurements) }} {{ count($measurements) === 1 ? 'Check-in' : 'Check-ins' }}
                             </span>
                         @endif
@@ -984,13 +932,13 @@
                         @endphp
 
                         <!-- Latest Stats Primary Highlight Card (Athletic Stealth) -->
-                        <div class="p-4 sm:p-5 rounded-xl bg-[#141518] border border-[#F5A524]/25 text-white space-y-4 shadow-none">
+                        <div class="p-4 sm:p-5 rounded-[10px] bg-[#141518] border border-[#F5A524]/25 text-white space-y-4 shadow-none">
                             
                             <!-- Header of Latest Check-in -->
                             <div class="flex items-center justify-between text-xs pb-3 border-b border-white/10 flex-wrap gap-2">
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-1 rounded-lg bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 font-mono text-[11px] font-bold">
-                                        📅 {{ \Carbon\Carbon::parse($latestMeasurement['date'])->format('d M Y') }}
+                                    <span class="px-2.5 py-1 rounded-lg bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 font-mono text-[11px] font-semibold">
+                                        {{ \Carbon\Carbon::parse($latestMeasurement['date'])->format('d M Y') }}
                                     </span>
                                     <span class="text-[10px] text-slate-400">Latest Assessment</span>
                                 </div>
@@ -1003,7 +951,7 @@
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
                                 <!-- 1. Weight -->
                                 @if(!empty($latestMeasurement['weight']))
-                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#F5A524]/40 transition-colors">
+                                    <div class="p-3 rounded-[10px] bg-white/5 border border-white/10 hover:border-[#F5A524]/40 transition-colors">
                                         <span class="text-[10px] uppercase font-semibold text-[#F5A524] tracking-wider block">Weight</span>
                                         <div class="text-lg sm:text-xl font-semibold text-white mt-0.5 font-mono">{{ $latestMeasurement['weight'] }} <span class="text-xs text-slate-400">kg</span></div>
                                         @if($weightDiff !== null)
@@ -1018,7 +966,7 @@
 
                                 <!-- 2. Body Fat -->
                                 @if(!empty($latestMeasurement['body_fat']))
-                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#F5A524]/40 transition-colors">
+                                    <div class="p-3 rounded-[10px] bg-white/5 border border-white/10 hover:border-[#F5A524]/40 transition-colors">
                                         <span class="text-[10px] uppercase font-semibold text-[#F5A524] tracking-wider block">Body Fat</span>
                                         <div class="text-lg sm:text-xl font-semibold text-white mt-0.5 font-mono">{{ $latestMeasurement['body_fat'] }}%</div>
                                         @if($fatDiff !== null)
@@ -1033,7 +981,7 @@
 
                                 <!-- 3. Waist -->
                                 @if(!empty($latestMeasurement['waist']))
-                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors">
+                                    <div class="p-3 rounded-[10px] bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors">
                                         <span class="text-[10px] uppercase font-semibold text-emerald-400 tracking-wider block">Waist</span>
                                         <div class="text-lg sm:text-xl font-semibold text-white mt-0.5 font-mono">{{ $latestMeasurement['waist'] }} <span class="text-xs text-slate-400">in</span></div>
                                         @if($waistDiff !== null)
@@ -1048,7 +996,7 @@
 
                                 <!-- 4. Arms / Bicep -->
                                 @if(!empty($latestMeasurement['bicep']))
-                                    <div class="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-[#F5A524]/30 transition-colors">
+                                    <div class="p-3 rounded-[10px] bg-white/5 border border-white/10 hover:border-[#F5A524]/30 transition-colors">
                                         <span class="text-[10px] uppercase font-semibold text-[#F5A524] tracking-wider block">Arms</span>
                                         <div class="text-lg sm:text-xl font-semibold text-white mt-0.5 font-mono">{{ $latestMeasurement['bicep'] }} <span class="text-xs text-slate-400">in</span></div>
                                         <span class="text-[10px] text-slate-400 block mt-1 font-semibold">Bicep Peak</span>
@@ -1059,21 +1007,21 @@
                             <!-- Secondary Tape Measurements Grid -->
                             @php
                                 $tapeMetrics = [];
-                                if (!empty($latestMeasurement['chest'])) $tapeMetrics[] = ['label' => 'Chest', 'val' => $latestMeasurement['chest'] . ' in', 'icon' => '🫁'];
-                                if (!empty($latestMeasurement['hips'])) $tapeMetrics[] = ['label' => 'Hips', 'val' => $latestMeasurement['hips'] . ' in', 'icon' => '📐'];
-                                if (!empty($latestMeasurement['thighs'])) $tapeMetrics[] = ['label' => 'Thighs', 'val' => $latestMeasurement['thighs'] . ' in', 'icon' => '🦵'];
-                                if (!empty($latestMeasurement['shoulders'])) $tapeMetrics[] = ['label' => 'Shoulders', 'val' => $latestMeasurement['shoulders'] . ' in', 'icon' => '🥋'];
-                                if (!empty($latestMeasurement['calves'])) $tapeMetrics[] = ['label' => 'Calves', 'val' => $latestMeasurement['calves'] . ' in', 'icon' => '🦶'];
-                                if (!empty($latestMeasurement['neck'])) $tapeMetrics[] = ['label' => 'Neck', 'val' => $latestMeasurement['neck'] . ' in', 'icon' => '🧣'];
+                                if (!empty($latestMeasurement['chest'])) $tapeMetrics[] = ['label' => 'Chest', 'val' => $latestMeasurement['chest'] . ' in'];
+                                if (!empty($latestMeasurement['hips'])) $tapeMetrics[] = ['label' => 'Hips', 'val' => $latestMeasurement['hips'] . ' in'];
+                                if (!empty($latestMeasurement['thighs'])) $tapeMetrics[] = ['label' => 'Thighs', 'val' => $latestMeasurement['thighs'] . ' in'];
+                                if (!empty($latestMeasurement['shoulders'])) $tapeMetrics[] = ['label' => 'Shoulders', 'val' => $latestMeasurement['shoulders'] . ' in'];
+                                if (!empty($latestMeasurement['calves'])) $tapeMetrics[] = ['label' => 'Calves', 'val' => $latestMeasurement['calves'] . ' in'];
+                                if (!empty($latestMeasurement['neck'])) $tapeMetrics[] = ['label' => 'Neck', 'val' => $latestMeasurement['neck'] . ' in'];
                             @endphp
 
                             @if(!empty($tapeMetrics))
                                 <div class="space-y-1.5 pt-2 border-t border-white/10">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tape Measurements</span>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Tape Measurements</span>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-center">
                                         @foreach($tapeMetrics as $tm)
-                                            <div class="p-2 rounded-xl bg-white/5 border border-white/10">
-                                                <span class="text-[10px] text-slate-400 uppercase font-bold block">{{ $tm['label'] }}</span>
+                                            <div class="p-2 rounded-[10px] bg-white/5 border border-white/10">
+                                                <span class="text-[10px] text-slate-400 uppercase font-semibold block">{{ $tm['label'] }}</span>
                                                 <span class="text-xs font-semibold text-white font-mono block mt-0.5">{{ $tm['val'] }}</span>
                                             </div>
                                         @endforeach
@@ -1089,7 +1037,7 @@
                                 @if(!empty($validCustom))
                                     <div class="flex items-center gap-1.5 flex-wrap pt-1">
                                         @foreach($validCustom as $cm)
-                                            <span class="px-2.5 py-1 rounded-xl bg-[#F5A524]/10 text-[#F5A524] border border-[#F5A524]/20 text-[10px] font-semibold">
+                                            <span class="px-2.5 py-1 rounded-[10px] bg-[#F5A524]/10 text-[#F5A524] border border-[#F5A524]/20 text-[10px] font-semibold">
                                                 <span class="text-slate-400">{{ $cm['name'] }}:</span> <strong class="text-white">{{ $cm['value'] }}</strong>
                                             </span>
                                         @endforeach
@@ -1099,9 +1047,9 @@
 
                             <!-- Coach's Observation / Advice Quote -->
                             @if(!empty($latestMeasurement['notes']))
-                                <div class="p-3 rounded-xl bg-[#F5A524]/10 border border-[#F5A524]/25 text-xs text-[#F5A524] leading-relaxed space-y-1">
+                                <div class="p-3 rounded-[10px] bg-[#F5A524]/10 border border-[#F5A524]/25 text-xs text-[#F5A524] leading-relaxed space-y-1">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="text-sm">💬</span>
+                                        <span class="text-sm"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H5l2-4a8 8 0 1 1 14-4z"/></svg></span>
                                         <span class="font-semibold uppercase tracking-wider text-[10px] text-[#F5A524]">Coach's Observation &amp; Feedback</span>
                                     </div>
                                     <p class="font-medium text-slate-200 pl-5 text-[11px]">{{ $latestMeasurement['notes'] }}</p>
@@ -1116,7 +1064,7 @@
                                 @if(count($measurements) > 0)
                                     <button type="button" 
                                             @click="showAllMeasurements = !showAllMeasurements" 
-                                            class="text-xs font-bold text-[#F5A524] hover:underline cursor-pointer flex items-center gap-1">
+                                            class="text-xs font-semibold text-[#F5A524] hover:underline cursor-pointer flex items-center gap-1">
                                         <span x-text="showAllMeasurements ? 'Hide History &uarr;' : 'View All ({{ count($measurements) }} Logs) &rarr;'"></span>
                                     </button>
                                 @endif
@@ -1125,19 +1073,19 @@
                             <!-- List of Measurements by Date -->
                             <div class="space-y-2" x-show="showAllMeasurements" x-cloak style="display: none;">
                                 @foreach($measurements as $idx => $m)
-                                    <div class="p-3.5 rounded-xl bg-[#0D0E10]/70 border border-neutral-800 text-xs space-y-2 transition-all">
+                                    <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] text-xs space-y-2 transition-all">
                                         
                                         <!-- Log Header -->
                                         <div class="flex items-center justify-between gap-2 flex-wrap">
                                             <div class="flex items-center gap-2">
-                                                <span class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-bold font-mono text-[10px] border border-[#F5A524]/25">
-                                                    📅 {{ \Carbon\Carbon::parse($m['date'] ?? now())->format('d M Y') }}
+                                                <span class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-semibold font-mono text-[10px] border border-[#F5A524]/25">
+                                                    {{ \Carbon\Carbon::parse($m['date'] ?? now())->format('d M Y') }}
                                                 </span>
                                                 @if(!empty($m['weight']))
                                                     <span class="font-semibold text-white text-xs">⚖️ {{ $m['weight'] }} kg</span>
                                                 @endif
                                                 @if(!empty($m['body_fat']))
-                                                    <span class="text-[#F5A524] font-bold text-[10px] bg-[#F5A524]/15 border border-[#F5A524]/25 px-2 py-0.5 rounded-lg">{{ $m['body_fat'] }}% Fat</span>
+                                                    <span class="text-[#F5A524] font-semibold text-[10px] bg-[#F5A524]/15 border border-[#F5A524]/25 px-2 py-0.5 rounded-lg">{{ $m['body_fat'] }}% Fat</span>
                                                 @endif
                                             </div>
                                             <span class="text-[10px] text-slate-400">
@@ -1148,49 +1096,49 @@
                                         <!-- Tape Measurement Mini-Tiles Grid -->
                                         <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-center">
                                             @if(!empty($m['waist']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Waist</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['waist'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['chest']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Chest</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['chest'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['bicep']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Arms</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['bicep'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['hips']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Hips</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['hips'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['thighs']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Thighs</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['thighs'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['shoulders']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Shoulders</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['shoulders'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['calves']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Calves</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['calves'] }}"</span>
                                                 </div>
                                             @endif
                                             @if(!empty($m['neck']))
-                                                <div class="p-2 rounded-xl bg-[#141518] border border-neutral-800">
+                                                <div class="p-2 rounded-[10px] bg-[#141518] border border-[#26282D]">
                                                     <span class="text-[8px] font-semibold uppercase tracking-wider text-slate-400 block">Neck</span>
                                                     <span class="text-[11px] font-semibold text-white block mt-0.5">{{ $m['neck'] }}"</span>
                                                 </div>
@@ -1202,15 +1150,15 @@
                                             <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
                                                 @foreach($m['custom_metrics'] as $cm)
                                                     @if(!empty($cm['name']) && !empty($cm['value']))
-                                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#F5A524]/10 text-[#F5A524] border border-[#F5A524]/20">{{ $cm['name'] }}: {{ $cm['value'] }}</span>
+                                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#F5A524]/10 text-[#F5A524] border border-[#F5A524]/20">{{ $cm['name'] }}: {{ $cm['value'] }}</span>
                                                     @endif
                                                 @endforeach
                                             </div>
                                         @endif
 
                                         @if(!empty($m['notes']))
-                                            <div class="p-2.5 rounded-xl bg-[#141518] border border-neutral-800 text-[11px] text-slate-300 italic flex items-start gap-2">
-                                                <span class="text-xs shrink-0">💬</span>
+                                            <div class="p-2.5 rounded-[10px] bg-[#141518] border border-[#26282D] text-[11px] text-slate-300 italic flex items-start gap-2">
+                                                <span class="text-xs shrink-0"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a8 8 0 0 1-8 8H5l2-4a8 8 0 1 1 14-4z"/></svg></span>
                                                 <span>&ldquo;{{ $m['notes'] }}&rdquo;</span>
                                             </div>
                                         @endif
@@ -1219,8 +1167,8 @@
                             </div>
                         </div>
                     @else
-                        <div class="py-6 px-4 text-center rounded-xl bg-[#0D0E10]/50 border border-dashed border-neutral-800 space-y-1.5">
-                            <div class="text-xs font-bold text-slate-300">No body measurements recorded yet</div>
+                        <div class="py-6 px-4 text-center rounded-[10px] bg-[#0D0E10]/50 border border-dashed border-[#26282D] space-y-1.5">
+                            <div class="text-xs font-semibold text-slate-300">No body measurements recorded yet</div>
                             <p class="text-[11px] text-slate-400 max-w-sm mx-auto leading-relaxed">
                                 Your personal trainer will record your weight, body fat %, and tape measurements date-wise during your coaching sessions.
                             </p>
@@ -1230,15 +1178,15 @@
 
                 @if($remainingAmt > 0)
                     <!-- Outstanding Due Reminder (Only shown when balance exists) -->
-                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between text-xs text-amber-300 shadow-xs">
+                    <div class="p-4 rounded-[10px] bg-amber-500/10 border border-amber-500/25 flex items-center justify-between text-xs text-amber-300 ">
                         <div class="flex items-center gap-2.5">
                             <span class="text-base">⚠️</span>
                             <div>
-                                <span class="font-bold text-white block">Fee Balance Outstanding</span>
-                                <span class="text-[11px] text-amber-400">Total remaining: <strong class="text-white font-mono font-bold">{{ $currency }}{{ number_format($remainingAmt, 2) }}</strong></span>
+                                <span class="font-semibold text-white block">Fee Balance Outstanding</span>
+                                <span class="text-[11px] text-amber-400">Total remaining: <strong class="text-white font-mono font-semibold">{{ $currency }}{{ number_format($remainingAmt, 2) }}</strong></span>
                             </div>
                         </div>
-                        <button type="button" @click="setPortalTab('memberships')" class="px-3 py-1.5 rounded-xl bg-amber-400 text-neutral-950 font-semibold text-xs hover:bg-amber-300 transition-all cursor-pointer">
+                        <button type="button" @click="setPortalTab('memberships')" class="px-3 py-1.5 rounded-[10px] bg-amber-400 text-neutral-950 font-semibold text-xs hover:bg-amber-300 transition-all cursor-pointer">
                             Pay / Bills &rarr;
                         </button>
                     </div>
@@ -1248,7 +1196,7 @@
 
             <!-- TAB 2: WORKOUT PLANS (CHAMPAGNE STEALTH) -->
             <div x-show="tab === 'workouts'" x-cloak class="space-y-5">
-                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Workout</h1>
+                <h1 class="text-2xl font-semibold text-white tracking-tight">Workout</h1>
                 @if($member->workoutPlans->isNotEmpty())
                     @foreach($member->workoutPlans as $plan)
                         @php
@@ -1398,11 +1346,11 @@
                                     destroy() { this.stopRest(); }
                                 }"
                                  x-effect="if (tab !== 'workouts') stopRest()"
-                                 class="rounded-xl bg-[#141518] border border-neutral-800 shadow-none overflow-hidden">
+                                 class="rounded-[10px] bg-[#141518] border border-[#26282D] shadow-none overflow-hidden">
 
                             <!-- Luxury Champagne Stealth Hero Header -->
-                            <header class="relative overflow-hidden border-b border-neutral-800 border-t-2 border-t-[#F5A524] bg-[#141518] p-5 sm:p-6 space-y-5">
-                                <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#F5A524]/10 blur-3xl"></div>
+                            <header class="relative overflow-hidden border-b border-[#26282D] border-t-2 border-t-[#F5A524] bg-[#141518] p-5 sm:p-6 space-y-5">
+                                
 
                                 <div class="relative flex flex-wrap items-center justify-between gap-2">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold uppercase tracking-wide">
@@ -1411,11 +1359,11 @@
                                     </span>
                                     <div class="flex items-center gap-2 flex-wrap">
                                         @if($plan->trainer)
-                                            <span class="px-2.5 py-1 rounded-xl bg-[#0D0E10]/80 border border-neutral-800 text-[10px] font-bold text-slate-300">
+                                            <span class="px-2.5 py-1 rounded-[10px] bg-[#0D0E10]/80 border border-[#26282D] text-[10px] font-semibold text-slate-300">
                                                 Coach: <span class="text-white">{{ $plan->trainer->full_name ?? $plan->trainer->name }}</span>
                                             </span>
                                         @endif
-                                        <span class="px-2.5 py-1 rounded-xl bg-[#0D0E10]/80 border border-neutral-700 text-[10px] font-semibold uppercase tracking-wider text-[#F5A524]">
+                                        <span class="px-2.5 py-1 rounded-[10px] bg-[#0D0E10]/80 border border-neutral-700 text-[10px] font-semibold uppercase tracking-wider text-[#F5A524]">
                                             {{ ucfirst($plan->level ?? 'Custom') }}
                                         </span>
                                     </div>
@@ -1425,7 +1373,7 @@
                                     <h3 class="text-xl sm:text-2xl font-semibold tracking-tight text-white leading-tight break-words">{{ $plan->title }}</h3>
                                     <div class="flex flex-wrap items-center gap-2 text-xs text-slate-400">
                                         <span class="inline-flex items-center gap-1 text-slate-300 font-semibold">
-                                            🎯 {{ ucwords(str_replace('_', ' ', $plan->goal ?? 'Strength & Conditioning')) }}
+                                            {{ ucwords(str_replace('_', ' ', $plan->goal ?? 'Strength & Conditioning')) }}
                                         </span>
                                         @if($plan->start_date)
                                             <span class="text-neutral-600">&bull;</span>
@@ -1436,30 +1384,30 @@
 
                                 <!-- 4-Tile Athletic KPI Strip -->
                                 <div class="relative grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                    <div class="rounded-xl bg-[#0D0E10]/85 border border-neutral-800/90 p-3">
-                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Days / Wk</div>
+                                    <div class="rounded-[10px] bg-[#0D0E10]/85 border border-[#26282D]/90 p-3">
+                                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Days / Wk</div>
                                         <div class="mt-0.5 text-xl font-semibold text-white tabular-nums">{{ count($workoutDays) }}</div>
                                     </div>
-                                    <div class="rounded-xl bg-[#0D0E10]/85 border border-neutral-800/90 p-3">
-                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Split Exercises</div>
+                                    <div class="rounded-[10px] bg-[#0D0E10]/85 border border-[#26282D]/90 p-3">
+                                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Split Exercises</div>
                                         <div class="mt-0.5 text-xl font-semibold text-[#F5A524] tabular-nums" x-text="activeDayMeta.count">0</div>
                                     </div>
-                                    <div class="rounded-xl bg-[#0D0E10]/85 border border-neutral-800/90 p-3">
-                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Sets</div>
+                                    <div class="rounded-[10px] bg-[#0D0E10]/85 border border-[#26282D]/90 p-3">
+                                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total Sets</div>
                                         <div class="mt-0.5 text-xl font-semibold text-white tabular-nums" x-text="activeDayMeta.sets">0</div>
                                     </div>
-                                    <div class="rounded-xl bg-[#0D0E10]/85 border border-neutral-800/90 p-3">
-                                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Est. Session</div>
+                                    <div class="rounded-[10px] bg-[#0D0E10]/85 border border-[#26282D]/90 p-3">
+                                        <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Est. Session</div>
                                         <div class="mt-0.5 text-xl font-semibold text-white tabular-nums" x-text="'~' + activeDayMeta.estMinutes + 'm'">~0m</div>
                                     </div>
                                 </div>
 
                                 <!-- Live Daily Workout Progress Bar -->
                                 @if(count($workoutDays))
-                                    <div class="relative rounded-xl bg-[#0D0E10]/75 border border-neutral-800 p-3.5 sm:p-4 space-y-2.5">
+                                    <div class="relative rounded-[10px] bg-[#0D0E10]/75 border border-[#26282D] p-3.5 sm:p-4 space-y-2.5">
                                         <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
                                             <div class="flex items-center gap-2">
-                                                <span class="font-bold text-slate-200" x-text="activeDayMeta.label + ' Progress'"></span>
+                                                <span class="font-semibold text-slate-200" x-text="activeDayMeta.label + ' Progress'"></span>
                                                 <span class="font-semibold text-[#F5A524] tabular-nums" x-text="activeDayDoneCount + ' / ' + activeDayMeta.count + ' (' + activeDayProgressPct + '%)'"></span>
                                                 <span x-show="activeDayProgressPct === 100" x-cloak class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold">
                                                     ✓ All Done!
@@ -1477,7 +1425,7 @@
                                                         x-show="activeDayDoneCount > 0"
                                                         x-cloak
                                                         @click="clearDayDone()"
-                                                        class="px-2 py-1 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-[11px] font-bold text-slate-300 hover:text-white cursor-pointer transition-colors">
+                                                        class="px-2 py-1 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-[11px] font-semibold text-slate-300 hover:text-white cursor-pointer transition-colors">
                                                     Reset
                                                 </button>
                                             </div>
@@ -1495,11 +1443,11 @@
 
                                 <!-- Coach's Instructions Callout -->
                                 @if(!empty($plan->notes))
-                                    <div x-data="{ expandedNotes: false }" class="rounded-xl bg-[#F5A524]/5 border border-[#F5A524]/20 p-4 space-y-1.5">
+                                    <div x-data="{ expandedNotes: false }" class="rounded-[10px] bg-[#F5A524]/5 border border-[#F5A524]/20 p-4 space-y-1.5">
                                         <div class="flex items-center justify-between gap-2">
                                             <span class="text-[10px] font-semibold uppercase tracking-wide text-[#F5A524]">Coach's Notes &amp; Focus</span>
                                             @if(strlen($plan->notes) > 130)
-                                                <button type="button" @click="expandedNotes = !expandedNotes" class="text-[10px] font-bold text-[#F5A524] underline cursor-pointer" x-text="expandedNotes ? 'Show less' : 'Read full'"></button>
+                                                <button type="button" @click="expandedNotes = !expandedNotes" class="text-[10px] font-semibold text-[#F5A524] underline cursor-pointer" x-text="expandedNotes ? 'Show less' : 'Read full'"></button>
                                             @endif
                                         </div>
                                         <p class="text-xs text-slate-300 leading-relaxed" :class="expandedNotes ? '' : 'line-clamp-3'">{{ $plan->notes }}</p>
@@ -1507,11 +1455,11 @@
                                 @endif
 
                                 <!-- Live Rest Timer Countdown Banner -->
-                                <div x-show="restLeft > 0" x-cloak class="rounded-xl border border-[#F5A524]/50 bg-[#141518] p-4 shadow-none space-y-3">
+                                <div x-show="restLeft > 0" x-cloak class="rounded-[10px] border border-[#F5A524]/50 bg-[#141518] p-4 shadow-none space-y-3">
                                     <div class="flex items-center justify-between gap-3">
                                         <div class="min-w-0">
                                             <span class="text-[10px] font-semibold uppercase tracking-wide text-[#F5A524] block">⏱ Rest Timer Active</span>
-                                            <p class="text-xs font-bold text-slate-300 truncate mt-0.5" x-text="restExerciseName"></p>
+                                            <p class="text-xs font-semibold text-slate-300 truncate mt-0.5" x-text="restExerciseName"></p>
                                         </div>
                                         <div class="text-3xl font-semibold tabular-nums font-mono text-white shrink-0" role="timer"
                                              x-text="Math.floor(restLeft / 60) + ':' + String(restLeft % 60).padStart(2, '0')"></div>
@@ -1521,9 +1469,9 @@
                                              :style="'width: ' + (restTotal > 0 ? Math.min(100, Math.round((restLeft / restTotal) * 100)) : 0) + '%'"></div>
                                     </div>
                                     <div class="flex items-center justify-end gap-2">
-                                        <button type="button" @click="adjustRest(-15)" class="px-3 py-1.5 rounded-xl bg-[#0D0E10] border border-neutral-700 text-xs font-bold text-slate-200 hover:border-[#F5A524]/50 cursor-pointer">-15s</button>
-                                        <button type="button" @click="adjustRest(15)" class="px-3 py-1.5 rounded-xl bg-[#0D0E10] border border-neutral-700 text-xs font-bold text-slate-200 hover:border-[#F5A524]/50 cursor-pointer">+15s</button>
-                                        <button type="button" @click="stopRest()" class="px-4 py-1.5 rounded-xl bg-[#F5A524] text-neutral-950 text-xs font-semibold hover:bg-[#E09414] cursor-pointer">Skip Rest</button>
+                                        <button type="button" @click="adjustRest(-15)" class="px-3 py-1.5 rounded-[10px] bg-[#0D0E10] border border-neutral-700 text-xs font-semibold text-slate-200 hover:border-[#F5A524]/50 cursor-pointer">-15s</button>
+                                        <button type="button" @click="adjustRest(15)" class="px-3 py-1.5 rounded-[10px] bg-[#0D0E10] border border-neutral-700 text-xs font-semibold text-slate-200 hover:border-[#F5A524]/50 cursor-pointer">+15s</button>
+                                        <button type="button" @click="stopRest()" class="px-4 py-1.5 rounded-[10px] bg-[#F5A524] text-neutral-950 text-xs font-semibold hover:bg-[#E09414] cursor-pointer">Skip Rest</button>
                                     </div>
                                 </div>
 
@@ -1535,14 +1483,14 @@
                                             <button type="button"
                                                     @click="workoutDay = '{{ $day }}'; search = ''; stopRest()"
                                                     :aria-pressed="workoutDay === '{{ $day }}'"
-                                                    :class="workoutDay === '{{ $day }}' ? 'bg-[#F5A524] text-neutral-950 border-[#F5A524] shadow-none shadow-[#F5A524]/15' : 'bg-[#141518] text-slate-300 border-neutral-800 hover:border-neutral-700'"
-                                                    class="min-w-[88px] shrink-0 rounded-xl border px-3.5 py-2.5 text-center transition-all cursor-pointer relative">
+                                                    :class="workoutDay === '{{ $day }}' ? 'bg-[#F5A524] text-neutral-950 border-[#F5A524] shadow-none ' : 'bg-[#141518] text-slate-300 border-[#26282D] hover:border-neutral-700'"
+                                                    class="min-w-[88px] shrink-0 rounded-[10px] border px-3.5 py-2.5 text-center transition-all cursor-pointer relative">
                                                 @if($isTodayDay)
                                                     <span :class="workoutDay === '{{ $day }}' ? 'bg-neutral-950 text-[#F5A524]' : 'bg-[#F5A524]/20 text-[#F5A524]'"
                                                           class="inline-block px-1.5 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-wide mb-1">Today</span>
                                                 @endif
                                                 <span class="block text-xs font-semibold uppercase tracking-wider">{{ strlen($day) <= 9 ? substr(ucfirst(str_replace('_', ' ', $day)), 0, 3) : ucwords(str_replace('_', ' ', $day)) }}</span>
-                                                <span :class="workoutDay === '{{ $day }}' ? 'text-neutral-900/85 font-bold' : (dayDoneCount('{{ $day }}') === {{ $workoutGroups[$day]->count() }} && {{ $workoutGroups[$day]->count() }} > 0 ? 'text-emerald-400 font-bold' : 'text-slate-400')"
+                                                <span :class="workoutDay === '{{ $day }}' ? 'text-neutral-900/85 font-semibold' : (dayDoneCount('{{ $day }}') === {{ $workoutGroups[$day]->count() }} && {{ $workoutGroups[$day]->count() }} > 0 ? 'text-emerald-400 font-semibold' : 'text-slate-400')"
                                                       class="mt-0.5 block text-[10px] tabular-nums"
                                                       x-text="(dayDoneCount('{{ $day }}') === {{ $workoutGroups[$day]->count() }} && {{ $workoutGroups[$day]->count() }} > 0 ? '✓ ' : '') + dayDoneCount('{{ $day }}') + '/{{ $workoutGroups[$day]->count() }}'"></span>
                                             </button>
@@ -1550,7 +1498,7 @@
                                     </div>
 
                                     <!-- Search Inside Selected Split -->
-                                    <div class="flex items-center gap-2.5 rounded-xl border border-neutral-800 bg-[#0D0E10] px-3.5 focus-within:border-[#F5A524]/60 transition-colors">
+                                    <div class="flex items-center gap-2.5 rounded-[10px] border border-[#26282D] bg-[#0D0E10] px-3.5 focus-within:border-[#F5A524]/60 transition-colors">
                                         <svg aria-hidden="true" class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" stroke-width="1.8"/><path d="m15 15 5 5" stroke-width="1.8"/></svg>
                                         <input type="search" aria-label="Search exercises in this split" x-model="search" placeholder="Search exercises in this split..." class="min-w-0 w-full bg-transparent py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none">
                                         <button type="button" x-show="search.trim()" x-cloak @click="search = ''" class="text-xs text-slate-400 hover:text-white px-1 cursor-pointer">✕</button>
@@ -1567,9 +1515,9 @@
                                             <div x-data="{ names: {{ Js::from($workoutGroups[$day]->pluck('exercise_name')->values()) }} }"
                                                  x-show="search.trim() && !names.some(name => name.toLowerCase().includes(search.trim().toLowerCase()))"
                                                  x-cloak
-                                                 class="rounded-xl border border-dashed border-neutral-700 bg-[#141518]/50 p-6 text-center space-y-2">
+                                                 class="rounded-[10px] border border-dashed border-neutral-700 bg-[#141518]/50 p-6 text-center space-y-2">
                                                 <p class="text-xs text-slate-400">No matching exercises found in {{ ucwords(str_replace('_', ' ', $day)) }}.</p>
-                                                <button type="button" @click="search = ''" class="px-3 py-1.5 rounded-xl bg-[#F5A524]/15 text-[#F5A524] text-xs font-bold cursor-pointer">Clear Search</button>
+                                                <button type="button" @click="search = ''" class="px-3 py-1.5 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] text-xs font-semibold cursor-pointer">Clear Search</button>
                                             </div>
 
                                             @foreach($workoutGroups[$day]->values() as $index => $ex)
@@ -1600,8 +1548,8 @@
 
                                                 <article x-data="{ exerciseName: {{ Js::from($ex->exercise_name) }} }"
                                                          x-show="exerciseName.toLowerCase().includes(search.trim().toLowerCase())"
-                                                         :class="isDone({{ $exId }}) ? 'border-emerald-500/40 bg-emerald-950/15' : 'border-neutral-800 bg-[#141518] hover:border-neutral-700'"
-                                                         class="rounded-xl border p-4 sm:p-5 space-y-3.5 transition-all shadow-sm">
+                                                         :class="isDone({{ $exId }}) ? 'border-emerald-500/40 bg-emerald-950/15' : 'border-[#26282D] bg-[#141518] hover:border-neutral-700'"
+                                                         class="rounded-[10px] border p-4 sm:p-5 space-y-3.5 transition-all ">
 
                                                     <!-- Top Row: Done Toggle + Number + Title + Badges -->
                                                     <div class="flex items-start justify-between gap-3">
@@ -1611,7 +1559,7 @@
                                                                     :aria-pressed="isDone({{ $exId }})"
                                                                     title="Mark exercise complete"
                                                                     :class="isDone({{ $exId }}) ? 'bg-emerald-500 border-emerald-400 text-neutral-950 shadow-none shadow-emerald-500/20' : 'bg-[#0D0E10] border-neutral-700 text-slate-400 hover:border-[#F5A524]'"
-                                                                    class="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 font-semibold text-sm transition-all cursor-pointer mt-0.5">
+                                                                    class="w-9 h-9 rounded-[10px] border flex items-center justify-center shrink-0 font-semibold text-sm transition-all cursor-pointer mt-0.5">
                                                                 <span x-show="isDone({{ $exId }})" x-cloak>✓</span>
                                                                 <span x-show="!isDone({{ $exId }})" class="font-mono text-xs text-[#F5A524]">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
                                                             </button>
@@ -1623,18 +1571,18 @@
                                                                 </h5>
                                                                 <div class="flex flex-wrap items-center gap-1.5">
                                                                     @if($matchedLib)
-                                                                        <span class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-neutral-800 text-[10px] font-bold text-slate-300">
+                                                                        <span class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-[#26282D] text-[10px] font-semibold text-slate-300">
                                                                             {{ $matchedLib['category'] }} &middot; {{ $matchedLib['equipment'] }}
                                                                         </span>
                                                                     @endif
                                                                     @if($ex->weight)
-                                                                        <span class="px-2 py-0.5 rounded-md bg-[#F5A524]/10 border border-[#F5A524]/25 text-[10px] font-bold text-[#F5A524]">
-                                                                            🏋️ {{ $ex->weight }}
+                                                                        <span class="px-2 py-0.5 rounded-md bg-[#F5A524]/10 border border-[#F5A524]/25 text-[10px] font-semibold text-[#F5A524]">
+                                                                            {{ $ex->weight }}
                                                                         </span>
                                                                     @endif
                                                                     @if($resolvedVideo)
-                                                                        <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold text-emerald-300">
-                                                                            🎬 Form Video
+                                                                        <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-semibold text-emerald-300">
+                                                                            Form video
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -1643,17 +1591,17 @@
                                                     </div>
 
                                                     <!-- 3-Column Athletic Prescription Grid -->
-                                                    <dl class="grid grid-cols-3 gap-2 rounded-xl border border-neutral-800/90 bg-[#0D0E10] p-3">
-                                                        <div class="text-center border-r border-neutral-800/80 pr-2">
-                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Rounds' : 'Sets' }}</dt>
+                                                    <dl class="grid grid-cols-3 gap-2 rounded-[10px] border border-[#26282D]/90 bg-[#0D0E10] p-3">
+                                                        <div class="text-center border-r border-[#26282D]/80 pr-2">
+                                                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Rounds' : 'Sets' }}</dt>
                                                             <dd class="mt-0.5 text-base font-semibold tabular-nums font-mono text-[#F5A524]">{{ $ex->sets }}</dd>
                                                         </div>
-                                                        <div class="text-center border-r border-neutral-800/80 px-2">
-                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Duration' : 'Reps' }}</dt>
+                                                        <div class="text-center border-r border-[#26282D]/80 px-2">
+                                                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ $ex->tracking_type === 'time' ? 'Duration' : 'Reps' }}</dt>
                                                             <dd class="mt-0.5 text-base font-semibold tabular-nums font-mono text-white">{{ $volumeValue }}</dd>
                                                         </div>
                                                         <div class="text-center pl-2">
-                                                            <dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rest</dt>
+                                                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Rest</dt>
                                                             <dd class="mt-0.5 text-base font-semibold tabular-nums font-mono text-slate-200">{{ ($ex->rest_seconds ?? 0) > 0 ? $ex->rest_seconds . 's' : '—' }}</dd>
                                                         </div>
                                                     </dl>
@@ -1663,7 +1611,7 @@
                                                         @if(($ex->rest_seconds ?? 0) > 0)
                                                             <button type="button"
                                                                     @click="startRest({{ (int) $ex->rest_seconds }}, {{ Js::from($ex->exercise_name) }})"
-                                                                    class="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl bg-[#0D0E10] hover:bg-neutral-900 border border-[#F5A524]/30 text-xs font-bold text-[#F5A524] flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                    class="flex-1 min-w-[120px] py-2.5 px-3 rounded-[10px] bg-[#0D0E10] hover:bg-neutral-900 border border-[#F5A524]/30 text-xs font-semibold text-[#F5A524] flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                                                 <span>⏱</span>
                                                                 <span>Start {{ $ex->rest_seconds }}s Rest</span>
                                                             </button>
@@ -1672,7 +1620,7 @@
                                                         @if($videoPayload)
                                                             <button type="button"
                                                                     @click="openExerciseVideo({{ Js::from($videoPayload) }})"
-                                                                    class="flex-1 min-w-[130px] py-2.5 px-3 rounded-xl bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold shadow-none shadow-[#F5A524]/15 flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                    class="min-h-11 flex-1 min-w-[130px] py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold shadow-none  flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                                                 <span>▶</span>
                                                                 <span>Watch Form Video</span>
                                                             </button>
@@ -1682,7 +1630,7 @@
                                                                 @click="toggleDone({{ $exId }})"
                                                                 :aria-pressed="isDone({{ $exId }})"
                                                                 :class="isDone({{ $exId }}) ? 'bg-emerald-500 text-neutral-950 border-emerald-400 shadow-none shadow-emerald-500/20' : 'bg-[#0D0E10] hover:bg-emerald-500/10 text-emerald-300 border-emerald-500/35'"
-                                                                class="w-full sm:w-auto sm:min-w-[130px] py-2.5 px-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                                                class="w-full sm:w-auto sm:min-w-[130px] py-2.5 px-3.5 rounded-[10px] border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                                             <span x-text="isDone({{ $exId }}) ? '✓ Completed' : '○ Mark Complete'"></span>
                                                         </button>
                                                     </div>
@@ -1691,7 +1639,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <div class="py-8 text-center text-xs text-slate-400 rounded-xl border border-dashed border-neutral-800">
+                                    <div class="py-8 text-center text-xs text-slate-400 rounded-[10px] border border-dashed border-[#26282D]">
                                         Your trainer has not added exercises to this plan yet.
                                     </div>
                                 @endif
@@ -1699,11 +1647,11 @@
                         </section>
                     @endforeach
                 @else
-                    <div class="p-10 rounded-xl bg-[#141518] border border-neutral-800 text-center space-y-3">
-                        <div class="w-12 h-12 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-xl border border-[#F5A524]/30">
-                            🏋️
+                    <div class="p-10 rounded-[10px] bg-[#141518] border border-[#26282D] text-center space-y-3">
+                        <div class="w-12 h-12 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-xl border border-[#F5A524]/30">
+                            <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6m3-8v10m12-10v10m3-8v6M6 12h12"/></svg>
                         </div>
-                        <h4 class="text-base font-bold text-white">No Workout Routine Assigned</h4>
+                        <h4 class="text-base font-semibold text-white">No Workout Routine Assigned</h4>
                         <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">Ask your gym trainer to prescribe a custom exercise routine suited to your fitness goals.</p>
                     </div>
                 @endif
@@ -1711,7 +1659,7 @@
 
             <!-- TAB 3: DIET & MEAL PLAN (REFINED PROFESSIONAL MEMBER INTERFACE) -->
             <div x-show="tab === 'diets'" x-cloak class="space-y-6">
-                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Nutrition</h1>
+                <h1 class="text-2xl font-semibold text-white tracking-tight">Nutrition</h1>
                 @if($member->dietPlans->isNotEmpty())
                     @foreach($member->dietPlans as $diet)
                         @php
@@ -1827,7 +1775,7 @@
                             }
                         @endphp
 
-                        <div class="rounded-xl bg-[#141518] border border-neutral-800 p-4 sm:p-6 shadow-none space-y-6"
+                        <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-4 sm:p-6 shadow-none space-y-6"
                              x-data="{
                                 dateOffset: 0,
                                 eatenMap: {},
@@ -1916,7 +1864,7 @@
                              }">
 
                             <!-- 1. Header with Plan Title & Prescribed Badge -->
-                            <div class="flex items-center justify-between gap-3 border-b border-neutral-800 pb-3 flex-wrap">
+                            <div class="flex items-center justify-between gap-3 border-b border-[#26282D] pb-3 flex-wrap">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2.5 flex-wrap">
                                         <h3 class="text-xl sm:text-2xl font-semibold text-white tracking-tight truncate">{{ $diet->title }}</h3>
@@ -1935,7 +1883,7 @@
                             </div>
 
                             <!-- 2. Daily Nutrition Summary Card (Full Width, Balanced & Responsive) -->
-                            <div class="p-4 sm:p-5 rounded-xl bg-[#0D0E10] border border-neutral-800 space-y-4 shadow-sm">
+                            <div class="p-4 sm:p-5 rounded-[10px] bg-[#0D0E10] border border-[#26282D] space-y-4 ">
                                 <!-- Top row: Big Calories & Date Selector -->
                                 <div class="flex items-start justify-between gap-3 flex-wrap">
                                     <div>
@@ -1944,7 +1892,7 @@
                                             <span class="text-2xl sm:text-3xl font-semibold text-white font-mono leading-none tracking-tight">
                                                 <span x-text="loggedTotals.cals.toLocaleString()"></span>
                                             </span>
-                                            <span class="text-sm sm:text-base font-bold text-slate-400 font-mono">
+                                            <span class="text-sm sm:text-base font-semibold text-slate-400 font-mono">
                                                 / {{ number_format($targetCals) }} kcal
                                             </span>
                                         </div>
@@ -1954,7 +1902,7 @@
                                     </div>
 
                                     <!-- Date Switcher Pill -->
-                                    <div class="flex items-center gap-1 p-1 rounded-xl bg-[#141518] border border-neutral-800 shadow-xs shrink-0">
+                                    <div class="flex items-center gap-1 p-1 rounded-[10px] bg-[#141518] border border-[#26282D]  shrink-0">
                                         <button type="button" @click="changeDay(-1)" class="w-8 h-8 rounded-lg hover:bg-neutral-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Previous Day">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                                         </button>
@@ -1966,15 +1914,15 @@
                                 </div>
 
                                 <!-- Subtle Progress Bar -->
-                                <div class="w-full bg-neutral-900 rounded-full h-2.5 overflow-hidden border border-neutral-800">
-                                    <div class="h-full rounded-full bg-[#F5A524] transition-all duration-300 shadow-sm"
+                                <div class="w-full bg-neutral-900 rounded-full h-2.5 overflow-hidden border border-[#26282D]">
+                                    <div class="h-full rounded-full bg-[#F5A524] transition-all duration-300 "
                                          :style="'width: ' + loggedTotals.calsPct + '%'"></div>
                                 </div>
 
                                 <!-- Macro Grid: Equal Symmetrical 3-Column Responsive Fill -->
                                 <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5 pt-1">
                                     <!-- Protein -->
-                                    <div class="p-3 sm:p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-center">
+                                    <div class="p-3 sm:p-3.5 rounded-[10px] bg-blue-500/10 border border-blue-500/20 text-center">
                                         <span class="text-[10px] sm:text-xs font-semibold uppercase text-blue-400 tracking-wider block">Protein</span>
                                         <div class="text-base sm:text-xl font-semibold text-white font-mono mt-0.5">
                                             <span x-text="loggedTotals.p"></span><span class="text-xs text-blue-300/80 font-normal"> / {{ $pGrams }}g</span>
@@ -1983,7 +1931,7 @@
                                     </div>
 
                                     <!-- Carbs -->
-                                    <div class="p-3 sm:p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                                    <div class="p-3 sm:p-3.5 rounded-[10px] bg-emerald-500/10 border border-emerald-500/20 text-center">
                                         <span class="text-[10px] sm:text-xs font-semibold uppercase text-emerald-400 tracking-wider block">Carbs</span>
                                         <div class="text-base sm:text-xl font-semibold text-white font-mono mt-0.5">
                                             <span x-text="loggedTotals.c"></span><span class="text-xs text-emerald-300/80 font-normal"> / {{ $cGrams }}g</span>
@@ -1992,7 +1940,7 @@
                                     </div>
 
                                     <!-- Fats -->
-                                    <div class="p-3 sm:p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-center">
+                                    <div class="p-3 sm:p-3.5 rounded-[10px] bg-rose-500/10 border border-rose-500/20 text-center">
                                         <span class="text-[10px] sm:text-xs font-semibold uppercase text-rose-400 tracking-wider block">Fats</span>
                                         <div class="text-base sm:text-xl font-semibold text-white font-mono mt-0.5">
                                             <span x-text="loggedTotals.f"></span><span class="text-xs text-rose-300/80 font-normal"> / {{ $fGrams }}g</span>
@@ -2006,10 +1954,10 @@
                             <div class="space-y-3.5 pt-1">
                                 <div class="flex items-center justify-between">
                                     <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                                        <span>🍽️</span>
+                                        <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18m13-18c-3 2-4 6-4 10h4m0-10v18"/></svg></span>
                                         <span>Today's Meal Schedule</span>
                                     </h4>
-                                    <span class="text-xs font-mono font-bold text-slate-400">
+                                    <span class="text-xs font-mono font-semibold text-slate-400">
                                         {{ count($preparedMeals) }} {{ count($preparedMeals) === 1 ? 'Meal' : 'Meals' }}
                                     </span>
                                 </div>
@@ -2018,26 +1966,26 @@
                                     <div class="space-y-3">
                                         @foreach($preparedMeals as $meal)
                                             <!-- Meal Card: Thumbnail + Clean Title & Time + Nutrition Strip + 44px Checkmark -->
-                                            <div class="group rounded-xl bg-[#0D0E10] border border-neutral-800 hover:border-[#F5A524]/40 p-3.5 sm:p-4 transition-all shadow-xs space-y-3 cursor-pointer"
+                                            <div class="group rounded-[10px] bg-[#0D0E10] border border-[#26282D] hover:border-[#F5A524]/40 p-3.5 sm:p-4 transition-all  space-y-3 cursor-pointer"
                                                  :class="isEaten({{ $meal['id'] }}) ? 'border-emerald-500/50 bg-emerald-500/[0.03]' : ''"
                                                  @click="openDetail(mealsList.find(m => m.id === {{ $meal['id'] }}))">
 
                                                 <!-- Top Row: Thumbnail + Single Title with Time + Checkmark Button -->
                                                 <div class="flex items-center gap-3.5 sm:gap-4">
                                                     <!-- Food Thumbnail (56px) with rounded corners & fallback -->
-                                                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-xl overflow-hidden bg-[#141518] border border-neutral-800 shrink-0 shadow-inner">
+                                                    <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-[10px] sm:rounded-[10px] overflow-hidden bg-[#141518] border border-[#26282D] shrink-0 ">
                                                         <img src="{{ $meal['image'] }}" 
                                                              alt="{{ $meal['name'] }}" 
                                                              loading="lazy"
                                                              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                              onerror="this.onerror=null; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                                                         <div class="hidden w-full h-full flex items-center justify-center text-xl bg-[#141518]">
-                                                            🍽️
+                                                            <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18m13-18c-3 2-4 6-4 10h4m0-10v18"/></svg>
                                                         </div>
 
                                                         <!-- Eaten Checkmark Overlay Badge -->
                                                         <div x-show="isEaten({{ $meal['id'] }})" x-cloak
-                                                             class="absolute inset-0 bg-emerald-950/80 backdrop-blur-[1px] flex items-center justify-center text-white transition-opacity">
+                                                             class="absolute inset-0 bg-emerald-950/80 flex items-center justify-center text-white transition-opacity">
                                                             <div class="w-6 h-6 rounded-full bg-emerald-500 text-neutral-950 flex items-center justify-center text-xs font-semibold shadow-none">✓</div>
                                                         </div>
                                                     </div>
@@ -2050,7 +1998,7 @@
                                                                 {{ $meal['name'] }}
                                                             </h5>
                                                             @if(!empty($meal['time']))
-                                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#141518] border border-neutral-700/80 text-[11px] font-bold font-mono text-[#F5A524] shrink-0">
+                                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#141518] border border-neutral-700/80 text-[11px] font-semibold font-mono text-[#F5A524] shrink-0">
                                                                     <svg class="w-3 h-3 text-[#F5A524]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                                     {{ $meal['time'] }}
                                                                 </span>
@@ -2072,7 +2020,7 @@
                                                             :class="isEaten({{ $meal['id'] }}) 
                                                                 ? 'bg-emerald-500 text-neutral-950 shadow-none shadow-emerald-500/25 ring-2 ring-emerald-400' 
                                                                 : 'bg-[#141518] text-slate-400 hover:text-white border border-neutral-700/80 hover:border-neutral-500'"
-                                                            class="w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ml-auto"
+                                                            class="w-11 h-11 rounded-[10px] flex items-center justify-center transition-all cursor-pointer shrink-0 ml-auto"
                                                             :title="isEaten({{ $meal['id'] }}) ? 'Marked as eaten (click to undo)' : 'Mark as eaten'">
                                                         <svg class="w-5 h-5 transition-transform" :class="isEaten({{ $meal['id'] }}) ? 'scale-110' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -2081,19 +2029,19 @@
                                                 </div>
 
                                                 <!-- Bottom Nutrition Strip: BIG, PROMINENT, CLEARLY ALIGNED -->
-                                                <div class="pt-2.5 border-t border-neutral-800/80 flex items-center justify-between gap-3 text-xs flex-wrap">
+                                                <div class="pt-2.5 border-t border-[#26282D]/80 flex items-center justify-between gap-3 text-xs flex-wrap">
                                                     <div class="flex items-center gap-3 sm:gap-4 font-mono flex-wrap">
                                                         <!-- Calories -->
                                                         <div class="flex items-center gap-1.5 text-white font-semibold text-sm sm:text-base">
-                                                            <span class="text-amber-400 text-sm">🔥</span>
+                                                            <span class="text-amber-400 text-sm"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 5 6 6 6 12a6 6 0 1 1-12 0c0-3 2-5 4-7 0 3 1 4 2 4 2-3 1-6 0-9z"/></svg></span>
                                                             <span>{{ number_format($meal['calories']) }}</span>
-                                                            <span class="text-[11px] text-amber-400 font-bold">kcal</span>
+                                                            <span class="text-[11px] text-amber-400 font-semibold">kcal</span>
                                                         </div>
 
                                                         <span class="text-neutral-700 hidden sm:inline">•</span>
 
                                                         <!-- Protein -->
-                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-semibold">
                                                             <span class="text-slate-400 text-[11px]">Prot:</span>
                                                             <span class="text-blue-400 font-mono font-semibold">{{ $meal['protein'] }}g</span>
                                                         </div>
@@ -2101,7 +2049,7 @@
                                                         <span class="text-neutral-700 hidden sm:inline">•</span>
 
                                                         <!-- Carbs -->
-                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-semibold">
                                                             <span class="text-slate-400 text-[11px]">Carb:</span>
                                                             <span class="text-emerald-400 font-mono font-semibold">{{ $meal['carbs'] }}g</span>
                                                         </div>
@@ -2109,13 +2057,13 @@
                                                         <span class="text-neutral-700 hidden sm:inline">•</span>
 
                                                         <!-- Fats -->
-                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-bold">
+                                                        <div class="flex items-center gap-1 text-xs sm:text-sm font-semibold">
                                                             <span class="text-slate-400 text-[11px]">Fat:</span>
                                                             <span class="text-rose-400 font-mono font-semibold">{{ $meal['fat'] }}g</span>
                                                         </div>
                                                     </div>
 
-                                                    <span class="text-[11px] text-[#F5A524] font-bold group-hover:underline flex items-center gap-1">
+                                                    <span class="text-[11px] text-[#F5A524] font-semibold group-hover:underline flex items-center gap-1">
                                                         <span>Details</span>
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                                     </span>
@@ -2124,7 +2072,7 @@
                                         @endforeach
                                     </div>
                                 @else
-                                    <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-xl border border-dashed border-neutral-800">
+                                    <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-[10px] border border-dashed border-[#26282D]">
                                         No meals scheduled in this plan yet.
                                     </div>
                                 @endif
@@ -2132,9 +2080,9 @@
 
                             <!-- 4. Guidelines / Advice from Trainer or Nutritionist -->
                             @if(!empty($diet->guidelines))
-                                <div class="p-4 sm:p-5 rounded-xl bg-[#F5A524]/5 border border-[#F5A524]/20 space-y-2">
+                                <div class="p-4 sm:p-5 rounded-[10px] bg-[#F5A524]/5 border border-[#F5A524]/20 space-y-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-base">💡</span>
+                                        <span class="text-base"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 2H9z"/></svg></span>
                                         <span class="font-semibold uppercase tracking-wider text-xs text-[#F5A524]">Notes from Trainer / Nutritionist:</span>
                                     </div>
                                     <p class="text-xs text-slate-300 leading-relaxed pl-6">
@@ -2145,10 +2093,10 @@
 
                             <!-- 5. Accessible Meal Details Bottom Sheet / Modal (Refined Professional UI/UX) -->
                             <div x-show="activeMealModal" x-cloak 
-                                 class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md transition-opacity"
+                                 class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 transition-opacity"
                                  @keydown.escape.window="closeDetail()">
                                 
-                                <div class="w-full max-w-lg rounded-t-3xl sm:rounded-xl bg-[#13161C] border border-neutral-800/90 shadow-none flex flex-col max-h-[92vh] overflow-hidden"
+                                <div class="w-full max-w-lg rounded-t-3xl sm:rounded-[10px] bg-[#13161C] border border-[#26282D]/90 shadow-none flex flex-col max-h-[92vh] overflow-hidden"
                                      @click.away="closeDetail()">
                                     
                                     <!-- Mobile Drag Handle Indicator -->
@@ -2160,9 +2108,9 @@
                                     <div class="p-5 sm:p-6 overflow-y-auto space-y-5">
                                         
                                         <!-- Header: Photo Thumbnail, Title & Timing -->
-                                        <div class="flex items-start justify-between gap-3 pb-4 border-b border-neutral-800/80">
+                                        <div class="flex items-start justify-between gap-3 pb-4 border-b border-[#26282D]/80">
                                             <div class="flex items-center gap-3.5 min-w-0">
-                                                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden bg-[#0D0E10] border border-neutral-800 shrink-0 shadow-none relative">
+                                                <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-[10px] overflow-hidden bg-[#0D0E10] border border-[#26282D] shrink-0 shadow-none relative">
                                                     <img :src="activeMealModal?.image" 
                                                          :alt="activeMealModal?.name" 
                                                          class="w-full h-full object-cover">
@@ -2171,7 +2119,7 @@
                                                     <div class="flex items-center gap-2 flex-wrap">
                                                         <h3 class="text-lg sm:text-xl font-semibold text-white tracking-tight leading-tight truncate" x-text="activeMealModal?.name"></h3>
                                                         <template x-if="activeMealModal?.time">
-                                                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono bg-[#1A1E26] text-[#F5A524] border border-neutral-700/80 shrink-0 flex items-center gap-1">
+                                                            <span class="px-2.5 py-0.5 rounded-md text-[11px] font-semibold font-mono bg-[#1A1E26] text-[#F5A524] border border-neutral-700/80 shrink-0 flex items-center gap-1">
                                                                 <svg class="w-3 h-3 text-[#F5A524]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                                                 <span x-text="activeMealModal?.time"></span>
                                                             </span>
@@ -2181,26 +2129,26 @@
                                                 </div>
                                             </div>
 
-                                            <button type="button" @click="closeDetail()" class="w-9 h-9 rounded-xl text-slate-400 hover:text-white hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0" title="Close">
+                                            <button type="button" @click="closeDetail()" class="w-9 h-9 rounded-[10px] text-slate-400 hover:text-white hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer shrink-0" title="Close">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </button>
                                         </div>
 
                                         <!-- Total Nutrition Cards (Balanced 4-column responsive grid) -->
                                         <div class="grid grid-cols-4 gap-2 text-center">
-                                            <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800">
+                                            <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                                                 <span class="text-[10px] font-semibold text-amber-400 block uppercase tracking-wider">Calories</span>
                                                 <span class="text-base sm:text-lg font-semibold text-white font-mono block mt-1" x-text="activeMealModal?.calories ? activeMealModal.calories + ' kcal' : '—'"></span>
                                             </div>
-                                            <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800">
+                                            <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                                                 <span class="text-[10px] font-semibold text-blue-400 block uppercase tracking-wider">Protein</span>
                                                 <span class="text-base sm:text-lg font-semibold text-white font-mono block mt-1" x-text="activeMealModal?.protein ? activeMealModal.protein + 'g' : '—'"></span>
                                             </div>
-                                            <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800">
+                                            <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                                                 <span class="text-[10px] font-semibold text-emerald-400 block uppercase tracking-wider">Carbs</span>
                                                 <span class="text-base sm:text-lg font-semibold text-white font-mono block mt-1" x-text="activeMealModal?.carbs ? activeMealModal.carbs + 'g' : '—'"></span>
                                             </div>
-                                            <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800">
+                                            <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D]">
                                                 <span class="text-[10px] font-semibold text-rose-400 block uppercase tracking-wider">Fats</span>
                                                 <span class="text-base sm:text-lg font-semibold text-white font-mono block mt-1" x-text="activeMealModal?.fat ? activeMealModal.fat + 'g' : '—'"></span>
                                             </div>
@@ -2210,18 +2158,18 @@
                                         <div class="space-y-3 pt-1">
                                             <div class="flex items-center justify-between">
                                                 <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                                                    <span>🥗</span>
+                                                    <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 9 0 0 1-18 0zm9-2V3m0 6 5-5M12 9 7 4"/></svg></span>
                                                     <span>Food Items &amp; Portions</span>
                                                 </h4>
-                                                <span class="text-xs font-mono font-bold text-[#F5A524]" x-text="(activeMealModal?.items?.length || 0) + ' items'"></span>
+                                                <span class="text-xs font-mono font-semibold text-[#F5A524]" x-text="(activeMealModal?.items?.length || 0) + ' items'"></span>
                                             </div>
 
                                             <!-- Item Cards with High-End Layout -->
                                             <div class="space-y-2">
                                                 <template x-for="(food, fIdx) in (activeMealModal?.items || [])" :key="fIdx">
-                                                    <div class="p-3 sm:p-3.5 rounded-xl bg-[#0D0E10] border border-neutral-800/90 hover:border-neutral-700 transition-all flex items-center justify-between gap-3 shadow-xs">
+                                                    <div class="p-3 sm:p-3.5 rounded-[10px] bg-[#0D0E10] border border-[#26282D]/90 hover:border-neutral-700 transition-all flex items-center justify-between gap-3 ">
                                                         <div class="flex items-start gap-3 min-w-0 flex-1">
-                                                            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5 shadow-sm">✓</span>
+                                                            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px] font-semibold shrink-0 mt-0.5 ">✓</span>
                                                             <div class="min-w-0 flex-1">
                                                                 <span class="font-semibold text-sm text-white block leading-snug" x-text="food.name"></span>
                                                                 <template x-if="food.portion">
@@ -2231,14 +2179,14 @@
                                                         </div>
                                                         
                                                         <template x-if="food.macros">
-                                                            <div class="px-2.5 py-1 rounded-xl bg-[#1A1E26] border border-neutral-800 text-right shrink-0">
+                                                            <div class="px-2.5 py-1 rounded-[10px] bg-[#1A1E26] border border-[#26282D] text-right shrink-0">
                                                                 <span class="text-xs font-mono font-semibold text-[#F5A524] block" x-text="food.macros"></span>
                                                             </div>
                                                         </template>
                                                     </div>
                                                 </template>
                                                 <template x-if="!activeMealModal?.items || activeMealModal?.items.length === 0">
-                                                    <div class="text-xs text-slate-400 italic py-4 text-center bg-[#0D0E10] rounded-xl border border-neutral-800">
+                                                    <div class="text-xs text-slate-400 italic py-4 text-center bg-[#0D0E10] rounded-[10px] border border-[#26282D]">
                                                         No specific ingredients listed.
                                                     </div>
                                                 </template>
@@ -2246,15 +2194,15 @@
                                         </div>
 
                                         <!-- Content Beneath Food Items: Preparation Notes & Trainer Advice -->
-                                        <div class="space-y-3 pt-2 border-t border-neutral-800/80">
+                                        <div class="space-y-3 pt-2 border-t border-[#26282D]/80">
                                             <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                                                <span>💡</span>
+                                                <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0l-1 2H9z"/></svg></span>
                                                 <span>Preparation &amp; Trainer Advice</span>
                                             </h4>
 
-                                            <div class="p-4 rounded-xl bg-[#0D0E10] border border-[#F5A524]/20 space-y-2.5">
+                                            <div class="p-4 rounded-[10px] bg-[#0D0E10] border border-[#F5A524]/20 space-y-2.5">
                                                 <div class="flex items-start gap-3">
-                                                    <span class="w-8 h-8 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-sm shrink-0 border border-[#F5A524]/30 font-bold">
+                                                    <span class="w-8 h-8 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-sm shrink-0 border border-[#F5A524]/30 font-semibold">
                                                         PT
                                                     </span>
                                                     <div class="min-w-0 flex-1">
@@ -2266,8 +2214,8 @@
                                                 </div>
 
                                                 <!-- Hydration Pill Strip -->
-                                                <div class="pt-2 border-t border-neutral-800/80 flex items-center gap-2 text-[11px] text-sky-300">
-                                                    <span>💧</span>
+                                                <div class="pt-2 border-t border-[#26282D]/80 flex items-center gap-2 text-[11px] text-sky-300">
+                                                    <span><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></svg></span>
                                                     <span>Keep at least 20 minutes gap between meal and cold water intake.</span>
                                                 </div>
                                             </div>
@@ -2276,13 +2224,13 @@
                                     </div>
 
                                     <!-- Sticky Bottom Action Footer -->
-                                    <div class="p-4 sm:p-5 bg-[#0D0E10] border-t border-neutral-800 flex items-center gap-3 shrink-0">
+                                    <div class="p-4 sm:p-5 bg-[#0D0E10] border-t border-[#26282D] flex items-center gap-3 shrink-0">
                                         <button type="button" 
                                                 @click="toggleEaten(activeMealModal.id)"
                                                 :class="isEaten(activeMealModal?.id) 
                                                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/25 ring-2 ring-emerald-400' 
                                                     : 'bg-[#F5A524] hover:bg-[#d6ba93] text-neutral-950 '"
-                                                class="flex-1 py-3.5 px-5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-none">
+                                                class="flex-1 py-3.5 px-5 rounded-[10px] text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-none">
                                             <template x-if="isEaten(activeMealModal?.id)">
                                                 <span class="flex items-center gap-2">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
@@ -2296,7 +2244,7 @@
                                                 </span>
                                             </template>
                                         </button>
-                                        <button type="button" @click="closeDetail()" class="py-3.5 px-5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer shrink-0">
+                                        <button type="button" @click="closeDetail()" class="min-h-11 py-3.5 px-5 rounded-[10px] bg-neutral-800 hover:bg-neutral-700 text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer shrink-0">
                                             Close
                                         </button>
                                     </div>
@@ -2305,9 +2253,9 @@
                         </div>
                     @endforeach
                 @else
-                    <div class="p-12 rounded-xl bg-[#141518] border border-neutral-800 text-center space-y-3">
-                        <div class="w-14 h-14 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-2xl border border-[#F5A524]/30 shadow-none">
-                            🥗
+                    <div class="p-12 rounded-[10px] bg-[#141518] border border-[#26282D] text-center space-y-3">
+                        <div class="w-14 h-14 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-2xl border border-[#F5A524]/30 shadow-none">
+                            <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18a9 9 0 0 1-18 0zm9-2V3m0 6 5-5M12 9 7 4"/></svg>
                         </div>
                         <h4 class="text-lg font-semibold text-white">No Diet Plan Assigned</h4>
                         <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
@@ -2318,7 +2266,7 @@
             </div>
             <!-- TAB 4: PERSONAL TRAINING & DEDICATED COACH -->
             <div x-show="tab === 'pt'" x-cloak class="space-y-5">
-                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Coaching</h1>
+                <h1 class="text-2xl font-semibold text-white tracking-tight">Coaching</h1>
                 @if($activePt)
                     @php
                         $ptUsed = (int) ($activePt->used_sessions ?? 0);
@@ -2344,12 +2292,12 @@
                     @endphp
 
                     <!-- Coach Spotlight Card -->
-                    <div class="rounded-xl bg-[#141518] border border-[#F5A524]/35 p-5 sm:p-7 shadow-none space-y-5 text-white relative overflow-hidden">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#F5A524]/35 p-5 sm:p-7 shadow-none space-y-5 text-white relative overflow-hidden">
                         
 
                         <!-- Top Row: Badge & Expiry -->
                         <div class="relative z-10 flex items-center justify-between gap-3 flex-wrap">
-                            <span class="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex items-center gap-1.5 shadow-sm">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex items-center gap-1.5 ">
                                 <span class="w-2 h-2 rounded-full bg-[#F5A524] "></span>
                                 <span>Personal Training</span>
                             </span>
@@ -2362,28 +2310,28 @@
                         <div class="relative z-10 flex items-center justify-between gap-4 pt-1 flex-wrap sm:flex-nowrap">
                             <div class="flex items-center gap-3.5 min-w-0">
                                 <div class="relative shrink-0">
-                                    <div class="w-14 h-14 rounded-xl bg-[#F5A524] text-neutral-950 font-semibold text-xl flex items-center justify-center shadow-none  border border-white/10">
+                                    <div class="w-14 h-14 rounded-[10px] bg-[#F5A524] text-neutral-950 font-semibold text-xl flex items-center justify-center shadow-none  border border-white/10">
                                         {{ strtoupper(substr($coachName, 0, 1)) }}
                                     </div>
                                     <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-[#141518] flex items-center justify-center text-[10px] text-neutral-950 font-semibold">✓</span>
                                 </div>
                                 <div class="min-w-0 space-y-0.5">
                                     <h3 class="text-lg sm:text-xl font-semibold text-white tracking-tight truncate">{{ $coachName }}</h3>
-                                    <p class="text-xs text-[#F5A524] font-bold">{{ $activePt->package_name ?? 'Personal Training Package' }}</p>
+                                    <p class="text-xs text-[#F5A524] font-semibold">{{ $activePt->package_name ?? 'Personal Training Package' }}</p>
                                     <p class="text-[11px] text-slate-400">Dedicated Personal Trainer &amp; Transformation Coach</p>
                                 </div>
                             </div>
 
                             <!-- Sessions Available Dial -->
-                            <div class="text-right shrink-0 p-3.5 rounded-xl bg-[#0D0E10]/90 border border-neutral-800 min-w-[120px]">
+                            <div class="text-right shrink-0 p-3.5 rounded-[10px] bg-[#0D0E10]/90 border border-[#26282D] min-w-[120px]">
                                 <div class="text-3xl sm:text-4xl font-semibold text-[#F5A524] font-mono leading-none">{{ $ptRemaining }}</div>
-                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Sessions Available</div>
+                                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">Sessions Available</div>
                             </div>
                         </div>
 
                         <!-- Progress Bar & Breakdown with 100% Ratio Zones -->
-                        <div class="relative z-10 space-y-2 pt-2 border-t border-neutral-800">
-                            <div class="relative w-full bg-[#0d1017] rounded-full h-3.5 p-0.5 overflow-hidden border border-neutral-800 shadow-inner">
+                        <div class="relative z-10 space-y-2 pt-2 border-t border-[#26282D]">
+                            <div class="relative w-full bg-[#0d1017] rounded-full h-3.5 p-0.5 overflow-hidden border border-[#26282D] ">
                                 <!-- 100% Ratio Track Zone Marks (0-40% Red, 40-75% Yellow, 75-100% Green) -->
                                 <div class="absolute inset-0 flex pointer-events-none opacity-30">
                                     <div class="w-[40%] h-full border-r border-rose-500/30 bg-rose-500/5"></div>
@@ -2393,8 +2341,8 @@
                                 <div class="relative z-10 h-full rounded-full bg-[#F5A524] transition-all duration-500" style="width: {{ $ptPct }}%"></div>
                             </div>
                             <div class="flex items-center justify-between text-xs text-slate-300">
-                                <span>Used: <strong class="text-white font-mono">{{ $ptUsed }}</strong> of {{ $ptTotal }} Sessions (<span class="{{ $ptTextColor }} font-bold font-mono">{{ $ptPct }}%</span>)</span>
-                                <span class="{{ $ptTextColor }} font-bold">{{ $ptRemaining }} Sessions Available</span>
+                                <span>Used: <strong class="text-white font-mono">{{ $ptUsed }}</strong> of {{ $ptTotal }} Sessions (<span class="{{ $ptTextColor }} font-semibold font-mono">{{ $ptPct }}%</span>)</span>
+                                <span class="{{ $ptTextColor }} font-semibold">{{ $ptRemaining }} Sessions Available</span>
                             </div>
                         </div>
 
@@ -2402,8 +2350,8 @@
                         <div class="relative z-10 pt-1">
                             <button type="button" 
                                     @click="startPortalScanner('code')" 
-                                    class="w-full py-3.5 px-4 rounded-xl bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-none  cursor-pointer">
-                                <span>⚡ Verify Today's Session (Enter PIN or Scan QR)</span>
+                                    class="min-h-11 w-full py-3.5 px-4 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-none  cursor-pointer">
+                                <span>Verify session</span>
                                 <span>&rarr;</span>
                             </button>
                         </div>
@@ -2411,27 +2359,27 @@
 
                     <!-- Upcoming Scheduled PT Sessions (Booked by Coach) -->
                     @if(isset($upcomingPtSessions) && $upcomingPtSessions->isNotEmpty())
-                        <div class="rounded-xl bg-[#141518] border border-[#F5A524]/30 p-5 sm:p-6 shadow-sm space-y-4">
-                            <div class="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+                        <div class="rounded-[10px] bg-[#141518] border border-[#F5A524]/30 p-5 sm:p-6  space-y-4">
+                            <div class="flex items-center justify-between border-b border-[#26282D] pb-3.5">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-10 h-10 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-semibold shrink-0 border border-[#F5A524]/30">
-                                        📅
+                                    <div class="w-10 h-10 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-semibold shrink-0 border border-[#F5A524]/30">
+                                        <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg>
                                     </div>
                                     <div>
                                         <h4 class="text-base font-semibold text-white">Upcoming Scheduled Sessions</h4>
                                         <p class="text-xs text-slate-400 mt-0.5">PT training slots booked by your coach</p>
                                     </div>
                                 </div>
-                                <span class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">
+                                <span class="px-2.5 py-1 rounded-[10px] text-xs font-semibold bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">
                                     {{ $upcomingPtSessions->count() }} Upcoming
                                 </span>
                             </div>
 
                             <div class="space-y-2.5">
                                 @foreach($upcomingPtSessions as $upSess)
-                                    <div class="p-3.5 rounded-xl bg-[#0D0E10]/80 border border-neutral-800 flex items-center justify-between gap-3">
+                                    <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/80 border border-[#26282D] flex items-center justify-between gap-3">
                                         <div class="flex items-center gap-3 min-w-0">
-                                            <div class="w-11 h-11 rounded-xl bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex flex-col items-center justify-center shrink-0">
+                                            <div class="w-11 h-11 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex flex-col items-center justify-center shrink-0">
                                                 <span class="text-[10px] font-semibold uppercase leading-none">{{ $upSess->session_date->format('M') }}</span>
                                                 <span class="text-sm font-semibold leading-none mt-0.5">{{ $upSess->session_date->format('d') }}</span>
                                             </div>
@@ -2440,14 +2388,14 @@
                                                     <span class="text-xs font-semibold text-white truncate">
                                                         {{ $upSess->session_date->isToday() ? 'Today' : ($upSess->session_date->isTomorrow() ? 'Tomorrow' : $upSess->session_date->format('l, d M')) }}
                                                     </span>
-                                                    <span class="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[10px] font-bold uppercase">Booked</span>
+                                                    <span class="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30 text-[10px] font-semibold uppercase">Booked</span>
                                                 </div>
                                                 <p class="text-[11px] text-slate-400 mt-0.5 truncate">
                                                     {{ \Carbon\Carbon::parse($upSess->start_time)->format('h:i A') }} &bull; {{ $upSess->duration_minutes ?? 60 }} mins &bull; {{ $upSess->focus_area ?? 'PT Workout' }}
                                                 </p>
                                             </div>
                                         </div>
-                                        <span class="text-[10px] font-bold text-[#F5A524] shrink-0">{{ $upSess->trainer?->full_name ?? 'Coach' }}</span>
+                                        <span class="text-[10px] font-semibold text-[#F5A524] shrink-0">{{ $upSess->trainer?->full_name ?? 'Coach' }}</span>
                                     </div>
                                 @endforeach
                             </div>
@@ -2455,18 +2403,18 @@
                     @endif
 
                     <!-- Verified PT Sessions Timeline -->
-                    <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+                    <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5 sm:p-6  space-y-4">
+                        <div class="flex items-center justify-between border-b border-[#26282D] pb-3.5">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-10 h-10 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-semibold shrink-0 border border-[#F5A524]/30">
-                                    📜
+                                <div class="w-10 h-10 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center text-lg font-semibold shrink-0 border border-[#F5A524]/30">
+                                    <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6m-6 4h6m-6 4h4"/></svg>
                                 </div>
                                 <div>
                                     <h4 class="text-base font-semibold text-white">Verified Sessions History</h4>
                                     <p class="text-xs text-slate-400 mt-0.5">Date-wise coaching workouts logged and confirmed with your trainer</p>
                                 </div>
                             </div>
-                            <span class="px-2.5 py-1 rounded-xl text-xs font-semibold bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">
+                            <span class="px-2.5 py-1 rounded-[10px] text-xs font-semibold bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30">
                                 {{ $ptSessionsHistory->count() }} {{ Str::plural('Session', $ptSessionsHistory->count()) }}
                             </span>
                         </div>
@@ -2474,11 +2422,11 @@
                         @if($ptSessionsHistory->isNotEmpty())
                             <div class="space-y-3">
                                 @foreach($ptSessionsHistory as $session)
-                                    <div class="p-4 rounded-xl bg-[#0D0E10]/70 border border-neutral-800 hover:border-[#F5A524]/40 transition-all space-y-3">
+                                    <div class="p-4 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] hover:border-[#F5A524]/40 transition-all space-y-3">
                                         <!-- Top Row: Date, Time & Verified Badge -->
                                         <div class="flex items-start justify-between gap-2">
                                             <div class="flex items-center gap-2.5">
-                                                <div class="w-10 h-10 rounded-xl bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex flex-col items-center justify-center shrink-0">
+                                                <div class="w-10 h-10 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex flex-col items-center justify-center shrink-0">
                                                     <span class="text-[10px] font-semibold uppercase leading-none">{{ $session->session_date ? $session->session_date->format('M') : $session->created_at->format('M') }}</span>
                                                     <span class="text-sm font-semibold leading-none mt-0.5">{{ $session->session_date ? $session->session_date->format('d') : $session->created_at->format('d') }}</span>
                                                 </div>
@@ -2500,10 +2448,10 @@
                                         </div>
 
                                         <!-- Middle Row: Coach & Workout Focus -->
-                                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-800 text-xs">
+                                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-[#26282D] text-xs">
                                             <div class="space-y-0.5">
                                                 <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Coach</span>
-                                                <div class="font-bold text-[#F5A524] flex items-center gap-1.5 truncate">
+                                                <div class="font-semibold text-[#F5A524] flex items-center gap-1.5 truncate">
                                                     <div class="w-4 h-4 rounded-full bg-[#F5A524]/20 text-[#F5A524] text-[10px] font-semibold flex items-center justify-center shrink-0">
                                                         {{ substr($session->trainer?->first_name ?? 'C', 0, 1) }}
                                                     </div>
@@ -2512,14 +2460,14 @@
                                             </div>
                                             <div class="space-y-0.5">
                                                 <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Focus Area</span>
-                                                <div class="font-bold text-slate-200 truncate">
-                                                    🎯 {{ $session->focus_area ?? 'Strength Training' }}
+                                                <div class="font-semibold text-slate-200 truncate">
+                                                    {{ $session->focus_area ?? 'Strength Training' }}
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Bottom Row: Package & Star Rating -->
-                                        <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-800 flex-wrap gap-2">
+                                        <div class="flex items-center justify-between text-xs pt-2 border-t border-[#26282D] flex-wrap gap-2">
                                             <div class="text-[11px] text-slate-400 truncate max-w-[200px]">
                                                 <span class="text-slate-500">Plan:</span>
                                                 <span class="font-semibold text-slate-300">{{ $session->memberPtPackage?->package_name ?? 'Personal Training' }}</span>
@@ -2538,7 +2486,7 @@
 
                                         <!-- Member Feedback Quote (if present) -->
                                         @if(!empty($session->member_feedback))
-                                            <div class="p-2.5 rounded-xl bg-[#141518] border border-neutral-800 text-[11px] text-slate-300 italic flex items-start gap-1.5">
+                                            <div class="p-2.5 rounded-[10px] bg-[#141518] border border-[#26282D] text-[11px] text-slate-300 italic flex items-start gap-1.5">
                                                 <span class="text-[#F5A524] text-xs shrink-0">“</span>
                                                 <span class="flex-1">{{ $session->member_feedback }}</span>
                                                 <span class="text-[#F5A524] text-xs shrink-0">”</span>
@@ -2548,47 +2496,47 @@
                                 @endforeach
                             </div>
                         @else
-                            <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-xl space-y-2">
-                                <div class="text-3xl">⚡</div>
-                                <p class="font-bold text-white text-sm">No PT sessions confirmed yet</p>
+                            <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-[10px] space-y-2">
+                                <div class="text-3xl"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg></div>
+                                <p class="font-semibold text-white text-sm">No PT sessions confirmed yet</p>
                                 <p class="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">When your coach logs a workout and you confirm via PIN or QR, your complete history will show here.</p>
                             </div>
                         @endif
                     </div>
                 @else
                     <!-- No Active PT Upgrade Screen -->
-                    <div class="p-8 sm:p-12 rounded-xl bg-[#141518] border border-neutral-800 text-center space-y-4 shadow-none">
-                        <div class="w-16 h-16 rounded-xl bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-3xl border border-[#F5A524]/30 shadow-none">
-                            🏋️‍♂️
+                    <div class="p-8 sm:p-12 rounded-[10px] bg-[#141518] border border-[#26282D] text-center space-y-4 shadow-none">
+                        <div class="w-16 h-16 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] flex items-center justify-center mx-auto text-3xl border border-[#F5A524]/30 shadow-none">
+                            <svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9v6m3-8v10m12-10v10m3-8v6M6 12h12"/></svg>
                         </div>
                         <div class="space-y-1.5 max-w-md mx-auto">
-                            <h3 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Personal Training</h3>
+                            <h3 class="text-2xl font-semibold text-white tracking-tight">Personal Training</h3>
                             <p class="text-xs text-slate-400 leading-relaxed">
                                 Get dedicated coach guidance, custom workout programming, and personalized technique feedback.
                             </p>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto pt-2 text-left">
-                            <div class="p-3.5 rounded-xl bg-[#0D0E10]/80 border border-neutral-800 space-y-1">
-                                <div class="text-lg">🎯</div>
-                                <div class="text-xs font-bold text-white">Custom Workouts</div>
+                            <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/80 border border-[#26282D] space-y-1">
+                                <div class="text-lg"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+                                <div class="text-xs font-semibold text-white">Custom Workouts</div>
                                 <p class="text-[10px] text-slate-400 leading-snug">Personalized progressive overload suited to your target.</p>
                             </div>
-                            <div class="p-3.5 rounded-xl bg-[#0D0E10]/80 border border-neutral-800 space-y-1">
-                                <div class="text-lg">🛡️</div>
-                                <div class="text-xs font-bold text-white">Form Correction</div>
+                            <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/80 border border-[#26282D] space-y-1">
+                                <div class="text-lg"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/></svg></div>
+                                <div class="text-xs font-semibold text-white">Form Correction</div>
                                 <p class="text-[10px] text-slate-400 leading-snug">100% injury prevention with dedicated rep supervision.</p>
                             </div>
-                            <div class="p-3.5 rounded-xl bg-[#0D0E10]/80 border border-neutral-800 space-y-1">
-                                <div class="text-lg">📈</div>
-                                <div class="text-xs font-bold text-white">3x Faster Results</div>
+                            <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/80 border border-[#26282D] space-y-1">
+                                <div class="text-lg"><svg aria-hidden="true" class="w-5 h-5 inline-block shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M6 15l5-5 4 3 6-7"/></svg></div>
+                                <div class="text-xs font-semibold text-white">3x Faster Results</div>
                                 <p class="text-[10px] text-slate-400 leading-snug">Strict accountability with date-wise measurement tracking.</p>
                             </div>
                         </div>
 
                         <div class="pt-3">
-                            <div class="inline-block px-5 py-2.5 rounded-xl bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 font-semibold text-xs">
-                                💬 Contact Gym Front Desk or Head Trainer to Get Started
+                            <div class="inline-block px-5 py-2.5 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 font-semibold text-xs">
+                                Contact the front desk to get started
                             </div>
                         </div>
                     </div>
@@ -2597,9 +2545,9 @@
 
             <!-- TAB 5: MEMBERSHIP, PASS & VISITS -->
             <div x-show="tab === 'memberships' || tab === 'attendance'" x-cloak class="space-y-4">
-                <h1 class="text-xl sm:text-2xl font-semibold text-white tracking-tight">Membership</h1>
+                <h1 class="text-2xl font-semibold text-white tracking-tight">Membership</h1>
                 <!-- HERO: LUXURY DIGITAL MEMBERSHIP PASS (ATHLETIC STEALTH) -->
-                <div class="relative overflow-hidden rounded-xl bg-[#141518] border border-[#F5A524]/30 shadow-none p-5 sm:p-6 text-white space-y-5">
+                <div class="relative overflow-hidden rounded-[10px] bg-[#141518] border border-[#F5A524]/30 shadow-none p-5 sm:p-6 text-white space-y-5">
                     
                     
 
@@ -2626,9 +2574,9 @@
                     <div class="relative z-10 flex items-center gap-4">
                         <div class="relative shrink-0">
                             @if($member->avatar_url)
-                                <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-[#F5A524]/40 shadow-none">
+                                <img src="{{ $member->avatar_url }}" alt="{{ $member->full_name }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-[10px] object-cover border-2 border-[#F5A524]/40 shadow-none">
                             @else
-                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-[#1B1D21] flex items-center justify-center text-[#F5A524] font-semibold text-2xl sm:text-3xl shadow-none border border-[#F5A524]/30">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-[10px] bg-[#1B1D21] flex items-center justify-center text-[#F5A524] font-semibold text-2xl sm:text-3xl shadow-none border border-[#F5A524]/30">
                                     {{ strtoupper(substr($member->first_name ?: 'M', 0, 1)) }}{{ strtoupper(substr($member->last_name ?: '', 0, 1)) }}
                                 </div>
                             @endif
@@ -2637,13 +2585,13 @@
                         <div class="min-w-0 flex-1 space-y-1">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h2 class="text-xl sm:text-2xl font-semibold text-white tracking-tight truncate">{{ $member->full_name }}</h2>
-                                <span class="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 text-[11px] font-mono font-bold border border-white/10">
+                                <span class="px-2 py-0.5 rounded-md bg-white/10 text-slate-200 text-[11px] font-mono font-semibold border border-white/10">
                                     {{ $member->member_code }}
                                 </span>
                             </div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-300">
                                 @if($activeMembership)
-                                    <span class="font-bold text-[#F5A524]">{{ $activeMembership->plan?->name ?? 'Standard Plan' }}</span>
+                                    <span class="font-semibold text-[#F5A524]">{{ $activeMembership->plan?->name ?? 'Standard Plan' }}</span>
                                 @else
                                     <span class="text-slate-400">No active plan</span>
                                 @endif
@@ -2659,10 +2607,10 @@
                         <div class="relative z-10 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
                             <div>
                                 <span class="text-slate-400 text-[11px]">Valid Until:</span>
-                                <span class="font-bold text-white ml-1">{{ $activeMembership->end_date?->format('d M, Y') ?? 'N/A' }}</span>
+                                <span class="font-semibold text-white ml-1">{{ $activeMembership->end_date?->format('d M, Y') ?? 'N/A' }}</span>
                             </div>
                             @if($daysLeft !== null)
-                                <span class="px-3 py-1 rounded-xl text-xs font-semibold {{ $daysLeft > 7 ? 'bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30' : ($daysLeft >= 0 ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30') }}">
+                                <span class="px-3 py-1 rounded-[10px] text-xs font-semibold {{ $daysLeft > 7 ? 'bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30' : ($daysLeft >= 0 ? 'bg-amber-400/15 text-amber-300 border border-amber-400/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30') }}">
                                     {{ $daysLeft >= 0 ? ($daysLeft . ' Days Left') : ('Expired ' . abs($daysLeft) . 'd ago') }}
                                 </span>
                             @endif
@@ -2673,14 +2621,14 @@
                     <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="startPortalScanner()" 
-                                class="py-3 px-3 rounded-xl bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span>Check-in / PT</span>
                         </button>
 
                         <button type="button" 
                                 @click="showQrModal = true" 
-                                class="py-3 px-3 rounded-xl bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
                             <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                             <span>View Pass</span>
                         </button>
@@ -2688,11 +2636,11 @@
                 </div>
 
                 <!-- Plan Summary Card -->
-                <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5 sm:p-6  space-y-4">
                     <h3 class="text-base font-semibold text-white">Active Plan & Validity</h3>
 
                     @if($activeMembership)
-                        <div class="p-4 rounded-xl bg-[#0D0E10]/70 border border-neutral-800 space-y-3">
+                        <div class="p-4 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] space-y-3">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <span class="text-xs text-slate-400 font-medium">Enrolled Plan</span>
@@ -2703,43 +2651,43 @@
                                 </span>
                             </div>
 
-                            <div class="flex justify-between text-xs pt-1 border-t border-neutral-800">
+                            <div class="flex justify-between text-xs pt-1 border-t border-[#26282D]">
                                 <span class="text-slate-400">Duration:</span>
-                                <span class="font-bold text-slate-200">{{ $activeMembership->start_date?->format('d M, Y') }} &rarr; {{ $activeMembership->end_date?->format('d M, Y') }}</span>
+                                <span class="font-semibold text-slate-200">{{ $activeMembership->start_date?->format('d M, Y') }} &rarr; {{ $activeMembership->end_date?->format('d M, Y') }}</span>
                             </div>
 
                             <div class="flex justify-between text-xs">
                                 <span class="text-slate-400">Total Fee:</span>
-                                <span class="font-bold text-white">{{ $currency }}{{ number_format($activeMembership->final_amount, 2) }}</span>
+                                <span class="font-semibold text-white">{{ $currency }}{{ number_format($activeMembership->final_amount, 2) }}</span>
                             </div>
 
                             <div class="flex justify-between text-xs">
                                 <span class="text-slate-400">Paid:</span>
-                                <span class="font-bold text-[#F5A524] font-mono">{{ $currency }}{{ number_format($activeMembership->paid_amount, 2) }}</span>
+                                <span class="font-semibold text-[#F5A524] font-mono">{{ $currency }}{{ number_format($activeMembership->paid_amount, 2) }}</span>
                             </div>
 
                             @if($remainingAmt > 0)
-                                <div class="flex justify-between text-xs pt-1 border-t border-neutral-800">
-                                    <span class="text-rose-400 font-bold">Balance Due:</span>
+                                <div class="flex justify-between text-xs pt-1 border-t border-[#26282D]">
+                                    <span class="text-rose-400 font-semibold">Balance Due:</span>
                                     <span class="font-semibold text-rose-400 font-mono">{{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
                                 </div>
                             @endif
                         </div>
                     @else
-                        <div class="py-6 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-xl">
+                        <div class="py-6 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-[10px]">
                             No active membership found.
                         </div>
                     @endif
                 </div>
 
                 <!-- GYM ATTENDANCE & VISITS HISTORY LOG -->
-                <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5 sm:p-6  space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-base font-semibold text-white">Gym Visit &amp; Attendance Log</h3>
                             <p class="text-xs text-slate-400 mt-0.5">Automated check-ins recorded via biometric &amp; QR scan</p>
                         </div>
-                        <span class="px-3 py-1 rounded-xl bg-[#F5A524]/15 text-[#F5A524] text-xs font-semibold border border-[#F5A524]/30 font-mono">
+                        <span class="px-3 py-1 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] text-xs font-semibold border border-[#F5A524]/30 font-mono">
                             {{ $totalCheckins }} Total Visits
                         </span>
                     </div>
@@ -2751,7 +2699,7 @@
                                     <div class="flex items-center gap-3">
                                         <div class="w-2.5 h-2.5 rounded-full bg-[#F5A524] shrink-0"></div>
                                         <div>
-                                            <div class="font-bold text-white">
+                                            <div class="font-semibold text-white">
                                                 {{ $att->date ? $att->date->format('l, d M Y') : ($att->check_in ? $att->check_in->format('l, d M Y') : 'Recent Visit') }}
                                             </div>
                                             <div class="text-[11px] text-slate-400 font-mono mt-0.5">
@@ -2769,7 +2717,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-xl">
+                        <div class="py-8 text-center text-xs text-slate-400 bg-[#0D0E10]/50 rounded-[10px]">
                             No attendance visits recorded yet.
                         </div>
                     @endif
@@ -2778,7 +2726,7 @@
 
 
                 <!-- Invoices & Receipts -->
-                <div class="rounded-xl bg-[#141518] border border-neutral-800 p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="rounded-[10px] bg-[#141518] border border-[#26282D] p-5 sm:p-6  space-y-4">
                     <h3 class="text-base font-semibold text-white">Tax Invoices & Receipts</h3>
 
                     @if($member->payments->isNotEmpty())
@@ -2791,7 +2739,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <span class="font-semibold text-white font-mono">{{ $currency }}{{ number_format($payment->amount, 2) }}</span>
-                                        <a href="{{ route('app.invoices.show', $payment->id) }}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-[#F5A524]/15 hover:bg-[#F5A524] text-[#F5A524] hover:text-neutral-950 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer">
+                                        <a href="{{ route('app.invoices.show', $payment->id) }}" target="_blank" class="px-2.5 py-1.5 rounded-[10px] bg-[#F5A524]/15 hover:bg-[#F5A524] text-[#F5A524] hover:text-neutral-950 font-semibold text-xs transition-colors flex items-center gap-1 cursor-pointer">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             <span>View</span>
                                         </a>
@@ -2806,8 +2754,8 @@
             </div>
 
             <!-- MODAL: DIGITAL QR PASS (ATHLETIC STEALTH) -->
-            <div x-show="showQrModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 backdrop-blur-sm">
-                <div @click.away="showQrModal = false" class="w-full max-w-sm rounded-xl bg-[#0D0E10] border border-neutral-800 shadow-none p-6 text-center space-y-5 relative text-white">
+            <div x-show="showQrModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 ">
+                <div @click.away="showQrModal = false" class="w-full max-w-sm rounded-[10px] bg-[#0D0E10] border border-[#26282D] shadow-none p-6 text-center space-y-5 relative text-white">
                     <button type="button" @click="showQrModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
                     <div>
                         <span class="px-3 py-1 rounded-full bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold uppercase tracking-wider">Gym Check-in Pass</span>
@@ -2816,13 +2764,13 @@
                     </div>
 
                     <!-- QR Code -->
-                    <div class="p-4 rounded-xl bg-white mx-auto inline-block shadow-none">
+                    <div class="p-4 rounded-[10px] bg-white mx-auto inline-block shadow-none">
                         <img src="https://quickchart.io/qr?size=200&margin=1&text={{ urlencode($member->qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}';">
                     </div>
 
                     <p class="text-xs text-slate-400">Scan this pass at the front desk scanner or turnstile to log your attendance.</p>
 
-                    <button type="button" @click="showQrModal = false" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer">
+                    <button type="button" @click="showQrModal = false" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
                         Close
                     </button>
                 </div>
@@ -2831,8 +2779,8 @@
             <!-- ========================================================= -->
             <!-- DUAL-MODE SMART SCANNER MODAL (SCAN QR OR ENTER SESSION PIN) -->
             <!-- ========================================================= -->
-            <div x-show="showPortalScanner" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 backdrop-blur-sm">
-                <div @click.away="if (!pinSubmitting && !pinSuccess) stopPortalScanner()" class="w-full max-w-sm rounded-xl bg-[#0D0E10] border border-neutral-800 shadow-none p-5 text-center space-y-4 relative text-white">
+            <div x-show="showPortalScanner" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 ">
+                <div @click.away="if (!pinSubmitting && !pinSuccess) stopPortalScanner()" class="w-full max-w-sm rounded-[10px] bg-[#0D0E10] border border-[#26282D] shadow-none p-5 text-center space-y-4 relative text-white">
                     <template x-if="!pinSubmitting && !pinSuccess">
                         <button type="button" @click="stopPortalScanner()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
                     </template>
@@ -2846,7 +2794,7 @@
                             <h3 class="text-lg font-semibold text-white">Session Confirmed!</h3>
                             <p class="text-xs text-slate-300 max-w-xs mx-auto" x-text="pinSuccessMsg"></p>
                             <template x-if="activePendingPt?.remaining_sessions !== undefined">
-                                <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800 text-xs inline-block">
+                                <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs inline-block">
                                     <span class="text-slate-400">Remaining Balance:</span>
                                     <span class="font-semibold text-[#F5A524] ml-1" x-text="activePendingPt.remaining_sessions + ' Sessions Left'"></span>
                                 </div>
@@ -2864,39 +2812,39 @@
                             </div>
 
                             <!-- Dual Toggle Tabs: Camera vs Session PIN -->
-                            <div class="flex items-center p-1 rounded-xl bg-slate-900 border border-neutral-800 text-xs font-bold">
+                            <div class="flex items-center p-1 rounded-[10px] bg-[#1B1D21] border border-[#26282D] text-xs font-semibold">
                                 <button type="button" 
                                         @click="switchScannerTab('camera')" 
                                         :class="scannerMode === 'camera' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
                                         class="flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                                    <span>📷 Camera Scan</span>
+                                    <span>Camera</span>
                                 </button>
                                 <button type="button" 
                                         @click="switchScannerTab('code')" 
                                         :class="scannerMode === 'code' ? 'bg-[#F5A524] text-neutral-950 font-semibold shadow-none ' : 'text-slate-400 hover:text-white'" 
                                         class="flex-1 py-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5">
-                                    <span>🔢 Session PIN</span>
+                                    <span>Session PIN</span>
                                 </button>
                             </div>
 
                             <!-- TAB A: CAMERA SCANNER -->
                             <div x-show="scannerMode === 'camera'" class="space-y-3">
-                                <div x-show="cameraStarting" class="py-8 text-center text-xs text-[#F5A524]  font-bold flex items-center justify-center gap-2">
+                                <div x-show="cameraStarting" class="py-8 text-center text-xs text-[#F5A524]  font-semibold flex items-center justify-center gap-2">
                                     <svg class="animate-spin w-4 h-4 text-[#F5A524]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
                                     <span>Starting Camera...</span>
                                 </div>
 
-                                <div id="portal-camera-reader" class="w-full aspect-square max-w-[260px] mx-auto rounded-xl overflow-hidden bg-black border border-slate-700 shadow-inner"></div>
+                                <div id="portal-camera-reader" class="w-full aspect-square max-w-[260px] mx-auto rounded-[10px] overflow-hidden bg-black border border-slate-700 "></div>
 
                                 <!-- Camera Error / HTTP Warning Notice -->
-                                <div x-show="cameraError || portalScanMsg" class="p-3 rounded-xl bg-[#F5A524]/10 border border-[#F5A524]/30 text-slate-200 text-xs text-left space-y-2">
+                                <div x-show="cameraError || portalScanMsg" class="p-3 rounded-[10px] bg-[#F5A524]/10 border border-[#F5A524]/30 text-slate-200 text-xs text-left space-y-2">
                                     <p class="text-[11px] leading-relaxed" x-text="portalScanMsg || 'Live camera access may be restricted by browser permissions or require HTTPS.'"></p>
                                     <div class="flex items-center gap-2 pt-1">
-                                        <button type="button" @click="switchScannerTab('code')" class="flex-1 py-2 rounded-xl bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[11px] cursor-pointer transition-all text-center">
-                                            🔢 Enter Session PIN
+                                        <button type="button" @click="switchScannerTab('code')" class="min-h-11 flex-1 py-2 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-[11px] cursor-pointer transition-all text-center">
+                                            Enter session PIN
                                         </button>
-                                        <label for="portal-file-input" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-[11px] cursor-pointer text-center">
-                                            📷 Snap Photo
+                                        <label for="portal-file-input" class="py-2 px-3 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 border border-slate-700 text-white font-semibold text-[11px] cursor-pointer text-center">
+                                            Open camera
                                         </label>
                                     </div>
                                 </div>
@@ -2907,19 +2855,19 @@
 
                             <!-- TAB B: 6-DIGIT SESSION PIN DIRECT CONFIRM -->
                             <div x-show="scannerMode === 'code'" class="space-y-3 py-1">
-                                <div class="p-3.5 rounded-xl bg-[#0D0E10]/60 border border-neutral-800 space-y-2 text-left">
-                                    <label class="block text-xs font-bold text-slate-300">Enter 6-Digit Session PIN</label>
+                                <div class="p-3.5 rounded-[10px] bg-[#0D0E10]/60 border border-[#26282D] space-y-2 text-left">
+                                    <label class="block text-xs font-semibold text-slate-300">Enter 6-Digit Session PIN</label>
                                     <p class="text-[11px] text-slate-400 leading-relaxed">Type the 6-digit PIN displayed on your trainer's screen (e.g. 210289).</p>
                                     <input type="text" 
                                            x-model="manualOtpCode" 
                                            maxlength="6" 
                                            placeholder="e.g. 210289" 
-                                           class="w-full px-4 py-3 rounded-xl bg-[#141518] border border-[#F5A524]/40 text-[#F5A524] font-mono font-semibold text-2xl text-center tracking-[0.3em] focus:outline-none focus:border-[#F5A524] focus:ring-1 focus:ring-[#F5A524]">
+                                           class="w-full px-4 py-3 rounded-[10px] bg-[#141518] border border-[#F5A524]/40 text-[#F5A524] font-mono font-semibold text-2xl text-center tracking-[0.3em] focus:outline-none focus:border-[#F5A524] focus:ring-1 focus:ring-[#F5A524]">
                                 </div>
 
                                 <!-- Quick Star Rating in PIN tab -->
                                 <div class="space-y-1 pt-1">
-                                    <label class="block text-[11px] font-bold text-slate-300">Rate Today's Workout</label>
+                                    <label class="block text-[11px] font-semibold text-slate-300">Rate Today's Workout</label>
                                     <div class="flex items-center justify-center gap-2 text-2xl">
                                         <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
                                             <button type="button" 
@@ -2933,18 +2881,18 @@
 
                                 <!-- Quick Feedback Chips in PIN tab -->
                                 <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                    <button type="button" @click="ptFeedback = 'Pushed to limits, great pump!'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">🔥 Great Pump</button>
-                                    <button type="button" @click="ptFeedback = 'Focused on correct form & mobility'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">👌 Good Form</button>
-                                    <button type="button" @click="ptFeedback = 'High intensity workout session'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">🏃 Intense</button>
+                                    <button type="button" @click="ptFeedback = 'Pushed to limits, great pump!'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">Great session</button>
+                                    <button type="button" @click="ptFeedback = 'Focused on correct form & mobility'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">Good form</button>
+                                    <button type="button" @click="ptFeedback = 'High intensity workout session'" class="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">High intensity</button>
                                 </div>
 
                                 <!-- Inline Error Banner -->
-                                <div x-show="pinErrorMsg" class="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center" x-text="pinErrorMsg"></div>
+                                <div x-show="pinErrorMsg" class="p-2.5 rounded-[10px] bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center" x-text="pinErrorMsg"></div>
 
                                 <button type="button" 
                                         @click="submitPinConfirm()" 
                                         :disabled="pinSubmitting"
-                                        class="w-full py-3.5 rounded-xl bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  cursor-pointer transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  cursor-pointer transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                                     <span x-show="!pinSubmitting">✓ Confirm with Session PIN</span>
                                     <span x-show="pinSubmitting" class="flex items-center gap-1.5">
                                         <svg class="animate-spin w-4 h-4 text-neutral-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -2953,7 +2901,7 @@
                                 </button>
                             </div>
 
-                            <button type="button" @click="stopPortalScanner()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer">
+                            <button type="button" @click="stopPortalScanner()" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
                                 Cancel
                             </button>
                         </div>
@@ -2964,8 +2912,8 @@
             <!-- ========================================================= -->
             <!-- PT SESSION CONFIRMATION & RATING MODAL (ATHLETIC STEALTH) -->
             <!-- ========================================================= -->
-            <div x-show="showPtConfirmModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 backdrop-blur-sm">
-                <div @click.away="if (!ptConfirmLoading && !ptConfirmSuccess) showPtConfirmModal = false" class="w-full max-w-sm rounded-xl bg-[#0D0E10] border border-neutral-800 shadow-none p-5 sm:p-6 text-center space-y-4 relative text-white">
+            <div x-show="showPtConfirmModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 ">
+                <div @click.away="if (!ptConfirmLoading && !ptConfirmSuccess) showPtConfirmModal = false" class="w-full max-w-sm rounded-[10px] bg-[#0D0E10] border border-[#26282D] shadow-none p-5 sm:p-6 text-center space-y-4 relative text-white">
                     <template x-if="!ptConfirmLoading && !ptConfirmSuccess">
                         <button type="button" @click="showPtConfirmModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
                     </template>
@@ -2979,7 +2927,7 @@
                             <h3 class="text-lg font-semibold text-white">Session Confirmed!</h3>
                             <p class="text-xs text-slate-300 max-w-xs mx-auto" x-text="ptSuccessMsg"></p>
                             <template x-if="activePendingPt?.remaining_sessions !== undefined">
-                                <div class="p-3 rounded-xl bg-[#0D0E10] border border-neutral-800 text-xs inline-block">
+                                <div class="p-3 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs inline-block">
                                     <span class="text-slate-400">Remaining Balance:</span>
                                     <span class="font-semibold text-[#F5A524] ml-1" x-text="activePendingPt.remaining_sessions + ' Sessions Left'"></span>
                                 </div>
@@ -2994,24 +2942,24 @@
                             <div class="space-y-1">
                                 <span class="px-3 py-1 rounded-full bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold uppercase tracking-wider">Workout Completed</span>
                                 <h3 class="text-lg font-semibold text-white mt-1">Confirm PT Session</h3>
-                                <p class="text-xs text-slate-400">With <span class="font-bold text-[#F5A524]" x-text="activePendingPt?.trainer_name || 'Your Coach'"></span></p>
+                                <p class="text-xs text-slate-400">With <span class="font-semibold text-[#F5A524]" x-text="activePendingPt?.trainer_name || 'Your Coach'"></span></p>
                             </div>
 
                             <!-- Session Summary Badge -->
-                            <div class="p-3 rounded-xl bg-[#0D0E10]/70 border border-neutral-800 text-xs flex items-center justify-between text-left">
+                            <div class="p-3 rounded-[10px] bg-[#0D0E10]/70 border border-[#26282D] text-xs flex items-center justify-between text-left">
                                 <div>
-                                    <span class="font-bold text-white block" x-text="activePendingPt?.package_name || 'Personal Training'"></span>
+                                    <span class="font-semibold text-white block" x-text="activePendingPt?.package_name || 'Personal Training'"></span>
                                     <span class="text-[11px] text-slate-400 block" x-text="activePendingPt?.focus_area || 'Strength Training'"></span>
                                 </div>
                                 <div class="text-right shrink-0">
-                                    <span class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-bold text-[10px] border border-[#F5A524]/30 block" x-text="(activePendingPt?.duration_minutes || 60) + ' Mins'"></span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-semibold text-[10px] border border-[#F5A524]/30 block" x-text="(activePendingPt?.duration_minutes || 60) + ' Mins'"></span>
                                     <span class="text-[10px] text-slate-400 block mt-0.5" x-text="activePendingPt?.remaining_sessions ? activePendingPt.remaining_sessions + ' Left' : ''"></span>
                                 </div>
                             </div>
 
                             <!-- Star Rating (1 to 5 Stars) -->
                             <div class="space-y-1.5 pt-1">
-                                <label class="block text-xs font-bold text-slate-300">Rate Today's Workout</label>
+                                <label class="block text-xs font-semibold text-slate-300">Rate Today's Workout</label>
                                 <div class="flex items-center justify-center gap-2 text-2xl">
                                     <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
                                         <button type="button" 
@@ -3021,14 +2969,14 @@
                                         </button>
                                     </template>
                                 </div>
-                                <span class="text-[10px] text-slate-400 block" x-text="ptRating === 5 ? 'Excellent Workout! 🔥' : (ptRating === 4 ? 'Great Session! 💪' : (ptRating === 3 ? 'Good Workout 👍' : 'Challenging session'))"></span>
+                                <span class="text-[10px] text-slate-400 block" x-text="ptRating === 5 ? 'Excellent' : (ptRating === 4 ? 'Very good' : (ptRating === 3 ? 'Good' : 'Challenging session'))"></span>
                             </div>
 
                             <!-- Quick Feedback Chips -->
                             <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                                <button type="button" @click="ptFeedback = 'Pushed to limits, great pump!'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">🔥 Great Pump</button>
-                                <button type="button" @click="ptFeedback = 'Focused on correct form & mobility'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">👌 Good Form</button>
-                                <button type="button" @click="ptFeedback = 'High intensity workout session'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer">🏃 Intense</button>
+                                <button type="button" @click="ptFeedback = 'Pushed to limits, great pump!'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">Great session</button>
+                                <button type="button" @click="ptFeedback = 'Focused on correct form & mobility'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">Good form</button>
+                                <button type="button" @click="ptFeedback = 'High intensity workout session'" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[#1B1D21] hover:bg-slate-700 text-slate-300 cursor-pointer">High intensity</button>
                             </div>
 
                             <!-- Optional note textarea -->
@@ -3036,7 +2984,7 @@
                                 <textarea x-model="ptFeedback" 
                                           rows="2" 
                                           placeholder="Optional coach feedback or workout note..." 
-                                          class="w-full px-3 py-2 rounded-xl bg-[#0D0E10] border border-neutral-800 text-xs text-white focus:outline-none focus:border-[#F5A524] resize-none"></textarea>
+                                          class="w-full px-3 py-2 rounded-[10px] bg-[#0D0E10] border border-[#26282D] text-xs text-white focus:outline-none focus:border-[#F5A524] resize-none"></textarea>
                             </div>
 
                             <!-- Confirm & Deduct Button -->
@@ -3044,7 +2992,7 @@
                                 <button type="button" 
                                         @click="submitPtConfirm()" 
                                         :disabled="ptConfirmLoading" 
-                                        class="w-full py-3.5 rounded-xl bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50">
+                                        class="min-h-11 w-full py-3.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50">
                                     <span x-show="!ptConfirmLoading">✓ Confirm &amp; Deduct 1 Session</span>
                                     <span x-show="ptConfirmLoading" class="flex items-center gap-1.5">
                                         <svg class="animate-spin w-4 h-4 text-neutral-950" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
@@ -3063,17 +3011,17 @@
             <template x-if="activeVideo">
                 <div @keydown.escape.window="closeExerciseVideo()"
                      @click.self="closeExerciseVideo()"
-                     class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md">
-                    <div @click.stop class="w-full max-w-2xl rounded-xl bg-[#12151C] border border-neutral-800 shadow-none overflow-hidden text-white">
+                     class="fixed inset-0 z-[90] flex items-center justify-center p-3 sm:p-5 bg-black/85 ">
+                    <div @click.stop class="w-full max-w-2xl rounded-[10px] bg-[#12151C] border border-[#26282D] shadow-none overflow-hidden text-white">
                         <!-- Modal Header -->
-                        <div class="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-neutral-800 bg-[#141518]">
+                        <div class="flex items-start justify-between gap-3 p-4 sm:p-5 border-b border-[#26282D] bg-[#141518]">
                             <div class="min-w-0 space-y-1.5">
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <span class="px-2 py-0.5 rounded-md bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-[10px] font-semibold uppercase tracking-wider"
                                           x-text="activeVideo.source || 'Video Library'"></span>
-                                    <span x-show="activeVideo.category" class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-neutral-800 text-[10px] font-bold text-slate-300"
+                                    <span x-show="activeVideo.category" class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-[#26282D] text-[10px] font-semibold text-slate-300"
                                           x-text="activeVideo.category"></span>
-                                    <span x-show="activeVideo.equipment" class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-neutral-800 text-[10px] font-semibold text-slate-400"
+                                    <span x-show="activeVideo.equipment" class="px-2 py-0.5 rounded-md bg-[#0D0E10] border border-[#26282D] text-[10px] font-semibold text-slate-400"
                                           x-text="activeVideo.equipment"></span>
                                 </div>
                                 <h3 class="text-base sm:text-lg font-semibold text-white leading-tight break-words" x-text="activeVideo.title"></h3>
@@ -3081,7 +3029,7 @@
                             <button type="button"
                                     @click="closeExerciseVideo()"
                                     aria-label="Close video player"
-                                    class="w-9 h-9 rounded-xl bg-[#0D0E10] hover:bg-neutral-800 border border-neutral-800 text-slate-300 hover:text-white flex items-center justify-center font-bold shrink-0 cursor-pointer transition-colors">
+                                    class="w-9 h-9 rounded-[10px] bg-[#0D0E10] hover:bg-neutral-800 border border-[#26282D] text-slate-300 hover:text-white flex items-center justify-center font-semibold shrink-0 cursor-pointer transition-colors">
                                 ✕
                             </button>
                         </div>
@@ -3112,10 +3060,10 @@
 
                             <template x-if="resolveVideoKind(activeVideo.url) === 'link'">
                                 <div class="p-8 text-center space-y-3">
-                                    <div class="w-12 h-12 rounded-xl bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex items-center justify-center mx-auto text-xl">▶</div>
+                                    <div class="w-12 h-12 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 flex items-center justify-center mx-auto text-xl">▶</div>
                                     <p class="text-xs text-slate-300">This demonstration opens externally.</p>
                                     <a :href="activeVideo.url" target="_blank" rel="noopener noreferrer"
-                                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F5A524] text-neutral-950 text-xs font-semibold">
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-[#F5A524] text-neutral-950 text-xs font-semibold">
                                         Open Demonstration Video &nearr;
                                     </a>
                                 </div>
@@ -3123,11 +3071,11 @@
                         </div>
 
                         <!-- Details & Actions Footer -->
-                        <div class="p-4 sm:p-5 space-y-4 bg-[#141518] border-t border-neutral-800">
+                        <div class="p-4 sm:p-5 space-y-4 bg-[#141518] border-t border-[#26282D]">
                             <!-- Distinct Prescription Cards: Sets & Reps -->
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                                 <!-- SETS -->
-                                <div class="rounded-xl bg-[#0D0E10] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                <div class="rounded-[10px] bg-[#0D0E10] border border-[#26282D]/90 p-3 text-center ">
                                     <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block"
                                           x-text="activeVideo.trackingType === 'time' ? 'Rounds' : 'Sets'">Sets</span>
                                     <span class="mt-1 text-lg sm:text-xl font-semibold font-mono text-[#F5A524] block tabular-nums"
@@ -3135,7 +3083,7 @@
                                 </div>
 
                                 <!-- REPS / DURATION -->
-                                <div class="rounded-xl bg-[#0D0E10] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                <div class="rounded-[10px] bg-[#0D0E10] border border-[#26282D]/90 p-3 text-center ">
                                     <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block"
                                           x-text="activeVideo.trackingType === 'time' ? 'Duration' : 'Reps'">Reps</span>
                                     <span class="mt-1 text-lg sm:text-xl font-semibold font-mono text-white block tabular-nums"
@@ -3143,14 +3091,14 @@
                                 </div>
 
                                 <!-- REST (if available) -->
-                                <div x-show="activeVideo.rest" class="rounded-xl bg-[#0D0E10] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                <div x-show="activeVideo.rest" class="rounded-[10px] bg-[#0D0E10] border border-[#26282D]/90 p-3 text-center ">
                                     <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Rest</span>
                                     <span class="mt-1 text-lg sm:text-xl font-semibold font-mono text-slate-200 block tabular-nums"
                                           x-text="activeVideo.rest"></span>
                                 </div>
 
                                 <!-- WEIGHT / LOAD (if available) -->
-                                <div x-show="activeVideo.weight" class="rounded-xl bg-[#0D0E10] border border-neutral-800/90 p-3 text-center shadow-xs">
+                                <div x-show="activeVideo.weight" class="rounded-[10px] bg-[#0D0E10] border border-[#26282D]/90 p-3 text-center ">
                                     <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Load</span>
                                     <span class="mt-1 text-sm sm:text-base font-semibold font-mono text-[#F5A524] block truncate"
                                           x-text="activeVideo.weight"></span>
@@ -3160,7 +3108,7 @@
                             <div class="flex items-center justify-end pt-1">
                                 <button type="button"
                                         @click="closeExerciseVideo()"
-                                        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold cursor-pointer transition-colors shadow-sm">
+                                        class="min-h-11 w-full sm:w-auto px-6 py-2.5 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 text-xs font-semibold cursor-pointer transition-colors ">
                                     Close Video
                                 </button>
                             </div>
