@@ -42,11 +42,23 @@
         });
 
 @endphp
-        <!-- Members List: Mobile Cards (block md:hidden) & Desktop Table (hidden md:block) -->
+        <!-- Member cards and table adapt to available content width, including the sidebar. -->
+        <style>
+            #member-results { container-type: inline-size; min-width: 0; }
+            #member-results .members-desktop { display: none; }
+            #member-results .members-cards { display: block; }
+            @container (min-width: 960px) {
+                #member-results .members-desktop { display: block; }
+                #member-results .members-cards { display: none; }
+            }
+            @container (min-width: 600px) and (max-width: 959px) {
+                #member-results .members-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; }
+            }
+        </style>
         <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             
             <!-- Mobile Cards View -->
-            <div class="block md:hidden divide-y divide-line dark:divide-line">
+            <div class="members-cards divide-y divide-line dark:divide-line">
                 @forelse($members as $member)
                     @php
                         $membership = $member->activeMembership ?? $member->latestMembership;
@@ -76,7 +88,7 @@
                                     <div class="font-semibold text-fg dark:text-white text-sm truncate group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                                         {{ $member->full_name }}
                                     </div>
-                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
                                         <span class="text-xs text-amber-600 dark:text-amber-400 font-mono font-semibold">{{ $member->member_code }}</span>
                                         <span class="text-fg-muted dark:text-fg-muted">•</span>
                                         <span class="text-xs text-fg-muted dark:text-fg-muted">{{ $member->branch?->name ?? 'Main Gym' }}</span>
@@ -108,7 +120,7 @@
                             <div class="space-y-0.5">
                                 <span class="text-xs text-fg-muted dark:text-fg-muted block font-medium">Plan</span>
                                 @if($membership)
-                                    <div class="font-semibold text-fg dark:text-white truncate">
+                                    <div class="font-semibold text-fg dark:text-white break-words">
                                         {{ $membership->plan?->name ?? 'Active Plan' }}
                                     </div>
                                     <div class="text-[10px] {{ $daysLeft !== null && $daysLeft < 7 ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400' }}">
@@ -152,9 +164,9 @@
                         </div>
 
                         <!-- Actions Bar -->
-                        <div class="flex items-center gap-2 pt-1">
+                        <div class="flex flex-wrap items-center gap-2 pt-1">
                             @if($membership && $remainingAmt > 0)
-                                <button type="button" @click="openCollectFeeModal({{ $member->id }})" class="flex-1 min-w-0 min-h-10 py-2 px-3 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                <button type="button" @click="openCollectFeeModal({{ $member->id }})" class="grow basis-full min-w-0 min-h-10 py-2 px-3 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                     <span>Collect {{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
                                 </button>
@@ -192,8 +204,8 @@
             </div>
 
             <!-- Desktop Table View (hidden md:block) -->
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[750px]">
+            <div class="members-desktop overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[960px] table-auto">
                     <thead class="bg-raised dark:bg-slate-950/70 border-b border-line dark:border-line text-fg-muted dark:text-fg-muted text-xs">
                         <tr>
                             <th class="py-3 px-3.5 font-semibold">Member</th>
@@ -252,15 +264,15 @@
                                 <!-- Plan & Validity -->
                                 <td class="py-3 px-3.5">
                                     @if($membership && $membership->status === 'CANCELLED')
-                                        <div class="font-semibold text-fg-muted dark:text-fg-muted leading-tight flex items-center gap-1.5">
+                                        <div class="font-semibold text-fg-muted dark:text-fg-muted leading-tight flex flex-wrap items-center gap-1.5">
                                             <span class="line-through">{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
                                             <span class="px-1.5 py-0.2 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-semibold border border-rose-200 dark:border-rose-500/20">Cancelled</span>
                                         </div>
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted leading-tight mt-0.5 font-mono">
+                                        <div class="text-xs text-fg-muted dark:text-fg-muted leading-tight mt-0.5 break-words">
                                             Package Cancelled / Transferred
                                         </div>
                                     @elseif($membership)
-                                        <div class="font-semibold text-fg dark:text-white leading-tight flex items-center gap-1.5">
+                                        <div class="font-semibold text-fg dark:text-white leading-tight flex flex-wrap items-center gap-1.5">
                                             <span>{{ $membership->plan?->name ?? 'Custom Plan' }}</span>
                                             @if($daysLeft !== null)
                                                 @if($daysLeft > 7)
@@ -293,6 +305,12 @@
                                     @else
                                         <span class="text-fg-muted text-xs">No membership</span>
                                     @endif
+                                    @if($membership && $remainingAmt > 0)
+                                            <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1.5 px-2.5 rounded-lg bg-accent text-accent-on ops-primary transition-all flex items-center gap-1 text-xs font-semibold cursor-pointer mt-2 whitespace-nowrap">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                                <span>Collect payment</span>
+                                            </button>
+                                        @endif
                                 </td>
 
                                 <!-- Status -->
@@ -312,13 +330,8 @@
 
                                 <!-- Actions Column -->
                                 <td class="py-3 px-3.5 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        @if($membership && $remainingAmt > 0)
-                                            <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1.5 px-2.5 rounded-lg bg-accent text-accent-on ops-primary transition-all flex items-center gap-1 text-xs font-semibold shrink-0 cursor-pointer">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                                <span>Collect {{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
-                                            </button>
-                                        @endif
+                                    <div class="flex flex-wrap items-center justify-end gap-1.5 min-w-[84px] max-w-[112px] ml-auto">
+                                        
 
                                         @php
                                             $firstPayment = $membership?->payments?->first();
