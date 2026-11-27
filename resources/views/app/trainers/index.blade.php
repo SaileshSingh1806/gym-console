@@ -1,4 +1,4 @@
-<x-app-layout header="Fitness Trainers & Coaches">
+<x-app-layout header="Trainers">
     @php
         $currency = $tenant->currency_symbol ?? '₹';
         $activeTrainersCount = $trainers->where('status', 'ACTIVE')->count();
@@ -187,12 +187,9 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <div class="flex items-center gap-2.5">
-                    <h2 class="text-xl font-semibold text-fg dark:text-white tracking-tight">Fitness Trainers &amp; Coaches</h2>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
-                        {{ $trainers->count() }} Total
-                    </span>
+                    <h2 class="text-xl font-semibold text-fg dark:text-white tracking-tight">Trainers</h2>
                 </div>
-                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Manage certified coaches, personal trainers, and assigned gym members</p>
+                <p class="text-xs text-fg-muted dark:text-fg-muted mt-0.5">Manage trainer profiles, member assignments and PT sessions.</p>
             </div>
 
             <div class="flex items-center gap-2.5">
@@ -212,70 +209,34 @@
             </div>
         </div>
 
-        <!-- ==================== METRICS KPI STATS BAR ==================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <!-- Total Trainers -->
-            <div class="p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden group hover:border-line dark:hover:border-line transition-all">
-                <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Total Coaches</span>
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </div>
+        <!-- Trainer overview -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            @foreach([
+                ['Total trainers', $trainers->count()],
+                ['Active trainers', $activeTrainersCount],
+                ['Assigned members', $totalAssignedMembers],
+                ["Today's sessions", $totalTodaySessions],
+            ] as [$label, $value])
+                <div class="min-w-0 p-3 sm:p-4 rounded-lg bg-surface border border-line">
+                    <div class="text-xs font-medium text-fg-muted">{{ $label }}</div>
+                    <div class="mt-1 text-xl sm:text-2xl font-semibold text-fg tabular-nums">{{ $value }}</div>
                 </div>
-                <div class="text-2xl font-semibold text-fg dark:text-white tracking-tight">{{ $trainers->count() }}</div>
-                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-0.5">Registered trainers</div>
-            </div>
-
-            <!-- Active Trainers -->
-            <div class="p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden group hover:border-line dark:hover:border-line transition-all">
-                <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Active Staff</span>
-                    <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-200 dark:border-emerald-500/20">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
-                    </div>
-                </div>
-                <div class="text-2xl font-semibold text-emerald-600 dark:text-emerald-400 tracking-tight">{{ $activeTrainersCount }}</div>
-                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-0.5">Ready for sessions</div>
-            </div>
-
-            <!-- Total Assigned Clients -->
-            <div class="p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden group hover:border-line dark:hover:border-line transition-all">
-                <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Assigned Clients</span>
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-200 dark:border-amber-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    </div>
-                </div>
-                <div class="text-2xl font-semibold text-fg dark:text-white tracking-tight">{{ $totalAssignedMembers }}</div>
-                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-0.5">Members under PT</div>
-            </div>
-
-            <!-- Today's Sessions -->
-            <div class="p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line relative overflow-hidden group hover:border-line dark:hover:border-line transition-all">
-                <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-xs font-semibold text-fg-muted dark:text-fg-muted">Today's Sessions</span>
-                    <div class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-200 dark:border-purple-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </div>
-                </div>
-                <div class="text-2xl font-semibold text-purple-600 dark:text-purple-400 tracking-tight">{{ $totalTodaySessions }}</div>
-                <div class="text-xs text-fg-muted dark:text-fg-muted font-medium mt-0.5">Scheduled for today</div>
-            </div>
+            @endforeach
         </div>
 
         <!-- ==================== TOOLBAR: SEARCH & STATUS FILTER ==================== -->
         <div class="p-3.5 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
-                <button type="button" @click="statusFilter = 'all'" :class="statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'all'" :class="statusFilter === 'all' ? 'bg-accent text-accent-on' : 'bg-surface text-fg-muted border border-line hover:bg-raised'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
                     All ({{ $trainers->count() }})
                 </button>
-                <button type="button" @click="statusFilter = 'active'" :class="statusFilter === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'active'" :class="statusFilter === 'active' ? 'bg-accent text-accent-on' : 'bg-surface text-fg-muted border border-line hover:bg-raised'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
                     Active ({{ $activeTrainersCount }})
                 </button>
-                <button type="button" @click="statusFilter = 'featured'" :class="statusFilter === 'featured' ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
-                    ★ Featured ({{ $trainers->where('is_featured', true)->count() }})
+                <button type="button" @click="statusFilter = 'featured'" :class="statusFilter === 'featured' ? 'bg-accent text-accent-on' : 'bg-surface text-fg-muted border border-line hover:bg-raised'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
+                    Featured ({{ $trainers->where('is_featured', true)->count() }})
                 </button>
-                <button type="button" @click="statusFilter = 'inactive'" :class="statusFilter === 'inactive' ? 'bg-slate-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-950 dark:text-slate-400 dark:hover:text-white dark:border-slate-800'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
+                <button type="button" @click="statusFilter = 'inactive'" :class="statusFilter === 'inactive' ? 'bg-accent text-accent-on' : 'bg-surface text-fg-muted border border-line hover:bg-raised'" class="px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer">
                     Inactive ({{ $trainers->where('status', '!=', 'ACTIVE')->count() }})
                 </button>
             </div>
@@ -287,13 +248,9 @@
         </div>
 
         <!-- ==================== TRAINER CARDS GRID ==================== -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
             @forelse($trainers as $trainer)
                 <div x-show="matchesFilter({{ Js::from($trainer) }})" class="p-4 rounded-xl bg-surface dark:bg-surface border border-line dark:border-line hover:border-line dark:hover:border-line transition-all flex flex-col justify-between space-y-3 group relative overflow-hidden">
-                    @if($trainer->is_featured)
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-surface border border-line"></div>
-                    @endif
-
                     <div>
                         <!-- Header: Avatar + Name + Specialization -->
                         <div class="flex items-start gap-3 mb-3">
@@ -301,7 +258,7 @@
                                 @if($trainer->photo_path)
                                     <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" loading="lazy" class="w-11 h-11 rounded-xl object-cover border border-line dark:border-line">
                                 @else
-                                    <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold text-sm flex items-center justify-center border border-indigo-200 dark:border-indigo-500/20">
+                                    <div class="w-11 h-11 rounded-xl bg-raised text-fg-muted font-semibold text-sm flex items-center justify-center border border-line">
                                         {{ substr($trainer->first_name, 0, 1) }}{{ substr($trainer->last_name, 0, 1) }}
                                     </div>
                                 @endif
@@ -310,23 +267,23 @@
 
                             <div class="min-w-0 flex-1">
                                 <h4 class="font-semibold text-fg dark:text-white text-sm truncate tracking-tight">{{ $trainer->full_name }}</h4>
-                                <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate mt-0.5">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
+                                <p class="text-xs text-fg-muted font-medium truncate mt-0.5">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
                                 
-                                <div class="flex items-center gap-1.5 mt-1.5">
+                                <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                    <span class="text-xs font-medium {{ $trainer->status === 'ACTIVE' ? 'text-emerald-600 dark:text-emerald-400' : 'text-fg-muted' }}">{{ ucfirst(strtolower($trainer->status)) }}</span>
                                     @if($canViewStaff)
-                                    <a href="{{ route('app.staff.index', ['search' => $trainer->phone]) }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
-                                        Staff
+                                    <a href="{{ route('app.staff.index', ['search' => $trainer->phone]) }}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line hover:text-fg transition-colors">
+                                        Staff profile
                                     </a>
                                     @endif
                                     @if($trainer->is_featured)
-                                        <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30">
-                                            ★ Featured
+                                        <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line">
+                                            Featured
                                         </span>
                                     @endif
                                     @if(auth()->user()->isGymOwner() || auth()->user()->isSuperAdmin())
-                                    <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" title="Trainer's Personal Training Commission">
-                                        {{ number_format($trainer->commission_percent ?? 40, 0) }}% PT Comm
+                                    <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-raised text-fg-muted border border-line" title="Trainer's Personal Training Commission">
+                                        {{ number_format($trainer->commission_percent ?? 40, 0) }}% PT commission
                                     </span>
                                     @endif
                                 </div>
@@ -334,14 +291,14 @@
                         </div>
 
                         <!-- 2 Stats Counters -->
-                        <div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-raised dark:bg-slate-950/70 border border-line dark:border-line mb-3 text-center">
-                            <div class="border-r border-line dark:border-line pr-1">
+                        <div class="grid grid-cols-2 gap-3 py-3 border-y border-line mb-3">
+                            <div class="border-r border-line pr-2">
                                 <div class="text-base font-semibold text-fg dark:text-white">{{ $trainer->assigned_members_count ?? ($trainer->assignedMembers ? $trainer->assignedMembers->count() : 0) }}</div>
-                                <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted mt-0.5">Assigned</div>
+                                <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted mt-0.5">Assigned members</div>
                             </div>
                             <div class="pl-1">
                                 <div class="text-base font-semibold text-fg dark:text-white">{{ $trainer->today_sessions_count ?? 0 }}</div>
-                                <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted mt-0.5">Today</div>
+                                <div class="text-xs font-semibold text-fg-muted dark:text-fg-muted mt-0.5">Sessions today</div>
                             </div>
                         </div>
 
@@ -349,12 +306,14 @@
                         <div class="space-y-1.5 text-xs text-fg-muted dark:text-fg-muted px-0.5">
                             <div class="flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5 text-fg-muted dark:text-fg-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                <a href="tel:{{ $trainer->phone }}" class="text-fg dark:text-fg hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold truncate transition-colors">{{ $trainer->phone }}</a>
+                                <a href="tel:{{ $trainer->phone }}" class="text-fg dark:text-fg hover:text-accent-fg font-semibold truncate transition-colors">{{ $trainer->phone }}</a>
                             </div>
+                            @if($trainer->email)
                             <div class="flex items-center gap-2">
                                 <svg class="w-3.5 h-3.5 text-fg-muted dark:text-fg-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                <span class="text-fg-muted dark:text-fg-muted truncate text-xs">{{ $trainer->email ?: 'No email registered' }}</span>
+                                <span class="text-fg-muted dark:text-fg-muted truncate text-xs">{{ $trainer->email }}</span>
                             </div>
+                            @endif
                         </div>
                     </div>
 
@@ -364,7 +323,7 @@
                         @if($canAssignTrainer)
                         <button type="button" @click="openAssignTrainer({{ Js::from($trainer) }})" class="flex-1 py-2 px-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ops-primary" title="Assign Members">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span>Assign</span>
+                            <span>Assign members</span>
                         </button>
                         @endif
 
@@ -389,10 +348,10 @@
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
                     <h4 class="font-semibold text-fg dark:text-white text-base">No trainers registered yet</h4>
-                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-1 max-w-sm mx-auto">Register your certified fitness coaches to start scheduling workouts and assigning gym members.</p>
+                    <p class="text-xs text-fg-muted dark:text-fg-muted mt-1 max-w-sm mx-auto">Add a trainer to manage member assignments and sessions.</p>
                     @if($canCreateTrainer)
                     <button type="button" @click="showTrainerModal = true" class="mt-4 px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-accent-on font-semibold text-xs transition-all cursor-pointer ops-primary">
-                        + Add Fitness Trainer
+                        + Add trainer
                     </button>
                     @endif
                 </div>
