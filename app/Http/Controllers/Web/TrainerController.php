@@ -38,27 +38,9 @@ class TrainerController extends Controller
             $activeTab = 'today';
         }
 
-        // Server-side Scoping: Assigned members OR members in trainer's branch
+        // A branch is not an assignment. Only explicitly assigned clients are visible.
         $assignedMembers = $trainer ? Member::where('tenant_id', $tenant->id)
-            ->where(function ($q) use ($trainer, $user) {
-                if (in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
-                    if ($trainer->branch_id) {
-                        $q->where('branch_id', $trainer->branch_id);
-                    }
-                } else {
-                    $q->where('trainer_id', $trainer->id)
-                        ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer->id));
-                    if ($trainer->branch_id) {
-                        $q->orWhere(function ($branchQ) use ($trainer) {
-                            $branchQ->where('branch_id', $trainer->branch_id)
-                                ->where(function ($tQ) use ($trainer) {
-                                    $tQ->whereNull('trainer_id')->orWhere('trainer_id', $trainer->id);
-                                });
-                        });
-                    }
-                }
-            })
-            ->when($trainer->branch_id, fn ($q) => $q->where('branch_id', $trainer->branch_id))
+            ->where(fn ($q) => $this->scopeAssignedMembers($q, $trainer))
             ->with([
                 'branch',
                 'activeWorkoutPlan.exercises',
@@ -272,20 +254,7 @@ class TrainerController extends Controller
             return null;
         }
 
-        $trainer = $user->trainerProfile;
-        if (! $trainer) {
-            $trainer = Trainer::where('tenant_id', $tenant->id)
-                ->where(function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                    if (! empty($user->phone)) {
-                        $q->orWhere('phone', $user->phone);
-                    }
-                    if (! empty($user->email)) {
-                        $q->orWhere('email', $user->email);
-                    }
-                })->first();
-        }
-
+        $trainer = $user->trainerProfile()->where('tenant_id', $tenant->id)->first();
         // Gym Owner / Manager inspecting trainer workspace
         if (! $trainer && in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
             $trainerId = $request?->query('trainer_id') ?? $request?->input('trainer_id');
@@ -300,22 +269,27 @@ class TrainerController extends Controller
         return $trainer;
     }
 
+    protected function scopeAssignedMembers(\Illuminate\Database\Eloquent\Builder $query, Trainer $trainer): void
+    {
+        $query->where('trainer_id', $trainer->id)
+            ->orWhereHas('memberPtPackages', fn ($package) => $package
+                ->where('tenant_id', $trainer->tenant_id)
+                ->where('trainer_id', $trainer->id)
+                ->where('status', 'ACTIVE')
+                ->where('end_date', '>=', now()->toDateString()));
+    }
+
     protected function authorizeTrainerMember(User $user, int $memberId, ?Request $request = null): Member
     {
         $tenant = TenantContext::getTenant() ?? $user->tenant;
         $trainer = $this->resolveTrainer($user, $request);
 
+        abort_unless($tenant, 403);
+
         $memberQuery = Member::where('tenant_id', $tenant->id)->where('id', $memberId);
         if (! in_array($user->role, ['super_admin', 'gym_owner', 'gym_manager'])) {
-            $memberQuery->where(function ($q) use ($trainer) {
-                if ($trainer) {
-                    $q->where('trainer_id', $trainer->id)
-                        ->orWhereHas('memberPtPackages', fn ($sub) => $sub->where('trainer_id', $trainer->id));
-                    if ($trainer->branch_id) {
-                        $q->orWhere('branch_id', $trainer->branch_id);
-                    }
-                }
-            });
+            abort_unless($trainer && (int) $trainer->tenant_id === (int) $tenant->id, 403);
+            $memberQuery->where(fn ($q) => $this->scopeAssignedMembers($q, $trainer));
         }
 
         return $memberQuery->firstOrFail();
@@ -918,14 +892,13 @@ class TrainerController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $member = Member::where('tenant_id', $tenant->id)->find($validated['member_id']);
-        if (! $member) {
-            return response()->json(['success' => false, 'message' => 'Member not found in your branch.'], 404);
-        }
+        $member = $this->authorizeTrainerMember($user, (int) $validated['member_id'], $request);
 
         $package = MemberPtPackage::where('tenant_id', $tenant->id)
             ->where('member_id', $member->id)
+            ->where(fn ($q) => $q->where('trainer_id', $trainer->id)->orWhereNull('trainer_id'))
             ->where('status', 'ACTIVE')
+            ->where('end_date', '>=', now()->toDateString())
             ->find($validated['member_pt_package_id']);
 
         if (! $package || $package->remaining_sessions <= 0) {
