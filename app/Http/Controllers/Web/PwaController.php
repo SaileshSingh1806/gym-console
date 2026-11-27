@@ -19,8 +19,8 @@ class PwaController extends Controller
     {
         $tenant = $this->tenant($slug);
         $version = $this->version($tenant);
-        $name = trim($tenant->settings['pwa_name'] ?? $tenant->name);
-        $short = trim($tenant->settings['pwa_short_name'] ?? $name);
+        $name = trim($tenant->settings['pwa_name'] ?? '') ?: $tenant->name;
+        $short = trim($tenant->settings['pwa_short_name'] ?? '') ?: $name;
         $icons = [];
         foreach ([192, 512] as $size) {
             $icons[] = ['src' => route('pwa.icon', [$slug, $role, $size, 'any', 'v' => $version], false),
@@ -67,7 +67,7 @@ class PwaController extends Controller
 
     public function icon(string $slug, string $role, int $size, string $purpose)
     {
-        abort_unless(in_array($size, [180, 192, 512], true), 404);
+        abort_unless(in_array($size, [180, 192, 512], true) && ($purpose !== 'maskable' || $size === 512), 404);
         $tenant = $this->tenant($slug);
         $fallback = base_path('public/pwa/icons/'.$role.'-'.($purpose === 'maskable' ? 'maskable-' : '').$size.'.png');
         if (!is_file($fallback)) $fallback = base_path('public/pwa/icons/'.$role.'-512.png');
