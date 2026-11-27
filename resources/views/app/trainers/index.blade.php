@@ -146,7 +146,7 @@
                 status: trainer.status || 'ACTIVE',
                 is_featured: Boolean(trainer.is_featured),
                 bio: trainer.bio || '',
-                photo_url: trainer.photo_path ? ('/storage/' + trainer.photo_path) : null,
+                photo_url: trainer.photo_path ? (/^(https?:\/\/|\/)/i.test(trainer.photo_path) ? trainer.photo_path : ('/storage/' + trainer.photo_path)) : null,
             };
             this.trainerEditPhotoPreview = null;
             
@@ -255,13 +255,14 @@
                         <!-- Header: Avatar + Name + Specialization -->
                         <div class="flex items-start gap-3 mb-3">
                             <div class="relative shrink-0">
-                                @if($trainer->photo_path)
-                                    <img src="{{ Storage::url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" loading="lazy" class="w-11 h-11 rounded-xl object-cover border border-line dark:border-line">
-                                @else
-                                    <div class="w-11 h-11 rounded-xl bg-raised text-fg-muted font-semibold text-sm flex items-center justify-center border border-line">
-                                        {{ substr($trainer->first_name, 0, 1) }}{{ substr($trainer->last_name, 0, 1) }}
+                                <div class="relative w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border border-line bg-raised">
+                                    <div class="absolute inset-0 flex items-center justify-center text-fg-muted text-xl font-semibold" aria-hidden="true">
+                                        {{ mb_strtoupper(mb_substr($trainer->first_name ?? '', 0, 1) . mb_substr($trainer->last_name ?? '', 0, 1)) ?: 'T' }}
                                     </div>
-                                @endif
+                                    @if($trainer->photo_path)
+                                        <img src="{{ \Illuminate\Support\Str::startsWith($trainer->photo_path, ['https://', 'http://', '/']) ? $trainer->photo_path : Storage::disk('public')->url($trainer->photo_path) }}" alt="{{ $trainer->full_name }}" loading="lazy" decoding="async" width="96" height="112" class="absolute inset-0 w-full h-full object-cover object-top" onerror="this.hidden = true; this.style.display = 'none';">
+                                    @endif
+                                </div>
                                 <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full {{ $trainer->status === 'ACTIVE' ? 'bg-emerald-500 ring-2 ring-white dark:ring-slate-900' : 'bg-slate-400 ring-2 ring-white dark:ring-slate-900' }}" title="{{ $trainer->status }}"></span>
                             </div>
 
