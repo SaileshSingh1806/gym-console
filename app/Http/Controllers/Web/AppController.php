@@ -1903,7 +1903,7 @@ class AppController extends Controller
 
         $validated = $request->validate([
             'date' => 'required|date',
-            'weight' => 'nullable|numeric|min:0',
+            'weight' => 'nullable|numeric|min:20|max:500',
             'height_cm' => 'nullable|numeric|min:40|max:260',
             'chest' => 'nullable|numeric|min:0',
             'shoulders' => 'nullable|numeric|min:0',
