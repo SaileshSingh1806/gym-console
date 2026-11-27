@@ -13,11 +13,6 @@
         $thisMonthCheckins = $attendanceStats['month'] ?? 0;
         $totalCheckins = $attendanceStats['total'] ?? 0;
 
-        // Gamified 20-Day Monthly Target
-        $monthlyGoal = 20;
-        $goalPercent = min(100, round(($thisMonthCheckins / $monthlyGoal) * 100));
-        $sessionsNeeded = max(0, $monthlyGoal - $thisMonthCheckins);
-
         // Current week (Mon to Sun) checkin timeline
         $currentWeekDays = [];
         $startOfWeek = now()->copy()->startOfWeek(); // Monday
@@ -48,7 +43,6 @@
     <div x-data="{
         tab: @js($activeTab),
         membershipSection: @js($activeTab === 'attendance' ? 'visits' : 'plan'),
-        showQrModal: false,
         showPortalScanner: false,
         scannerMode: 'camera',
         manualOtpCode: '',
@@ -528,7 +522,7 @@
                         </template>
                     </div>
 
-                    <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
+                    <div class="relative z-10 grid grid-cols-1 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="openPtConfirmModal()" 
                                 class="min-h-11 py-2.5 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414] text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-1.5 cursor-pointer transition-all ">
@@ -603,8 +597,8 @@
                     </div>
                 @endif
 
-                <!-- Card Action Buttons: 1-Tap Check-in & Pass -->
-                <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
+                <!-- Check-in action -->
+                <div class="relative z-10 grid grid-cols-1 gap-2.5 pt-1">
                     <button type="button" 
                             @click="startPortalScanner('camera')" 
                             class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
@@ -612,12 +606,6 @@
                         <span>Check-in / PT</span>
                     </button>
 
-                    <button type="button" 
-                            @click="showQrModal = true" 
-                            class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
-                        <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                        <span>View Pass</span>
-                    </button>
                 </div>
             </div>
 
@@ -642,13 +630,16 @@
                     <h2 class="text-lg font-semibold">Attendance</h2>
                     <span class="text-xs text-slate-400">{{ now()->format('F Y') }}</span>
                 </div>
-                <div class="space-y-2">
-                    <div class="flex flex-wrap items-baseline justify-between gap-2">
-                        <span class="text-sm text-slate-300">{{ $thisMonthCheckins }} of {{ $monthlyGoal }} visits</span>
-                        <span class="text-xs text-slate-400">{{ $sessionsNeeded > 0 ? $sessionsNeeded . ' remaining' : 'Goal reached' }}</span>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-[10px] border border-[#26282D] bg-[#0D0E10] p-3">
+                        <p class="text-xs text-slate-400">This month</p>
+                        <p class="mt-1 text-2xl font-semibold tabular-nums text-[#F5A524]">{{ $thisMonthCheckins }}</p>
+                        <p class="text-xs text-slate-400">Visits</p>
                     </div>
-                    <div class="h-2 w-full rounded-full bg-[#26282D] overflow-hidden" role="progressbar" aria-label="Monthly attendance target" aria-valuenow="{{ $goalPercent }}" aria-valuemin="0" aria-valuemax="100">
-                        <div class="h-full rounded-full bg-[#F5A524]" style="width: {{ $goalPercent }}%"></div>
+                    <div class="rounded-[10px] border border-[#26282D] bg-[#0D0E10] p-3">
+                        <p class="text-xs text-slate-400">Total attendance</p>
+                        <p class="mt-1 text-2xl font-semibold tabular-nums text-white">{{ $totalCheckins }}</p>
+                        <p class="text-xs text-slate-400">Visits</p>
                     </div>
                 </div>
                 <!-- Weekly Consistency Dots (Mon - Sun Streak) -->
@@ -2570,8 +2561,8 @@
                         </div>
                     @endif
 
-                    <!-- Card Action Buttons: 1-Tap Check-in & Pass -->
-                    <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-1">
+                    <!-- Check-in action -->
+                    <div class="relative z-10 grid grid-cols-1 gap-2.5 pt-1">
                         <button type="button" 
                                 @click="startPortalScanner()" 
                                 class="min-h-11 py-3 px-3 rounded-[10px] bg-[#F5A524] hover:bg-[#E09414]  text-neutral-950 font-semibold text-xs shadow-none  flex items-center justify-center gap-2 transition-all cursor-pointer">
@@ -2579,12 +2570,6 @@
                             <span>Check-in / PT</span>
                         </button>
 
-                        <button type="button" 
-                                @click="showQrModal = true" 
-                                class="min-h-11 py-3 px-3 rounded-[10px] bg-white/10 hover:bg-white/15  border border-white/15 text-white font-semibold text-xs shadow-none flex items-center justify-center gap-2 transition-all cursor-pointer">
-                            <svg class="w-4 h-4 text-[#F5A524] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-                            <span>View Pass</span>
-                        </button>
                     </div>
                 </div>
 
@@ -2710,32 +2695,6 @@
                 </div>
             </div>
                 </div>
-
-            <!-- MODAL: DIGITAL QR PASS (ATHLETIC STEALTH) -->
-            <div x-show="showQrModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0D0E10]/85 ">
-                <div @click.away="showQrModal = false" class="w-full max-w-sm rounded-[10px] bg-[#0D0E10] border border-[#26282D] shadow-none p-6 text-center space-y-5 relative text-white">
-                    <button type="button" @click="showQrModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
-                    <div>
-                        <span class="px-3 py-1 rounded-full bg-[#F5A524]/15 text-[#F5A524] border border-[#F5A524]/30 text-xs font-semibold uppercase tracking-wider">Gym Check-in Pass</span>
-                        <h3 class="text-xl font-semibold text-white mt-2">{{ $member->full_name }}</h3>
-                        <p class="text-xs text-slate-400 font-mono mt-0.5">{{ $member->member_code }}</p>
-                    </div>
-
-                    <!-- QR Code -->
-                    <div class="p-4 rounded-[10px] bg-white mx-auto inline-block shadow-none">
-                        <div x-data="{ failed: false }" x-init="try { $el.querySelector('img').src = window.gymQrDataUrl(@js($member->qr_code_token ?? $member->member_code)); } catch (e) { failed = true; }" class="w-44 h-44 mx-auto">
-                            <img x-show="!failed" alt="Member QR pass" class="w-full h-full object-contain">
-                            <p x-show="failed" class="text-sm text-neutral-900">QR unavailable. Show your member ID at reception.</p>
-                        </div>qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}';">
-                    </div>
-
-                    <p class="text-xs text-slate-400">Scan this pass at the front desk scanner or turnstile to log your attendance.</p>
-
-                    <button type="button" @click="showQrModal = false" class="min-h-11 w-full py-2.5 rounded-[10px] bg-[#1B1D21] hover:bg-slate-700 text-white font-semibold text-xs cursor-pointer">
-                        Close
-                    </button>
-                </div>
-            </div>
 
             <!-- ========================================================= -->
             <!-- DUAL-MODE SMART SCANNER MODAL (SCAN QR OR ENTER SESSION PIN) -->
