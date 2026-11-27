@@ -581,22 +581,28 @@
                                 @endif
                             </div>
 
-                            <!-- Fee & Due Status (Spans 2 cols) -->
-                            <div class="col-span-2 pt-1 border-t border-line dark:border-line flex items-center justify-between">
-                                <span class="text-xs text-fg-muted dark:text-fg-muted font-medium">Fee Balance</span>
-                                @if($membership)
-                                    @if($remainingAmt > 0)
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">{{ $currency }}{{ number_format($remainingAmt, 0) }} Due</span>
-                                            <span class="text-xs text-fg-muted font-mono">({{ $currency }}{{ number_format($paidAmt, 0) }}/{{ number_format($finalAmt, 0) }})</span>
+                            <!-- Fee balance: separate payment status from membership status -->
+                            <div class="col-span-2 pt-2 border-t border-line space-y-2">
+                                <span class="text-xs text-fg-muted font-medium">Fee balance</span>
+                                @if($membership && $membership->status === 'CANCELLED')
+                                    <div class="text-xs text-fg-muted">Cancelled / Transferred</div>
+                                @elseif($membership)
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <div class="min-w-0">
+                                            <div class="text-fg-muted">Total fee</div>
+                                            <div class="font-semibold text-fg tabular-nums break-words">{{ $currency }}{{ number_format($finalAmt, 2) }}</div>
                                         </div>
-                                    @else
-                                        <span class="px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
-                                            Paid in Full ({{ $currency }}{{ number_format($finalAmt, 0) }})
-                                        </span>
-                                    @endif
+                                        <div class="min-w-0 text-right">
+                                            <div class="text-fg-muted">Paid amount</div>
+                                            <div class="font-semibold text-emerald-700 dark:text-emerald-400 tabular-nums break-words">{{ $currency }}{{ number_format($paidAmt, 2) }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg border {{ $remainingAmt > 0 ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/30 dark:text-rose-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' }}">
+                                        <span class="font-semibold">{{ $remainingAmt > 0 ? 'Payment due' : 'Paid in full' }}</span>
+                                        <span class="text-base font-bold tabular-nums text-right break-words">{{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
+                                    </div>
                                 @else
-                                    <span class="text-fg-muted text-xs">—</span>
+                                    <span class="text-fg-muted text-xs block">No membership</span>
                                 @endif
                             </div>
                         </div>
@@ -604,13 +610,13 @@
                         <!-- Actions Bar -->
                         <div class="flex items-center gap-2 pt-1">
                             @if($membership && $remainingAmt > 0)
-                                <button type="button" @click="openCollectFeeModal({{ $member->id }})" class="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                <button type="button" @click="openCollectFeeModal({{ $member->id }})" class="flex-1 min-w-0 min-h-10 py-2 px-3 rounded-lg bg-accent text-accent-on ops-primary font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                    <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
+                                    <span>Collect {{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
                                 </button>
                             @endif
 
-                            <a href="{{ route('app.members.show', $member->id) }}" class="{{ ($membership && $remainingAmt > 0) ? 'px-3' : 'flex-1' }} py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-600/20 transition-colors">
+                            <a href="{{ route('app.members.show', $member->id) }}" class="{{ ($membership && $remainingAmt > 0) ? 'px-3' : 'flex-1' }} min-h-10 py-2 rounded-lg bg-surface text-fg border border-line hover:bg-raised font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 <span>Profile</span>
                             </a>
@@ -730,31 +736,18 @@
                                     @endif
                                 </td>
 
-                                <!-- Fee & Balance with Live Indicators -->
+                                <!-- Fee & Balance -->
                                 <td class="py-3 px-3.5">
                                     @if($membership && $membership->status === 'CANCELLED')
-                                        <div class="font-semibold text-fg-muted dark:text-fg-muted leading-tight text-xs">
-                                            <span class="line-through">{{ $currency }}{{ number_format($paidAmt, 0) }}</span>
-                                        </div>
-                                        <div class="text-xs text-fg-muted dark:text-fg-muted font-semibold leading-tight mt-0.5">
-                                            Cancelled / Transferred
-                                        </div>
+                                        <div class="text-xs text-fg-muted">Cancelled / Transferred</div>
                                     @elseif($membership)
-                                        <div class="font-semibold text-fg dark:text-white leading-tight text-xs">
-                                            {{ $currency }}{{ number_format($paidAmt, 0) }} <span class="text-xs text-fg-muted font-normal">/ {{ $currency }}{{ number_format($finalAmt, 0) }}</span>
+                                        <div class="text-xs text-fg-muted tabular-nums whitespace-nowrap">Total: <span class="text-fg font-medium">{{ $currency }}{{ number_format($finalAmt, 2) }}</span></div>
+                                        <div class="text-xs text-fg-muted tabular-nums whitespace-nowrap mt-1">Paid: <span class="font-semibold text-emerald-700 dark:text-emerald-400">{{ $currency }}{{ number_format($paidAmt, 2) }}</span></div>
+                                        <div class="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 mt-1.5 text-xs font-semibold tabular-nums whitespace-nowrap {{ $remainingAmt > 0 ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' }}">
+                                            {{ $remainingAmt > 0 ? 'Due: ' : 'Paid in full · ' }}{{ $currency }}{{ number_format($remainingAmt, 2) }}
                                         </div>
-                                        @if($remainingAmt > 0)
-                                            <div class="text-xs text-amber-600 dark:text-amber-400 font-semibold leading-tight mt-0.5 flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                                <span>{{ $currency }}{{ number_format($remainingAmt, 0) }} Due</span>
-                                            </div>
-                                        @else
-                                            <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold leading-tight mt-0.5">
-                                                ✓ Paid Full
-                                            </div>
-                                        @endif
                                     @else
-                                        <span class="text-fg-muted italic text-xs">—</span>
+                                        <span class="text-fg-muted text-xs">No membership</span>
                                     @endif
                                 </td>
 
@@ -777,9 +770,9 @@
                                 <td class="py-3 px-3.5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         @if($membership && $remainingAmt > 0)
-                                            <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 transition-all flex items-center gap-1 text-xs font-semibold shrink-0 cursor-pointer">
+                                            <button type="button" @click="openCollectFeeModal({{ $member->id }})" title="Collect Remaining Fees" class="py-1.5 px-2.5 rounded-lg bg-accent text-accent-on ops-primary transition-all flex items-center gap-1 text-xs font-semibold shrink-0 cursor-pointer">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                                <span>Collect {{ $currency }}{{ number_format($remainingAmt, 0) }}</span>
+                                                <span>Collect {{ $currency }}{{ number_format($remainingAmt, 2) }}</span>
                                             </button>
                                         @endif
 
@@ -792,8 +785,9 @@
                                             </a>
                                         @endif
 
-                                        <a href="{{ route('app.members.show', $member->id) }}" title="View Member Profile" class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors">
+                                        <a href="{{ route('app.members.show', $member->id) }}" title="View Member Profile" class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-surface hover:bg-raised text-fg border border-line transition-colors text-xs font-medium whitespace-nowrap">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <span>Profile</span>
                                         </a>
 
                                         <button type="button" @click="openEditModal({{ $member->id }})" title="Edit Member" class="p-1.5 rounded-lg bg-raised hover:bg-slate-200 text-fg-muted hover:text-fg border border-line dark:bg-raised dark:hover:bg-slate-700 dark:text-fg-muted dark:hover:text-white dark:border-line transition-colors cursor-pointer">
