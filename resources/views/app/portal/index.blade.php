@@ -914,6 +914,13 @@
                                 @endif
 
                                 <!-- 2. Body Fat -->
+                                @if(isset($latestMeasurement['bmi']))
+                                    <div class="rounded-[10px] bg-[#0D0E10] border border-[#26282D] p-3">
+                                        <p class="text-xs text-slate-400">BMI</p>
+                                        <p class="text-xl font-semibold text-white tabular-nums">{{ $latestMeasurement['bmi'] }}</p>
+                                        <p class="text-xs text-slate-400">{{ $latestMeasurement['height_cm'] ?? '—' }} cm</p>
+                                    </div>
+                                @endif
                                 @if(!empty($latestMeasurement['body_fat']))
                                     <div class="p-3 rounded-[10px] bg-white/5 border border-white/10 hover:border-[#F5A524]/40 transition-colors">
                                         <span class="text-xs uppercase font-semibold text-[#F5A524] tracking-wider block">Body Fat</span>
@@ -1030,6 +1037,9 @@
                                                 <span class="px-2 py-0.5 rounded-lg bg-[#F5A524]/15 text-[#F5A524] font-semibold font-mono text-xs border border-[#F5A524]/25">
                                                     {{ \Carbon\Carbon::parse($m['date'] ?? now())->format('d M Y') }}
                                                 </span>
+                                                @if(isset($m['bmi']))
+                                                    <span class="font-semibold text-white text-xs">BMI {{ $m['bmi'] }}</span>
+                                                @endif
                                                 @if(!empty($m['weight']))
                                                     <span class="font-semibold text-white text-xs">⚖️ {{ $m['weight'] }} kg</span>
                                                 @endif
