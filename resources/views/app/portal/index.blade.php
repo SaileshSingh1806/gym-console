@@ -9,19 +9,9 @@
         $activeDiet = $member?->activeDietPlan ?? $member?->dietPlans?->first();
         $latestMeasurement = !empty($measurements) ? $measurements[0] : null;
 
-        // Check if member attended gym today
-        $todayCheckin = $member?->attendance?->first(function ($att) {
-            return ($att->date && \Carbon\Carbon::parse($att->date)->isToday()) 
-                || ($att->check_in && \Carbon\Carbon::parse($att->check_in)->isToday());
-        });
-
-        // Attendance stats for motivation system
-        $thisMonthCheckins = $member ? $member->attendance->filter(function($a) {
-            $d = $a->date ? \Carbon\Carbon::parse($a->date) : ($a->check_in ? \Carbon\Carbon::parse($a->check_in) : null);
-            return $d && $d->isCurrentMonth();
-        })->count() : 0;
-
-        $totalCheckins = $member ? $member->attendance->count() : 0;
+        $todayCheckin = $attendanceStats['today'] ?? null;
+        $thisMonthCheckins = $attendanceStats['month'] ?? 0;
+        $totalCheckins = $attendanceStats['total'] ?? 0;
 
         // Gamified 20-Day Monthly Target
         $monthlyGoal = 20;
@@ -31,10 +21,7 @@
         // Current week (Mon to Sun) checkin timeline
         $currentWeekDays = [];
         $startOfWeek = now()->copy()->startOfWeek(); // Monday
-        $attendedDates = $member ? $member->attendance->map(function($a) {
-            $d = $a->date ? \Carbon\Carbon::parse($a->date) : ($a->check_in ? \Carbon\Carbon::parse($a->check_in) : null);
-            return $d ? $d->toDateString() : null;
-        })->filter()->all() : [];
+        $attendedDates = $attendanceStats['week_dates'] ?? [];
 
         for ($i = 0; $i < 7; $i++) {
             $dayDate = $startOfWeek->copy()->addDays($i);
@@ -2653,7 +2640,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-base font-semibold text-white">Gym Visit &amp; Attendance Log</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Automated check-ins recorded via biometric &amp; QR scan</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Latest 30 visits · Biometric and QR check-ins</p>
                         </div>
                         <span class="px-3 py-1 rounded-[10px] bg-[#F5A524]/15 text-[#F5A524] text-xs font-semibold border border-[#F5A524]/30 font-mono">
                             {{ $totalCheckins }} Total Visits
@@ -2736,7 +2723,10 @@
 
                     <!-- QR Code -->
                     <div class="p-4 rounded-[10px] bg-white mx-auto inline-block shadow-none">
-                        <img src="https://quickchart.io/qr?size=200&margin=1&text={{ urlencode($member->qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}';">
+                        <div x-data="{ failed: false }" x-init="try { $el.querySelector('img').src = window.gymQrDataUrl(@js($member->qr_code_token ?? $member->member_code)); } catch (e) { failed = true; }" class="w-44 h-44 mx-auto">
+                            <img x-show="!failed" alt="Member QR pass" class="w-full h-full object-contain">
+                            <p x-show="failed" class="text-sm text-neutral-900">QR unavailable. Show your member ID at reception.</p>
+                        </div>qr_code_token ?? $member->member_code) }}" alt="QR Code" class="w-44 h-44 mx-auto object-contain" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($member->qr_code_token ?? $member->member_code) }}';">
                     </div>
 
                     <p class="text-xs text-slate-400">Scan this pass at the front desk scanner or turnstile to log your attendance.</p>
