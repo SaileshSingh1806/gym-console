@@ -55,7 +55,10 @@ class MembershipCreditService
         return Schema::hasTable('membership_payment_credits') && DB::table('membership_payment_credits')
             ->where('tenant_id', $payment->tenant_id)->where(function ($q) use ($payment) {
                 $q->where('source_payment_id', $payment->id);
-                if ($payment->membership_id) $q->orWhere('target_membership_id', $payment->membership_id);
+                if ($payment->membership_id) {
+                    $q->orWhere('target_membership_id', $payment->membership_id)
+                      ->orWhereIn('source_payment_id', MemberPayment::withoutGlobalScopes()->where('tenant_id', $payment->tenant_id)->where('membership_id', $payment->membership_id)->select('id'));
+                }
             })->exists();
     }
 
@@ -64,7 +67,7 @@ class MembershipCreditService
         return Schema::hasTable('membership_payment_credits') && DB::table('membership_payment_credits')
             ->where('tenant_id', $membership->tenant_id)->where(function ($q) use ($membership) {
                 $q->where('target_membership_id', $membership->id)
-                  ->orWhereIn('source_payment_id', $membership->payments()->select('id'));
+                  ->orWhereIn('source_payment_id', MemberPayment::withoutGlobalScopes()->where('tenant_id', $membership->tenant_id)->where('membership_id', $membership->id)->select('id'));
             })->exists();
     }
 
@@ -90,11 +93,14 @@ class MembershipCreditService
             if (DB::table('membership_payment_credits')->where('target_membership_id', $payment->membership_id)->exists()) {
                 throw ValidationException::withMessages(['credit_ids' => 'A membership already settled using credit cannot be reused as a credit source.']);
             }
-            if (! self::eligible($payment) || $payment->membership_id === $target->id) {
+            if (! self::eligible($payment) || (int) $payment->membership_id === (int) $target->id) {
                 throw ValidationException::withMessages(['credit_ids' => 'Only fully paid, eligible short-duration membership receipts can be adjusted.']);
             }
             $used = (int) DB::table('membership_payment_credits')->where('source_payment_id', $payment->id)->sum('amount_cents');
             $available[$payment->id] = max(0, self::cents($payment->amount) - $used);
+            if ($available[$payment->id] === 0) {
+                throw ValidationException::withMessages(['credit_ids' => 'A selected receipt has already been fully adjusted. Refresh and select available receipts.']);
+            }
         }
         $total = array_sum($available);
         $credit = $mode === 'full' ? $total : $requested;
