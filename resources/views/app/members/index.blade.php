@@ -1,4 +1,17 @@
 <x-app-layout header="Gym Members Management">
+        <style>
+            #member-results { container-type: inline-size; container-name: member-results; min-width: 0; }
+            #member-results .members-desktop { display: none; }
+            #member-results .members-cards { display: block; }
+            @container member-results (min-width: 960px) {
+                #member-results .members-desktop { display: block; }
+                #member-results .members-cards { display: none; }
+            }
+            @container member-results (min-width: 600px) and (max-width: 959px) {
+                #member-results .members-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; }
+            }
+        </style>
+
     @php
         $currency = auth()->user()->tenant?->currency_symbol ?? '₹';
         $membershipPlans = ($membershipPlans ?? collect())->filter(fn ($p) => (bool) $p->is_active);
