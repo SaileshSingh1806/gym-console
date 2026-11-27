@@ -31,7 +31,7 @@
     // OG Image
     $resolvedOgImage = $ogImage 
         ?? ($platformSettings['og_image_url'] ?? null) 
-        ?? asset('images/gymdeskhub_horizontal_dark.png');
+        ?? asset('images/gymdeskhub-official-dark.svg');
 
     // Canonical URL
     $resolvedCanonical = $canonicalUrl ?? url()->current();
@@ -90,11 +90,9 @@
     <meta name="revisit-after" content="7 days">
 
     {{-- Favicon & App Icons --}}
-    <link rel="icon" type="image/x-icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('favicon.ico') }}?v=4">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=4">
+    <link rel="icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('images/gymdeskhub-official-icon.svg') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=4">
-    <link rel="shortcut icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('favicon.ico') }}?v=4">
+    <link rel="shortcut icon" href="{{ !empty($platformSettings['favicon_url']) ? $platformSettings['favicon_url'] : asset('images/gymdeskhub-official-icon.svg') }}">
 
     {{-- Schema.org JSON-LD Structured Data for Google Rich Snippets --}}
     @php
@@ -108,7 +106,7 @@
                     'url' => url('/'),
                     'logo' => [
                         '@type' => 'ImageObject',
-                        'url' => asset('images/gymdeskhub_horizontal_dark.png'),
+                        'url' => asset('images/gymdeskhub-official-dark.svg'),
                     ],
                     'contactPoint' => [
                         '@type' => 'ContactPoint',
@@ -346,7 +344,7 @@
 
                 <!-- ── LOGO ── -->
                 <a href="{{ route('home') }}" class="flex items-center shrink-0 focus:outline-none group">
-                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                    <img src="{{ asset('images/gymdeskhub-official-dark.svg') }}"
                          alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
                          class="h-9 sm:h-10 w-auto object-contain transition-opacity group-hover:opacity-90">
                 </a>
@@ -460,7 +458,7 @@
     @if($marketingPage)
 <footer class="border-t border-slate-800 bg-[#141518]">
 <div class="max-w-[1200px] mx-auto px-5 lg:px-8 py-12">
-<a href="{{ route('home') }}" class="inline-block mb-8"><img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="GymDeskHub" class="h-9 w-auto"></a>
+<a href="{{ route('home') }}" class="inline-block mb-8"><img src="{{ asset('images/gymdeskhub-official-dark.svg') }}" alt="GymDeskHub" class="h-9 w-auto"></a>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
 @foreach(['Product'=>['features'=>'Features','pricing'=>'Pricing','register'=>'Start free','login'=>'Log in'],'Company'=>['about'=>'About','contact'=>'Contact'],'Legal'=>['terms'=>'Terms & conditions','privacy'=>'Privacy policy','refund-policy'=>'Refund & cancellation','shipping-policy'=>'Shipping & delivery']] as $heading=>$links)
 <div><h4 class="font-semibold text-white mb-4">{{ $heading }}</h4><ul class="space-y-3">@foreach($links as $route=>$label)<li><a href="{{ route($route) }}" class="text-slate-400 hover:text-white hover:underline">{{ $label }}</a></li>@endforeach</ul></div>
@@ -477,7 +475,7 @@
                 <!-- Brand Column (2 cols) -->
                 <div class="col-span-2 space-y-4">
                     <a href="{{ route('home') }}" class="inline-flex items-center group">
-                        <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}"
+                        <img src="{{ asset('images/gymdeskhub-official-dark.svg') }}"
                              alt="{{ $platformSettings['app_name'] ?? 'GymDeskHub' }}"
                              class="h-9 w-auto object-contain transition-opacity group-hover:opacity-90">
                     </a>
