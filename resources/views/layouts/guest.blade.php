@@ -10,6 +10,7 @@
 ])
 
 @php
+    $marketingPage = request()->routeIs('home', 'features', 'pricing', 'about', 'contact', 'terms', 'privacy', 'refund-policy', 'shipping-policy');
     $siteName = $platformSettings['app_name'] ?? 'GymDeskHub';
     
     // Page Title
@@ -132,21 +133,7 @@
                     'name' => $siteName,
                     'applicationCategory' => 'BusinessApplication',
                     'operatingSystem' => 'Web, Android, iOS',
-                    'offers' => [
-                        '@type' => 'AggregateOffer',
-                        'priceCurrency' => 'INR',
-                        'lowPrice' => '12000',
-                        'highPrice' => '28000',
-                        'offerCount' => '3',
-                    ],
                     'description' => $resolvedDescription,
-                    'aggregateRating' => [
-                        '@type' => 'AggregateRating',
-                        'ratingValue' => '4.9',
-                        'reviewCount' => '148',
-                        'bestRating' => '5',
-                        'worstRating' => '1',
-                    ],
                 ],
             ],
         ];
@@ -157,7 +144,12 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    @if($marketingPage)
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @endif
+    @unless($marketingPage)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+    @endunless
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { theme: { extend: { colors: { slate: { 900: "#151618" } } } } };</script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -225,6 +217,38 @@
         .animate-marquee:hover {
             animation-play-state: paused;
         }
+        /* Public marketing pages only; authentication and public check-in retain their styles. */
+        .marketing-site { background:#0D0E10 !important; color:#ECEDEF !important; font-family:Inter,system-ui,sans-serif; }
+        .marketing-site header { background:#0D0E10 !important; border-color:#26282D !important; backdrop-filter:none !important; }
+        .marketing-site footer { background:#141518 !important; border-color:#26282D !important; }
+        .marketing-site main > section { scroll-margin-top:80px; }
+        .marketing-site { --brand:#F5A524; }
+        .marketing-site [class~="bg-amber-500"] { background-color:var(--brand); }
+        .marketing-site [class~="text-amber-400"] { color:var(--brand); }
+        .marketing-site [class~="border-amber-500"] { border-color:var(--brand); }
+        .marketing-site [class~="bg-slate-900"] { background-color:#141518; }
+        .marketing-site [class~="bg-slate-800"] { background-color:#1B1D21; }
+        .marketing-site [class~="border-slate-800"] { border-color:#26282D; }
+        .marketing-site [class~="border-slate-700"] { border-color:#373A41; }
+        .marketing-site [class~="text-slate-300"] { color:#C7C9CD; }
+        .marketing-site [class~="text-slate-400"] { color:#A0A4AB; }
+        .marketing-site [class~="text-slate-500"] { color:#92969E; }
+        .marketing-site header nav a[aria-current="page"] { color:#F5A524; background:transparent; }
+        .marketing-site main a[class~="bg-amber-500"]:hover, .marketing-site header a[class~="bg-amber-500"]:hover { background-color:#E09414; }
+
+        .marketing-site main h1, .marketing-site main h2, .marketing-site main h3 { letter-spacing:-.035em; font-weight:600; }
+        .marketing-site main h1 { font-size:clamp(2.25rem,5vw,4rem); line-height:1.08; }
+        .marketing-site main h2 { font-size:clamp(1.6rem,3vw,2.5rem); line-height:1.18; }
+        .marketing-site main h3 { line-height:1.35; }
+        .marketing-site a:focus-visible, .marketing-site button:focus-visible, .marketing-site input:focus-visible, .marketing-site select:focus-visible, .marketing-site textarea:focus-visible { outline:2px solid #F5A524; outline-offset:3px; }
+        .marketing-site main input, .marketing-site main select, .marketing-site main textarea { font-family:inherit; }
+        .marketing-site .marketing-hero { padding-block:clamp(3rem,6vw,6rem); }
+        .marketing-site .marketing-hero p { max-width:60ch; }
+        .marketing-site .marketing-section { padding-block:clamp(3rem,6vw,5rem); }
+        .marketing-site .marketing-legal { max-width:760px; margin-inline:auto; font-size:15px; line-height:1.85; }
+        .marketing-site .marketing-legal h2 { font-size:1.125rem; letter-spacing:-.015em; }
+        .marketing-site .marketing-legal ul { padding-left:1.25rem; }
+        @media(prefers-reduced-motion:reduce) { .marketing-site *, .marketing-site *::before, .marketing-site *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
     </style>
 
     @if(!empty($platformSettings['google_analytics_id']))
@@ -256,15 +280,16 @@
         {!! $platformSettings['custom_header_scripts'] !!}
     @endif
 </head>
-<body class="flex flex-col min-h-screen antialiased bg-[#090d16] selection:bg-amber-500/25 selection:text-amber-200 overflow-x-hidden">
+<body class="{{ $marketingPage ? 'marketing-site' : '' }} flex flex-col min-h-screen antialiased bg-[#090d16] selection:bg-amber-500/25 selection:text-amber-200 overflow-x-hidden">
 
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-black focus:p-3">Skip to content</a>
     @if(!($hideNav ?? false))
     <!-- ═══════════════════════════════════════════════════
          CLEAN SAAS NAVIGATION HEADER
     ═══════════════════════════════════════════════════ -->
     <header
         class="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-md border-b border-slate-800/80 transition-all"
-        x-data="{ mobileMenuOpen: false }"
+        x-data="{ mobileMenuOpen: false }" @keydown.escape.window="mobileMenuOpen = false"
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
@@ -277,10 +302,10 @@
                 </a>
 
                 <!-- ── DESKTOP NAV ── -->
-                <nav class="hidden md:flex items-center gap-1">
+                <nav class="hidden lg:flex items-center gap-1">
                     @php
                         $navLinks = [
-                            ['route' => 'home',     'label' => 'Overview'],
+                            ['route' => 'home',     'label' => 'Home'],
                             ['route' => 'features', 'label' => 'Features'],
                             ['route' => 'pricing',  'label' => 'Pricing'],
                             ['route' => 'about',    'label' => 'About'],
@@ -288,7 +313,7 @@
                         ];
                     @endphp
                     @foreach($navLinks as $link)
-                        <a href="{{ route($link['route']) }}"
+                        <a href="{{ route($link['route']) }}" @if(request()->routeIs($link['route'])) aria-current="page" @endif
                            class="px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs($link['route']) ? 'text-white bg-slate-800/80 font-semibold' : 'text-slate-300 hover:text-white hover:bg-slate-800/40' }}">
                             {{ $link['label'] }}
                         </a>
@@ -296,7 +321,7 @@
                 </nav>
 
                 <!-- ── DESKTOP ACTIONS ── -->
-                <div class="hidden md:flex items-center gap-5">
+                <div class="hidden lg:flex items-center gap-5">
                     @auth
                         @if(auth()->user()->isSuperAdmin())
                             <a href="{{ route('admin.dashboard') }}"
@@ -329,10 +354,10 @@
                 </div>
 
                 <!-- ── MOBILE MENU BUTTON ── -->
-                <div class="flex md:hidden items-center gap-2">
+                <div class="flex lg:hidden items-center gap-2">
                     <button @click="mobileMenuOpen = !mobileMenuOpen"
                             class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white focus:outline-none cursor-pointer"
-                            aria-label="Toggle menu">
+                            aria-label="Toggle menu" :aria-expanded="mobileMenuOpen.toString()">
                         <svg x-show="!mobileMenuOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         <svg x-show="mobileMenuOpen" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -346,10 +371,10 @@
              x-transition:enter="transition ease-out duration-150"
              x-transition:enter-start="opacity-0 -translate-y-1"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="md:hidden border-t border-slate-800/80 bg-[#090d16] px-4 py-5 space-y-4 shadow-2xl">
+             class="lg:hidden border-t border-slate-800/80 bg-[#090d16] px-4 py-5 space-y-4 shadow-2xl">
             <nav class="flex flex-col gap-1">
-                @foreach($navLinks ?? [['route'=>'home','label'=>'Overview'],['route'=>'features','label'=>'Features'],['route'=>'pricing','label'=>'Pricing'],['route'=>'about','label'=>'About'],['route'=>'contact','label'=>'Contact']] as $link)
-                    <a href="{{ route($link['route']) }}"
+                @foreach($navLinks ?? [['route'=>'home','label'=>'Home'],['route'=>'features','label'=>'Features'],['route'=>'pricing','label'=>'Pricing'],['route'=>'about','label'=>'About'],['route'=>'contact','label'=>'Contact']] as $link)
+                    <a href="{{ route($link['route']) }}" @if(request()->routeIs($link['route'])) aria-current="page" @endif
                        class="px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs($link['route']) ? 'bg-slate-800 text-white font-semibold' : 'text-slate-300 hover:bg-slate-900 hover:text-white' }}">
                         {{ $link['label'] }}
                     </a>
@@ -374,7 +399,7 @@
     @endif
 
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main id="main-content" class="flex-grow">
         {{ $slot }}
     </main>
 

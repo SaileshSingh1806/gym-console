@@ -7,98 +7,75 @@
     {{-- ══════════════════════════════════════════════════════════════
          HERO SECTION (CLEAN MATTE DARK - NO GLOW - HUMAN TONE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 overflow-hidden bg-[#090d16]">
+    <section class="marketing-hero relative pt-12 pb-16 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28 overflow-hidden bg-[#0D0E10]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-4xl mx-auto">
-                
-                {{-- Category Pill Badge (Responsive Wrap for Small Screens) --}}
-                <div class="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-slate-900 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium mb-6 sm:mb-8 max-w-full flex-wrap sm:flex-nowrap justify-center text-center">
-                    <span class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] uppercase tracking-wider shrink-0">ALL-IN-ONE</span>
-                    <span class="text-slate-300 font-medium">Simple &bull; Reliable &bull; Built for Indian Gyms</span>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+                <div class="lg:col-span-7">
+                    <p class="text-xs font-semibold text-amber-400 mb-4">Gym management software</p>
+                    <h1 class="text-white mb-5">Run your gym.<br class="hidden sm:block"> From one workspace.</h1>
+                    <p class="text-base sm:text-lg text-slate-300 leading-relaxed mb-7">Manage memberships, attendance, payments and coaching from one connected platform. Give your staff the tools they need and keep your business in view.</p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-amber-500 text-slate-950 font-semibold text-sm">Start free <span aria-hidden="true">&rarr;</span></a>
+                        <a href="{{ route('contact') }}" class="inline-flex items-center justify-center px-5 py-3 rounded-lg border border-slate-700 text-white font-medium text-sm hover:bg-slate-800">Book a demo</a>
+                    </div>
+                    <p class="mt-4 text-xs text-slate-400">Free plan for up to 75 active members. No credit card required.</p>
                 </div>
-
-                {{-- Direct, Human Headline --}}
-                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.14] mb-6">
-                    Manage Members, Attendance &amp; Fees <br class="hidden sm:inline">
-                    <span class="text-amber-400">
-                        Without the Everyday Chaos
-                    </span>
-                </h1>
-
-                {{-- Grounded, Straightforward Subheadline --}}
-                <p class="text-base sm:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-3xl mx-auto font-normal mb-10">
-                    Stop chasing members for renewals and maintaining messy registers. GymDeskHub connects your front-desk billing, smart biometric access, automated WhatsApp reminders, and workout plans in one easy dashboard.
-                </p>
-
-                {{-- Direct CTA Buttons --}}
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ route('register') }}"
-                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-colors active:scale-[0.98]">
-                        <span>Start Free Forever</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
-                    <a href="{{ route('contact') }}"
-                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-semibold text-base hover:bg-slate-800 hover:text-white transition-colors">
-                        <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771z"/></svg>
-                        <span>Book a Live Demo</span>
-                    </a>
-                </div>
-
-                {{-- Honest Trust Proof Points --}}
-                <div class="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-slate-400 font-medium">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Free Forever Plan (Up to 75 members)</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>No credit card required to start</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>Plug &amp; Play Biometric Integration</span>
-                    </div>
+                <div class="lg:col-span-5 border-t lg:border-t-0 lg:border-l border-slate-800 pt-5 lg:pt-0 lg:pl-8">
+                    <p class="text-xs font-medium text-slate-400 mb-3">One platform, three workspaces</p>
+                    @foreach([
+                        ['01', 'Gym owners', 'Memberships, fees and daily operations'],
+                        ['02', 'Trainers', 'Workouts, diet plans and PT sessions'],
+                        ['03', 'Members', 'Membership details and attendance'],
+                    ] as [$number, $label, $description])
+                        <div class="flex items-start gap-4 py-3 border-b border-slate-800 last:border-b-0">
+                            <span class="text-xs text-slate-500 tabular-nums pt-1">{{ $number }}</span>
+                            <div>
+                                <p class="text-sm font-semibold text-white">{{ $label }}</p>
+                                <p class="text-xs text-slate-400 mt-1">{{ $description }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
             {{-- ══════════════════════════════════════════════════════════
                  THE 3 CORE APPS SHOWCASE (OWNER, TRAINER, MEMBER)
             ══════════════════════════════════════════════════════════════ --}}
-            <div class="mt-16 max-w-6xl mx-auto" x-data="{ activeApp: 'owner' }">
+            <div class="mt-10 sm:mt-14 max-w-7xl mx-auto" x-data="{ activeApp: 'owner' }">
                 
                 {{-- App Switcher Tabs (Responsive Scrollable Container) --}}
                 <div class="flex items-center justify-start sm:justify-center mb-6 overflow-x-auto max-w-full pb-2 scrollbar-none">
-                    <div class="inline-flex p-1.5 rounded-2xl bg-slate-900 border border-slate-800 shrink-0">
+                    <div class="inline-flex p-1.5 rounded-lg bg-slate-900 border border-slate-800 shrink-0">
                         <button type="button" 
                                 @click="activeApp = 'owner'" 
                                 :class="activeApp === 'owner' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white font-medium'"
                                 class="flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap">
-                            <span>🏢</span>
+                            
                             <span>Owner Console</span>
                         </button>
                         <button type="button" 
                                 @click="activeApp = 'trainer'" 
                                 :class="activeApp === 'trainer' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white font-medium'"
                                 class="flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap">
-                            <span>💪</span>
+                            
                             <span>Trainer App</span>
                         </button>
                         <button type="button" 
                                 @click="activeApp = 'member'" 
                                 :class="activeApp === 'member' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white font-medium'"
                                 class="flex items-center gap-2 px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm transition-colors cursor-pointer whitespace-nowrap">
-                            <span>📱</span>
+                            
                             <span>Member Pass</span>
                         </button>
                     </div>
                 </div>
 
                 {{-- APP 1: OWNER CONSOLE --}}
-                <div x-show="activeApp === 'owner'" x-cloak class="rounded-3xl bg-[#0c121e] p-4 sm:p-6 border border-slate-800">
+                <div x-show="activeApp === 'owner'" x-cloak class="rounded-xl bg-[#1B1D21] p-4 sm:p-6 border border-slate-800">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         <div class="lg:col-span-5 space-y-4">
-                            <span class="px-3 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider">Owner Dashboard</span>
-                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Full Control Over Every Rupee &amp; Check-in</h3>
+                            <span class="px-3 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-normal">Owner Dashboard</span>
+                            <h3 class="text-2xl sm:text-3xl font-semibold text-white">Full Control Over Every Rupee &amp; Check-in</h3>
                             <p class="text-sm text-slate-300 leading-relaxed">
                                 Know exactly how many members visited today, who has an overdue payment, and how much cash vs UPI was collected at the front desk.
                             </p>
@@ -108,7 +85,7 @@
                                 <li class="flex items-center gap-2.5"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Single login to manage 1 branch or multiple locations</li>
                             </ul>
                         </div>
-                        <div class="lg:col-span-7 bg-[#070b14] rounded-2xl p-4 border border-slate-800 space-y-3">
+                        <div class="lg:col-span-7 bg-[#141518] rounded-lg p-4 border border-slate-800 space-y-3">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
@@ -149,11 +126,11 @@
                 </div>
 
                 {{-- APP 2: TRAINER APP --}}
-                <div x-show="activeApp === 'trainer'" x-cloak class="rounded-3xl bg-[#0c121e] p-4 sm:p-6 border border-slate-800">
+                <div x-show="activeApp === 'trainer'" x-cloak class="rounded-xl bg-[#1B1D21] p-4 sm:p-6 border border-slate-800">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         <div class="lg:col-span-5 space-y-4">
-                            <span class="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-wider">Trainer App</span>
-                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Workout &amp; Diet Plans on Trainer’s Phone</h3>
+                            <span class="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-normal">Trainer App</span>
+                            <h3 class="text-2xl sm:text-3xl font-semibold text-white">Workout &amp; Diet Plans on Trainer’s Phone</h3>
                             <p class="text-sm text-slate-300 leading-relaxed">
                                 No more writing diet charts on loose paper. Trainers assign customized exercises, sets, reps, and macro targets directly to their assigned clients.
                             </p>
@@ -163,7 +140,7 @@
                                 <li class="flex items-center gap-2.5"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Personal Training (PT) sessions &amp; commission tracking</li>
                             </ul>
                         </div>
-                        <div class="lg:col-span-7 bg-[#070b14] rounded-2xl p-5 border border-slate-800 space-y-3">
+                        <div class="lg:col-span-7 bg-[#141518] rounded-lg p-5 border border-slate-800 space-y-3">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
                                 <span class="font-bold text-white">Trainer: Rahul Verma</span>
                                 <span class="text-amber-400 font-medium">10 Assigned Members</span>
@@ -196,11 +173,11 @@
                 </div>
 
                 {{-- APP 3: MEMBER WEB PASS --}}
-                <div x-show="activeApp === 'member'" x-cloak class="rounded-3xl bg-[#0c121e] p-4 sm:p-6 border border-slate-800">
+                <div x-show="activeApp === 'member'" x-cloak class="rounded-xl bg-[#1B1D21] p-4 sm:p-6 border border-slate-800">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         <div class="lg:col-span-5 space-y-4">
-                            <span class="px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-wider">Member Web Pass</span>
-                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white">Instant QR Check-in Without App Downloads</h3>
+                            <span class="px-3 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-normal">Member Web Pass</span>
+                            <h3 class="text-2xl sm:text-3xl font-semibold text-white">Instant QR Check-in Without App Downloads</h3>
                             <p class="text-sm text-slate-300 leading-relaxed">
                                 Members don’t need to install a heavy app from Play Store. They simply open their link to show their digital gym pass, scan the gym QR, and track their attendance streak.
                             </p>
@@ -210,15 +187,15 @@
                                 <li class="flex items-center gap-2.5"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Direct 1-tap UPI fee renewal via PhonePe or Google Pay</li>
                             </ul>
                         </div>
-                        <div class="lg:col-span-7 bg-[#070b14] rounded-2xl p-5 border border-slate-800 space-y-3">
+                        <div class="lg:col-span-7 bg-[#141518] rounded-lg p-5 border border-slate-800 space-y-3">
                             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                                 <div>
-                                    <div class="text-xs text-amber-400 font-bold uppercase tracking-wider">Active Digital Pass</div>
+                                    <div class="text-xs text-amber-400 font-bold uppercase tracking-normal">Active Digital Pass</div>
                                     <div class="text-lg font-bold text-white">Ankush Singh</div>
                                     <div class="text-[11px] text-slate-400">12-Month Membership &bull; Valid till 02 Dec 2026</div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-black text-emerald-400">30</div>
+                                    <div class="text-2xl font-semibold text-emerald-400">30</div>
                                     <div class="text-[10px] text-slate-400 uppercase font-bold">Days Left</div>
                                 </div>
                             </div>
@@ -249,11 +226,11 @@
     {{-- ══════════════════════════════════════════════════════════════
          BIOMETRIC INTEGRATION (NO BRAND NAMES - GENERIC HARDWARE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-16 bg-[#070b14] border-y border-slate-800">
+    <section class="marketing-section py-16 bg-[#141518] border-y border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Biometric Integration</span>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mt-1">
+                <span class="text-xs font-bold uppercase tracking-normal text-amber-400">Biometric Integration</span>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-tight mt-1">
                     Connect Any Access Device or Check-in Mode
                 </h2>
                 <p class="text-slate-400 text-sm sm:text-base mt-2">
@@ -262,32 +239,32 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">👤</div>
                     <div class="font-bold text-white text-xs sm:text-sm">Face Recognition</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">High-Speed Contactless</div>
                 </div>
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">👆</div>
                     <div class="font-bold text-white text-xs sm:text-sm">Fingerprint Scanners</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">Optical &amp; Capacitive</div>
                 </div>
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">🛑</div>
                     <div class="font-bold text-white text-xs sm:text-sm">Turnstiles &amp; Gates</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">Auto-Lock Expired Entry</div>
                 </div>
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">📲</div>
                     <div class="font-bold text-white text-xs sm:text-sm">Dynamic QR Scan</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">Member Phone Check-in</div>
                 </div>
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">💳</div>
                     <div class="font-bold text-white text-xs sm:text-sm">RFID Smart Cards</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">Tap-and-Go Keyfobs</div>
                 </div>
-                <div class="p-5 rounded-2xl bg-[#0c121e] border border-slate-800 text-center hover:border-slate-700 transition-colors">
+                <div class="p-5 rounded-lg bg-[#1B1D21] border border-slate-800 text-center hover:border-slate-700 transition-colors">
                     <div class="text-2xl mb-2">🖥️</div>
                     <div class="font-bold text-white text-xs sm:text-sm">Front-Desk Entry</div>
                     <div class="text-[10px] text-slate-400 mt-0.5">Fast Name/Phone Search</div>
@@ -299,16 +276,16 @@
     {{-- ══════════════════════════════════════════════════════════════
          AUTOMATED WHATSAPP FEE RECOVERY (CLEAN NATURAL COLORS & COPY)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 lg:py-24 bg-[#090d16]">
+    <section class="marketing-section py-20 lg:py-24 bg-[#0D0E10]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
                 {{-- Left Text Info --}}
                 <div class="lg:col-span-6 space-y-6">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-bold uppercase tracking-normal">
                         <span>💬</span> WhatsApp Fee Recovery
                     </div>
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-tight">
                         Collect Pending Gym Fees On Time, Without Awkward Follow-up Calls
                     </h2>
                     <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
@@ -342,7 +319,7 @@
 
                 {{-- Right WhatsApp Chat Bubble Mockup (Polished Realistic Colors) --}}
                 <div class="lg:col-span-6 flex justify-center">
-                    <div class="w-full max-w-sm rounded-3xl bg-[#0b141a] border border-slate-800 p-4 space-y-3 font-sans shadow-xl">
+                    <div class="w-full max-w-sm rounded-xl bg-[#0b141a] border border-slate-800 p-4 space-y-3 font-sans ">
                         {{-- WhatsApp Header --}}
                         <div class="flex items-center gap-3 pb-3 border-b border-slate-800">
                             <div class="w-10 h-10 rounded-full bg-emerald-700 flex items-center justify-center font-bold text-white text-sm">
@@ -358,7 +335,7 @@
                         </div>
 
                         {{-- Chat Message Bubble --}}
-                        <div class="p-4 rounded-2xl bg-[#1f2c34] text-slate-100 text-xs space-y-3">
+                        <div class="p-4 rounded-lg bg-[#1f2c34] text-slate-100 text-xs space-y-3">
                             <p class="font-normal text-slate-200 leading-relaxed">
                                 Hi <strong>Rohit Sharma</strong>! 👋<br>
                                 Your Annual Membership at <strong>Armour 24/7 Gym</strong> expires in <strong>3 days</strong> (12 Dec 2026).
@@ -368,7 +345,7 @@
                             </p>
                             <div class="p-3 rounded-xl bg-[#111b21] border border-slate-700/60 flex items-center justify-between">
                                 <div>
-                                    <div class="text-[10px] text-slate-400 uppercase tracking-wider">Renewal Amount</div>
+                                    <div class="text-[10px] text-slate-400 uppercase tracking-normal">Renewal Amount</div>
                                     <div class="text-sm font-bold text-amber-400">₹6,000 / year</div>
                                 </div>
                                 <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium text-[10px] border border-emerald-500/20">Zero Surcharge</span>
@@ -393,22 +370,22 @@
     {{-- ══════════════════════════════════════════════════════════════
          MODERN HIGH-END COMPARISON MATRIX (REDESIGNED PROFESSIONAL UI)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 bg-[#070b14] border-t border-slate-800">
+    <section class="marketing-section py-20 bg-[#141518] border-t border-slate-800">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-14">
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Why Upgrade?</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">
+                <span class="text-xs font-bold uppercase tracking-normal text-amber-400">Why Upgrade?</span>
+                <h2 class="text-3xl sm:text-4xl font-semibold text-white tracking-tight mt-2">
                     Paper Registers vs GymDeskHub
                 </h2>
                 <p class="text-slate-400 text-sm sm:text-base mt-2">
-                    See how automating everyday admin tasks saves 10+ hours every week and stops revenue leaks.
+                    Compare everyday administration workflows in one connected platform.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 
                 {{-- Left: Old Manual Way --}}
-                <div class="p-6 sm:p-8 rounded-3xl bg-[#0c121e] border border-rose-500/20 flex flex-col justify-between">
+                <div class="p-6 sm:p-8 rounded-xl bg-[#1B1D21] border border-rose-500/20 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
                             <div>
@@ -444,8 +421,8 @@
                 </div>
 
                 {{-- Right: GymDeskHub Way --}}
-                <div class="p-6 sm:p-8 rounded-3xl bg-[#0c121e] border-2 border-amber-500 flex flex-col justify-between relative shadow-sm">
-                    <div class="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black uppercase tracking-wider">
+                <div class="p-6 sm:p-8 rounded-xl bg-[#1B1D21] border-2 border-amber-500 flex flex-col justify-between relative shadow-sm">
+                    <div class="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-semibold uppercase tracking-normal">
                         Modern Gym OS
                     </div>
                     <div>
@@ -488,11 +465,11 @@
     {{-- ══════════════════════════════════════════════════════════════
          PRICING PREVIEW (MATTE DARK - STRICTLY ANNUAL ONLY)
     ══════════════════════════════════════════════════════════════ --}}
-    <section id="plans" class="py-20 lg:py-24 bg-[#090d16] border-t border-slate-800">
+    <section id="plans" class="marketing-section py-20 lg:py-24 bg-[#0D0E10] border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Clear &bull; Transparent &bull; Affordable</span>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mt-2 mb-4">
+                <span class="text-xs font-bold uppercase tracking-normal text-amber-400">Clear &bull; Transparent &bull; Affordable</span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight mt-2 mb-4">
                     Simple Annual Pricing Built For Gyms
                 </h2>
                 <p class="text-slate-400 text-base sm:text-lg mb-8">
@@ -500,7 +477,7 @@
                 </p>
 
                 {{-- Annual Pill (Matte) --}}
-                <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-200 text-xs sm:text-sm font-semibold">
+                <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs sm:text-sm font-semibold">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span>Annual Billing &bull; Free Assisted Database Migration &bull; Zero Monthly Surcharges</span>
                 </div>
@@ -509,12 +486,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch max-w-6xl mx-auto">
 
                 {{-- FREE FOREVER --}}
-                <div class="p-8 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div class="p-8 rounded-xl bg-[#1B1D21] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-wider">Free Forever</span>
+                            <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-normal">Free Forever</span>
                         </div>
-                        <div class="text-4xl font-extrabold text-white">₹0</div>
+                        <div class="text-4xl font-semibold text-white">₹0</div>
                         <div class="text-xs text-slate-400 mt-1 font-medium">Free forever &bull; Up to 75 members</div>
                         <p class="text-xs text-slate-400 mt-3 pb-6 border-b border-slate-800 leading-relaxed">
                             Ideal for boutique studios, independent yoga/crossfit coaches, and gyms starting out.
@@ -533,17 +510,17 @@
                 </div>
 
                 {{-- STARTER (HIGHLIGHTED) --}}
-                <div class="p-8 rounded-3xl bg-[#0c121e] border-2 border-amber-500 flex flex-col justify-between relative">
-                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-black uppercase tracking-wider">
+                <div class="p-8 rounded-xl bg-[#1B1D21] border-2 border-amber-500 flex flex-col justify-between relative">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-500 text-slate-950 text-[11px] font-semibold uppercase tracking-normal">
                         Most Popular
                     </div>
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider">Starter</span>
+                            <span class="px-3 py-1 rounded-md bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-normal">Starter</span>
                             <span class="text-xs text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Annual Plan</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹6,000</span>
+                            <span class="text-4xl sm:text-5xl font-semibold text-white">₹6,000</span>
                             <span class="text-xs text-slate-400">/year</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Single branch &bull; <strong>Unlimited Members</strong></div>
@@ -559,20 +536,20 @@
                         </ul>
                     </div>
                     <a href="{{ route('register', ['plan' => 'starter']) }}"
-                       class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm text-center transition-colors">
+                       class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm text-center transition-colors">
                         Choose Starter Plan
                     </a>
                 </div>
 
                 {{-- PRO CHAIN --}}
-                <div class="p-8 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div class="p-8 rounded-xl bg-[#1B1D21] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
                     <div>
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-wider">Pro Chain</span>
+                            <span class="px-3 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-normal">Pro Chain</span>
                             <span class="text-xs text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Annual Plan</span>
                         </div>
                         <div class="flex items-baseline gap-2">
-                            <span class="text-4xl sm:text-5xl font-extrabold text-white">₹12,000</span>
+                            <span class="text-4xl sm:text-5xl font-semibold text-white">₹12,000</span>
                             <span class="text-xs text-slate-400">/year</span>
                         </div>
                         <div class="text-xs text-slate-400 mt-1">Multi-branch chains &bull; <strong>Central Command</strong></div>
@@ -612,123 +589,31 @@
     {{-- ══════════════════════════════════════════════════════════════
          PROFESSIONAL REAL GYM FEEDBACK SHOWCASE
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 bg-[#070b14] border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Gym Owner Feedback</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-2">
-                    Loved by Fitness Centers Across India
-                </h2>
-                <p class="text-slate-400 text-sm mt-2">Here is how gym owners use GymDeskHub to eliminate daily admin headaches.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                {{-- Review 1 --}}
-                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-1 text-amber-400">
-                                @for($i=0; $i<5; $i++)
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                @endfor
-                            </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold text-[10px] border border-emerald-500/20">Verified Gym</span>
-                        </div>
-                        <p class="text-slate-200 text-sm leading-relaxed mb-6 font-normal">
-                            "Connecting our access gates took less than 20 minutes. Pehle har mahine 15-20 log bina renew kiye gym me aate the. Gate auto-lock hone ke baad pehle hi mahine me ₹42,000 pending fees recover hui."
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
-                        <div class="w-10 h-10 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-xs border border-slate-700">
-                            VR
-                        </div>
-                        <div>
-                            <div class="text-white font-bold text-sm">Vikram Rathore</div>
-                            <div class="text-slate-400 text-xs">Owner, Apex Fitness Studio &bull; Jaipur</div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Review 2 --}}
-                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-1 text-amber-400">
-                                @for($i=0; $i<5; $i++)
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                @endfor
-                            </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold text-[10px] border border-emerald-500/20">Verified Gym</span>
-                        </div>
-                        <p class="text-slate-200 text-sm leading-relaxed mb-6 font-normal">
-                            "WhatsApp reminder aur direct UPI link ka feature kamaal ka hai. 70% members expiry date aane se pehle hi PhonePe ya GPay se pay kar dete hain. Counter pe follow-up karne ka jhanjhat khatam ho gaya."
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
-                        <div class="w-10 h-10 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-xs border border-slate-700">
-                            SP
-                        </div>
-                        <div>
-                            <div class="text-white font-bold text-sm">Sneha Patel</div>
-                            <div class="text-slate-400 text-xs">Operations Manager, Pulse Gym &bull; Ahmedabad</div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Review 3 --}}
-                <div class="p-7 rounded-3xl bg-[#0c121e] border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-colors">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-1 text-amber-400">
-                                @for($i=0; $i<5; $i++)
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                @endfor
-                            </div>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold text-[10px] border border-emerald-500/20">Verified Chain</span>
-                        </div>
-                        <p class="text-slate-200 text-sm leading-relaxed mb-6 font-normal">
-                            "Humari 3 branches hain. Pehle daily evening me cash aur online collection ka hisab lagana mushkil tha. GymDeskHub se har branch ka collection aur staff entry phone pe live dikhta hai."
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
-                        <div class="w-10 h-10 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-xs border border-slate-700">
-                            MS
-                        </div>
-                        <div>
-                            <div class="text-white font-bold text-sm">Manish Sharma</div>
-                            <div class="text-slate-400 text-xs">Founder, Iron Core Fitness &bull; Pune</div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
+    
 
     {{-- ══════════════════════════════════════════════════════════════
          PROFESSIONALLY ANIMATED FAQ ACCORDION (SPLIT LAYOUT - LARGE & POLISHED)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 lg:py-28 bg-[#090d16] border-t border-slate-800" x-data="{ open: 0 }">
+    <section class="marketing-section py-20 lg:py-28 bg-[#0D0E10] border-t border-slate-800" x-data="{ open: 0 }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
                 
                 {{-- Left Side: Direct Reassurance & WhatsApp CTA --}}
                 <div class="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 text-xs font-bold uppercase tracking-normal">
                         <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                         <span>Frequently Asked Questions</span>
                     </div>
-                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-[1.15]">
                         Everything You Need to Know Before Starting
                     </h2>
                     <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
                         Have questions about biometric integration, automated WhatsApp fee recovery, or moving member data? Here are straightforward answers.
                     </p>
 
-                    <div class="p-6 sm:p-7 rounded-3xl bg-[#0c121e] border border-slate-800 space-y-4 mt-6">
+                    <div class="p-6 sm:p-7 rounded-xl bg-[#1B1D21] border border-slate-800 space-y-4 mt-6">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg border border-amber-500/20">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg border border-amber-500/20">
                                 💬
                             </div>
                             <div>
@@ -784,8 +669,8 @@
                             'a' => 'No. GymDeskHub operates as a lightweight Progressive Web App (PWA). Members simply open their private gym link in any mobile browser to view their digital membership card, check attendance streak records, and access daily workout routines without consuming phone storage.'
                         ],
                     ] as $i => $faq)
-                        <div class="rounded-2xl sm:rounded-3xl transition-all duration-200 overflow-hidden"
-                             :class="open === {{ $i }} ? 'bg-[#151618] border-2 border-amber-500/70 shadow-lg' : 'bg-[#0c121e] border border-slate-800 hover:border-slate-700'">
+                        <div class="rounded-lg sm:rounded-xl transition-all duration-200 overflow-hidden"
+                             :class="open === {{ $i }} ? 'bg-[#151618] border-2 border-amber-500/70 shadow-lg' : 'bg-[#1B1D21] border border-slate-800 hover:border-slate-700'">
                             
                             <button type="button" 
                                     class="w-full flex items-center justify-between gap-4 sm:gap-6 px-6 sm:px-8 py-5 sm:py-6 text-left transition-colors cursor-pointer group"
@@ -801,7 +686,7 @@
                                     </h3>
                                 </div>
 
-                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border flex items-center justify-center shrink-0 transition-all duration-300"
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-lg border flex items-center justify-center shrink-0 transition-all duration-300"
                                      :class="open === {{ $i }} ? 'bg-amber-500 text-slate-950 border-amber-500 rotate-180' : 'bg-slate-900 border-slate-800 text-slate-400 group-hover:text-white group-hover:border-slate-700'">
                                     <svg class="w-4 h-4 sm:w-5 sm:h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
@@ -828,9 +713,9 @@
     {{-- ══════════════════════════════════════════════════════════════
          FINAL CLOSING CTA (CLEAN MATTE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="py-20 bg-[#0c121e] border-t border-slate-800">
+    <section class="marketing-section py-20 bg-[#1B1D21] border-t border-slate-800">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight mb-4">
                 Ready to Upgrade Your Gym to Autopilot?
             </h2>
             <p class="text-slate-400 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
