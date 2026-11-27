@@ -74,7 +74,7 @@ class MembershipCreditService
             ->where('tenant_id', $member->tenant_id)->where('member_id', $member->id)->exists();
     }
 
-    public static function apply(Member $member, Membership $target, array $ids, string $mode, int $requested, string $reason): int
+    public static function apply(Member $member, Membership $target, array $ids, string $mode, int $requested, string $reason, string $requestId): int
     {
         if ($mode === 'none') return 0;
         if (! Schema::hasTable('membership_payment_credits')) {
@@ -112,6 +112,7 @@ class MembershipCreditService
                 'target_membership_id' => $target->id,
                 'amount_cents' => $allocated,
                 'reason' => $reason,
+                'request_id' => $requestId,
                 'created_by_user_id' => auth()->id(),
                 'created_at' => now(),
             ]);
