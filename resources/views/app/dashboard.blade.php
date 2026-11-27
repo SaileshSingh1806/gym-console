@@ -82,6 +82,30 @@
             .dashboard-overview .owner-due-card, .dashboard-overview .owner-pt-cell { padding:10px 12px; }
             .dashboard-overview .owner-due-card .ds-kpi, .dashboard-overview .owner-pt-cell .ds-kpi { font-size:20px; }
         }
+        @container (max-width:599px) {
+            .dashboard-overview .owner-finance {
+                grid-template-columns:repeat(2,minmax(0,1fr));
+                gap:8px; padding:10px; background:transparent;
+            }
+            .dashboard-overview .owner-finance > div {
+                border:1px solid rgb(var(--c-line)); border-radius:10px;
+                padding:12px; gap:10px; min-width:0;
+            }
+            .dashboard-overview .owner-finance .finance-label {
+                font-size:12px; gap:6px; align-items:flex-start;
+            }
+            .dashboard-overview .owner-finance .finance-label svg { width:16px; height:16px; }
+            .dashboard-overview .owner-finance .ds-kpi {
+                font-size:clamp(16px,5.2cqi,22px); line-height:1.35;
+                font-variant-numeric:tabular-nums; overflow-wrap:anywhere;
+            }
+            .dashboard-overview .owner-finance .finance-count {
+                font-size:11px; line-height:1.45; overflow-wrap:anywhere;
+            }
+            .dashboard-overview .owner-finance .finance-link {
+                min-height:32px; font-size:11px;
+            }
+        }
         @container (min-width:600px) {
             .dashboard-overview .owner-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
             .dashboard-overview .owner-finance { grid-template-columns:repeat(3,minmax(0,1fr)); }
