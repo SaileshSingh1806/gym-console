@@ -43,18 +43,7 @@
 
 @endphp
         <!-- Member cards and table adapt to available content width, including the sidebar. -->
-        <style>
-            #member-results { container-type: inline-size; min-width: 0; }
-            #member-results .members-desktop { display: none; }
-            #member-results .members-cards { display: block; }
-            @container (min-width: 960px) {
-                #member-results .members-desktop { display: block; }
-                #member-results .members-cards { display: none; }
-            }
-            @container (min-width: 600px) and (max-width: 959px) {
-                #member-results .members-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; }
-            }
-        </style>
+
         <div class="rounded-xl bg-surface dark:bg-surface border border-line dark:border-line overflow-hidden">
             
             <!-- Mobile Cards View -->
