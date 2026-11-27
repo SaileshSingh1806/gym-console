@@ -128,10 +128,48 @@ class PwaController extends Controller
     {
         $tenant = $this->tenant($slug);
         $user = $request->user();
-        if (!$user) return redirect()->guest(route('login'));
+        if (!$user) return redirect()->route('pwa.login', [$slug, $role]);
         $allowed = $role === 'member' ? $user->isMember() : (!$user->isMember() && !$user->isGymOwner() && !$user->isSuperAdmin() && $user->isTrainer());
         abort_unless((int) $user->tenant_id === (int) $tenant->id && $allowed && $user->status === 'ACTIVE', 403);
         return redirect()->route($role === 'member' ? 'app.portal' : 'trainer.workspace');
+    }
+
+    public function showLogin(Request $request, string $slug, string $role)
+    {
+        $tenant = $this->tenant($slug);
+        if ($request->user()) return redirect()->route('pwa.launch', [$slug, $role]);
+        $name = trim($tenant->settings['pwa_name'] ?? '') ?: $tenant->name;
+        $path = $this->localLogo($tenant);
+        $logo = $path ? '/storage/'.$path : $this->installIconUrl($tenant, $role, 512, 'any');
+        $manifest = route('pwa.manifest', [$slug, $role, 'v' => $this->version($tenant)], false);
+        $icon = $this->installIconUrl($tenant, $role, 180, 'any');
+        return response()->view('auth.pwa-login', compact('tenant', 'role', 'name', 'logo', 'manifest', 'icon'))
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function login(Request $request, string $slug, string $role)
+    {
+        $tenant = $this->tenant($slug);
+        $data = $request->validate(['email' => 'required|string|max:190', 'password' => 'required|string|max:1024', 'remember' => 'nullable']);
+        $input = trim($data['email']);
+        $digits = preg_replace('/[^0-9]/', '', $input);
+        $users = \App\Models\User::where('tenant_id', $tenant->id)->where('role', $role)->where('status', 'ACTIVE')
+            ->where(function ($query) use ($input, $digits, $tenant, $role) {
+                $query->where('email', $input)->orWhere('phone', $input);
+                if (strlen($digits) >= 10) $query->orWhere('phone', 'like', '%'.substr($digits, -10));
+                if ($role === 'member') {
+                    $query->orWhereIn('id', \App\Models\Member::where('tenant_id', $tenant->id)->where('member_code', $input)->whereNotNull('user_id')->select('user_id'));
+                }
+            })->get();
+        foreach ($users as $user) {
+            if (\Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
+                \Illuminate\Support\Facades\Auth::login($user, $request->boolean('remember'));
+                $request->session()->regenerate();
+                $request->session()->forget('url.intended');
+                return redirect()->route('pwa.launch', [$slug, $role]);
+            }
+        }
+        return back()->withErrors(['email' => 'Invalid credentials for this gym. Contact your gym reception if you need account access.'])->onlyInput('email');
     }
 
     public function saveBranding(Request $request)
