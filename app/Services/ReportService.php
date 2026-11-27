@@ -114,6 +114,11 @@ class ReportService
         });
         $expensesQuery = Expense::query();
         $membershipsQuery = Membership::query()->whereNotIn('status', ['CANCELLED', 'TRANSFERRED']);
+        // Original demo bills remain historical; subtract applied credits from new billed totals only.
+        $billedExpression = 'COALESCE(final_amount, price)';
+        if (\Illuminate\Support\Facades\Schema::hasTable('membership_payment_credits')) {
+            $billedExpression .= ' - COALESCE((SELECT SUM(mpc.amount_cents) FROM membership_payment_credits mpc WHERE mpc.target_membership_id = memberships.id AND mpc.tenant_id = memberships.tenant_id), 0) / 100.0';
+        }
         $baseAttendanceQuery = Attendance::query();
 
         if ($branchId) {
@@ -365,7 +370,7 @@ class ReportService
                 $q->where('created_at', '>=', $monthStartStr . ' 00:00:00')
                     ->orWhere('start_date', '>=', $monthStartStr);
             })
-            ->sum(DB::raw('COALESCE(final_amount, price)'));
+            ->sum(DB::raw($billedExpression));
 
         $activeMemberships = (clone $membershipsQuery)->with('payments')->where('status', 'ACTIVE')->get();
         $totalActivePackageValue = 0.0;
@@ -464,7 +469,7 @@ class ReportService
                     });
                 });
             }
-            $gymBilled = (float) (clone $gymBilledQ)->sum(DB::raw('COALESCE(final_amount, price)'));
+            $gymBilled = (float) (clone $gymBilledQ)->sum(DB::raw($billedExpression));
             $gymBilledCount = (clone $gymBilledQ)->count();
 
             // PT Packages Billed
