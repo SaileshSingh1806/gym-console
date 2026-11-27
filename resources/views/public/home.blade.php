@@ -111,25 +111,5 @@
     {{-- ══════════════════════════════════════════════════════════════
          FINAL CLOSING CTA (CLEAN MATTE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="marketing-section py-20 bg-[#1B1D21] border-t border-slate-800">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight mb-4">
-                Ready to Upgrade Your Gym to Autopilot?
-            </h2>
-            <p class="text-slate-400 text-base sm:text-lg mb-8 max-w-2xl mx-auto">
-                Join fitness club owners across India running attendance, billing, and member workouts with complete peace of mind.
-            </p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="{{ route('register') }}"
-                   class="w-full sm:w-auto px-8 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition-colors">
-                    Start Free Forever &rarr;
-                </a>
-                <a href="{{ route('contact') }}"
-                   class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-semibold text-base hover:bg-slate-800 hover:text-white transition-colors">
-                    Book a Free Demo
-                </a>
-            </div>
-        </div>
-    </section>
-
+    <section class="marketing-section bg-[#141518] border-t border-slate-800"><div class="mx-auto flex flex-wrap items-center justify-between gap-6"><div><h2 class="text-white mb-3">Bring your gym into one workspace.</h2><p class="text-slate-400">Questions? <a href="{{ route('contact') }}" class="text-amber-400 hover:underline">Talk to us.</a></p></div><a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-lg bg-amber-500 text-slate-950 font-semibold">Start free &rarr;</a></div></section>
 </x-guest-layout>
