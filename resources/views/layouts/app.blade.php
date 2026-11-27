@@ -5,6 +5,12 @@
     $isPureTrainer = $authUser && ($authUser->role === 'trainer' || ($authUser->isTrainer() && !$authUser->isGymOwner() && !$authUser->isSuperAdmin()));
     $isStealthApp = $isMemberUser || $isPureTrainer || request()->routeIs('trainer.*');
     $pwaRole = $isMemberUser ? 'member' : ($isPureTrainer ? 'trainer' : null);
+    $pwaTenant = $pwaRole ? $authUser->tenant : null;
+    $pwaVersion = $pwaTenant ? substr(hash('sha256', json_encode([$pwaTenant->logo_url, $pwaTenant->settings['pwa_icon_path'] ?? null, $pwaTenant->updated_at?->timestamp])), 0, 20) : null;
+    $pwaName = $pwaTenant ? ($pwaTenant->settings['pwa_name'] ?? $pwaTenant->name) : 'GymDeskHub';
+    $pwaSplashLogo = $pwaTenant?->settings['pwa_icon_path'] ?? null;
+    $pwaSplashLogo = $pwaSplashLogo ? asset('storage/'.$pwaSplashLogo) : ($pwaTenant?->logo_url ?: asset('images/gymdeskhub-official-dark.svg'));
+    if (!\Illuminate\Support\Str::startsWith($pwaSplashLogo, ['https://', 'http://', '/'])) $pwaSplashLogo = asset('storage/'.$pwaSplashLogo);
     $serverThemeMode = 'dark';
     if (!empty($savedThemeSettings)) {
         $st = is_array($savedThemeSettings) ? $savedThemeSettings : json_decode($savedThemeSettings, true);
@@ -26,14 +32,14 @@
     <title>{{ $title ?? ($platformSettings['app_name'] ?? 'GymDeskHub') }}</title>
 
     @if($pwaRole)
-        <link rel="manifest" href="{{ asset('pwa/' . $pwaRole . '.webmanifest') }}?v=2">
+        <link rel="manifest" href="{{ $pwaTenant ? route('pwa.manifest', [$pwaTenant->slug, $pwaRole, 'v' => $pwaVersion]) : asset('pwa/' . $pwaRole . '.webmanifest') }}">
         <meta name="theme-color" content="#0D0E10">
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="GDH {{ ucfirst($pwaRole) }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('pwa/icons/' . $pwaRole . '-180.png') }}">
-        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('pwa/icons/' . $pwaRole . '-192.png') }}">
+        <meta name="apple-mobile-web-app-title" content="{{ $pwaName }} {{ ucfirst($pwaRole) }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 180, 'any', 'v' => $pwaVersion]) : asset('pwa/icons/' . $pwaRole . '-180.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 192, 'any', 'v' => $pwaVersion]) : asset('pwa/icons/' . $pwaRole . '-192.png') }}">
     @elseif(!empty($platformSettings['favicon_url']))
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
@@ -1275,7 +1281,26 @@
 
     @stack('scripts')
     @if($pwaRole)
-        <script defer src="{{ asset('pwa/install.js') }}?v=2"></script>
+        <div id="gdh-brand-splash" hidden aria-hidden="true" style="position:fixed;inset:0;z-index:100000;background:#0D0E10;display:grid;place-items:center;padding:32px">
+            <img src="{{ $pwaSplashLogo }}" alt="" decoding="async" style="display:block;width:auto;height:auto;max-width:min(76vw,320px);max-height:36vh;object-fit:contain">
+        </div>
+        <script>
+            (() => {
+                const splash = document.getElementById('gdh-brand-splash');
+                const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+                const key = @js('gdh-splash-'.$pwaTenant?->id.'-'.$pwaRole);
+                if (!standalone) return;
+                try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (_) {}
+                splash.hidden = false;
+                const hide = () => { splash.hidden = true; };
+                const img = splash.querySelector('img');
+                if (img.complete && !img.naturalWidth) hide();
+                img.addEventListener('error', hide, {once:true});
+                window.setTimeout(hide, 900);
+            })();
+        </script>
+        <style>#gdh-brand-splash[hidden]{display:none!important}</style>
+        <script defer src="{{ asset('pwa/install.js') }}?v=3"></script>
         <style>[data-gdh-pwa] [hidden]{display:none!important}</style>
     @endif
 </body>
