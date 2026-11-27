@@ -28,11 +28,9 @@
         <link rel="icon" type="image/x-icon" href="{{ $platformSettings['favicon_url'] }}">
         <link rel="shortcut icon" href="{{ $platformSettings['favicon_url'] }}">
     @else
-        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=4">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=4">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=4">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('images/gymdeskhub-official-icon.svg') }}">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=4">
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=4">
+        <link rel="shortcut icon" href="{{ asset('images/gymdeskhub-official-icon.svg') }}">
     @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -141,8 +139,8 @@
                     <img src="{{ $gymLogo }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[120px] rounded-md object-contain">
                     <span class="text-sm font-semibold text-fg truncate max-w-[130px]">{{ $gymName }}</span>
                 @else
-                    <img src="{{ asset('images/gymdeskhub_horizontal_dark.png') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain hidden dark:block">
-                    <img src="{{ asset('images/gymdeskhub_horizontal_light.png') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain block dark:hidden">
+                    <img src="{{ asset('images/gymdeskhub-official-dark.svg') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain hidden dark:block">
+                    <img src="{{ asset('images/gymdeskhub-official-light.svg') }}" alt="{{ $gymName }}" class="h-8 w-auto max-w-[170px] object-contain block dark:hidden">
                 @endif
             </a>
             <button @click="sidebarOpen = false" type="button" aria-label="Close sidebar" class="lg:hidden ds-btn ds-btn-ghost !h-8 !w-8 !p-0">
