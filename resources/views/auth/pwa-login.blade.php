@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-title" content="{{ $name }}">
     <title>{{ $name }} — {{ ucfirst($role) }} sign in</title>
     <style>
-        *{box-sizing:border-box}body{margin:0;background:#0D0E10;color:#ECEDEF;font:15px/1.5 system-ui,sans-serif;color-scheme:dark}
+        html{background:#0D0E10;color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0D0E10;color:#ECEDEF;font:15px/1.5 system-ui,sans-serif;color-scheme:dark}
         main{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:32px 24px;padding: max(32px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) max(32px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px))}
         section{width:100%;max-width:380px}header{text-align:center;margin-bottom:32px}
         img{display:block;width:144px;height:144px;object-fit:contain;margin:0 auto 18px}

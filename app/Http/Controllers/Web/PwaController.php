@@ -135,11 +135,31 @@ class PwaController extends Controller
         $portrait = [min($width, $height), max($width, $height)];
         abort_unless(in_array($portrait, $sizes, true), 404);
         $tenant = $this->tenant($slug);
-        $disk = Storage::disk('public');
-        $target = 'pwa-generated/'.$tenant->id.'/'.$this->version($tenant).'/startup-v1-'.$role.'-'.$width.'x'.$height.'.png';
+        $target = $this->generateStartupImage($tenant, $role, $width, $height);
+        return response()->file(Storage::disk('public')->path($target), [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
 
-        abort_unless(function_exists('imagecreatetruecolor') && function_exists('imagecreatefromstring'), 503);
+    public function startupImageUrl(Tenant $tenant, string $role, int $width, int $height): string
+    {
+        try {
+            return '/storage/'.$this->generateStartupImage($tenant, $role, $width, $height);
+        } catch (\Throwable $e) {
+            report($e);
+            return route('pwa.startup', [$tenant->slug, $role, $width, $height, 'v' => $this->version($tenant).'-2'], false);
+        }
+    }
+
+    private function generateStartupImage(Tenant $tenant, string $role, int $width, int $height): string
+    {
+        $disk = Storage::disk('public');
+        $target = 'pwa-generated/'.$tenant->id.'/'.$this->version($tenant).'/startup-v2-'.$role.'-'.$width.'x'.$height.'.png';
+
         if (!$disk->exists($target)) {
+            abort_unless(function_exists('imagecreatetruecolor') && function_exists('imagecreatefromstring'), 503);
             $source = $this->localLogo($tenant);
             $bytes = $source && $disk->exists($source) && $disk->size($source) <= 10485760 ? $disk->get($source) : null;
             $info = is_string($bytes) ? @getimagesizefromstring($bytes) : false;
@@ -167,11 +187,7 @@ class PwaController extends Controller
             abort_unless($ok && is_string($png) && $disk->put($target, $png, ['visibility' => 'public']), 503);
         }
 
-        return response($disk->get($target), 200, [
-            'Content-Type' => 'image/png',
-            'Cache-Control' => 'public, max-age=86400',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return $target;
     }
 
     public function redirectLegacyLogin(string $slug, string $role)
