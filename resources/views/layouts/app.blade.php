@@ -35,6 +35,9 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="{{ $pwaName }} {{ ucfirst($pwaRole) }}">
+        @if($pwaTenant)
+            <x-pwa-startup-images :tenant="$pwaTenant" :role="$pwaRole" :version="$pwaVersion" />
+        @endif
         <link rel="apple-touch-icon" sizes="180x180" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 180, 'any', 'v' => $pwaVersion], false) : asset('pwa/icons/' . $pwaRole . '-180.png') }}">
         <link rel="icon" type="image/png" sizes="192x192" href="{{ $pwaTenant ? route('pwa.icon', [$pwaTenant->slug, $pwaRole, 192, 'any', 'v' => $pwaVersion], false) : asset('pwa/icons/' . $pwaRole . '-192.png') }}">
     @elseif(!empty($platformSettings['favicon_url']))
@@ -89,6 +92,24 @@
     @endif
     <x-workspace-ui-styles />
     @stack('styles')
+    <style>
+        /* iOS standalone extends the viewport behind the status bar / Dynamic Island. */
+        .pwa-safe-header {
+            box-sizing: border-box;
+            height: auto;
+            min-height: calc(64px + env(safe-area-inset-top, 0px));
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+            z-index: 35;
+        }
+        @media (max-width: 639px) {
+            .pwa-profile-menu { top: calc(64px + env(safe-area-inset-top, 0px)); }
+        }
+    </style>
 </head>
 <body class="{{ $isMemberUser ? 'member-app-shell' : ($isStealthApp ? 'trainer-app-shell' : '') }} workspace-shell flex min-h-screen min-h-[100dvh] lg:h-screen lg:overflow-hidden antialiased {{ $isMemberUser ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : ($isStealthApp ? 'bg-[#0D0E10] text-[#ECEDEF] dark:bg-[#0D0E10] selection:bg-[#F5A524]/30' : 'ds-body bg-canvas text-fg') }}" :class="{ 'overflow-hidden': sidebarOpen }" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false" @pageshow.window="sidebarOpen = false">
 
@@ -442,7 +463,7 @@
         @endif
 
         <!-- Top Navbar -->
-        <header class="h-16 {{ $isStealthApp ? 'bg-[#0D0E10] border-b border-[#26282D] text-[#ECEDEF]' : 'bg-surface border-b border-line' }} px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
+        <header class="{{ $isStealthApp ? 'pwa-safe-header' : '' }} h-16 {{ $isStealthApp ? 'bg-[#0D0E10] border-b border-[#26282D] text-[#ECEDEF]' : 'bg-surface border-b border-line' }} px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shrink-0">
             <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                 @if(request()->routeIs('trainer.*') || $isPureTrainer)
                     @php
@@ -677,7 +698,7 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 scale-100 translate-y-0"
                          x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                         class="origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-xl {{ $isStealthApp ? 'bg-[#141518] border border-neutral-800 text-[#ECEDEF] divide-neutral-800' : 'bg-surface border border-line-strong divide-line' }} shadow-lg z-[9999] overflow-hidden divide-y">
+                         class="{{ $isStealthApp ? 'pwa-profile-menu' : '' }} origin-top-right fixed right-2.5 sm:absolute sm:right-0 top-16 sm:top-full mt-2 w-[calc(100vw-1.25rem)] max-w-xs sm:max-w-none sm:w-80 rounded-xl {{ $isStealthApp ? 'bg-[#141518] border border-neutral-800 text-[#ECEDEF] divide-neutral-800' : 'bg-surface border border-line-strong divide-line' }} shadow-lg z-[9999] overflow-hidden divide-y">
                         
                         <!-- Account Summary Header -->
                         <div class="p-4 {{ $isStealthApp ? 'bg-[#0D0E10]/80' : 'bg-surface' }}">
