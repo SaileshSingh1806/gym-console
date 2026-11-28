@@ -9,11 +9,13 @@
     <link rel="icon" href="{{ $icon }}">
     <link rel="apple-touch-icon" href="{{ $icon }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <x-pwa-startup-images :tenant="$tenant" :role="$role" :version="substr(hash('sha256', json_encode(['static-icon-v4', $tenant->logo_url, $tenant->settings['pwa_icon_path'] ?? null, $tenant->updated_at?->timestamp])), 0, 20)" />
     <meta name="apple-mobile-web-app-title" content="{{ $name }}">
     <title>{{ $name }} — {{ ucfirst($role) }} sign in</title>
     <style>
         *{box-sizing:border-box}body{margin:0;background:#0D0E10;color:#ECEDEF;font:15px/1.5 system-ui,sans-serif;color-scheme:dark}
-        main{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:32px 24px}
+        main{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:32px 24px;padding: max(32px, env(safe-area-inset-top, 0px)) max(24px, env(safe-area-inset-right, 0px)) max(32px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px))}
         section{width:100%;max-width:380px}header{text-align:center;margin-bottom:32px}
         img{display:block;width:144px;height:144px;object-fit:contain;margin:0 auto 18px}
         h1{font-size:24px;line-height:1.25;margin:0 0 8px;font-weight:650}p{color:#A0A4AB;margin:0}

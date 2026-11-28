@@ -124,6 +124,56 @@ class PwaController extends Controller
         return redirect($url)->header('Cache-Control', 'no-store');
     }
 
+
+    /**
+     * iOS needs a full-resolution PNG for its native launch screen.
+     * Only known screen sizes are accepted; cache is isolated by tenant and branding version.
+     */
+    public function startup(string $slug, string $role, int $width, int $height)
+    {
+        $sizes = [[1320,2868],[1206,2622],[1290,2796],[1179,2556],[1170,2532],[1125,2436],[1284,2778],[1242,2688],[828,1792],[750,1334],[1242,2208]];
+        $portrait = [min($width, $height), max($width, $height)];
+        abort_unless(in_array($portrait, $sizes, true), 404);
+        $tenant = $this->tenant($slug);
+        $disk = Storage::disk('public');
+        $target = 'pwa-generated/'.$tenant->id.'/'.$this->version($tenant).'/startup-v1-'.$role.'-'.$width.'x'.$height.'.png';
+
+        abort_unless(function_exists('imagecreatetruecolor') && function_exists('imagecreatefromstring'), 503);
+        if (!$disk->exists($target)) {
+            $source = $this->localLogo($tenant);
+            $bytes = $source && $disk->exists($source) && $disk->size($source) <= 10485760 ? $disk->get($source) : null;
+            $info = is_string($bytes) ? @getimagesizefromstring($bytes) : false;
+            if (!$info || $info[0] * $info[1] > 16777216 || !in_array($info['mime'], ['image/png','image/jpeg','image/webp'], true)) {
+                $bytes = @file_get_contents(public_path('pwa/icons/'.$role.'-512.png'));
+            }
+            $logo = is_string($bytes) ? @imagecreatefromstring($bytes) : false;
+            abort_unless($logo, 503);
+            $canvas = imagecreatetruecolor($width, $height);
+            abort_unless($canvas, 503);
+            imagefill($canvas, 0, 0, imagecolorallocate($canvas, 13, 14, 16));
+            imagealphablending($canvas, true);
+            $limit = (int) round(min($width, $height) * 0.36);
+            $scale = min($limit / imagesx($logo), $limit / imagesy($logo));
+            $w = max(1, (int) round(imagesx($logo) * $scale));
+            $h = max(1, (int) round(imagesy($logo) * $scale));
+            abort_unless(imagecopyresampled($canvas, $logo, (int) (($width-$w)/2), (int) (($height-$h)/2), 0, 0, $w, $h, imagesx($logo), imagesy($logo)), 503);
+            ob_start();
+            try {
+                $ok = imagepng($canvas, null, 6);
+                $png = ob_get_contents();
+            } finally {
+                ob_end_clean();
+            }
+            abort_unless($ok && is_string($png) && $disk->put($target, $png, ['visibility' => 'public']), 503);
+        }
+
+        return response($disk->get($target), 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=86400',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function redirectLegacyLogin(string $slug, string $role)
     {
         return redirect()->route('pwa.login', [$slug, $role]);
