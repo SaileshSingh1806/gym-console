@@ -1,9 +1,10 @@
 @props(['image', 'alt' => '', 'kind' => 'dashboard', 'eager' => false])
 @php
     $available = file_exists(public_path('assets/img/'.$image.'.webp'));
+    [$imageWidth,$imageHeight] = str_starts_with($image,'phone-') ? [900,1800] : (in_array($image,['trainer-tablet','biometric-entry'],true) ? [1600,1100] : [1800,1130]);
 @endphp
 @if($available)
-    <div class="gd-frame"><img src="{{ asset('assets/img/'.$image.'.webp') }}" width="{{ str_starts_with($image,'phone-') ? 900 : 1800 }}" height="{{ str_starts_with($image,'phone-') ? 1800 : 1130 }}" alt="{{ $alt }}" @if($eager) fetchpriority="high" @else loading="lazy" decoding="async" @endif></div>
+    <div class="gd-frame"><img src="{{ asset('assets/img/'.$image.'.webp') }}" width="{{ $imageWidth }}" height="{{ $imageHeight }}" alt="{{ $alt }}" @if($eager) fetchpriority="high" @else loading="lazy" decoding="async" @endif></div>
 @elseif(in_array($kind,['checkin','payment','whatsapp'],true))
     <div class="gd-phone" aria-label="{{ $alt }}">
         <p class="gd-demo-example">Illustrative product preview</p>
