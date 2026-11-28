@@ -300,8 +300,8 @@
     </style>
 
     @if($marketingPage)
-        <link rel="stylesheet" href="{{ asset('assets/css/site.css') }}?v=1">
-        <script defer src="{{ asset('assets/js/site.js') }}?v=1"></script>
+        @include('public.partials.marketing-style')
+        @include('public.partials.marketing-script')
     @endif
     @if(!empty($platformSettings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $platformSettings['google_analytics_id'] }}"></script>
