@@ -299,6 +299,10 @@
         }
     </style>
 
+    @if($marketingPage)
+        <link rel="stylesheet" href="{{ asset('assets/css/site.css') }}?v=1">
+        <script defer src="{{ asset('assets/js/site.js') }}?v=1"></script>
+    @endif
     @if(!empty($platformSettings['google_analytics_id']))
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $platformSettings['google_analytics_id'] }}"></script>
         <script>
@@ -395,7 +399,7 @@
                         </a>
                         <a href="{{ route('register') }}"
                            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
-                            <span>Get Started</span>
+                            <span>{{ $marketingPage ? 'Start free' : 'Get Started' }}</span>
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @endauth

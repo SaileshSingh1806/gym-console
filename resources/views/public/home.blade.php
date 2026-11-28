@@ -7,69 +7,33 @@
     {{-- ══════════════════════════════════════════════════════════════
          HERO SECTION (CLEAN MATTE DARK - NO GLOW - HUMAN TONE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="marketing-hero bg-[#0D0E10] border-b border-slate-800">
-    <div class="mx-auto grid lg:grid-cols-12 gap-10 items-center">
-        <div class="lg:col-span-6">
-            <p class="text-sm text-amber-400 font-semibold mb-5">Gym management software</p>
-            <h1 class="text-white mb-6">Run your gym without the chaos.</h1>
-            <p class="text-lg text-slate-300 max-w-xl mb-8">Manage members, attendance, payments and coaching in one workspace, from the front desk to your phone.</p>
-            <div class="flex flex-wrap gap-3 items-center">
-                <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 bg-amber-500 text-slate-950 font-semibold rounded-lg">Start free &rarr;</a>
-                <a href="#front-desk" class="inline-flex items-center px-5 py-3 border border-slate-700 rounded-lg text-white font-medium">See how it works</a>
-            </div>
-            <p class="mt-4 text-sm text-slate-400">No card needed for the free plan.</p>
-        </div>
-        <div class="lg:col-span-6 relative py-8">
-            <div class="rounded-[20px] border border-slate-700 bg-[#141518] overflow-hidden">
-                <div class="flex items-center gap-2 p-4 border-b border-slate-800"><span class="w-2 h-2 rounded-full bg-slate-600"></span><span class="w-2 h-2 rounded-full bg-slate-600"></span><span class="w-2 h-2 rounded-full bg-slate-600"></span><span class="ml-2 text-xs text-slate-400">GymDeskHub / Owner workspace</span></div>
-                <div class="p-6 sm:p-8">
-                    @if(file_exists(public_path('images/marketing/dashboard.webp')))
-                        <img src="{{ asset('images/marketing/dashboard.webp') }}" width="1440" height="900" fetchpriority="high" alt="GymDeskHub owner dashboard" class="w-full h-auto rounded-lg">
-                    @else
-                        <p class="text-xs text-slate-400 mb-5">Product workflow overview</p>
-                        <div class="space-y-3">
-                            @foreach([['Members','Memberships and renewals'],['Attendance','Daily check-in records'],['Payments','Collections and outstanding fees'],['Trainers','Assignments and coaching']] as [$label,$description])
-                                <div class="flex justify-between gap-3 border-b border-slate-800 pb-3"><span class="text-white font-medium">{{ $label }}</span><span class="text-xs text-slate-400 text-right">{{ $description }}</span></div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-2 justify-end mt-3">
-                @foreach([['QR check-in','.12'],['Renewal reminders','.25'],['Daily collections','.08']] as [$label,$speed])
-                    <div data-parallax data-speed="{{ $speed }}" class="px-3 py-2 rounded-lg border border-slate-700 bg-[#1B1D21] text-xs text-slate-300">{{ $label }}</div>
-                @endforeach
+    <section class="marketing-hero gd-hero">
+        @if(file_exists(public_path('assets/img/hero-gym.webp')))<img class="gd-hero-bg" src="{{ asset('assets/img/hero-gym.webp') }}" width="2400" height="1400" alt="" fetchpriority="high" data-parallax data-speed=".15">@endif
+        <div class="mx-auto gd-hero-grid">
+            <div><p class="gd-kicker">Gym management software</p><h1 class="mb-6">Run your gym without the <span class="gd-accent">chaos.</span></h1><p class="text-lg text-slate-300 mb-8">Members, attendance, payments and coaching in one workspace, from the front desk to your phone.</p><div class="gd-cta-links"><a class="bg-amber-500 text-slate-950" href="{{ route('register') }}">Start free</a><a class="gd-secondary" href="#front-desk">See how it works</a></div><p class="mt-4 text-sm text-slate-400">No card needed for the free plan.</p></div>
+            <div class="gd-visual"><x-marketing-visual image="hero-dashboard" alt="Owner dashboard preview" :eager="true"/>
+                <div class="gd-float one" data-parallax data-speed=".10"><span aria-hidden="true">↗</span><div><strong>Renewal reminder sent</strong>on WhatsApp · Example</div></div>
+                <div class="gd-float two" data-parallax data-speed=".18"><span aria-hidden="true">✓</span><div><strong>Rohan checked in</strong>6:42 am · Example</div></div>
+                <div class="gd-float three" data-parallax data-speed=".28"><span aria-hidden="true">₹</span><div>Collected today<strong>₹18,400</strong>Example</div></div>
             </div>
         </div>
-    </div>
-</section>
-<section id="front-desk" class="marketing-section bg-[#141518] border-b border-slate-800">
-    <div class="mx-auto grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-        <div class="lg:col-span-5 lg:sticky lg:top-28">
-            <p class="text-sm text-amber-400 mb-3">Daily operations</p><h2 class="text-white mb-5">A day at your front desk.</h2>
-            <p class="text-slate-400">Follow the everyday work of a gym, from the first check-in to the last payment.</p>
-        </div>
-        <div class="lg:col-span-7 divide-y divide-slate-800">
-            @foreach([['01','Member arrives','Find the member and record attendance using the available check-in workflow.','checkin'],['02','Collect a fee','Record the payment and review any remaining balance.','members'],['03','Follow up on renewals','Find expiring memberships and prepare a WhatsApp reminder.','whatsapp'],['04','Review the day','Open the owner dashboard to review collections and attendance.','dashboard']] as [$number,$heading,$description,$image])
-                <article data-reveal class="py-8 first:pt-0">
-                    <div class="text-sm text-amber-400 mb-2">{{ $number }}</div><h3 class="text-white mb-3">{{ $heading }}</h3><p class="text-slate-300">{{ $description }}</p>
-                    @if(file_exists(public_path('images/marketing/'.$image.'.webp')))
-                        <div class="mt-5 rounded-[20px] border border-slate-700 overflow-hidden"><img loading="lazy" decoding="async" src="{{ asset('images/marketing/'.$image.'.webp') }}" width="1440" height="900" alt="{{ $heading }}" class="w-full h-auto"></div>
-                    @endif
-                </article>
-            @endforeach
-        </div>
-    </div>
-</section>
+    </section>
+    <section class="gd-proof"><div class="mx-auto">@foreach([['Gyms','Built for India'],['Members managed','Member records'],['Check-ins','Daily attendance'],['Collections','Payment records']] as [$label,$value])<div><strong>{{ $value }}</strong><span>{{ $label }}</span></div>@endforeach</div></section>
+    @php($steps = [['01','A member arrives','Scan the QR at the door or enter a phone number to record a check-in.','phone-checkin','checkin'],['02','Collect a fee','Record a payment, see the balance and generate a PDF invoice.','phone-payment','payment'],['03','Follow up on renewals','Prepare a WhatsApp reminder before a membership ends.','phone-whatsapp','whatsapp'],['04','Review the day','Open the owner dashboard to review collections and attendance from anywhere.','dashboard-owner','dashboard']])
+    <section id="front-desk" class="marketing-section bg-[#141518]"><div class="mx-auto"><p class="gd-kicker">Daily operations</p><h2 class="mb-6">A day at your front desk.</h2><p class="text-slate-400 mb-10">Four moments that keep your gym running.</p>
+        <div class="gd-story"><div>@foreach($steps as [$number,$heading,$description,$image,$kind])<article class="gd-story-step" data-story-step="{{ $number }}"><div class="gd-story-mobile"><x-marketing-visual :image="$image" :kind="$kind" :alt="$heading"/></div><span class="gd-step-number">{{ $number }}</span><h3>{{ $heading }}</h3><p class="text-slate-400">{{ $description }}</p></article>@endforeach</div><div class="gd-story-pin" aria-hidden="true">@foreach($steps as [$number,$heading,$description,$image,$kind])<div class="gd-story-screen {{ $loop->first ? 'active' : '' }}" data-story-screen="{{ $number }}"><x-marketing-visual :image="$image" :kind="$kind" :alt="$heading"/></div>@endforeach</div></div>
+    </div></section>
+    <section class="gd-band">@if(file_exists(public_path('assets/img/gym-band.webp')))<img src="{{ asset('assets/img/gym-band.webp') }}" width="2400" height="1000" alt="" loading="lazy" data-parallax data-speed=".2">@endif<div class="mx-auto"><h2>Built for how Indian gyms actually run.</h2></div></section>
 <section class="marketing-section bg-[#0D0E10]">
     <div class="mx-auto">
         <h2 class="text-white mb-8">Tools for every part of your gym.</h2>
-        <div class="grid md:grid-cols-12 gap-4">
-            @foreach([['Members and fees','Track plans, payments and outstanding balances.','members','md:col-span-7'],['Attendance','Review check-ins and attendance records.','checkin','md:col-span-5'],['WhatsApp reminders','Follow up with members about renewals.','whatsapp','md:col-span-4'],['Biometric access','Connect supported attendance hardware.','biometric','md:col-span-8'],['Trainer workspace','Manage workout and diet plans.','trainer','md:col-span-7'],['Reports','Review revenue and membership activity.','dashboard','md:col-span-5']] as [$heading,$description,$image,$span])
+        <div class="grid md:grid-cols-12 gap-4 gd-bento">
+            @foreach([['Members and fees','Track plans, payments and outstanding balances.','members-list','md:col-span-7'],['Attendance','Review check-ins and attendance records.','phone-checkin','md:col-span-5'],['WhatsApp reminders','Follow up with members about renewals.','phone-whatsapp','md:col-span-4'],['Biometric access','Connect supported attendance hardware.','biometric-entry','md:col-span-8'],['Trainer workspace','Manage workout and diet plans.','trainer-tablet','md:col-span-7'],['Reports','Review revenue and membership activity.','dashboard-owner','md:col-span-5']] as [$heading,$description,$image,$span])
                 <article data-reveal class="{{ $span }} border border-slate-800 rounded-xl bg-[#141518] p-6 min-h-36">
                     <h3 class="text-white mb-3">{{ $heading }}</h3><p class="text-slate-400">{{ $description }}</p>
-                    @if(file_exists(public_path('images/marketing/'.$image.'.webp')))
-                        <div class="mt-5 overflow-hidden rounded-xl border border-slate-800"><img src="{{ asset('images/marketing/'.$image.'.webp') }}" width="1440" height="900" loading="lazy" decoding="async" alt="{{ $heading }}" class="w-full h-auto"></div>
+                    @if(in_array($image,['members-list','biometric-entry','trainer-tablet','dashboard-owner'],true))
+                        @php($previewKind = match($image){'members-list'=>'members','biometric-entry'=>'biometric','trainer-tablet'=>'trainer',default=>'dashboard'})
+                        <x-marketing-visual :image="$image" :kind="$previewKind" :alt="$heading"/>
                     @endif
                 </article>
             @endforeach
@@ -77,16 +41,8 @@
         <a href="{{ route('features') }}" class="inline-block mt-6 text-amber-400 font-medium hover:underline">Explore features &rarr;</a>
     </div>
 </section>
-<section class="marketing-section marketing-light">
-    <div class="mx-auto grid md:grid-cols-2 gap-8">
-        <div><h2 class="mb-4">Less admin. More time for your gym.</h2><p class="text-slate-400">Keep your daily work in one place instead of switching between registers and spreadsheets.</p></div>
-        <div class="border border-slate-800 rounded-xl bg-[#141518] p-6 space-y-5">
-            <div class="border-b border-slate-800 pb-4"><h3>Before</h3><p class="text-slate-400 mt-2">Paper registers, separate payment records and manual renewal lists.</p></div>
-            <div><h3>With GymDeskHub</h3><p class="text-slate-400 mt-2">Member profiles, attendance, collections and renewal follow-ups in one workspace.</p></div>
-        </div>
-    </div>
-</section>
-<section id="plans" class="marketing-section bg-[#141518] border-t border-slate-800">
+<section class="marketing-section marketing-light"><div class="mx-auto"><h2 class="mb-4">Less admin. More time for your gym.</h2><p class="text-slate-400 mb-8">Keep your daily work in one place instead of switching between registers and spreadsheets.</p><div class="grid md:grid-cols-2 gap-5"><div class="gd-light-card"><h3>Before</h3><ul><li>Paper attendance registers</li><li>Separate payment records</li><li>Manual renewal lists</li></ul></div><div class="gd-light-card" style="border-top:2px solid #F5A524"><h3>With GymDeskHub</h3><ul><li>Member profiles and attendance in one workspace</li><li>Collections and fee balances together</li><li>Renewal follow-ups organized by membership</li></ul></div></div></div></section>
+<section id="plans" class="marketing-section marketing-light border-t border-slate-800">
     <div class="mx-auto">
         <h2 class="text-white mb-8">Find the right plan for your gym.</h2>
         @include('public.partials.marketing-plans')
@@ -111,5 +67,5 @@
     {{-- ══════════════════════════════════════════════════════════════
          FINAL CLOSING CTA (CLEAN MATTE)
     ══════════════════════════════════════════════════════════════ --}}
-    <section class="marketing-section bg-[#141518] border-t border-slate-800"><div class="mx-auto flex flex-wrap items-center justify-between gap-6"><div><h2 class="text-white mb-3">Bring your gym into one workspace.</h2><p class="text-slate-400">Questions? <a href="{{ route('contact') }}" class="text-amber-400 hover:underline">Talk to us.</a></p></div><a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-lg bg-amber-500 text-slate-950 font-semibold">Start free &rarr;</a></div></section>
+    <section class="marketing-section gd-band">@if(file_exists(public_path('assets/img/gym-cta.webp')))<img src="{{ asset('assets/img/gym-cta.webp') }}" width="2400" height="1000" alt="" loading="lazy" data-parallax data-speed=".15">@endif<div class="mx-auto flex flex-wrap items-center justify-between gap-6"><div><h2 class="text-white mb-3">Bring your gym into one workspace.</h2><p class="text-slate-400">Questions? <a href="{{ route('contact') }}" class="text-amber-400 hover:underline">Talk to us.</a></p></div><a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 rounded-lg bg-amber-500 text-slate-950 font-semibold">Start free &rarr;</a></div></section>
 </x-guest-layout>
