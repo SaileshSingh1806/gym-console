@@ -31,23 +31,18 @@
             @foreach([['Members and fees','Track plans, payments and outstanding balances.','members-list','md:col-span-7'],['Attendance','Review check-ins and attendance records.','phone-checkin','md:col-span-5'],['WhatsApp reminders','Follow up with members about renewals.','phone-whatsapp','md:col-span-4'],['Biometric access','Connect supported attendance hardware.','biometric-entry','md:col-span-8'],['Trainer workspace','Manage workout and diet plans.','trainer-tablet','md:col-span-7'],['Reports','Review revenue and membership activity.','dashboard-owner','md:col-span-5']] as [$heading,$description,$image,$span])
                 <article data-reveal class="{{ $span }} border border-slate-800 rounded-xl bg-[#141518] p-6 min-h-36">
                     <h3 class="text-white mb-3">{{ $heading }}</h3><p class="text-slate-400">{{ $description }}</p>
-                    @if(in_array($image,['members-list','biometric-entry','trainer-tablet','dashboard-owner'],true))<x-marketing-visual :image="$image" :kind="match($image){'members-list'=>'members','biometric-entry'=>'biometric','trainer-tablet'=>'trainer',default=>'dashboard'}" :alt="$heading"/>@endif
+                    @if(in_array($image,['members-list','biometric-entry','trainer-tablet','dashboard-owner'],true))
+                        @php($previewKind = match($image){'members-list'=>'members','biometric-entry'=>'biometric','trainer-tablet'=>'trainer',default=>'dashboard'})
+                        <x-marketing-visual :image="$image" :kind="$previewKind" :alt="$heading"/>
+                    @endif
                 </article>
             @endforeach
         </div>
         <a href="{{ route('features') }}" class="inline-block mt-6 text-amber-400 font-medium hover:underline">Explore features &rarr;</a>
     </div>
 </section>
-<section class="marketing-section marketing-light">
-    <div class="mx-auto grid md:grid-cols-2 gap-8">
-        <div><h2 class="mb-4">Less admin. More time for your gym.</h2><p class="text-slate-400">Keep your daily work in one place instead of switching between registers and spreadsheets.</p></div>
-        <div class="border border-slate-800 rounded-xl bg-[#141518] p-6 space-y-5">
-            <div class="border-b border-slate-800 pb-4"><h3>Before</h3><p class="text-slate-400 mt-2">Paper registers, separate payment records and manual renewal lists.</p></div>
-            <div><h3>With GymDeskHub</h3><p class="text-slate-400 mt-2">Member profiles, attendance, collections and renewal follow-ups in one workspace.</p></div>
-        </div>
-    </div>
-</section>
-<section id="plans" class="marketing-section bg-[#141518] border-t border-slate-800">
+<section class="marketing-section marketing-light"><div class="mx-auto"><h2 class="mb-4">Less admin. More time for your gym.</h2><p class="text-slate-400 mb-8">Keep your daily work in one place instead of switching between registers and spreadsheets.</p><div class="grid md:grid-cols-2 gap-5"><div class="gd-light-card"><h3>Before</h3><ul><li>Paper attendance registers</li><li>Separate payment records</li><li>Manual renewal lists</li></ul></div><div class="gd-light-card" style="border-top:2px solid #F5A524"><h3>With GymDeskHub</h3><ul><li>Member profiles and attendance in one workspace</li><li>Collections and fee balances together</li><li>Renewal follow-ups organized by membership</li></ul></div></div></div></section>
+<section id="plans" class="marketing-section marketing-light border-t border-slate-800">
     <div class="mx-auto">
         <h2 class="text-white mb-8">Find the right plan for your gym.</h2>
         @include('public.partials.marketing-plans')
